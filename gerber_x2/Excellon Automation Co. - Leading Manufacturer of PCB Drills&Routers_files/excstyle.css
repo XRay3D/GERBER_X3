@@ -1,0 +1,68 @@
+/* CSS Document */
+
+h1 {font-size: 1.25em; font-style: bold; color: #00000; font-family: Arial, Helvetica, sans-serif; }
+h2 {font-size: .95em; font-style: bold; color: #00000; font-family: Arial, Helvetica, sans-serif; }
+h3 {font-size: .85em; color: #003366; font-family: Arial, Helvetica, sans-serif; }
+h4 {font-size: .80em; color: #003366; font-family: Arial, Helvetica, sans-serif; border-bottom: dashed 1x #003366; } 
+h5 {font-size: .70em; font-style: bold; font-family: Arial, Helvetica, sans-serif; color: #ffffff;letter-spacing: 1px; background: #C1B168; padding: 5x 5x 5x 5x; } 
+h6 {font-size: .80em; text-align: left; font-style: bold; font-family: Arial, Helvetica, sans-serif; color: #000000; } 
+
+hr {height: 1px; border: none; border-top: 1px dashed #003366; }
+hr.blue {color: white; height: 2px; background: white; border: none; border-top: 1px dashed #003366; }
+
+p {color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: .75em; line-height:135%; }
+p.small {color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: .65em; line-height:110%; }
+
+table.small {padding: 15px 15px 15px 15px; }
+
+/* Links */
+
+a {color: #003366;font-family: Arial, Helvetica, sans-serif; } 
+
+a:link {font-size: .90em; color: #003366; text-decoration: none; }
+a:visited {font-size: .90em; color: #999999; text-decoration: none; }
+a:active {font-size: .90em; color: #003366; }
+a:hover {font-size: .90em; color: #990000; text-decoration:underline; }
+
+a.light:link {font-weight: normal; color: white; text-decoration: underline; }
+a.light:visited {font-weight: normal; color: white; text-decoration: underline; }
+a.light:active {font-weight: normal; color: white; }
+a.light:hover {font-weight: normal; white; text-decoration: underline; }
+
+a.top:link {font-weight: bold; font-size: .90em; color: #333333; text-decoration: none; }
+a.top:visited {font-weight: bold; font-size: .90em; color: #F5F6C7; text-decoration: none; }
+a.top:active {font-weight: bold;font-size: .90em; color: #333333; }
+a.top:hover {font-weight: bold; font-size: .90em; color: #990000; text-decoration:none; }
+
+a.bottom:link {font-weight: bold; font-size: .90em; color: #F5F6C7; text-decoration: none; }
+a.bottom:visited {font-weight: bold; font-size: .90em; color: #999999; text-decoration: none; }
+a.bottom:active {font-weight: bold; font-size: .90em; color: #F5F6C7; }
+a.bottom:hover {font-weight: bold; font-size: .90em; color: #990000; text-decoration:underline; }
+
+a.email:link {font-size: .90em; color: #F5F6C7; text-decoration: none; }
+a.email:visited {font-size: .90em; color: #999999; text-decoration: none; }
+a.email:active {font-size: .90em; color: #F5F6C7; }
+a.email:hover {font-size: .90em; color: #990000; text-decoration:underline; }
+
+img {border-color:#000000;}
+/*
+     FILE ARCHIVED ON 04:57:33 Jul 19, 2007 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 07:38:17 Sep 18, 2018.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  LoadShardBlock: 110.963 (3)
+  esindex: 0.01
+  captures_list: 135.198
+  CDXLines.iter: 11.667 (3)
+  PetaboxLoader3.datanode: 208.634 (4)
+  exclusion.robots: 0.18
+  exclusion.robots.policy: 0.166
+  RedisCDXSource: 6.77
+  PetaboxLoader3.resolve: 76.81 (3)
+  load_resource: 178.826
+*/

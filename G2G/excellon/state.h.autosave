@@ -1,0 +1,27 @@
+#ifndef STATE_H
+#define STATE_H
+
+namespace Excellon {
+///////////////////////////////////////////////////////
+/// \brief The State struct
+///
+struct State {
+    double currentToolDiameter() const;
+    double parseNumber(QString Str);
+    void reset(Format* f);
+    void updatePos();
+
+    QPair<QString, QString> rawPos;
+    QList<QPair<QString, QString>> rawPosList;
+    Format* format = nullptr;
+    GCode gCode = G_NULL;
+    MCode mCode = M_NULL;
+    int tCode = -1;
+    QPointF pos;
+    QPointF offsetPos() const { return pos + format->offsetPos; }
+    QPolygonF path;
+    int line = 0;
+};
+
+} // namespace name
+#endif // STATE_H
