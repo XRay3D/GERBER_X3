@@ -15,7 +15,6 @@
 #include <gi/bridgeitem.h>
 #include <limits>
 #include <scene.h>
-#include <voronoi.h>
 
 struct Pair {
     IntPoint first;
