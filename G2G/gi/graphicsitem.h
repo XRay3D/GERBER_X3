@@ -17,6 +17,7 @@ enum GiType {
     RawItemType,
     RulerType,
     PinType,
+    Shape,
 };
 
 class AbstractFile;
@@ -41,6 +42,8 @@ public:
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
+    virtual Paths& rPaths() { static Paths p; return p; }
+    virtual void redraw() {}
 
     //    void setItemGroup(ItemGroup* itemGroup);
     //    ItemGroup* parentItemGroup() const;
@@ -56,15 +59,14 @@ public:
     int id() const;
 
 protected:
-    int m_id = -1;
+    const AbstractFile* m_file;
     QPen m_pen;
     QBrush m_brush;
     QColor* m_penColor = nullptr;
     QColor* m_brushColor = nullptr;
-
     QPainterPath m_shape;
     QRectF m_rect;
-    const AbstractFile* m_file;
+    int m_id = -1;
 
     //private:
     //    ItemGroup* m_ig = nullptr;

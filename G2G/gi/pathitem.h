@@ -6,6 +6,7 @@
 namespace GCode {
 class File;
 }
+
 class PathItem : public GraphicsItem {
 public:
     PathItem(const Paths& paths, GCode::File* file = nullptr);

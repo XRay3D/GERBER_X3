@@ -7,7 +7,7 @@
 
 using namespace Gerber;
 
-Format* crutch;
+static Format* crutch;
 
 File::File(const QString& fileName) { m_name = fileName; }
 
@@ -25,9 +25,6 @@ const QMap<int, QSharedPointer<AbstractAperture>>* File::apertures() const { ret
 
 Paths File::merge() const
 {
-#ifdef QT_DEBUG
-    qDebug() << "merge()" << size();
-#endif
     QElapsedTimer t;
     t.start();
     m_mergedPaths.clear();
@@ -35,29 +32,18 @@ Paths File::merge() const
     while (i < size()) {
         Clipper clipper;
         clipper.AddPaths(m_mergedPaths, ptSubject, true);
-
-        const int exp = at(i).state().imgPolarity();
-
-        Paths workingPaths;
-
+        const auto exp = at(i).state().imgPolarity();
         do {
-            Paths paths(at(i++).paths());
-            workingPaths.append(paths);
+            const GraphicObject& go = at(i++);
+            clipper.AddPaths(go.paths(), ptClip, true);
         } while (i < size() && exp == at(i).state().imgPolarity());
-
-        if (at(i - 1).state().imgPolarity() == Positive) {
-            clipper.AddPaths(workingPaths, ptClip, true);
+        if (at(i - 1).state().imgPolarity() == Positive)
             clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
-        } else {
-            clipper.AddPaths(workingPaths, ptClip, true);
+        else
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
-        }
     }
     if (Settings::cleanPolygons())
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
-#ifdef QT_DEBUG
-    qDebug() << shortName() << t.elapsed();
-#endif
     return m_mergedPaths;
 }
 
@@ -177,8 +163,8 @@ void Gerber::File::write(QDataStream& stream) const
     stream << *this;
     stream << m_apertures;
     stream << m_format;
-    stream << layer;
-    stream << miror;
+    //stream << layer;
+    //stream << miror;
     stream << rawIndex;
     stream << m_itemsType;
     _write(stream);
@@ -190,10 +176,10 @@ void Gerber::File::read(QDataStream& stream)
     stream >> *this;
     stream >> m_apertures;
     stream >> m_format;
-    stream >> (int&)layer;
-    stream >> (int&)miror;
+    //stream >> layer;
+    //stream >> miror;
     stream >> rawIndex;
-    stream >> (int&)m_itemsType;
+    stream >> m_itemsType;
     for (GraphicObject& go : *this) {
         go.m_gFile = this;
         go.m_state.m_format = format();
@@ -206,42 +192,13 @@ void Gerber::File::createGi()
     if (shortName().contains("bot", Qt::CaseInsensitive))
         setSide(Bottom);
 
-    if (Project::ver() == G2G_Ver_1) {
-
-        for (Paths& p1 : m_groupedPaths) {
-            for (Path& p2 : p1) {
-                for (IntPoint& p : p2) {
-                    p.X *= 0.01;
-                    p.Y *= 0.01;
-                }
-            }
-        }
-        for (Path& p1 : m_mergedPaths) {
-            for (IntPoint& p : p1) {
-                p.X *= 0.01;
-                p.Y *= 0.01;
-            }
-        }
-        for (GraphicObject& go : *this) {
-            for (IntPoint& p : go.m_path) {
-                p.X *= 0.01;
-                p.Y *= 0.01;
-            }
-            for (Path& p1 : go.m_paths) {
-                for (IntPoint& p : p1) {
-                    p.X *= 0.01;
-                    p.Y *= 0.01;
-                }
-            }
-        }
-    }
-
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
         item->m_id = m_itemGroup->size();
         item->setToolTip(QString("ID: %1").arg(item->m_id));
         m_itemGroup->append(item);
     }
+
     setRawItemGroup(new ItemGroup);
     if (!Settings::skipDuplicates()) {
         for (const GraphicObject& go : *this) {
@@ -302,24 +259,23 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& a
     stream >> type;
     switch (type) {
     case Circle:
-        aperture = QSharedPointer<AbstractAperture>(new ApCircle(0.0, 0.0, crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApCircle(stream, crutch));
         break;
     case Rectangle:
-        aperture = QSharedPointer<AbstractAperture>(new ApRectangle(0.0, 0.0, 0.0, crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApRectangle(stream, crutch));
         break;
     case Obround:
-        aperture = QSharedPointer<AbstractAperture>(new ApObround(0.0, 0.0, 0.0, crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApObround(stream, crutch));
         break;
     case Polygon:
-        aperture = QSharedPointer<AbstractAperture>(new ApPolygon(0.0, 0.0, 0.0, 0.0, crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApPolygon(stream, crutch));
         break;
     case Macro:
-        aperture = QSharedPointer<AbstractAperture>(new ApMacro("", {}, {}, crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApMacro(stream, crutch));
         break;
     case Block:
-        aperture = QSharedPointer<AbstractAperture>(new ApBlock(crutch));
+        aperture = QSharedPointer<AbstractAperture>(new ApBlock(stream, crutch));
         break;
     }
-    aperture->read(stream);
     return stream;
 }

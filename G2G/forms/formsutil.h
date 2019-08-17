@@ -20,7 +20,7 @@ class FormsUtil : public QWidget {
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(const QString& name, QWidget* parent = nullptr);
+    explicit FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent = nullptr);
     ~FormsUtil() override;
     virtual void editFile(GCode::File* file) = 0;
 
@@ -29,7 +29,7 @@ signals:
 
 protected:
     void readTools(const QVector<Tool*>& tools) const;
-    void writeTools(const QVector<Tool*>& tools) const;
+    void writeTools(const QVector<Tool>& tools) const;
     virtual void createFile() = 0;
     virtual void updateName() = 0;
 
@@ -44,19 +44,16 @@ protected:
 
     QString m_fileName;
 
-    void showProgress();
-    void toolPathCreator(GCode::Creator* tps); /*const Paths& value, const bool convent, GCode::SideOfMilling side*/
-
-    QMap<int, QVector<int>> m_used;
+    QMap<int, QVector<int>> m_usedItems;
     bool m_editMode = false;
-    GCode::Creator* m_tps = nullptr;
+    GCode::Creator* m_tpc = nullptr;
 
 private:
     const QString m_name;
     QThread thread;
     GCode::File* m_file;
     void cancel();
-    QProgressDialog* pd = nullptr;
+    QProgressDialog* pd;
     int m_timerId = 0;
 
     // QObject interface

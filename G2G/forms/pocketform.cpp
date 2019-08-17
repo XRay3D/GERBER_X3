@@ -1,6 +1,7 @@
 #include "pocketform.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
+#include "icons.h"
 #include "tooldatabase/tooldatabase.h"
 #include "ui_pocketform.h"
 #include <QDockWidget>
@@ -21,16 +22,16 @@ enum {
 };
 
 PocketForm::PocketForm(QWidget* parent)
-    : FormsUtil("PocketForm", parent)
+    : FormsUtil("PocketForm", new GCode::PocketCreator, parent)
     , ui(new Ui::PocketForm)
 {
     ui->setupUi(this);
     ui->lblToolName->setText(tool.name());
     ui->lblToolName_2->setText(tool2.name());
+    updateArea();
+    //    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
-    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
-
-    auto rb_clicked = [&] {
+    auto rb_clicked = [this] {
         if (ui->rbOutside->isChecked())
             side = GCode::Outer;
         else if (ui->rbInside->isChecked())
@@ -41,13 +42,18 @@ PocketForm::PocketForm(QWidget* parent)
         } else if (ui->rbRaster->isChecked()) {
             type = Raster;
             ui->chbxUseTwoTools->setChecked(false);
-            ui->chbxUseTwoTools->clicked(false);
         }
-        ui->chbxUseTwoTools->setEnabled(!ui->rbRaster->isChecked());
-        ui->sbxSteps->setEnabled(!ui->rbRaster->isChecked());
-        //ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
-        ui->dsbxAngle->setEnabled(ui->rbRaster->isChecked());
-        ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
+        {
+            ui->cbxPass->setVisible(ui->rbRaster->isChecked());
+            ui->labelPass->setVisible(ui->rbRaster->isChecked());
+            ui->dsbxAngle->setVisible(ui->rbRaster->isChecked());
+            ui->labelAngle->setVisible(ui->rbRaster->isChecked());
+        }
+        {
+            ui->chbxUseTwoTools->setVisible(!ui->rbRaster->isChecked());
+            ui->sbxSteps->setVisible(!ui->rbRaster->isChecked());
+            ui->labelSteps->setVisible(!ui->rbRaster->isChecked());
+        }
 
         if (ui->rbClimb->isChecked())
             direction = GCode::Climb;
@@ -79,8 +85,8 @@ PocketForm::PocketForm(QWidget* parent)
         ui->dsbxDepth->rbBoard->setChecked(true);
     if (settings.value("rbCopper").toBool())
         ui->dsbxDepth->rbCopper->setChecked(true);
-
-    on_chbxUseTwoTools_clicked(settings.value("chbxUseTwoTools").toBool());
+    rb_clicked();
+    on_chbxUseTwoTools_toggled(settings.value("chbxUseTwoTools").toBool());
     settings.endGroup();
 
     ui->pbEdit->setIcon(Icon(ButtonEditIcon));
@@ -96,7 +102,6 @@ PocketForm::PocketForm(QWidget* parent)
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 
-    rb_clicked();
     connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
@@ -140,6 +145,7 @@ void PocketForm::on_pbSelect_clicked()
         } else {
             tool = mpTool;
             ui->lblToolName->setText(tool.name());
+            updateArea();
         }
     }
 }
@@ -162,6 +168,11 @@ void PocketForm::on_pbEdit_clicked()
     ToolEditDialog d;
     d.setTool(tool);
     if (d.exec()) {
+        if (ui->chbxUseTwoTools->isChecked() && tool2.id() > -1 && tool2.diameter() <= d.tool().diameter()) {
+            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
+            return;
+        }
+        updateArea();
         tool = d.tool();
         tool.setId(-1);
         ui->lblToolName->setText(tool.name());
@@ -174,6 +185,10 @@ void PocketForm::on_pbEdit_2_clicked()
     ToolEditDialog d;
     d.setTool(tool2);
     if (d.exec()) {
+        if (tool.id() > -1 && tool.diameter() >= d.tool().diameter()) {
+            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
+            return;
+        }
         tool2 = d.tool();
         tool.setId(-1);
         ui->lblToolName_2->setText(tool2.name());
@@ -205,12 +220,14 @@ void PocketForm::createFile()
     }
 
     Paths wPaths;
+    Paths wRawPaths;
     AbstractFile const* file = nullptr;
 
     for (auto* item : Scene::selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GerberItemType:
+        case RawItemType:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -218,12 +235,19 @@ void PocketForm::createFile()
                 QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
-            wPaths.append(gi->paths());
-            m_used[gi->file()->id()].append(gi->id());
+            if (item->type() == GerberItemType)
+                wPaths.append(gi->paths());
+            else
+                wRawPaths.append(gi->paths());
+            m_usedItems[gi->file()->id()].append(gi->id());
+            break;
+        case Shape:
+            wRawPaths.append(gi->paths());
+            //m_used[gi->file()->id()].append(gi->id());
             break;
         case DrillItemType:
             wPaths.append(gi->paths());
-            m_used[gi->file()->id()].append(gi->id());
+            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         default:
             break;
@@ -243,32 +267,31 @@ void PocketForm::createFile()
         //            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (wPaths.isEmpty()) {
+    if (wRawPaths.isEmpty() && wPaths.isEmpty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
 
-    toolPathCreator(new GCode::PocketCreator);
-    m_tps->addPaths(wPaths);
-    GCode::GCodeParams gpc;
-    gpc.convent = ui->rbConventional->isChecked();
-    gpc.side = side;
-    gpc.tool.append(tool);
-    gpc.tool.append(tool2);
+    GCode::GCodeParams gcp;
+    gcp.convent = ui->rbConventional->isChecked();
+    gcp.side = side;
+    gcp.tool.append(tool);
+    gcp.tool.append(tool2);
 
-    gpc.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
-    gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
+    gcp.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
+    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
 
-    gpc.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
-    gpc.dParam[GCode::UseRaster] = ui->rbRaster->isChecked();
-    gpc.dParam[GCode::Steps] = ui->sbxSteps->value();
-    gpc.dParam[GCode::TwoTools] = ui->chbxUseTwoTools->isChecked();
-
+    gcp.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
+    gcp.dParam[GCode::UseRaster] = ui->rbRaster->isChecked();
+    gcp.dParam[GCode::Steps] = ui->sbxSteps->value();
+    gcp.dParam[GCode::TwoTools] = ui->chbxUseTwoTools->isChecked();
+    gcp.dParam[GCode::MinArea] = ui->dsbxMinArea->value();
+    m_tpc->setGcp(gcp);
+    m_tpc->addPaths(wPaths);
+    m_tpc->addRawPaths(wRawPaths);
     if (ui->chbxUseTwoTools->isChecked())
         fileCount = 2;
-    createToolpath(gpc);
-
-    showProgress();
+    createToolpath(gcp);
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)
@@ -282,15 +305,6 @@ void PocketForm::updateName()
     ui->leName->setText(name[side + type * 3]);
 }
 
-void PocketForm::on_chbxUseTwoTools_clicked(bool checked)
-{
-    ui->chbxUseTwoTools->setChecked(checked);
-    ui->lblToolName_2->setEnabled(checked);
-    ui->pbEdit_2->setEnabled(checked);
-    ui->pbSelect_2->setEnabled(checked);
-    ui->sbxSteps->setEnabled(!checked);
-}
-
 void PocketForm::updatePixmap()
 {
     static const QStringList pixmapList = {
@@ -301,6 +315,12 @@ void PocketForm::updatePixmap()
     };
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon(pixmapList[type + direction * 2]).pixmap(QSize(size, size)));
+}
+
+void PocketForm::updateArea()
+{
+    //    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
+    ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
 }
 
 void PocketForm::resizeEvent(QResizeEvent* event)
@@ -319,4 +339,24 @@ void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1;
 
 void PocketForm::editFile(GCode::File* /*file*/)
 {
+}
+
+void PocketForm::on_chbxUseTwoTools_toggled(bool checked)
+{
+    //ui->pbSelect_2->setEnabled(checked);
+    //ui->lblToolName_2->setEnabled(checked);
+    //ui->pbEdit_2->setEnabled(checked);
+    //ui->sbxSteps->setEnabled(!checked);
+    ui->chbxUseTwoTools->setChecked(checked);
+
+    ui->labelSteps->setVisible(!checked);
+    ui->sbxSteps->setVisible(!checked);
+
+    ui->dsbxMinArea->setVisible(checked);
+    ui->labelMinArea->setVisible(checked);
+
+    ui->labelToolName2->setVisible(checked);
+    ui->lblToolName_2->setVisible(checked);
+    ui->pbEdit_2->setVisible(checked);
+    ui->pbSelect_2->setVisible(checked);
 }

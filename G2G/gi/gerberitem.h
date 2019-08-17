@@ -24,8 +24,10 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-
+    // GraphicsItem interface
+    void redraw() override;
     Paths paths() const override;
+    Paths &rPaths() override;
     //const Gerber::File* file() const;
 
 private:

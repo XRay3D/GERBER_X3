@@ -168,7 +168,7 @@ PolyNode* PolyTree::GetFirst() const
     if (!Childs.empty())
         return Childs[0];
     else
-        return 0;
+        return nullptr;
 }
 //------------------------------------------------------------------------------
 
@@ -1167,7 +1167,7 @@ bool ClipperBase::AddPath(const Path& pg, PolyType PolyTyp, bool Closed)
         E->Prev->OutIdx = Skip;
         MinimaList::value_type locMin;
         locMin.Y = E->Bot.Y;
-        locMin.LeftBound = 0;
+        locMin.LeftBound = nullptr;
         locMin.RightBound = E;
         locMin.RightBound->Side = esRight;
         locMin.RightBound->WindDelta = 0;
@@ -1186,7 +1186,7 @@ bool ClipperBase::AddPath(const Path& pg, PolyType PolyTyp, bool Closed)
 
     m_edges.push_back(edges);
     bool leftBoundIsForward;
-    TEdge* EMin = 0;
+    TEdge* EMin = nullptr;
 
     //workaround to avoid an endless loop in the while loop below when
     //open paths have matching start and end points ...
@@ -1231,9 +1231,9 @@ bool ClipperBase::AddPath(const Path& pg, PolyType PolyTyp, bool Closed)
             E2 = ProcessBound(E2, !leftBoundIsForward);
 
         if (locMin.LeftBound->OutIdx == Skip)
-            locMin.LeftBound = 0;
+            locMin.LeftBound = nullptr;
         else if (locMin.RightBound->OutIdx == Skip)
-            locMin.RightBound = 0;
+            locMin.RightBound = nullptr;
         m_MinimaList.push_back(locMin);
         if (!leftBoundIsForward)
             E = E2;
@@ -1290,7 +1290,7 @@ void ClipperBase::Reset()
             e->OutIdx = Unassigned;
         }
     }
-    m_ActiveEdges = 0;
+    m_ActiveEdges = nullptr;
     m_CurrentLM = m_MinimaList.begin();
 }
 //------------------------------------------------------------------------------
@@ -1386,7 +1386,7 @@ void ClipperBase::DisposeOutRec(PolyOutList::size_type index)
     if (outRec->Pts)
         DisposeOutPts(outRec->Pts);
     delete outRec;
-    m_PolyOuts[index] = 0;
+    m_PolyOuts[index] = nullptr;
 }
 //------------------------------------------------------------------------------
 
@@ -1402,8 +1402,8 @@ void ClipperBase::DeleteFromAEL(TEdge* e)
         m_ActiveEdges = AelNext;
     if (AelNext)
         AelNext->PrevInAEL = AelPrev;
-    e->NextInAEL = 0;
-    e->PrevInAEL = 0;
+    e->NextInAEL = nullptr;
+    e->PrevInAEL = nullptr;
 }
 //------------------------------------------------------------------------------
 
@@ -1412,10 +1412,10 @@ OutRec* ClipperBase::CreateOutRec()
     OutRec* result = new OutRec;
     result->IsHole = false;
     result->IsOpen = false;
-    result->FirstLeft = 0;
-    result->Pts = 0;
-    result->BottomPt = 0;
-    result->PolyNd = 0;
+    result->FirstLeft = nullptr;
+    result->Pts = nullptr;
+    result->BottomPt = nullptr;
+    result->PolyNd = nullptr;
     m_PolyOuts.push_back(result);
     result->Idx = (int)m_PolyOuts.size() - 1;
     return result;
@@ -1608,17 +1608,16 @@ bool Clipper::ExecuteInternal()
     try {
         Reset();
         m_Maxima = MaximaList();
-        m_SortedEdges = 0;
+        m_SortedEdges = nullptr;
 
         succeeded = true;
         cInt botY, topY;
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
-
+        GCode::Creator::progress(static_cast<int>(m_Scanbeam.size()));
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-            GCode::Creator::progressOrCancel();
-
+            GCode::Creator::progress();
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {

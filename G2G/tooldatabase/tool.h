@@ -1,7 +1,6 @@
 #ifndef TOOL_H
 #define TOOL_H
 
-#include "icons.h"
 #include <QJsonObject>
 #include <QMap>
 #include <QMessageBox>
@@ -29,7 +28,7 @@ class Tool {
     {
         stream >> tool.m_name;
         stream >> tool.m_note;
-        stream >> (int&)(tool.m_type);
+        stream >> tool.m_type;
         stream >> tool.m_angle;
         stream >> tool.m_diameter;
         stream >> tool.m_feedRate;
@@ -43,6 +42,8 @@ class Tool {
         return stream;
     }
 
+
+
 public:
     Tool();
 
@@ -52,6 +53,14 @@ public:
         Engraving,
         Group
     };
+
+    friend QDataStream& operator>>(QDataStream& stream, Type& type)
+    {
+        int tmp;
+        stream >> tmp;
+        type = static_cast<Type>(tmp);
+        return stream;
+    }
 
     enum {
         Angle,

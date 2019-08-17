@@ -37,8 +37,6 @@ PathItem::PathItem(const Path& path, GCode::File* file)
 #endif
 }
 
-
-
 QRectF PathItem::boundingRect() const { return m_rect; }
 
 void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)

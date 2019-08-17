@@ -14,7 +14,8 @@ class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    File(const QString& name = "");
+    explicit File(QDataStream& stream) { read(stream); }
+    explicit File(const QString& name = "");
     ~File() override;
 
     enum Group {
@@ -37,7 +38,7 @@ public:
     ItemsType itemsType() const;
     FileType type() const override { return FileType::Gerber; }
     ItemGroup* itemGroup() const override;
-    void addToScene() const ;
+    void addToScene() const;
     void setColor(const QColor& color);
 
 protected:
@@ -49,8 +50,8 @@ private:
     QSharedPointer<ItemGroup> m_rawItemGroup;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
-    Layer layer = Copper;
-    Miror miror = Vertical;
+    //Layer layer = Copper;
+    //Miror miror = Vertical;
     QVector<int> rawIndex;
 
     // AbstractFile interface

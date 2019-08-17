@@ -55,19 +55,19 @@ enum DCode {
     D03 = 3
 };
 
-enum Layer {
-    Assy,
-    Silk,
-    Paste,
-    Mask,
-    Copper,
-    Board,
-};
+//enum Layer {
+//    Assy,
+//    Silk,
+//    Paste,
+//    Mask,
+//    Copper,
+//    Board,
+//};
 
-enum Miror {
-    Vertical,
-    Horizontal
-};
+//enum Miror {
+//    Vertical,
+//    Horizontal
+//};
 
 enum Mirroring {
     NoMirroring,
@@ -133,82 +133,29 @@ struct Format {
     int yInteger = 3;
     int yDecimal = 4;
 
-    friend QDataStream& operator<<(QDataStream& stream, const Gerber::Format& format)
+    friend QDataStream& operator<<(QDataStream& stream, const Format& format)
     {
-        //    stream << static_cast<int>(st.m_dCode)
-        //           << static_cast<int>(st.m_gCode)
-        //           << static_cast<int>(st.m_imgPolarity)
-        //           << static_cast<int>(st.m_interpolation)
-        //           << static_cast<int>(st.m_type)
-        //           << static_cast<int>(st.m_quadrant)
-        //           << static_cast<int>(st.m_region)
-        //           << st.m_aperture
-        //           << st.m_lineNum
-        //           << st.m_curPos
-        //           << static_cast<int>(st.m_mirroring)
-        //           << st.m_scaling
-        //           << st.m_rotating;
-        stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Gerber::Format));
+        stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Format));
         return stream;
     }
-
-    friend QDataStream& operator>>(QDataStream& stream, Gerber::Format& format)
+    friend QDataStream& operator>>(QDataStream& stream, Format& format)
     {
-        //    stream >> static_cast<qint32>(st.m_dCode);
-        //    stream >> static_cast<qint32>(st.m_gCode);
-        //    stream >> static_cast<qint32>(st.m_imgPolarity);
-        //    stream >> static_cast<qint32>(st.m_interpolation);
-        //    stream >> static_cast<qint32>(st.m_type);
-        //    stream >> static_cast<qint32>(st.m_quadrant);
-        //    stream >> static_cast<qint32>(st.m_region);
-        //    stream >> st.m_aperture;
-        //    stream >> st.m_lineNum;
-        //    stream >> st.m_curPos;
-        //    stream >> static_cast<int>(st.m_mirroring);
-        //    stream >> st.m_scaling;
-        //    stream >> st.m_rotating;
-        stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Gerber::Format));
+        stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Format));
         return stream;
     }
 };
 
 class State {
     friend class File;
-    friend QDataStream& operator<<(QDataStream& stream, const Gerber::State& state)
+    friend QDataStream& operator<<(QDataStream& stream, const State& state)
     {
-        //    stream << static_cast<int>(st.m_dCode)
-        //           << static_cast<int>(st.m_gCode)
-        //           << static_cast<int>(st.m_imgPolarity)
-        //           << static_cast<int>(st.m_interpolation)
-        //           << static_cast<int>(st.m_type)
-        //           << static_cast<int>(st.m_quadrant)
-        //           << static_cast<int>(st.m_region)
-        //           << st.m_aperture
-        //           << st.m_lineNum
-        //           << st.m_curPos
-        //           << static_cast<int>(st.m_mirroring)
-        //           << st.m_scaling
-        //           << st.m_rotating;
-        stream.writeRawData(reinterpret_cast<const char*>(&state), sizeof(Gerber::State));
+        stream.writeRawData(reinterpret_cast<const char*>(&state), sizeof(State));
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, Gerber::State& state)
+    friend QDataStream& operator>>(QDataStream& stream, State& state)
     {
-        //    stream >> static_cast<qint32>(st.m_dCode);
-        //    stream >> static_cast<qint32>(st.m_gCode);
-        //    stream >> static_cast<qint32>(st.m_imgPolarity);
-        //    stream >> static_cast<qint32>(st.m_interpolation);
-        //    stream >> static_cast<qint32>(st.m_type);
-        //    stream >> static_cast<qint32>(st.m_quadrant);
-        //    stream >> static_cast<qint32>(st.m_region);
-        //    stream >> st.m_aperture;
-        //    stream >> st.m_lineNum;
-        //    stream >> st.m_curPos;
-        //    stream >> static_cast<int>(st.m_mirroring);
-        //    stream >> st.m_scaling;
-        //    stream >> st.m_rotating;
-        stream.readRawData(reinterpret_cast<char*>(&state), sizeof(Gerber::State));
+        stream.readRawData(reinterpret_cast<char*>(&state), sizeof(State));
         return stream;
     }
 
@@ -288,14 +235,15 @@ public:
 
 class GraphicObject {
     friend class File;
-    friend QDataStream& operator<<(QDataStream& stream, const Gerber::GraphicObject& go)
+    friend class Parser;
+    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
     {
         stream << go.m_path;
         stream << go.m_paths;
         stream << go.m_state;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Gerber::GraphicObject& go)
+    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
     {
         stream >> go.m_path;
         stream >> go.m_paths;
@@ -314,11 +262,11 @@ public:
     {
     }
     GraphicObject(
-        int /*id*/,
-        const State& state,
-        const Paths& paths,
-        File* gFile,
-        const Path& path = Path())
+            int /*id*/,
+            const State& state,
+            const Paths& paths,
+            File* gFile,
+            const Path& path = Path())
         : m_gFile(gFile)
         , m_path(path)
         , m_paths(paths)

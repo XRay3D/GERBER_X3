@@ -6,6 +6,7 @@
 #include <QTextDocument>
 #include <QTextFormat>
 #include <QtMath>
+#include <settings.h>
 
 QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
     : QWidget(parent)
@@ -109,7 +110,8 @@ void QDRuler::paintEvent(QPaintEvent* event)
     painter.fillRect(rulerRect, QColor(10, 10, 10));
     if (qFuzzyIsNull(rulerZoom))
         return;
-    gridStep = qPow(10.0, qCeil(log10((7.0 / rulerZoom))));
+
+    gridStep = Settings::gridStep(rulerZoom);
 
     // drawing a scale of 0.1
     if ((gridStep * rulerZoom) > 35) {
@@ -198,7 +200,7 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
             painter->save();
             painter->setPen(textPen); // zero width pen is cosmetic pen
             painter->setFont(font());
-            QString number = QString::number((startTickNo * gridStep * tickKoef));
+            QString number = QString::number((startTickNo * gridStep * tickKoef * (Settings ::inch() ? 1.0 / 25.4 : 1.0)));
             if (1) {
                 if (startTickNo != 0) {
                     if (step > 0.0)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>636</height>
+    <height>584</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -34,6 +34,9 @@
    </property>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -61,6 +64,9 @@
       </property>
       <item>
        <widget class="QLabel" name="label">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <weight>75</weight>
@@ -77,16 +83,16 @@
    </item>
    <item>
     <widget class="QFrame" name="frame_2">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Box</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="labelAlignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
        <number>6</number>
       </property>
@@ -99,46 +105,13 @@
       <property name="bottomMargin">
        <number>6</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Depth:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Tool:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="lblToolName">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="2" column="2">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="pbSelect">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Select</string>
           </property>
@@ -146,6 +119,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Edit</string>
           </property>
@@ -153,17 +129,47 @@
         </item>
        </layout>
       </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="Line" name="line">
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+      <item row="8" column="0" colspan="2">
+       <widget class="QLabel" name="labelAngle">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Raster
+Angle:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
+      <item row="13" column="2">
+       <widget class="QLineEdit" name="leName">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="DoubleSpinBox" name="dsbxAngle">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="suffix">
+         <string> °</string>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="3">
        <widget class="QCheckBox" name="chbxUseTwoTools">
         <property name="enabled">
          <bool>true</bool>
@@ -179,8 +185,11 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="10" column="0" colspan="2">
+       <widget class="QLabel" name="labelSteps">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <weight>75</weight>
@@ -188,26 +197,19 @@
          </font>
         </property>
         <property name="text">
-         <string>Tool:</string>
+         <string>Steps:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QLabel" name="lblToolName_2">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
+      <item row="6" column="2">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QPushButton" name="pbSelect_2">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Select</string>
@@ -217,7 +219,7 @@
         <item>
          <widget class="QPushButton" name="pbEdit_2">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Edit</string>
@@ -226,14 +228,39 @@
         </item>
        </layout>
       </item>
-      <item row="7" column="0" colspan="2">
+      <item row="7" column="0" colspan="3">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="2" column="0">
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>Direction</string>
+        <item row="1" column="1">
+         <widget class="QLabel" name="lblPixmap">
+          <property name="enabled">
+           <bool>true</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>:/toolpath/offset_climb.png</pixmap>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="title">
+           <string>Aligin</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
            <property name="leftMargin">
             <number>6</number>
            </property>
@@ -247,9 +274,12 @@
             <number>6</number>
            </property>
            <item>
-            <widget class="QRadioButton" name="rbClimb">
+            <widget class="QRadioButton" name="rbOutside">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
-              <string>Climb</string>
+              <string>Outside</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -257,17 +287,23 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="rbConventional">
+            <widget class="QRadioButton" name="rbInside">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
-              <string>Conventional</string>
+              <string>Inside</string>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="1">
          <widget class="QGroupBox" name="groupBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="title">
            <string>Type</string>
           </property>
@@ -286,6 +322,9 @@
            </property>
            <item>
             <widget class="QRadioButton" name="rbOffset">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
               <string>Offset</string>
              </property>
@@ -307,12 +346,15 @@
           </layout>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_4">
-          <property name="title">
-           <string>Aligin</string>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="enabled">
+           <bool>true</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="title">
+           <string>Direction</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <property name="leftMargin">
             <number>6</number>
            </property>
@@ -326,9 +368,12 @@
             <number>6</number>
            </property>
            <item>
-            <widget class="QRadioButton" name="rbOutside">
+            <widget class="QRadioButton" name="rbClimb">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
-              <string>Outside</string>
+              <string>Climb</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -336,75 +381,24 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="rbInside">
+            <widget class="QRadioButton" name="rbConventional">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
-              <string>Inside</string>
+              <string>Conventional</string>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
         </item>
-        <item row="0" column="1" rowspan="3">
-         <widget class="QLabel" name="lblPixmap">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap>:/toolpath/offset_climb.png</pixmap>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Raster
-Angle:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="DoubleSpinBox" name="dsbxAngle">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="suffix">
-         <string> °</string>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Profile
-Pass:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
+      <item row="9" column="2">
        <widget class="QComboBox" name="cbxPass">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <item>
          <property name="text">
@@ -423,34 +417,11 @@ Pass:</string>
         </item>
        </widget>
       </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Steps:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="QSpinBox" name="sbxSteps"/>
-      </item>
-      <item row="11" column="0" colspan="2">
-       <widget class="Line" name="line_2">
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0">
+      <item row="13" column="0" colspan="2">
        <widget class="QLabel" name="label_6">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <weight>75</weight>
@@ -460,19 +431,193 @@ Pass:</string>
         <property name="text">
          <string>Name:</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
-      <item row="12" column="1">
-       <widget class="QLineEdit" name="leName"/>
+      <item row="12" column="0" colspan="3">
+       <widget class="Line" name="line_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="DepthForm" name="dsbxDepth" native="true"/>
+      <item row="10" column="2">
+       <widget class="QSpinBox" name="sbxSteps">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Tool:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Depth:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="labelToolName2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Tool2:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="2">
+       <widget class="QLabel" name="labelPass">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Profile
+Pass:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lblToolName">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="Line" name="line">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="lblToolName_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="DepthForm" name="dsbxDepth" native="true">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="labelMinArea">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+          <kerning>true</kerning>
+         </font>
+        </property>
+        <property name="text">
+         <string>Min T1
+Area:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="2">
+       <widget class="DoubleSpinBox" name="dsbxMinArea">
+        <property name="suffix">
+         <string> mm²</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.005000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item>
     <widget class="QPushButton" name="pbCreate">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="text">
       <string>Create</string>
      </property>
@@ -480,6 +625,9 @@ Pass:</string>
    </item>
    <item>
     <spacer name="verticalSpacer">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -493,6 +641,9 @@ Pass:</string>
    </item>
    <item>
     <widget class="QPushButton" name="pbClose">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="text">
       <string>Close</string>
      </property>

@@ -10,17 +10,10 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     : GraphicsItem(file)
     , m_paths(paths)
 {
-    for (Path path : m_paths) {
-        if (path.empty() && path.first() != path.last())
-            path.append(path.first());
-        m_shape.addPolygon(toQPolygon(path));
-    }
-    m_rect = m_shape.boundingRect();
+    redraw();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
-
-
 
 QRectF GerberItem::boundingRect() const { return m_rect; }
 
@@ -49,7 +42,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     QColor cb(m_brush.color());
     QBrush b(cb);
     QColor cp(cb);
-    QPen pen(Qt::NoPen);
+    QPen pen(m_brush.color(), 0.0); //Qt::NoPen);
 
     if (option->state & QStyle::State_Selected) {
         cb.setAlpha(255);
@@ -58,7 +51,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         pen = QPen(cp, 0.0);
     }
     if (option->state & QStyle::State_MouseOver) {
-        cb = cb.dark(110);
+        cb = cb.darker(110);
         b.setColor(cb);
         //        b.setStyle(Qt::Dense4Pattern);
         //        b.setMatrix(matrix().scale(2 * MyGraphicsView:: scaleFactor(), 2 * MyGraphicsView:: scaleFactor()));
@@ -73,4 +66,17 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
 int GerberItem::type() const { return GerberItemType; }
 
+void GerberItem::redraw()
+{
+    m_shape = QPainterPath();
+    for (Path path : m_paths) {
+        path.append(path.first());
+        m_shape.addPolygon(toQPolygon(path));
+    }
+    m_rect = m_shape.boundingRect();
+    update();
+}
+
 Paths GerberItem::paths() const { return m_paths; }
+
+Paths& GerberItem::rPaths() { return m_paths; }

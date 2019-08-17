@@ -21,7 +21,7 @@ public:
     Paths paths() const override;
     QPainterPath shape() const override;
 
-private:
+protected:
     QPolygonF m_polygon;
     const Path& m_path;
     mutable QPainterPath m_shape;

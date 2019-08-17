@@ -3,6 +3,7 @@
 
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
+#include "icons.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -14,7 +15,7 @@
 #include <scene.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
-    : FormsUtil("VoronoiForm", parent)
+    : FormsUtil("VoronoiForm", new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm)
 {
     ui->setupUi(this);
@@ -149,9 +150,6 @@ void VoronoiForm::createFile()
         return;
     }
 
-    toolPathCreator(new GCode::VoronoiCreator);
-    m_tps->addPaths(wPaths);
-    m_tps->addRawPaths(wRawPaths);
     GCode::GCodeParams gpc;
     gpc.convent = true;
     gpc.side = GCode::Outer;
@@ -159,6 +157,9 @@ void VoronoiForm::createFile()
     gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
     gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
     gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
+    m_tpc->setGcp(gpc);
+    m_tpc->addPaths(wPaths);
+    m_tpc->addRawPaths(wRawPaths);
     createToolpath(gpc);
 }
 

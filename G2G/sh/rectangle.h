@@ -1,13 +1,13 @@
-#ifndef CIRCLE_H
-#define CIRCLE_H
+#ifndef Rectangle_H
+#define Rectangle_H
 
 #include <gi/graphicsitem.h>
 namespace ShapePr {
 
-class Circle : public GraphicsItem {
+class Rectangle : public GraphicsItem {
 public:
-    explicit Circle(QPointF center, QPointF rh);
-    ~Circle() override = default;
+    explicit Rectangle(QPointF center, QPointF rh);
+    ~Rectangle() override = default;
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -22,14 +22,10 @@ public:
     void setCenter(const QPointF& center);
     QPointF rh() const;
     void setRh(const QPointF& rh);
-    double radius() const;
-    void setRadius(double radius);
 
 private:
     Path m_path;
     QPointF m_rh;
-    double m_radius;
-    QRectF handle();
 
     // QGraphicsItem interface
 protected:
@@ -40,4 +36,4 @@ protected:
 };
 }
 
-#endif // CIRCLE_H
+#endif // Rectangle_H

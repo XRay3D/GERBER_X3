@@ -22,8 +22,8 @@ private slots:
     void on_pbSelect_2_clicked();
     void on_pbEdit_2_clicked();
     void on_sbxSteps_valueChanged(int arg1);
-    void on_chbxUseTwoTools_clicked(bool checked);
     void on_leName_textChanged(const QString& arg1);
+    void on_chbxUseTwoTools_toggled(bool checked);
 
 private:
     Ui::PocketForm* ui;
@@ -31,6 +31,7 @@ private:
     int direction = 0;
     int type = 0;
     void updatePixmap();
+    void updateArea();
 
     // QWidget interface
 protected:

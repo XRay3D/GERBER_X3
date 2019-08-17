@@ -1,4 +1,4 @@
-﻿#include "circle.h"
+#include "rectangle.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -10,10 +10,9 @@
 #include <settings.h>
 
 namespace ShapePr {
-Circle::Circle(QPointF center, QPointF rh)
+Rectangle::Rectangle(QPointF center, QPointF rh)
     : GraphicsItem(nullptr)
     , m_rh(rh)
-    , m_radius(QLineF(center, rh).length())
 {
     setPos(center);
     redraw();
@@ -23,11 +22,11 @@ Circle::Circle(QPointF center, QPointF rh)
     Scene::addItem(this);
 }
 
-QRectF Circle::boundingRect() const { return m_rect; }
+QRectF Rectangle::boundingRect() const { return m_rect; }
 
-QPainterPath Circle::shape() const { return m_shape; }
+QPainterPath Rectangle::shape() const { return m_shape; }
 
-void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_penColor)
         m_pen.setColor(*m_penColor);
@@ -52,9 +51,8 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
-    //    painter->drawPolyline(toQPolygon(m_path));
+    painter->drawPolyline(toQPolygon(m_path));
     painter->drawPath(m_shape);
-
     if (option->state & QStyle::State_Selected) {
         const double scale = GraphicsView::scaleFactor();
         const double k = 5 * scale;
@@ -66,39 +64,38 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     }
 }
 
-Paths Circle::paths() const
+Paths Rectangle::paths() const
 {
     Path p(m_path);
     TranslatePath(p, toIntPoint(pos()));
     return { p };
 }
 
-void Circle::redraw()
+void Rectangle::redraw()
 {
-    m_radius = (QLineF(pos(), m_rh).length());
-    const int intSteps = Settings::circleSegments(m_radius);
-    const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const double delta_angle = (2.0 * M_PI) / intSteps;
-    m_path.clear();
-    for (int i = 0; i < intSteps; i++) {
-        const double theta = delta_angle * i;
-        m_path.append(IntPoint(
-            static_cast<cInt>(radius * cos(theta)),
-            static_cast<cInt>(radius * sin(theta))));
-    }
-    m_path.append(m_path.first());
+    IntPoint p1;
+    IntPoint p2(toIntPoint(m_rh - pos()));
+    m_path = {
+        IntPoint{ p1.X, p1.Y },
+        IntPoint{ p2.X, p1.Y },
+        IntPoint{ p2.X, p2.Y },
+        IntPoint{ p1.X, p2.Y },
+        IntPoint{ p1.X, p1.Y },
+    };
+    if (Area(m_path) < 0)
+        ReversePath(m_path);
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(m_path));
     m_rect = m_shape.boundingRect();
     update();
 }
 
-QPointF Circle::rh() const
+QPointF Rectangle::rh() const
 {
     return m_rh;
 }
 
-void Circle::setRh(const QPointF& rh)
+void Rectangle::setRh(const QPointF& rh)
 {
     if (m_rh == rh)
         return;
@@ -110,46 +107,21 @@ void Circle::setRh(const QPointF& rh)
     m_rh -= pos();
 }
 
-QPointF Circle::center() const
+QPointF Rectangle::center() const
 {
     return pos();
 }
 
-void Circle::setCenter(const QPointF& center)
+void Rectangle::setCenter(const QPointF& center)
 {
     if (pos() == center)
         return;
     setPos(center);
-    //    calc();
-}
-double Circle::radius() const
-{
-    return m_radius;
-}
-
-void Circle::setRadius(double radius)
-{
-    if (!qFuzzyCompare(m_radius, radius))
-        return;
-    m_radius = radius;
-    redraw();
-}
-
-QRectF Circle::handle()
-{
-    const double scale = GraphicsView::scaleFactor();
-    const double k = 5 * scale;
-    const double s = k * 2;
-    return { QPointF(-k, -k), QSizeF(s, s) };
 }
 }
 
-void ShapePr::Circle::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Rectangle::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    //    if (!handle().contains(event->pos())) {
-    //        event->accept();
-    //        return;
-    //    }
     GraphicsItem::mouseMoveEvent(event);
     if (event->modifiers() & Qt::AltModifier) {
         const double gs = Settings::gridStep(GraphicsView::self->matrix().m11());
@@ -160,18 +132,18 @@ void ShapePr::Circle::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void ShapePr::Circle::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Rectangle::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     GraphicsItem::mousePressEvent(event);
 }
 
-void ShapePr::Circle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Rectangle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     GraphicsItem::mouseReleaseEvent(event);
     scene()->setSceneRect(scene()->itemsBoundingRect());
 }
 
-void ShapePr::Circle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Rectangle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     GraphicsItem::mouseDoubleClickEvent(event);
     delete this;

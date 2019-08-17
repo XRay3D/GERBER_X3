@@ -1,5 +1,6 @@
 #include "foldernode.h"
 #include "gerbernode.h"
+#include "icons.h"
 
 FolderNode::FolderNode(const QString& name)
     : AbstractNode(-1)

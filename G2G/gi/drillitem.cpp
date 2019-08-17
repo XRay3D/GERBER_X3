@@ -49,7 +49,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
         brush.setColor(Qt::magenta);
 
     if (option->state & QStyle::State_MouseOver)
-        brush.setColor(brush.color().dark(150));
+        brush.setColor(brush.color().darker(150));
 
     painter->setBrush(brush);
     painter->setPen(m_pen);

@@ -3,7 +3,7 @@
 
 #include <QGraphicsItem>
 
-namespace Shape {
+namespace ShapePr {
 class Handler : public QGraphicsItem {
 public:
     explicit Handler(QGraphicsItem* parent = nullptr);

@@ -33,9 +33,9 @@ public:
     double apertureSize();
 
     Path drawDrill(const State& state);
-    Paths draw(const State& state);
+    Paths draw(const State& state, bool fl = false);
 
-    virtual QString name() = 0;
+    virtual QString name() const = 0;
     virtual ApertureType type() const = 0;
 
     double minSize() const;
@@ -63,7 +63,12 @@ protected:
 class ApCircle : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const Format* format);
-    QString name() override;
+    ApCircle(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
+    QString name() const override;
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
@@ -85,7 +90,12 @@ class ApRectangle : public AbstractAperture {
 
 public:
     ApRectangle(double width, double height, double drillDiam, const Format* format);
-    QString name() override;
+    ApRectangle(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
+    QString name()const override;
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
@@ -106,7 +116,12 @@ private:
 class ApObround : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const Format* format);
-    QString name() override;
+    ApObround(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
+    QString name()const override;
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
@@ -127,10 +142,15 @@ private:
 class ApPolygon : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format);
+    ApPolygon(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
     double rotation() const;
     int verticesCount() const;
 
-    QString name() override;
+    QString name() const override;
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
@@ -152,7 +172,12 @@ private:
 class ApMacro : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format);
-    QString name() override;
+    ApMacro(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
+    QString name()const override;
     ApertureType type() const override;
     bool fit(double) const override;
 
@@ -181,7 +206,12 @@ private:
 class ApBlock : public AbstractAperture, public QList<GraphicObject> {
 public:
     ApBlock(const Format* format);
-    QString name() override;
+    ApBlock(QDataStream& stream, const Format* format)
+        : AbstractAperture(format)
+    {
+        read(stream);
+    }
+    QString name()const override;
     ApertureType type() const override;
     bool fit(double) const override;
 

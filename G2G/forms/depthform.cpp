@@ -11,12 +11,10 @@ DepthForm::DepthForm(QWidget* parent)
     setupUi(this);
     retranslateUi(this);
     connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &DepthForm::valueChanged);
-    //    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
-    //        if (rbCopper->isChecked())
-    //            GCodePropertiesForm::copperThickness = value;
-    //        if (rbBoard->isChecked())
-    //            GCodePropertiesForm::thickness = value;
-    //    });
+    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+        if (rbCustom->isChecked())
+            m_value = value;
+    });
 
     connect(rbCustom, &QRadioButton::toggled, [this](bool checked) {
         if (checked) {

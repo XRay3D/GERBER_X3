@@ -54,7 +54,7 @@ void AbstractFile::_read(QDataStream& stream)
     stream >> m_name;
     stream >> m_mergedPaths;
     stream >> m_groupedPaths;
-    stream >> (int&)(m_side);
+    stream >> m_side;
     stream >> m_color;
     stream >> m_date;
     createGi();

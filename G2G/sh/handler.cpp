@@ -1,6 +1,6 @@
 #include "handler.h"
 
-namespace Shape {
+namespace ShapePr {
 Handler::Handler(QGraphicsItem* parent)
     : QGraphicsItem(parent)
 {
@@ -16,14 +16,14 @@ void Handler::paint(QPainter* /*painter*/, const QStyleOptionGraphicsItem* /*opt
 }
 }
 
-void Shape::Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Handler::mousePressEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }
 
-void Shape::Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }
 
-void Shape::Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void ShapePr::Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }

@@ -86,8 +86,8 @@ static cInt const loRange = 0x7FFF;
 static cInt const hiRange = 0x7FFF;
 #else
 typedef signed /*long*/ long cInt;
-static cInt const loRange = 0x7FFFFFFF;
-static cInt const hiRange = 0x7FFFFFFF; //FFFFFFFFL /*L*/;
+static cInt const loRange = 0x40000000;
+static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
 typedef unsigned long long ulong64;
 
@@ -101,7 +101,7 @@ struct IntPoint {
     IntPoint(cInt x = 0, cInt y = 0, cInt z = 0) F
         : X(x),
           Y(y),
-          Z(z){};
+          Z(z) {};
 #else
     IntPoint(cInt x = 0, cInt y = 0)
         : X(x)
@@ -126,6 +126,11 @@ struct IntPoint {
     {
         stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(IntPoint));
         return stream;
+    }
+    friend QDebug operator<<(QDebug d, const IntPoint& p)
+    {
+        d << "IntPoint(" << p.X << ", " << p.Y << ")";
+        return d;
     }
 };
 //------------------------------------------------------------------------------
@@ -157,8 +162,8 @@ struct DoublePoint {
     {
     }
     DoublePoint(IntPoint ip)
-        : X((double)ip.X)
-        , Y((double)ip.Y)
+        : X(static_cast<double>(ip.X))
+        , Y(static_cast<double>(ip.Y))
     {
     }
 };
@@ -186,7 +191,7 @@ typedef QVector<PolyNode*> PolyNodes;
 class PolyNode {
 public:
     PolyNode();
-    virtual ~PolyNode() {}
+    /*virtual*/ ~PolyNode() {}
     Path Contour;
     PolyNodes Childs;
     PolyNode* Parent;
@@ -197,7 +202,7 @@ public:
 
 private:
     //PolyNode& operator =(PolyNode& other);
-    unsigned Index; //node index in Parent.Childs
+    int Index; //node index in Parent.Childs
     bool m_IsOpen;
     JoinType m_jointype;
     EndType m_endtype;
@@ -343,7 +348,7 @@ public:
     void ZFillFunction(ZFillCallback zFillFunc);
 #endif
 protected:
-    virtual bool ExecuteInternal();
+    /*virtual*/ bool ExecuteInternal();
 
 private:
     JoinList m_Joins;
@@ -451,8 +456,8 @@ public:
         : m_descr(description)
     {
     }
-    virtual ~clipperException() throw() {}
-    virtual const char* what() const throw() { return m_descr.c_str(); }
+    ~clipperException() noexcept override = default;
+    const char* what() const noexcept override { return m_descr.c_str(); }
 
 private:
     std::string m_descr;

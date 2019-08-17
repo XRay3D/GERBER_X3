@@ -12,7 +12,8 @@ class File : public AbstractFile, public QList<Hole> {
     Format m_format;
 
 public:
-    File();
+    explicit File(QDataStream& stream);
+    explicit File();
     ~File() override;
 
     FileType type() const override { return FileType::Drill; }
@@ -33,9 +34,9 @@ protected:
 
     // AbstractFile interface
 public:
-    virtual void write(QDataStream& stream) const override;
-    virtual void read(QDataStream& stream) override;
-    virtual void createGi() override;
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
+    void createGi() override;
 };
 } // namespace Excellon
 

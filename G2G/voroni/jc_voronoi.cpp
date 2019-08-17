@@ -1,5 +1,5 @@
 #include "jc_voronoi.h"
-
+#include <gccreator.h>
 #include <memory.h>
 
 // INTERNAL FUNCTIONS
@@ -992,7 +992,9 @@ void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, con
     qsort(sites, (size_t)num_points, sizeof(jcv_site), jcv_point_cmp);
 
     int offset = 0;
+    GCode::Creator::progress(num_points);
     for (int i = 0; i < num_points; i++) {
+        GCode::Creator::progress();
         const jcv_site* s = &sites[i];
         // Remove duplicates, to avoid anomalies
         if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {

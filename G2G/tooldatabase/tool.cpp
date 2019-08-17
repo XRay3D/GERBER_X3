@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <qmath.h>
+#include "icons.h"
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 

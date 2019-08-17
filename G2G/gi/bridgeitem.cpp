@@ -8,12 +8,14 @@
 #include <gccreator.h>
 #include <graphicsview.h>
 #include <limits>
+#include <math.h>
 #include <scene.h>
 
-BridgeItem::BridgeItem(double& lenght, double& size, BridgeItem*& ptr)
+BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
     : m_ptr(ptr)
     , m_lenght(lenght)
     , m_size(size)
+    , m_side(side)
 {
     connect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
@@ -28,22 +30,28 @@ QRectF BridgeItem::boundingRect() const
 
 void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
-    painter->setBrush(/*scene()->collidingItems(this).isEmpty()*/ !m_ok ? Qt::red : Qt::green);
+    painter->setBrush(!m_ok ? Qt::red : Qt::green);
     painter->setPen(Qt::NoPen);
     painter->drawPath(m_path);
     painter->setBrush(Qt::magenta);
-
-    //    QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
-    //    l.setAngle(m_angle + 90);
-    //    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
-    //    l.setAngle(m_angle - 90);
-    //    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
-
-    //    QLineF l2(0, 0, m_size / 2, 0);
-    //    l2.setAngle(m_angle);
-    //    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
-    //    l2.setAngle(m_angle + 180);
-    //    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+    switch (m_side) {
+    case GCode::On: {
+        //        QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
+        //        l.setAngle(m_angle + 90);
+        //        painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+        //        l.setAngle(m_angle - 90);
+        //        painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+        //        QLineF l2(0, 0, m_size / 2, 0);
+        //        l2.setAngle(m_angle);
+        //        painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+        //        l2.setAngle(m_angle + 180);
+        //        painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+    } break;
+    case GCode::Outer:
+        break;
+    case GCode::Inner:
+        break;
+    }
 }
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
@@ -172,7 +180,7 @@ void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)
 void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (m_ok && pos() == m_lastPos) {
-        m_ptr = new BridgeItem(m_lenght, m_size, m_ptr);
+        m_ptr = new BridgeItem(m_lenght, m_size, m_side, m_ptr);
         scene()->addItem(m_ptr);
     } else if (!m_ok) {
         deleteLater();

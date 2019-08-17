@@ -24,7 +24,7 @@ using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
-const /*long*/ long uScale = 10000;
+const cInt uScale = 100000;
 const double dScale = 1.0 / uScale;
 
 Path toPath(const QPolygonF& p);
@@ -33,8 +33,8 @@ Paths toPaths(const QVector<QPolygonF>& p);
 QPolygonF toQPolygon(const Path& p);
 QVector<QPolygonF> toQPolygons(const Paths& p);
 
-QPointF toQPointF(const IntPoint& p);
-IntPoint toIntPoint(const QPointF& p);
+inline QPointF toQPointF(const IntPoint& p) { return QPointF(p.X * dScale, p.Y * dScale); }
+inline IntPoint toIntPoint(const QPointF& p) { return IntPoint(static_cast<cInt>(p.x() * uScale), static_cast<cInt>(p.y() * uScale)); }
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);

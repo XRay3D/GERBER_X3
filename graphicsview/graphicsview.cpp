@@ -10,8 +10,10 @@
 #include <gi/bridgeitem.h>
 //#include <gi/ruler.h>
 #include <mainwindow.h>
+#include <settings.h>
 
 #include <sh/circle.h>
+#include <sh/constructor.h>
 
 #ifdef ANIM
 enum {
@@ -27,7 +29,7 @@ GraphicsView::GraphicsView(QWidget* parent)
 {
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
-    setViewportUpdateMode(FullViewportUpdate /*NoViewportUpdate*/);
+    setViewportUpdateMode(FullViewportUpdate /*SmartViewportUpdate*/ /*NoViewportUpdate*/);
     setDragMode(RubberBandDrag);
     setInteractive(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -39,7 +41,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     // add grid layout
     QGridLayout* gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(0);
-    gridLayout->setMargin(0);
+    //gridLayout->setMargin(0);
 
     // create rulers
     hRuler = new QDRuler(QDRuler::Horizontal, this);
@@ -48,8 +50,18 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler->SetMouseTrack(true);
 
     // add items to grid layout
-    QLabel* corner = new QLabel("<html><head/><body><p><span style=\" color:#ffffff;\">mm</span></p></body></html>", this);
-    corner->setAlignment(Qt::AlignCenter);
+
+    //QLabel* corner = new QLabel("<html><head/><body><p><span style=\" color:#ffffff;\">mm</span></p></body></html>", this);
+    QPushButton* corner = new QPushButton(Settings::inch() ? "I" : "M", this);
+    connect(corner, &QPushButton::clicked, [this, corner](bool fl) {
+        corner->setText(fl ? "I" : "M");
+        Settings::setInch(fl);
+        scene()->update();
+        hRuler->update();
+        vRuler->update();
+    });
+    corner->setCheckable(true);
+    //corner->setAlignment(Qt::AlignCenter);
     corner->setFixedSize(RulerBreadth, RulerBreadth);
 
     gridLayout->addWidget(corner, 1, 0);
@@ -62,19 +74,24 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     scale(1.0, -1.0); //flip vertical
     zoom100();
-
+    QGLWidget* glw = nullptr;
     QSettings settings;
     settings.beginGroup("Viewer");
     setViewport(settings.value("OpenGl").toBool()
-            ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
+            ? (glw = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)))
             : new QWidget);
+    if (glw) {
+    }
+
     setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
 
     m_scene = new Scene;
     setScene(m_scene);
-    connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross);
+    connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
+    //    connect(this, &GraphicsView::mouseMove, hRuler, &QDRuler::setCross);
+    //    connect(this, &GraphicsView::mouseMove, vRuler, &QDRuler::setCross);
 
     setStyleSheet("QGraphicsView { background: black }");
 
@@ -137,7 +154,7 @@ void GraphicsView::zoomToSelected()
 void GraphicsView::zoom100()
 {
     double x = 1.0, y = 1.0;
-    if (0) {
+    if (/* DISABLES CODE */ (0)) {
         x = qAbs(1.0 / transform().m11() / (25.4 / physicalDpiX()));
         y = qAbs(1.0 / transform().m22() / (25.4 / physicalDpiY()));
     } else {
@@ -184,14 +201,16 @@ void GraphicsView::zoomOut()
 #endif
 }
 
-PrType GraphicsView::pt() const
+QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
-    return m_pt;
-}
-
-void GraphicsView::setPt(const PrType& pt)
-{
-    m_pt = pt;
+    if (event->modifiers() & Qt::AltModifier) {
+        const double gs = Settings::gridStep(matrix().m11());
+        QPointF px(mapToScene(event->pos()) / gs);
+        px.setX(gs * round(px.x()));
+        px.setY(gs * round(px.y()));
+        return px;
+    }
+    return mapToScene(event->pos());
 }
 
 #ifdef ANIM
@@ -221,13 +240,16 @@ void GraphicsView::ScalingTime(qreal x)
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
+    //    const QPointF pt(mapToScene(event->pos()));
     switch (event->modifiers()) {
     case Qt::ControlModifier:
         if (abs(event->delta()) == 120) {
+            setInteractive(false);
             if (event->delta() > 0)
                 zoomIn();
             else
                 zoomOut();
+            setInteractive(true);
         }
         break;
     case Qt::ShiftModifier:
@@ -270,6 +292,9 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     //            return;
     //        }
     event->accept();
+    //    if (event->buttons() & Qt::RightButton)
+    //        centerOn(pt);
+    update();
 }
 
 void GraphicsView::UpdateRuler()
@@ -330,15 +355,12 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         setDragMode(NoDrag);
         setInteractive(false);
         //Ruler
-        m_scene->setCross2(mapToScene(event->pos()));
-        //ruller = new Ruler(mapToScene(event->pos()));
-        //connect(this, &GraphicsView::mouseMove, ruller, &Ruler::setPoint2);
-        //scene()->addItem(ruller);
+        m_scene->setDrawRuller(true);
+        m_scene->setCross2(mappedPos(event));
         QGraphicsView::mousePressEvent(event);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
-        pt1 = mapToScene(event->pos());
     }
 }
 
@@ -355,65 +377,10 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
-        //Ruler
-        //delete ruller;
-        //ruller = nullptr;
-        m_scene->setCross2(QPointF());
-        m_scene->update();
+        m_scene->setDrawRuller(false);
     } else {
         QGraphicsView::mouseReleaseEvent(event);
-        pt2 = mapToScene(event->pos());
-        switch (m_pt) {
-        case Rect: {
-            QGraphicsRectItem* item = scene()->addRect(
-                std::min(pt1.x(), pt2.x()),
-                std::min(pt1.y(), pt2.y()),
-                std::max(pt1.x(), pt2.x()) - std::min(pt1.x(), pt2.x()),
-                std::max(pt1.y(), pt2.y()) - std::min(pt1.y(), pt2.y()),
-                QPen(Qt::red, 0.0), QColor(255, 255, 255, 100));
-            item->setFlags(
-                QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-            m_pt = NullPT;
-        } break;
-        case Line: {
-            QGraphicsLineItem* item = scene()->addLine(QLineF(pt1, pt2), QPen(Qt::red, 0.0));
-            item->setFlags(
-                QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-            m_pt = NullPT;
-        } break;
-        case Elipse: {
-            auto* shapeItem = new ::Shape::Circle(pt1, pt2);
-            scene()->addItem(shapeItem);
-            shapeItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-            m_pt = NullPT;
-            scene()->setSceneRect(scene()->itemsBoundingRect());
-        } break;
-        case ArcPT: {
-            QGraphicsEllipseItem* item = scene()->addEllipse(
-                std::min(pt1.x(), pt2.x()),
-                std::min(pt1.y(), pt2.y()),
-                std::max(pt1.x(), pt2.x()) - std::min(pt1.x(), pt2.x()),
-                std::max(pt1.y(), pt2.y()) - std::min(pt1.y(), pt2.y()),
-                QPen(Qt::red, 0.0), QColor(255, 255, 255, 100));
-            item->setStartAngle(0);
-            item->setSpanAngle(123);
-            item->setFlags(
-                QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-            m_pt = NullPT;
-        } break;
-        case Text: {
-            QGraphicsTextItem* item = scene()->addText("QGraphicsTextItem");
-            // QPen(Qt::red, 0.0), QColor(255, 255, 255, 100));
-            item->setDefaultTextColor(QColor(255, 255, 255, 100));
-            item->setMatrix(QMatrix().scale(1, -1));
-            item->setPos(pt1);
-            item->setFlags(
-                QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsFocusable);
-            m_pt = NullPT;
-        } break;
-        default:
-            break;
-        }
+        ShapePr::Constructor::addItem(mappedPos(event));
     }
 }
 
@@ -423,7 +390,8 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
-    mouseMove(mapToScene(event->pos() + QPoint(1, 1)));
-
+    const QPointF point(mappedPos(event));
+    mouseMove(point);
+    ShapePr::Constructor::updateItem(point);
     QGraphicsView::mouseMoveEvent(event);
 }

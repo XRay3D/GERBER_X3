@@ -45,6 +45,10 @@ public:
     static QPointF pinOffset();
 
     static bool gcinfo();
+    static bool inch();
+    static void setInch(bool val);
+
+    static double gridStep(double scale);
 
 protected:
     static QColor m_color[static_cast<int>(Colors::Count)];
@@ -60,6 +64,7 @@ protected:
     static QPointF m_pinOffset;
     static QPointF m_homeOffset;
     static int m_homePos;
+    static bool m_inch;
 };
 
 #endif // SETTINGS_H

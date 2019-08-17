@@ -4,6 +4,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QLocale>
 #include <QTimer>
 
 DoubleSpinBox::DoubleSpinBox(QWidget* parent)
@@ -54,8 +55,8 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event)
     //        lineEdit()->setSelection(start, 100);
     //        return;
     //    }
-    if (event->text() == '.')
-        QDoubleSpinBox::keyPressEvent(new QKeyEvent(event->type(), Qt::Key_Comma, event->modifiers(), ","));
+    if (event->text() == '.' || event->text() == ',')
+        QDoubleSpinBox::keyPressEvent(new QKeyEvent(event->type(), Qt::Key_Comma, event->modifiers(), QLocale().decimalPoint()));
     else
         QDoubleSpinBox::keyPressEvent(event);
     //    lineEdit()->setSelection(lineEdit()->cursorPosition(), 100);

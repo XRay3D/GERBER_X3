@@ -4,6 +4,7 @@
 
 #include <QJsonArray>
 #include <QPixmap>
+#include "icons.h"
 
 bool ToolItem::m_deleteEnable = false;
 
@@ -140,11 +141,12 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
             return QVariant();
         }
     case Qt::DecorationRole:
-        if (index.column() == 0)
-            if (m_toolId)
+        if (index.column() == 0) {
+            if(m_toolId)
                 return ToolHolder::tools[m_toolId].icon();
             else
                 return Icon(ToolFolderIcon);
+        }
         return QVariant();
     case Qt::UserRole:
         return m_toolId;

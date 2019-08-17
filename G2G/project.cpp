@@ -270,17 +270,14 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     int type;
     stream >> type;
     switch (type) {
-    case FileType::Gerber:
-        file = QSharedPointer<AbstractFile>(new Gerber::File);
-        file->read(stream);
+    case static_cast<int>(FileType::Gerber):
+        file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
         break;
-    case FileType::Drill:
-        file = QSharedPointer<AbstractFile>(new Excellon::File);
-        file->read(stream);
+    case static_cast<int>(FileType::Drill):
+        file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
         break;
-    case FileType::GCode:
-        file = QSharedPointer<AbstractFile>(new GCode::File);
-        file->read(stream);
+    case static_cast<int>(FileType::GCode):
+        file = QSharedPointer<AbstractFile>(new GCode::File(stream));
         break;
     }
     return stream;

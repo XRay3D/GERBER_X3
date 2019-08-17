@@ -7,11 +7,14 @@ namespace GCode {
 class PocketCreator : public Creator {
 public:
     PocketCreator();
-    void create(const GCodeParams& gcp) override; // Creator interface
+
 private:
-    void createRaster(const Tool& tool, const double depth, const double angle, const int pPass);
+    void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createPocket(const Tool& tool, const double depth, const int steps);
-    void createPocket2(const QPair<Tool, Tool>& tool, double depth);
+    void createPocket2(const QPair<Tool, Tool>& tool, double depth, double minArea);
+
+protected:
+    void create(const GCodeParams& gcp) override; // Creator interface
 };
 }
 

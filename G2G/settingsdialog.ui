@@ -205,41 +205,39 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Gerber \ G-Code</string>
+       <string>Gerber / G-Code</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>Gerber</string>
+          <string>Gerber / G-Code</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_2">
+         <layout class="QFormLayout" name="formLayout_3">
           <property name="labelAlignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>9</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="minimumCircleSegmentsLabel">
             <property name="text">
-             <string>Minimum number of circle segments</string>
+             <string>Minimum points of circle aproximation:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="sbxMinCircleSegments">
+            <property name="minimum">
+             <number>12</number>
+            </property>
+            <property name="maximum">
+             <number>360</number>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="minimumCircleSegmentLengthLabel">
             <property name="text">
-             <string>The minimum length of a segment of a circle</string>
+             <string>The minimum length of circle aproximation:</string>
             </property>
            </widget>
           </item>
@@ -265,35 +263,40 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="sbxMinCircleSegments">
-            <property name="minimum">
-             <number>12</number>
-            </property>
-            <property name="maximum">
-             <number>360</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="cleanPolygonsLabel">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Gerber</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="chbxCleanPolygons">
             <property name="text">
              <string>Cleaning Polygons</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QCheckBox" name="chbxCleanPolygons"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="skipDuplicatesLabel">
+          <item>
+           <widget class="QCheckBox" name="chbxSkipDuplicates">
             <property name="text">
              <string>Skip duplicates</string>
             </property>
            </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="chbxSkipDuplicates"/>
           </item>
          </layout>
         </widget>

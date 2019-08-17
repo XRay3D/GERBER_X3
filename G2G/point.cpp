@@ -76,7 +76,7 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
-        c.setAlpha(50);
+        c.setAlpha(static_cast<int>(c.alpha() * 0.5));
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
@@ -90,8 +90,7 @@ QPainterPath Point::shape() const
 {
     if (Scene::drawPdf())
         return QPainterPath();
-
-    return m_shape;
+    return /*m_shape*/ m_path;
 }
 
 void Point::resetPos(bool fl)
@@ -101,16 +100,16 @@ void Point::resetPos(bool fl)
     }
     if (m_type == Home)
         switch (Settings::homePos()) {
-        case HomePosition::BottomLeft:
+        case static_cast<int>(HomePosition::BottomLeft):
             setPos(Pin::worckRect.topLeft() + Settings::homeOffset());
             break;
-        case HomePosition::BottomRight:
+        case static_cast<int>(HomePosition::BottomRight):
             setPos(Pin::worckRect.topRight() + Settings::homeOffset());
             break;
-        case HomePosition::TopLeft:
+        case static_cast<int>(HomePosition::TopLeft):
             setPos(Pin::worckRect.bottomLeft() + Settings::homeOffset());
             break;
-        case HomePosition::TopRight:
+        case static_cast<int>(HomePosition::TopRight):
             setPos(Pin::worckRect.bottomRight() + Settings::homeOffset());
             break;
         default:
@@ -224,7 +223,8 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
-        c.setAlpha(50);
+        c.setAlpha(static_cast<int>(c.alpha() * 0.5));
+    //c.setAlpha(50);
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
@@ -245,7 +245,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF p[4]{
+    QPointF p[4] {
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
@@ -336,7 +336,7 @@ void Pin::resetPos(bool fl)
         updateRect();
     }
     const QPointF o(Settings::pinOffset());
-    QPointF p[]{
+    QPointF p[] {
         QPointF(Pin::worckRect.topLeft() + QPointF(-o.x(), -o.y())),
         QPointF(Pin::worckRect.topRight() + QPointF(+o.x(), -o.y())),
         QPointF(Pin::worckRect.bottomRight() + QPointF(+o.x(), +o.y())),

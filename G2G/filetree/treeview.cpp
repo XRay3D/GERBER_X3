@@ -2,6 +2,7 @@
 #include "abstractnode.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
+#include "icons.h"
 #include "layerdelegate.h"
 #include "project.h"
 #include <QContextMenuEvent>
@@ -10,6 +11,7 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QPainter>
+#include <QtWidgets>
 #include <excellondialog.h>
 
 TreeView::TreeView(QWidget* parent)
@@ -91,6 +93,7 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 
 void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
+#ifndef QT_DEBUG
     if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
         const int row = index.parent().row();
@@ -109,6 +112,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
             file->itemGroup()->setZValue(-id);
         }
     }
+#endif
 }
 
 void TreeView::hideOther()
@@ -136,7 +140,7 @@ void TreeView::saveGcodeFile()
 {
     auto* file = Project::file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCode::File::getLastDir().append(m_menuIndex.data().toString()) + QStringList{ "(Top)", "(Bot)" }[file->side()],
+        GCode::File::getLastDir().append(m_menuIndex.data().toString()),
         tr("GCode (*.tap)")));
 
     if (name.isEmpty())
@@ -166,10 +170,24 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.addAction(Icon(HideOtherIcon), tr("&Hide other"), this, &TreeView::hideOther);
         auto* file = Project::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
-            if (file)
-                file->setItemType(static_cast<Gerber::File::ItemsType>(checked));
+            //            if (file)
+            file->setItemType(static_cast<Gerber::File::ItemsType>(checked));
         });
         a->setCheckable(true);
+        menu.addAction(QIcon(), tr("&Show source"), [=] {
+            QDialog* Dialog = new QDialog;
+            Dialog->setObjectName(QString::fromUtf8("Dialog"));
+            //Dialog->resize(400, 300);
+            QVBoxLayout* verticalLayout = new QVBoxLayout(Dialog);
+            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+            QTextBrowser* textBrowser = new QTextBrowser(Dialog);
+            textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+            verticalLayout->addWidget(textBrowser);
+            for (const QString& str : Project::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
+                textBrowser->append(str);
+            Dialog->exec();
+            delete Dialog;
+        });
         a->setChecked(file->itemsType());
     } break;
     case NodeDrillFiles:

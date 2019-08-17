@@ -82,7 +82,7 @@ private:
     void printDialog();
     void readSettings();
     void redo();
-    void resetActions();
+    void resetToolPathsActions();
     void saveSelectedToolpaths();
     void selectAll();
     void setRecentFilesVisible(bool visible);
@@ -112,6 +112,7 @@ private:
     void loadFile(const QString& fileName);
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
+    void addFileToPro(AbstractFile *file);
 
     // QWidget interface
 protected:

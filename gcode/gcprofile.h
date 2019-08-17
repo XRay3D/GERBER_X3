@@ -8,9 +8,11 @@ class ProfileCreator : public Creator {
 public:
     ProfileCreator();
     ~ProfileCreator() override = default;
-    void create(const GCodeParams& gcp) override; // Creator interface
+
 private:
     void createProfile(const Tool& tool, const double depth);
+protected:
+    void create(const GCodeParams& gcp) override; // Creator interface
 };
 }
 

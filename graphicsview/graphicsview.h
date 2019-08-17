@@ -6,14 +6,6 @@
 #include <QSettings>
 
 //#define ANIM
-enum PrType {
-    NullPT,
-    Rect,
-    Line,
-    Elipse,
-    ArcPT,
-    Text,
-};
 
 class QDRuler;
 //class Ruler;
@@ -32,9 +24,7 @@ public:
     void zoomOut();
     static GraphicsView* self;
     static double scaleFactor() { return 1.0 / GraphicsView::self->matrix().m11(); }
-
-    PrType pt() const;
-    void setPt(const PrType& pt);
+    QPointF mappedPos(QMouseEvent* event) const;
 
 signals:
     void fileDroped(const QString&);
@@ -46,10 +36,6 @@ private:
     //    Ruler* ruller;
     Scene* m_scene;
     const double zoomFactor = 1.5;
-
-    PrType m_pt = NullPT;
-    QPointF pt1;
-    QPointF pt2;
 
 #ifdef ANIM
     void AnimFinished();

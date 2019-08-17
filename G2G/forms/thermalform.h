@@ -40,7 +40,7 @@ private slots:
 private:
     Ui::ThermalForm* ui;
 
-    void setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
+    void createTPI(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
     ThermalModel* model;

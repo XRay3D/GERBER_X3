@@ -81,6 +81,8 @@ void ThermalPreviewItem::redraw()
         offset.Execute(paths, diameter * uScale * 0.5);
     }
     Clipper clipper;
+    for (Path& path : paths)
+        path.append(path.first());
     clipper.AddPaths(paths, ptSubject, false);
     // create frame
     {
@@ -95,7 +97,7 @@ void ThermalPreviewItem::redraw()
         const double radius = (m_sourcePath.boundingRect().width() + m_sourcePath.boundingRect().height()) * uScale * 0.5;
         for (int i = 0; i < m_count; ++i) {
             ClipperOffset offset;
-            Path path{
+            Path path {
                 center,
                 IntPoint(
                     static_cast<cInt>((cos(i * 2 * M_PI / m_count + qDegreesToRadians(m_angle)) * radius) + center.X),
@@ -119,13 +121,12 @@ void ThermalPreviewItem::redraw()
         offset.AddPaths(paths, jtRound, etOpenRound);
         offset.Execute(paths, diameter * uScale * 0.5);
     }
-
+    m_isValid = !paths.isEmpty();
     m_toolPath = QPainterPath();
     for (QPolygonF& polygon : toQPolygons(paths)) {
         polygon.append(polygon.first());
         m_toolPath.addPolygon(polygon);
     }
-
     update();
 }
 
@@ -156,4 +157,9 @@ void ThermalPreviewItem::setCount(int count)
 ThermalNode* ThermalPreviewItem::node() const
 {
     return m_node;
+}
+
+bool ThermalPreviewItem::isValid() const
+{
+    return flags() & QGraphicsItem::ItemIsSelectable && m_isValid;
 }

@@ -3,6 +3,12 @@
 
 namespace Excellon {
 
+File::File(QDataStream& stream)
+    : m_format(this)
+{
+    read(stream);
+}
+
 File::File()
     : m_format(this)
 {

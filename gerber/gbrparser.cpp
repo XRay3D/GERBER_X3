@@ -15,7 +15,7 @@ namespace Gerber {
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<Gerber::File*>("G::GFile*");
+const int id1 = qRegisterMetaType<Gerber::File*>("G::GFile*");
 
 Parser::Parser(QObject* parent)
     : FileParser(parent)
@@ -37,68 +37,61 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 {
     static QMutex mutex;
     mutex.lock();
+    try {
+        QElapsedTimer t;
+        t.start();
 
-    QElapsedTimer t;
-    t.start();
+        static const QRegExp match(QStringLiteral("FS([L|T]?)([A|I]?)X(\\d)(\\d)Y(\\d)(\\d)\\*"));
+        if (match.indexIn(gerberLines) == -1) {
+            emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
+            mutex.unlock();
+            return;
+        }
 
-    static const QRegExp match(QStringLiteral("FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*"));
-    if (match.indexIn(gerberLines) == -1) {
-        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
-        mutex.unlock();
-        return;
-    }
+        reset(fileName);
+        //    m_file->read();
+        //    if (m_file->size()) {
+        //        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
+        //        m_file->createGi();
+        //        emit fileReady(m_file);
+        //        emit fileProgress(m_file->shortName(), 1, 1);
+        //        mutex.unlock();
+        //        qDebug() << m_file->shortName() << "read" << t.elapsed();
+        //        return;
+        //    }
 
-    reset(fileName);
-    //    m_file->read();
-    //    if (m_file->size()) {
-    //        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
-    //        m_file->createGi();
-    //        emit fileReady(m_file);
-    //        emit fileProgress(m_file->shortName(), 1, 1);
-    //        mutex.unlock();
-    //        qDebug() << m_file->shortName() << "read" << t.elapsed();
-    //        return;
-    //    }
+        m_file->lines() = format(gerberLines);
+        if (m_file->lines().isEmpty())
+            emit fileError("", m_file->shortName() + "\n" + "Incorrect File!");
 
-    m_file->lines() = format(gerberLines);
-    if (m_file->lines().isEmpty())
-        emit fileError("", m_file->shortName() + "\n" + "Incorrect File!");
+        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
 
-    emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
-
-    m_lineNum = 0;
-    for (const QString& gerberLine : m_file->lines()) {
-        m_currentGerbLine = gerberLine;
-        ++m_lineNum;
-        if (!(m_lineNum % 1000))
-            emit fileProgress(m_file->shortName(), 0, m_lineNum);
-        try {
-            //qWarning() << gerberLine;
-            //            if (ParseApertureBlock(gerberLine))
-            //                continue;
-
-            if (parseApertureBlock(gerberLine))
-                continue;
-
-            if (parseEndOfFile(gerberLine))
-                continue;
+        m_lineNum = 0;
+        for (const QString& gerberLine : m_file->lines()) {
+            m_currentGerbLine = gerberLine;
+            ++m_lineNum;
+            if (!(m_lineNum % 1000))
+                emit fileProgress(m_file->shortName(), 0, m_lineNum);
 
             if (parseGCode(gerberLine))
                 continue;
 
-            if (parseAttributes(gerberLine))
+            if (parseDCode(gerberLine))
                 continue;
 
             if (parseStepRepeat(gerberLine))
                 continue; //////////
 
+            if (parseApertureBlock(gerberLine))
+                continue;
+
+            if (parseAttributes(gerberLine))
+                continue;
+
             if (parseImagePolarity(gerberLine))
                 continue;
 
             if (parseApertureMacros(gerberLine))
-                continue;
-
-            if (parseDCode(gerberLine))
                 continue;
 
             // Aperture definitions %ADD...
@@ -109,8 +102,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             // Example: %LPD*% or %LPC*%
             // If polarity changes, creates geometry from current
             // buffer, then adds or subtracts accordingly.
-            //            if (parseLevelPolarity(gerberLine)) //-> parseTransformations
-            //                continue;
             if (parseTransformations(gerberLine))
                 continue;
 
@@ -125,49 +116,51 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             if (parseUnitMode(gerberLine))
                 continue;
 
+            if (parseEndOfFile(gerberLine))
+                continue;
+
             // G01 - Linear interpolation plus flashes
             // Operation code (D0x) missing is deprecated... oh well I will support it.
-            // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
             if (parseLineInterpolation(gerberLine))
                 continue;
 
-            // G02/3 - Circular interpolation
+            // G02/G03 - Circular interpolation
             // 2-clockwise, 3-counterclockwise
             if (parseCircularInterpolation(gerberLine))
                 continue;
 
-            // Line did not match any pattern. Warn user.
-            //qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
-        } catch (const QString& errStr) {
-            qWarning() << "exeption Q:" << errStr;
-            emit fileError("", m_file->shortName() + "\n" + errStr);
-            file()->clear();
-            break;
-        } catch (const char* errStr) {
-            qWarning() << "exeption Q:" << errStr;
-            emit fileError("", m_file->shortName() + "\n" + errStr);
-            file()->clear();
-            break;
-        } catch (...) {
-            qWarning() << "exeption S:" << strerror(errno);
-            emit fileError("", m_file->shortName() + "\n" + "Unknown Error!");
-            file()->clear();
-            break;
+            // Line didn`t match any pattern. Warn user.
+            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
         }
+        if (file()->isEmpty()) {
+            delete m_file;
+        } else {
+            m_file->mergedPaths();
+            m_file->createGi();
+            //m_file->itemGroup()->setVisible(true);
+            emit fileReady(m_file);
+        }
+        emit fileProgress(m_file->shortName(), 1, 1);
+        m_currentGerbLine.clear();
+        m_apertureMacro.clear();
+        m_path.clear();
+        qDebug() << m_file->shortName() << "Parser" << t.elapsed();
+    } catch (const QString& errStr) {
+        qWarning() << "exeption Q:" << errStr;
+        emit fileError("", m_file->shortName() + "\n" + errStr);
+        file()->clear();
+        emit fileProgress(m_file->shortName(), 1, 1);
+    } catch (const char* errStr) {
+        qWarning() << "exeption Q:" << errStr;
+        emit fileError("", m_file->shortName() + "\n" + errStr);
+        file()->clear();
+        emit fileProgress(m_file->shortName(), 1, 1);
+    } catch (...) {
+        qWarning() << "exeption S:" << strerror(errno) << errno;
+        emit fileError("", m_file->shortName() + "\n" + "Unknown Error!");
+        file()->clear();
+        emit fileProgress(m_file->shortName(), 1, 1);
     }
-    if (file()->isEmpty()) {
-        delete m_file;
-    } else {
-        m_file->mergedPaths();
-        m_file->createGi();
-        //m_file->itemGroup()->setVisible(true);
-        emit fileReady(m_file);
-    }
-    emit fileProgress(m_file->shortName(), 1, 1);
-    m_currentGerbLine.clear();
-    m_apertureMacro.clear();
-    m_path.clear();
-    qDebug() << m_file->shortName() << "Parser" << t.elapsed();
     mutex.unlock();
 }
 
@@ -386,10 +379,10 @@ void Parser::addPath()
             file()->append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
             break;
         case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), file(), m_path));
             break;
         case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, createLine(), file(), m_path));
             break;
         }
         break;
@@ -400,25 +393,24 @@ void Parser::addPath()
 void Parser::addFlash()
 {
     m_state.setType(Aperture);
-
     if (!file()->m_apertures.contains(m_state.aperture()) && file()->m_apertures[m_state.aperture()].data() == nullptr)
         throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
-    Paths paths(file()->m_apertures[m_state.aperture()]->draw(m_state));
-
+    AbstractAperture* ap = file()->m_apertures[m_state.aperture()].data();
+    Paths paths(ap->draw(m_state, m_abSrIdStack.top().first != ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
-    if (file()->m_apertures[m_state.aperture()]->isDrilled())
-        paths.push_back(file()->m_apertures[m_state.aperture()]->drawDrill(m_state));
+    if (ap->isDrilled())
+        paths.push_back(ap->drawDrill(m_state));
 
     switch (m_abSrIdStack.top().first) {
     case Normal:
         file()->append(GraphicObject(m_goId++, m_state, paths, file()));
         break;
     case StepRepeat:
-        m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, paths, file()));
+        m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, file()));
         break;
     case ApertureBlock:
-        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, paths, file()));
+        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, paths, file()));
         break;
     }
     resetStep();
@@ -622,9 +614,9 @@ bool Parser::parseTransformations(const QString& gLine)
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations{ "P", "M", "R", "S" };
-    static const QStringList slLevelPolarity{ "D", "C" };
-    static const QStringList slLoadMirroring{ "N", "X", "Y", "XY" };
+    static const QStringList slTransformations { "P", "M", "R", "S" };
+    static const QStringList slLevelPolarity { "D", "C" };
+    static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
     if (match.exactMatch(gLine)) {
         switch (slTransformations.indexOf(match.cap(1))) {
@@ -657,11 +649,11 @@ bool Parser::parseTransformations(const QString& gLine)
 
 bool Parser::parseStepRepeat(const QString& gLine)
 {
-    return false;
+    //    return false;
     //<SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
     //<SR close>     = %SR*%
     //<SR statement> = <SR open>{<single command>|<region statement>}<SR close>
-    static const QRegExp match(QStringLiteral("^%SRX(\\d+)Y(\\d+)I([+-]?\\d*\\.?\\d+)J([+-]?\\d*\\.?\\d+)\\*%$"));
+    static const QRegExp match(QStringLiteral("^%SRX(\\d+)Y(\\d+)I([+-]?\\d*\\.?\\d*)J([+-]?\\d*\\.?\\d*)\\*%$"));
     if (match.exactMatch(gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
             closeStepRepeat();
@@ -689,15 +681,18 @@ bool Parser::parseStepRepeat(const QString& gLine)
 
 void Parser::closeStepRepeat()
 {
-    qDebug() << "sr" << m_stepRepeat.x << m_stepRepeat.y;
+    addPath();
     for (int y = 0; y < m_stepRepeat.y; ++y) {
         for (int x = 0; x < m_stepRepeat.x; ++x) {
-            for (const GraphicObject& go : m_stepRepeat.storage) {
+            const IntPoint pt(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y));
+            for (GraphicObject& go : m_stepRepeat.storage) {
                 Paths paths(go.paths());
-                for (Path& path : paths) {
-                    TranslatePath(path, IntPoint(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y)));
-                }
-                file()->append(GraphicObject(m_goId++, go.state(), paths, go.gFile(), go.path()));
+                for (Path& path : paths)
+                    TranslatePath(path, pt);
+                Path path(go.path());
+                TranslatePath(path, pt);
+                go.state().setCurPos({ go.state().curPos().X + pt.X, go.state().curPos().Y + pt.Y });
+                file()->append(GraphicObject(m_goId++, go.state(), paths, go.gFile(), path));
             }
         }
     }
@@ -720,7 +715,7 @@ bool Parser::parseApertureMacros(const QString& gLine)
 
 bool Parser::parseAttributes(const QString& gLine)
 {
-    static const QRegExp match(QStringLiteral("^%(TF|TA|TO|TD)(.*)\\*%$"));
+    static const QRegExp match(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
     if (match.exactMatch(gLine)) {
         //const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
         // switch (slAttributeType.indexOf(match.cap(1))) {
@@ -834,19 +829,17 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         bool valid = false;
 
         m_path.push_back(m_state.curPos());
-        double radius1 = 0.0, radius2 = 0.0, start = 0.0, stop = 0.0, angle = 0.0;
         Path arcPolygon;
-
         switch (m_state.quadrant()) {
         case Multi: //G75
-            radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
-            start = atan2(-j, -i); // Start angle
+        {
+            const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
+            const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            if (m_state.curPos() == IntPoint(x, y))
-                stop = start;
-            else
-                stop = atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
+            const double stop = (m_state.curPos() == IntPoint(x, y))
+                ? start
+                : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
             arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
             //arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
@@ -857,11 +850,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 arcPolygon.last() = m_state.curPos();
             else
                 arcPolygon.push_back(m_state.curPos());
-            break;
+        } break;
         case Single: //G74
             for (int c = 0; c < 4; ++c) {
-                radius1 = sqrt(i * i + j * j);
-                radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
+                const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
+                const double radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
                 if (qAbs(radius2 - radius1) > (5e-4 * uScale)) // Недействительный центр.
                     continue;
@@ -869,9 +862,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 i = centerPos[c].X - m_state.curPos().X;
                 j = centerPos[c].Y - m_state.curPos().Y;
                 // Углы
-                start = atan2(-j, -i);
-                stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
-                angle = arcAngle(start, stop);
+                const double start = atan2(-j, -i);
+                const double stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
+                const double angle = arcAngle(start, stop);
                 if (angle < (M_PI + 1e-5) * 0.5) {
                     arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
                     // Replace with exact values
@@ -1059,6 +1052,7 @@ bool Parser::parseImagePolarity(const QString& gLine)
 
 bool Parser::parseLineInterpolation(const QString& gLine)
 {
+    // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
     static const QRegExp match(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
     if (match.exactMatch(gLine)) {
         parsePosition(gLine);

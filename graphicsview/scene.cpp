@@ -101,9 +101,9 @@ void Scene::update()
         m_self->QGraphicsScene::update();
 }
 
-void Scene::setCross(const QPointF& cross)
+void Scene::setCross1(const QPointF& cross)
 {
-    m_cross = cross;
+    m_cross1 = cross;
     update();
 }
 
@@ -112,10 +112,16 @@ void Scene::setCross2(const QPointF& cross2)
     m_cross2 = cross2;
 }
 
+void Scene::setDrawRuller(bool drawRuller)
+{
+    m_drawRuller = drawRuller;
+    update();
+}
+
 void Scene::drawRuller(QPainter* painter)
 {
     const QPointF pt1(m_cross2);
-    const QPointF pt2(m_cross);
+    const QPointF pt2(m_cross1);
     QLineF line(pt2, pt1);
     const QRectF rect(
         QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
@@ -125,18 +131,20 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString("  ∆X = %1 mm\n"
-                                 "  ∆Y = %2 mm\n"
-                                 "  ∆ / = %3 mm\n"
-                                 "  %4°")
-                             .arg(rect.width(), 4, 'f', 3, '0')
-                             .arg(rect.height(), 4, 'f', 3, '0')
-                             .arg(length, 4, 'f', 3, '0')
+    const QString text = QString(Settings::inch() ? "  ∆X = %1 in\n"
+                                                    "  ∆Y = %2 in\n"
+                                                    "  ∆ / = %3 in\n"
+                                                    "  %4°"
+                                                  : "  ∆X = %1 mm\n"
+                                                    "  ∆Y = %2 mm\n"
+                                                    "  ∆ / = %3 mm\n"
+                                                    "  %4°")
+                             .arg(rect.width() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.height() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(length / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
-
-    //    QLineF line(m_pt2, m_pt1);
 
     if (qFuzzyIsNull(line.length()))
         return;
@@ -219,11 +227,11 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    const long k = 10000;
+    const long k = 1000000;
     const double invK = 1.0 / k;
-
-    if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect) {
-
+    static bool in = Settings::inch();
+    if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != Settings::inch()) {
+        in = Settings::inch();
         m_scale = views().first()->matrix().m11();
         if (qFuzzyIsNull(m_scale))
             return;
@@ -233,7 +241,8 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         hGrid.clear();
         vGrid.clear();
 
-        double gridStep = qPow(10.0, qCeil(log10((8.0 / m_scale)))); // 0.1;
+        double gridStep = Settings::gridStep(m_scale);
+
         for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * k),
                   right = static_cast<long>(rect.right() * k),
                   step = static_cast<long>(gridStep * k);
@@ -276,7 +285,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
 
-    const QColor color[3]{
+    const QColor color[3] {
         Settings::color(Colors::Grid1),
         Settings::color(Colors::Grid5),
         Settings::color(Colors::Grid10),
@@ -303,7 +312,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
     painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
 
-    QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
+    QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
     bool fl = false;
     for (QGraphicsItem* item : items) {
         if (item && item->type() != RulerType && item->type() != BridgeType && item->flags() & QGraphicsItem::ItemIsSelectable) {
@@ -316,11 +325,23 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     else
         painter->setPen(QPen(QColor(255, 255, 255, 150), 0.0 /*1.0 / scale*/));
 
-    painter->drawLine(QLineF(m_cross.x(), rect.top(), m_cross.x(), rect.bottom()));
-    painter->drawLine(QLineF(rect.left(), m_cross.y(), rect.right(), m_cross.y()));
+    painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
+    painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));
 
-    if (!m_cross2.isNull())
+    if (m_drawRuller)
         drawRuller(painter);
 
     painter->restore();
+}
+
+void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    //    if (event->modifiers() & Qt::AltModifier) {
+    //        const double gs = Settings::gridStep(m_scale);
+    //        QPointF px(event->pos() / gs);
+    //        px.setX(gs * round(px.x()));
+    //        px.setY(gs * round(px.y()));
+    //        event->setPos(px);
+    //    }
+    QGraphicsScene::mouseMoveEvent(event);
 }

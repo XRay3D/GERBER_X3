@@ -5,23 +5,50 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QPushButton>
 #include <QTimer>
 #include <gcvoronoi.h>
 #include <qprogressdialog.h>
 #include <scene.h>
 
-int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
-FormsUtil::FormsUtil(const QString& name, QWidget* parent)
+FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
+    , m_tpc(tps)
     , m_name(name + ".dat")
+    , pd(new QProgressDialog(this))
 {
     readTools({ &tool, &tool2 });
+
+    fileCount = 1;
+    m_tpc = tps;
+    m_tpc->moveToThread(&thread);
+    connect(m_tpc, &GCode::Creator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
+    connect(&thread, &QThread::finished, m_tpc, &QObject::deleteLater);
+    connect(this, &FormsUtil::createToolpath, m_tpc, &GCode::Creator::createGc);
+    connect(this, &FormsUtil::createToolpath, [this] {
+        if (!fileCount)
+            fileCount = 1;
+        pd->setLabelText(m_fileName);
+        m_timerId = startTimer(100);
+    });
+    thread.start(QThread::HighestPriority);
+
+    pd->setMinimumDuration(100);
+    pd->setModal(true);
+    pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
+    pd->setAutoClose(false);
+    pd->setAutoReset(false);
+    pd->reset();
+    connect(pd, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
 }
 
 FormsUtil::~FormsUtil()
 {
-    writeTools({ &tool, &tool2 });
+    thread.quit();
+    thread.wait();
+    writeTools({ tool, tool2 });
 }
 
 void FormsUtil::readTools(const QVector<Tool*>& tools) const
@@ -42,7 +69,7 @@ void FormsUtil::readTools(const QVector<Tool*>& tools) const
     }
 }
 
-void FormsUtil::writeTools(const QVector<Tool*>& tools) const
+void FormsUtil::writeTools(const QVector<Tool>& tools) const
 {
     QFile file(m_name);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -51,9 +78,9 @@ void FormsUtil::writeTools(const QVector<Tool*>& tools) const
     }
 
     QJsonArray toolArray;
-    for (Tool* tool : tools) {
+    for (const Tool& tool : tools) {
         QJsonObject toolObject;
-        tool->write(toolObject);
+        tool.write(toolObject);
         toolArray.append(toolObject);
     }
     QJsonObject json;
@@ -62,39 +89,30 @@ void FormsUtil::writeTools(const QVector<Tool*>& tools) const
     file.write(saveDoc.toBinaryData());
 }
 
-void FormsUtil::showProgress()
-{
-    if (pd)
-        delete pd;
-    pd = new QProgressDialog(this);
-    pd->setLabelText(m_fileName);
-    pd->setMaximum(/*max*/ 0);
-    pd->setModal(true);
-    pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
-    pd->show();
-    connect(pd, &QProgressDialog::canceled, this, &FormsUtil::cancel);
-    m_timerId = startTimer(50);
-}
+//void FormsUtil::showProgress()
+//{
+//    pd = new QProgressDialog(this);
+//    pd->setMinimumDuration(0);
+//    pd->setLabelText(m_fileName);
+//    pd->setModal(true);
+//    pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
+//    connect(pd, &QProgressDialog::canceled, m_tpc, &GCode::Creator::cancel);
+//    m_timerId = startTimer(100);
+//    qDebug("FormsUtil::showProgress()");
+//}
 
 void FormsUtil::cancel()
 {
-    thread.requestInterruption();
-    thread.quit();
-    thread.wait();
-    if (pd) {
-        pd->deleteLater();
-        pd = nullptr;
-    }
-    if (m_timerId) {
-        killTimer(m_timerId);
-        m_timerId = 0;
-    }
-    qDebug("canceled");
+    m_tpc->cancel();
+    killTimer(m_timerId);
+    m_timerId = 0;
+    pd->reset();
+    pd->hide();
 }
 
 void FormsUtil::setFile(GCode::File* file)
 {
-    if (pd && !(--fileCount))
+    if (--fileCount == 0)
         cancel();
 
     if (file == nullptr) {
@@ -104,31 +122,16 @@ void FormsUtil::setFile(GCode::File* file)
 
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
-    file->m_used = m_used;
+    file->m_usedItems = m_usedItems;
     Project::addFile(file);
-}
-
-void FormsUtil::toolPathCreator(GCode::Creator* tps)
-{
-    fileCount = 1;
-    //    thread.quit();
-    //    thread.wait();
-    m_tps = tps; //GCode::Creator(value, convent, side);
-    m_tps->moveToThread(&thread);
-    connect(m_tps, &GCode::Creator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
-    connect(&thread, &QThread::finished, m_tps, &QObject::deleteLater);
-    connect(this, &FormsUtil::createToolpath, m_tps, &GCode::Creator::create);
-    thread.start(QThread::HighestPriority);
-    showProgress();
-    //    return m_tps;
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)
 {
-    if (event->timerId() == m_timerId && pd && m_tps) {
-        pd->setMaximum(m_tps->progressMax());
-        pd->setValue(m_tps->progressValue());
-        if (!m_tps->progressMax() && !m_tps->progressValue())
-            pd->canceled();
+    if (event->timerId() == m_timerId && pd && m_tpc) {
+        const auto [max, val] = m_tpc->getProgress();
+        pd->setMaximum(max);
+        pd->setValue(val);
+        qDebug() << "timerEvent" << max << val;
     }
 }

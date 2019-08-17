@@ -48,7 +48,8 @@ enum Param {
     Tolerance,
     TwoTools,
     Width,
-    FileId
+    FileId,
+    MinArea,
 };
 
 struct GCodeParams {

@@ -9,6 +9,8 @@ class VoronoiCreator : public Creator {
 public:
     VoronoiCreator() {}
     ~VoronoiCreator() override = default;
+
+protected:
     void create(const GCodeParams& gcp) override; // Creator interface
 
 private:

@@ -43,9 +43,12 @@ public:
 
     ThermalNode* node() const;
 
+    bool isValid() const;
+
 private:
     Tool& tool;
     double& m_depth;
+    bool m_isValid = false;
 
     const Gerber::GraphicObject* const grob = nullptr;
 

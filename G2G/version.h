@@ -1,11 +1,11 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VER_FILEVERSION             0,7,7,0
-#define VER_FILEVERSION_STR         "0.7.7.0\0"
+#define VER_FILEVERSION             0,7,7,5
+#define VER_FILEVERSION_STR         "0.7.7.5\0"
 
-#define VER_PRODUCTVERSION          0,7,7,0
-#define VER_PRODUCTVERSION_STR      "0.7.7\0"
+#define VER_PRODUCTVERSION          0,7,7,5
+#define VER_PRODUCTVERSION_STR      "0.7.7.5\0"
 
 #define VER_COMPANYNAME_STR         "XrSoft"
 #define VER_FILEDESCRIPTION_STR     "Getber2Gcode"

@@ -22,72 +22,23 @@ QString File::lastDir;
   M03 - вкл лазера GRBL
  */
 
-///////////////////////////////////////////////
-void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
-{
-    static cInt top = 0;
-    static cInt bottom = 0;
-    Clipper clipper;
-    clipper.AddPaths(paths, ptSubject, true);
-    const IntRect rect(clipper.GetBounds());
-
-    if (fl) {
-        top = rect.top - 1;
-        bottom = rect.bottom + 1;
-    }
-
-    const cInt k = rect.right - rect.left;
-    Paths paths1;
-    Paths paths2;
-    qDebug() << ((rect.bottom - rect.top) * dScale);
-    if (k < (uScale * 10)) {
-        range.append(qMakePair(rect.left, rect.right));
-        pathss.append(paths);
-    } else {
-        cInt c = static_cast<cInt>(k * 0.5);
-        Path outerLeft{
-            IntPoint(rect.left - 1, top),
-            IntPoint(rect.left + c + 1, top),
-            IntPoint(rect.left + c + 1, bottom),
-            IntPoint(rect.left - 1, bottom)
-        };
-        clipper.Clear();
-        clipper.AddPaths(paths, ptSubject, false);
-        clipper.AddPath(outerLeft, ptClip, true);
-        clipper.Execute(ctIntersection, paths1, pftPositive);
-        performance(range, pathss, paths1, false);
-
-        Path outerRight{
-            IntPoint(rect.right - c - 1, top),
-            IntPoint(rect.right + 1, top),
-            IntPoint(rect.right + 1, bottom),
-            IntPoint(rect.right - c - 1, bottom)
-        };
-        clipper.Clear();
-        clipper.AddPaths(paths, ptSubject, false);
-        clipper.AddPath(outerRight, ptClip, true);
-        clipper.Execute(ctIntersection, paths2, pftPositive);
-        performance(range, pathss, paths2, false);
-    }
-}
-
-File::File(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
+File::File(const Pathss& toolPathss, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
     : m_pocketPaths(pocketPaths)
     , m_type(type)
-    , m_toolPaths(toolPaths)
+    , m_toolPathss(toolPathss)
     , m_tool(tool)
     , m_depth(depth)
 {
     createGi();
 }
 
-Paths File::getPaths() const
-{
-    return m_toolPaths;
-}
-
 void File::save(const QString& name)
 {
+    if (name.isEmpty())
+        return;
+    setLastDir(name);
+    m_name = name;
+
     sl.clear();
     if (Settings::gcinfo()) {
         sl.append(QString(";\tName: %1").arg(shortName()));
@@ -95,16 +46,21 @@ void File::save(const QString& name)
         sl.append(QString(";\tDepth: %1").arg(m_depth));
         sl.append(QString(";\tSide: %1").arg(QStringList{ "Top", "Bottom" }[side()]));
     }
-    setLastDir(name);
-    if (!name.isEmpty())
-        m_name = name;
+
     switch (m_type) {
-    case Profile:
     case Pocket:
+        savePocket();
+        break;
     case Voronoi:
+        if (m_toolPathss.size() > 1)
+            savePocket();
+        else
+            saveProfile();
+        break;
+    case Profile:
     case Thermal:
     case Raster:
-        saveProfilePocket();
+        saveProfile();
         break;
     case Drill:
         saveDrill();
@@ -117,12 +73,9 @@ void File::save(const QString& name)
 void File::saveDrill()
 {
     statFile();
-
-    QPolygonF path(toQPolygon(m_toolPaths.first()));
-
-    const double k = Pin::min() + Pin::max();
-
+    QPolygonF path(toQPolygon(m_toolPathss.first().first()));
     if (m_side) {
+        const double k = Pin::min() + Pin::max();
         for (QPointF& point : path) {
             point.rx() = -point.x() + k;
         }
@@ -131,29 +84,147 @@ void File::saveDrill()
     for (QPointF& point : path)
         point -= GCodePropertiesForm::zeroPoint->pos();
 
+    const QVector<double> depths(getDepths());
+
     for (QPointF& point : path) {
-        qDebug() << "saveDrill" << point << path.size() << m_tool.getDepth();
         startPath(point);
-        const double depth = m_depth;
-        for (int i = 1; depth > m_tool.passDepth() * i; ++i) {
-            sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) }));
+        for (int i = 0;;) {
+            sl.append(formated({ g1(), z(depths[i]), feed(m_tool.plungeRate()) }));
+            if (++i == depths.count())
+                break;
             sl.append(formated({ g0(), z(0.0) }));
         }
-        sl.append(formated({ g1(), z(-(depth + m_tool.getDepth())), feed(m_tool.plungeRate()) }));
         endPath();
     }
     endFile();
 }
 
-void File::saveProfilePocket()
+void File::savePocket()
 {
     statFile();
 
-    QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
+    QVector<QVector<QPolygonF>> pathss(pss());
 
-    const double k = Pin::min() + Pin::max();
+    const QVector<double> depths(getDepths());
 
+    for (QVector<QPolygonF>& paths : pathss) {
+        startPath(paths.first().first());
+        for (int i = 0; i < depths.count(); ++i) {
+            sl.append(formated({ g1(), z(depths[i]), feed(m_tool.plungeRate()) }));
+            bool skip = true;
+            for (QPolygonF& path : paths) {
+                for (QPointF& point : path) {
+                    if (skip)
+                        skip = false;
+                    else
+                        sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                }
+            }
+            for (int j = paths.size() - 2; j >= 0 && i < depths.count() - 1; --j) {
+                QPointF& point = paths[j].last();
+                sl.append(formated({ g0(), x(point.x()), y(point.y()) }));
+            }
+            if (paths.size() > 1 && i < (depths.count() - 1))
+                sl.append(formated({ g0(), x(paths.first().first().x()), y(paths.first().first().y()) }));
+        }
+        endPath();
+    }
+    endFile();
+}
+
+void File::saveProfile()
+{
+    statFile();
+    QVector<QVector<QPolygonF>> pathss(pss());
+    const QVector<double> depths(getDepths());
+    if (m_type != Raster) {
+        for (QVector<QPolygonF>& paths : pathss) {
+            for (int i = 0; i < depths.count(); ++i) {
+                for (int j = 0; j < paths.size(); ++j) {
+                    QPolygonF& path = paths[j];
+                    if (path.first() == path.last()) {
+                        startPath(path.first());
+                        for (int i = 0; i < depths.count(); ++i) {
+                            sl.append(formated({ g1(), z(depths[i]), feed(m_tool.plungeRate()) }));
+                            bool skip = true;
+                            for (QPointF& point : path) {
+                                if (skip)
+                                    skip = false;
+                                else
+                                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                            }
+                        }
+                        endPath();
+                        paths.remove(j--);
+                        continue;
+                    } else {
+                        startPath(path.first());
+                        sl.append(formated({ g1(), z(depths[i]), feed(m_tool.plungeRate()) }));
+                        bool skip = true;
+                        for (QPointF& point : path) {
+                            if (skip)
+                                skip = false;
+                            else
+                                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                        }
+                        endPath();
+                    }
+                }
+            }
+        }
+    } else
+        for (QVector<QPolygonF>& paths : pathss) {
+            for (int i = 0; i < depths.count(); ++i) {
+                for (QPolygonF& path : paths) {
+                    startPath(path.first());
+                    sl.append(formated({ g1(), z(depths[i]), feed(m_tool.plungeRate()) }));
+                    bool skip = true;
+                    for (QPointF& point : path) {
+                        if (skip)
+                            skip = false;
+                        else
+                            sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                    }
+                    endPath();
+                }
+            }
+        }
+    endFile();
+}
+
+QVector<QVector<QPolygonF>> File::pss()
+{
+    QVector<QVector<QPolygonF>> pathss;
+    pathss.reserve(m_toolPathss.size());
+    for (const Paths& paths : m_toolPathss) {
+        pathss.append(toQPolygons(paths));
+    }
     if (m_side) {
+        const double k = Pin::min() + Pin::max();
+        for (QVector<QPolygonF>& paths : pathss) {
+            for (QPolygonF& path : paths) {
+                std::reverse(path.begin(), path.end());
+                for (QPointF& point : path) {
+                    point.rx() = -point.x() + k;
+                }
+            }
+        }
+    }
+    for (QVector<QPolygonF>& paths : pathss) {
+        for (QPolygonF& path : paths) {
+            for (QPointF& point : path) {
+                point -= GCodePropertiesForm::zeroPoint->pos();
+            }
+        }
+    }
+    return pathss;
+}
+
+QVector<QPolygonF> File::ps()
+{
+    QVector<QPolygonF> paths(toQPolygons(m_toolPathss.first()));
+    if (m_side) {
+        const double k = Pin::min() + Pin::max();
         for (QPolygonF& path : paths) {
             std::reverse(path.begin(), path.end());
             for (QPointF& point : path) {
@@ -166,36 +237,21 @@ void File::saveProfilePocket()
             point -= GCodePropertiesForm::zeroPoint->pos();
         }
     }
+    return paths;
+}
 
-    for (int i = 1; m_depth > m_tool.passDepth() * i; ++i) {
-        for (const QPolygonF& path : paths) {
-            startPath(path.first());
-            sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) })); //start z
-            bool skip = true;
-            for (const QPointF& point : path) {
-                if (skip)
-                    skip = false;
-                else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
-            }
-            endPath();
-        }
-    }
+QVector<double> File::getDepths()
+{
+    if (m_depth < m_tool.passDepth() || qFuzzyCompare(m_depth, m_tool.passDepth()))
+        return { -m_depth - m_tool.getDepth() };
 
-    for (const QPolygonF& path : paths) {
-        startPath(path.first());
-        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate()) })); //start z
-        bool skip = true;
-        for (const QPointF& point : path) {
-            if (skip)
-                skip = false;
-            else
-                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
-        }
-        endPath();
-    }
-
-    endFile();
+    const int count = static_cast<int>(ceil(m_depth / m_tool.passDepth()));
+    const double depth = m_depth / count;
+    QVector<double> depths(count);
+    for (int i = 0; i < count; ++i)
+        depths[i] = (i + 1) * -depth;
+    depths.last() = -m_depth - m_tool.getDepth();
+    return depths;
 }
 
 GCodeType File::gtype() const
@@ -249,7 +305,8 @@ void File::statFile()
         const int index = format.indexOf(cl[i], 0, Qt::CaseInsensitive);
         if (index != -1) {
             FormatFlags[i + AlwaysG] = format[index + 1] == '+';
-            FormatFlags[i + SpaceG] = format[index + 2] == ' ';
+            if ((index + 2) < format.size())
+                FormatFlags[i + SpaceG] = format[index + 2] == ' ';
         }
     }
 
@@ -302,11 +359,144 @@ QString File::formated(const QList<QString> data)
     return ret.trimmed();
 }
 
+void File::createGiDrill()
+{
+    GraphicsItem* item;
+    for (const IntPoint& point : m_toolPathss.first().first()) {
+        item = new DrillItem(m_tool.diameter(), this);
+        item->setPos(toQPointF(point));
+        item->setPenColor(Settings::color(Colors::ToolPath));
+        item->setBrushColor(Settings::color(Colors::CutArea));
+        itemGroup()->append(item);
+    }
+    item = new PathItem(m_toolPathss.first().first());
+    item->setPenColor(Settings::color(Colors::G0));
+    itemGroup()->append(item);
+}
+
+void File::createGiPocket()
+{
+    GraphicsItem* item;
+    if (m_pocketPaths.size()) {
+        item = new GerberItem(m_pocketPaths, nullptr);
+        item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColor(Settings::color(Colors::CutArea));
+        item->setBrushColor(Settings::color(Colors::CutArea));
+        item->setAcceptHoverEvents(false);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        itemGroup()->append(item);
+    }
+    m_g0path.reserve(m_toolPathss.size());
+    int i = 0;
+    for (const Paths& paths : m_toolPathss) {
+        int k = static_cast<int>((m_toolPathss.size() > 1) ? (300.0 / (m_toolPathss.size() - 1)) * i : 0);
+        QColor* c = new QColor;
+        *c = QColor::fromHsv(k, 255, 255, 255);
+
+        for (const Path& path : paths) {
+            item = new PathItem(path, this);
+#ifdef QT_DEBUG
+            item->setPenColor(*c);
+#else
+            item->setPenColor(Settings::color(Colors::ToolPath));
+#endif
+            itemGroup()->append(item);
+        }
+
+        {
+            Paths g1path;
+            for (int i = 0; i < paths.count() - 1; ++i)
+                g1path.append({ paths[i].last(), paths[i + 1].first() });
+            item = new PathItem(g1path);
+#ifdef QT_DEBUG
+            item->setPenColor(*new QColor(0, 0, 255));
+#else
+            item->setPenColor(Settings::color(Colors::ToolPath));
+#endif
+            itemGroup()->append(item);
+        }
+
+        if (i < m_toolPathss.size() - 1) {
+            m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
+        }
+    }
+    item = new PathItem(m_g0path);
+    item->setPenColor(Settings::color(Colors::G0));
+    itemGroup()->append(item);
+}
+
+void File::createGiProfile()
+{
+    GraphicsItem* item;
+    for (const Paths& paths : m_toolPathss) {
+        item = new PathItem(paths, this);
+        item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColor(Settings::color(Colors::CutArea));
+        itemGroup()->append(item);
+    }
+    int i = 0;
+    for (const Paths& paths : m_toolPathss) {
+        item = new PathItem(m_toolPathss[i], this);
+        item->setPenColor(Settings::color(Colors::ToolPath));
+        itemGroup()->append(item);
+        for (int i = 0; i < paths.count() - 1; ++i)
+            m_g0path.append({ paths[i].last(), paths[i + 1].first() });
+        if (i < m_toolPathss.size() - 1) {
+            m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
+        }
+    }
+
+    item = new PathItem(m_g0path);
+    //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+    item->setPenColor(Settings::color(Colors::G0));
+    itemGroup()->append(item);
+}
+
+void File::createGiRaster()
+{
+    //        int k = static_cast<int>((m_toolPathss.size() > 1) ? (300.0 / (m_toolPathss.size() - 1)) * i : 0);
+    //        QColor* c = new QColor;
+    //        *c = QColor::fromHsv(k, 255, 255, 255);
+    GraphicsItem* item;
+    m_g0path.reserve(m_toolPathss.size());
+
+    if (m_pocketPaths.size()) {
+        item = new GerberItem(m_pocketPaths, nullptr);
+        item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColor(Settings::color(Colors::CutArea));
+        item->setBrushColor(Settings::color(Colors::CutArea));
+        item->setAcceptHoverEvents(false);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        itemGroup()->append(item);
+    } else {
+        for (const Paths& paths : m_toolPathss) {
+            item = new PathItem(paths, this);
+            item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setPenColor(Settings::color(Colors::CutArea));
+            itemGroup()->append(item);
+        }
+    }
+    int i = 0;
+    for (const Paths& paths : m_toolPathss) {
+        item = new PathItem(paths, this);
+        item->setPenColor(Settings::color(Colors::ToolPath));
+        itemGroup()->append(item);
+        for (int i = 0; i < paths.count() - 1; ++i)
+            m_g0path.append({ paths[i].last(), paths[i + 1].first() });
+        if (i < m_toolPathss.size() - 1) {
+            m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
+        }
+    }
+    item = new PathItem(m_g0path);
+    item->setPenColor(Settings::color(Colors::G0));
+    itemGroup()->append(item);
+}
+
 void File::write(QDataStream& stream) const
 {
     stream << m_pocketPaths;
     stream << m_type;
-    stream << m_toolPaths;
+    stream << m_toolPathss;
     stream << m_tool;
     stream << m_depth;
     _write(stream);
@@ -315,8 +505,8 @@ void File::write(QDataStream& stream) const
 void File::read(QDataStream& stream)
 {
     stream >> m_pocketPaths;
-    stream >> (int&)(m_type);
-    stream >> m_toolPaths;
+    stream >> m_type;
+    stream >> m_toolPathss;
     stream >> m_tool;
     stream >> m_depth;
     _read(stream);
@@ -324,165 +514,31 @@ void File::read(QDataStream& stream)
 
 void File::createGi()
 {
-    if (Project::ver() == G2G_Ver_1) {
-        for (Path& p1 : m_pocketPaths) {
-            for (IntPoint& p : p1) {
-                p.X *= 0.01;
-                p.Y *= 0.01;
-            }
-        }
-        for (Path& p1 : m_toolPaths) {
-            for (IntPoint& p : p1) {
-                p.X *= 0.01;
-                p.Y *= 0.01;
-            }
-        }
-        for (Path& p1 : m_g0path) {
-            for (IntPoint& p : p1) {
-                p.X *= 0.01;
-                p.Y *= 0.01;
-            }
-        }
-    }
-    GraphicsItem* item;
+
     switch (m_type) {
     case Profile:
-    case Voronoi:
     case Thermal:
-    case Raster:
-        for (const Path& path : m_toolPaths) {
-            //qDebug() << path;
-            item = new PathItem(path, this);
+        createGiProfile();
+        break;
+    case Raster: {
+        createGiRaster();
+    } break;
+    case Voronoi:
+        if (m_toolPathss.size() > 1) {
+            GraphicsItem* item;
+            item = new PathItem(m_toolPathss.last().last(), this);
             item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            //#ifdef QT_DEBUG
-            //            int k = static_cast<int>((m_toolPaths.size() > 1) ? (300.0 / (m_toolPaths.size() - 1)) * i++ : 0);
-            //            QColor* c = new QColor;
-            //            *c = QColor::fromHsv(k, 255, 255, 255);
-            //            item->setPenColor(*c);
-            //#else
             item->setPenColor(Settings::color(Colors::CutArea));
-            //#endif
             itemGroup()->append(item);
-        }
-
-        m_g0path.reserve(m_toolPaths.size() * 2);
-        for (int i = 0; i < m_toolPaths.size(); ++i) {
-            item = new PathItem(m_toolPaths[i], this);
-#ifdef QT_DEBUG
-            int k = static_cast<int>((m_toolPaths.size() > 1) ? (300.0 / (m_toolPaths.size() - 1)) * i : 0);
-            QColor* c = new QColor;
-            *c = QColor::fromHsv(k, 255, 255, 255);
-            item->setPenColor(*c);
-#else
-            item->setPenColor(Settings::color(Colors::ToolPath));
-#endif
-            itemGroup()->append(item);
-            if (i < m_toolPaths.size() - 1) {
-                m_g0path.append({ m_toolPaths[i].last(), m_toolPaths[i + 1].first() });
-            }
-        }
-
-        //        for (const Path& path : tmpPaths2) {
-        //            item = new PathItem({ path } , this);
-        //            item->setPenColor(Settings::color(Colors::ToolPath));
-        //            itemGroup()->append(item);
-        //            g0path.append(path.first());
-        //        }
-
-        item = new PathItem(m_g0path);
-        item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
-        item->setPenColor(Settings::color(Colors::G0));
-        itemGroup()->append(item);
+            createGiPocket();
+        } else
+            createGiProfile();
         break;
     case Pocket:
-        if (0) {
-            //fast render
-            //            Paths tmpPaths;
-            //            Pathss pathss;
-            //            Clipper clipper;
-            //            QVector<QPair<cInt, cInt>> range;
-            //            item = new GerberItem(m_pocketPaths, nullptr);
-            //            item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            //            item->setPenColor(Settings::color(Colors::CutArea));
-            //            item->setBrushColor(Settings::color(Colors::CutArea));
-            //            item->setAcceptHoverEvents(false);
-            //            item->setFlag(QGraphicsItem::ItemIsSelectable, false);
-            //            g0path.reserve(toolPaths.size());
-            //            itemGroup()->append(item);
-            //            clipper.Clear();
-            //            clipper.AddPaths(tmpPaths2, ptSubject, true);
-            //            const IntRect rect(clipper.GetBounds());
-            //            for (Path& path : tmpPaths2)
-            //                if (path.first() != path.last())
-            //                    path.append(path.first());
-
-            //            cInt ky = uScale * 10;
-            //            performance(range, pathss, tmpPaths2);
-            //            qDebug() << range.size() << pathss.size();
-            //            for (int i = 0; i < range.size(); ++i) {
-            //                for (cInt y = rect.top; y < rect.bottom; y += ky) {
-            //                    qDebug() << i << y;
-            //                    Path outer{
-            //                        IntPoint(range[i].first - 1, y - 1),
-            //                        IntPoint(range[i].second + 1, y - 1),
-            //                        IntPoint(range[i].second + 1, y + ky + 1),
-            //                        IntPoint(range[i].first - 1, y + ky + 1)
-            //                    };
-            //                    clipper.Clear();
-            //                    clipper.AddPaths(pathss[i], ptSubject, false);
-            //                    clipper.AddPath(outer, ptClip, true);
-            //                    clipper.Execute(ctIntersection, tmpPaths, /*pftNonZero*/ pftPositive);
-            //                    item = new PathItem(tmpPaths , this);
-
-            //                    item->setPenColor(Settings::color(Colors::ToolPath));
-            //                    item->setAcceptDrops(false);
-            //                    item->setAcceptedMouseButtons(Qt::NoButton);
-            //                    item->setAcceptHoverEvents(false);
-            //                    item->setAcceptTouchEvents(false);
-            //                    //item->setActive(false);\ g
-            //                    itemGroup()->append(item);
-            //                }
-            //            }
-
-            //            for (const Path& path : toolPaths)
-            //                g0path.append(path.first());
-            //            item = new PathItem({ g0path } , this);
-            //            item->setPenColor(Settings::color(Colors::G0));
-            //            itemGroup()->append(item);
-        } else {
-            item = new GerberItem(m_pocketPaths, nullptr);
-            item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setPenColor(Settings::color(Colors::CutArea));
-            item->setBrushColor(Settings::color(Colors::CutArea));
-            item->setAcceptHoverEvents(false);
-            item->setFlag(QGraphicsItem::ItemIsSelectable, false);
-            itemGroup()->append(item);
-            m_g0path.reserve(m_toolPaths.size());
-            int i = 0;
-            for (const Path& path : m_toolPaths) {
-                item = new PathItem(path, this);
-                item->setPenColor(Settings::color(Colors::ToolPath));
-                itemGroup()->append(item);
-                if (i < m_toolPaths.size() - 1) {
-                    m_g0path.append({ m_toolPaths[i].last(), m_toolPaths[++i].first() });
-                }
-            }
-            item = new PathItem(m_g0path);
-            item->setPenColor(Settings::color(Colors::G0));
-            itemGroup()->append(item);
-        }
+        createGiPocket();
         break;
     case Drill:
-        for (const IntPoint& point : m_toolPaths.first()) {
-            item = new DrillItem(m_tool.diameter(), this);
-            item->setPos(toQPointF(point));
-            item->setPenColor(Settings::color(Colors::ToolPath));
-            item->setBrushColor(Settings::color(Colors::CutArea));
-            itemGroup()->append(item);
-        }
-        item = new PathItem(m_toolPaths);
-        item->setPenColor(Settings::color(Colors::G0));
-        itemGroup()->append(item);
+        createGiDrill();
         break;
     default:
         break;

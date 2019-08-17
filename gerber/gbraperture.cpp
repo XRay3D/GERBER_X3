@@ -17,9 +17,9 @@ double AbstractAperture::drillDiameter() const
     return m_drillDiam;
 }
 
-Paths AbstractAperture::draw(const State& state)
+Paths AbstractAperture::draw(const State& state, bool fl)
 {
-    if (state.dCode() == D03 && state.imgPolarity() == Positive)
+    if (state.dCode() == D03 && state.imgPolarity() == Positive && fl)
         m_isFlashed = true;
     if (m_paths.isEmpty())
         draw();
@@ -89,7 +89,6 @@ Path AbstractAperture::drawDrill(const State& state)
 
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
-
     bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
 
@@ -122,7 +121,7 @@ ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
     // GerberAperture interface
 }
 
-QString ApCircle::name() { return QString("CIRC(Ø%1)").arg(m_diam); } //CIRCLE
+QString ApCircle::name() const { return QString("C(Ø%1)").arg(m_diam); } //CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
@@ -165,12 +164,12 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fo
     m_drillDiam = drillDiam;
 }
 
-QString ApRectangle::name() //RECTANGLE
+QString ApRectangle::name() const //RECTANGLE
 {
     if (qFuzzyCompare(m_width, m_height))
-        return QString("RECT(□ %1)").arg(m_width);
+        return QString("R(SQ %1)").arg(m_width);
     else
-        return QString("RECT(%1 x %2)").arg(m_width).arg(m_height);
+        return QString("R(%1 x %2)").arg(m_width).arg(m_height);
 }
 
 ApertureType ApRectangle::type() const { return Rectangle; }
@@ -217,7 +216,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const Format
     m_drillDiam = drillDiam;
 }
 
-QString ApObround::name() { return QString("OBRO(%1 x %2)").arg(m_width).arg(m_height); } //OBROUND
+QString ApObround::name() const { return QString("O(%1 x %2)").arg(m_width).arg(m_height); } //OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
@@ -284,7 +283,7 @@ double ApPolygon::rotation() const { return m_rotation; }
 
 int ApPolygon::verticesCount() const { return m_verticesCount; }
 
-QString ApPolygon::name() { return QString("POLY(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } //POLYGON
+QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } //POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
@@ -345,7 +344,7 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QM
     m_coefficients = coefficients;
 }
 
-QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); } //MACRO
+QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } //MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 
@@ -383,56 +382,47 @@ void ApMacro::draw()
         CenterLine = 21,
     };
 
-    QList<double> mod;
-    Path polygon;
-
-    QMap<QString, double> macroCoefficients{ m_coefficients };
-
+    QMap<QString, double> macroCoefficients { m_coefficients };
     QVector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
-            QString var = m_modifiers[i];
-
-            mod.clear();
-
-            if (var.at(0) == '0') {
+            QString var(m_modifiers[i]);
+            if (var.at(0) == '0') { // Skip Comment
+                qDebug() << "Macro comment:" << var;
                 continue;
             }
+
+            QList<double> mod;
 
             if (var.contains('=')) {
                 QList<QString> stringList = var.split('=');
-                macroCoefficients[stringList.first()]
-                    = MathParser(macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
+                macroCoefficients[stringList.first()] = MathParser(macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
             } else {
                 for (QString& var2 : var.split(',')) {
-                    if (var2.contains('$')) {
-                        mod.push_back(MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
-                    } else {
-                        mod.push_back(var2.toDouble());
-                    }
+                    mod.push_back(var2.contains('$')
+                            ? MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
+                            : var2.toDouble());
                 }
             }
-
-            //qDebug() << macroCoefficients;
 
             if (mod.size() < 2)
                 continue;
 
             const bool exposure = !qFuzzyIsNull(mod[1]);
+            Path path;
 
             switch (static_cast<int>(mod[0])) {
             case Comment:
-                //qDebug() << "Macro comment2:" << var;
                 continue;
             case Circle:
-                polygon = drawCircle(mod);
+                path = drawCircle(mod);
                 break;
             case OutlineCustomPolygon:
-                polygon = drawOutlineCustomPolygon(mod);
+                path = drawOutlineCustomPolygon(mod);
                 break;
             case OutlineRegularPolygon:
-                polygon = drawOutlineRegularPolygon(mod);
+                path = drawOutlineRegularPolygon(mod);
                 break;
             case Moire:
                 drawMoire(mod);
@@ -441,20 +431,20 @@ void ApMacro::draw()
                 drawThermal(mod);
                 return;
             case VectorLine:
-                polygon = drawVectorLine(mod);
+                path = drawVectorLine(mod);
                 break;
             case CenterLine:
-                polygon = drawCenterLine(mod);
+                path = drawCenterLine(mod);
                 break;
             }
-            if (Area(polygon) < 0) {
-                if (exposure)
-                    ReversePath(polygon);
-            } else {
-                if (!exposure)
-                    ReversePath(polygon);
-            }
-            items.push_back({ exposure, polygon });
+
+            const double area = Area(path);
+            if (area < 0 && exposure)
+                ReversePath(path);
+            else if (area > 0 && !exposure)
+                ReversePath(path);
+
+            items.append({ exposure, path });
         }
     } catch (...) {
         qWarning() << "Macro draw error";
@@ -475,15 +465,31 @@ void ApMacro::draw()
                 clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
         }
     } else
-        m_paths.append(polygon);
+        m_paths.append(items.first().second);
+
+    //    {
+    //        Clipper clipper;
+    //        clipper.AddPaths(m_paths, ptSubject, true);
+    //        IntRect r(clipper.GetBounds());
+    //        int k = uScale ;
+    //        Path outer {
+    //            IntPoint(r.left - k, r.bottom + k),
+    //            IntPoint(r.right + k, r.bottom + k),
+    //            IntPoint(r.right + k, r.top - k),
+    //            IntPoint(r.left - k, r.top - k)
+    //        };
+    //        clipper.AddPath(outer, ptClip, true);
+    //        clipper.Execute(ctXor, m_paths, pftEvenOdd);
+    //        m_paths.takeFirst();
+    //    }
 
     ClipperBase clipperBase;
     clipperBase.AddPaths(m_paths, ptSubject, true);
     IntRect rect = clipperBase.GetBounds();
-    rect.top -= rect.bottom;
     rect.right -= rect.left;
-    double x = rect.right * dScale;
-    double y = rect.top * dScale;
+    rect.top -= rect.bottom;
+    const double x = rect.right * dScale;
+    const double y = rect.top * dScale;
     m_size = qSqrt(x * x + y * y);
 }
 
@@ -556,17 +562,20 @@ void ApMacro::drawMoire(const QList<double>& mod)
 
     {
         Clipper clipper;
-        for (int num = 0; num < mod[NumberOfRings]; ++num) {
-            clipper.AddPath(CirclePath(diameter), ptClip, true);
-            diameter -= thickness * 2;
-            Path polygon = CirclePath(diameter);
-            ReversePath(polygon);
-            clipper.AddPath(polygon, ptClip, true);
-            diameter -= gap * 2;
+        if (thickness && gap) {
+            for (int num = 0; num < mod[NumberOfRings]; ++num) {
+                clipper.AddPath(CirclePath(diameter), ptClip, true);
+                diameter -= thickness * 2;
+                Path polygon(CirclePath(diameter));
+                ReversePath(polygon);
+                clipper.AddPath(polygon, ptClip, true);
+                diameter -= gap * 2;
+            }
         }
-
-        clipper.AddPath(RectanglePath(cl, ct), ptClip, true);
-        clipper.AddPath(RectanglePath(ct, cl), ptClip, true);
+        if (cl && ct) {
+            clipper.AddPath(RectanglePath(cl, ct), ptClip, true);
+            clipper.AddPath(RectanglePath(ct, cl), ptClip, true);
+        }
         clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
     }
 
@@ -717,7 +726,7 @@ ApBlock::ApBlock(const Format* format)
 {
 }
 
-QString ApBlock::name() { return QString("BLOCK"); }
+QString ApBlock::name() const { return QString("BLOCK"); }
 
 ApertureType ApBlock::type() const { return Block; }
 

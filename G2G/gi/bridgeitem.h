@@ -3,13 +3,14 @@
 
 #include "graphicsitem.h"
 #include <QObject>
+#include <gcvars.h>
 
 class GraphicsView;
 
 class BridgeItem : public QObject, public GraphicsItem {
     Q_OBJECT
 public:
-    explicit BridgeItem(double& lenght, double& size, BridgeItem*& ptr);
+    explicit BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr);
     ~BridgeItem() override { m_ptr = nullptr; }
 
     QRectF boundingRect() const override;
@@ -43,6 +44,7 @@ private:
     bool m_ok = false;
     double& m_lenght;
     double& m_size;
+    GCode::SideOfMilling& m_side;
     double m_angle = 0.0;
     QPointF m_lastPos;
 };

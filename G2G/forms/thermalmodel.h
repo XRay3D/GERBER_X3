@@ -81,19 +81,19 @@ public:
                     for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
-                    return m_angle = value.toDouble();
+                    m_angle = value.toDouble();
                     return true;
                 case 3:
                     for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
-                    return m_tickness = value.toDouble();
+                    m_tickness = value.toDouble();
                     return true;
                 case 4:
                     for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
-                    return m_count = value.toInt();
+                    m_count = value.toInt();
                     return true;
                 }
                 return false;

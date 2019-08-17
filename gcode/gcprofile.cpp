@@ -18,142 +18,116 @@ void ProfileCreator::create(const GCodeParams& gcp)
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    try {
-        self = this;
+    self = this;
 
-        m_toolDiameter = tool.getDiameter(depth);
+    m_toolDiameter = tool.getDiameter(depth);
+    // execute offset
+    if (m_gcp.side == On) {
+        m_returnPs = m_workingPs;
+
+        for (Path& path : m_returnPs)
+            path.append(path.first());
+
+        // fix direction
+        if (m_gcp.convent)
+            ReversePaths(m_returnPs);
+
+        if (m_workingRawPs.size())
+            m_returnPs.append(m_workingRawPs);
+
+    } else {
+        // calc offset
+        const double dOffset = (m_gcp.side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+
         // execute offset
-        if (m_gcp.side == On) {
-            m_returnPaths = m_workingPaths;
+        if (!m_workingPs.isEmpty()) {
+            ClipperOffset offset;
+            for (Paths& paths : groupedPaths(CopperPaths))
+                offset.AddPaths(paths, jtRound, etClosedPolygon);
+            offset.Execute(m_returnPs, dOffset);
+        }
+        if (!m_workingRawPs.isEmpty()) {
+            ClipperOffset offset;
+            offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
+            offset.Execute(m_workingRawPs, dOffset);
+        }
 
-            for (Path& path : m_returnPaths)
-                path.append(path.first());
+        if (!m_workingRawPs.isEmpty())
+            m_returnPs.append(m_workingRawPs);
 
-            // fix direction
-            if (m_gcp.convent)
-                ReversePaths(m_returnPaths);
+        // fix direction
+        if (m_gcp.side == Outer && !m_gcp.convent)
+            ReversePaths(m_returnPs);
+        else if (m_gcp.side == Inner && m_gcp.convent)
+            ReversePaths(m_returnPs);
 
-            if (m_workingRawPaths.size())
-                m_returnPaths.append(m_workingRawPaths);
+        for (Path& path : m_returnPs)
+            path.append(path.first());
+    }
 
-        } else {
-            // calc offset
-            const double dOffset = (m_gcp.side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+    if (m_returnPs.isEmpty()) {
+        emit fileReady(nullptr);
+        return;
+    }
 
-            // execute offset
-            if (!m_workingPaths.isEmpty()) {
-                ClipperOffset offset;
-                for (Paths& paths : groupedPaths(CopperPaths))
-                    offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(m_returnPaths, dOffset);
+    // find Bridges
+    QVector<BridgeItem*> bridgeItems;
+    for (QGraphicsItem* item : Scene::items()) {
+        if (item->type() == BridgeType)
+            bridgeItems.append(static_cast<BridgeItem*>(item));
+    }
+
+    // create Bridges
+    if (bridgeItems.size()) {
+        for (int index = 0; index < m_returnPs.size(); ++index) {
+            const Path& path = m_returnPs.at(index);
+            QList<QPair<BridgeItem*, IntPoint>> biStack;
+            for (BridgeItem* bi : bridgeItems) {
+                IntPoint pt;
+                if (pointOnPolygon(bi->getPath(), path, &pt))
+                    biStack.append({ bi, pt });
             }
-            if (!m_workingRawPaths.isEmpty()) {
-                ClipperOffset offset;
-                offset.AddPaths(m_workingRawPaths, jtRound, etOpenRound);
-                offset.Execute(m_workingRawPaths, dOffset);
-            }
+            if (!biStack.isEmpty()) {
+                Paths paths;
+                // create frame
+                {
+                    ClipperOffset offset;
+                    offset.AddPath(path, jtMiter, etClosedLine);
+                    offset.Execute(paths, +m_toolDiameter * uScale * 0.1);
 
-            if (!m_workingRawPaths.isEmpty())
-                m_returnPaths.append(m_workingRawPaths);
-
-            // fix direction
-            if (m_gcp.side == Outer && !m_gcp.convent)
-                ReversePaths(m_returnPaths);
-            else if (m_gcp.side == Inner && m_gcp.convent)
-                ReversePaths(m_returnPaths);
-
-            for (Path& path : m_returnPaths)
-                path.append(path.first());
-        }
-
-        if (m_returnPaths.isEmpty()) {
-            emit fileReady(nullptr);
-            return;
-        }
-
-        // find Bridges
-        QVector<BridgeItem*> bridgeItems;
-        for (QGraphicsItem* item : Scene::items()) {
-            if (item->type() == BridgeType)
-                bridgeItems.append(static_cast<BridgeItem*>(item));
-        }
-        // create Bridges
-        if (bridgeItems.size()) {
-            for (int index = 0, size = m_returnPaths.size(); index < size; ++index) {
-                Path& path = m_returnPaths[index];
-                QList<QPair<BridgeItem*, IntPoint>> biStack;
-                for (BridgeItem* bi : bridgeItems) {
-                    IntPoint pt;
-                    if (PointOnPolygon(bi->getPath(), path, &pt))
-                        biStack.append({ bi, pt });
+                    Clipper clipper;
+                    clipper.AddPaths(paths, ptSubject, true);
+                    for (const QPair<BridgeItem*, IntPoint>& bip : biStack) {
+                        clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
+                    }
+                    clipper.Execute(ctIntersection, paths, pftPositive);
                 }
-                if (!biStack.isEmpty()) {
-                    Paths tmpPaths;
-                    // create frame
-                    {
-                        ClipperOffset offset;
-                        offset.AddPath(path, jtMiter, etClosedLine);
-                        offset.Execute(tmpPaths, +m_toolDiameter * uScale * 0.1);
-
-                        Clipper clipper;
-                        clipper.AddPaths(tmpPaths, ptSubject, true);
-                        for (const QPair<BridgeItem*, IntPoint>& bip : biStack) {
-                            clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
-                        }
-                        clipper.Execute(ctIntersection, tmpPaths, pftPositive);
-                    }
-                    // cut toolPath
-                    {
-                        Clipper clipper;
-                        clipper.AddPath(path, ptSubject, false);
-                        clipper.AddPaths(tmpPaths, ptClip, true);
-                        PolyTree polytree;
-                        clipper.Execute(ctDifference, polytree, pftPositive);
-                        PolyTreeToPaths(polytree, tmpPaths);
-                    }
-                    // merge result toolPaths
-                    for (int i = 0; i < tmpPaths.size(); ++i) {
-                        for (int j = 0; j < tmpPaths.size(); ++j) {
-                            if (i == j)
-                                continue;
-                            if (tmpPaths[i].last() == tmpPaths[j].first()) {
-                                tmpPaths[j].removeFirst();
-                                tmpPaths[i].append(tmpPaths[j]);
-                                tmpPaths.remove(j--);
-                                continue;
-                            }
-                            if (tmpPaths[i].first() == tmpPaths[j].last()) {
-                                tmpPaths[i].removeFirst();
-                                tmpPaths[j].append(tmpPaths[i]);
-                                tmpPaths.remove(i--);
-                                break;
-                            }
-                            if (tmpPaths[i].last() == tmpPaths[j].last()) {
-                                ReversePath(tmpPaths[j]);
-                                tmpPaths[j].removeFirst();
-                                tmpPaths[i].append(tmpPaths[j]);
-                                tmpPaths.remove(j--);
-                                continue;
-                            }
-                        }
-                    }
-
-                    --size;
-                    m_returnPaths.remove(index--);
-                    m_returnPaths.append(tmpPaths);
+                // cut toolPath
+                {
+                    Clipper clipper;
+                    clipper.AddPath(path, ptSubject, false);
+                    clipper.AddPaths(paths, ptClip, true);
+                    PolyTree polytree;
+                    clipper.Execute(ctDifference, polytree, pftPositive);
+                    PolyTreeToPaths(polytree, paths);
                 }
+                // merge result toolPaths
+                mergeSegments(paths);
+                m_returnPs.remove(index--);
+                m_returnPss.append(sortBE(paths));
             }
         }
+    }
 
-        if (m_returnPaths.isEmpty()) {
-            emit fileReady(nullptr);
-        } else {
-            m_file = new File(sortByStratDistance(m_returnPaths), tool, depth, Profile);
-            m_file->setFileName(tool.name());
-            emit fileReady(m_file);
-        }
-    } catch (...) {
-        //qDebug() << "catch";
+    sortB(m_returnPs);
+    m_returnPss.append(m_returnPs);
+    sortBE(m_returnPss);
+    if (m_returnPss.isEmpty()) {
+        emit fileReady(nullptr);
+    } else {
+        m_file = new File(m_returnPss, tool, depth, Profile);
+        m_file->setFileName(tool.name());
+        emit fileReady(m_file);
     }
 }
 }

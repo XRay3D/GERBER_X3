@@ -4,6 +4,7 @@
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
+#include "icons.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -16,7 +17,7 @@
 #include <scene.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
-    : FormsUtil("ProfileForm", parent)
+    : FormsUtil("ProfileForm", new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)
 
 {
@@ -145,7 +146,7 @@ void ProfileForm::on_pbClose_clicked()
 
 void ProfileForm::createFile()
 {
-    m_used.clear();
+    m_usedItems.clear();
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -172,11 +173,15 @@ void ProfileForm::createFile()
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
-            m_used[gi->file()->id()].append(gi->id());
+            m_usedItems[gi->file()->id()].append(gi->id());
+            break;
+        case Shape:
+            wRawPaths.append(gi->paths());
+            //m_used[gi->file()->id()].append(gi->id());
             break;
         case DrillItemType:
             wPaths.append(gi->paths());
-            m_used[gi->file()->id()].append(gi->id());
+            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         default:
             break;
@@ -188,15 +193,15 @@ void ProfileForm::createFile()
         return;
     }
 
-    toolPathCreator(new GCode::ProfileCreator);
-    m_tps->addPaths(wPaths);
-    m_tps->addRawPaths(wRawPaths);
-    GCode::GCodeParams gpc;
-    gpc.convent = ui->rbConventional->isChecked();
-    gpc.side = side;
-    gpc.tool.append(tool);
-    gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    createToolpath(gpc);
+    GCode::GCodeParams gcp;
+    gcp.convent = ui->rbConventional->isChecked();
+    gcp.side = side;
+    gcp.tool.append(tool);
+    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
+    m_tpc->setGcp(gcp);
+    m_tpc->addPaths(wPaths);
+    m_tpc->addRawPaths(wRawPaths);
+    createToolpath(gcp);
 }
 
 void ProfileForm::updateName()
@@ -225,7 +230,7 @@ void ProfileForm::on_pbAddBridge_clicked()
         if (!item->ok())
             delete item;
     }
-    item = new BridgeItem(m_lenght, m_size, item);
+    item = new BridgeItem(m_lenght, m_size, side, item);
     GraphicsView::self->scene()->addItem(item);
 }
 
@@ -245,7 +250,7 @@ void ProfileForm::updateBridge()
 
 void ProfileForm::updatePixmap()
 {
-    static const QStringList pixmapList{
+    static const QStringList pixmapList {
         QStringLiteral(":/toolpath/prof_on_climb.svg"),
         QStringLiteral(":/toolpath/prof_out_climb.svg"),
         QStringLiteral(":/toolpath/prof_in_climb.svg"),
