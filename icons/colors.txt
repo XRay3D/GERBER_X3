@@ -1,0 +1,4 @@
+red 		da4453ff
+gray dark 	4d4d4dff
+gray light 	4d4d4d80
+blue 		3daee9ff
