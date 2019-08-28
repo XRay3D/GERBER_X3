@@ -38,12 +38,11 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double val) { glue = val; });
-
-    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double val) { homePoint->setPosX(val); });
-    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double val) { homePoint->setPosY(val); });
-    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double val) { zeroPoint->setPosX(val); });
-    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double val) { zeroPoint->setPosY(val); });
+    connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { glue = val; });
+    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { homePoint->setPosX(val); });
+    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { homePoint->setPosY(val); });
+    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { zeroPoint->setPosX(val); });
+    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { zeroPoint->setPosY(val); });
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -94,7 +93,8 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
         if (ui->dsbxClearence->value() == 0.0)
             ui->dsbxClearence->flicker();
     });
-    prnt->setWindowTitle(ui->label->text());
+    if (prnt != nullptr)
+        prnt->setWindowTitle(ui->label->text());
     self = this;
 
     for (QPushButton* button : findChildren<QPushButton*>()) {

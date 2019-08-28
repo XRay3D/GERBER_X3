@@ -105,7 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     setCurrentFile(QString());
     readSettings();
 
-    GCodePropertiesForm(this); //init vars;
+    GCodePropertiesForm(); //init vars;
 
     if (/* DISABLES CODE */ (0))
         QTimer::singleShot(500, [this] {
@@ -115,8 +115,9 @@ MainWindow::MainWindow(QWidget* parent)
             //loadFile("D:\\gerber_file_format_examples 20181113\\2-13-1_Two_square_boxes.gbr");
             // QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
         });
-    else
-        QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
+    else {
+        //   QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
+    }
 
     self = this;
 }
@@ -613,7 +614,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
+                printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);
