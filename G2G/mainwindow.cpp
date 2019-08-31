@@ -399,25 +399,25 @@ void MainWindow::createActionsToolPath()
     addDockWidget(Qt::RightDockWidgetArea, dockWidget);
     dockWidget->hide();
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Pro&file"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
         createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
     }));
     toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+F"));
     menu->addAction(toolpathActionList.last());
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("&Pocket"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
         createDockWidget(new PocketForm(dockWidget), GCode::Pocket);
     }));
     toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+P"));
     menu->addAction(toolpathActionList.last());
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("&Voronoi"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
         createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
     }));
     toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+V"));
     menu->addAction(toolpathActionList.last());
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("&Thermal Insulation"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
         if (ThermalForm::canToShow())
             createDockWidget(new ThermalForm(dockWidget), GCode::Thermal);
         else
@@ -426,7 +426,7 @@ void MainWindow::createActionsToolPath()
     toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+T"));
     menu->addAction(toolpathActionList.last());
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("&Drilling"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
         if (DrillForm::canToShow())
             createDockWidget(new DrillForm(dockWidget), GCode::Drill);
         else
@@ -640,10 +640,7 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
         return;
 
     if (item->type() == PinType) {
-        a = menu.addAction(Icon(PathDrillIcon),
-            tr("&Create path for Pins"),
-            this,
-            &MainWindow::createPinsPath);
+        a = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
         a = menu.addAction(tr("Fixed"), [](bool fl) {
             for (Pin* item : Pin::pins())
                 item->setFlag(QGraphicsItem::ItemIsMovable, !fl);

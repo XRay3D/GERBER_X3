@@ -4,12 +4,6 @@
 #include <QIcon>
 
 enum Id {
-    PathProfileIcon,
-    PathPocketIcon,
-    PathVoronoiIcon,
-    PathThermalIcon,
-    PathDrillIcon,
-
     GCodePropertiesIcon,
     AutoRefpointsIcon,
 
@@ -21,9 +15,6 @@ enum Id {
     SettingsIcon,
 
     ToolDatabaseIcon,
-    ToolDrillIcon,
-    ToolEndmillIcon,
-    ToolEngraverIcon,
 
     Zoom100Icon,
     ZoomFitIcon,
@@ -64,16 +55,6 @@ enum Id {
 static QIcon Icon(int id)
 {
     switch (id) {
-    case PathProfileIcon:
-        return QIcon::fromTheme("object-to-path");
-    case PathPocketIcon:
-        return QIcon::fromTheme("stroke-to-path");
-    case PathVoronoiIcon:
-        return QIcon::fromTheme("path-reverse");
-    case PathThermalIcon:
-        return QIcon::fromTheme("thermal");
-    case PathDrillIcon:
-        return QIcon::fromTheme("roll");
     case GCodePropertiesIcon:
         return QIcon::fromTheme("node");
     case AutoRefpointsIcon:
@@ -92,12 +73,6 @@ static QIcon Icon(int id)
 
     case ToolDatabaseIcon:
         return QIcon::fromTheme("view-form");
-    case ToolDrillIcon:
-        return QIcon::fromTheme("stroke-cap-butt");
-    case ToolEndmillIcon:
-        return QIcon::fromTheme("stroke-cap-round");
-    case ToolEngraverIcon:
-        return QIcon::fromTheme("stroke-cap-square");
 
     case Zoom100Icon:
         return QIcon::fromTheme("zoom-original");

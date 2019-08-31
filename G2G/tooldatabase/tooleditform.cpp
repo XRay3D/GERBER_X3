@@ -76,6 +76,10 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     ui->cbxUnits->setVisible(false);
 
+    ui->cbxToolType->setItemIcon(Tool::Drill, QIcon::fromTheme("drill"));
+    ui->cbxToolType->setItemIcon(Tool::EndMill, QIcon::fromTheme("endmill"));
+    ui->cbxToolType->setItemIcon(Tool::Engraving, QIcon::fromTheme("engraving"));
+
     QSettings settings;
     ui->cbxFeedSpeeds->setCurrentIndex(settings.value("cbxFeedSpeeds").toInt());
     //ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());

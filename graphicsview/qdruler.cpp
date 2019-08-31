@@ -119,7 +119,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::darkGray, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, RulerBreadth * 0.6);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, static_cast<double>(RulerBreadth) * 0.6);
     drawText = false;
 
     // drawing a scale of 0.2
@@ -128,12 +128,12 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::green, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, RulerBreadth * 0.3);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, static_cast<double>(RulerBreadth) * 0.3);
     drawText = false;
 
     // drawing a scale of 1.0
     meterPen = QPen(Qt::red, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, RulerBreadth * 0);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, static_cast<double>(RulerBreadth) * 0);
 
     // drawing the current mouse position indicator
     if (mouseTracking) {

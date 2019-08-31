@@ -63,7 +63,7 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
             case Qt::CheckStateRole:
                 return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
-                return Icon(PathDrillIcon);
+                return QIcon::fromTheme("drill-path");
             case Qt::UserRole:
                 return m_id;
             default:

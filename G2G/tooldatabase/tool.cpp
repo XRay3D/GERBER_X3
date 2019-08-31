@@ -1,10 +1,10 @@
 #include "tool.h"
+#include "icons.h"
 #include <QDebug>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <qmath.h>
-#include "icons.h"
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
@@ -100,11 +100,11 @@ QIcon Tool::icon() const
 {
     switch (m_type) {
     case Tool::Drill:
-        return Icon(ToolDrillIcon);
+        return QIcon::fromTheme("drill");
     case Tool::EndMill:
-        return Icon(ToolEndmillIcon);
+        return QIcon::fromTheme("endmill");
     case Tool::Engraving:
-        return Icon(ToolEngraverIcon);
+        return QIcon::fromTheme("engraving");
     default:
         return QIcon();
     }
@@ -134,8 +134,6 @@ QString Tool::errorStr()
 /// \brief ToolHolder::tools
 ///
 QMap<int, Tool> ToolHolder::tools;
-
-
 
 void ToolHolder::readTools()
 {

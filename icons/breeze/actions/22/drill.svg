@@ -10,7 +10,7 @@
    viewBox="0 0 22 22"
    version="1.1"
    id="svg4532"
-   sodipodi:docname="stroke-cap-round.svg"
+   sodipodi:docname="drill.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata4536">
@@ -20,7 +20,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -33,14 +33,14 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1835"
-     inkscape:window-height="1058"
+     inkscape:window-width="3756"
+     inkscape:window-height="2138"
      id="namedview4534"
      showgrid="true"
      inkscape:zoom="40.227273"
-     inkscape:cx="9.5456676"
-     inkscape:cy="10.360957"
-     inkscape:window-x="77"
+     inkscape:cx="11"
+     inkscape:cy="11"
+     inkscape:window-x="76"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg4532">
@@ -63,38 +63,20 @@
   </defs>
   <path
      style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 6.5,3 v 15.5 h 9 v 0 V 3"
+     d="m 6.5,3 v 13.5 l 4.5,2 4.5,-2.5 V 3"
      id="path4546"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc" />
   <path
      style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 6.5,18.5 9,-9"
+     d="m 6.5,16.5 9,-5.5"
      id="path4548"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path
      style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 6.5,14 9,-9"
-     id="path4548-9"
-     inkscape:connector-curvature="0"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#4d4d4d;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-     d="M 11,18.5 15.5,14"
-     id="path4548-9-2"
-     inkscape:connector-curvature="0"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 6.5,9.5 11,5"
-     id="path4548-9-2-5"
-     inkscape:connector-curvature="0"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 10,9.5 9,8"
-     id="path4628"
+     d="M 6.5,11.5 15.5,6"
+     id="path4550"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
 </svg>

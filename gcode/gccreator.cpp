@@ -293,6 +293,11 @@ void Creator::mergeSegments(Paths& paths, double glue)
         for (int j = 0; j < paths.size(); ++j) {
             if (i == j)
                 continue;
+            if (i >= paths.size() || i >= paths.size()) {
+                i = -1;
+                j = 0;
+                break;
+            }
             if (paths[i].last() == paths[j].first()) {
                 paths[i].append(paths[j].mid(1));
                 paths.remove(j--);
@@ -309,7 +314,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
                 paths.remove(j--);
                 continue;
             }
-            if (glue == 0.0)
+            if (qFuzzyIsNull(glue))
                 continue;
             if (Length(paths[i].last(), paths[j].first()) < glue) {
                 paths[i].append(paths[j].mid(1));
