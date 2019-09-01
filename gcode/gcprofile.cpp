@@ -76,7 +76,6 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         if (item->type() == BridgeType)
             bridgeItems.append(static_cast<BridgeItem*>(item));
     }
-
     // create Bridges
     if (bridgeItems.size()) {
         for (int index = 0; index < m_returnPs.size(); ++index) {
@@ -120,7 +119,8 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     }
 
     sortB(m_returnPs);
-    m_returnPss.append(m_returnPs);
+    if (m_returnPs.size() != 0)
+        m_returnPss.append(m_returnPs);
     sortBE(m_returnPss);
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);

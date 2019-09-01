@@ -488,7 +488,7 @@ Pathss& Creator::sortBE(Pathss& src)
 
 bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
 {
-    int cnt = path.size();
+    const int cnt = path.size();
     if (cnt < 3)
         return false;
     QPointF p;

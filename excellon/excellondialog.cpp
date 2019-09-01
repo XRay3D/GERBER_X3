@@ -41,11 +41,11 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     connect(ui->rbMillimeters, &QRadioButton::toggled, [&] { updateFormat(); });
     connect(ui->rbTrailing, &QRadioButton::toggled, [&] { updateFormat(); });
 
-    connect(ui->rbLeading, &QRadioButton::toggled, [&](bool checked) { ui->sbxInteger->setEnabled(checked); });
-    connect(ui->rbTrailing, &QRadioButton::toggled, [&](bool checked) { ui->sbxDecimal->setEnabled(checked); });
+    //    connect(ui->rbLeading, &QRadioButton::toggled, [&](bool checked) { ui->sbxInteger->setEnabled(checked); });
+    //    connect(ui->rbTrailing, &QRadioButton::toggled, [&](bool checked) { ui->sbxDecimal->setEnabled(checked); });
 
-    connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxDecimal->setValue(8 - val); });
-    connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxInteger->setValue(8 - val); });
+    //    connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxDecimal->setValue(8 - val); });
+    //    connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxInteger->setValue(8 - val); });
 
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);

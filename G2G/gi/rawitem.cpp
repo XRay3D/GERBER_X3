@@ -20,16 +20,14 @@ RawItem::RawItem(const Path& path, Gerber::File* file)
     offset.AddPath(path, jtSquare, etOpenButt);
     offset.Execute(tmpPpath, 0.01 * uScale);
     for (const Path& path : tmpPpath)
-        m_shape.addPolygon(toQPolygon(path));
-    m_boundingRect = m_shape.boundingRect();
+        m_shape_raw.addPolygon(toQPolygon(path));
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
-QRectF RawItem::boundingRect() const { return m_boundingRect; }
+QRectF RawItem::boundingRect() const { return m_shape_raw.boundingRect(); }
 
 void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-
 {
     if (m_penColor)
         m_pen.setColor(*m_penColor);
@@ -62,18 +60,17 @@ Paths RawItem::paths() const { return { m_path }; }
 
 QPainterPath RawItem::shape() const
 {
-    if (m_scale != GraphicsView::scaleFactor()) {
+    if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
         m_scale = GraphicsView::scaleFactor();
-        m_shape = QPainterPath();
+        m_shape_raw = QPainterPath();
         ClipperOffset offset;
         Paths tmpPpath;
         offset.AddPath(m_path, jtSquare, etOpenButt);
-        offset.Execute(tmpPpath, 6 * uScale * m_scale);
+        offset.Execute(tmpPpath, 5 * uScale * m_scale);
         for (const Path& path : tmpPpath)
-            m_shape.addPolygon(toQPolygon(path));
-        m_boundingRect = m_shape.boundingRect();
+            m_shape_raw.addPolygon(toQPolygon(path));
     }
-    return m_shape;
+    return m_shape_raw;
 }
 
 void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
