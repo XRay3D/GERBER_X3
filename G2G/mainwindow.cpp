@@ -473,32 +473,44 @@ void MainWindow::createActionsGraphics()
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     // tb->setEnabled(false);
-    tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"), [] {
-        ShapePr::Constructor::setType(ShapePr::Rect);
+    QAction* action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
+    action->setCheckable(true);
+    connect(action, &QAction::triggered, [action](bool checked) {
+        ShapePr::Constructor::setType(checked ? ShapePr::Rect : ShapePr::NullPT, checked ? action : nullptr);
     });
+    action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
+    action->setCheckable(true);
+    connect(action, &QAction::triggered, [action](bool checked) {
+        ShapePr::Constructor::setType(checked ? ShapePr::Elipse : ShapePr::NullPT, checked ? action : nullptr);
+    });
+
     // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });
-    tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"), [] {
-        ShapePr::Constructor::setType(ShapePr::Elipse);
-    });
     // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] { graphicsView->setPt(ArcPT); });
     // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] { graphicsView->setPt(Text); });
     tb->addSeparator();
 
     auto ex = [](ClipType type) {
-        QList<QGraphicsItem*> i = Scene::selectedItems();
-
-        for (QGraphicsItem* item : i) {
+        QList<QGraphicsItem*> si = Scene::selectedItems();
+        QList<GraphicsItem*> rmi;
+        for (QGraphicsItem* item : si) {
             if (item->type() == GerberItemType) {
                 GerberItem* gitem = reinterpret_cast<GerberItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
-                for (QGraphicsItem* item : i)
+                for (QGraphicsItem* item : si)
                     if (item->type() == Shape)
                         clipper.AddPaths(reinterpret_cast<GraphicsItem*>(item)->paths(), ptClip, true);
                 clipper.Execute(type, gitem->rPaths(), pftEvenOdd, pftPositive);
-                ReversePaths(gitem->rPaths());
-                gitem->redraw();
+                if (gitem->rPaths().isEmpty()) {
+                    rmi.append(gitem);
+                } else {
+                    ReversePaths(gitem->rPaths());
+                    gitem->redraw();
+                }
             }
+        }
+        for (GraphicsItem* item : rmi) {
+            delete item->file()->itemGroup()->takeAt(item->file()->itemGroup()->indexOf(item));
         }
     };
     tb->addAction(QIcon::fromTheme("path-union"), tr("union"), [ex] { ex(ctUnion); });
@@ -614,7 +626,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
+                  printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);

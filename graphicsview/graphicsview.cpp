@@ -381,7 +381,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         m_scene->setDrawRuller(false);
     } else {
         QGraphicsView::mouseReleaseEvent(event);
-        ShapePr::Constructor::addItem(mappedPos(event));
+        ShapePr::Constructor::addShapePoint(mappedPos(event));
     }
 }
 
@@ -393,7 +393,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
     mouseMove(point);
-    ShapePr::Constructor::updateItem(point);
+    ShapePr::Constructor::updateShape(point);
     QGraphicsView::mouseMoveEvent(event);
 }
 class PropertyAnimation : public QPropertyAnimation {

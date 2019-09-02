@@ -1,42 +1,31 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
 
-#include <gi/graphicsitem.h>
-namespace ShapePr {
+#include "shape.h"
 
-class Circle : public GraphicsItem {
+namespace ShapePr {
+class Circle : public Shape {
 public:
-    explicit Circle(QPointF center, QPointF rh);
+    explicit Circle(QPointF center, QPointF pt);
     ~Circle() override = default;
 
     // QGraphicsItem interface
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return Shape; }
+    int type() const override { return GiType::Shape; }
+
     // GraphicsItem interface
-    Paths paths() const override;
     void redraw() override;
 
-    QPointF center() const;
-    void setCenter(const QPointF& center);
-    QPointF rh() const;
-    void setRh(const QPointF& rh);
+    void setPt(const QPointF& pt);
     double radius() const;
     void setRadius(double radius);
+    enum {
+        Center,
+        Point1,
+    };
 
 private:
-    Path m_path;
-    QPointF m_rh;
     double m_radius;
-    QRectF handle();
-
-    // QGraphicsItem interface
-protected:
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }
 

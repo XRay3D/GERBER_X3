@@ -73,6 +73,8 @@ HEADERS += \
     sh/constructor.h \
     sh/handler.h \
     sh/rectangle.h \
+    sh/sh.h \
+    sh/shape.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
     tooldatabase/tooleditdialog.h \
@@ -125,6 +127,8 @@ SOURCES += \
     sh/constructor.cpp \
     sh/handler.cpp \
     sh/rectangle.cpp \
+    sh/sh.cpp \
+    sh/shape.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooleditdialog.cpp \

@@ -1,4 +1,6 @@
 #include "rectangle.h"
+#include "constructor.h"
+#include "sh.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -10,21 +12,23 @@
 #include <settings.h>
 
 namespace ShapePr {
-Rectangle::Rectangle(QPointF center, QPointF rh)
-    : GraphicsItem(nullptr)
-    , m_rh(rh)
+Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
-    setPos(center);
+    m_paths.resize(1);
+    sh = { new SH(this, true), new SH(this), new SH(this) };
+    sh[Point1]->setPos(pt1);
+    sh[Point2]->setPos(pt2);
+
     redraw();
-    setFlags(ItemIsMovable | ItemIsSelectable | ItemIsFocusable);
+    setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
     setZValue(std::numeric_limits<double>::max());
+
     Scene::addItem(this);
+    Scene::addItem(sh[Center]);
+    Scene::addItem(sh[Point1]);
+    Scene::addItem(sh[Point2]);
 }
-
-QRectF Rectangle::boundingRect() const { return m_rect; }
-
-QPainterPath Rectangle::shape() const { return m_shape; }
 
 void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
@@ -51,100 +55,34 @@ void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(toQPolygon(m_path));
     painter->drawPath(m_shape);
-    if (option->state & QStyle::State_Selected) {
-        const double scale = GraphicsView::scaleFactor();
-        const double k = 5 * scale;
-        const double s = k * 2;
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(Qt::red);
-        painter->drawRect({ m_rh + QPointF(-k, -k), QSizeF(s, s) });
-        painter->drawRect({ QPointF(-k, -k), QSizeF(s, s) });
-    }
-}
-
-Paths Rectangle::paths() const
-{
-    Path p(m_path);
-    TranslatePath(p, toIntPoint(pos()));
-    return { p };
 }
 
 void Rectangle::redraw()
 {
-    IntPoint p1;
-    IntPoint p2(toIntPoint(m_rh - pos()));
-    m_path = {
+    sh[Center]->setPos(QLineF(sh[Point1]->pos(), sh[Point2]->pos()).center());
+    IntPoint p1(toIntPoint(sh[Point1]->pos()));
+    IntPoint p2(toIntPoint(sh[Point2]->pos()));
+    m_paths.first() = {
         IntPoint{ p1.X, p1.Y },
         IntPoint{ p2.X, p1.Y },
         IntPoint{ p2.X, p2.Y },
         IntPoint{ p1.X, p2.Y },
         IntPoint{ p1.X, p1.Y },
     };
-    if (Area(m_path) < 0)
-        ReversePath(m_path);
+    if (Area(m_paths.first()) < 0)
+        ReversePath(m_paths.first());
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(m_path));
-    m_rect = m_shape.boundingRect();
-    update();
+    m_shape.addPolygon(toQPolygon(m_paths.first()));
+    setPos({ 1, 1 }); //костыли    //update();
+    setPos({ 0, 0 });
 }
 
-QPointF Rectangle::rh() const
+void Rectangle::setPt(const QPointF& pt)
 {
-    return m_rh;
-}
-
-void Rectangle::setRh(const QPointF& rh)
-{
-    if (m_rh == rh)
+    if (sh[Point2]->pos() == pt)
         return;
-    m_rh = rh;
+    sh[Point2]->setPos(pt);
     redraw();
-    QPointF p(pos());
-    setPos(pos() * 0.99);
-    setPos(p);
-    m_rh -= pos();
 }
-
-QPointF Rectangle::center() const
-{
-    return pos();
-}
-
-void Rectangle::setCenter(const QPointF& center)
-{
-    if (pos() == center)
-        return;
-    setPos(center);
-}
-}
-
-void ShapePr::Rectangle::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    GraphicsItem::mouseMoveEvent(event);
-    if (event->modifiers() & Qt::AltModifier) {
-        const double gs = Settings::gridStep(GraphicsView::getScale());
-        QPointF px(pos() / gs);
-        px.setX(gs * round(px.x()));
-        px.setY(gs * round(px.y()));
-        setPos(px);
-    }
-}
-
-void ShapePr::Rectangle::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    GraphicsItem::mousePressEvent(event);
-}
-
-void ShapePr::Rectangle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-    GraphicsItem::mouseReleaseEvent(event);
-    scene()->setSceneRect(scene()->itemsBoundingRect());
-}
-
-void ShapePr::Rectangle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
-    GraphicsItem::mouseDoubleClickEvent(event);
-    delete this;
 }

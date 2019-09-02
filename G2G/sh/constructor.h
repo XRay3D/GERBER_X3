@@ -3,6 +3,7 @@
 
 #include <QPointF>
 class QGraphicsItem;
+class QAction;
 namespace ShapePr {
 
 enum PrType {
@@ -22,18 +23,17 @@ class Constructor {
     static bool m_snap;
 
 public:
-    static void addItem(const QPointF& value);
-    static void updateItem(const QPointF& value);
+    static void addShapePoint(const QPointF& value);
+    static void updateShape(const QPointF& value);
 
     static PrType getType();
-    static void setType(const PrType& value);
+    static void setType(const PrType& value, QAction* act);
 
-    static void update(bool click);
-
-    static int getCounter();
-    static void setCounter(int value);
     static bool snap();
     static void setSnap(bool snap);
+
+private:
+    static QAction* action;
 };
 
 } // namespace ShapePr

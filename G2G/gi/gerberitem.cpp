@@ -15,7 +15,12 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     setFlag(ItemIsSelectable, true);
 }
 
-QRectF GerberItem::boundingRect() const { return m_rect; }
+GerberItem::~GerberItem()
+{
+    qDebug("~GerberItem()");
+}
+
+QRectF GerberItem::boundingRect() const { return m_shape.boundingRect(); }
 
 QPainterPath GerberItem::shape() const { return m_shape; }
 
@@ -73,8 +78,9 @@ void GerberItem::redraw()
         path.append(path.first());
         m_shape.addPolygon(toQPolygon(path));
     }
-    m_rect = m_shape.boundingRect();
-    update();
+    setPos({ 1, 1 });
+    setPos({ 0, 0 });
+    //update();
 }
 
 Paths GerberItem::paths() const { return m_paths; }
