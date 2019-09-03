@@ -314,7 +314,10 @@ void File::statFile()
     for (QString& str : lastValues)
         str.clear();
 
-    sl.append(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
+    QString str(Settings::startGCode());
+    str.replace(QRegExp("S\\?"), formated({ s(static_cast<int>(m_tool.spindleSpeed())) }));
+
+    sl.append(str /*Settings::startGCode()*/); //"G21 G17 G90"); //G17 XY plane
 
     //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
