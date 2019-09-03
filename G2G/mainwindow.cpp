@@ -513,10 +513,10 @@ void MainWindow::createActionsGraphics()
             delete item->file()->itemGroup()->takeAt(item->file()->itemGroup()->indexOf(item));
         }
     };
-    tb->addAction(QIcon::fromTheme("path-union"), tr("union"), [ex] { ex(ctUnion); });
-    tb->addAction(QIcon::fromTheme("path-difference"), tr("difference"), [ex] { ex(ctDifference); });
-    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("exclusion"), [ex] { ex(ctXor); });
-    tb->addAction(QIcon::fromTheme("path-intersection"), tr("intersection"), [ex] { ex(ctIntersection); });
+    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
+    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
+    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
+    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
     tb->addSeparator();
     tb->addAction(tr("Undo"))->setEnabled(false);
     tb->addAction(tr("Redo"))->setEnabled(false);
