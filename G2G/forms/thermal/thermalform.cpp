@@ -3,7 +3,6 @@
 
 #include "../gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
-#include "icons.h"
 #include "project.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
@@ -83,10 +82,10 @@ ThermalForm::ThermalForm(QWidget* parent)
         return;
     }
 
-    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
-    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
-    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
-    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
+    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon( QIcon::fromTheme("document-export"));
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {

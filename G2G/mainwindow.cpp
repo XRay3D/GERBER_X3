@@ -7,7 +7,6 @@
 #include "forms/thermal/thermalform.h"
 #include "forms/voronoiform.h"
 #include "gi/bridgeitem.h"
-#include "icons.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "tooldatabase/tooldatabase.h"
@@ -225,7 +224,7 @@ void MainWindow::createActionsFile()
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
     // New
-    QAction* action = fileMenu->addAction(Icon(NewProjectIcon),
+    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"),
         tr("&New project"),
         this,
         &MainWindow::newFile);
@@ -233,17 +232,17 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Create a new file"));
     fileToolBar->addAction(action);
     // Open
-    action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
+    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
     fileToolBar->addAction(action);
     // Save
-    action = fileMenu->addAction(Icon(SaveIcon), tr("&Save project"), this, &MainWindow::save);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
     // Save As
-    action = fileMenu->addAction(Icon(SaveAsIcon),
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"),
         tr("Save project &As..."),
         this,
         &MainWindow::saveAs);
@@ -251,14 +250,14 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
-    action = fileMenu->addAction(Icon(SaveAllIcon),
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"),
         tr("&Save Selected Tool Paths..."),
         this,
         &MainWindow::saveSelectedToolpaths);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
-    action = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), scene, &Scene::RenderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), scene, &Scene::RenderPdf);
     action->setStatusTip(tr("Export to PDF file"));
     fileToolBar->addAction(action);
 
@@ -284,7 +283,7 @@ void MainWindow::createActionsFile()
     recentFileSeparator = fileMenu->addSeparator();
     setRecentFilesVisible(MainWindow::hasRecentFiles());
 
-    m_closeAllAct = fileMenu->addAction(Icon(CloseIcon),
+    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"),
         tr("&Close project \"%1\""),
         this,
         &MainWindow::closeProject);
@@ -294,12 +293,12 @@ void MainWindow::createActionsFile()
     fileToolBar->addAction(m_closeAllAct);
 
     fileMenu->addSeparator();
-    action = fileMenu->addAction(Icon(PrintIcon), tr("P&rint"), this, &MainWindow::printDialog);
+    action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
     action->setShortcuts(QKeySequence::Print);
     action->setStatusTip(tr("Print"));
     fileMenu->addSeparator();
 
-    action = fileMenu->addAction(Icon(ExitIcon), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);
     action->setStatusTip(tr("Exit the application"));
 }
@@ -307,7 +306,7 @@ void MainWindow::createActionsFile()
 void MainWindow::createActionsService()
 {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    QAction* action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"), [this] {
+    QAction* action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] {
         SettingsDialog(this).exec();
     });
     action->setStatusTip(tr("Show the application's settings box"));
@@ -329,24 +328,24 @@ void MainWindow::createActionsZoom()
     //zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     // zoomToolBar->setMovable(false);
-    QAction* action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [this]() {
+    QAction* action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), [this]() {
         graphicsView->zoomFit();
     });
     action->setShortcut(QKeySequence::FullScreen);
-    action = zoomToolBar->addAction(Icon(Zoom100Icon), tr("100%"), [this]() {
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), [this]() {
         graphicsView->zoom100();
     });
     action->setShortcut(tr("Ctrl+0"));
-    action = zoomToolBar->addAction(Icon(ZoomInIcon), tr("Zoom in"), [this]() {
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), [this]() {
         graphicsView->zoomIn();
     });
     action->setShortcut(QKeySequence::ZoomIn);
-    action = zoomToolBar->addAction(Icon(ZoomOutIcon), tr("Zoom out"), [this]() {
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [this]() {
         graphicsView->zoomOut();
     });
     action->setShortcut(QKeySequence::ZoomOut);
     zoomToolBar->addSeparator();
-    action = zoomToolBar->addAction(Icon(ZoomToSelectedIcon), tr("Zoom to selected"), [this]() {
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), [this]() {
         graphicsView->zoomToSelected();
     });
 }
@@ -356,13 +355,13 @@ void MainWindow::createActionsSDS()
     QToolBar* toolBar = addToolBar(tr("Selection"));
     toolBar->setObjectName(QStringLiteral("s"));
     // s->setMovable(false);
-    QAction* action = toolBar->addAction(Icon(SelectAllIcon),
+    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
         tr("Select all"),
         this,
         &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
-    // action = toolBar->addAction(Icon(CloseIcon), tr("Redo"), this, &MainWindow::redo);
+    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
     // action->setShortcut(QKeySequence::Redo);
     // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
     // QList<QGraphicsItem*> list;
@@ -436,7 +435,7 @@ void MainWindow::createActionsToolPath()
     menu->addAction(toolpathActionList.last());
 
     toolpathToolBar->addSeparator();
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(GCodePropertiesIcon), tr("&G-Code Properties"), [this] {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] {
         createDockWidget(new GCodePropertiesForm(dockWidget), GCode::GCodeProperties);
     }));
     toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+G"));
@@ -447,12 +446,12 @@ void MainWindow::createActionsToolPath()
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    toolpathToolBar->addAction(Icon(ToolDatabaseIcon), tr("Tool Base"), [this] {
+    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] {
         ToolDatabase tdb(this, {});
         tdb.exec();
     });
     toolpathToolBar->addSeparator();
-    toolpathToolBar->addAction(Icon(AutoRefpointsIcon), tr("Autoplace All Refpoints"), [this] {
+    toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         QList<bool> selected;
         for (QGraphicsItem* item : Scene::items()) {
             selected.append(item->isSelected());
@@ -666,11 +665,11 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
         a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
     } else if (item->type() == ThermalType) {
         if (item->flags() & QGraphicsItem::ItemIsSelectable)
-            a = menu.addAction(Icon(CloseAllIcon), tr("Exclude from the calculation"), [=] {
+            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
                 reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
             });
         else
-            a = menu.addAction(Icon(NewToolIcon), tr("Include in the calculation"), [=] {
+            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
                 reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
             });
     }

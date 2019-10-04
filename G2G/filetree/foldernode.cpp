@@ -1,6 +1,6 @@
 #include "foldernode.h"
 #include "gerbernode.h"
-#include "icons.h"
+#include <QIcon>
 
 FolderNode::FolderNode(const QString& name)
     : AbstractNode(-1)
@@ -17,7 +17,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole:
         return name;
     case Qt::DecorationRole:
-        return Icon(FolderIcon);
+        return QIcon::fromTheme("folder");
         //    case Qt::CheckStateRole:
         //        return checkState;
     default:

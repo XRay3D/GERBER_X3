@@ -375,8 +375,7 @@ void Pin::resetPos(bool fl)
 
 void Pin::updateToolTip()
 {
-    QPointF p(pos());
-    p -= GCodePropertiesForm::zeroPoint->pos();
+    const QPointF p(pos() - GCodePropertiesForm::zeroPoint->pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3").arg(m_pins.indexOf(this) + 1).arg(p.x()).arg(p.y()));
 }
 

@@ -4,7 +4,6 @@
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
-#include "icons.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -67,11 +66,11 @@ ProfileForm::ProfileForm(QWidget* parent)
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
 
-    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
-    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
-    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
-    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
-    ui->pbAddBridge->setIcon(Icon(ButtonAddBridgeIcon));
+    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
@@ -250,7 +249,7 @@ void ProfileForm::updateBridge()
 
 void ProfileForm::updatePixmap()
 {
-    static const QStringList pixmapList {
+    static const QStringList pixmapList{
         QStringLiteral(":/toolpath/prof_on_climb.svg"),
         QStringLiteral(":/toolpath/prof_out_climb.svg"),
         QStringLiteral(":/toolpath/prof_in_climb.svg"),

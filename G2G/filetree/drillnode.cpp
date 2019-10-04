@@ -4,7 +4,6 @@
 #include <QFileInfo>
 #include <exfile.h>
 #include <mainwindow.h>
-#include "icons.h"
 
 DrillNode::DrillNode(int id)
     : AbstractNode(id)

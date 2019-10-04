@@ -4,7 +4,6 @@
 #include "../gcodepropertiesform.h"
 #include "drillmodel.h"
 #include "drillpreviewgi.h"
-#include "icons.h"
 #include "project.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QCheckBox>
@@ -173,8 +172,8 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
-    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
-    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon( QIcon::fromTheme("document-export"));
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
@@ -600,7 +599,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
     if (ui->toolTable->selectionModel()->selectedIndexes().isEmpty())
         return;
     QMenu menu;
-    menu.addAction(Icon(ToolDatabaseIcon), tr("&Select Tool"), [this] {
+    menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [this] {
         bool fl = true;
         for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
             fl = model->isSlot(current.row());
@@ -638,7 +637,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
     for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
         if (model->toolId(current.row()) != -1) {
-            menu.addAction(Icon(RemoveIcon), tr("&Remove Tool"), [this] {
+            menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [this] {
                 for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
                     model->setToolId(current.row(), -1);
                     createHoles(model->apertureId(current.row()), -1);

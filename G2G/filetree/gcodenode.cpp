@@ -1,8 +1,8 @@
 #include "gcodenode.h"
-#include "icons.h"
 #include "project.h"
 
 #include <QFileInfo>
+#include <QIcon>
 
 GcodeNode::GcodeNode(int id)
     : AbstractNode(id)

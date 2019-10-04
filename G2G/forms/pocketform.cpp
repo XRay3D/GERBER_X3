@@ -1,7 +1,6 @@
 #include "pocketform.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
-#include "icons.h"
 #include "tooldatabase/tooldatabase.h"
 #include "ui_pocketform.h"
 #include <QDockWidget>
@@ -89,12 +88,12 @@ PocketForm::PocketForm(QWidget* parent)
     on_chbxUseTwoTools_toggled(settings.value("chbxUseTwoTools").toBool());
     settings.endGroup();
 
-    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
-    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
-    ui->pbEdit_2->setIcon(Icon(ButtonEditIcon));
-    ui->pbSelect_2->setIcon(Icon(ButtonSelectIcon));
-    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
-    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
+    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
+    ui->pbEdit_2->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect_2->setIcon(QIcon::fromTheme("view-form"));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });

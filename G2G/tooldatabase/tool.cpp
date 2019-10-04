@@ -1,7 +1,7 @@
 #include "tool.h"
-#include "icons.h"
 #include <QDebug>
 #include <QFile>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <qmath.h>

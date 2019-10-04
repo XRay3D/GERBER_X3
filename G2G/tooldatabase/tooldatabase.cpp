@@ -5,7 +5,6 @@
 #include "ui_tooldatabase.h"
 #include <QKeyEvent>
 #include <QMessageBox>
-#include "icons.h"
 
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)
@@ -46,10 +45,10 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
         }
     });
 
-    ui->pbCopy->setIcon(Icon(CopyIcon_));
-    ui->pbDelete->setIcon(Icon(DeleteIcon));
-    ui->pbNew->setIcon(Icon(NewToolIcon));
-    ui->pbNewGroup->setIcon(Icon(NewGroupIcon));
+    ui->pbCopy->setIcon(QIcon::fromTheme("edit-copy"));
+    ui->pbDelete->setIcon(QIcon::fromTheme("edit-delete"));
+    ui->pbNew->setIcon(QIcon::fromTheme("list-add"));
+    ui->pbNewGroup->setIcon(QIcon::fromTheme("folder-add"));
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);

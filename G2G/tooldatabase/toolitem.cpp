@@ -2,9 +2,9 @@
 #include "tooldatabase.h"
 #include "toolmodel.h"
 
+#include <QIcon>
 #include <QJsonArray>
 #include <QPixmap>
-#include "icons.h"
 
 bool ToolItem::m_deleteEnable = false;
 
@@ -145,7 +145,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
             if(m_toolId)
                 return ToolHolder::tools[m_toolId].icon();
             else
-                return Icon(ToolFolderIcon);
+                return QIcon::fromTheme("folder-sync");
         }
         return QVariant();
     case Qt::UserRole:

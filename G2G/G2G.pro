@@ -62,7 +62,6 @@ HEADERS += \
     gi/itemgroup.h \
     gi/pathitem.h \
     gi/rawitem.h \
-    icons.h \
     mainwindow.h \
     openingdialog.h \
     point.h \
