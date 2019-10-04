@@ -60,7 +60,7 @@ Paths RawItem::paths() const { return { m_path }; }
 
 QPainterPath RawItem::shape() const
 {
-    if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
+//    if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
         m_scale = GraphicsView::scaleFactor();
         m_shape_raw = QPainterPath();
         ClipperOffset offset;
@@ -69,7 +69,7 @@ QPainterPath RawItem::shape() const
         offset.Execute(tmpPpath, 5 * uScale * m_scale);
         for (const Path& path : tmpPpath)
             m_shape_raw.addPolygon(toQPolygon(path));
-    }
+//    }
     return m_shape_raw;
 }
 

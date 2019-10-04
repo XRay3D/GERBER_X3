@@ -224,9 +224,7 @@ void GraphicsView::zoomOut()
 
 double GraphicsView::scaleFactor()
 {
-    if (self == nullptr)
-        return 1.0;
-    return 1.0 / self->matrix().m11();
+    return 1.0 / getScale();
 }
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const

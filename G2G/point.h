@@ -50,11 +50,13 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
     int type() const override;
+
     static QVector<Pin*> pins();
     static double min() { return qMin(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
     static double max() { return qMax(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
-    void resetPos(bool fl = true);
     static QRectF worckRect;
+
+    void resetPos(bool fl = true);
     void updateToolTip();
     void setPos(const QPointF& pos);
 
@@ -64,13 +66,12 @@ private:
     QPainterPath m_shape;
     static QVector<Pin*> m_pins;
     QPointF m_lastPos;
+    const int m_index;
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // POINT_H

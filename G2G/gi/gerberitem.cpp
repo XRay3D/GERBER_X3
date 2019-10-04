@@ -26,6 +26,8 @@ QPainterPath GerberItem::shape() const { return m_shape; }
 
 void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    //    const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
+    //    qDebug() << lod << GraphicsView::getScale() << painter->worldTransform().m11() << transform().m11();
     if (Scene::drawPdf()) {
         painter->setBrush(Qt::black);
         painter->setPen(QPen(Qt::black, 0.0));

@@ -16,15 +16,11 @@ Scene* Scene::m_self = nullptr;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
-    , m_drawPdf(false)
 {
     m_self = this;
 }
 
-Scene::~Scene()
-{
-    m_self = nullptr;
-}
+Scene::~Scene() { m_self = nullptr; }
 
 void Scene::RenderPdf()
 {
@@ -206,20 +202,6 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
         return;
 
     painter->fillRect(rect, Settings::color(Colors::Background));
-
-    //    if (qFuzzyIsNull(itemsBoundingRect().width()) || qFuzzyIsNull(itemsBoundingRect().height()))
-    //        return;
-
-    //    painter->save();
-
-    //    //    if (GerberProject::getDrawingType() == GerberProject::RAW)
-    //    //        painter->setBrush(QColor(128, 128, 0));
-    //    //    else
-    //    painter->setBrush(Qt::NoBrush);
-
-    //    painter->setPen(QPen(Qt::white, 0.0));
-    //    painter->drawRect(itemsBoundingRect() /*+ QMarginsF(2, 2, 2, 2)*/);
-    //    painter->restore();
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -323,7 +305,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     if (fl)
         painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0 /*1.0 / scale*/));
     else
-        painter->setPen(QPen(QColor(255, 255, 255, 150), 0.0 /*1.0 / scale*/));
+        painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0 /*1.0 / scale*/));
 
     painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
     painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));
@@ -332,16 +314,4 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         drawRuller(painter);
 
     painter->restore();
-}
-
-void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    //    if (event->modifiers() & Qt::AltModifier) {
-    //        const double gs = Settings::gridStep(m_scale);
-    //        QPointF px(event->pos() / gs);
-    //        px.setX(gs * round(px.x()));
-    //        px.setY(gs * round(px.y()));
-    //        event->setPos(px);
-    //    }
-    QGraphicsScene::mouseMoveEvent(event);
 }

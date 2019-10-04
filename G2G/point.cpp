@@ -93,6 +93,8 @@ QPainterPath Point::shape() const
     return /*m_shape*/ m_path;
 }
 
+int Point::type() const { return m_type ? PointHomeType : PointZeroType; }
+
 void Point::resetPos(bool fl)
 {
     if (fl) {
@@ -124,7 +126,7 @@ void Point::resetPos(bool fl)
 void Point::setPosX(double x)
 {
     QPointF point(pos());
-    if (point.x() == x)
+    if (qFuzzyCompare(point.x(), x))
         return;
     point.setX(x);
     setPos(point);
@@ -133,7 +135,7 @@ void Point::setPosX(double x)
 void Point::setPosY(double y)
 {
     QPointF point(pos());
-    if (point.y() == y)
+    if (qFuzzyCompare(point.y(), y))
         return;
     point.setY(y);
     setPos(point);
@@ -177,6 +179,7 @@ void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 Pin::Pin()
     : QGraphicsItem(nullptr)
+    , m_index(m_pins.size())
 {
     setAcceptHoverEvents(true);
 
@@ -205,6 +208,9 @@ Pin::Pin()
 
 Pin::~Pin()
 {
+    QSettings settings;
+    settings.beginGroup("Pin");
+    settings.setValue("pos" + QString::number(m_index), pos());
 }
 
 QRectF Pin::boundingRect() const
@@ -245,65 +251,65 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF p[4] {
+    QPointF pt[4]{
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
         m_pins[3]->pos()
     };
 
-    switch (m_pins.indexOf(this)) {
+    const QPointF center(worckRect.center());
+
+    switch (m_index) {
     case 0:
-        if (p[0].x() > Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-            p[0].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-        if (p[0].y() > Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-            p[0].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
-        p[2] = m_pins[2]->m_lastPos - (p[0] - m_lastPos);
-        p[1].rx() = p[2].x();
-        p[1].ry() = p[0].y();
-        p[3].rx() = p[0].x();
-        p[3].ry() = p[2].y();
+        if (pt[0].x() > center.x())
+            pt[0].rx() = center.x();
+        if (pt[0].y() > center.y())
+            pt[0].ry() = center.y();
+        pt[2] = m_pins[2]->m_lastPos - (pt[0] - m_lastPos);
+        pt[1].rx() = pt[2].x();
+        pt[1].ry() = pt[0].y();
+        pt[3].rx() = pt[0].x();
+        pt[3].ry() = pt[2].y();
         break;
     case 1:
-        if (p[1].x() < Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-            p[1].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-        if (p[1].y() > Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-            p[1].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
-        p[3] = m_pins[3]->m_lastPos - (p[1] - m_lastPos);
-        p[0].rx() = p[3].x();
-        p[0].ry() = p[1].y();
-        p[2].rx() = p[1].x();
-        p[2].ry() = p[3].y();
+        if (pt[1].x() < center.x())
+            pt[1].rx() = center.x();
+        if (pt[1].y() > center.y())
+            pt[1].ry() = center.y();
+        pt[3] = m_pins[3]->m_lastPos - (pt[1] - m_lastPos);
+        pt[0].rx() = pt[3].x();
+        pt[0].ry() = pt[1].y();
+        pt[2].rx() = pt[1].x();
+        pt[2].ry() = pt[3].y();
         break;
     case 2:
-        if (p[2].x() < Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-            p[2].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-        if (p[2].y() < Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-            p[2].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
-        p[0] = m_pins[0]->m_lastPos - (p[2] - m_lastPos);
-        p[1].rx() = p[2].x();
-        p[1].ry() = p[0].y();
-        p[3].rx() = p[0].x();
-        p[3].ry() = p[2].y();
+        if (pt[2].x() < center.x())
+            pt[2].rx() = center.x();
+        if (pt[2].y() < center.y())
+            pt[2].ry() = center.y();
+        pt[0] = m_pins[0]->m_lastPos - (pt[2] - m_lastPos);
+        pt[1].rx() = pt[2].x();
+        pt[1].ry() = pt[0].y();
+        pt[3].rx() = pt[0].x();
+        pt[3].ry() = pt[2].y();
         break;
     case 3:
-        if (p[3].x() > Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-            p[3].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-        if (p[3].y() < Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-            p[3].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
-        p[1] = m_pins[1]->m_lastPos - (p[3] - m_lastPos);
-        p[0].rx() = p[3].x();
-        p[0].ry() = p[1].y();
-        p[2].rx() = p[1].x();
-        p[2].ry() = p[3].y();
+        if (pt[3].x() > center.x())
+            pt[3].rx() = center.x();
+        if (pt[3].y() < center.y())
+            pt[3].ry() = center.y();
+        pt[1] = m_pins[1]->m_lastPos - (pt[3] - m_lastPos);
+        pt[0].rx() = pt[3].x();
+        pt[0].ry() = pt[1].y();
+        pt[2].rx() = pt[1].x();
+        pt[2].ry() = pt[3].y();
         break;
     }
-    for (int i = 0; i < 4; ++i) {
-        m_pins[i]->setPos(p[i]);
-    }
-    QSettings settings;
-    settings.beginGroup("Pin");
-    settings.setValue("pos" + QString::number(m_pins.indexOf(this)), pos());
+
+    for (int i = 0; i < 4; ++i)
+        m_pins[i]->setPos(pt[i]);
+
     Project::setChanged();
 }
 
@@ -322,10 +328,6 @@ void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mousePressEvent(event);
 }
 
-void Pin::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) { QGraphicsItem::mouseReleaseEvent(event); }
-
-int Point::type() const { return m_type ? PointHomeType : PointZeroType; }
-
 int Pin::type() const { return PinType; }
 
 QVector<Pin*> Pin::pins() { return m_pins; }
@@ -335,37 +337,36 @@ void Pin::resetPos(bool fl)
     if (fl) {
         updateRect();
     }
-    const QPointF o(Settings::pinOffset());
-    QPointF p[] {
-        QPointF(Pin::worckRect.topLeft() + QPointF(-o.x(), -o.y())),
-        QPointF(Pin::worckRect.topRight() + QPointF(+o.x(), -o.y())),
-        QPointF(Pin::worckRect.bottomRight() + QPointF(+o.x(), +o.y())),
-        QPointF(Pin::worckRect.bottomLeft() + QPointF(-o.x(), +o.y())),
+    const QPointF offset(Settings::pinOffset());
+    QPointF pt[]{
+        QPointF(Pin::worckRect.topLeft() + QPointF(-offset.x(), -offset.y())),
+        QPointF(Pin::worckRect.topRight() + QPointF(+offset.x(), -offset.y())),
+        QPointF(Pin::worckRect.bottomRight() + QPointF(+offset.x(), +offset.y())),
+        QPointF(Pin::worckRect.bottomLeft() + QPointF(-offset.x(), +offset.y())),
     };
 
-    if (p[0].x() > Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-        p[0].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-    if (p[0].y() > Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-        p[0].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
+    const QPointF center(worckRect.center());
 
-    if (p[1].x() < Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-        p[1].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-    if (p[1].y() > Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-        p[1].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
+    if (pt[0].x() > center.x())
+        pt[0].rx() = center.x();
+    if (pt[0].y() > center.y())
+        pt[0].ry() = center.y();
+    if (pt[1].x() < center.x())
+        pt[1].rx() = center.x();
+    if (pt[1].y() > center.y())
+        pt[1].ry() = center.y();
+    if (pt[2].x() < center.x())
+        pt[2].rx() = center.x();
+    if (pt[2].y() < center.y())
+        pt[2].ry() = center.y();
+    if (pt[3].x() > center.x())
+        pt[3].rx() = center.x();
+    if (pt[3].y() < center.y())
+        pt[3].ry() = center.y();
 
-    if (p[2].x() < Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-        p[2].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-    if (p[2].y() < Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-        p[2].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
+    for (int i = 0; i < 4; ++i)
+        m_pins[i]->setPos(pt[i]);
 
-    if (p[3].x() > Pin::worckRect.left() + Pin::worckRect.width() * 0.5)
-        p[3].rx() = Pin::worckRect.left() + Pin::worckRect.width() * 0.5;
-    if (p[3].y() < Pin::worckRect.top() + Pin::worckRect.height() * 0.5)
-        p[3].ry() = Pin::worckRect.top() + Pin::worckRect.height() * 0.5;
-
-    for (int i = 0; i < 4; ++i) {
-        m_pins[i]->setPos(p[i]);
-    }
     QSettings settings;
     settings.beginGroup("Pin");
     settings.setValue("pos" + QString::number(m_pins.indexOf(this)), pos());
