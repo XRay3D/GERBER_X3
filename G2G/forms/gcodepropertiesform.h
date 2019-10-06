@@ -17,8 +17,8 @@ public:
 
     static void updatePosDsbxs();
 
-    static Point* homePoint;
-    static Point* zeroPoint;
+    static Marker* homePoint;
+    static Marker* zeroPoint;
     static double safeZ;
     static double thickness;
     static double copperThickness;

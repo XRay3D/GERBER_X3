@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 
 #include <QElapsedTimer>
+#include <QFileDialog>
 //#include <WinBase.h>
 //#include <WinNT.h>
 #include <filetree/filemodel.h>
@@ -253,9 +254,26 @@ int Project::addFile(AbstractFile* file)
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
 
-int Project::ver()
+int Project::ver() { return m_ver; }
+
+void Project::saveSelectedToolpaths()
 {
-    return m_ver;
+    bool isEmpty = true;
+    for (GCode::File* file : files<GCode::File>()) {
+        if (!file->itemGroup()->isVisible())
+            continue;
+        isEmpty = false;
+        QString name(GCode::File::getLastDir().append(file->shortName()));
+        if (!name.endsWith("tap"))
+            name += QStringList({ "(Top)", "(Bot)" })[file->side()];
+        name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+        if (name.isEmpty())
+            return;
+        file->save(name);
+        file->itemGroup()->setVisible(false);
+    }
+    if (isEmpty)
+        QMessageBox::information(nullptr, "", tr("No selected toolpath files."));
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)

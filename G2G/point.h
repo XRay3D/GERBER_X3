@@ -7,12 +7,12 @@
 #include <QGraphicsItem>
 #include <QPen>
 
-class Point : public QGraphicsItem { //Object {
+class Marker : public QGraphicsItem { //Object {
     //    Q_OBJECT
 
 public:
-    Point(int type);
-    ~Point() override;
+    Marker(int type);
+    ~Marker() override;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

@@ -17,7 +17,7 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
 
 GerberItem::~GerberItem()
 {
-    qDebug("~GerberItem()");
+    //qDebug("~GerberItem()");
 }
 
 QRectF GerberItem::boundingRect() const { return m_shape.boundingRect(); }

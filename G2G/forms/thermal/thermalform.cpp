@@ -35,14 +35,14 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 
     const QRectF rect = painterPath.boundingRect();
 
-    qreal scale = (double)Size / qMax(rect.width(), rect.height());
+    qreal scale = static_cast<double>(Size) / qMax(rect.width(), rect.height());
 
     double ky = rect.bottom() * scale;
     double kx = rect.left() * scale;
     if (rect.width() > rect.height())
-        ky += (Size - rect.height() * scale) / 2;
+        ky += (static_cast<double>(Size) - rect.height() * scale) / 2;
     else
-        kx -= (Size - rect.width() * scale) / 2;
+        kx -= (static_cast<double>(Size) - rect.width() * scale) / 2;
 
     QPixmap pixmap(Size, Size);
     pixmap.fill(Qt::transparent);
@@ -85,7 +85,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
     ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon( QIcon::fromTheme("document-export"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {

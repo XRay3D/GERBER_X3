@@ -28,7 +28,7 @@ bool updateRect()
     return true;
 }
 
-Point::Point(int type)
+Marker::Marker(int type)
     : m_type(type)
 {
     setAcceptHoverEvents(true);
@@ -52,7 +52,7 @@ Point::Point(int type)
     Scene::addItem(this);
 }
 
-Point::~Point()
+Marker::~Marker()
 {
     QSettings settings;
     settings.beginGroup("Point");
@@ -60,14 +60,14 @@ Point::~Point()
     settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
 }
 
-QRectF Point::boundingRect() const
+QRectF Marker::boundingRect() const
 {
     if (Scene::drawPdf())
         return QRectF();
     return m_rect;
 }
 
-void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (Scene::drawPdf())
         return;
@@ -86,44 +86,58 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath Point::shape() const
+QPainterPath Marker::shape() const
 {
     if (Scene::drawPdf())
         return QPainterPath();
     return /*m_shape*/ m_path;
 }
 
-int Point::type() const { return m_type ? PointHomeType : PointZeroType; }
+int Marker::type() const { return m_type ? PointHomeType : PointZeroType; }
 
-void Point::resetPos(bool fl)
+void Marker::resetPos(bool fl)
 {
-    if (fl) {
+    if (fl)
         updateRect();
-    }
     if (m_type == Home)
         switch (Settings::homePos()) {
-        case static_cast<int>(HomePosition::BottomLeft):
+        case Qt::BottomLeftCorner:
             setPos(Pin::worckRect.topLeft() + Settings::homeOffset());
             break;
-        case static_cast<int>(HomePosition::BottomRight):
+        case Qt::BottomRightCorner:
             setPos(Pin::worckRect.topRight() + Settings::homeOffset());
             break;
-        case static_cast<int>(HomePosition::TopLeft):
+        case Qt::TopLeftCorner:
             setPos(Pin::worckRect.bottomLeft() + Settings::homeOffset());
             break;
-        case static_cast<int>(HomePosition::TopRight):
+        case Qt::TopRightCorner:
             setPos(Pin::worckRect.bottomRight() + Settings::homeOffset());
             break;
         default:
             break;
         }
     else {
-        setPos(Pin::worckRect.topLeft());
+        switch (Settings::zeroPos()) {
+        case Qt::BottomLeftCorner:
+            setPos(Pin::worckRect.topLeft() + Settings::zeroOffset());
+            break;
+        case Qt::BottomRightCorner:
+            setPos(Pin::worckRect.topRight() + Settings::zeroOffset());
+            break;
+        case Qt::TopLeftCorner:
+            setPos(Pin::worckRect.bottomLeft() + Settings::zeroOffset());
+            break;
+        case Qt::TopRightCorner:
+            setPos(Pin::worckRect.bottomRight() + Settings::zeroOffset());
+            break;
+        default:
+            break;
+        }
     }
     updateGCPForm();
 }
 
-void Point::setPosX(double x)
+void Marker::setPosX(double x)
 {
     QPointF point(pos());
     if (qFuzzyCompare(point.x(), x))
@@ -132,7 +146,7 @@ void Point::setPosX(double x)
     setPos(point);
 }
 
-void Point::setPosY(double y)
+void Marker::setPosY(double y)
 {
     QPointF point(pos());
     if (qFuzzyCompare(point.y(), y))
@@ -141,7 +155,7 @@ void Point::setPosY(double y)
     setPos(point);
 }
 
-void Point::updateGCPForm()
+void Marker::updateGCPForm()
 {
     GCodePropertiesForm::updatePosDsbxs();
     QSettings settings;
@@ -153,13 +167,13 @@ void Point::updateGCPForm()
             pin->updateToolTip();
 }
 
-void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
     updateGCPForm();
 }
 
-void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
@@ -251,7 +265,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF pt[4]{
+    QPointF pt[4] {
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
@@ -338,7 +352,7 @@ void Pin::resetPos(bool fl)
         updateRect();
     }
     const QPointF offset(Settings::pinOffset());
-    QPointF pt[]{
+    QPointF pt[] {
         QPointF(Pin::worckRect.topLeft() + QPointF(-offset.x(), -offset.y())),
         QPointF(Pin::worckRect.topRight() + QPointF(+offset.x(), -offset.y())),
         QPointF(Pin::worckRect.bottomRight() + QPointF(+offset.x(), +offset.y())),

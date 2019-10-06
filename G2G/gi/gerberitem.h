@@ -10,7 +10,7 @@ class File;
 class GerberItem : public GraphicsItem {
 public:
     explicit GerberItem(Paths& m_paths, Gerber::File* file);
-    ~GerberItem() override /* = default*/;
+    ~GerberItem() override;
     //    {
     //    if (dynamic_cast<const G::File*>(m_file)) {
     //        int index = m_file->groupedPaths().indexOf(m_paths);

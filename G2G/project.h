@@ -126,6 +126,8 @@ public:
         m_isModified = true;
         self->changed();
     }
+
+    static void saveSelectedToolpaths();
 signals:
     void changed();
 

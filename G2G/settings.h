@@ -40,7 +40,9 @@ public:
     static QString gCodeFormat();
 
     static QPointF homeOffset();
+    static QPointF zeroOffset();
     static int homePos();
+    static int zeroPos();
 
     static QPointF pinOffset();
 
@@ -64,7 +66,9 @@ protected:
 
     static QPointF m_pinOffset;
     static QPointF m_homeOffset;
+    static QPointF m_zeroOffset;
     static int m_homePos;
+    static int m_zeroPos;
     static bool m_inch;
     static bool m_smoothScSh;
 };

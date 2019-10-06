@@ -54,6 +54,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         qApp->setFont(f);
     });
 
+    labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
     readSettings();
 }
 
@@ -94,11 +95,15 @@ void SettingsDialog::readSettings()
     settings.beginGroup("Home");
     m_pinOffset = settings.value("pinOffset", QPointF(6, 6)).toPointF();
     m_homeOffset = settings.value("homeOffset").toPointF();
+    m_zeroOffset = settings.value("zeroOffset").toPointF();
     dsbxPinX->setValue(m_pinOffset.x());
     dsbxPinY->setValue(m_pinOffset.y());
     dsbxHomeX->setValue(m_homeOffset.x());
     dsbxHomeY->setValue(m_homeOffset.y());
+    dsbxZeroX->setValue(m_zeroOffset.x());
+    dsbxZeroY->setValue(m_zeroOffset.y());
     cbxHomePos->setCurrentIndex(m_homePos = settings.value("homePos").toInt());
+    cbxZeroPos->setCurrentIndex(m_zeroPos = settings.value("zeroPos").toInt());
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");
@@ -155,7 +160,9 @@ void SettingsDialog::writeSettings()
     settings.beginGroup("Home");
     settings.setValue("pinOffset", m_pinOffset = QPointF(dsbxPinX->value(), dsbxPinY->value()));
     settings.setValue("homeOffset", m_homeOffset = QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
+    settings.setValue("zeroOffset", m_zeroOffset = QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
     settings.setValue("homePos", m_homePos = cbxHomePos->currentIndex());
+    settings.setValue("zeroPos", m_zeroPos = cbxZeroPos->currentIndex());
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");

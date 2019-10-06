@@ -38,8 +38,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     init();
 
-    GCodePropertiesForm::zeroPoint = new Point(Point::Zero);
-    GCodePropertiesForm::homePoint = new Point(Point::Home);
+    GCodePropertiesForm::zeroPoint = new Marker(Marker::Zero);
+    GCodePropertiesForm::homePoint = new Marker(Marker::Home);
     new Pin[4];
 
     gerberParser->moveToThread(&parserThread);
@@ -148,28 +148,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #endif
 }
 
-void MainWindow::saveSelectedToolpaths()
-{
-    bool isEmpty = true;
-    for (GCode::File* file : Project::files<GCode::File>()) {
-        if (!file->itemGroup()->isVisible())
-            continue;
-        isEmpty = false;
-        QString name(GCode::File::getLastDir().append(file->shortName()));
-        if (!name.endsWith("tap"))
-            name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-        name = QFileDialog::getSaveFileName(this, tr("Save GCode file"), name, tr("GCode (*.tap)"));
-        if (name.isEmpty())
-            return;
-        file->save(name);
-        qDebug() << name;
-        file->itemGroup()->setVisible(false);
-    }
-    if (isEmpty) {
-        QMessageBox::information(this, "", tr("No selected toolpath files."));
-    }
-}
-
 bool MainWindow::closeProject()
 {
     if (maybeSave()) {
@@ -250,10 +228,7 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"),
-        tr("&Save Selected Tool Paths..."),
-        this,
-        &MainWindow::saveSelectedToolpaths);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), pro, &Project::saveSelectedToolpaths);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
@@ -520,7 +495,7 @@ void MainWindow::createActionsGraphics()
     tb->addAction(tr("Undo"))->setEnabled(false);
     tb->addAction(tr("Redo"))->setEnabled(false);
     tb->addSeparator();
-    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); })->setCheckable(true);
+    tb->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); })->setCheckable(true);
 }
 
 void MainWindow::createPinsPath()
@@ -625,7 +600,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
+                printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);
@@ -658,7 +633,7 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
         });
         a->setCheckable(true);
         a->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
-    } else if (dynamic_cast<Point*>(item)) {
+    } else if (dynamic_cast<Marker*>(item)) {
         a = menu.addAction(tr("Fixed"),
             [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
         a->setCheckable(true);

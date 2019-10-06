@@ -9,8 +9,8 @@
 
 GCodePropertiesForm* GCodePropertiesForm::self = nullptr;
 
-Point* GCodePropertiesForm::homePoint = nullptr;
-Point* GCodePropertiesForm::zeroPoint = nullptr;
+Marker* GCodePropertiesForm::homePoint = nullptr;
+Marker* GCodePropertiesForm::zeroPoint = nullptr;
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::thickness;
 double GCodePropertiesForm::copperThickness;

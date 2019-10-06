@@ -24,3 +24,4 @@ AboutForm::~AboutForm()
 {
     delete ui;
 }
+

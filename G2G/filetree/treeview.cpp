@@ -173,7 +173,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             file->setItemType(static_cast<Gerber::File::ItemsType>(checked));
         });
         a->setCheckable(true);
-        menu.addAction(QIcon(), tr("&Show source"), [=] {
+        menu.addAction(QIcon(), tr("&Show source"), [this] {
             QDialog* Dialog = new QDialog;
             Dialog->setObjectName(QString::fromUtf8("Dialog"));
             //Dialog->resize(400, 300);
@@ -209,6 +209,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
         });
+        menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { Project::saveSelectedToolpaths(); });
     }
 
     if (a) {

@@ -83,7 +83,6 @@ private:
     void readSettings();
     void redo();
     void resetToolPathsActions();
-    void saveSelectedToolpaths();
     void selectAll();
     void setRecentFilesVisible(bool visible);
     void updateRecentFileActions();

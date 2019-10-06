@@ -6,7 +6,7 @@
 #endif
 const int gridColor = 100;
 
-QColor Settings::m_color[static_cast<int>(Colors::Count)]{
+QColor Settings::m_color[static_cast<int>(Colors::Count)] {
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
@@ -20,19 +20,21 @@ QColor Settings::m_color[static_cast<int>(Colors::Count)]{
     QColor(Qt::red) //G0
 };
 
-int Settings::m_minCircleSegments = 36;
-double Settings::m_minCircleSegmentLength = 0.5;
-bool Settings::m_cleanPolygons = true;
-bool Settings::m_skipDuplicates = false;
-bool Settings::m_gcinfo = false;
-QString Settings::m_startGCode = "G21 G17 G90";
-QString Settings::m_endGCode = "M30";
-QString Settings::m_GCode = "G?X?Y?Z?F?S?";
-QPointF Settings::m_pinOffset;
 QPointF Settings::m_homeOffset;
-int Settings::m_homePos = 0;
+QPointF Settings::m_zeroOffset;
+QPointF Settings::m_pinOffset;
+QString Settings::m_GCode = "G?X?Y?Z?F?S?";
+QString Settings::m_endGCode = "M30";
+QString Settings::m_startGCode = "G21 G17 G90";
+bool Settings::m_cleanPolygons = true;
+bool Settings::m_gcinfo = false;
 bool Settings::m_inch = false; //true;
+bool Settings::m_skipDuplicates = false;
 bool Settings::m_smoothScSh = false; //true;
+double Settings::m_minCircleSegmentLength = 0.5;
+int Settings::m_homePos = Qt::BottomLeftCorner;
+int Settings::m_zeroPos = Qt::BottomLeftCorner;
+int Settings::m_minCircleSegments = 36;
 
 Settings::Settings() {}
 
@@ -47,16 +49,18 @@ int Settings::circleSegments(double radius)
 }
 
 QColor& Settings::color(Colors id) { return m_color[static_cast<int>(id)]; }
-bool Settings::cleanPolygons() { return m_cleanPolygons; }
-bool Settings::skipDuplicates() { return m_skipDuplicates; }
-QString Settings::startGCode() { return m_startGCode; }
+QPointF Settings::homeOffset() { return m_homeOffset; }
+QPointF Settings::pinOffset() { return m_pinOffset; }
+QPointF Settings::zeroOffset() { return m_zeroOffset; }
 QString Settings::endGCode() { return m_endGCode; }
 QString Settings::gCodeFormat() { return m_GCode; }
-QPointF Settings::homeOffset() { return m_homeOffset; }
-int Settings::homePos() { return m_homePos; }
-QPointF Settings::pinOffset() { return m_pinOffset; }
+QString Settings::startGCode() { return m_startGCode; }
+bool Settings::cleanPolygons() { return m_cleanPolygons; }
 bool Settings::gcinfo() { return m_gcinfo; }
 bool Settings::inch() { return m_inch; }
+bool Settings::skipDuplicates() { return m_skipDuplicates; }
+int Settings::homePos() { return m_homePos; }
+int Settings::zeroPos() { return m_zeroPos; }
 void Settings::setInch(bool val) { m_inch = val; }
 
 double Settings::gridStep(double scale)
@@ -66,7 +70,4 @@ double Settings::gridStep(double scale)
         : pow(10.0, ceil(log10(8.0 / scale))); // 0.1;
 }
 
-bool Settings::smoothScSh()
-{
-    return m_smoothScSh;
-}
+bool Settings::smoothScSh() { return m_smoothScSh; }
