@@ -427,17 +427,17 @@ void MainWindow::createActionsToolPath()
     });
     toolpathToolBar->addSeparator();
     toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
-        QList<bool> selected;
-        for (QGraphicsItem* item : Scene::items()) {
-            selected.append(item->isSelected());
-            if (item->isVisible())
-                item->setSelected(true);
-        }
+        //        QList<bool> selected;
+        //        for (QGraphicsItem* item : Scene::items()) {
+        //            selected.append(item->isSelected());
+        //            if (item->isVisible())
+        //                item->setSelected(true);
+        //        }
         Pin::pins().first()->resetPos();
         GCodePropertiesForm::homePoint->resetPos(false);
         GCodePropertiesForm::zeroPoint->resetPos(false);
-        for (QGraphicsItem* item : Scene::items())
-            item->setSelected(selected.takeFirst());
+        //        for (QGraphicsItem* item : Scene::items())
+        //            item->setSelected(selected.takeFirst());
         graphicsView->zoomFit();
     });
 }

@@ -19,7 +19,9 @@ bool updateRect()
 {
     QRectF rect(Project::getSelectedBoundingRect());
     if (rect.isEmpty()) {
-        if (QMessageBox::question(nullptr, "", QObject::tr("There is no dedicated data to define boundaries.\nOld data will be used."), QMessageBox::No, QMessageBox::Yes)
+        if (QMessageBox::question(nullptr, "", QObject::tr("There are no selected items to define the border.\n"
+                                                           "The old border will be used."),
+                QMessageBox::No, QMessageBox::Yes)
             == QMessageBox::No)
             return false;
         return true;
