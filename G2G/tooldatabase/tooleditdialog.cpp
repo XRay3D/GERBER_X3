@@ -8,14 +8,15 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     setupUi(this);
     toolEdit->setDialog();
     connect(buttonBox, &QDialogButtonBox::accepted, [this] {
-        if (toolEdit->m_tool.isValid())
+        if (toolEdit->m_tool.isValid()) {
+            toolEdit->m_tool.setId(-1);
             accept();
-        else
-            toolEdit->on_pbApply_clicked(); //            toolEdit->m_tool.errorMessageBox(this);
+        } else {
+            toolEdit->on_pbApply_clicked();
+            //toolEdit->m_tool.errorMessageBox(this);
+        }
     });
 }
-
-
 
 Tool ToolEditDialog::tool() const { return toolEdit->m_tool; }
 

@@ -42,8 +42,6 @@ class Tool {
         return stream;
     }
 
-
-
 public:
     Tool();
 
@@ -77,43 +75,95 @@ public:
 
     // name
     inline QString name() const { return m_name; }
-    inline void setName(const QString& name) { m_name = name; }
+    inline void setName(const QString& name)
+    {
+        m_hash = 0;
+        m_name = name;
+    }
     // note
     inline QString note() const { return m_note; }
-    inline void setNote(const QString& note) { m_note = note; }
+    inline void setNote(const QString& note)
+    {
+        m_hash = 0;
+        m_note = note;
+    }
     // type
     inline Type type() const { return m_type; }
-    inline void setType(int type) { m_type = static_cast<Type>(type); }
+    inline void setType(int type)
+    {
+        m_hash = 0;
+        m_type = static_cast<Type>(type);
+    }
     // angle
     inline double angle() const { return m_angle; }
-    inline void setAngle(double angle) { m_angle = angle; }
+    inline void setAngle(double angle)
+    {
+        m_hash = 0;
+        m_angle = angle;
+    }
     // diameter
     inline double diameter() const { return m_diameter; }
-    inline void setDiameter(double diameter) { m_diameter = diameter; }
+    inline void setDiameter(double diameter)
+    {
+        m_hash = 0;
+        m_diameter = diameter;
+    }
     // feedRate
     inline double feedRate() const { return m_feedRate; }
-    inline void setFeedRate(double feedRate) { m_feedRate = feedRate; }
+    inline void setFeedRate(double feedRate)
+    {
+        m_hash = 0;
+        m_feedRate = feedRate;
+    }
     // oneTurnCut
     inline double oneTurnCut() const { return m_oneTurnCut; }
-    inline void setOneTurnCut(double oneTurnCut) { m_oneTurnCut = oneTurnCut; }
+    inline void setOneTurnCut(double oneTurnCut)
+    {
+        m_hash = 0;
+        m_oneTurnCut = oneTurnCut;
+    }
     // passDepth
     inline double passDepth() const { return m_passDepth; }
-    inline void setPassDepth(double passDepth) { m_passDepth = passDepth; }
+    inline void setPassDepth(double passDepth)
+    {
+        m_hash = 0;
+        m_passDepth = passDepth;
+    }
     // plungeRate
     inline double plungeRate() const { return m_plungeRate; }
-    inline void setPlungeRate(double plungeRate) { m_plungeRate = plungeRate; }
+    inline void setPlungeRate(double plungeRate)
+    {
+        m_hash = 0;
+        m_plungeRate = plungeRate;
+    }
     // spindleSpeed
     inline double spindleSpeed() const { return m_spindleSpeed; }
-    inline void setSpindleSpeed(double spindleSpeed) { m_spindleSpeed = spindleSpeed; }
+    inline void setSpindleSpeed(double spindleSpeed)
+    {
+        m_hash = 0;
+        m_spindleSpeed = spindleSpeed;
+    }
     // stepover
     inline double stepover() const { return m_stepover; }
-    inline void setStepover(double stepover) { m_stepover = stepover; }
+    inline void setStepover(double stepover)
+    {
+        m_hash = 0;
+        m_stepover = stepover;
+    }
     // autoName
     inline bool autoName() const { return m_autoName; }
-    inline void setAutoName(bool autoName) { m_autoName = autoName; }
+    inline void setAutoName(bool autoName)
+    {
+        m_hash = 0;
+        m_autoName = autoName;
+    }
     // id
     inline int id() const { return m_id; }
-    inline void setId(int id) { m_id = id; }
+    inline void setId(int id)
+    {
+        m_hash = 0;
+        m_id = id;
+    }
 
     double getDiameter(double depth) const;
     double getDepth() const;
@@ -123,8 +173,10 @@ public:
     QIcon icon() const;
     QString errorStr();
     void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
+    uint hash() const;
 
 private:
+    mutable int m_hash = 0;
     QString m_name;
     QString m_note;
     Type m_type;
@@ -137,7 +189,7 @@ private:
     double m_spindleSpeed;
     double m_stepover;
     bool m_autoName;
-    int m_id;
+    uint m_id;
 };
 
 class ToolHolder {

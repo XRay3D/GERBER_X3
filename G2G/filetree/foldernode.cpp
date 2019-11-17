@@ -27,7 +27,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const
 {
-    return Qt::ItemIsEnabled /*| Qt::ItemIsUserCheckable|*/;
+    return Qt::ItemIsEnabled /*| Qt::ItemIsDropEnabled*/;
 }
 
 bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role)

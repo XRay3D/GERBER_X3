@@ -5,6 +5,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <qmath.h>
+//#include <QCryptographicHash>
+#include <QHash>
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
@@ -128,6 +130,65 @@ QString Tool::errorStr()
     if (qFuzzyIsNull(m_plungeRate))
         errorString += "Plunge rate = 0!\n";
     return errorString;
+}
+
+uint Tool::hash() const
+{
+    if (m_hash)
+        return m_hash;
+
+    QByteArray hashData;
+    hashData.append(m_name.toLocal8Bit());
+    hashData.append(m_note.toLocal8Bit());
+    hashData.append(reinterpret_cast<const char*>(&m_type), sizeof(Type));
+    hashData.append(reinterpret_cast<const char*>(&m_angle), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_diameter), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_feedRate), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_oneTurnCut), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_passDepth), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_plungeRate), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_spindleSpeed), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_stepover), sizeof(double));
+    hashData.append(reinterpret_cast<const char*>(&m_autoName), sizeof(bool));
+    hashData.append(reinterpret_cast<const char*>(&m_id), sizeof(int));
+    m_hash = qHash(hashData);
+
+    //    QCryptographicHash calcHash(QCryptographicHash::Sha1);
+    //    calcHash.addData(m_name.toLocal8Bit());
+    //    calcHash.addData(m_note.toLocal8Bit());
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_type), sizeof(Type));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_angle), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_diameter), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_feedRate), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_oneTurnCut), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_passDepth), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_plungeRate), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_spindleSpeed), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_stepover), sizeof(double));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_autoName), sizeof(bool));
+    //    calcHash.addData(reinterpret_cast<const char*>(&m_id), sizeof(int));
+    //    m_hash = *reinterpret_cast<int*>(calcHash.result().data());
+    //    qDebug() << calcHash.result() << m_hash << qHash(calcHash.result());
+
+    //        if (m_hash)
+    //            return m_hash;
+    //        for (const QChar& h : m_name) {
+    //            m_hash ^= h.digitValue();
+    //        }
+    //        for (const QChar& h : m_note) {
+    //            m_hash ^= h.digitValue();
+    //        }
+    //        m_hash ^= m_type;
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_angle);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_diameter);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_feedRate);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_oneTurnCut);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_passDepth);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_plungeRate);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_spindleSpeed);
+    //        m_hash ^= *reinterpret_cast<const uint64_t*>(&m_stepover);
+    //        m_hash ^= m_id;
+    return m_hash;
 }
 
 ///////////////////////////////////////////////////////

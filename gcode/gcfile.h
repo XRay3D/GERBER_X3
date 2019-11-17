@@ -13,6 +13,7 @@
 namespace GCode {
 class File : public AbstractFile {
     friend class ::PathItem;
+    friend class ::Project;
 
 public:
     explicit File(QDataStream& stream) { read(stream); } // for project load
@@ -67,7 +68,9 @@ private:
             return QString::number(val, 'f', 3);
         return str;
     }
-
+    void initSave();
+    void genGcode();
+    void addInfo(bool fl = false);
     void startPath(const QPointF& point);
     void endPath();
     void statFile();
@@ -112,6 +115,8 @@ public:
 
     static QString getLastDir();
     static void setLastDir(QString value);
+    QList<QString> getSl() const;
+    Tool getTool() const;
 };
 }
 #endif // GCODE_H

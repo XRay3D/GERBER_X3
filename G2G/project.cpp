@@ -256,23 +256,85 @@ bool Project::contains(AbstractFile* file) { return m_files.values().contains(QS
 
 int Project::ver() { return m_ver; }
 
+bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
+{
+    return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
+}
+
 void Project::saveSelectedToolpaths()
 {
-    bool isEmpty = true;
-    for (GCode::File* file : files<GCode::File>()) {
-        if (!file->itemGroup()->isVisible())
-            continue;
-        isEmpty = false;
-        QString name(GCode::File::getLastDir().append(file->shortName()));
-        if (!name.endsWith("tap"))
-            name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-        name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
-        if (name.isEmpty())
-            return;
-        file->save(name);
-        file->itemGroup()->setVisible(false);
+    QVector<GCode::File*> files(files<GCode::File>());
+    for (int i = 0; i < files.size(); ++i) {
+        if (!files[i]->itemGroup()->isVisible())
+            files.remove(i--);
     }
-    if (isEmpty)
+
+    QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
+    for (GCode::File* file : files)
+        mm[QPair { file->getTool(), file->side() }].append(file);
+
+    for (const QPair<Tool, Side>& key : mm.keys()) {
+        QList<GCode::File*> files(mm.value(key));
+        if (files.size() < 2 /*|| key.first == -1*/) {
+            for (GCode::File* file : files) {
+                QString name(GCode::File::getLastDir().append(file->shortName()));
+                if (!name.endsWith("tap"))
+                    name += QStringList({ "(Top)", "(Bot)" })[file->side()];
+                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+                if (name.isEmpty())
+                    return;
+                file->save(name);
+                file->itemGroup()->setVisible(false);
+            }
+        } else {
+            QString name(GCode::File::getLastDir().append(files.first()->getTool().name()));
+            if (!name.endsWith("tap"))
+                name += QStringList({ "(Top)", "(Bot)" })[files.first()->side()];
+            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+            if (name.isEmpty())
+                return;
+            QList<QString> sl;
+            for (int i = 0; i < files.size(); ++i) {
+                GCode::File* file = files[i];
+                file->itemGroup()->setVisible(false);
+                file->initSave();
+                if (i == 0)
+                    file->statFile();
+                file->addInfo(true);
+                file->genGcode();
+                if (i == files.size() - 1)
+                    file->endFile();
+                sl.append(file->getSl());
+            }
+            QFile file(name);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                QString str;
+                for (QString& s : sl) {
+                    if (!s.isEmpty())
+                        str.append(s);
+                    if (!str.endsWith('\n'))
+                        str.append("\n");
+                }
+                out << str;
+            }
+            file.close();
+        }
+    }
+    //    for (GCode::File* file : files) {
+    //        if (!file->itemGroup()->isVisible())
+    //            continue;
+    //        isEmpty = false;
+    //        QString name(GCode::File::getLastDir().append(file->shortName()));
+    //        if (!name.endsWith("tap"))
+    //            name += QStringList({ "(Top)", "(Bot)" })[file->side()];
+    //        name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+    //        if (name.isEmpty())
+    //            return;
+    //        file->save(name);
+    //        file->itemGroup()->setVisible(false);
+    //    }
+    if (mm.isEmpty())
         QMessageBox::information(nullptr, "", tr("No selected toolpath files."));
 }
 

@@ -42,7 +42,17 @@ public:
 
     static FileModel* self();
 
+    // Drag and Drop
+    //    QStringList mimeTypes() const override;
+    //    QMimeData* mimeData(const QModelIndexList& indexes) const override;
+    //    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+    //    Qt::DropActions supportedDragActions() const override;
+    //    Qt::DropActions supportedDropActions() const override;
+    //    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
+
 private:
+    const QString mimeType;
+
     static void addFile(AbstractFile* file);
     static FileModel* m_self;
     AbstractNode* getItem(const QModelIndex& index) const;

@@ -5,12 +5,14 @@
 #include "gerbernode.h"
 #include <QDebug>
 #include <QFile>
+#include <QMimeData>
 
 FileModel* FileModel::m_self = nullptr;
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem"))
+    , mimeType(QStringLiteral("application/GCodeItem"))
 {
     m_self = this;
     rootItem->append(new FolderNode(tr("Gerber Files")));
@@ -18,40 +20,6 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode(tr("Tool Paths")));
     rootItem->append(new FolderNode(tr("Special")));
 }
-
-//FileModel::FileModel(Gerber::File* file)
-//{
-//    if (self && file) {
-//        AbstractNode* item = rootItem->child(NodeGerberFiles);
-//        QModelIndex index = createIndex(0, 0, rootItem);
-//        int rowCount = item->childCount();
-//        beginInsertRows(index, rowCount, rowCount);
-//        item->append(new GerberNode(file));
-//        endInsertRows();
-//    }
-//}
-//FileModel::FileModel(Excellon::File* file)
-//{
-//    if (self && file) {
-//        AbstractNode* item{ rootItem->child(NodeDrillFiles) };
-//        QModelIndex index = createIndex(0, 0, item);
-//        int rowCount = item->childCount();
-//        beginInsertRows(index, rowCount, rowCount);
-//        item->append(new DrillNode(file));
-//        endInsertRows();
-//    }
-//}
-//FileModel::FileModel(GCodeFile* file)
-//{
-//    if (self && file) {
-//        AbstractNode* item{ rootItem->child(NodeToolPath) };
-//        QModelIndex index = createIndex(0, 0, item);
-//        int rowCount = item->childCount();
-//        beginInsertRows(index, rowCount, rowCount);
-//        item->append(new GcodeNode(file));
-//        endInsertRows();
-//    }
-//}
 
 FileModel::~FileModel()
 {
@@ -132,26 +100,11 @@ QVariant FileModel::data(const QModelIndex& index, int role) const
     AbstractNode* item = getItem(index);
 
     return item->data(index, role);
-    //    if (!index.isValid())
-    //        return QVariant();
-
-    //    AbstractNode* item = getItem(index);
-
-    //    return item->data(index, role);
 }
 
 bool FileModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    bool result = getItem(index)->setData(index, value, role);
-
-    //    if (result)
-    //        emit dataChanged(index, index);
-
-    return result;
-    //    if (!index.isValid())
-    //        return false;
-    //    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
-    //    return item->setData(index, value, role);
+    return getItem(index)->setData(index, value, role);
 }
 
 QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -203,18 +156,129 @@ int FileModel::rowCount(const QModelIndex& parent) const
     if (parent.column() > 0)
         return 0;
     return getItem(parent)->childCount();
-
-    //    AbstractNode* parentItem;
-
-    //    if (!parent.isValid())
-    //        parentItem = rootItem;
-    //    else
-    //        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
-
-    //    return parentItem->childCount();
 }
 
 FileModel* FileModel::self() { return m_self; }
+
+//QStringList FileModel::mimeTypes() const
+//{
+//    QStringList types;
+//    types << mimeType;
+//    return types;
+//}
+
+//QMimeData* FileModel::mimeData(const QModelIndexList& indexes) const
+//{
+//    //    QMimeData* mimeData = new QMimeData();
+//    //    QByteArray encodedData;
+//    //    int noCopy = -1;
+//    //    for (const QModelIndex& index : indexes) {
+//    //        if (noCopy != index.row()) {
+//    //            noCopy = index.row();
+//    //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
+//    //            if (!item)
+//    //                item = rootItem;
+//    //            if (index.isValid()) {
+//    //                encodedData.append(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+//    //                encodedData.append("|");
+//    //            }
+//    //        }
+//    //    }
+//    //    mimeData->setData(myModelMimeType(), encodedData);
+//    //    return mimeData;
+//    QMimeData* mimeData = new QMimeData();
+//    QByteArray encodedData;
+//    int noCopy = -1;
+//    for (const QModelIndex& index : indexes) {
+//        if (noCopy != index.row()) {
+//            noCopy = index.row();
+//            if (index.isValid()) {
+//                encodedData.append(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
+//                encodedData.append("|");
+//            }
+//        }
+//    }
+//    mimeData->setData(mimeType, encodedData);
+//    return mimeData;
+//}
+
+//bool FileModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+//{
+//    return false;
+//    //    if (action == Qt::IgnoreAction)
+//    //        return true;
+
+//    //    if (!data->hasFormat(mimeType))
+//    //        return false;
+
+//    //    if (column > 0)
+//    //        return false;
+
+//    //    int beginRow;
+
+//    //    if (row != -1)
+//    //        beginRow = row;
+//    //    else if (parent.isValid())
+//    //        beginRow = parent.row();
+//    //    else
+//    //        beginRow = rowCount(QModelIndex());
+
+//    //    QString encodedData = data->data(mimeType);
+//    //    QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
+
+//    //    //    for (QString& item : list) {
+//    //    //        QList<QString> d = item.split(',', QString::SkipEmptyParts);
+//    //    //        if (d.size() < 2)
+//    //    //            return false;
+//    //    //        int srcRow = d.at(0).toInt();
+//    //    //        ToolItem* ti = reinterpret_cast<ToolItem*>(d.at(1).toLongLong());
+//    //    //        QModelIndex index = createIndex(srcRow, 0, ti);
+//    //    //        moveRows(index, srcRow, 1, parent, parent.row() > -1 ? parent.row() : 0);
+//    //    //    }
+
+//    //    for (QString& item : list) {
+//    //        AbstractNode* copyItem = reinterpret_cast<AbstractNode*>(item.toLongLong());
+//    //        AbstractNode* parentItem = static_cast<AbstractNode*>(parent.internalPointer());
+//    //        if (copyItem) {
+//    //            if (!parentItem)
+//    //                parentItem = rootItem;
+//    //            insertRows(beginRow, list.size(), parent);
+//    //            if (parentItem->childCount() > beginRow)
+//    //                parentItem->setChild(beginRow, new AbstractNode(*copyItem));
+//    //            else
+//    //                parentItem->setChild(parentItem->childCount() - 1, new AbstractNode(*copyItem));
+//    //        }
+//    //        ++beginRow;
+//    //    }
+//    //    return true;
+//}
+
+//Qt::DropActions FileModel::supportedDragActions() const
+//{
+//    return Qt::MoveAction | Qt::TargetMoveAction;
+//}
+
+//Qt::DropActions FileModel::supportedDropActions() const
+//{
+//    return Qt::MoveAction | Qt::TargetMoveAction;
+//}
+
+//bool FileModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+//{
+//    return false;
+//    //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+//    //    AbstractNode* srcItem = static_cast<AbstractNode*>(sourceParent.internalPointer());
+//    //    AbstractNode* dstItem = static_cast<AbstractNode*>(destinationParent.internalPointer());
+//    //    if (!srcItem)
+//    //        srcItem = rootItem;
+//    //    if (!dstItem)
+//    //        dstItem = rootItem;
+//    //    for (int r = 0; r < count; ++r) {
+//    //        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+//    //    }
+//    //    endMoveRows();
+//    //    return true;
+//}
 
 AbstractNode* FileModel::getItem(const QModelIndex& index) const
 {

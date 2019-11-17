@@ -39,40 +39,28 @@ void File::save(const QString& name)
     setLastDir(name);
     m_name = name;
 
-    sl.clear();
-    if (Settings::gcinfo()) {
-        sl.append(QString(";\tName: %1").arg(shortName()));
-        sl.append(QString(";\tTool: %1").arg(m_tool.name()));
-        sl.append(QString(";\tDepth: %1").arg(m_depth));
-        sl.append(QString(";\tSide: %1").arg(QStringList{ "Top", "Bottom" }[side()]));
+    initSave();
+    addInfo();
+    statFile();
+    genGcode();
+    endFile();
+    QFile file(m_name);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        QString str;
+        for (QString& s : sl) {
+            if (!s.isEmpty())
+                str.append(s);
+            if (!str.endsWith('\n'))
+                str.append("\n");
+        }
+        out << str;
     }
-
-    switch (m_type) {
-    case Pocket:
-        savePocket();
-        break;
-    case Voronoi:
-        if (m_toolPathss.size() > 1)
-            savePocket();
-        else
-            saveProfile();
-        break;
-    case Profile:
-    case Thermal:
-    case Raster:
-        saveProfile();
-        break;
-    case Drill:
-        saveDrill();
-        break;
-    default:
-        break;
-    }
+    file.close();
 }
 
 void File::saveDrill()
 {
-    statFile();
     QPolygonF path(toQPolygon(m_toolPathss.first().first()));
     if (m_side) {
         const double k = Pin::min() + Pin::max();
@@ -96,15 +84,11 @@ void File::saveDrill()
         }
         endPath();
     }
-    endFile();
 }
 
 void File::savePocket()
 {
-    statFile();
-
     QVector<QVector<QPolygonF>> pathss(pss());
-
     const QVector<double> depths(getDepths());
 
     for (QVector<QPolygonF>& paths : pathss) {
@@ -129,12 +113,10 @@ void File::savePocket()
         }
         endPath();
     }
-    endFile();
 }
 
 void File::saveProfile()
 {
-    statFile();
     QVector<QVector<QPolygonF>> pathss(pss());
     const QVector<double> depths(getDepths());
     if (m_type != Raster) {
@@ -172,7 +154,7 @@ void File::saveProfile()
                 }
             }
         }
-    } else
+    } else {
         for (QVector<QPolygonF>& paths : pathss) {
             for (int i = 0; i < depths.count(); ++i) {
                 for (QPolygonF& path : paths) {
@@ -189,7 +171,7 @@ void File::saveProfile()
                 }
             }
         }
-    endFile();
+    }
 }
 
 QVector<QVector<QPolygonF>> File::pss()
@@ -254,6 +236,68 @@ QVector<double> File::getDepths()
     return depths;
 }
 
+void File::initSave()
+{
+    sl.clear();
+    static const QList<QChar> cl { 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    memset(FormatFlags, 0, sizeof(bool) * Size);
+    //    for (bool& fl : FormatFlags) {
+    //        fl = false;
+    //    }
+    const QString format(Settings::gCodeFormat());
+    for (int i = 0; i < cl.size(); ++i) {
+        const int index = format.indexOf(cl[i], 0, Qt::CaseInsensitive);
+        if (index != -1) {
+            FormatFlags[i + AlwaysG] = format[index + 1] == '+';
+            if ((index + 2) < format.size())
+                FormatFlags[i + SpaceG] = format[index + 2] == ' ';
+        }
+    }
+
+    for (QString& str : lastValues)
+        str.clear();
+}
+
+void File::genGcode()
+{
+    switch (m_type) {
+    case Pocket:
+        savePocket();
+        break;
+    case Voronoi:
+        if (m_toolPathss.size() > 1)
+            savePocket();
+        else
+            saveProfile();
+        break;
+    case Profile:
+    case Thermal:
+    case Raster:
+        saveProfile();
+        break;
+    case Drill:
+        saveDrill();
+        break;
+    default:
+        break;
+    }
+}
+
+Tool File::getTool() const
+{
+    return m_tool;
+}
+
+void File::addInfo(bool fl)
+{
+    if (Settings::gcinfo() || fl) {
+        sl.append(QString(";\tName: %1").arg(shortName()));
+        sl.append(QString(";\tTool: %1").arg(m_tool.name()));
+        sl.append(QString(";\tDepth: %1").arg(m_depth));
+        sl.append(QString(";\tSide: %1").arg(QStringList { "Top", "Bottom" }[side()]));
+    }
+}
+
 GCodeType File::gtype() const
 {
     return m_type;
@@ -297,32 +341,11 @@ void File::endPath()
 
 void File::statFile()
 {
-    static const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
-    for (bool& fl : FormatFlags) {
-        fl = false;
-    }
-    const QString format(Settings::gCodeFormat());
-    for (int i = 0; i < cl.size(); ++i) {
-        const int index = format.indexOf(cl[i], 0, Qt::CaseInsensitive);
-        if (index != -1) {
-            FormatFlags[i + AlwaysG] = format[index + 1] == '+';
-            if ((index + 2) < format.size())
-                FormatFlags[i + SpaceG] = format[index + 2] == ' ';
-        }
-    }
 
-    for (QString& str : lastValues)
-        str.clear();
-
-    QString str(Settings::startGCode());
+    QString str(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
     str.replace(QRegExp("S\\?"), formated({ s(static_cast<int>(m_tool.spindleSpeed())) }));
-
-    sl.append(str /*Settings::startGCode()*/); //"G21 G17 G90"); //G17 XY plane
-
-    //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
-    //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
+    sl.append(str);
     sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
-    //    sl.append(s(m_tool.spindleSpeed) + " M3"); //HomeXY
 }
 
 void File::endFile()
@@ -330,29 +353,12 @@ void File::endFile()
     sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
     QPointF home(GCodePropertiesForm::homePoint->pos() - GCodePropertiesForm::zeroPoint->pos());
     sl.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
-    //    sl.append("M5"); //HomeXY
     sl.append(Settings::endGCode());
-
-    QFile file(m_name);
-    //    QString str(m_fileName);
-    //    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
-        QString str;
-        for (QString& s : sl) {
-            if (!s.isEmpty())
-                str.append(s);
-            if (!str.endsWith('\n'))
-                str.append("\n");
-        }
-        out << str;
-    }
-    file.close();
 }
 
 QString File::formated(const QList<QString> data)
 {
-    static const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    static const QList<QChar> cl { 'G', 'X', 'Y', 'Z', 'F', 'S' };
     QString ret;
     for (const QString& str : data) {
         const int index = cl.indexOf(str.front().toUpper());
@@ -364,6 +370,11 @@ QString File::formated(const QList<QString> data)
         }
     }
     return ret.trimmed();
+}
+
+QList<QString> File::getSl() const
+{
+    return sl;
 }
 
 void File::createGiDrill()

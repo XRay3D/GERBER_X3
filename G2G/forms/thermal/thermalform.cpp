@@ -255,6 +255,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
             map.append({ &go, thermalNode, "Region" });
         }
     }
+
     thermalNode = nullptr;
     for (const Gerber::GraphicObject& go : *file) {
         if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive && go.path().size() == 2 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
@@ -263,6 +264,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
             map.append({ &go, thermalNode, "Line" });
         }
     }
+
     QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apIt;
     for (apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
         if (apIt.value()->isFlashed()) {
@@ -274,14 +276,15 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
             }
         }
     }
+
     for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
         auto m(map.mid(i, c));
         qDebug() << m.size();
         QFuture<void> future = QtConcurrent::map(m, creator);
         future.waitForFinished();
     }
-    qDebug("QFuture");
 
+    qDebug("QFuture");
     for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview)
         Scene::addItem(item.data());
     qDebug("Scene");

@@ -19,7 +19,6 @@ AboutForm::AboutForm(QWidget* parent)
     connect(ui->cmdOk_2, &QPushButton::clicked, this, &AboutForm::accept);
     connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) { QDesktopServices::openUrl(link); });
 }
-
 AboutForm::~AboutForm()
 {
     delete ui;

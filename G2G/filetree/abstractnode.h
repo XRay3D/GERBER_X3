@@ -13,6 +13,8 @@ public:
     AbstractNode* child(int row);
     AbstractNode* parentItem();
 
+    void setChild(int row, AbstractNode* item);
+
     int childCount() const;
     int row() const;
 

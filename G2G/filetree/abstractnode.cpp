@@ -41,6 +41,15 @@ AbstractNode* AbstractNode::child(int row) { return childItems.value(row).data()
 
 AbstractNode* AbstractNode::parentItem() { return m_parentItem; }
 
+void AbstractNode::setChild(int row, AbstractNode* item)
+{
+    if (item)
+        item->m_parentItem = this;
+    if (row < childItems.size()) {
+        childItems[row].reset(item);
+    }
+}
+
 void AbstractNode::append(AbstractNode* item)
 {
     item->m_parentItem = this;

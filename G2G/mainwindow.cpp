@@ -45,20 +45,15 @@ MainWindow::MainWindow(QWidget* parent)
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    //connect(gerberParser, &FileParser::fileReady, pro, &Project::addFile);
-    //connect(gerberParser, &FileParser::fileReady, [this](AbstractFile* file) { prependToRecentFiles(file->name()); });
-    //connect(gerberParser, &FileParser::fileReady, GerberNode::repaintTimer(), QOverload<>::of(&QTimer::start));
     connect(gerberParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &FileParser::fileError, this, &MainWindow::fileError);
-    connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
 
     excellonParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseExcellonFile, excellonParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(excellonParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    //connect(excellonParser, &FileParser::fileReady, pro, &Project::addFile);
-    //connect(excellonParser, &FileParser::fileReady, [this](AbstractFile* file) { prependToRecentFiles(file->name()); });
-    // connect(excellonParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
+
+    connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
 
     parserThread.start(QThread::HighestPriority);
@@ -82,23 +77,20 @@ MainWindow::MainWindow(QWidget* parent)
         Scene::addItem(pathItem);
     }
 
-    QLatin1String styleSheet("QGroupBox, .QFrame {"
-                             "background-color: rgb(255,255,255);"
-                             "border: 1px solid gray;"
-                             "border-radius: 1ex;"
-                             //"padding: 0ex;"
-                             "}"
-                             "QGroupBox {"
-                             "margin-top: 3ex; /* leave space at the top for the title */"
-                             "}"
-                             "QGroupBox::title {"
-                             "subcontrol-origin: margin;"
-                             //"margin-top: -1ex;"
-                             "subcontrol-position: top center; /* position at the top center */"
-                             //"padding: 0 1ex;"
-                             "}");
-
-    setStyleSheet(styleSheet);
+    //    QLatin1String styleSheet("QGroupBox, .QFrame {"
+    //                             "background-color: rgb(255,255,255);"
+    //                             "border: 1px solid gray;"
+    //                             "}"
+    //                             "QGroupBox {"
+    //                             "margin-top: 3ex; /* leave space at the top for the title */"
+    //                             "}"
+    //                             "QGroupBox::title {"
+    //                             "subcontrol-origin: margin;"
+    //                             //"margin-top: -1ex;"
+    //                             "subcontrol-position: top center; /* position at the top center */"
+    //                             //"padding: 0 1ex;"
+    //                             "}");
+    //    setStyleSheet(styleSheet);
 
     ToolHolder::readTools();
     setCurrentFile(QString());
@@ -115,7 +107,7 @@ MainWindow::MainWindow(QWidget* parent)
             // QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
         });
     else {
-        //   QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
+        QTimer::singleShot(100, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
     }
 
     self = this;

@@ -30,15 +30,17 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+    // Drag and Drop
     QStringList mimeTypes() const override;
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
     Qt::DropActions supportedDragActions() const override;
     Qt::DropActions supportedDropActions() const override;
-    static inline QString myModelMimeType();
     bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 
 private:
+    const QString mimeType;
     void exportTools();
     void importTools();
     ToolItem* getItem(const QModelIndex& index) const

@@ -158,12 +158,12 @@ void ToolEditForm::setupToolWidgets(int type)
     ui->dsbxFeedRate->setEnabled(true);
     ui->dsbxStepover->setEnabled(true);
     ui->dsbxStepoverPercent->setEnabled(true);
+    static double angle = 0.0;
     switch (type) {
     case Tool::Drill:
         ui->label_3->setText(tr("Pass"));
-        ui->dsbxAngle->setMaximum(180.0);
-        if (qFuzzyIsNull(ui->dsbxAngle->value()))
-            ui->dsbxAngle->setValue(120.0);
+        ui->dsbxAngle->setRange(90.0, 180.0);
+        ui->dsbxAngle->setValue(qFuzzyIsNull(angle) ? 120.0 : angle);
         ui->dsbxFeedRate->setEnabled(false);
         ui->dsbxFeedRate->setMaximum(0.0);
         ui->dsbxStepover->setEnabled(false);
@@ -173,8 +173,9 @@ void ToolEditForm::setupToolWidgets(int type)
         break;
     case Tool::EndMill:
         ui->label_3->setText(tr("Depth"));
+        angle = ui->dsbxAngle->value();
         ui->dsbxAngle->setEnabled(false);
-        ui->dsbxAngle->setMaximum(0.0);
+        ui->dsbxAngle->setRange(0.0, 0.0);
         ui->dsbxFeedRate->setMaximum(100000.0);
         ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
         ui->dsbxStepoverPercent->setMaximum(100.0);
@@ -185,8 +186,8 @@ void ToolEditForm::setupToolWidgets(int type)
         break;
     case Tool::Engraving:
         ui->label_3->setText(tr("Depth"));
-        //        ui->dsbxAngle->setValue(0.0);
-        ui->dsbxAngle->setMaximum(180.0);
+        ui->dsbxAngle->setRange(0.0, 180.0);
+        ui->dsbxAngle->setValue(angle);
         ui->dsbxFeedRate->setMaximum(100000.0);
         ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
         ui->dsbxStepoverPercent->setMaximum(100.0);

@@ -14,6 +14,7 @@
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ToolItem())
+    , mimeType(QStringLiteral("application/ToolItem"))
 {
     importTools();
 }
@@ -124,19 +125,10 @@ Qt::ItemFlags ToolModel::flags(const QModelIndex& index) const
     if (!index.isValid())
         return rootItem->flags(index);
     return getItem(index)->flags(index);
-
-    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    //    if (!item)
-    //        item = rootItem;
-    //    return item->flags(index);
 }
 
 bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    //    if (!item)
-    //        item = rootItem;
-    //    return item->setData(index, value, role);
     return getItem(index)->setData(index, value, role);
 }
 
@@ -144,10 +136,6 @@ QVariant ToolModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    //    if (!item)
-    //        item = rootItem;
-    //    return item->data(index, role);
     return getItem(index)->data(index, role);
 }
 
@@ -163,29 +151,12 @@ QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int rol
 QStringList ToolModel::mimeTypes() const
 {
     QStringList types;
-    types << myModelMimeType();
+    types << mimeType;
     return types;
 }
 
 QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
 {
-    //    QMimeData* mimeData = new QMimeData();
-    //    QByteArray encodedData;
-    //    int noCopy = -1;
-    //    for (const QModelIndex& index : indexes) {
-    //        if (noCopy != index.row()) {
-    //            noCopy = index.row();
-    //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
-    //            if (!item)
-    //                item = rootItem;
-    //            if (index.isValid()) {
-    //                encodedData.append(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
-    //                encodedData.append("|");
-    //            }
-    //        }
-    //    }
-    //    mimeData->setData(myModelMimeType(), encodedData);
-    //    return mimeData;
     QMimeData* mimeData = new QMimeData();
     QByteArray encodedData;
     int noCopy = -1;
@@ -198,7 +169,7 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
             }
         }
     }
-    mimeData->setData(myModelMimeType(), encodedData);
+    mimeData->setData(mimeType, encodedData);
     return mimeData;
 }
 
@@ -207,7 +178,7 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     if (action == Qt::IgnoreAction)
         return true;
 
-    if (!data->hasFormat(myModelMimeType()))
+    if (!data->hasFormat(mimeType))
         return false;
 
     if (column > 0)
@@ -222,18 +193,8 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     else
         beginRow = rowCount(QModelIndex());
 
-    QString encodedData = data->data(myModelMimeType());
+    QString encodedData = data->data(mimeType);
     QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
-
-    //    for (QString& item : list) {
-    //        QList<QString> d = item.split(',', QString::SkipEmptyParts);
-    //        if (d.size() < 2)
-    //            return false;
-    //        int srcRow = d.at(0).toInt();
-    //        ToolItem* ti = reinterpret_cast<ToolItem*>(d.at(1).toLongLong());
-    //        QModelIndex index = createIndex(srcRow, 0, ti);
-    //        moveRows(index, srcRow, 1, parent, parent.row() > -1 ? parent.row() : 0);
-    //    }
 
     for (QString& item : list) {
         ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
@@ -255,8 +216,6 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
 Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
-
-QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolItem"); }
 
 void ToolModel::exportTools()
 {
