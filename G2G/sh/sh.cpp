@@ -5,6 +5,7 @@
 #include <graphicsview.h>
 #include <scene.h>
 #include <settings.h>
+#include <math.h>
 
 using namespace ShapePr;
 

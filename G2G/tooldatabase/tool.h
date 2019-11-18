@@ -7,40 +7,8 @@
 #include <QObject>
 
 class Tool {
-    friend QDataStream& operator<<(QDataStream& stream, const Tool& tool)
-    {
-        stream << tool.m_name;
-        stream << tool.m_note;
-        stream << tool.m_type;
-        stream << tool.m_angle;
-        stream << tool.m_diameter;
-        stream << tool.m_feedRate;
-        stream << tool.m_oneTurnCut;
-        stream << tool.m_passDepth;
-        stream << tool.m_plungeRate;
-        stream << tool.m_spindleSpeed;
-        stream << tool.m_stepover;
-        stream << tool.m_autoName;
-        stream << tool.m_id;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Tool& tool)
-    {
-        stream >> tool.m_name;
-        stream >> tool.m_note;
-        stream >> tool.m_type;
-        stream >> tool.m_angle;
-        stream >> tool.m_diameter;
-        stream >> tool.m_feedRate;
-        stream >> tool.m_oneTurnCut;
-        stream >> tool.m_passDepth;
-        stream >> tool.m_plungeRate;
-        stream >> tool.m_spindleSpeed;
-        stream >> tool.m_stepover;
-        stream >> tool.m_autoName;
-        stream >> tool.m_id;
-        return stream;
-    }
+    friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
+    friend QDataStream& operator>>(QDataStream& stream, Tool& tool);
 
 public:
     Tool();
@@ -51,14 +19,6 @@ public:
         Engraving,
         Group
     };
-
-    friend QDataStream& operator>>(QDataStream& stream, Type& type)
-    {
-        int tmp;
-        stream >> tmp;
-        type = static_cast<Type>(tmp);
-        return stream;
-    }
 
     enum {
         Angle,
@@ -74,96 +34,44 @@ public:
     };
 
     // name
-    inline QString name() const { return m_name; }
-    inline void setName(const QString& name)
-    {
-        m_hash = 0;
-        m_name = name;
-    }
+    QString name() const;
+    void setName(const QString& name);
     // note
-    inline QString note() const { return m_note; }
-    inline void setNote(const QString& note)
-    {
-        m_hash = 0;
-        m_note = note;
-    }
+    QString note() const;
+    void setNote(const QString& note);
     // type
-    inline Type type() const { return m_type; }
-    inline void setType(int type)
-    {
-        m_hash = 0;
-        m_type = static_cast<Type>(type);
-    }
+    Type type() const;
+    void setType(int type);
     // angle
-    inline double angle() const { return m_angle; }
-    inline void setAngle(double angle)
-    {
-        m_hash = 0;
-        m_angle = angle;
-    }
+    double angle() const;
+    void setAngle(double angle);
     // diameter
-    inline double diameter() const { return m_diameter; }
-    inline void setDiameter(double diameter)
-    {
-        m_hash = 0;
-        m_diameter = diameter;
-    }
+    double diameter() const;
+    void setDiameter(double diameter);
     // feedRate
-    inline double feedRate() const { return m_feedRate; }
-    inline void setFeedRate(double feedRate)
-    {
-        m_hash = 0;
-        m_feedRate = feedRate;
-    }
+    double feedRate() const;
+    void setFeedRate(double feedRate);
     // oneTurnCut
-    inline double oneTurnCut() const { return m_oneTurnCut; }
-    inline void setOneTurnCut(double oneTurnCut)
-    {
-        m_hash = 0;
-        m_oneTurnCut = oneTurnCut;
-    }
+    double oneTurnCut() const;
+    void setOneTurnCut(double oneTurnCut);
     // passDepth
-    inline double passDepth() const { return m_passDepth; }
-    inline void setPassDepth(double passDepth)
-    {
-        m_hash = 0;
-        m_passDepth = passDepth;
-    }
+    double passDepth() const;
+    void setPassDepth(double passDepth);
     // plungeRate
-    inline double plungeRate() const { return m_plungeRate; }
-    inline void setPlungeRate(double plungeRate)
-    {
-        m_hash = 0;
-        m_plungeRate = plungeRate;
-    }
+    double plungeRate() const;
+    void setPlungeRate(double plungeRate);
     // spindleSpeed
-    inline double spindleSpeed() const { return m_spindleSpeed; }
-    inline void setSpindleSpeed(double spindleSpeed)
-    {
-        m_hash = 0;
-        m_spindleSpeed = spindleSpeed;
-    }
+    double spindleSpeed() const;
+    void setSpindleSpeed(double spindleSpeed);
     // stepover
-    inline double stepover() const { return m_stepover; }
-    inline void setStepover(double stepover)
-    {
-        m_hash = 0;
-        m_stepover = stepover;
-    }
+    double stepover() const;
+    void setStepover(double stepover);
     // autoName
-    inline bool autoName() const { return m_autoName; }
-    inline void setAutoName(bool autoName)
-    {
-        m_hash = 0;
-        m_autoName = autoName;
-    }
+    bool autoName() const;
+    void setAutoName(bool autoName);
     // id
-    inline int id() const { return m_id; }
-    inline void setId(int id)
-    {
-        m_hash = 0;
-        m_id = id;
-    }
+    int id() const;
+    void setId(int id);
 
     double getDiameter(double depth) const;
     double getDepth() const;
@@ -172,7 +80,7 @@ public:
     bool isValid();
     QIcon icon() const;
     QString errorStr();
-    void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
+    void errorMessageBox(QWidget* parent = nullptr);
     uint hash() const;
 
 private:
@@ -190,6 +98,20 @@ private:
     double m_stepover;
     bool m_autoName;
     uint m_id;
+
+    friend QDataStream& operator>>(QDataStream& stream, Type& type)
+    {
+        int tmp;
+        stream >> tmp;
+        type = static_cast<Type>(tmp);
+        return stream;
+    }
+
+    friend QDataStream& operator<<(QDataStream& stream, Type& type)
+    {
+        stream << static_cast<int>(type);
+        return stream;
+    }
 };
 
 class ToolHolder {

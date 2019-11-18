@@ -90,13 +90,18 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
             std::function<void(Worck)> scan = [this, &angle, &center, &src, &acc](Worck w) {
                 static QMutex m;
                 auto [_1, _2, _3, flag] = w.first();
+                Q_UNUSED(_1)
+                Q_UNUSED(_2)
+                Q_UNUSED(_3)
                 Paths scanLine;
                 {
                     Clipper clipper;
                     clipper.AddPaths(src, ptClip, true);
                     for (std::tuple<cInt, cInt, cInt, cInt> t : w) {
                         auto [left, right, var, flag] = t;
-                        Path frame{ { left, var }, { right, var } };
+                        Q_UNUSED(var)
+                        Q_UNUSED(flag)
+                        Path frame { { left, var }, { right, var } };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptSubject, false);
                     }
@@ -130,7 +135,8 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
                     clipper.AddPaths(src, ptSubject, false);
                     for (std::tuple<cInt, cInt, cInt, cInt> t : w) {
                         auto [left, right, var, flag] = t;
-                        Path frame{
+                        Q_UNUSED(flag)
+                        Path frame {
                             { left, var },
                             { right, var },
                             { right, var += m_stepOver },

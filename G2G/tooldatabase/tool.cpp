@@ -10,6 +10,41 @@
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
+QDataStream& operator<<(QDataStream& stream, const Tool& tool)
+{
+    stream << tool.m_name;
+    stream << tool.m_note;
+    stream << tool.m_type;
+    stream << tool.m_angle;
+    stream << tool.m_diameter;
+    stream << tool.m_feedRate;
+    stream << tool.m_oneTurnCut;
+    stream << tool.m_passDepth;
+    stream << tool.m_plungeRate;
+    stream << tool.m_spindleSpeed;
+    stream << tool.m_stepover;
+    stream << tool.m_autoName;
+    stream << tool.m_id;
+    return stream;
+}
+QDataStream& operator>>(QDataStream& stream, Tool& tool)
+{
+    stream >> tool.m_name;
+    stream >> tool.m_note;
+    stream >> tool.m_type;
+    stream >> tool.m_angle;
+    stream >> tool.m_diameter;
+    stream >> tool.m_feedRate;
+    stream >> tool.m_oneTurnCut;
+    stream >> tool.m_passDepth;
+    stream >> tool.m_plungeRate;
+    stream >> tool.m_spindleSpeed;
+    stream >> tool.m_stepover;
+    stream >> tool.m_autoName;
+    stream >> tool.m_id;
+    return stream;
+}
+
 Tool::Tool()
     : m_name("Name")
     , m_type(EndMill)
@@ -24,6 +59,110 @@ Tool::Tool()
     , m_autoName(true)
     , m_id(0)
 {
+}
+
+QString Tool::name() const { return m_name; }
+
+void Tool::setName(const QString& name)
+{
+    m_hash = 0;
+    m_name = name;
+}
+
+QString Tool::note() const { return m_note; }
+
+void Tool::setNote(const QString& note)
+{
+    m_hash = 0;
+    m_note = note;
+}
+
+Tool::Type Tool::type() const { return m_type; }
+
+void Tool::setType(int type)
+{
+    m_hash = 0;
+    m_type = static_cast<Type>(type);
+}
+
+double Tool::angle() const { return m_angle; }
+
+void Tool::setAngle(double angle)
+{
+    m_hash = 0;
+    m_angle = angle;
+}
+
+double Tool::diameter() const { return m_diameter; }
+
+void Tool::setDiameter(double diameter)
+{
+    m_hash = 0;
+    m_diameter = diameter;
+}
+
+double Tool::feedRate() const { return m_feedRate; }
+
+void Tool::setFeedRate(double feedRate)
+{
+    m_hash = 0;
+    m_feedRate = feedRate;
+}
+
+double Tool::oneTurnCut() const { return m_oneTurnCut; }
+
+void Tool::setOneTurnCut(double oneTurnCut)
+{
+    m_hash = 0;
+    m_oneTurnCut = oneTurnCut;
+}
+
+double Tool::passDepth() const { return m_passDepth; }
+
+void Tool::setPassDepth(double passDepth)
+{
+    m_hash = 0;
+    m_passDepth = passDepth;
+}
+
+double Tool::plungeRate() const { return m_plungeRate; }
+
+void Tool::setPlungeRate(double plungeRate)
+{
+    m_hash = 0;
+    m_plungeRate = plungeRate;
+}
+
+double Tool::spindleSpeed() const { return m_spindleSpeed; }
+
+void Tool::setSpindleSpeed(double spindleSpeed)
+{
+    m_hash = 0;
+    m_spindleSpeed = spindleSpeed;
+}
+
+double Tool::stepover() const { return m_stepover; }
+
+void Tool::setStepover(double stepover)
+{
+    m_hash = 0;
+    m_stepover = stepover;
+}
+
+bool Tool::autoName() const { return m_autoName; }
+
+void Tool::setAutoName(bool autoName)
+{
+    m_hash = 0;
+    m_autoName = autoName;
+}
+
+int Tool::id() const { return m_id; }
+
+void Tool::setId(int id)
+{
+    m_hash = 0;
+    m_id = id;
 }
 
 double Tool::getDiameter(double depth) const
@@ -131,6 +270,8 @@ QString Tool::errorStr()
         errorString += "Plunge rate = 0!\n";
     return errorString;
 }
+
+void Tool::errorMessageBox(QWidget* parent) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
 
 uint Tool::hash() const
 {

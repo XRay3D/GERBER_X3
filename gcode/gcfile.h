@@ -2,13 +2,9 @@
 #define GCODE_H
 
 #include "gcvars.h"
-//#include <QGraphicsItemGroup>
-//#include <QObject>
 #include <abstractfile.h>
-//#include <gbrvars.h>
-//#include <gi/itemgroup.h>
-//#include <myclipper.h>
-//#include <tooldatabase/tool.h>
+
+class Project;
 
 namespace GCode {
 class File : public AbstractFile {
