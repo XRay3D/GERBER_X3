@@ -173,7 +173,7 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon( QIcon::fromTheme("document-export"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
@@ -506,6 +506,7 @@ void DrillForm::on_pbCreate_clicked()
                     gcp.dParam[GCode::Steps] = 0;
                     gcp.dParam[GCode::TwoTools] = 0;
                     GCode::PocketCreator tpc;
+                    tpc.setGcp(gcp);
                     tpc.addPaths(pathsMap[toolId].paths);
                     tpc.createGc(gcp);
                     gcode = tpc.file();
