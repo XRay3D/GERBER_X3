@@ -158,12 +158,11 @@ void ToolEditForm::setupToolWidgets(int type)
     ui->dsbxFeedRate->setEnabled(true);
     ui->dsbxStepover->setEnabled(true);
     ui->dsbxStepoverPercent->setEnabled(true);
-    static double angle = 0.0;
     switch (type) {
     case Tool::Drill:
         ui->label_3->setText(tr("Pass"));
         ui->dsbxAngle->setRange(90.0, 180.0);
-        ui->dsbxAngle->setValue(qFuzzyIsNull(angle) ? 120.0 : angle);
+        ui->dsbxAngle->setValue(qFuzzyIsNull(m_angle) ? 120.0 : m_angle);
         ui->dsbxFeedRate->setEnabled(false);
         ui->dsbxFeedRate->setMaximum(0.0);
         ui->dsbxStepover->setEnabled(false);
@@ -173,7 +172,7 @@ void ToolEditForm::setupToolWidgets(int type)
         break;
     case Tool::EndMill:
         ui->label_3->setText(tr("Depth"));
-        angle = ui->dsbxAngle->value();
+        m_angle = ui->dsbxAngle->value();
         ui->dsbxAngle->setEnabled(false);
         ui->dsbxAngle->setRange(0.0, 0.0);
         ui->dsbxFeedRate->setMaximum(100000.0);
@@ -187,7 +186,7 @@ void ToolEditForm::setupToolWidgets(int type)
     case Tool::Engraving:
         ui->label_3->setText(tr("Depth"));
         ui->dsbxAngle->setRange(0.0, 180.0);
-        ui->dsbxAngle->setValue(angle);
+        ui->dsbxAngle->setValue(m_angle);
         ui->dsbxFeedRate->setMaximum(100000.0);
         ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
         ui->dsbxStepoverPercent->setMaximum(100.0);
@@ -206,6 +205,7 @@ void ToolEditForm::valueChangedSlot(double value)
     switch (dsbx.indexOf(dynamic_cast<DoubleSpinBox*>(sender()))) {
     case Tool::Angle:
         m_tool.setAngle(value);
+        m_angle = value;
         break;
     case Tool::Diameter:
         m_tool.setDiameter(value);

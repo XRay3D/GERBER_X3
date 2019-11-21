@@ -40,11 +40,12 @@ private:
     Tool m_tool;
     double m_feed = 1.0;
     bool m_dialog = true;
+    double m_angle = 0.0;
 
     void updateName();
     void setChanged(bool fl = true);
     void setVisibleToolWidgets(bool visible);
-    void setupToolWidgets(int  type);
+    void setupToolWidgets(int type);
     QVector<DoubleSpinBox*> dsbx;
 };
 
