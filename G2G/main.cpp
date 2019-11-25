@@ -1,10 +1,12 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QFile>
 #include <QGLWidget>
 #include <QLocale>
 #include <QSettings>
+#include <QSplashScreen>
 #include <QTranslator>
 
 //#include "application.h"
@@ -16,7 +18,7 @@
 
 int main(int argc, char* argv[])
 {
-    //Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
 
     app.setApplicationName("G2G");
@@ -54,14 +56,27 @@ int main(int argc, char* argv[])
             delete baseTranslator;
     }
 
+    QSplashScreen* splash = nullptr;
+    //int screenId = 0 QApplication::desktop()->screenNumber(tmp.geometry().center());
+    splash = new QSplashScreen(/*QApplication::desktop()->screen(screenId), */ QPixmap(QLatin1String(":/256.png")));
+    //    if (QApplication::desktop()->isVirtualDesktop()) {
+    //        QRect srect(0, 0, splash->width(), splash->height());
+    //        splash->move(QApplication::desktop()->availableGeometry(screenId).center() - srect.center());
+    //    }
+    splash->setAttribute(Qt::WA_DeleteOnClose);
+    splash->show();
+
     MainWindow mainWin;
     mainWin.setIconSize({ 24, 24 });
     mainWin.show();
+    splash->finish(&mainWin);
+
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
+
     return app.exec();
 }

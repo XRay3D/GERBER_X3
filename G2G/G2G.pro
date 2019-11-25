@@ -13,11 +13,12 @@ ICON = 256.png
 
 #macx: ICON = resources/icon.icns
 
-win32-msvc* {
+msvc* {
     QMAKE_CXXFLAGS += /std:c++latest
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
 }
+
 gcc* {
     QMAKE_CXXFLAGS += -std=c++1z
     LIBS += -lsetupapi -lAdvapi32 -lpsapi
@@ -27,7 +28,7 @@ gcc* {
 
 TRANSLATIONS += \
     translations/g2g_en.ts \
-    translations/g2g_ru.ts
+    translations/g2g_ru.ts \
 
 HEADERS += \
     aboutform.h \
@@ -84,7 +85,6 @@ HEADERS += \
     version.h \
     voroni/jc_voronoi.h \
 
-
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
@@ -137,7 +137,6 @@ SOURCES += \
     tooldatabase/tooltreeview.cpp \
     voroni/jc_voronoi.cpp \
 
-
 FORMS += \
     aboutform.ui \
     colorselector.ui \
@@ -149,9 +148,9 @@ FORMS += \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
+    tooldatabase/tooldatabase.ui \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
-    tooldatabase/tooldatabase.ui \
 
 DISTFILES += \
     translations/g2g_en.ts \

@@ -14,5 +14,6 @@
         <file>toolpath/pock_offs_conv.svg</file>
         <file>toolpath/pock_rast_climb.svg</file>
         <file>toolpath/pock_rast_conv.svg</file>
+        <file>256.png</file>
     </qresource>
 </RCC>
