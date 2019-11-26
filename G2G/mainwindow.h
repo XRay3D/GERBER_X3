@@ -75,7 +75,7 @@ private:
     void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
-    void init();
+    void initWidgets();
     void onCustomContextMenuRequested(const QPoint& pos);
     void openRecentFile();
     void prependToRecentFiles(const QString& fileName);
@@ -111,12 +111,13 @@ private:
     void loadFile(const QString& fileName);
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
-    void addFileToPro(AbstractFile *file);
+    void addFileToPro(AbstractFile* file);
 
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 };
 
 class DockWidget : public QDockWidget {
@@ -125,6 +126,7 @@ public:
     explicit DockWidget(QWidget* parent = nullptr)
         : QDockWidget(parent)
     {
+        hide();
     }
     ~DockWidget() override = default;
 

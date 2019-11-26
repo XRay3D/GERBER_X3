@@ -1283,7 +1283,7 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="254"/>
-        <location filename="../mainwindow.cpp" line="854"/>
+        <location filename="../mainwindow.cpp" line="848"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation>&amp;Закрыть проект &quot;%1&quot;</translation>
     </message>
@@ -1540,70 +1540,72 @@ Public License instead of this License.  But first, please read
         <translation>Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="765"/>
-        <location filename="../mainwindow.cpp" line="775"/>
-        <location filename="../mainwindow.cpp" line="834"/>
-        <source>Application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="766"/>
+        <location filename="../mainwindow.cpp" line="764"/>
         <source>Do you want to close this project?</source>
         <translation>Вы хотите закрыть этот проект?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="776"/>
+        <location filename="../mainwindow.cpp" line="764"/>
+        <location filename="../mainwindow.cpp" line="770"/>
+        <location filename="../mainwindow.cpp" line="789"/>
+        <location filename="../mainwindow.cpp" line="813"/>
+        <location filename="../mainwindow.cpp" line="828"/>
+        <source>Warning</source>
+        <translation>Предупреждение</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="770"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>Документ был изменен.
 Вы хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="796"/>
+        <location filename="../mainwindow.cpp" line="790"/>
         <source>Do you want to reload file %1?</source>
         <translation>Хотите перезагрузить файл%1?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="819"/>
+        <location filename="../mainwindow.cpp" line="813"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation>Не удается прочитать файл%1:
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="830"/>
+        <location filename="../mainwindow.cpp" line="824"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="829"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Невозможно записать файл%1:
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="845"/>
+        <location filename="../mainwindow.cpp" line="839"/>
         <source>Untitled.g2g</source>
         <translation>Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="888"/>
+        <location filename="../mainwindow.cpp" line="882"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="935"/>
+        <location filename="../mainwindow.cpp" line="929"/>
         <source>Icon size = 24</source>
         <translation>Размер иконки = 24</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="936"/>
+        <location filename="../mainwindow.cpp" line="930"/>
         <source>Icon size = 48</source>
         <translation>Размер иконки = 48</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="937"/>
+        <location filename="../mainwindow.cpp" line="931"/>
         <source>Icon size = 72</source>
         <translation>Размер иконки = 72</translation>
     </message>
@@ -1774,6 +1776,7 @@ Area:</source>
         <location filename="../forms/pocketform.cpp" line="157"/>
         <location filename="../forms/pocketform.cpp" line="171"/>
         <location filename="../forms/pocketform.cpp" line="188"/>
+        <location filename="../forms/pocketform.cpp" line="234"/>
         <location filename="../forms/pocketform.cpp" line="270"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
@@ -1935,6 +1938,7 @@ Area:</source>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
+        <location filename="../forms/profileform.cpp" line="168"/>
         <location filename="../forms/profileform.cpp" line="191"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
@@ -2334,6 +2338,34 @@ X %2:Y %3</translation>
         <source>Thermal</source>
         <translation>Термоизоляция</translation>
     </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="254"/>
+        <source>Regions</source>
+        <translation>Полигоны</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="255"/>
+        <source>Region</source>
+        <translation>Полигон</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="263"/>
+        <source>Lines</source>
+        <translation>Проводники</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="264"/>
+        <source>Line</source>
+        <translation>Проводник</translation>
+    </message>
+</context>
+<context>
+    <name>ThermalModel</name>
+    <message>
+        <location filename="../forms/thermal/thermalmodel.cpp" line="84"/>
+        <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
+        <translation>     Имя|Поз.(X:Y)|Угол|Ширина|Кол-во</translation>
+    </message>
 </context>
 <context>
     <name>ToolDatabase</name>
@@ -2623,7 +2655,7 @@ X %2:Y %3</translation>
         <location filename="../filetree/treeview.cpp" line="168"/>
         <location filename="../filetree/treeview.cpp" line="193"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть проект</translation>
+        <translation type="unfinished">&amp;Закрыть</translation>
     </message>
     <message>
         <location filename="../filetree/treeview.cpp" line="169"/>
@@ -2743,7 +2775,10 @@ X %2:Y %3</translation>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
+        <location filename="../forms/voronoiform.cpp" line="119"/>
+        <location filename="../forms/voronoiform.cpp" line="131"/>
         <location filename="../forms/voronoiform.cpp" line="148"/>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
@@ -2756,6 +2791,11 @@ X %2:Y %3</translation>
         <location filename="../forms/voronoiform.cpp" line="167"/>
         <source>Voronoi</source>
         <translation>Вороной</translation>
+    </message>
+    <message>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
+        <source>The width must be larger than the tool diameter!</source>
+        <translation>Ширина должна быть больше диаметра инструмента!</translation>
     </message>
 </context>
 </TS>

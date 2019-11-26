@@ -231,7 +231,7 @@ void PocketForm::createFile()
                 file = gi->file();
                 boardSide = file->side();
             } else if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
             if (item->type() == GerberItemType)
