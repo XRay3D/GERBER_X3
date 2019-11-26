@@ -423,7 +423,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
-      <string>Feed Speeds (Set checkbox for automatic calculation)</string>
+      <string>Feed Speeds</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <property name="labelAlignment">
