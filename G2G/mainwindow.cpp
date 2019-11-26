@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget* parent)
     , excellonParser(new Excellon::Parser)
     , pro(new Project)
 {
+
     setupUi(this);
 
     scene = reinterpret_cast<Scene*>(graphicsView->scene());
@@ -61,45 +62,45 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
-
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows) {
         if (QOperatingSystemVersion::current().majorVersion() > 7) {
             setStyleSheet("QGroupBox, .QFrame {"
-                          "background-color: rgb(255,255,255);"
+                          "background-color: white;"
                           "border: 1px solid gray;"
                           "}"
                           "QGroupBox {"
-                          "margin-top: 3ex; /* leave space at the top for the title */"
+                          "margin-top: 3ex;" /* leave space at the top for the title */
                           "}"
                           "QGroupBox::title {"
                           "subcontrol-origin: margin;"
-                          "subcontrol-position: top center; /* position at the top center */"
+                          "subcontrol-position: top center;" /* position at the top center */
                           "}");
+
         } else {
             setStyleSheet("QGroupBox, .QFrame {"
-                          "background-color: rgb(255,255,255);"
+                          "background-color: white;"
                           "border: 1px solid gray;"
                           "border-radius: 3px;" // Win 7
                           "}"
                           "QGroupBox {"
-                          "margin-top: 3ex; /* leave space at the top for the title */"
+                          "margin-top: 3ex;" /* leave space at the top for the title */
                           "}"
                           "QGroupBox::title {"
                           "subcontrol-origin: margin;"
-                          "subcontrol-position: top center; /* position at the top center */"
+                          "subcontrol-position: top center;" /* position at the top center */
                           "}");
         }
     } else {
         setStyleSheet("QGroupBox, .QFrame {"
-                      "background-color: rgb(255,255,255);"
+                      "background-color: white;"
                       "border: 1px solid gray;"
                       "}"
                       "QGroupBox {"
-                      "margin-top: 3ex; /* leave space at the top for the title */"
+                      "margin-top: 3ex;" /* leave space at the top for the title */
                       "}"
                       "QGroupBox::title {"
                       "subcontrol-origin: margin;"
-                      "subcontrol-position: top center; /* position at the top center */"
+                      "subcontrol-position: top center;" /* position at the top center */
                       "}");
     }
 
@@ -577,7 +578,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
+                printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);
