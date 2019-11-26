@@ -235,7 +235,7 @@
        <property name="title">
         <string>Bridges</string>
        </property>
-       <layout class="QFormLayout" name="formLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <property name="leftMargin">
          <number>6</number>
         </property>
@@ -248,7 +248,7 @@
         <property name="bottomMargin">
          <number>6</number>
         </property>
-        <item row="0" column="0">
+        <item>
          <widget class="QLabel" name="label_4">
           <property name="font">
            <font>
@@ -261,7 +261,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="DoubleSpinBox" name="dsbxBridgeLenght">
           <property name="suffix">
            <string> mm</string>
@@ -283,7 +283,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="2">
+        <item>
          <widget class="QPushButton" name="pbAddBridge">
           <property name="text">
            <string>Add Bridge</string>

@@ -784,7 +784,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/drillform/drillform.ui" line="71"/>
         <source>Drill Toolpath</source>
-        <translation>Сверловки</translation>
+        <translation>Сверловка</translation>
     </message>
     <message>
         <location filename="../forms/drillform/drillform.ui" line="96"/>
@@ -1103,7 +1103,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="191"/>
         <source>Zero Position</source>
-        <translation>Нулевая позиция</translation>
+        <translation>Ноль УП</translation>
     </message>
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="209"/>
@@ -1120,7 +1120,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="292"/>
         <source>Home Position</source>
-        <translation>Домашняя позиция</translation>
+        <translation>Дом УП</translation>
     </message>
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="365"/>
@@ -1430,7 +1430,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../mainwindow.cpp" line="391"/>
         <source>&amp;Drilling</source>
-        <translation>&amp;Cверление отверстий</translation>
+        <translation type="unfinished">&amp;Сверловка</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="401"/>
@@ -1620,7 +1620,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="../forms/pocketform.ui" line="77"/>
         <source>Pocket Toolpath</source>
-        <translation>УП Карман</translation>
+        <translation>Карман</translation>
     </message>
     <message>
         <location filename="../forms/pocketform.ui" line="116"/>
@@ -1840,7 +1840,7 @@ Area:</source>
     <message>
         <location filename="../forms/profileform.ui" line="71"/>
         <source>Profile Toolpath</source>
-        <translation>УП Профиль</translation>
+        <translation>Профиль</translation>
     </message>
     <message>
         <location filename="../forms/profileform.ui" line="111"/>
@@ -2008,17 +2008,17 @@ Area:</source>
         <source>There are no selected items to define the border.
 The old border will be used.</source>
         <translation>Нет выбранных элементов для определения границы.
-Старая граница будет использована.</translation>
+Будет использована предыдущая граница.</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="41"/>
         <source>G-Code Home Point</source>
-        <translation>Домашняя точка.УП</translation>
+        <translation>Дом.УП</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="45"/>
         <source>G-Code Zero Point</source>
-        <translation>Нулевая точка УП</translation>
+        <translation>Ноль УП</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="395"/>
@@ -2281,7 +2281,7 @@ X %2:Y %3</translation>
     <message>
         <location filename="../forms/thermal/thermalform.ui" line="62"/>
         <source>Thermal Insulation Toolpath</source>
-        <translation>УП Термоизоляции</translation>
+        <translation>Термоизоляция</translation>
     </message>
     <message>
         <location filename="../forms/thermal/thermalform.ui" line="99"/>
@@ -2715,7 +2715,7 @@ X %2:Y %3</translation>
     <message>
         <location filename="../forms/voronoiform.ui" line="65"/>
         <source>Voronoi Toolpath</source>
-        <translation>УП Диаграмма Вороного</translation>
+        <translation>Диаграмма Вороного</translation>
     </message>
     <message>
         <location filename="../forms/voronoiform.ui" line="105"/>
