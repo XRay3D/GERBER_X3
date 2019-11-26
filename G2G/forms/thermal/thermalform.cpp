@@ -251,8 +251,8 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     for (const Gerber::GraphicObject& go : *file) {
         if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
             if (thermalNode == nullptr)
-                thermalNode = model->appendRow(QIcon(), "Regions");
-            map.append({ &go, thermalNode, "Region" });
+                thermalNode = model->appendRow(QIcon(), tr("Regions"));
+            map.append({ &go, thermalNode, tr("Region") });
         }
     }
 
@@ -260,8 +260,8 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     for (const Gerber::GraphicObject& go : *file) {
         if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive && go.path().size() == 2 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
             if (thermalNode == nullptr)
-                thermalNode = model->appendRow(QIcon(), "Lines");
-            map.append({ &go, thermalNode, "Line" });
+                thermalNode = model->appendRow(QIcon(), tr("Lines"));
+            map.append({ &go, thermalNode, tr("Line") });
         }
     }
 

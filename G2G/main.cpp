@@ -38,7 +38,12 @@ int main(int argc, char* argv[])
 
     const QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;
-    const QString trFolder(qApp->applicationDirPath() + "/translations/");
+    QString trFolder;
+    if (qApp->applicationDirPath().contains("build/G2G-Desktop"))
+        trFolder = "../../G2G/translations/";
+    else
+        trFolder = (qApp->applicationDirPath() + "/translations/");
+
     QString trFileName(trFolder + qApp->applicationDisplayName() + "_" + loc + ".qm");
     if (QFile::exists(trFileName)) {
         QTranslator* translator = new QTranslator();

@@ -1213,17 +1213,17 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="935"/>
+        <location filename="../mainwindow.cpp" line="929"/>
         <source>Icon size = 24</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="936"/>
+        <location filename="../mainwindow.cpp" line="930"/>
         <source>Icon size = 48</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="937"/>
+        <location filename="../mainwindow.cpp" line="931"/>
         <source>Icon size = 72</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1423,25 +1423,18 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="765"/>
-        <location filename="../mainwindow.cpp" line="775"/>
-        <location filename="../mainwindow.cpp" line="834"/>
-        <source>Application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="766"/>
+        <location filename="../mainwindow.cpp" line="764"/>
         <source>Do you want to close this project?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="776"/>
+        <location filename="../mainwindow.cpp" line="770"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="796"/>
+        <location filename="../mainwindow.cpp" line="790"/>
         <source>Do you want to reload file %1?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1482,7 +1475,7 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="254"/>
-        <location filename="../mainwindow.cpp" line="854"/>
+        <location filename="../mainwindow.cpp" line="848"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1578,29 +1571,38 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="819"/>
+        <location filename="../mainwindow.cpp" line="764"/>
+        <location filename="../mainwindow.cpp" line="770"/>
+        <location filename="../mainwindow.cpp" line="789"/>
+        <location filename="../mainwindow.cpp" line="813"/>
+        <location filename="../mainwindow.cpp" line="828"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="813"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="830"/>
+        <location filename="../mainwindow.cpp" line="824"/>
         <source>File saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="829"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="845"/>
+        <location filename="../mainwindow.cpp" line="839"/>
         <source>Untitled.g2g</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="888"/>
+        <location filename="../mainwindow.cpp" line="882"/>
         <source>&amp;%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1810,6 +1812,7 @@ Area:</source>
         <location filename="../forms/pocketform.cpp" line="157"/>
         <location filename="../forms/pocketform.cpp" line="171"/>
         <location filename="../forms/pocketform.cpp" line="188"/>
+        <location filename="../forms/pocketform.cpp" line="234"/>
         <location filename="../forms/pocketform.cpp" line="270"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
@@ -1934,6 +1937,7 @@ Area:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../forms/profileform.cpp" line="168"/>
         <location filename="../forms/profileform.cpp" line="191"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
@@ -2324,6 +2328,34 @@ X %2:Y %3</source>
     <message>
         <location filename="../forms/thermal/thermalform.cpp" line="222"/>
         <source>Thermal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="254"/>
+        <source>Regions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="255"/>
+        <source>Region</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="263"/>
+        <source>Lines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="264"/>
+        <source>Line</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ThermalModel</name>
+    <message>
+        <location filename="../forms/thermal/thermalmodel.cpp" line="84"/>
+        <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2740,7 +2772,15 @@ X %2:Y %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
+        <source>The width must be larger than the tool diameter!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/voronoiform.cpp" line="119"/>
+        <location filename="../forms/voronoiform.cpp" line="131"/>
         <location filename="../forms/voronoiform.cpp" line="148"/>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
