@@ -63,10 +63,9 @@ void ThermalNode::remove(int row) { childItems.removeAt(row); }
 
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    ThermalModel::m_self->dataChanged(
-        ThermalModel::m_self->createIndex(row(), ThermalModel::ThName, this),
-        ThermalModel::m_self->createIndex(row(), ThermalModel::ThGapCount, this),
-        { role });
+    const QModelIndex i1(ThermalModel::m_self->createIndex(row(), ThermalModel::ThName, this));
+    const QModelIndex i2(ThermalModel::m_self->createIndex(row(), ThermalModel::ThGapCount, this));
+    ThermalModel::m_self->dataChanged(i1, i2, { role });
 
     switch (role) {
     case Qt::EditRole:
@@ -222,7 +221,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
                 else if (item->m_checkState == Qt::Checked)
                     val |= 2;
             }
-            static const Qt::CheckState chState[]{
+            static const Qt::CheckState chState[] {
                 Qt::Unchecked, // index 0
                 Qt::Unchecked, // index 1
                 Qt::Checked, // index 2

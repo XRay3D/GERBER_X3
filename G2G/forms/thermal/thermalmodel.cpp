@@ -23,7 +23,6 @@ ThermalModel::ThermalModel(QObject* parent)
 ThermalModel::~ThermalModel()
 {
     delete rootItem;
-    m_self = nullptr;
 }
 
 ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name)
@@ -85,7 +84,7 @@ bool ThermalModel::setData(const QModelIndex& index, const QVariant& value, int 
 
 QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    static const QStringList horizontalLabel{ tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|') };
+    static const QStringList horizontalLabel { tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|') };
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal)
