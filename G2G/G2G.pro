@@ -23,8 +23,14 @@ gcc* {
     QMAKE_CXXFLAGS += -std=c++1z
     LIBS += -lsetupapi -lAdvapi32 -lpsapi
     RC_FILE = myapp.rc
+    win32 {
+        LIBS += -lsetupapi -lAdvapi32 -lpsapi
+    }
 }
 
+linux* {
+    DEFINES += linux
+}
 
 TRANSLATIONS += \
     translations/g2g_en.ts \

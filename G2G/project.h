@@ -15,6 +15,7 @@ using namespace ClipperLib;
 enum FileVersion {
     G2G_Ver_1 = 1,
     G2G_Ver_1_1,
+    G2G_Ver_1_2,
 };
 
 class Project : public QObject {
