@@ -57,7 +57,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     painter->restore();
 }
 
-int DrillItem::type() const { return DrillItemType; }
+int DrillItem::type() const { return GiDrill; }
 
 bool DrillItem::isSlot()
 {

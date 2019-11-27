@@ -9,6 +9,7 @@
 #include <forms/gcodepropertiesform.h>
 #include <qt_windows.h>
 
+bool Project::m_isUntitled = true;
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
 bool Project::m_isModified = false;
 QMutex Project::m_mutex;
@@ -238,7 +239,6 @@ bool Project::reload(int id, AbstractFile* file)
 
 int Project::addFile(AbstractFile* file)
 {
-
     //QMutexLocker locker(&m_mutex);
     const int id = contains(file->name());
     if (id != -1) {
@@ -253,6 +253,15 @@ int Project::addFile(AbstractFile* file)
 }
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
+
+void Project::setName(const QString& name)
+{
+    setUntitled(name.isEmpty());
+    if (m_isUntitled)
+        m_name = tr("Untitled.g2g");
+    else
+        m_name = name;
+}
 
 int Project::ver() { return m_ver; }
 
@@ -271,7 +280,7 @@ void Project::saveSelectedToolpaths()
 
     QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
     for (GCode::File* file : files)
-        mm[QPair { file->getTool(), file->side() }].append(file);
+        mm[QPair{ file->getTool(), file->side() }].append(file);
 
     for (const QPair<Tool, Side>& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));
@@ -337,6 +346,10 @@ void Project::saveSelectedToolpaths()
     if (mm.isEmpty())
         QMessageBox::information(nullptr, "", tr("No selected toolpath files."));
 }
+
+bool Project::isUntitled() { return m_isUntitled; }
+
+void Project::setUntitled(bool value) { m_isUntitled = value; }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {

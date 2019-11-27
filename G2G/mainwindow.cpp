@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
+
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows) {
         if (QOperatingSystemVersion::current().majorVersion() > 7) {
             setStyleSheet("QGroupBox, .QFrame {"
@@ -157,7 +158,6 @@ void MainWindow::about()
 
 void MainWindow::initWidgets()
 {
-    isUntitled = true;
     createActions();
     connect(pro, &Project::changed, this, &MainWindow::documentWasModified);
     setUnifiedTitleAndToolBarOnMac(true);
@@ -448,12 +448,12 @@ void MainWindow::createActionsGraphics()
         QList<QGraphicsItem*> si = Scene::selectedItems();
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
-            if (item->type() == GerberItemType) {
+            if (item->type() == GiGerber) {
                 GerberItem* gitem = reinterpret_cast<GerberItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
                 for (QGraphicsItem* item : si)
-                    if (item->type() == Shape)
+                    if (item->type() == GiShapeC)
                         clipper.AddPaths(reinterpret_cast<GraphicsItem*>(item)->paths(), ptClip, true);
                 clipper.Execute(type, gitem->rPaths(), pftEvenOdd, pftPositive);
                 if (gitem->rPaths().isEmpty()) {
@@ -578,7 +578,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
+                  printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);
@@ -603,7 +603,7 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
     if (!item)
         return;
 
-    if (item->type() == PinType) {
+    if (item->type() == GiPin) {
         a = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
         a = menu.addAction(tr("Fixed"), [](bool fl) {
             for (Pin* item : Pin::pins())
@@ -616,16 +616,17 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
             [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
         a->setCheckable(true);
         a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
-    } else if (item->type() == ThermalType) {
-        if (item->flags() & QGraphicsItem::ItemIsSelectable)
-            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
-                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
-            });
-        else
-            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
-                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
-            });
     }
+    //    else if (item->type() == GiThermalPr) {
+    //        if (item->flags() & QGraphicsItem::ItemIsSelectable)
+    //            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
+    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
+    //            });
+    //        else
+    //            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
+    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
+    //            });
+    //    }
     if (a)
         menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
@@ -716,18 +717,16 @@ void MainWindow::open()
             loadFile(fileName);
         }
     }
-
-    QString name(QFileInfo(files.first()).path());
-    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+    //    QString name(QFileInfo(files.first()).path());
+    //    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
 }
 
 bool MainWindow::save()
 {
-    if (isUntitled) {
+    if (pro->isUntitled())
         return saveAs();
-    } else {
+    else
         return saveFile(pro->name());
-    }
 }
 
 bool MainWindow::saveAs()
@@ -769,13 +768,8 @@ bool MainWindow::maybeSave()
 
 void MainWindow::loadFile(const QString& fileName)
 {
-    qDebug() << "loadFile" << fileName;
     if (Project::contains(fileName) != -1
-        && QMessageBox::warning(this,
-               tr("Warning"),
-               QString(tr("Do you want to reload file %1?"))
-                   .arg(QFileInfo(fileName).fileName()),
-               QMessageBox::Ok | QMessageBox::Cancel)
+        && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
             == QMessageBox::Cancel) {
         return;
     }
@@ -819,24 +813,23 @@ bool MainWindow::saveFile(const QString& fileName)
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
-    isUntitled = fileName.isEmpty();
-
-    if (isUntitled)
-        pro->setName(tr("Untitled.g2g"));
-    else
-        pro->setName(fileName); //QFileInfo(fileName).canonicalFilePath());
-
+    pro->setName(fileName);
     pro->setModified(false);
     setWindowModified(false);
-
-    if (!isUntitled /*&& windowFilePath() != curFile*/)
+    if (!pro->isUntitled())
         prependToRecentFiles(pro->name());
     m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(pro->name())));
+    setWindowFilePath(pro->name());
+    setWindowFilePath(pro->name());
     setWindowFilePath(pro->name());
 }
 
 void MainWindow::addFileToPro(AbstractFile* file)
 {
+    if (Project::isUntitled()) {
+        QString name(QFileInfo(file->name()).path());
+        setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+    }
     Project::addFile(file);
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)

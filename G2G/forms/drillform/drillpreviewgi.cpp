@@ -39,7 +39,7 @@ DrillPrGI::DrillPrGI(const Gerber::GraphicObject& go, int id)
     , grob(&go)
     , m_sourcePath(drawApetrure(go, id))
     , m_sourceDiameter(qFuzzyIsNull(go.gFile()->apertures()->value(id)->drillDiameter()) ? go.gFile()->apertures()->value(id)->minSize() : go.gFile()->apertures()->value(id)->drillDiameter())
-    , m_type(ApetrureType)
+    , m_type(GiApetrurePr)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -51,7 +51,7 @@ DrillPrGI::DrillPrGI(const Excellon::Hole& hole)
     : hole(&hole)
     , m_sourcePath(hole.state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
     , m_sourceDiameter(hole.state.currentToolDiameter())
-    , m_type(hole.state.path.isEmpty() ? DrillType : SlotType)
+    , m_type(hole.state.path.isEmpty() ? GiDrillPr : GiSlotPr)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -100,7 +100,7 @@ void DrillPrGI::setToolId(int toolId)
         m_toolPath = QPainterPath(); //.clear();
         const double diameter = ToolHolder::tools[m_toolId].diameter();
         switch (m_type) {
-        case SlotType: {
+        case GiSlotPr: {
             Paths tmpPpath;
             ClipperOffset offset;
             offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
@@ -123,14 +123,14 @@ void DrillPrGI::setToolId(int toolId)
                 }
             }
         } break;
-        case DrillType:
+        case GiDrillPr:
             m_toolPath.addEllipse(hole->state.offsetedPos(), diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(0.0, diameter * 0.7));
             m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(diameter * 0.7, 0.0));
             m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(diameter * 0.7, 0.0));
             break;
-        case ApetrureType:
+        case GiApetrurePr:
             m_toolPath.addEllipse(toQPointF(grob->state().curPos()), diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(toQPointF(grob->state().curPos()) - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(toQPointF(grob->state().curPos()) + QPointF(0.0, diameter * 0.7));
@@ -145,11 +145,11 @@ void DrillPrGI::setToolId(int toolId)
 IntPoint DrillPrGI::pos() const
 {
     switch (m_type) {
-    case SlotType:
+    case GiSlotPr:
         return toIntPoint(hole->state.offsetedPos());
-    case DrillType:
+    case GiDrillPr:
         return toIntPoint(hole->state.offsetedPos());
-    case ApetrureType:
+    case GiApetrurePr:
         return grob->state().curPos();
     }
     return IntPoint();
@@ -158,13 +158,13 @@ IntPoint DrillPrGI::pos() const
 Paths DrillPrGI::paths() const
 {
     switch (m_type) {
-    case SlotType:
+    case GiSlotPr:
         return hole->item->paths();
-    case DrillType: {
+    case GiDrillPr: {
         Paths paths(hole->item->paths());
         return ReversePaths(paths);
     }
-    case ApetrureType:
+    case GiApetrurePr:
         return grob->paths();
     }
     return Paths();
@@ -173,10 +173,10 @@ Paths DrillPrGI::paths() const
 bool DrillPrGI::fit(double depth)
 {
     switch (m_type) {
-    case SlotType:
-    case DrillType:
+    case GiSlotPr:
+    case GiDrillPr:
         return m_sourceDiameter > ToolHolder::tools[m_toolId].getDiameter(depth);
-    case ApetrureType:
+    case GiApetrurePr:
         return grob->gFile()->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
     }
     return false;

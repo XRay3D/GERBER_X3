@@ -63,8 +63,6 @@ private:
 
     QVector<QAction*> toolpathActionList;
 
-    bool isUntitled;
-
     static MainWindow* self;
 
     inline QString fileKey();

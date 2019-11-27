@@ -52,8 +52,10 @@ HEADERS += \
     forms/gcodepropertiesform.h \
     forms/pocketform.h \
     forms/profileform.h \
+    forms/thermal/thermaldelegate.h \
     forms/thermal/thermalform.h \
     forms/thermal/thermalmodel.h \
+    forms/thermal/thermalnode.h \
     forms/thermal/thermalpreviewitem.h \
     forms/voronoiform.h \
     gi/bridgeitem.h \
@@ -105,8 +107,10 @@ SOURCES += \
     forms/gcodepropertiesform.cpp \
     forms/pocketform.cpp \
     forms/profileform.cpp \
+    forms/thermal/thermaldelegate.cpp \
     forms/thermal/thermalform.cpp \
     forms/thermal/thermalmodel.cpp \
+    forms/thermal/thermalnode.cpp \
     forms/thermal/thermalpreviewitem.cpp \
     forms/voronoiform.cpp \
     gi/bridgeitem.cpp \

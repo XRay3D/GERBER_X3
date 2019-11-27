@@ -71,7 +71,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawPath(m_shape);
 }
 
-int GerberItem::type() const { return GerberItemType; }
+int GerberItem::type() const { return GiGerber; }
 
 void GerberItem::redraw()
 {

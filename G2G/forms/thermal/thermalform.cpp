@@ -1,4 +1,5 @@
 #include "thermalform.h"
+#include "thermaldelegate.h"
 #include "ui_thermalform.h"
 
 #include "../gcodepropertiesform.h"
@@ -104,6 +105,8 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
+    ui->treeView->hideColumn(1);
+    ui->treeView->setItemDelegate(new ThermalDelegate(this));
 }
 
 ThermalForm::~ThermalForm()
@@ -235,11 +238,13 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     const auto* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
     boardSide = file->side();
 
+    model->appendRow(QIcon(), tr("All"));
+
     using Worker = std::tuple<const Gerber::GraphicObject*, ThermalNode*, QString>;
     QVector<Worker> map;
     auto creator = [this](Worker w) {
         static QMutex m;
-        auto [go, thermalNode, name] = w;
+        const auto [go, thermalNode, name] = w;
         auto item = new ThermalPreviewItem(*go, tool, m_depth);
         item->setToolTip(name);
         QMutexLocker lock(&m);
@@ -279,15 +284,12 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
 
     for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
         auto m(map.mid(i, c));
-        qDebug() << m.size();
         QFuture<void> future = QtConcurrent::map(m, creator);
         future.waitForFinished();
     }
 
-    qDebug("QFuture");
     for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview)
         Scene::addItem(item.data());
-    qDebug("Scene");
     //    updateCreateButton();
     delete ui->treeView->model();
     ui->treeView->setModel(model);

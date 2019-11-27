@@ -1,5 +1,7 @@
 #include "thermalmodel.h"
 
+ThermalModel* ThermalModel::m_self = nullptr;
+
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
     QImage image(icon.pixmap(24, 24).toImage());
@@ -14,12 +16,14 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 ThermalModel::ThermalModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
+    m_self = this;
     rootItem = new ThermalNode(QIcon(), "");
 }
 
 ThermalModel::~ThermalModel()
 {
     delete rootItem;
+    m_self = nullptr;
 }
 
 ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name)
