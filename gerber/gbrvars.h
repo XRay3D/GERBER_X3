@@ -1,7 +1,8 @@
 #ifndef GERBER_H
 #define GERBER_H
 
-#include <QObject>
+//#include <QObject>
+#include <datastream.h>
 #include <myclipper.h>
 
 #define DEPRECATED
@@ -149,13 +150,37 @@ class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state)
     {
-        stream.writeRawData(reinterpret_cast<const char*>(&state), sizeof(State));
+        stream << state.m_dCode;
+        stream << state.m_gCode;
+        stream << state.m_imgPolarity;
+        stream << state.m_interpolation;
+        stream << state.m_type;
+        stream << state.m_quadrant;
+        stream << state.m_region;
+        stream << state.m_aperture;
+        stream << state.m_lineNum;
+        stream << state.m_curPos;
+        stream << state.m_mirroring;
+        stream << state.m_scaling;
+        stream << state.m_rotating;
         return stream;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state)
     {
-        stream.readRawData(reinterpret_cast<char*>(&state), sizeof(State));
+        stream >> state.m_dCode;
+        stream >> state.m_gCode;
+        stream >> state.m_imgPolarity;
+        stream >> state.m_interpolation;
+        stream >> state.m_type;
+        stream >> state.m_quadrant;
+        stream >> state.m_region;
+        stream >> state.m_aperture;
+        stream >> state.m_lineNum;
+        stream >> state.m_curPos;
+        stream >> state.m_mirroring;
+        stream >> state.m_scaling;
+        stream >> state.m_rotating;
         return stream;
     }
 
@@ -262,11 +287,11 @@ public:
     {
     }
     GraphicObject(
-            int /*id*/,
-            const State& state,
-            const Paths& paths,
-            File* gFile,
-            const Path& path = Path())
+        int /*id*/,
+        const State& state,
+        const Paths& paths,
+        File* gFile,
+        const Path& path = Path())
         : m_gFile(gFile)
         , m_path(path)
         , m_paths(paths)
