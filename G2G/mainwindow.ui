@@ -22,16 +22,16 @@
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>0</number>
+     <number>3</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>3</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>3</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>3</number>
     </property>
     <item>
      <widget class="GraphicsView" name="graphicsView">
@@ -75,7 +75,25 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="TreeView" name="treeView"/>
+   <widget class="QWidget" name="widget">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="leftMargin">
+      <number>3</number>
+     </property>
+     <property name="topMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
+     </property>
+     <property name="bottomMargin">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="TreeView" name="treeView"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <customwidgets>

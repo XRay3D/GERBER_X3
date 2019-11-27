@@ -1,4 +1,4 @@
-#include "graphicsview.h"
+﻿#include "graphicsview.h"
 #include "edid.h"
 #include "qdruler.h"
 #include "scene.h"
@@ -14,6 +14,9 @@
 
 #include <sh/circle.h>
 #include <sh/constructor.h>
+
+#include <forms/thermal/thermalmodel.h>
+#include <forms/thermal/thermalpreviewitem.h>
 
 const double zoomFactor = 1.5;
 
@@ -347,7 +350,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
     } else if (event->button() == Qt::RightButton) {
         { // удаление мостика
             QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-            if (item && item->type() == BridgeType && !static_cast<BridgeItem*>(item)->ok())
+            if (item && item->type() == GiBridge && !static_cast<BridgeItem*>(item)->ok())
                 delete item;
         }
         // это что бы при вызове контекстного меню ничего постороннего не было
@@ -383,7 +386,18 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
-void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) { QGraphicsView::mouseDoubleClickEvent(event); }
+void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    auto item = scene()->itemAt(mapToScene(event->pos()), transform()); //itemAt(event->pos());
+    qDebug() << (item->type() == GiThermalPr);
+    if (item->type() == GiThermalPr) {
+        if (item->flags() & QGraphicsItem::ItemIsSelectable)
+            reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
+        else
+            reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
+    }
+    QGraphicsView::mouseDoubleClickEvent(event);
+}
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {

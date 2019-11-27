@@ -63,7 +63,9 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 
 QRectF ThermalPreviewItem::boundingRect() const { return m_sourcePath.boundingRect().united(m_toolPath.boundingRect()); }
 
-int ThermalPreviewItem::type() const { return ThermalType; }
+QPainterPath ThermalPreviewItem::shape() const { return m_sourcePath; }
+
+int ThermalPreviewItem::type() const { return GiThermalPr; }
 
 IntPoint ThermalPreviewItem::pos() const { return grob->state().curPos(); }
 
@@ -85,7 +87,9 @@ void ThermalPreviewItem::redraw()
         path.append(path.first());
     clipper.AddPaths(paths, ptSubject, false);
     // create frame
-    {
+    if (qFuzzyIsNull(m_tickness) && m_count) {
+        m_bridge.clear();
+    } else {
         ClipperOffset offset;
         offset.AddPaths(paths, jtMiter, etClosedLine);
         offset.Execute(m_bridge, diameter * uScale * 0.1);

@@ -165,7 +165,6 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
     switch (m_menuIndex.parent().row()) {
     case NodeGerberFiles: {
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         auto* file = Project::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
@@ -188,17 +187,18 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             delete Dialog;
         });
         a->setChecked(file->itemsType());
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
     } break;
     case NodeDrillFiles:
-        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        a = menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         if (!m_exFormatDialog)
             menu.addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), this, &TreeView::showExcellonDialog);
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         break;
     case NodeToolPath:
-        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        a = menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
+        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
         break;
     default:
         break;

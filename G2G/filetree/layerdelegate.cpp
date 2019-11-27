@@ -13,7 +13,7 @@ LayerDelegate::LayerDelegate(QObject* parent)
 QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
 {
     auto* comboBox = new QComboBox(parent);
-    comboBox->addItems({ tr("Top"), tr("Bottom") });
+    comboBox->addItems(tr("Top|Bottom").split('|'));
     comboBox->setCurrentIndex(index.model()->data(index).toInt());
     //        if (index.column() == 1)
     //            comboBox->addItems(IconPreviewArea::iconModeNames());

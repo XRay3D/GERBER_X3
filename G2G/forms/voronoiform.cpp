@@ -109,7 +109,7 @@ void VoronoiForm::createFile()
     for (auto* item : Scene::selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
-        case GerberItemType:
+        case GiGerber:
             //GerberItem* gi = static_cast<GerberItem*>(item);
             if (!file) {
                 file = gi->file();
@@ -121,7 +121,7 @@ void VoronoiForm::createFile()
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-        case RawItemType:
+        case GiRaw:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();

@@ -4,6 +4,7 @@
 
 AbstractNode::AbstractNode(int id)
     : m_id(id)
+    , tbStrList(QObject::tr("Top|Bottom").split('|'))
 {
     //    if (MainWindow::closeAllAct()) {
     //        MainWindow::closeAllAct()->setEnabled(true);

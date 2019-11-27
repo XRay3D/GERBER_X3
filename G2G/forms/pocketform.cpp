@@ -40,38 +40,37 @@ PocketForm::PocketForm(QWidget* parent)
             type = Raster;
             ui->chbxUseTwoTools->setChecked(false);
         }
-        {
-            ui->cbxPass->setEnabled(ui->rbRaster->isChecked()); /*setVisible*/
-            ui->labelPass->setEnabled(ui->rbRaster->isChecked()); /*setVisible*/
-            ui->dsbxAngle->setEnabled(ui->rbRaster->isChecked()); /*setVisible*/
-            ui->labelAngle->setEnabled(ui->rbRaster->isChecked()); /*setVisible*/
-        }
-        {
-            ui->chbxUseTwoTools->setEnabled(!ui->rbRaster->isChecked()); /*setVisible*/
-            ui->sbxSteps->setEnabled(!ui->rbRaster->isChecked()); /*setVisible*/
-            ui->labelSteps->setEnabled(!ui->rbRaster->isChecked()); /*setVisible*/
-        }
 
         if (ui->rbClimb->isChecked())
             direction = GCode::Climb;
         else if (ui->rbConventional->isChecked())
             direction = GCode::Conventional;
-
+        {
+            ui->cbxPass->setVisible(ui->rbRaster->isChecked());
+            ui->labelPass->setVisible(ui->rbRaster->isChecked());
+            ui->dsbxAngle->setVisible(ui->rbRaster->isChecked());
+            ui->labelAngle->setVisible(ui->rbRaster->isChecked());
+        }
+        {
+            ui->chbxUseTwoTools->setVisible(!ui->rbRaster->isChecked());
+            ui->sbxSteps->setVisible(!ui->rbRaster->isChecked());
+            ui->labelSteps->setVisible(!ui->rbRaster->isChecked());
+        }
         {
             const bool checked = ui->chbxUseTwoTools->isChecked();
             ui->chbxUseTwoTools->setChecked(checked);
 
-            ui->labelSteps->setEnabled(!checked && type != Raster); /*setVisible*/
-            ui->sbxSteps->setEnabled(!checked && type != Raster); /*setVisible*/
+            ui->labelSteps->setVisible(!checked && type != Raster);
+            ui->sbxSteps->setVisible(!checked && type != Raster);
 
-            ui->dsbxMinArea->setEnabled(checked); /*setVisible*/
-            ui->labelMinArea->setEnabled(checked); /*setVisible*/
+            ui->dsbxMinArea->setVisible(checked);
+            ui->labelMinArea->setVisible(checked);
 
-            ui->labelToolName2->setEnabled(checked); /*setVisible*/
-            ui->lblToolName_2->setEnabled(checked); /*setVisible*/
+            ui->labelToolName2->setVisible(checked);
+            ui->lblToolName_2->setVisible(checked);
 
-            ui->pbEdit_2->setEnabled(checked); /*setVisible*/
-            ui->pbSelect_2->setEnabled(checked); /*setVisible*/
+            ui->pbEdit_2->setVisible(checked);
+            ui->pbSelect_2->setVisible(checked);
         }
 
         updateName();
@@ -234,8 +233,8 @@ void PocketForm::createFile()
     for (auto* item : Scene::selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
-        case GerberItemType:
-        case RawItemType:
+        case GiGerber:
+        case GiRaw:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -243,17 +242,17 @@ void PocketForm::createFile()
                 QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
-            if (item->type() == GerberItemType)
+            if (item->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;
-        case Shape:
+        case GiShapeC:
             wRawPaths.append(gi->paths());
             //m_used[gi->file()->id()].append(gi->id());
             break;
-        case DrillItemType:
+        case GiDrill:
             wPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;

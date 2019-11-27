@@ -6,10 +6,6 @@
 #include <gbrvars.h>
 #include <myclipper.h>
 
-enum {
-    ThermalType = PinType + 1,
-};
-
 class ThermalNode;
 
 class ThermalPreviewItem : public QGraphicsItem {
@@ -24,6 +20,7 @@ public:
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 
     //////////////////////////////////////////
     int type() const override;
