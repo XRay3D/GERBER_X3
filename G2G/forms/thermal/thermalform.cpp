@@ -244,7 +244,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     QVector<Worker> map;
     auto creator = [this](Worker w) {
         static QMutex m;
-        const auto [go, thermalNode, name] = w;
+        auto [go, thermalNode, name] = w;
         auto item = new ThermalPreviewItem(*go, tool, m_depth);
         item->setToolTip(name);
         QMutexLocker lock(&m);

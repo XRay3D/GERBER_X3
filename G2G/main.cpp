@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     const QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;
     QString trFolder;
-    if (qApp->applicationDirPath().contains("build/G2G-Desktop"))
+    if (qApp->applicationDirPath().contains("build/G2G"))
         trFolder = "../../G2G/translations/";
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
