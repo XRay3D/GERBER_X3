@@ -7,6 +7,7 @@
 #include <QLocale>
 #include <QSettings>
 #include <QSplashScreen>
+#include <QStandardPaths>
 #include <QTranslator>
 
 //#include "application.h"
@@ -28,7 +29,12 @@ int main(int argc, char* argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
 
-    QIcon::setThemeSearchPaths({ "../../icons/breeze/", "../icons/breeze/", "icons/breeze/" });
+    QIcon::setThemeSearchPaths({
+        "../../../icons/",
+        "../../icons/",
+        "../icons/",
+        "icons/",
+    });
     QIcon::setThemeName("Breeze");
 
     QGLFormat glf = QGLFormat::defaultFormat();
