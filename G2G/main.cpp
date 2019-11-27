@@ -81,7 +81,7 @@ void translation(QApplication* app)
 #ifdef linux
         trFolder = "../../../G2G/translations/";
 #else
-        trFolder =../../ G2G / translations / ";
+        trFolder = "../../G2G/translations/";
 #endif
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
