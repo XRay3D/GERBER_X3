@@ -21,7 +21,6 @@ msvc* {
 
 gcc* {
     QMAKE_CXXFLAGS += -std=c++1z
-    LIBS += -lsetupapi -lAdvapi32 -lpsapi
     RC_FILE = myapp.rc
     win32 {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
