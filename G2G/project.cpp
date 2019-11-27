@@ -3,11 +3,8 @@
 
 #include <QElapsedTimer>
 #include <QFileDialog>
-//#include <WinBase.h>
-//#include <WinNT.h>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
-#include <qt_windows.h>
 
 bool Project::m_isUntitled = true;
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
@@ -17,7 +14,7 @@ QString Project::m_fileName;
 Project* Project::self = nullptr;
 QSemaphore Project::sem;
 QString Project::m_name;
-int Project::m_ver = G2G_Ver_1_1 /*G2G_Ver_1*/;
+int Project::m_ver = G2G_Ver_1_2;
 
 Project::Project() { self = this; }
 
