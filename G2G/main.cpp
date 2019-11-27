@@ -5,17 +5,17 @@
 #include <QFile>
 #include <QGLWidget>
 #include <QLocale>
+#include <QOperatingSystemVersion>
 #include <QSettings>
 #include <QSplashScreen>
 #include <QStandardPaths>
 #include <QTranslator>
 
-//#include "application.h"
 #include "mainwindow.h"
 #include "version.h"
-#ifndef linux
-//#include <qt_windows.h>
-#endif
+
+void initIcon();
+void translation(QApplication* app);
 
 int main(int argc, char* argv[])
 {
@@ -29,51 +29,16 @@ int main(int argc, char* argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
 
-    QIcon::setThemeSearchPaths({
-        "../../../icons/",
-        "../../icons/",
-        "../icons/",
-        "icons/",
-    });
-    QIcon::setThemeName("Breeze");
-
     QGLFormat glf = QGLFormat::defaultFormat();
     glf.setSampleBuffers(true);
     glf.setSamples(16);
     QGLFormat::setDefaultFormat(glf);
 
-    const QString loc(QLocale().name().left(2));
-    qDebug() << "locale:" << loc;
-    QString trFolder;
-    if (qApp->applicationDirPath().contains("build/G2G"))
-        trFolder = "../../G2G/translations/";
-    else
-        trFolder = (qApp->applicationDirPath() + "/translations/");
-
-    QString trFileName(trFolder + qApp->applicationDisplayName() + "_" + loc + ".qm");
-    if (QFile::exists(trFileName)) {
-        QTranslator* translator = new QTranslator();
-        if (translator->load(trFileName))
-            app.installTranslator(translator);
-        else
-            delete translator;
-    }
-    QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
-    if (QFile::exists(trFileName)) {
-        QTranslator* baseTranslator = new QTranslator();
-        if (baseTranslator->load(baseTrFileName))
-            app.installTranslator(baseTranslator);
-        else
-            delete baseTranslator;
-    }
+    initIcon();
+    translation(&app);
 
     QSplashScreen* splash = nullptr;
-    //int screenId = 0 QApplication::desktop()->screenNumber(tmp.geometry().center());
-    splash = new QSplashScreen(/*QApplication::desktop()->screen(screenId), */ QPixmap(QLatin1String(":/256.png")));
-    //    if (QApplication::desktop()->isVirtualDesktop()) {
-    //        QRect srect(0, 0, splash->width(), splash->height());
-    //        splash->move(QApplication::desktop()->availableGeometry(screenId).center() - srect.center());
-    //    }
+    splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
 
@@ -90,4 +55,51 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     return app.exec();
+}
+
+void initIcon()
+{
+    QIcon::setThemeSearchPaths({
+        "../../../icons/",
+        "../../../icons/breeze/",
+        "../../icons/",
+        "../../icons/breeze/",
+        "../icons/",
+        "../icons/breeze/",
+        "icons/",
+        "icons/breeze/",
+    });
+    QIcon::setThemeName("Breeze");
+}
+
+void translation(QApplication* app)
+{
+    const QString loc(QLocale().name().left(2));
+    qDebug() << "locale:" << loc;
+    QString trFolder;
+    if (qApp->applicationDirPath().contains("build/G2G"))
+#ifdef linux
+        trFolder = "../../../G2G/translations/";
+#else
+        trFolder =../../ G2G / translations / ";
+#endif
+    else
+        trFolder = (qApp->applicationDirPath() + "/translations/");
+
+    QString trFileName(trFolder + qApp->applicationDisplayName().toLower() + "_" + loc + ".qm");
+    if (QFile::exists(trFileName)) {
+        QTranslator* translator = new QTranslator();
+        if (translator->load(trFileName))
+            app->installTranslator(translator);
+        else
+            delete translator;
+    }
+    QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
+    if (QFile::exists(trFileName)) {
+        QTranslator* baseTranslator = new QTranslator();
+        if (baseTranslator->load(baseTrFileName))
+            app->installTranslator(baseTranslator);
+        else
+            delete baseTranslator;
+    }
 }

@@ -33,7 +33,6 @@ MainWindow::MainWindow(QWidget* parent)
     , excellonParser(new Excellon::Parser)
     , pro(new Project)
 {
-
     setupUi(this);
 
     scene = reinterpret_cast<Scene*>(graphicsView->scene());
@@ -95,6 +94,7 @@ MainWindow::MainWindow(QWidget* parent)
         setStyleSheet("QGroupBox, .QFrame {"
                       "background-color: white;"
                       "border: 1px solid gray;"
+                      "border-radius: 3px;" // other
                       "}"
                       "QGroupBox {"
                       "margin-top: 3ex;" /* leave space at the top for the title */
