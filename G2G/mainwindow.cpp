@@ -504,7 +504,7 @@ void MainWindow::createPinsPath()
         settings.setValue("Pin/depth", depth);
 
         GCode::File* gcode = new GCode::File({ { toPath(dst) } }, tool, depth, GCode::Drill);
-        gcode->setFileName("Pin (Tool Id " + QString::number(tool.id()) + ")");
+        gcode->setFileName(tr("Pin (") + tool.name() + ")");
         Project::addFile(gcode);
     }
 }

@@ -1504,6 +1504,11 @@ Public License instead of this License.  But first, please read
         <translation>Установить глубину</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="507"/>
+        <source>Pin (</source>
+        <translation>Булавки (</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="607"/>
         <source>&amp;Create path for Pins</source>
         <translation>&amp;Создать УП для булавок</translation>
@@ -1966,24 +1971,24 @@ Area:</source>
 <context>
     <name>Project</name>
     <message>
-        <location filename="../project.cpp" line="261"/>
+        <location filename="../project.cpp" line="258"/>
         <source>Untitled.g2g</source>
         <translation>Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="292"/>
-        <location filename="../project.cpp" line="302"/>
+        <location filename="../project.cpp" line="289"/>
+        <location filename="../project.cpp" line="299"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="292"/>
-        <location filename="../project.cpp" line="302"/>
+        <location filename="../project.cpp" line="289"/>
+        <location filename="../project.cpp" line="299"/>
         <source>GCode (*.tap)</source>
         <translation>УП (*.tap)</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="347"/>
+        <location filename="../project.cpp" line="344"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>
@@ -2374,7 +2379,7 @@ X %2:Y %3</translation>
 <context>
     <name>ThermalModel</name>
     <message>
-        <location filename="../forms/thermal/thermalmodel.cpp" line="88"/>
+        <location filename="../forms/thermal/thermalmodel.cpp" line="87"/>
         <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
         <translation>     Имя|Поз.(X:Y)|Угол|Ширина|Кол-во</translation>
     </message>
