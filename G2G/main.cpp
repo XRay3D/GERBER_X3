@@ -73,33 +73,23 @@ void translation(QApplication* app)
     const QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;
     QString trFolder;
+
     if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
-        trFolder = "../G2G/translations/";
+        trFolder = "../G2G/translations/"; // for debug
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
 
-    QString trFileName(trFolder + qApp->applicationDisplayName().toLower() + "_" + loc + ".qm");
-    if (QFile::exists(trFileName)) {
-        QTranslator* translator = new QTranslator();
-        if (translator->load(trFileName))
-            app->installTranslator(translator);
-        else
-            delete translator;
-    }
-    QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
-    if (QFile::exists(baseTrFileName)) {
-        QTranslator* baseTranslator = new QTranslator();
-        if (baseTranslator->load(baseTrFileName))
-            app->installTranslator(baseTranslator);
-        else
-            delete baseTranslator;
-    }
-    QString qtTrFileName(trFolder + "qt_" + loc + ".qm");
-    if (QFile::exists(qtTrFileName)) {
-        QTranslator* baseTranslator = new QTranslator();
-        if (baseTranslator->load(qtTrFileName))
-            app->installTranslator(baseTranslator);
-        else
-            delete baseTranslator;
-    }
+    auto translator = [app](const QString& path) {
+        if (QFile::exists(path)) {
+            QTranslator* translator = new QTranslator();
+            if (translator->load(path))
+                app->installTranslator(translator);
+            else
+                delete translator;
+        }
+    };
+
+    translator(trFolder + qApp->applicationDisplayName().toLower() + "_" + loc + ".qm");
+    translator(trFolder + "qtbase_" + loc + ".qm");
+    translator(trFolder + "qt_" + loc + ".qm");
 }
