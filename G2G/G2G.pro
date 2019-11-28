@@ -3,7 +3,7 @@ QT += core gui opengl widgets printsupport concurrent
 TARGET = Getber2Gcode
 TEMPLATE = app
 
-RESOURCES += res/resources.qrc \
+RESOURCES += res/resources.qrc
 
 #DEFINES += QT_DEBUG
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -21,10 +21,19 @@ msvc* {
 
 gcc* {
     QMAKE_CXXFLAGS += -std=c++1z
-    LIBS += -lsetupapi -lAdvapi32 -lpsapi
     RC_FILE = myapp.rc
+    win32 {
+        LIBS += -lsetupapi -lAdvapi32 -lpsapi
+    }
 }
 
+linux {
+    DEFINES += linux
+}
+
+DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
+
+DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 TRANSLATIONS += \
     translations/g2g_en.ts \
@@ -52,8 +61,10 @@ HEADERS += \
     forms/gcodepropertiesform.h \
     forms/pocketform.h \
     forms/profileform.h \
+    forms/thermal/thermaldelegate.h \
     forms/thermal/thermalform.h \
     forms/thermal/thermalmodel.h \
+    forms/thermal/thermalnode.h \
     forms/thermal/thermalpreviewitem.h \
     forms/voronoiform.h \
     gi/bridgeitem.h \
@@ -105,8 +116,10 @@ SOURCES += \
     forms/gcodepropertiesform.cpp \
     forms/pocketform.cpp \
     forms/profileform.cpp \
+    forms/thermal/thermaldelegate.cpp \
     forms/thermal/thermalform.cpp \
     forms/thermal/thermalmodel.cpp \
+    forms/thermal/thermalnode.cpp \
     forms/thermal/thermalpreviewitem.cpp \
     forms/voronoiform.cpp \
     gi/bridgeitem.cpp \

@@ -78,7 +78,7 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 #endif
 }
 
-int PathItem::type() const { return PathItemType; }
+int PathItem::type() const { return GiPath; }
 
 Paths PathItem::paths() const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG

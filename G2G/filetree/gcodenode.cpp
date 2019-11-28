@@ -91,7 +91,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QStringList({ QObject::tr("Top"), QObject::tr("Bottom") })[m_file->side()];
+            return tbStrList[m_file->side()];
         case Qt::EditRole:
             return static_cast<bool>(m_file->side());
         default:

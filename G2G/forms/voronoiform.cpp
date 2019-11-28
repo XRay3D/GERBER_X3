@@ -27,7 +27,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
     ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon( QIcon::fromTheme("document-export"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
@@ -109,26 +109,26 @@ void VoronoiForm::createFile()
     for (auto* item : Scene::selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
-        case GerberItemType:
+        case GiGerber:
             //GerberItem* gi = static_cast<GerberItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-        case RawItemType:
+        case GiRaw:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
             wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
@@ -177,7 +177,7 @@ void VoronoiForm::setWidth(double /*w*/)
 {
     const double d = tool.getDiameter(ui->dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
-        QMessageBox::warning(this, "Warning", "The width must be larger than the tool diameter!");
+        QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));
         ui->dsbxWidth->setValue(d + 0.05);
     }
 }

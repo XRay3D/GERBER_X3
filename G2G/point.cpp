@@ -95,7 +95,7 @@ QPainterPath Marker::shape() const
     return /*m_shape*/ m_path;
 }
 
-int Marker::type() const { return m_type ? PointHomeType : PointZeroType; }
+int Marker::type() const { return m_type ? GiPointHome : GiPointZero; }
 
 void Marker::resetPos(bool fl)
 {
@@ -344,7 +344,7 @@ void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mousePressEvent(event);
 }
 
-int Pin::type() const { return PinType; }
+int Pin::type() const { return GiPin; }
 
 QVector<Pin*> Pin::pins() { return m_pins; }
 

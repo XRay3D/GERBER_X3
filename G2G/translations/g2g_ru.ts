@@ -782,87 +782,87 @@ Public License instead of this License.  But first, please read
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="71"/>
+        <location filename="../forms/drillform/drillform.ui" line="126"/>
         <source>Drill Toolpath</source>
-        <translation>Сверловки</translation>
+        <translation>Сверловка</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="96"/>
+        <location filename="../forms/drillform/drillform.ui" line="240"/>
         <source>Depth:</source>
         <translation>Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="132"/>
+        <location filename="../forms/drillform/drillform.ui" line="263"/>
         <source>File:</source>
         <translation>Файл:</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="149"/>
+        <location filename="../forms/drillform/drillform.ui" line="227"/>
         <source>Zoom To Selected</source>
         <translation>Увеличить до выбранных</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="156"/>
+        <location filename="../forms/drillform/drillform.ui" line="141"/>
         <source>Work Type</source>
         <translation>Тип работы</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="174"/>
+        <location filename="../forms/drillform/drillform.ui" line="159"/>
         <source>Only drilling</source>
         <translation>Только сверловка</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="181"/>
+        <location filename="../forms/drillform/drillform.ui" line="173"/>
         <source>Profile</source>
         <translation>Профиль</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="188"/>
+        <location filename="../forms/drillform/drillform.ui" line="166"/>
         <source>Pocket</source>
         <translation>Карман</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="203"/>
+        <location filename="../forms/drillform/drillform.ui" line="183"/>
         <source>Side</source>
         <translation>Сторона</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="221"/>
+        <location filename="../forms/drillform/drillform.ui" line="208"/>
         <source>In</source>
         <translation>Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="228"/>
+        <location filename="../forms/drillform/drillform.ui" line="215"/>
         <source>Out</source>
         <translation>Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="235"/>
+        <location filename="../forms/drillform/drillform.ui" line="201"/>
         <source>On</source>
         <translation>Поверху</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="245"/>
+        <location filename="../forms/drillform/drillform.ui" line="52"/>
         <source>Direction</source>
         <translation>Направление</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="263"/>
+        <location filename="../forms/drillform/drillform.ui" line="80"/>
         <source>Conventional</source>
         <translation>Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="270"/>
+        <location filename="../forms/drillform/drillform.ui" line="70"/>
         <source>Climb</source>
         <translation>Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="291"/>
+        <location filename="../forms/drillform/drillform.ui" line="250"/>
         <source>Create</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="298"/>
+        <location filename="../forms/drillform/drillform.ui" line="38"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
@@ -925,9 +925,8 @@ Public License instead of this License.  But first, please read
 <context>
     <name>DrillNode</name>
     <message>
-        <location filename="../filetree/drillnode.cpp" line="75"/>
         <source>Top|Bottom</source>
-        <translation>Вверх|Вниз</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
 </context>
 <context>
@@ -1067,83 +1066,83 @@ Public License instead of this License.  But first, please read
         <translation>Параметры G-кода</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="108"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="87"/>
         <source>Material</source>
         <translation>Материал</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="123"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="108"/>
         <source>Board Thickness</source>
         <translation>Толщина платы</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="133"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="156"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="219"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="245"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="270"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="320"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="346"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="396"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="419"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="451"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="118"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="141"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="191"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="214"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="246"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="293"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="319"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="366"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="392"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="454"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="149"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="134"/>
         <source>Copper Thickness</source>
         <translation>Толщина меди</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="181"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="438"/>
         <source>Glue (for &quot;raw&quot;)</source>
         <translation>Клей (для «сырых»)</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="191"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="338"/>
         <source>Zero Position</source>
-        <translation>Нулевая позиция</translation>
+        <translation>Ноль УП</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="209"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="310"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="283"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="356"/>
         <source>X</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="235"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="336"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="309"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="382"/>
         <source>Y</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="292"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="265"/>
         <source>Home Position</source>
-        <translation>Домашняя позиция</translation>
+        <translation>Дом УП</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="365"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="160"/>
         <source>G0 Properties</source>
         <translation>Параметры G0</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="386"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="181"/>
         <source>Clearence Z</source>
         <translation>Клиренс Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="409"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="204"/>
         <source>Plunge Z</source>
         <translation>Нач. погр. Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="441"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="236"/>
         <source>Safe Z</source>
         <translation>Безопасная Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="473"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="479"/>
         <source>Ok</source>
         <translation>Да</translation>
     </message>
@@ -1171,22 +1170,24 @@ Public License instead of this License.  But first, please read
 <context>
     <name>GerberNode</name>
     <message>
-        <location filename="../filetree/gerbernode.cpp" line="106"/>
         <source>Top|Bottom</source>
-        <translation>Вверх|Вниз</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
 </context>
 <context>
     <name>LayerDelegate</name>
     <message>
-        <location filename="../filetree/layerdelegate.cpp" line="16"/>
         <source>Top</source>
-        <translation>Верх</translation>
+        <translation type="vanished">Верх</translation>
+    </message>
+    <message>
+        <source>Bottom</source>
+        <translation type="vanished">Низ</translation>
     </message>
     <message>
         <location filename="../filetree/layerdelegate.cpp" line="16"/>
-        <source>Bottom</source>
-        <translation>Низ</translation>
+        <source>Top|Bottom</source>
+        <translation>Верх|Низ</translation>
     </message>
 </context>
 <context>
@@ -1197,413 +1198,417 @@ Public License instead of this License.  But first, please read
         <translation>Файлы</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="185"/>
+        <location filename="../mainwindow.cpp" line="183"/>
         <source>Ready</source>
         <translation>Готов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="190"/>
+        <location filename="../mainwindow.cpp" line="188"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="193"/>
+        <location filename="../mainwindow.cpp" line="191"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="198"/>
+        <location filename="../mainwindow.cpp" line="196"/>
         <source>&amp;New project</source>
         <translation>&amp;Новый проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="202"/>
+        <location filename="../mainwindow.cpp" line="200"/>
         <source>Create a new file</source>
         <translation>Создать новый файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="205"/>
+        <location filename="../mainwindow.cpp" line="203"/>
         <source>&amp;Open...</source>
         <translation>&amp;Открыть...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="207"/>
+        <location filename="../mainwindow.cpp" line="205"/>
         <source>Open an existing file</source>
         <translation>Открыть существующий файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="210"/>
+        <location filename="../mainwindow.cpp" line="208"/>
         <source>&amp;Save project</source>
         <translation>&amp;Сохранить проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="212"/>
+        <location filename="../mainwindow.cpp" line="210"/>
         <source>Save the document to disk</source>
         <translation>Сохранить проект на диск</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="216"/>
+        <location filename="../mainwindow.cpp" line="214"/>
         <source>Save project &amp;As...</source>
         <translation>Сохранить проект и &amp;как ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="220"/>
+        <location filename="../mainwindow.cpp" line="218"/>
         <source>Save the document under a new name</source>
         <translation>Сохранить проект под новым именем</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="223"/>
+        <location filename="../mainwindow.cpp" line="221"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation>Сохранить выбранные &amp;УП...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="224"/>
+        <location filename="../mainwindow.cpp" line="222"/>
         <source>Save selected toolpaths</source>
         <translation>Сохранить выбранные УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="227"/>
+        <location filename="../mainwindow.cpp" line="225"/>
         <source>&amp;Export PDF...</source>
         <translation>&amp;Экспорт PDF...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="228"/>
+        <location filename="../mainwindow.cpp" line="226"/>
         <source>Export to PDF file</source>
         <translation>Экспорт в файл PDF</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="234"/>
+        <location filename="../mainwindow.cpp" line="232"/>
         <source>Recent...</source>
         <translation>Последние...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="243"/>
+        <location filename="../mainwindow.cpp" line="241"/>
         <source>Clear Recent Files</source>
-        <translation>Очистить последние файлы</translation>
+        <translation type="unfinished">Очистить список</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="254"/>
-        <location filename="../mainwindow.cpp" line="854"/>
+        <location filename="../mainwindow.cpp" line="252"/>
+        <location filename="../mainwindow.cpp" line="821"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation>&amp;Закрыть проект &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="258"/>
+        <location filename="../mainwindow.cpp" line="256"/>
         <source>Close project</source>
         <translation>Закрыть проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="263"/>
+        <location filename="../mainwindow.cpp" line="261"/>
         <source>P&amp;rint</source>
         <translation>&amp;Печатать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="265"/>
+        <location filename="../mainwindow.cpp" line="263"/>
         <source>Print</source>
         <translation>Печатать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="268"/>
+        <location filename="../mainwindow.cpp" line="266"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="268"/>
         <source>Exit the application</source>
         <translation>Выйти из приложения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="275"/>
+        <location filename="../mainwindow.cpp" line="273"/>
         <source>&amp;Service</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Service</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="276"/>
+        <location filename="../mainwindow.cpp" line="274"/>
         <source>&amp;Settings</source>
         <translation>&amp;Параметры</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="279"/>
+        <location filename="../mainwindow.cpp" line="277"/>
         <source>Show the application&apos;s settings box</source>
         <translation>Показать окно настроек приложения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="284"/>
+        <location filename="../mainwindow.cpp" line="282"/>
         <source>&amp;Help</source>
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="285"/>
+        <location filename="../mainwindow.cpp" line="283"/>
         <source>&amp;About</source>
         <translation>&amp;О G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="286"/>
+        <location filename="../mainwindow.cpp" line="284"/>
         <source>Show the application&apos;s About box</source>
         <translation>Показать окно приложения O G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="288"/>
+        <location filename="../mainwindow.cpp" line="286"/>
         <source>About &amp;Qt</source>
         <translation>О &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="289"/>
+        <location filename="../mainwindow.cpp" line="287"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Показать окно о библиотеки Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
+        <location filename="../mainwindow.cpp" line="292"/>
         <source>Zoom ToolBar</source>
         <translation>Панель Увеличение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="298"/>
+        <location filename="../mainwindow.cpp" line="296"/>
         <source>Fit best</source>
         <translation>Вписать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="302"/>
+        <location filename="../mainwindow.cpp" line="300"/>
         <source>100%</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="305"/>
+        <location filename="../mainwindow.cpp" line="303"/>
         <source>Ctrl+0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="306"/>
+        <location filename="../mainwindow.cpp" line="304"/>
         <source>Zoom in</source>
         <translation>Увеличить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="310"/>
+        <location filename="../mainwindow.cpp" line="308"/>
         <source>Zoom out</source>
         <translation>Уменьшить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="315"/>
+        <location filename="../mainwindow.cpp" line="313"/>
         <source>Zoom to selected</source>
         <translation>Увеличить выбранное</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="322"/>
+        <location filename="../mainwindow.cpp" line="320"/>
         <source>Selection</source>
         <translation>Выбор</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="326"/>
+        <location filename="../mainwindow.cpp" line="324"/>
         <source>Select all</source>
         <translation>Выбрать все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="353"/>
         <source>&amp;Paths</source>
         <translation>&amp;УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="355"/>
         <source>Toolpath</source>
         <translation>Путь инструмента</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="368"/>
+        <location filename="../mainwindow.cpp" line="365"/>
         <source>Pro&amp;file</source>
         <translation>&amp;Профиль</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="374"/>
+        <location filename="../mainwindow.cpp" line="371"/>
         <source>&amp;Pocket</source>
         <translation>&amp;Карман</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="380"/>
+        <location filename="../mainwindow.cpp" line="377"/>
         <source>&amp;Voronoi</source>
         <translation>Диаграмма &amp;Вороного</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="386"/>
+        <location filename="../mainwindow.cpp" line="383"/>
         <source>&amp;Thermal Insulation</source>
         <translation>&amp;Теплоизоляция</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="395"/>
+        <location filename="../mainwindow.cpp" line="392"/>
         <source>&amp;Drilling</source>
-        <translation>&amp;Cверление отверстий</translation>
+        <translation>&amp;Сверловка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="402"/>
         <source>&amp;G-Code Properties</source>
         <translation>П&amp;араметры G-кода</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="416"/>
+        <location filename="../mainwindow.cpp" line="413"/>
         <source>Tool Base</source>
         <translation>База инструментов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="421"/>
+        <location filename="../mainwindow.cpp" line="418"/>
         <source>Autoplace All Refpoints</source>
         <translation>Авторазмещение всех опорных точек</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="439"/>
+        <location filename="../mainwindow.cpp" line="428"/>
         <source>Graphics Items</source>
         <translation>Графические элементы</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="442"/>
+        <location filename="../mainwindow.cpp" line="431"/>
         <source>Rect</source>
         <translation>Прямоугольник</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="447"/>
+        <location filename="../mainwindow.cpp" line="436"/>
         <source>Elipse</source>
         <translation>Окружность</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="482"/>
+        <location filename="../mainwindow.cpp" line="471"/>
         <source>Union</source>
         <translation>Объединение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="483"/>
+        <location filename="../mainwindow.cpp" line="472"/>
         <source>Difference</source>
         <translation>Разница</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="484"/>
+        <location filename="../mainwindow.cpp" line="473"/>
         <source>Exclusion</source>
         <translation>Исключение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="485"/>
+        <location filename="../mainwindow.cpp" line="474"/>
         <source>Intersection</source>
         <translation>Пересечение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="487"/>
+        <location filename="../mainwindow.cpp" line="476"/>
         <source>Undo</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="488"/>
+        <location filename="../mainwindow.cpp" line="477"/>
         <source>Redo</source>
         <translation>Повторить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="490"/>
+        <location filename="../mainwindow.cpp" line="479"/>
         <source>Snap to grid</source>
         <translation>Привязка к сетке</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="512"/>
+        <location filename="../mainwindow.cpp" line="501"/>
         <source>Set Depth</source>
         <translation>Установить глубину</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="621"/>
+        <location filename="../mainwindow.cpp" line="507"/>
+        <source>Pin (</source>
+        <translation>Булавки (</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="607"/>
         <source>&amp;Create path for Pins</source>
         <translation>&amp;Создать УП для булавок</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="622"/>
-        <location filename="../mainwindow.cpp" line="629"/>
+        <location filename="../mainwindow.cpp" line="608"/>
+        <location filename="../mainwindow.cpp" line="615"/>
         <source>Fixed</source>
         <translation>Фиксация</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="635"/>
         <source>Exclude from the calculation</source>
-        <translation>Исключить из расчета</translation>
+        <translation type="vanished">Исключить из расчета</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="639"/>
         <source>Include in the calculation</source>
-        <translation>Включить в расчет</translation>
+        <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="719"/>
-        <location filename="../mainwindow.cpp" line="750"/>
+        <location filename="../mainwindow.cpp" line="706"/>
+        <location filename="../mainwindow.cpp" line="735"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="721"/>
+        <location filename="../mainwindow.cpp" line="708"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation>Любой (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="750"/>
+        <location filename="../mainwindow.cpp" line="735"/>
         <source>Project (*.g2g)</source>
         <translation>Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="765"/>
-        <location filename="../mainwindow.cpp" line="775"/>
-        <location filename="../mainwindow.cpp" line="834"/>
-        <source>Application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="766"/>
+        <location filename="../mainwindow.cpp" line="749"/>
         <source>Do you want to close this project?</source>
-        <translation>Вы хотите закрыть этот проект?</translation>
+        <translation>Закрыть этот проект?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="776"/>
+        <location filename="../mainwindow.cpp" line="749"/>
+        <location filename="../mainwindow.cpp" line="755"/>
+        <location filename="../mainwindow.cpp" line="772"/>
+        <location filename="../mainwindow.cpp" line="793"/>
+        <location filename="../mainwindow.cpp" line="808"/>
+        <source>Warning</source>
+        <translation>Предупреждение</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="755"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>Документ был изменен.
 Вы хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="796"/>
+        <location filename="../mainwindow.cpp" line="772"/>
         <source>Do you want to reload file %1?</source>
-        <translation>Хотите перезагрузить файл%1?</translation>
+        <translation>Перезагрузить файл %1?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="819"/>
+        <location filename="../mainwindow.cpp" line="793"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation>Не удается прочитать файл%1:
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="830"/>
+        <location filename="../mainwindow.cpp" line="804"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="809"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Невозможно записать файл%1:
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="845"/>
         <source>Untitled.g2g</source>
-        <translation>Без названия.g2g</translation>
+        <translation type="vanished">Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="888"/>
+        <location filename="../mainwindow.cpp" line="861"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="935"/>
+        <location filename="../mainwindow.cpp" line="908"/>
         <source>Icon size = 24</source>
         <translation>Размер иконки = 24</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="936"/>
+        <location filename="../mainwindow.cpp" line="909"/>
         <source>Icon size = 48</source>
         <translation>Размер иконки = 48</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="937"/>
+        <location filename="../mainwindow.cpp" line="910"/>
         <source>Icon size = 72</source>
         <translation>Размер иконки = 72</translation>
     </message>
@@ -1618,211 +1623,213 @@ Do you want to save your changes?</source>
     <message>
         <location filename="../forms/pocketform.ui" line="77"/>
         <source>Pocket Toolpath</source>
-        <translation>УП Карман</translation>
+        <translation>Карман</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="116"/>
-        <location filename="../forms/pocketform.ui" line="215"/>
+        <location filename="../forms/pocketform.ui" line="162"/>
+        <location filename="../forms/pocketform.ui" line="237"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="126"/>
-        <location filename="../forms/pocketform.ui" line="225"/>
+        <location filename="../forms/pocketform.ui" line="172"/>
+        <location filename="../forms/pocketform.ui" line="247"/>
         <source>Edit</source>
-        <translation>Редактировать</translation>
+        <translation>Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="144"/>
+        <location filename="../forms/pocketform.ui" line="442"/>
         <source>Raster
 Angle:</source>
         <translation>Угол
 растра:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="165"/>
+        <location filename="../forms/pocketform.ui" line="456"/>
         <source> °</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="184"/>
+        <location filename="../forms/pocketform.ui" line="190"/>
         <source>Use Larger area clearance tool</source>
         <translation>Инструмент «Большая площадь»</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="200"/>
+        <location filename="../forms/pocketform.ui" line="517"/>
         <source>Steps:</source>
         <translation>Шаги:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="261"/>
+        <location filename="../forms/pocketform.ui" line="293"/>
         <source>Aligin</source>
         <translation>Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="282"/>
+        <location filename="../forms/pocketform.ui" line="314"/>
         <source>Outside</source>
         <translation>Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="295"/>
+        <location filename="../forms/pocketform.ui" line="327"/>
         <source>Inside</source>
         <translation>Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="308"/>
+        <location filename="../forms/pocketform.ui" line="340"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="329"/>
+        <location filename="../forms/pocketform.ui" line="361"/>
         <source>Offset</source>
         <translation>Смещение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="342"/>
+        <location filename="../forms/pocketform.ui" line="374"/>
         <source>Raster</source>
         <translation>Растр</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="355"/>
+        <location filename="../forms/pocketform.ui" line="387"/>
         <source>Direction</source>
         <translation>Направление</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="376"/>
+        <location filename="../forms/pocketform.ui" line="408"/>
         <source>Climb</source>
         <translation>Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="389"/>
+        <location filename="../forms/pocketform.ui" line="421"/>
         <source>Conventional</source>
         <translation>Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="405"/>
+        <location filename="../forms/pocketform.ui" line="490"/>
         <source>No Profile Pass</source>
         <translation>Без профиля</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="410"/>
+        <location filename="../forms/pocketform.ui" line="495"/>
         <source>First</source>
-        <translation>Сначала</translation>
+        <translation>В начале</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="415"/>
+        <location filename="../forms/pocketform.ui" line="500"/>
         <source>Last</source>
         <translation>В конце</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="432"/>
+        <location filename="../forms/pocketform.ui" line="596"/>
         <source>Name:</source>
         <translation>Название:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="471"/>
+        <location filename="../forms/pocketform.ui" line="134"/>
         <source>Tool:</source>
         <translation>Инстр.:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="490"/>
+        <location filename="../forms/pocketform.ui" line="102"/>
         <source>Depth:</source>
         <translation>Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="509"/>
+        <location filename="../forms/pocketform.ui" line="212"/>
         <source>Tool2:</source>
         <translation>Инстр. 2:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="528"/>
+        <location filename="../forms/pocketform.ui" line="475"/>
         <source>Profile
 Pass:</source>
         <translation>Проход
 профиля:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="589"/>
+        <location filename="../forms/pocketform.ui" line="541"/>
         <source>Min T1
 Area:</source>
-        <translation>Мин Площадь
-Инср.1:</translation>
+        <translation>Мин.
+площадь
+инср.1:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="600"/>
+        <location filename="../forms/pocketform.ui" line="552"/>
         <source> mm²</source>
         <translation> мм²</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="622"/>
+        <location filename="../forms/pocketform.ui" line="616"/>
         <source>Create</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.ui" line="648"/>
+        <location filename="../forms/pocketform.ui" line="626"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="102"/>
-        <location filename="../forms/pocketform.cpp" line="298"/>
+        <location filename="../forms/pocketform.cpp" line="114"/>
+        <location filename="../forms/pocketform.cpp" line="306"/>
         <source> - Infinity</source>
         <translation> - До заполнения</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="143"/>
-        <location filename="../forms/pocketform.cpp" line="157"/>
-        <location filename="../forms/pocketform.cpp" line="171"/>
-        <location filename="../forms/pocketform.cpp" line="188"/>
-        <location filename="../forms/pocketform.cpp" line="270"/>
+        <location filename="../forms/pocketform.cpp" line="151"/>
+        <location filename="../forms/pocketform.cpp" line="165"/>
+        <location filename="../forms/pocketform.cpp" line="179"/>
+        <location filename="../forms/pocketform.cpp" line="196"/>
+        <location filename="../forms/pocketform.cpp" line="242"/>
+        <location filename="../forms/pocketform.cpp" line="278"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="143"/>
-        <location filename="../forms/pocketform.cpp" line="157"/>
-        <location filename="../forms/pocketform.cpp" line="171"/>
-        <location filename="../forms/pocketform.cpp" line="188"/>
+        <location filename="../forms/pocketform.cpp" line="151"/>
+        <location filename="../forms/pocketform.cpp" line="165"/>
+        <location filename="../forms/pocketform.cpp" line="179"/>
+        <location filename="../forms/pocketform.cpp" line="196"/>
         <source>The diameter of the second tool must be greater than the first!</source>
         <translation>Диаметр второго инструмента должен быть больше первого!</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="234"/>
+        <location filename="../forms/pocketform.cpp" line="242"/>
         <source>Working items from different files!</source>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="270"/>
+        <location filename="../forms/pocketform.cpp" line="278"/>
         <source>No selected items for working...</source>
         <translation>Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Pocket On</source>
         <translation>Карман поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Pocket Outside</source>
         <translation>Карман снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Pocket Inside</source>
         <translation>Карман внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Raster On</source>
         <translation>Растр поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Raster Outside</source>
         <translation>Растр снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="303"/>
+        <location filename="../forms/pocketform.cpp" line="311"/>
         <source>Raster Inside</source>
         <translation>Растр внутри</translation>
     </message>
@@ -1835,97 +1842,97 @@ Area:</source>
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="71"/>
+        <location filename="../forms/profileform.ui" line="74"/>
         <source>Profile Toolpath</source>
-        <translation>УП Профиль</translation>
+        <translation>Профиль</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="111"/>
+        <location filename="../forms/profileform.ui" line="90"/>
         <source>Depth:</source>
         <translation>Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="124"/>
+        <location filename="../forms/profileform.ui" line="106"/>
         <source>Tool:</source>
         <translation>Инстр.:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="143"/>
+        <location filename="../forms/profileform.ui" line="125"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="150"/>
+        <location filename="../forms/profileform.ui" line="132"/>
         <source>Edit</source>
-        <translation>Редактировать</translation>
+        <translation>Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="171"/>
+        <location filename="../forms/profileform.ui" line="153"/>
         <source>Aligin</source>
         <translation>Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="189"/>
+        <location filename="../forms/profileform.ui" line="171"/>
         <source>Outside</source>
         <translation>Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="199"/>
+        <location filename="../forms/profileform.ui" line="181"/>
         <source>Inside</source>
         <translation>Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="206"/>
+        <location filename="../forms/profileform.ui" line="188"/>
         <source>On</source>
         <translation>Поверху</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="216"/>
+        <location filename="../forms/profileform.ui" line="198"/>
         <source>Direction</source>
         <translation>Направление</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="234"/>
+        <location filename="../forms/profileform.ui" line="216"/>
         <source>Climb</source>
         <translation>Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="244"/>
+        <location filename="../forms/profileform.ui" line="226"/>
         <source>Conventional</source>
         <translation>Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="254"/>
+        <location filename="../forms/profileform.ui" line="236"/>
         <source>Bridges</source>
         <translation>Мосты</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="278"/>
+        <location filename="../forms/profileform.ui" line="260"/>
         <source>Lenght:</source>
         <translation>Длинна:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="285"/>
+        <location filename="../forms/profileform.ui" line="267"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="307"/>
+        <location filename="../forms/profileform.ui" line="289"/>
         <source>Add Bridge</source>
         <translation>Добавить мост</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="354"/>
+        <location filename="../forms/profileform.ui" line="336"/>
         <source>Name:</source>
         <translation>Название:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="370"/>
+        <location filename="../forms/profileform.ui" line="346"/>
         <source>Create</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="390"/>
+        <location filename="../forms/profileform.ui" line="353"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
@@ -1935,6 +1942,7 @@ Area:</source>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
+        <location filename="../forms/profileform.cpp" line="168"/>
         <location filename="../forms/profileform.cpp" line="191"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
@@ -1963,19 +1971,24 @@ Area:</source>
 <context>
     <name>Project</name>
     <message>
-        <location filename="../project.cpp" line="283"/>
-        <location filename="../project.cpp" line="293"/>
+        <location filename="../project.cpp" line="258"/>
+        <source>Untitled.g2g</source>
+        <translation>Без названия.g2g</translation>
+    </message>
+    <message>
+        <location filename="../project.cpp" line="289"/>
+        <location filename="../project.cpp" line="299"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="283"/>
-        <location filename="../project.cpp" line="293"/>
+        <location filename="../project.cpp" line="289"/>
+        <location filename="../project.cpp" line="299"/>
         <source>GCode (*.tap)</source>
         <translation>УП (*.tap)</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="338"/>
+        <location filename="../project.cpp" line="344"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>
@@ -1983,14 +1996,12 @@ Area:</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../filetree/gcodenode.cpp" line="94"/>
         <source>Top</source>
-        <translation>Верх</translation>
+        <translation type="vanished">Верх</translation>
     </message>
     <message>
-        <location filename="../filetree/gcodenode.cpp" line="94"/>
         <source>Bottom</source>
-        <translation>Низ</translation>
+        <translation type="vanished">Низ</translation>
     </message>
     <message>
         <location filename="../gi/drillitem.cpp" line="99"/>
@@ -2004,17 +2015,17 @@ Area:</source>
         <source>There are no selected items to define the border.
 The old border will be used.</source>
         <translation>Нет выбранных элементов для определения границы.
-Старая граница будет использована.</translation>
+Будет использована предыдущая граница.</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="41"/>
         <source>G-Code Home Point</source>
-        <translation>Домашняя точка.УП</translation>
+        <translation>Дом.УП</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="45"/>
         <source>G-Code Zero Point</source>
-        <translation>Нулевая точка УП</translation>
+        <translation>Ноль УП</translation>
     </message>
     <message>
         <location filename="../point.cpp" line="395"/>
@@ -2037,6 +2048,11 @@ X %2:Y %3</translation>
         <location filename="../../gerber/gbraperture.cpp" line="658"/>
         <source>Bad thermal macro!</source>
         <translation>Плохой тепловой макрос!</translation>
+    </message>
+    <message>
+        <location filename="../filetree/abstractnode.cpp" line="7"/>
+        <source>Top|Bottom</source>
+        <translation>Верх|Низ</translation>
     </message>
 </context>
 <context>
@@ -2205,7 +2221,7 @@ X %2:Y %3</translation>
     <message>
         <location filename="../settingsdialog.ui" line="354"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - only if the value has changed.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - always.&lt;/p&gt;&lt;p&gt;If one of the commands &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; and&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; is missing, it will not be inserted into the G-code.&lt;/p&gt;&lt;p&gt;If there is a space between the teams, then it will also be inserted into the G-code.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;По умолчанию &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - только если значение изменилось.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - всегда.&lt;/p&gt;&lt;p&gt;Если одна из команд &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; и&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; отсутствует, она не будет вставлена в G-код.&lt;/p&gt;&lt;p&gt;Если между командами есть пробел, он также будет вставлен в G-код.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="364"/>
@@ -2275,64 +2291,97 @@ X %2:Y %3</translation>
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="62"/>
+        <location filename="../forms/thermal/thermalform.ui" line="95"/>
         <source>Thermal Insulation Toolpath</source>
-        <translation>УП Термоизоляции</translation>
+        <translation>Термоизоляция</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="99"/>
+        <location filename="../forms/thermal/thermalform.ui" line="35"/>
         <source>Exclude deselected thermals.</source>
         <translation>Исключить невыбранные &quot;термики&quot;.</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="122"/>
+        <location filename="../forms/thermal/thermalform.ui" line="185"/>
         <source>Tool:</source>
         <translation>Инстр.:</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="138"/>
+        <location filename="../forms/thermal/thermalform.ui" line="111"/>
         <source>File:</source>
         <translation>Файл:</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="150"/>
+        <location filename="../forms/thermal/thermalform.ui" line="197"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="157"/>
+        <location filename="../forms/thermal/thermalform.ui" line="204"/>
         <source>Edit</source>
-        <translation>Редактировать</translation>
+        <translation>Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="178"/>
+        <location filename="../forms/thermal/thermalform.ui" line="133"/>
         <source>Depth:</source>
         <translation>Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="224"/>
+        <location filename="../forms/thermal/thermalform.ui" line="149"/>
         <source>Name:</source>
         <translation>Название:</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="260"/>
+        <location filename="../forms/thermal/thermalform.ui" line="55"/>
         <source>Create</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.ui" line="267"/>
+        <location filename="../forms/thermal/thermalform.ui" line="213"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.cpp" line="151"/>
+        <location filename="../forms/thermal/thermalform.cpp" line="154"/>
         <source>No data to process.</source>
         <translation>Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../forms/thermal/thermalform.cpp" line="222"/>
+        <location filename="../forms/thermal/thermalform.cpp" line="225"/>
         <source>Thermal</source>
         <translation>Термоизоляция</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="241"/>
+        <source>All</source>
+        <translation>Все</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="259"/>
+        <source>Regions</source>
+        <translation>Полигоны</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="260"/>
+        <source>Region</source>
+        <translation>Полигон</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="268"/>
+        <source>Lines</source>
+        <translation>Проводники</translation>
+    </message>
+    <message>
+        <location filename="../forms/thermal/thermalform.cpp" line="269"/>
+        <source>Line</source>
+        <translation>Проводник</translation>
+    </message>
+</context>
+<context>
+    <name>ThermalModel</name>
+    <message>
+        <location filename="../forms/thermal/thermalmodel.cpp" line="87"/>
+        <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
+        <translation>     Имя|Поз.(X:Y)|Угол|Ширина|Кол-во</translation>
     </message>
 </context>
 <context>
@@ -2509,8 +2558,8 @@ X %2:Y %3</translation>
     </message>
     <message>
         <location filename="../tooldatabase/tooleditform.ui" line="426"/>
-        <source>Feed Speeds (Set checkbox for automatic calculation)</source>
-        <translation>Скорость подачи (Установите флажок для автоматического расчета)</translation>
+        <source>Feed Speeds</source>
+        <translation>Скорости подач</translation>
     </message>
     <message>
         <location filename="../tooldatabase/tooleditform.ui" line="450"/>
@@ -2620,40 +2669,40 @@ X %2:Y %3</translation>
         <translation>G-код (*.tap)</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="168"/>
-        <location filename="../filetree/treeview.cpp" line="193"/>
+        <location filename="../filetree/treeview.cpp" line="190"/>
+        <location filename="../filetree/treeview.cpp" line="196"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть проект</translation>
+        <translation>&amp;Закрыть</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="169"/>
-        <location filename="../filetree/treeview.cpp" line="194"/>
-        <location filename="../filetree/treeview.cpp" line="200"/>
+        <location filename="../filetree/treeview.cpp" line="168"/>
+        <location filename="../filetree/treeview.cpp" line="193"/>
+        <location filename="../filetree/treeview.cpp" line="199"/>
         <source>&amp;Hide other</source>
         <translation>&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="171"/>
+        <location filename="../filetree/treeview.cpp" line="170"/>
         <source>&amp;Raw Lines</source>
         <translation>&quot;С&amp;ырые&quot; линии</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="176"/>
+        <location filename="../filetree/treeview.cpp" line="175"/>
         <source>&amp;Show source</source>
         <translation>&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="196"/>
+        <location filename="../filetree/treeview.cpp" line="195"/>
         <source>&amp;Edit Format</source>
         <translation>&amp;Редактировать формат</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="199"/>
+        <location filename="../filetree/treeview.cpp" line="201"/>
         <source>&amp;Delete Toolpath</source>
         <translation>&amp;Удалить УП</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="201"/>
+        <location filename="../filetree/treeview.cpp" line="200"/>
         <source>&amp;Save Toolpath</source>
         <translation>&amp;Сохранить УП</translation>
     </message>
@@ -2681,58 +2730,58 @@ X %2:Y %3</translation>
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="65"/>
+        <location filename="../forms/voronoiform.ui" line="68"/>
         <source>Voronoi Toolpath</source>
-        <translation>УП Диаграмма Вороного</translation>
+        <translation>Диаграмма Вороного</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="105"/>
+        <location filename="../forms/voronoiform.ui" line="84"/>
         <source>Depth:</source>
         <translation>Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="118"/>
+        <location filename="../forms/voronoiform.ui" line="97"/>
         <source>Tool:</source>
         <translation>Инстр.:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="137"/>
+        <location filename="../forms/voronoiform.ui" line="119"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="144"/>
+        <location filename="../forms/voronoiform.ui" line="126"/>
         <source>Edit</source>
-        <translation>Редактировать</translation>
+        <translation>Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="169"/>
+        <location filename="../forms/voronoiform.ui" line="151"/>
         <source>Precision:</source>
         <translation>Точность:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="176"/>
-        <location filename="../forms/voronoiform.ui" line="240"/>
+        <location filename="../forms/voronoiform.ui" line="171"/>
+        <location filename="../forms/voronoiform.ui" line="193"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="214"/>
+        <location filename="../forms/voronoiform.ui" line="212"/>
         <source>Name:</source>
         <translation>Название:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="233"/>
+        <location filename="../forms/voronoiform.ui" line="164"/>
         <source>Width:</source>
         <translation>Ширина:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="256"/>
+        <location filename="../forms/voronoiform.ui" line="239"/>
         <source>Create</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="276"/>
+        <location filename="../forms/voronoiform.ui" line="232"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
@@ -2743,7 +2792,10 @@ X %2:Y %3</translation>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
+        <location filename="../forms/voronoiform.cpp" line="119"/>
+        <location filename="../forms/voronoiform.cpp" line="131"/>
         <location filename="../forms/voronoiform.cpp" line="148"/>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
@@ -2756,6 +2808,11 @@ X %2:Y %3</translation>
         <location filename="../forms/voronoiform.cpp" line="167"/>
         <source>Voronoi</source>
         <translation>Вороной</translation>
+    </message>
+    <message>
+        <location filename="../forms/voronoiform.cpp" line="180"/>
+        <source>The width must be larger than the tool diameter!</source>
+        <translation>Ширина должна быть больше диаметра инструмента!</translation>
     </message>
 </context>
 </TS>

@@ -54,7 +54,7 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     painter->drawPolyline(toQPolygon(m_path));
 }
 
-int RawItem::type() const { return RawItemType; }
+int RawItem::type() const { return GiRaw; }
 
 Paths RawItem::paths() const { return { m_path }; }
 

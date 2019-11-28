@@ -27,8 +27,6 @@ PocketForm::PocketForm(QWidget* parent)
     ui->setupUi(this);
     ui->lblToolName->setText(tool.name());
     ui->lblToolName_2->setText(tool2.name());
-    updateArea();
-    //    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     auto rb_clicked = [this] {
         if (ui->rbOutside->isChecked())
@@ -42,6 +40,11 @@ PocketForm::PocketForm(QWidget* parent)
             type = Raster;
             ui->chbxUseTwoTools->setChecked(false);
         }
+
+        if (ui->rbClimb->isChecked())
+            direction = GCode::Climb;
+        else if (ui->rbConventional->isChecked())
+            direction = GCode::Conventional;
         {
             ui->cbxPass->setVisible(ui->rbRaster->isChecked());
             ui->labelPass->setVisible(ui->rbRaster->isChecked());
@@ -53,39 +56,49 @@ PocketForm::PocketForm(QWidget* parent)
             ui->sbxSteps->setVisible(!ui->rbRaster->isChecked());
             ui->labelSteps->setVisible(!ui->rbRaster->isChecked());
         }
+        {
+            const bool checked = ui->chbxUseTwoTools->isChecked();
+            ui->chbxUseTwoTools->setChecked(checked);
 
-        if (ui->rbClimb->isChecked())
-            direction = GCode::Climb;
-        else if (ui->rbConventional->isChecked())
-            direction = GCode::Conventional;
+            ui->labelSteps->setVisible(!checked && type != Raster);
+            ui->sbxSteps->setVisible(!checked && type != Raster);
+
+            ui->dsbxMinArea->setVisible(checked);
+            ui->labelMinArea->setVisible(checked);
+
+            ui->labelToolName2->setVisible(checked);
+            ui->lblToolName_2->setVisible(checked);
+
+            ui->pbEdit_2->setVisible(checked);
+            ui->pbSelect_2->setVisible(checked);
+        }
 
         updateName();
         updatePixmap();
     };
 
+    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbOffset, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
+    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, rb_clicked);
+
     QSettings settings;
     settings.beginGroup("PocketForm");
-    if (settings.value("rbClimb").toBool())
-        ui->rbClimb->setChecked(true);
-    if (settings.value("rbConventional").toBool())
-        ui->rbConventional->setChecked(true);
-    if (settings.value("rbInside").toBool())
-        ui->rbInside->setChecked(true);
-    if (settings.value("rbOffset").toBool())
-        ui->rbOffset->setChecked(true);
-    if (settings.value("rbOutside").toBool())
-        ui->rbOutside->setChecked(true);
-    if (settings.value("rbRaster").toBool())
-        ui->rbRaster->setChecked(true);
-    ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
     ui->cbxPass->setCurrentIndex(settings.value("cbxPass").toInt());
+    ui->chbxUseTwoTools->setChecked(settings.value("chbxUseTwoTools").toBool());
+    ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
+    ui->dsbxDepth->rbBoard->setChecked(settings.value("rbBoard").toBool());
+    ui->dsbxDepth->rbCopper->setChecked(settings.value("rbCopper").toBool());
     ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
-    if (settings.value("rbBoard").toBool())
-        ui->dsbxDepth->rbBoard->setChecked(true);
-    if (settings.value("rbCopper").toBool())
-        ui->dsbxDepth->rbCopper->setChecked(true);
-    rb_clicked();
-    on_chbxUseTwoTools_toggled(settings.value("chbxUseTwoTools").toBool());
+    ui->rbClimb->setChecked(settings.value("rbClimb").toBool());
+    ui->rbConventional->setChecked(settings.value("rbConventional").toBool());
+    ui->rbInside->setChecked(settings.value("rbInside").toBool());
+    ui->rbOffset->setChecked(settings.value("rbOffset").toBool());
+    ui->rbOutside->setChecked(settings.value("rbOutside").toBool());
+    ui->rbRaster->setChecked(settings.value("rbRaster").toBool());
     settings.endGroup();
 
     ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
@@ -95,18 +108,14 @@ PocketForm::PocketForm(QWidget* parent)
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
-    }
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 
-    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOffset, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
+    updateArea();
+    rb_clicked();
+
     parent->setWindowTitle(ui->label->text());
 }
 
@@ -114,19 +123,18 @@ PocketForm::~PocketForm()
 {
     QSettings settings;
     settings.beginGroup("PocketForm");
+    settings.setValue("cbxPass", ui->cbxPass->currentIndex());
+    settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
+    settings.setValue("dsbxAngle", ui->dsbxAngle->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.setValue("rbInside", ui->rbInside->isChecked());
     settings.setValue("rbOffset", ui->rbOffset->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
-    settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
-
-    settings.setValue("dsbxAngle", ui->dsbxAngle->value());
-    settings.setValue("cbxPass", ui->cbxPass->currentIndex());
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
     delete ui;
 }
@@ -225,26 +233,26 @@ void PocketForm::createFile()
     for (auto* item : Scene::selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
-        case GerberItemType:
-        case RawItemType:
+        case GiGerber:
+        case GiRaw:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
             } else if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
-            if (item->type() == GerberItemType)
+            if (item->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;
-        case Shape:
+        case GiShapeC:
             wRawPaths.append(gi->paths());
             //m_used[gi->file()->id()].append(gi->id());
             break;
-        case DrillItemType:
+        case GiDrill:
             wPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;
@@ -338,24 +346,4 @@ void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1;
 
 void PocketForm::editFile(GCode::File* /*file*/)
 {
-}
-
-void PocketForm::on_chbxUseTwoTools_toggled(bool checked)
-{
-    //ui->pbSelect_2->setEnabled(checked);
-    //ui->lblToolName_2->setEnabled(checked);
-    //ui->pbEdit_2->setEnabled(checked);
-    //ui->sbxSteps->setEnabled(!checked);
-    ui->chbxUseTwoTools->setChecked(checked);
-
-    ui->labelSteps->setVisible(!checked);
-    ui->sbxSteps->setVisible(!checked);
-
-    ui->dsbxMinArea->setVisible(checked);
-    ui->labelMinArea->setVisible(checked);
-
-    ui->labelToolName2->setVisible(checked);
-    ui->lblToolName_2->setVisible(checked);
-    ui->pbEdit_2->setVisible(checked);
-    ui->pbSelect_2->setVisible(checked);
 }
