@@ -524,8 +524,8 @@ void MainWindow::readSettings()
     restoreState(settings.value("state", QByteArray()).toByteArray());
 
     lastPath = settings.value("lastPath").toString();
-    pro->setName(settings.value("project").toString());
-    loadFile(pro->name());
+    //    pro->setName(settings.value("project").toString());
+    //    loadFile(pro->name());
 
     SettingsDialog().readSettings();
     settings.endGroup();
@@ -578,7 +578,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
+                printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);

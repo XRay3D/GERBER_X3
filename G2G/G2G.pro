@@ -13,6 +13,10 @@ ICON = 256.png
 
 #macx: ICON = resources/icon.icns
 
+#debug {
+#    CONFIG += console
+#}
+
 msvc* {
     QMAKE_CXXFLAGS += /std:c++latest
     LIBS += -lsetupapi -lAdvapi32
