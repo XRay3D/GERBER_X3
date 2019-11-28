@@ -74,11 +74,7 @@ void translation(QApplication* app)
     qDebug() << "locale:" << loc;
     QString trFolder;
     if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
-#ifdef linux
-        trFolder = "../../G2G/translations/";
-#else
         trFolder = "../G2G/translations/";
-#endif
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
 
