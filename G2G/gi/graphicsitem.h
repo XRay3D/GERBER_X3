@@ -7,16 +7,23 @@
 
 using namespace ClipperLib;
 
-enum GiType {
-    GerberItemType = QGraphicsItem::UserType,
-    BridgeType,
-    DrillItemType,
-    PathItemType,
-    PointHomeType,
-    PointZeroType,
-    RawItemType,
-    PinType,
-    Shape,
+enum GraphicsItemType {
+    GiGerber = QGraphicsItem::UserType,
+    GiBridge,
+    GiDrill,
+    GiPath,
+    GiPointHome,
+    GiPointZero,
+    GiRaw,
+    GiPin,
+
+    GiThermalPr, // ThermalForm
+    GiSlotPr, // DrillForm
+    GiDrillPr, // DrillForm
+    GiApetrurePr, // DrillForm
+
+    GiShapeC,
+    GiShapeR = GiShapeC,
 };
 
 class AbstractFile;
@@ -41,7 +48,11 @@ public:
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
-    virtual Paths& rPaths() { static Paths p; return p; }
+    virtual Paths& rPaths()
+    {
+        static Paths p;
+        return p;
+    }
     virtual void redraw() {}
 
     //    void setItemGroup(ItemGroup* itemGroup);

@@ -11,7 +11,7 @@ public:
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return GiType::Shape; }
+    int type() const override { return GiShapeR; }
 
     // GraphicsItem interface
     void redraw() override;

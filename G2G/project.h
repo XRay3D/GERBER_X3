@@ -15,6 +15,7 @@ using namespace ClipperLib;
 enum FileVersion {
     G2G_Ver_1 = 1,
     G2G_Ver_1_1,
+    G2G_Ver_1_2,
 };
 
 class Project : public QObject {
@@ -119,7 +120,7 @@ public:
     static bool contains(AbstractFile* file);
     static void setIsModified(bool isModified) { m_isModified = isModified; }
     static QString name() { return m_name; }
-    void setName(const QString& name) { m_name = name; }
+    void setName(const QString& name);
     static int ver();
     static void setChanged()
     {
@@ -128,13 +129,16 @@ public:
     }
 
     static void saveSelectedToolpaths();
+    static bool isUntitled();
+    static void setUntitled(bool value);
+
 signals:
     void changed();
 
 private:
+    static bool m_isUntitled;
     static QString m_name;
     static int m_ver;
-
     static bool m_isModified;
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;

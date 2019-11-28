@@ -35,6 +35,7 @@ public:
     AbstractNode& operator=(const AbstractNode&) = delete;
 
 protected:
+    const QStringList tbStrList;
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
     const int m_id;

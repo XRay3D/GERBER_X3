@@ -12,6 +12,7 @@
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QOperatingSystemVersion>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QProgressDialog>
@@ -36,7 +37,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     scene = reinterpret_cast<Scene*>(graphicsView->scene());
 
-    init();
+    initWidgets();
 
     GCodePropertiesForm::zeroPoint = new Marker(Marker::Zero);
     GCodePropertiesForm::homePoint = new Marker(Marker::Home);
@@ -61,55 +62,53 @@ MainWindow::MainWindow(QWidget* parent)
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
 
-    if (/* DISABLES CODE */ (0)) {
-        QPainterPath painterPath;
-        QFont font;
-        font.setPointSizeF(10);
-        painterPath.addText(QPointF(1, -23), font, "Gerber X2");
-        painterPath.addText(QPointF(1, -12), font, "to");
-        painterPath.addText(QPointF(1, -01), font, "G Code");
-        QGraphicsPathItem* pathItem = new QGraphicsPathItem(painterPath);
-        pathItem->setAcceptHoverEvents(true);
-        pathItem->setBrush(QColor(255, 180, 120));
-        pathItem->setPen(Qt::NoPen);
-        QTransform tr = QTransform::fromScale(2, -2);
-        pathItem->setTransform(tr);
-        Scene::addItem(pathItem);
-    }
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows) {
+        if (QOperatingSystemVersion::current().majorVersion() > 7) {
+            setStyleSheet("QGroupBox, .QFrame {"
+                          "background-color: white;"
+                          "border: 1px solid gray;"
+                          "}"
+                          "QGroupBox {"
+                          "margin-top: 3ex;" /* leave space at the top for the title */
+                          "}"
+                          "QGroupBox::title {"
+                          "subcontrol-origin: margin;"
+                          "subcontrol-position: top center;" /* position at the top center */
+                          "}");
 
-    //    QLatin1String styleSheet("QGroupBox, .QFrame {"
-    //                             "background-color: rgb(255,255,255);"
-    //                             "border: 1px solid gray;"
-    //                             "}"
-    //                             "QGroupBox {"
-    //                             "margin-top: 3ex; /* leave space at the top for the title */"
-    //                             "}"
-    //                             "QGroupBox::title {"
-    //                             "subcontrol-origin: margin;"
-    //                             //"margin-top: -1ex;"
-    //                             "subcontrol-position: top center; /* position at the top center */"
-    //                             //"padding: 0 1ex;"
-    //                             "}");
-    //    setStyleSheet(styleSheet);
+        } else {
+            setStyleSheet("QGroupBox, .QFrame {"
+                          "background-color: white;"
+                          "border: 1px solid gray;"
+                          "border-radius: 3px;" // Win 7
+                          "}"
+                          "QGroupBox {"
+                          "margin-top: 3ex;" /* leave space at the top for the title */
+                          "}"
+                          "QGroupBox::title {"
+                          "subcontrol-origin: margin;"
+                          "subcontrol-position: top center;" /* position at the top center */
+                          "}");
+        }
+    } else {
+        setStyleSheet("QGroupBox, .QFrame {"
+                      "background-color: white;"
+                      "border: 1px solid gray;"
+                      "border-radius: 3px;" // other
+                      "}"
+                      "QGroupBox {"
+                      "margin-top: 3ex;" /* leave space at the top for the title */
+                      "}"
+                      "QGroupBox::title {"
+                      "subcontrol-origin: margin;"
+                      "subcontrol-position: top center;" /* position at the top center */
+                      "}");
+    }
 
     ToolHolder::readTools();
     setCurrentFile(QString());
     readSettings();
-
-    GCodePropertiesForm(); //init vars;
-
-    if (/* DISABLES CODE */ (0))
-        QTimer::singleShot(500, [this] {
-            toolpathActionList[GCode::Drill]->trigger();
-            //selectAll();
-            //reinterpret_cast<FormsUtil*>(dockWidget->widget())->createFile();
-            //loadFile("D:\\gerber_file_format_examples 20181113\\2-13-1_Two_square_boxes.gbr");
-            // QTimer::singleShot(10, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
-        });
-    else {
-        QTimer::singleShot(100, [this] { toolpathActionList[GCode::GCodeProperties]->trigger(); });
-    }
-
+    GCodePropertiesForm(); // init vars;
     self = this;
 }
 
@@ -157,9 +156,8 @@ void MainWindow::about()
     a.exec();
 }
 
-void MainWindow::init()
+void MainWindow::initWidgets()
 {
-    isUntitled = true;
     createActions();
     connect(pro, &Project::changed, this, &MainWindow::documentWasModified);
     setUnifiedTitleAndToolBarOnMac(true);
@@ -363,7 +361,6 @@ void MainWindow::createActionsToolPath()
 
     connect(dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-    dockWidget->hide();
 
     toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
         createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
@@ -419,17 +416,9 @@ void MainWindow::createActionsToolPath()
     });
     toolpathToolBar->addSeparator();
     toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
-        //        QList<bool> selected;
-        //        for (QGraphicsItem* item : Scene::items()) {
-        //            selected.append(item->isSelected());
-        //            if (item->isVisible())
-        //                item->setSelected(true);
-        //        }
         Pin::pins().first()->resetPos();
         GCodePropertiesForm::homePoint->resetPos(false);
         GCodePropertiesForm::zeroPoint->resetPos(false);
-        //        for (QGraphicsItem* item : Scene::items())
-        //            item->setSelected(selected.takeFirst());
         graphicsView->zoomFit();
     });
 }
@@ -459,12 +448,12 @@ void MainWindow::createActionsGraphics()
         QList<QGraphicsItem*> si = Scene::selectedItems();
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
-            if (item->type() == GerberItemType) {
+            if (item->type() == GiGerber) {
                 GerberItem* gitem = reinterpret_cast<GerberItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
                 for (QGraphicsItem* item : si)
-                    if (item->type() == Shape)
+                    if (item->type() == GiShapeC)
                         clipper.AddPaths(reinterpret_cast<GraphicsItem*>(item)->paths(), ptClip, true);
                 clipper.Execute(type, gitem->rPaths(), pftEvenOdd, pftPositive);
                 if (gitem->rPaths().isEmpty()) {
@@ -515,7 +504,7 @@ void MainWindow::createPinsPath()
         settings.setValue("Pin/depth", depth);
 
         GCode::File* gcode = new GCode::File({ { toPath(dst) } }, tool, depth, GCode::Drill);
-        gcode->setFileName("Pin (Tool Id " + QString::number(tool.id()) + ")");
+        gcode->setFileName(tr("Pin (") + tool.name() + ")");
         Project::addFile(gcode);
     }
 }
@@ -537,9 +526,6 @@ void MainWindow::readSettings()
     lastPath = settings.value("lastPath").toString();
     pro->setName(settings.value("project").toString());
     loadFile(pro->name());
-    //loadFile(settings.value("project").toString());
-    // for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
-    // openFile(file);
 
     SettingsDialog().readSettings();
     settings.endGroup();
@@ -592,7 +578,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
+                  printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);
@@ -617,7 +603,7 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
     if (!item)
         return;
 
-    if (item->type() == PinType) {
+    if (item->type() == GiPin) {
         a = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
         a = menu.addAction(tr("Fixed"), [](bool fl) {
             for (Pin* item : Pin::pins())
@@ -630,16 +616,17 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
             [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
         a->setCheckable(true);
         a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
-    } else if (item->type() == ThermalType) {
-        if (item->flags() & QGraphicsItem::ItemIsSelectable)
-            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
-                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
-            });
-        else
-            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
-                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
-            });
     }
+    //    else if (item->type() == GiThermalPr) {
+    //        if (item->flags() & QGraphicsItem::ItemIsSelectable)
+    //            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
+    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
+    //            });
+    //        else
+    //            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
+    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
+    //            });
+    //    }
     if (a)
         menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
@@ -730,18 +717,16 @@ void MainWindow::open()
             loadFile(fileName);
         }
     }
-
-    QString name(QFileInfo(files.first()).path());
-    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+    //    QString name(QFileInfo(files.first()).path());
+    //    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
 }
 
 bool MainWindow::save()
 {
-    if (isUntitled) {
+    if (pro->isUntitled())
         return saveAs();
-    } else {
+    else
         return saveFile(pro->name());
-    }
 }
 
 bool MainWindow::saveAs()
@@ -761,20 +746,14 @@ void MainWindow::documentWasModified()
 bool MainWindow::maybeSave()
 {
     if (!pro->isModified() && pro->size()) {
-        return QMessageBox::warning(this,
-                   tr("Application"),
-                   tr("Do you want to close this project?"),
-                   QMessageBox::Ok | QMessageBox::Cancel)
-            == QMessageBox::Ok;
+        return QMessageBox::warning(this, tr("Warning"), tr("Do you want to close this project?"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok;
     } else if (!pro->size()) {
         return true;
     }
 
     const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this,
-            tr("Application"),
-            tr("The document has been modified.\n"
-               "Do you want to save your changes?"),
+        = QMessageBox::warning(this, tr("Warning"), tr("The document has been modified.\n"
+                                                       "Do you want to save your changes?"),
             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     switch (ret) {
     case QMessageBox::Save:
@@ -789,13 +768,8 @@ bool MainWindow::maybeSave()
 
 void MainWindow::loadFile(const QString& fileName)
 {
-    qDebug() << "loadFile" << fileName;
     if (Project::contains(fileName) != -1
-        && QMessageBox::warning(this,
-               "",
-               QString(tr("Do you want to reload file %1?"))
-                   .arg(QFileInfo(fileName).fileName()),
-               QMessageBox::Ok | QMessageBox::Cancel)
+        && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
             == QMessageBox::Cancel) {
         return;
     }
@@ -816,7 +790,7 @@ void MainWindow::loadFile(const QString& fileName)
             emit parseGerberFile(fileName);
         return;
     }
-    QMessageBox::warning(this, "", tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    QMessageBox::warning(this, tr("Warning"), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
 }
 
 bool MainWindow::saveFile(const QString& fileName)
@@ -831,7 +805,7 @@ bool MainWindow::saveFile(const QString& fileName)
         return true;
     }
     QMessageBox::warning(this,
-        tr("Application"),
+        tr("Warning"),
         tr("Cannot write file %1:\n%2.")
             .arg(QDir::toNativeSeparators(fileName), file.errorString()));
     return false;
@@ -839,24 +813,23 @@ bool MainWindow::saveFile(const QString& fileName)
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
-    isUntitled = fileName.isEmpty();
-
-    if (isUntitled)
-        pro->setName(tr("Untitled.g2g"));
-    else
-        pro->setName(fileName); //QFileInfo(fileName).canonicalFilePath());
-
+    pro->setName(fileName);
     pro->setModified(false);
     setWindowModified(false);
-
-    if (!isUntitled /*&& windowFilePath() != curFile*/)
+    if (!pro->isUntitled())
         prependToRecentFiles(pro->name());
     m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(pro->name())));
+    setWindowFilePath(pro->name());
+    setWindowFilePath(pro->name());
     setWindowFilePath(pro->name());
 }
 
 void MainWindow::addFileToPro(AbstractFile* file)
 {
+    if (Project::isUntitled()) {
+        QString name(QFileInfo(file->name()).path());
+        setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+    }
     Project::addFile(file);
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
@@ -946,4 +919,10 @@ QString MainWindow::fileKey()
 QString MainWindow::recentFilesKey()
 {
     return QStringLiteral("recentFileList");
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+    toolpathActionList[GCode::GCodeProperties]->trigger();
+    QMainWindow::showEvent(event);
 }

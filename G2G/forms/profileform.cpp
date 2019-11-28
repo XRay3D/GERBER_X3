@@ -103,7 +103,7 @@ ProfileForm::~ProfileForm()
     settings.endGroup();
 
     for (QGraphicsItem* item : Scene::items()) {
-        if (item->type() == BridgeType)
+        if (item->type() == GiBridge)
             delete item;
     }
     delete ui;
@@ -159,26 +159,26 @@ void ProfileForm::createFile()
     for (auto* item : Scene::selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
-        case GerberItemType:
-        case RawItemType:
+        case GiGerber:
+        case GiRaw:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
             } else if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
-            if (item->type() == GerberItemType)
+            if (item->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;
-        case Shape:
+        case GiShapeC:
             wRawPaths.append(gi->paths());
             //m_used[gi->file()->id()].append(gi->id());
             break;
-        case DrillItemType:
+        case GiDrill:
             wPaths.append(gi->paths());
             m_usedItems[gi->file()->id()].append(gi->id());
             break;
@@ -242,7 +242,7 @@ void ProfileForm::updateBridge()
     m_lenght = ui->dsbxBridgeLenght->value();
     m_size = tool.getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : Scene::items()) {
-        if (item->type() == BridgeType)
+        if (item->type() == GiBridge)
             dynamic_cast<BridgeItem*>(item)->update();
     }
 }

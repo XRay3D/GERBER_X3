@@ -1,5 +1,7 @@
 #include "thermalmodel.h"
 
+ThermalModel* ThermalModel::m_self = nullptr;
+
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
     QImage image(icon.pixmap(24, 24).toImage());
@@ -14,6 +16,7 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 ThermalModel::ThermalModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
+    m_self = this;
     rootItem = new ThermalNode(QIcon(), "");
 }
 
@@ -81,7 +84,7 @@ bool ThermalModel::setData(const QModelIndex& index, const QVariant& value, int 
 
 QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    static const QVector<QString> horizontalLabel{ "     Name", "Pos (X:Y)", "Angle", "Tickness", "Count" };
+    static const QStringList horizontalLabel { tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|') };
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal)

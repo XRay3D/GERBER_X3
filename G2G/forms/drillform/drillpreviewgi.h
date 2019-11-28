@@ -6,12 +6,6 @@
 #include <gbrvars.h>
 #include <myclipper.h>
 
-enum PreviewItemType {
-    SlotType = PinType + 1,
-    DrillType,
-    ApetrureType
-};
-
 class DrillPrGI : public QGraphicsItem {
     static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id);
     static QPainterPath drawDrill(const Excellon::Hole& hole);
@@ -46,7 +40,7 @@ private:
 
     const double m_sourceDiameter;
     int m_toolId = -1;
-    const PreviewItemType m_type;
+    const int m_type;
 
     QPen m_pen;
     QBrush m_brush;

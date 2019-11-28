@@ -73,7 +73,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     // find Bridges
     QVector<BridgeItem*> bridgeItems;
     for (QGraphicsItem* item : Scene::items()) {
-        if (item->type() == BridgeType)
+        if (item->type() == GiBridge)
             bridgeItems.append(static_cast<BridgeItem*>(item));
     }
     // create Bridges
