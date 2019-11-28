@@ -60,10 +60,6 @@ int main(int argc, char* argv[])
 void initIcon()
 {
     QIcon::setThemeSearchPaths({
-        "../../../icons/",
-        "../../../icons/breeze/",
-        "../../icons/",
-        "../../icons/breeze/",
         "../icons/",
         "../icons/breeze/",
         "icons/",
@@ -77,11 +73,11 @@ void translation(QApplication* app)
     const QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;
     QString trFolder;
-    if (qApp->applicationDirPath().contains("build/G2G"))
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
 #ifdef linux
-        trFolder = "../../../G2G/translations/";
-#else
         trFolder = "../../G2G/translations/";
+#else
+        trFolder = "../G2G/translations/";
 #endif
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
@@ -95,9 +91,17 @@ void translation(QApplication* app)
             delete translator;
     }
     QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
-    if (QFile::exists(trFileName)) {
+    if (QFile::exists(baseTrFileName)) {
         QTranslator* baseTranslator = new QTranslator();
         if (baseTranslator->load(baseTrFileName))
+            app->installTranslator(baseTranslator);
+        else
+            delete baseTranslator;
+    }
+    QString qtTrFileName(trFolder + "qt_" + loc + ".qm");
+    if (QFile::exists(qtTrFileName)) {
+        QTranslator* baseTranslator = new QTranslator();
+        if (baseTranslator->load(qtTrFileName))
             app->installTranslator(baseTranslator);
         else
             delete baseTranslator;
