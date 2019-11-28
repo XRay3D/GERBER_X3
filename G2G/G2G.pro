@@ -3,7 +3,7 @@ QT += core gui opengl widgets printsupport concurrent
 TARGET = Getber2Gcode
 TEMPLATE = app
 
-RESOURCES += res/resources.qrc \
+RESOURCES += res/resources.qrc
 
 #DEFINES += QT_DEBUG
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -27,9 +27,13 @@ gcc* {
     }
 }
 
-linux* {
+linux {
     DEFINES += linux
 }
+
+DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
+
+DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 TRANSLATIONS += \
     translations/g2g_en.ts \

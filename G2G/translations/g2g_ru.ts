@@ -1541,7 +1541,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../mainwindow.cpp" line="749"/>
         <source>Do you want to close this project?</source>
-        <translation>Вы хотите закрыть этот проект?</translation>
+        <translation>Закрыть этот проект?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="749"/>
@@ -1562,7 +1562,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="../mainwindow.cpp" line="772"/>
         <source>Do you want to reload file %1?</source>
-        <translation>Хотите перезагрузить файл%1?</translation>
+        <translation>Перезагрузить файл %1?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="793"/>
