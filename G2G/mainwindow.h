@@ -106,7 +106,11 @@ private:
     bool saveAs();
     void documentWasModified();
     bool maybeSave();
+
+public:
     void loadFile(const QString& fileName);
+
+private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
     void addFileToPro(AbstractFile* file);
