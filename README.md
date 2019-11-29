@@ -1,9 +1,9 @@
 # GERBER_X2
 V0.7.8
 
-Программа для подготовки Г-кода из файлов Gerbre для фрезеровки плат на ЧПУ.
+Программа для подготовки Г-кода из файлов Gerber (RS-274X) для фрезеровки плат на ЧПУ.
 
-Program for preparing G-code from Gerbre files for CNC milling.
+Program for preparing G-code from Gerber (RS-274X) files for CNC milling.
 
 ![Window](Window.PNG)
 
