@@ -219,13 +219,9 @@ Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction 
 
 void ToolModel::exportTools()
 {
-    QFile file(QStringLiteral("../tools.dat"));
+    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     do {
         if (file.exists() && file.open(QIODevice::WriteOnly))
-            break;
-        qWarning() << file.errorString();
-        file.setFileName(QStringLiteral("tools.dat"));
-        if (file.open(QIODevice::WriteOnly))
             break;
         qWarning() << file.errorString();
         return;
@@ -281,12 +277,8 @@ void ToolModel::exportTools()
 
 void ToolModel::importTools()
 {
-    QFile file(QStringLiteral("../tools.dat"));
+    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     do {
-        if (file.open(QIODevice::ReadOnly))
-            break;
-        qWarning() << file.errorString();
-        file.setFileName(QStringLiteral("tools.dat"));
         if (file.open(QIODevice::ReadOnly))
             break;
         qWarning() << file.errorString();

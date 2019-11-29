@@ -340,15 +340,9 @@ QMap<int, Tool> ToolHolder::tools;
 
 void ToolHolder::readTools()
 {
-    QFile loadFile(QStringLiteral("../tools.dat"));
-    do {
-        if (loadFile.open(QIODevice::ReadOnly))
-            break;
-        loadFile.setFileName(qApp->applicationDirPath() + QStringLiteral("tools.dat"));
-        if (loadFile.open(QIODevice::ReadOnly))
-            break;
+    QFile loadFile(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
+    if (!loadFile.open(QIODevice::ReadOnly))
         return;
-    } while (1);
 
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
     QJsonArray toolArray = loadDoc.object()["tools"].toArray();
