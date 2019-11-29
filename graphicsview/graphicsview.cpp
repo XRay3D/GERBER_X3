@@ -389,8 +389,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
 void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     auto item = scene()->itemAt(mapToScene(event->pos()), transform()); //itemAt(event->pos());
-    qDebug() << (item->type() == GiThermalPr);
-    if (item->type() == GiThermalPr) {
+    if (item && item->type() == GiThermalPr) {
         if (item->flags() & QGraphicsItem::ItemIsSelectable)
             reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
         else
