@@ -16,7 +16,7 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
-    , m_name(qApp->applicationDirPath() + name + ".dat")
+    , m_name(qApp->applicationDirPath() + "/" + name + ".dat")
     , pd(new QProgressDialog(this))
 {
     readTools({ &tool, &tool2 });
