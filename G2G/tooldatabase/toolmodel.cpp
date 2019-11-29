@@ -221,7 +221,7 @@ void ToolModel::exportTools()
 {
     QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     do {
-        if (file.exists() && file.open(QIODevice::WriteOnly))
+        if (file.open(QIODevice::WriteOnly))
             break;
         qWarning() << file.errorString();
         return;
