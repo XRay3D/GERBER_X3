@@ -1,4 +1,5 @@
 #include "tool.h"
+#include <QApplication>
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
@@ -343,7 +344,7 @@ void ToolHolder::readTools()
     do {
         if (loadFile.open(QIODevice::ReadOnly))
             break;
-        loadFile.setFileName(QStringLiteral("tools.dat"));
+        loadFile.setFileName(qApp->applicationDirPath() + QStringLiteral("tools.dat"));
         if (loadFile.open(QIODevice::ReadOnly))
             break;
         return;
