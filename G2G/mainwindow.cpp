@@ -62,47 +62,25 @@ MainWindow::MainWindow(QWidget* parent)
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
 
-    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows) {
-        if (QOperatingSystemVersion::current().majorVersion() > 7) {
-            setStyleSheet("QGroupBox, .QFrame {"
-                          "background-color: white;"
-                          "border: 1px solid gray;"
-                          "}"
-                          "QGroupBox {"
-                          "margin-top: 3ex;" /* leave space at the top for the title */
-                          "}"
-                          "QGroupBox::title {"
-                          "subcontrol-origin: margin;"
-                          "subcontrol-position: top center;" /* position at the top center */
-                          "}");
-
-        } else {
-            setStyleSheet("QGroupBox, .QFrame {"
-                          "background-color: white;"
-                          "border: 1px solid gray;"
-                          "border-radius: 3px;" // Win 7
-                          "}"
-                          "QGroupBox {"
-                          "margin-top: 3ex;" /* leave space at the top for the title */
-                          "}"
-                          "QGroupBox::title {"
-                          "subcontrol-origin: margin;"
-                          "subcontrol-position: top center;" /* position at the top center */
-                          "}");
-        }
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
+        setStyleSheet("QGroupBox, .QFrame {"
+                      "background-color: white;"
+                      "border: 1px solid gray; }"
+                      "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
+                      "QGroupBox::title {"
+                      "subcontrol-origin: margin;"
+                      "subcontrol-position: top center; }" /* position at the top center */
+        );
     } else {
         setStyleSheet("QGroupBox, .QFrame {"
                       "background-color: white;"
                       "border: 1px solid gray;"
-                      "border-radius: 3px;" // other
-                      "}"
-                      "QGroupBox {"
-                      "margin-top: 3ex;" /* leave space at the top for the title */
-                      "}"
+                      "border-radius: 3px; }" // Win 7 or other
+                      "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
                       "QGroupBox::title {"
                       "subcontrol-origin: margin;"
-                      "subcontrol-position: top center;" /* position at the top center */
-                      "}");
+                      "subcontrol-position: top center; }" /* position at the top center */
+        );
     }
 
     ToolHolder::readTools();
