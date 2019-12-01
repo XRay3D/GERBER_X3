@@ -74,7 +74,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     zoom100();
     QGLWidget* glw = nullptr;
     QSettings settings;
-    settings.beginGroup("Viewer");
+    settings.beginGroup(objectName());
     setViewport(settings.value("OpenGl").toBool()
             ? (glw = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)))
             : new QWidget);

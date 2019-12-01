@@ -35,10 +35,10 @@ public:
     AbstractNode& operator=(const AbstractNode&) = delete;
 
 protected:
+    const int m_id;
     const QStringList tbStrList;
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
-    const int m_id;
     //Qt::CheckState m_checkState = Qt::Checked;
 };
 

@@ -519,7 +519,7 @@ void MainWindow::newFile()
 void MainWindow::readSettings()
 {
     QSettings settings;
-    settings.beginGroup("MainWindow");
+    settings.beginGroup(objectName());
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
 
@@ -534,14 +534,14 @@ void MainWindow::readSettings()
 void MainWindow::writeSettings()
 {
     QSettings settings;
-    settings.beginGroup("MainWindow");
+    settings.beginGroup(objectName());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("project", pro->name());
     settings.endGroup();
 
-    settings.beginGroup("Pin");
+    settings.beginGroup(objectName());
     for (int i = 0; i < Pin::pins().size(); ++i) {
         settings.setValue(QString("pos%1").arg(i), Pin::pins()[i]->pos());
     }

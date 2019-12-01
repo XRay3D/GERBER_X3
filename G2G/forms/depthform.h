@@ -17,34 +17,21 @@ class DepthForm : public QWidget {
     Q_OBJECT
 public:
     explicit DepthForm(QWidget* parent = nullptr);
-    ~DepthForm() override = default;
-
-    double value(bool fl = false) const;
-    void setValue(double value);
-    QRadioButton* rbCopper;
+    ~DepthForm() override;
+    double value() const;
     QRadioButton* rbBoard;
+    QRadioButton* rbCopper;
     QRadioButton* rbCustom;
+
 signals:
     void valueChanged(double);
 
 private:
     double m_value = 0.0;
-    bool m_fl = false;
-    QHBoxLayout* horizontalLayout;
     DoubleSpinBox* dsbx;
-    void setupUi(QWidget* Form); // setupUi
-    void retranslateUi(QWidget* Form); // retranslateUi
+    const QString m_parent;
+    void setupUi(QWidget* Form);
+    void retranslateUi(QWidget* Form);
 };
-
-//class DepthForm : public QWidget
-//{
-//    Q_OBJECT
-//public:
-//    explicit DepthForm(QWidget *parent = nullptr);
-
-//signals:
-
-//public slots:
-//};
 
 #endif // DEPTHFORM_H

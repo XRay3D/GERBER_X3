@@ -86,13 +86,10 @@ PocketForm::PocketForm(QWidget* parent)
     connect(ui->chbxUseTwoTools, &QCheckBox::clicked, rb_clicked);
 
     QSettings settings;
-    settings.beginGroup("PocketForm");
+    settings.beginGroup(objectName());
     ui->cbxPass->setCurrentIndex(settings.value("cbxPass").toInt());
     ui->chbxUseTwoTools->setChecked(settings.value("chbxUseTwoTools").toBool());
     ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
-    ui->dsbxDepth->rbBoard->setChecked(settings.value("rbBoard").toBool());
-    ui->dsbxDepth->rbCopper->setChecked(settings.value("rbCopper").toBool());
-    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
     ui->rbClimb->setChecked(settings.value("rbClimb").toBool());
     ui->rbConventional->setChecked(settings.value("rbConventional").toBool());
     ui->rbInside->setChecked(settings.value("rbInside").toBool());
@@ -122,15 +119,12 @@ PocketForm::PocketForm(QWidget* parent)
 PocketForm::~PocketForm()
 {
     QSettings settings;
-    settings.beginGroup("PocketForm");
+    settings.beginGroup(objectName());
     settings.setValue("cbxPass", ui->cbxPass->currentIndex());
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
     settings.setValue("dsbxAngle", ui->dsbxAngle->value());
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.setValue("rbInside", ui->rbInside->isChecked());
     settings.setValue("rbOffset", ui->rbOffset->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());

@@ -23,7 +23,6 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->setupUi(this);
 
     ui->lblToolName->setText(tool.name());
-    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     auto rb_clicked = [&] {
         if (ui->rbOn->isChecked())
@@ -43,7 +42,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     };
 
     QSettings settings;
-    settings.beginGroup("ProfileForm");
+    settings.beginGroup(objectName());
     if (settings.value("rbClimb").toBool())
         ui->rbClimb->setChecked(true);
     if (settings.value("rbConventional").toBool())
@@ -54,13 +53,6 @@ ProfileForm::ProfileForm(QWidget* parent)
         ui->rbOn->setChecked(true);
     if (settings.value("rbOutside").toBool())
         ui->rbOutside->setChecked(true);
-
-    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
-    if (settings.value("rbBoard").toBool())
-        ui->dsbxDepth->rbBoard->setChecked(true);
-    if (settings.value("rbCopper").toBool())
-        ui->dsbxDepth->rbCopper->setChecked(true);
-
     ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
     settings.endGroup();
 
@@ -89,17 +81,13 @@ ProfileForm::~ProfileForm()
 {
 
     QSettings settings;
-    settings.beginGroup("ProfileForm");
+    settings.beginGroup(objectName());
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
     settings.setValue("rbInside", ui->rbInside->isChecked());
     settings.setValue("rbOn", ui->rbOn->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
-
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
 
     for (QGraphicsItem* item : Scene::items()) {

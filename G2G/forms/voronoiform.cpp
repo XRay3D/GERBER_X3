@@ -20,7 +20,6 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->setupUi(this);
 
     ui->lblToolName->setText(tool.name());
-    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     updateName();
 
@@ -37,26 +36,18 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
     QSettings settings;
-    settings.beginGroup("VoronoiForm");
-    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    settings.beginGroup(objectName());
     ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
     ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
-    if (settings.value("rbBoard").toBool())
-        ui->dsbxDepth->rbBoard->setChecked(true);
-    if (settings.value("rbCopper").toBool())
-        ui->dsbxDepth->rbCopper->setChecked(true);
     settings.endGroup();
 }
 
 VoronoiForm::~VoronoiForm()
 {
     QSettings settings;
-    settings.beginGroup("VoronoiForm");
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
+    settings.beginGroup(objectName());
     settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
     delete ui;
 }

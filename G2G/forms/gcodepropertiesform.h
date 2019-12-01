@@ -20,7 +20,7 @@ public:
     static Marker* homePoint;
     static Marker* zeroPoint;
     static double safeZ;
-    static double thickness;
+    static double boardThickness;
     static double copperThickness;
     static double clearence;
     static double plunge;
