@@ -33,7 +33,7 @@ bool Project::save(QFile& file)
         out << Pin::pins()[3]->pos();
         out << Pin::worckRect;
         out << GCodePropertiesForm::safeZ;
-        out << GCodePropertiesForm::thickness;
+        out << GCodePropertiesForm::boardThickness;
         out << GCodePropertiesForm::copperThickness;
         out << GCodePropertiesForm::clearence;
         out << GCodePropertiesForm::plunge;
@@ -69,7 +69,7 @@ bool Project::open(QFile& file)
         Pin::pins()[3]->setPos(pt);
         in >> Pin::worckRect;
         in >> GCodePropertiesForm::safeZ;
-        in >> GCodePropertiesForm::thickness;
+        in >> GCodePropertiesForm::boardThickness;
         in >> GCodePropertiesForm::copperThickness;
         in >> GCodePropertiesForm::clearence;
         in >> GCodePropertiesForm::plunge;

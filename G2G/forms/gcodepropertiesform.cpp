@@ -12,7 +12,7 @@ GCodePropertiesForm* GCodePropertiesForm::self = nullptr;
 Marker* GCodePropertiesForm::homePoint = nullptr;
 Marker* GCodePropertiesForm::zeroPoint = nullptr;
 double GCodePropertiesForm::safeZ;
-double GCodePropertiesForm::thickness;
+double GCodePropertiesForm::boardThickness;
 double GCodePropertiesForm::copperThickness;
 double GCodePropertiesForm::clearence;
 double GCodePropertiesForm::plunge;
@@ -54,7 +54,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     });
 
     QSettings settings;
-    settings.beginGroup("GCodeProperties");
+    settings.beginGroup(objectName());
     ui->dsbxSafeZ->setValue(settings.value("dsbxSafeZ", 20).toDouble());
     ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
     ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
@@ -70,7 +70,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     ui->dsbxZeroY->setValue(zeroPoint->pos().y());
 
     safeZ = ui->dsbxSafeZ->value();
-    thickness = ui->dsbxThickness->value();
+    boardThickness = ui->dsbxThickness->value();
     copperThickness = ui->dsbxCopperThickness->value();
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();
@@ -110,7 +110,7 @@ GCodePropertiesForm::~GCodePropertiesForm()
     zeroPoint->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     QSettings settings;
-    settings.beginGroup("GCodeProperties");
+    settings.beginGroup(objectName());
     settings.setValue("dsbxSafeZ", ui->dsbxSafeZ->value());
     settings.setValue("dsbxClearence", ui->dsbxClearence->value());
     settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
@@ -120,7 +120,7 @@ GCodePropertiesForm::~GCodePropertiesForm()
     settings.endGroup();
 
     safeZ = ui->dsbxSafeZ->value();
-    thickness = ui->dsbxThickness->value();
+    boardThickness = ui->dsbxThickness->value();
     copperThickness = ui->dsbxCopperThickness->value();
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();

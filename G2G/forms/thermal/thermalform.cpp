@@ -68,7 +68,6 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->treeView->setIconSize(QSize(Size, Size));
 
     ui->lblToolName->setText(tool.name());
-    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     updateName();
 
@@ -94,12 +93,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     }
 
     QSettings settings;
-    settings.beginGroup("ThermalForm");
-    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
-    if (settings.value("rbBoard").toBool())
-        ui->dsbxDepth->rbBoard->setChecked(true);
-    if (settings.value("rbCopper").toBool())
-        ui->dsbxDepth->rbCopper->setChecked(true);
+    settings.beginGroup(objectName());
     settings.endGroup();
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -113,10 +107,7 @@ ThermalForm::~ThermalForm()
 {
     m_sourcePreview.clear();
     QSettings settings;
-    settings.beginGroup("ThermalForm");
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
+    settings.beginGroup(objectName());
     settings.endGroup();
     delete ui;
 }

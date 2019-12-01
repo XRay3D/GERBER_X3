@@ -139,7 +139,7 @@ DrillForm::DrillForm(QWidget* parent)
     };
 
     QSettings settings;
-    settings.beginGroup("DrillForm");
+    settings.beginGroup(objectName());
     if (settings.value("rbClimb").toBool())
         ui->rbClimb->setChecked(true);
     if (settings.value("rbConventional", true).toBool())
@@ -156,13 +156,6 @@ DrillForm::DrillForm(QWidget* parent)
         ui->rb_pocket->setChecked(true);
     if (settings.value("rb_profile").toBool())
         ui->rb_profile->setChecked(true);
-
-    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
-    if (settings.value("rbBoard").toBool())
-        ui->dsbxDepth->rbBoard->setChecked(true);
-    if (settings.value("rbCopper").toBool())
-        ui->dsbxDepth->rbCopper->setChecked(true);
-
     settings.endGroup();
 
     connect(ui->rb_drilling, &QRadioButton::clicked, updateState);
@@ -177,6 +170,7 @@ DrillForm::DrillForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
+
     updateState();
 
     updateFiles();
@@ -189,11 +183,8 @@ DrillForm::DrillForm(QWidget* parent)
 DrillForm::~DrillForm()
 {
     self = nullptr;
-
-    qDebug("~DrillForm()");
-
     QSettings settings;
-    settings.beginGroup("DrillForm");
+    settings.beginGroup(objectName());
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
     settings.setValue("rb_drilling", ui->rb_drilling->isChecked());
@@ -202,12 +193,7 @@ DrillForm::~DrillForm()
     settings.setValue("rb_out", ui->rb_out->isChecked());
     settings.setValue("rb_pocket", ui->rb_pocket->isChecked());
     settings.setValue("rb_profile", ui->rb_profile->isChecked());
-
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
-    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
-    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
-
     clear();
     delete ui;
 }
