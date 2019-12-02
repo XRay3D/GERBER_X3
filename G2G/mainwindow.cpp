@@ -41,7 +41,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     GCodePropertiesForm::zeroPoint = new Marker(Marker::Zero);
     GCodePropertiesForm::homePoint = new Marker(Marker::Home);
-    new Pin[4];
+    for (int i = 0; i < 4; ++i)
+        new Pin(scene);
 
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
@@ -87,6 +88,7 @@ MainWindow::MainWindow(QWidget* parent)
     setCurrentFile(QString());
     readSettings();
     GCodePropertiesForm(); // init vars;
+    QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
     self = this;
 }
 
@@ -497,7 +499,7 @@ void MainWindow::newFile()
 void MainWindow::readSettings()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
 
@@ -512,19 +514,11 @@ void MainWindow::readSettings()
 void MainWindow::writeSettings()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("MainWindow");
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("project", pro->name());
-    settings.endGroup();
-
-    settings.beginGroup(objectName());
-    for (int i = 0; i < Pin::pins().size(); ++i) {
-        settings.setValue(QString("pos%1").arg(i), Pin::pins()[i]->pos());
-    }
-    settings.setValue("fixed", bool(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
-    settings.setValue("worckRect", Pin::pins()[0]->worckRect);
     settings.endGroup();
 }
 
@@ -556,7 +550,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
+                  printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);

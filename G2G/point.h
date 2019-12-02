@@ -44,7 +44,7 @@ protected:
 class Pin : public QObject, public QGraphicsItem {
 
 public:
-    Pin();
+    Pin(QObject *parent);
     ~Pin() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

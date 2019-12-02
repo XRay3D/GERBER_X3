@@ -139,7 +139,7 @@ DrillForm::DrillForm(QWidget* parent)
     };
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("DrillForm");
     if (settings.value("rbClimb").toBool())
         ui->rbClimb->setChecked(true);
     if (settings.value("rbConventional", true).toBool())
@@ -184,7 +184,7 @@ DrillForm::~DrillForm()
 {
     self = nullptr;
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("DrillForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
     settings.setValue("rb_drilling", ui->rb_drilling->isChecked());

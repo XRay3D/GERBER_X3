@@ -27,10 +27,8 @@ bool Project::save(QFile& file)
         out << G2G_Ver_1_1;
         out << GCodePropertiesForm::homePoint->pos();
         out << GCodePropertiesForm::zeroPoint->pos();
-        out << Pin::pins()[0]->pos();
-        out << Pin::pins()[1]->pos();
-        out << Pin::pins()[2]->pos();
-        out << Pin::pins()[3]->pos();
+        for (Pin* pin : Pin::pins())
+            out << pin->pos();
         out << Pin::worckRect;
         out << GCodePropertiesForm::safeZ;
         out << GCodePropertiesForm::boardThickness;
@@ -59,14 +57,10 @@ bool Project::open(QFile& file)
         GCodePropertiesForm::homePoint->setPos(pt);
         in >> pt;
         GCodePropertiesForm::zeroPoint->setPos(pt);
-        in >> pt;
-        Pin::pins()[0]->setPos(pt);
-        in >> pt;
-        Pin::pins()[1]->setPos(pt);
-        in >> pt;
-        Pin::pins()[2]->setPos(pt);
-        in >> pt;
-        Pin::pins()[3]->setPos(pt);
+        for (Pin* pin : Pin::pins()) {
+            in >> pt;
+            pin->setPos(pt);
+        }
         in >> Pin::worckRect;
         in >> GCodePropertiesForm::safeZ;
         in >> GCodePropertiesForm::boardThickness;

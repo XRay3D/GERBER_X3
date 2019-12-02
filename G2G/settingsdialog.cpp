@@ -61,18 +61,18 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 void SettingsDialog::readSettings()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("Viewer");
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
     chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
     chbSmoothScSh->setChecked(m_smoothScSh = settings.value("SmoothScSh").toBool());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Color");
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
         m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Gerber");
     sbxMinCircleSegments->setValue(m_minCircleSegments = settings.value("MinCircleSegments", 36).toInt());
     dsbxMinCircleSegmentLength->setValue(m_minCircleSegmentLength = settings.value("MinCircleSegmentLenght", 0.5).toDouble());
     chbxCleanPolygons->setChecked(m_cleanPolygons = settings.value("CleanPolygons", true).toBool());
@@ -80,19 +80,19 @@ void SettingsDialog::readSettings()
     chbxInfo->setChecked(m_gcinfo = settings.value("GCInfo", false).toBool());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("GCode");
     leFormat->setText(m_GCode = settings.value("GCodeFormat", "G?X?Y?Z?F?S?").toString());
     pteStart->setPlainText(m_startGCode = settings.value("GCodeStart", "G21 G17 G90|M3").toString().replace('|', '\n'));
     pteEnd->setPlainText(m_endGCode = settings.value("GCodeEnd", "M5|M30").toString().replace('|', '\n'));
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Application");
     const QString fontSize(settings.value("FontSize", "8").toString());
     qApp->setStyleSheet("QWidget {font-size: " + fontSize + "pt}");
     cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Home");
     m_pinOffset = settings.value("pinOffset", QPointF(6, 6)).toPointF();
     m_homeOffset = settings.value("homeOffset").toPointF();
     m_zeroOffset = settings.value("zeroOffset").toPointF();
@@ -106,7 +106,7 @@ void SettingsDialog::readSettings()
     cbxZeroPos->setCurrentIndex(m_zeroPos = settings.value("zeroPos").toInt());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("SettingsDialog");
     if (isVisible())
         settings.setValue("geometry", saveGeometry());
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
@@ -116,7 +116,7 @@ void SettingsDialog::readSettings()
 void SettingsDialog::writeSettings()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("Viewer");
     if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
         GraphicsView::self->setViewport(chbOpenGl->isChecked()
                 ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
@@ -132,12 +132,12 @@ void SettingsDialog::writeSettings()
     settings.setValue("SmoothScSh", m_smoothScSh = chbSmoothScSh->isChecked());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Color");
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
         settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Gerber");
     settings.setValue("MinCircleSegments", (m_minCircleSegments = sbxMinCircleSegments->value()));
     settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
     settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
@@ -145,7 +145,7 @@ void SettingsDialog::writeSettings()
     settings.setValue("GCInfo", (m_gcinfo = chbxInfo->isChecked()));
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("GCode");
     settings.setValue("GCodeFormat", m_GCode = leFormat->text());
     m_startGCode = pteStart->toPlainText();
     settings.setValue("GCodeStart", pteStart->toPlainText().replace('\n', '|'));
@@ -153,11 +153,11 @@ void SettingsDialog::writeSettings()
     settings.setValue("GCodeEnd", pteEnd->toPlainText().replace('\n', '|'));
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Application");
     settings.setValue("FontSize", cbxFontSize->currentText());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("Home");
     settings.setValue("pinOffset", m_pinOffset = QPointF(dsbxPinX->value(), dsbxPinY->value()));
     settings.setValue("homeOffset", m_homeOffset = QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
     settings.setValue("zeroOffset", m_zeroOffset = QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
@@ -165,7 +165,7 @@ void SettingsDialog::writeSettings()
     settings.setValue("zeroPos", m_zeroPos = cbxZeroPos->currentIndex());
     settings.endGroup();
 
-    settings.beginGroup(objectName());
+    settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
     settings.endGroup();
 }

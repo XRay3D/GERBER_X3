@@ -42,7 +42,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     };
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("ProfileForm");
     if (settings.value("rbClimb").toBool())
         ui->rbClimb->setChecked(true);
     if (settings.value("rbConventional").toBool())
@@ -53,7 +53,7 @@ ProfileForm::ProfileForm(QWidget* parent)
         ui->rbOn->setChecked(true);
     if (settings.value("rbOutside").toBool())
         ui->rbOutside->setChecked(true);
-    ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
+    ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght", 1.0).toDouble());
     settings.endGroup();
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
@@ -79,9 +79,8 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 ProfileForm::~ProfileForm()
 {
-
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("ProfileForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
     settings.setValue("rbInside", ui->rbInside->isChecked());
@@ -89,7 +88,6 @@ ProfileForm::~ProfileForm()
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
     settings.endGroup();
-
     for (QGraphicsItem* item : Scene::items()) {
         if (item->type() == GiBridge)
             delete item;

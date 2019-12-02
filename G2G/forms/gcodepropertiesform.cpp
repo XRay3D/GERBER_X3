@@ -54,7 +54,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     });
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("GCodePropertiesForm");
     ui->dsbxSafeZ->setValue(settings.value("dsbxSafeZ", 20).toDouble());
     ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
     ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
@@ -110,7 +110,7 @@ GCodePropertiesForm::~GCodePropertiesForm()
     zeroPoint->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("GCodePropertiesForm");
     settings.setValue("dsbxSafeZ", ui->dsbxSafeZ->value());
     settings.setValue("dsbxClearence", ui->dsbxClearence->value());
     settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
