@@ -36,7 +36,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("VoronoiForm");
     ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
     ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
     settings.endGroup();
@@ -45,7 +45,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 VoronoiForm::~VoronoiForm()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("VoronoiForm");
     settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
     settings.endGroup();

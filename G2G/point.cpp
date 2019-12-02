@@ -193,10 +193,12 @@ void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 /// \param num
 ///
 
-Pin::Pin()
-    : QGraphicsItem(nullptr)
+Pin::Pin(QObject* parent)
+    : QObject(parent)
+    , QGraphicsItem(nullptr)
     , m_index(m_pins.size())
 {
+    setObjectName("Pin");
     setAcceptHoverEvents(true);
 
     if (m_pins.size() % 2) {
@@ -216,9 +218,10 @@ Pin::Pin()
     QSettings settings;
     settings.beginGroup("Pin");
     setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
-    setPos(settings.value("pos" + QString::number(m_pins.size())).toPointF());
-    if (m_pins.isEmpty())
+    setPos(settings.value(QString("pos%1").arg(m_index)).toPointF());
+    if (!m_index)
         worckRect = settings.value("worckRect").toRectF();
+    settings.endGroup();
     m_pins.append(this);
 }
 
@@ -226,7 +229,10 @@ Pin::~Pin()
 {
     QSettings settings;
     settings.beginGroup("Pin");
-    settings.setValue("pos" + QString::number(m_index), pos());
+    settings.setValue(QString("pos%1").arg(m_index), pos());
+    if (!m_index)
+        settings.setValue("worckRect", worckRect);
+    settings.endGroup();
 }
 
 QRectF Pin::boundingRect() const
@@ -267,7 +273,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF pt[4] {
+    QPointF pt[4]{
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
@@ -354,7 +360,7 @@ void Pin::resetPos(bool fl)
         updateRect();
     }
     const QPointF offset(Settings::pinOffset());
-    QPointF pt[] {
+    QPointF pt[]{
         QPointF(Pin::worckRect.topLeft() + QPointF(-offset.x(), -offset.y())),
         QPointF(Pin::worckRect.topRight() + QPointF(+offset.x(), -offset.y())),
         QPointF(Pin::worckRect.bottomRight() + QPointF(+offset.x(), +offset.y())),

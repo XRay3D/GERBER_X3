@@ -93,7 +93,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     }
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("ThermalForm");
     settings.endGroup();
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -107,7 +107,7 @@ ThermalForm::~ThermalForm()
 {
     m_sourcePreview.clear();
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("ThermalForm");
     settings.endGroup();
     delete ui;
 }

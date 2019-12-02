@@ -31,27 +31,37 @@ QRectF BridgeItem::boundingRect() const
 void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
     painter->setBrush(!m_ok ? Qt::red : Qt::green);
+    painter->setTransform(QTransform().rotate(-(m_angle - 360)), true);
     painter->setPen(Qt::NoPen);
     painter->drawPath(m_path);
-    painter->setBrush(Qt::magenta);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(QPen(Qt::white, 2 * GraphicsView::scaleFactor()));
+
+    const double halfSize = m_size / 2;
+
+    QLineF l(0, 0, m_lenght / 2 + halfSize, 0);
     switch (m_side) {
-    case GCode::On: {
-        //        QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
-        //        l.setAngle(m_angle + 90);
-        //        painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
-        //        l.setAngle(m_angle - 90);
-        //        painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
-        //        QLineF l2(0, 0, m_size / 2, 0);
-        //        l2.setAngle(m_angle);
-        //        painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
-        //        l2.setAngle(m_angle + 180);
-        //        painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
-    } break;
+    case GCode::On:
+        break;
     case GCode::Outer:
+        l.translate(halfSize, 0);
         break;
     case GCode::Inner:
+        l.translate(-halfSize, 0);
         break;
     }
+
+    auto drawEllipse = [painter, halfSize, this](const QPointF& pt, bool fl = false) {
+        const QRectF rectangle(pt + QPointF{ halfSize, halfSize }, pt - QPointF{ halfSize, halfSize });
+        const int startAngle = (fl ? 0 : 180) * 16;
+        const int spanAngle = 180 * 16;
+        painter->drawArc(rectangle, startAngle, spanAngle);
+    };
+
+    l.setAngle(+90);
+    drawEllipse(l.p2());
+    l.setAngle(-90);
+    drawEllipse(l.p2(), true);
 }
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
@@ -82,7 +92,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        if (gi && (gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiRaw)) {
+        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiRaw)) {
             if (!gi->isSelected())
                 continue;
             for (const Path& path : gi->paths()) {
@@ -93,12 +103,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                     if (lastAngle == 0.0)
                         lastAngle = l3.normalVector().angle();
                     const double p = (l1.length() + l2.length() + l3.length()) / 2;
-                    if (l1.length() < l3.length()
-                        && l2.length() < l3.length() /*
-                        && l1.length() > m_lenght / 2 + m_size
-                        && l2.length() > m_lenght / 2 + m_size
-                        && l3.length() > m_lenght / 2 + m_size*/
-                    ) {
+                    if (l1.length() < l3.length() && l2.length() < l3.length()) {
                         const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
                         if (l > h) {
                             l = h;
@@ -121,10 +126,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     return pos;
 }
 
-double BridgeItem::angle() const
-{
-    return m_angle;
-}
+double BridgeItem::angle() const { return m_angle; }
 
 void BridgeItem::update()
 {
@@ -157,25 +159,13 @@ QLineF BridgeItem::getPath() const
     return retLine;
 }
 
-double BridgeItem::lenght() const
-{
-    return m_lenght;
-}
+double BridgeItem::lenght() const { return m_lenght; }
 
-bool BridgeItem::ok() const
-{
-    return m_ok;
-}
+bool BridgeItem::ok() const { return m_ok; }
 
-QPainterPath BridgeItem::shape() const
-{
-    return m_path;
-}
+QPainterPath BridgeItem::shape() const { return m_path; }
 
-void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)
-{
-    deleteLater();
-}
+void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
 
 void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -188,12 +178,6 @@ void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths BridgeItem::paths() const
-{
-    return Paths();
-}
+Paths BridgeItem::paths() const { return Paths(); }
 
-int BridgeItem::type() const
-{
-    return GiBridge;
-}
+int BridgeItem::type() const { return GiBridge; }

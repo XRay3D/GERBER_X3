@@ -86,7 +86,7 @@ PocketForm::PocketForm(QWidget* parent)
     connect(ui->chbxUseTwoTools, &QCheckBox::clicked, rb_clicked);
 
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("PocketForm");
     ui->cbxPass->setCurrentIndex(settings.value("cbxPass").toInt());
     ui->chbxUseTwoTools->setChecked(settings.value("chbxUseTwoTools").toBool());
     ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
@@ -119,7 +119,7 @@ PocketForm::PocketForm(QWidget* parent)
 PocketForm::~PocketForm()
 {
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("PocketForm");
     settings.setValue("cbxPass", ui->cbxPass->currentIndex());
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
     settings.setValue("dsbxAngle", ui->dsbxAngle->value());

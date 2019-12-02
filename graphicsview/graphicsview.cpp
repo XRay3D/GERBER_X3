@@ -74,7 +74,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     zoom100();
     QGLWidget* glw = nullptr;
     QSettings settings;
-    settings.beginGroup(objectName());
+    settings.beginGroup("Viewer");
     setViewport(settings.value("OpenGl").toBool()
             ? (glw = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)))
             : new QWidget);
@@ -85,7 +85,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     viewport()->setObjectName("viewport");
     settings.endGroup();
 
-    m_scene = new Scene;
+    m_scene = new Scene(this);
     setScene(m_scene);
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
     //    connect(this, &GraphicsView::mouseMove, hRuler, &QDRuler::setCross);
