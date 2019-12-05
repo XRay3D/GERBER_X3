@@ -504,8 +504,10 @@ void MainWindow::readSettings()
     restoreState(settings.value("state", QByteArray()).toByteArray());
 
     lastPath = settings.value("lastPath").toString();
-    //    pro->setName(settings.value("project").toString());
-    //    loadFile(pro->name());
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
+        pro->setName(settings.value("project").toString());
+        loadFile(pro->name());
+    }
 
     SettingsDialog().readSettings();
     settings.endGroup();
