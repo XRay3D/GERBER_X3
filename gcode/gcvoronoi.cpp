@@ -2,10 +2,47 @@
 #include "gcfile.h"
 #include "gcvoronoi.h"
 
-#include "voroni/jc_voronoi.h"
+//#include "voroni/jc_voronoi.h"
 #include <QElapsedTimer>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
+
+// includes for defining the Voronoi diagram adaptor
+#include <CGAL/Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_triangulation_adaptation_policies_2.h>
+#include <CGAL/Delaunay_triangulation_adaptation_traits_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Voronoi_diagram_2.h>
+// typedefs for defining the adaptor
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using DT = CGAL::Delaunay_triangulation_2<K>;
+using AT = CGAL::Delaunay_triangulation_adaptation_traits_2<DT>;
+using AP = CGAL::Delaunay_triangulation_caching_degeneracy_removal_policy_2<DT>;
+using VD = CGAL::Voronoi_diagram_2<DT, AT, AP>;
+// typedef for the result type of the point location
+using Site_2 = AT::Site_2;
+using Point_2 = AT::Point_2;
+using Locate_result = VD::Locate_result;
+using Vertex_handle = VD::Vertex_handle;
+using Face_handle = VD::Face_handle;
+using Halfedge_handle = VD::Halfedge_handle;
+using Ccb_halfedge_circulator = VD::Ccb_halfedge_circulator;
+
+//void print_endpoint(Halfedge_handle e, bool is_src)
+//{
+//    qDebug() << "\t";
+//    if (is_src) {
+//        if (e->has_source())
+//            qDebug() << e->source()->point().x() << e->source()->point().y();
+//        else
+//            qDebug() << "point at infinity";
+//    } else {
+//        if (e->has_target())
+//            qDebug() << e->target()->point().x() << e->target()->point().y();
+//        else
+//            qDebug() << "point at infinity";
+//    }
+//}
 
 namespace GCode {
 
@@ -23,107 +60,207 @@ void VoronoiCreator::create(const GCodeParams& gcp)
 void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double tolerance, const double width)
 {
     self = this;
-    QVector<jcv_point> points;
-    points.reserve(100000);
+
     CleanPolygons(m_workingPs, tolerance * 0.1 * uScale);
     groupedPaths(CopperPaths);
-    int id = 0;
-    auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
-        QLineF line(toQPointF(tmp), toQPointF(point));
-        if (line.length() > tolerance) {
-            for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
-                line.setLength(i * tolerance);
-                IntPoint point(toIntPoint(line.p2()));
-                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-            }
-        }
-    };
-    progress(7, 1); // progress
+
+    VD vd;
+
+    //    for (Face_iterator f = VD.faces_begin(); f != VD.faces_end(); f++) {
+    //        Ccb_halfedge_circulator ec_start = (f)->ccb();
+    //        Ccb_halfedge_circulator ec = ec_start;
+    //        do {
+    //            if (!ec->has_source()) {
+    //            } else
+    //                QpolyF << QPointF(((Halfedge_handle)ec)->source()->point().x(), ((Halfedge_handle)ec)->source()->point().y());
+    //        } while (++ec != ec_start);
+    //        VectPolygon.push_back(QpolyF);
+    //        QpolyF.clear();
+    //    }
+
     for (const Paths& paths : m_groupedPss) {
         for (const Path& path : paths) {
-
-            IntPoint tmp(path.first());
-            for (const IntPoint& point : path) {
-                condei(tmp, point);
-                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                tmp = point;
-            }
-            condei(tmp, path.first());
-        }
-        ++id;
-    }
-    progress(7, 2); // progress
-    for (const Path& path : m_workingRawPs) {
-
-        IntPoint tmp(path.first());
-        for (const IntPoint& point : path) {
-            condei(tmp, point);
-            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-            tmp = point;
-        }
-        condei(tmp, path.first());
-        ++id;
-    }
-
-    Clipper clipper;
-    for (const Paths& paths : m_groupedPss) {
-        clipper.AddPaths(paths, ptClip, true);
-    }
-    clipper.AddPaths(m_workingRawPs, ptClip, true);
-    const IntRect r(clipper.GetBounds());
-    QMap<int, Pairs> edges;
-    Pairs frame;
-    //progressOrCancel(7, 3); // progress
-    {
-        jcv_rect bounding_box = {
-            { static_cast<jcv_real>(r.left - uScale * 1.1), static_cast<jcv_real>(r.top - uScale * 1.1) },
-            { static_cast<jcv_real>(r.right + uScale * 1.1), static_cast<jcv_real>(r.bottom + uScale * 1.1) }
-        };
-        jcv_diagram diagram;
-        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
-        auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
-            return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
-        };
-        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
-        for (int i = 0; i < diagram.numsites; i++) {
-
-            jcv_graphedge* graph_edge = sites[i].edges;
-            while (graph_edge) {
-                const jcv_edge* edge = graph_edge->edge;
-                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
-                if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
-                    frame.insert(pair); // frame
-                else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
-                    edges[edge->sites[0]->p.id * edge->sites[0]->p.id ^ edge->sites[1]->p.id * edge->sites[1]->p.id].insert(pair); // other
-                graph_edge = graph_edge->next;
+            for (int i = 0; i < path.size(); ++i) {
+                const IntPoint& point = path[i];
+                //for (const IntPoint& point : path) {
+                //                Site_2 t;
+                //                if (point == path.first()) {
+                //                    t << { path.last().X, path.last().Y };
+                //                    t << { point.X, point.Y };
+                //                } else {
+                //                    t << { path[i - 1].X, path[i - 1].Y };
+                //                    t << { point.X, point.Y };
+                //                }
+                //                vd.insert(t);
+                vd.insert({ point.X, point.Y });
             }
         }
-        jcv_diagram_free(&diagram);
     }
 
-    //progressOrCancel(7, 5); // progress
-    for (const Pairs& edge : edges) {
-        m_returnPs.append(toPath(edge));
-        progress(edges.size(), m_returnPs.size()); // progress
+    m_returnPss.clear();
+    m_returnPss.resize(1);
+
+    //    std::for_each(vd.edges_begin(), vd.edges_end(), [this](VD::Halfedge_handle e) {
+    //        qDebug() << e->is_valid();
+    //        //        m_returnPss.first().append(Path{
+    //        //            IntPoint{ static_cast<cInt>(e->right()->point().x()), static_cast<cInt>(e->right()->point().y()) },
+    //        //            IntPoint{ static_cast<cInt>(e->left()->point().x()), static_cast<cInt>(e->left()->point().y()) } });
+    //    });
+    for (VD::Face_iterator f = vd.faces_begin(); f != vd.faces_end(); f++) {
+        Ccb_halfedge_circulator ec_start = f->ccb();
+        Ccb_halfedge_circulator ec = ec_start;
+        Path path;
+        do {
+            if (ec->has_source())
+                path << IntPoint{
+                    static_cast<cInt>(((Halfedge_handle)ec)->source()->point().x()),
+                    static_cast<cInt>(((Halfedge_handle)ec)->source()->point().y())
+                }; //((Halfedge_handle)ec)->source()->point().x(), ((Halfedge_handle)ec)->source()->point().y());
+        } while (++ec != ec_start);
+        m_returnPss.first().append(path);
     }
-    mergePaths(m_returnPs);
-    m_returnPs.append(toPath(frame));
-    //progressOrCancel(7, 6); // progress
-    for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
-        if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
-            m_returnPs.remove(i--);
-    }
-    //progressOrCancel(7, 7); // progress
-    if (width < tool.getDiameter(depth)) {
-        m_file = new File({ sortBE(m_returnPs) }, tool, depth, Voronoi);
-        m_file->setFileName(tool.name());
-        emit fileReady(m_file);
-    } else {
-        createOffset(tool, depth, width);
-        m_file = new File(m_returnPss, tool, depth, Voronoi, m_workingRawPs);
-        m_file->setFileName(tool.name());
-        emit fileReady(m_file);
-    }
+
+    m_file = new File(m_returnPss, tool, depth, Voronoi, m_workingRawPs);
+    m_file->setFileName(tool.name());
+    emit fileReady(m_file);
+
+    //    std::ifstream ifs("data/data1.dt.cin");
+    //    assert(ifs);
+    //    ifs.close();
+    //    assert(vd.is_valid());
+    //    std::ifstream ifq("data/queries1.dt.cin");
+    //    assert(ifq);
+    //    Point_2 p;
+    //    while (ifq >> p) {
+    //        qDebug() << "Query point (" << p.x() << "," << p.y() << ") lies on a Voronoi ";
+    //        Locate_result lr = vd.locate(p);
+    //        if (Vertex_handle* v = boost::get<Vertex_handle>(&lr)) {
+    //            qDebug() << "vertex.";
+    //            qDebug() << "The Voronoi vertex is:";
+    //            qDebug() << "\t" << (*v)->point().x() << (*v)->point().y();
+    //        } else if (Halfedge_handle* e = boost::get<Halfedge_handle>(&lr)) {
+    //            qDebug() << "edge.";
+    //            qDebug() << "The source and target vertices "
+    //                     << "of the Voronoi edge are:";
+    //            print_endpoint(*e, true);
+    //            print_endpoint(*e, false);
+    //        } else if (Face_handle* f = boost::get<Face_handle>(&lr)) {
+    //            qDebug() << "face.";
+    //            qDebug() << "The vertices of the Voronoi face are"
+    //                     << " (in counterclockwise order):";
+    //            Ccb_halfedge_circulator ec_start = (*f)->ccb();
+    //            Ccb_halfedge_circulator ec = ec_start;
+    //            do {
+    //                print_endpoint(ec, false);
+    //            } while (++ec != ec_start);
+    //        }
+    //        qDebug();
+    //    }
+    //    ifq.close();
+
+    // }
+
+    //    QVector<jcv_point> points;
+    //    points.reserve(100000);
+    //    CleanPolygons(m_workingPs, tolerance * 0.1 * uScale);
+    //    groupedPaths(CopperPaths);
+    //    int id = 0;
+    //    auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
+    //        QLineF line(toQPointF(tmp), toQPointF(point));
+    //        if (line.length() > tolerance) {
+    //            for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
+    //                line.setLength(i * tolerance);
+    //                IntPoint point(toIntPoint(line.p2()));
+    //                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+    //            }
+    //        }
+    //    };
+    //    progress(7, 1); // progress
+    //    for (const Paths& paths : m_groupedPss) {
+    //        for (const Path& path : paths) {
+
+    //            IntPoint tmp(path.first());
+    //            for (const IntPoint& point : path) {
+    //                condei(tmp, point);
+    //                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+    //                tmp = point;
+    //            }
+    //            condei(tmp, path.first());
+    //        }
+    //        ++id;
+    //    }
+    //    progress(7, 2); // progress
+    //    for (const Path& path : m_workingRawPs) {
+
+    //        IntPoint tmp(path.first());
+    //        for (const IntPoint& point : path) {
+    //            condei(tmp, point);
+    //            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+    //            tmp = point;
+    //        }
+    //        condei(tmp, path.first());
+    //        ++id;
+    //    }
+
+    //    Clipper clipper;
+    //    for (const Paths& paths : m_groupedPss) {
+    //        clipper.AddPaths(paths, ptClip, true);
+    //    }
+    //    clipper.AddPaths(m_workingRawPs, ptClip, true);
+    //    const IntRect r(clipper.GetBounds());
+    //    QMap<int, Pairs> edges;
+    //    Pairs frame;
+    //    //progressOrCancel(7, 3); // progress
+    //    {
+    //        jcv_rect bounding_box = {
+    //            { static_cast<jcv_real>(r.left - uScale * 1.1), static_cast<jcv_real>(r.top - uScale * 1.1) },
+    //            { static_cast<jcv_real>(r.right + uScale * 1.1), static_cast<jcv_real>(r.bottom + uScale * 1.1) }
+    //        };
+    //        jcv_diagram diagram;
+    //        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+    //        auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
+    //            return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
+    //        };
+    //        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+    //        for (int i = 0; i < diagram.numsites; i++) {
+
+    //            jcv_graphedge* graph_edge = sites[i].edges;
+    //            while (graph_edge) {
+    //                const jcv_edge* edge = graph_edge->edge;
+    //                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+    //                if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
+    //                    frame.insert(pair); // frame
+    //                else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
+    //                    edges[edge->sites[0]->p.id * edge->sites[0]->p.id ^ edge->sites[1]->p.id * edge->sites[1]->p.id].insert(pair); // other
+    //                graph_edge = graph_edge->next;
+    //            }
+    //        }
+    //        jcv_diagram_free(&diagram);
+    //    }
+
+    //    //progressOrCancel(7, 5); // progress
+    //    for (const Pairs& edge : edges) {
+    //        m_returnPs.append(toPath(edge));
+    //        progress(edges.size(), m_returnPs.size()); // progress
+    //    }
+    //    mergePaths(m_returnPs);
+    //    m_returnPs.append(toPath(frame));
+    //    //progressOrCancel(7, 6); // progress
+    //    for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
+    //        if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
+    //            m_returnPs.remove(i--);
+    //    }
+    //    //progressOrCancel(7, 7); // progress
+    //    if (width < tool.getDiameter(depth)) {
+    //        m_file = new File({ sortBE(m_returnPs) }, tool, depth, Voronoi);
+    //        m_file->setFileName(tool.name());
+    //        emit fileReady(m_file);
+    //    } else {
+    //        createOffset(tool, depth, width);
+    //        m_file = new File(m_returnPss, tool, depth, Voronoi, m_workingRawPs);
+    //        m_file->setFileName(tool.name());
+    //        emit fileReady(m_file);
+    //    }
 }
 
 void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width)
