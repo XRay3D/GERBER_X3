@@ -10,6 +10,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += C:/local/boost_1_71_0
+INCLUDEPATH += C:/dev/CGAL-5.0/include
+INCLUDEPATH += C:/dev/CGAL-5.0/auxiliary/gmp/include
+
+LIBS += \
+    -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \
+    -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libgmp-10 \
 
 HEADERS += \
     $$PWD/gccreator.h \
@@ -18,7 +25,8 @@ HEADERS += \
     $$PWD/gcprofile.h \
     $$PWD/gcthermal.h \
     $$PWD/gcvars.h \
-    $$PWD/gcvoronoi.h
+    $$PWD/gcvoronoi.h \
+    $$PWD/voroni/jc_voronoi.h \
 
 SOURCES += \
     $$PWD/gccreator.cpp \
@@ -26,4 +34,5 @@ SOURCES += \
     $$PWD/gcpocket.cpp \
     $$PWD/gcprofile.cpp \
     $$PWD/gcthermal.cpp \
-    $$PWD/gcvoronoi.cpp
+    $$PWD/gcvoronoi.cpp \
+    $$PWD/voroni/jc_voronoi.cpp \
