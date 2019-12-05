@@ -98,7 +98,6 @@ HEADERS += \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
     version.h \
-    voroni/jc_voronoi.h \
 
 SOURCES += \
     aboutform.cpp \
@@ -152,7 +151,6 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    voroni/jc_voronoi.cpp \
 
 FORMS += \
     aboutform.ui \
