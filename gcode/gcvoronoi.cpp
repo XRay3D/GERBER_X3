@@ -23,55 +23,34 @@ enum /*Red_blue*/ {
     PURPLE = 3
 };
 
-using Red_blue = int;
-
-// functor that defines how to convert color info when:
-// 1. constructing the storage site of an endpoint of a segment
-// 2. a segment site is split into two sub-segments
-struct Red_blue_convert_info {
-    using Info = Red_blue;
+struct convert_info {
+    using Info = int;
     using result_type = const Info&;
-
-    inline const Info& operator()(const Info& info0, bool) const
-    {
-        // just return the info of the supporting segment
-        return info0;
-    }
-
-    inline const Info& operator()(const Info& info0, const Info&, bool) const
-    {
-        // just return the info of the supporting segment
-        return info0;
-    }
+    inline const Info& operator()(const Info& info0, bool) const { return info0; }
+    inline const Info& operator()(const Info& info0, const Info&, bool) const { return info0; }
 };
-// functor that defines how to merge color info when a site (either
-// point or segment) corresponds to point(s) on plane belonging to
-// more than one input site
-struct Red_blue_merge_info {
-    using Info = Red_blue;
-    using result_type = Info;
 
+struct merge_info {
+    using Info = int;
+    using result_type = Info;
     inline Info operator()(const Info& info0, const Info& info1) const
     {
-        // if the two sites defining the new site have the same info, keep this common info
-        if (info0 == info1) {
+        if (info0 == info1)
             return info0;
-        }
-        // otherwise the new site should be purple
-        return PURPLE;
+        return info0; /*PURPLE*/
     }
 };
 
-//typedef CGAL::Simple_cartesian<double> K;
-using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+typedef CGAL::Simple_cartesian<double> K;
+//using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Gt = CGAL::Segment_Delaunay_graph_filtered_traits_2<K>;
-using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<Gt, Red_blue, Red_blue_convert_info, Red_blue_merge_info>;
+using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<Gt, int, convert_info, merge_info>;
 using D_S = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<Gt>>;
 using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
 
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -148,6 +127,13 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
         //        }
         //        ++id;
     }
+    const cInt kx = (maxX - minX) * 2 /*uScale*/;
+    const cInt ky = (maxY - minY) * 2 /*uScale*/;
+    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { minX - kx, minY - ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
+
     assert(sdg.is_valid(true, 1));
     progress(4, 1);
     Paths segments;
@@ -155,11 +141,9 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
     for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
         const SDG2::Edge e = *eit;
         CGAL_precondition(!sdg.is_infinite(e));
-
-        if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info()) {
+        bool skip = e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info();
+        if (skip)
             continue;
-        }
-
         SDG2::Geom_traits::Line_2 sdgLine;
         SDG2::Geom_traits::Segment_2 sdgSegment;
         SDG2::Geom_traits::Ray_2 sdgRay;
@@ -167,14 +151,24 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
 
         CGAL::Object o = sdg.primal(e);
 
+        auto test = [maxX, maxY, minX, minY, skip](const Path& path) -> bool {
+            return 0; // skip && (path.first().X > maxX || path.last().X > maxX || path.first().Y > maxY || path.last().Y > maxY || path.first().X < minX || path.last().X < minX || path.first().Y < minY || path.last().Y < minY);
+        };
+
         if (CGAL::assign(sdgLine, o)) {
-            Path path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+            Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+            if (test(path))
+                continue;
             segments.append(path);
         } else if (CGAL::assign(sdgRay, o)) {
-            Path path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+            Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+            if (test(path))
+                continue;
             segments.append(path);
         } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-            Path path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+            Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+            if (test(path))
+                continue;
             segments.append(path);
         } else if (CGAL::assign(cgalParabola, o)) {
             std::vector<CGAL::Point_2<K>> points;
@@ -188,7 +182,7 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
     }
     progress(4, 2);
 
-    Path frame{
+    Path frame {
         { minX - uScale, minY - uScale },
         { minX - uScale, maxY + uScale },
         { maxX + uScale, maxY + uScale },
@@ -196,21 +190,17 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
         { minX - uScale, minY - uScale },
     };
     {
-
         Clipper clipper;
         clipper.AddPaths(segments, ptSubject, false);
         clipper.AddPath(frame, ptClip, true);
         clipper.Execute(ctIntersection, segments, pftNonZero);
     }
     progress(4, 3);
-    mergePaths(segments);
+//    mergePaths(segments);
     progress(4, 4);
     m_returnPs = segments;
-
     m_returnPs.append(frame);
-
     // generateFile("segments", segments);
-
 #endif
 
 #ifdef JCV
@@ -281,7 +271,7 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
@@ -378,40 +368,45 @@ void VoronoiCreator::mergePaths(Paths& paths)
             for (int j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                if (paths[i].first() == paths[j].first()) {
+                else if (paths[i].first() == paths[j].first()) {
                     ReversePath(paths[j]);
                     paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                }
-                if (paths[i].last() == paths[j].last()) {
+                } else if (paths[i].last() == paths[j].last()) {
                     ReversePath(paths[j]);
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
+                } else if (paths[i].first() == paths[j].last()) {
+                    paths[j].append(paths[i].mid(1));
+                    paths.remove(i--);
+                    break;
+                } else if (paths[j].first() == paths[i].last()) {
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    break;
                 }
-                if (Length(paths[i].last(), paths[j].last()) < dist) {
+
+                /* else if (Length(paths[i].last(), paths[j].last()) < dist) {
                     ReversePath(paths[j]);
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     continue; // break;
-                }
-                if (Length(paths[i].last(), paths[j].first()) < dist) {
+                } else if (Length(paths[i].last(), paths[j].first()) < dist) {
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     continue; // break;
-                }
-                if (Length(paths[i].first(), paths[j].last()) < dist) {
+                } else if (Length(paths[i].first(), paths[j].last()) < dist) {
                     paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                }
-                if (Length(paths[i].first(), paths[j].first()) < dist) {
+                } else if (Length(paths[i].first(), paths[j].first()) < dist) {
                     ReversePath(paths[j]);
                     paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                }
+                }*/
             }
         }
     }

@@ -402,6 +402,7 @@ Paths& Creator::sortBE(Paths& src)
 {
     IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
