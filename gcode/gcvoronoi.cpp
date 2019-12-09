@@ -2,7 +2,7 @@
 #include "gcfile.h"
 #include "gcvoronoi.h"
 
-#define JCV
+#define SDG2_
 
 #ifdef JCV
 #include "voroni/jc_voronoi.h"
@@ -97,10 +97,10 @@ void VoronoiCreator::create(const GCodeParams& gcp)
         m_gcp.dParam[Width]);
 }
 
-void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double tolerance, const double width)
+void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double /*tolerance*/, const double width)
 {
     self = this;
-    CleanPolygons(m_workingPs, /*tolerance **/ 0.001 * uScale);
+    //CleanPolygons(m_workingPs, /*tolerance **/ 0.001 * uScale);
     groupedPaths(CopperPaths);
 
 #ifdef SDG2_
@@ -108,61 +108,58 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
          minY = minX,
          maxX = std::numeric_limits<cInt>::min(),
          maxY = maxX;
-
-    auto generateFile = [this, tool, depth](const QString& name, Paths& paths) {
-        m_file = new File({ paths }, tool, depth, Voronoi, m_workingRawPs);
-        m_file->setFileName(name);
-        emit fileReady(m_file);
-    };
-    auto clip = [&maxX, &maxY, &minX, &minY, this](Paths& paths) {
-        Clipper clipper;
-        clipper.AddPaths(paths, ptSubject, false);
-        clipper.AddPath({ { minX - uScale, minY - uScale },
-                            { minX - uScale, maxY + uScale },
-                            { maxX + uScale, maxY + uScale },
-                            { maxX + uScale, minY - uScale } },
-            ptClip, true);
-        clipper.Execute(ctIntersection, paths, pftNonZero);
-        Clipper clipper2;
-        clipper2.AddPaths(paths, ptSubject, false);
-        for (const Paths& paths : m_groupedPss)
-            clipper2.AddPaths(paths, ptClip, true);
-        clipper2.Execute(ctDifference, paths, pftNonZero);
-    };
-    progress(2, 0);
+    progress(4, 0);
     SDG2 sdg;
-    QSet<IntPoint> testSet;
-    //add line segments to diagram
     int id = 0;
+    //add line segments to diagram
+
+    int c = 0;
     for (const Paths& paths : m_groupedPss) {
+        progress(m_groupedPss.size(), ++c);
         for (const Path& path : paths) {
             for (int i = 0; i < path.size(); ++i) {
                 const IntPoint& point = path[i];
-                testSet.insert(point);
-                SDG2::Site_2 site;
-                site = !i ? CGAL::Segment_Delaunay_graph_site_2<K>::
-                                construct_site_2({ path.last().X, path.last().Y }, { point.X, point.Y })
-                          : CGAL::Segment_Delaunay_graph_site_2<K>::
-                                construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
+                const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({ path.last().X, path.last().Y }, { point.X, point.Y })
+                                             : SDG2::Site_2::construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
                 sdg.insert(site, id);
                 maxX = std::max(maxX, point.X);
                 maxY = std::max(maxY, point.Y);
                 minX = std::min(minX, point.X);
                 minY = std::min(minY, point.Y);
             }
-            ++id;
         }
+        ++id;
+
+        //        std::vector<Gt::Point_2> points;
+        //        std::vector<std::pair<std::size_t, std::size_t>> indices;
+        //        for (const Path& path : paths) {
+        //            int i = 0;
+        //            for (; i < path.size(); i) {
+        //                const IntPoint& point = path[i];
+        //                points.push_back({ point.X, point.Y });
+        //                indices.push_back(std::make_pair(i, ++i));
+        //                maxX = std::max(maxX, point.X);
+        //                maxY = std::max(maxY, point.Y);
+        //                minX = std::min(minX, point.X);
+        //                minY = std::min(minY, point.Y);
+        //            }
+        //            *--indices.end() = std::make_pair(--i, 0);
+        //            sdg.insert_segments(points.begin(), points.end(), indices.begin(), indices.end());
+        //        }
+        //        ++id;
     }
-
     assert(sdg.is_valid(true, 1));
-
+    progress(4, 1);
     Paths segments;
-
+    segments.reserve(id * 2);
     for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
         const SDG2::Edge e = *eit;
         CGAL_precondition(!sdg.is_infinite(e));
 
-        // get the vertices defining the Voronoi edge
+        if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info()) {
+            continue;
+        }
+
         SDG2::Geom_traits::Line_2 sdgLine;
         SDG2::Geom_traits::Segment_2 sdgSegment;
         SDG2::Geom_traits::Ray_2 sdgRay;
@@ -172,91 +169,47 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
 
         if (CGAL::assign(sdgLine, o)) {
             Path path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
-            if (!testSet.contains(path.first()) && !testSet.contains(path.last()))
-                segments /*line*/.append(path);
+            segments.append(path);
         } else if (CGAL::assign(sdgRay, o)) {
             Path path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
-            if (!testSet.contains(path.first()) && !testSet.contains(path.last()))
-                segments /*ray*/.append(path);
+            segments.append(path);
         } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
             Path path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
-            if (!testSet.contains(path.first()) && !testSet.contains(path.last()))
-                segments.append(path);
+            segments.append(path);
         } else if (CGAL::assign(cgalParabola, o)) {
             std::vector<CGAL::Point_2<K>> points;
-            cgalParabola.generate_points(points);
-
+            cgalParabola.generate_points(points, 10);
             Path path;
             path.reserve(static_cast<int>(points.size()));
             for (const CGAL::Point_2<K>& pt : points)
                 path << toIntPoint(pt);
-            //            clean(path);
-            segments.append(path);
+            segments.append(path /*{ toIntPoint(*points.begin()), toIntPoint(*--points.end()) }*/);
         }
     }
-    clip(segments);
+    progress(4, 2);
 
-    //sortBE(segments);
+    Path frame{
+        { minX - uScale, minY - uScale },
+        { minX - uScale, maxY + uScale },
+        { maxX + uScale, maxY + uScale },
+        { maxX + uScale, minY - uScale },
+        { minX - uScale, minY - uScale },
+    };
+    {
 
-    QVector<QPair<const Path*, int>> mv;
-    mv.reserve(segments.size());
-    for (const Path& p : segments)
-        mv.append(QPair{ &p, 0 });
-    bool rm = false;
-    do {
-        qDebug() << "mv 1" << mv.size();
-        for (int i = 0; i < mv.size(); ++i) {
-            progress(mv.size(), i); // progress
-            const IntPoint &p11 = mv[i].first->first(), &p12 = mv[i].first->last();
-            int& key1 = mv[i].second;
-            //            if (key1 == 3)
-            //                continue;
-            if (p11.X == minX - uScale || p11.X == maxX + uScale || p11.Y == minY - uScale || p11.Y == maxY + uScale)
-                key1 |= 1;
-            if (p12.X == minX - uScale || p12.X == maxX + uScale || p12.Y == minY - uScale || p12.Y == maxY + uScale)
-                key1 |= 2;
-            for (int j = 0; j < mv.size(); ++j) {
-                const IntPoint &p21 = mv[j].first->first(), &p22 = mv[j].first->last();
-                int& key2 = mv[j].second;
-                if (i == j /*|| key2 == 3*/)
-                    continue;
-                auto test = [](const IntPoint& p1, const IntPoint& p2) -> bool {
-                    return abs(p1.X - p2.X) < uScale * 0.005 && abs(p1.Y - p2.Y) < uScale * 0.005;
-                };
-                if (test(p11, p21)) {
-                    key1 |= 1;
-                    key2 |= 1;
-                } else if (test(p11, p22)) {
-                    key1 |= 1;
-                    key2 |= 2;
-                } else if (test(p12, p21)) {
-                    key1 |= 2;
-                    key2 |= 1;
-                } else if (test(p12, p22)) {
-                    key1 |= 2;
-                    key2 |= 2;
-                }
-            }
-        }
-        rm = false;
-        for (int i = 0; i < mv.size(); ++i) {
-            int& key = mv[i].second;
-            if (key != 3) {
-                rm = true;
-                mv.remove(i--);
-                continue;
-            }
-            key = 0;
-        }
-        qDebug() << "mv 2" << mv.size();
-    } while (rm);
+        Clipper clipper;
+        clipper.AddPaths(segments, ptSubject, false);
+        clipper.AddPath(frame, ptClip, true);
+        clipper.Execute(ctIntersection, segments, pftNonZero);
+    }
+    progress(4, 3);
+    mergePaths(segments);
+    progress(4, 4);
+    m_returnPs = segments;
 
-    Paths ppp;
-    ppp.reserve(mv.size());
-    for (int i = 0; i < mv.size(); ++i)
-        ppp.append(*mv[i].first);
+    m_returnPs.append(frame);
 
-    generateFile("segments", /*segments*/ ppp);
+    // generateFile("segments", segments);
 
 #endif
 
@@ -352,6 +305,8 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
             m_returnPs.remove(i--);
     }
     //progressOrCancel(7, 7); // progress
+
+#endif
     if (width < tool.getDiameter(depth)) {
         m_file = new File({ sortBE(m_returnPs) }, tool, depth, Voronoi);
         m_file->setFileName(tool.name());
@@ -362,7 +317,6 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
-#endif
 }
 
 void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width)
