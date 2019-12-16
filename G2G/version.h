@@ -1,8 +1,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VER_FILEVERSION             0,7,8,2
-#define VER_FILEVERSION_STR         "0.7.8.2\0"
+#define VER_FILEVERSION             0,7,8,3
+#define VER_FILEVERSION_STR         "0.7.8.3\0"
 
 #define VER_PRODUCTVERSION          VER_FILEVERSION //0,7,7,6
 #define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR //"0.7.7.5\0"
