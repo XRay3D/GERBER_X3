@@ -155,15 +155,17 @@ void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
 
 void Creator::createGc(const GCodeParams& gcp)
 {
+    QElapsedTimer t;
+    t.start();
     try {
-        qDebug() << "Creator::createGc() started";
+        qDebug() << "Creator::createGc() started" << t.elapsed();
         create(gcp);
-        qDebug() << "Creator::createGc() ended";
+        qDebug() << "Creator::createGc() ended" << t.elapsed();
     } catch (bool) {
         m_cancel = false;
-        qWarning() << "Creator::createGc() canceled";
+        qWarning() << "Creator::createGc() canceled" << t.elapsed();
     } catch (...) {
-        qWarning() << "Creator::createGc() exeption:" << strerror(errno);
+        qWarning() << "Creator::createGc() exeption:" << strerror(errno) << t.elapsed();
     }
 }
 

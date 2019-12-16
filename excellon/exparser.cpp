@@ -225,8 +225,8 @@ bool Parser::parseTCode(const QString& line)
 bool Parser::parsePos(const QString& line)
 {
     QRegExp match("^(?:G(\\d+))?"
-                  "(?:X([+-]?\\d*\\.?\\d+))?"
-                  "(?:Y([+-]?\\d*\\.?\\d+))?"
+                  "(?:X([+-]?\\d*\\.?\\d*))?"
+                  "(?:Y([+-]?\\d*\\.?\\d*))?"
                   ".*$");
     if (match.exactMatch(line)) {
 

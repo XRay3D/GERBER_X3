@@ -189,9 +189,6 @@ void Gerber::File::read(QDataStream& stream)
 
 void Gerber::File::createGi()
 {
-    if (shortName().contains("bot", Qt::CaseInsensitive))
-        setSide(Bottom);
-
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
         item->m_id = m_itemGroup->size();
