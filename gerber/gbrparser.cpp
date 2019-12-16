@@ -135,6 +135,10 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         if (file()->isEmpty()) {
             delete m_file;
         } else {
+            if (m_file->shortName().contains("bot", Qt::CaseInsensitive))
+                m_file->setSide(Bottom);
+            else if (m_file->shortName().contains(".gb", Qt::CaseInsensitive) && !m_file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
+                m_file->setSide(Bottom);
             m_file->mergedPaths();
             m_file->createGi();
             //m_file->itemGroup()->setVisible(true);
