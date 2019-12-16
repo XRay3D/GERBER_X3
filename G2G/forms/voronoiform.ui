@@ -139,7 +139,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="label_4">
      <property name="font">
       <font>
@@ -152,7 +152,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="label_5">
      <property name="font">
       <font>
@@ -165,7 +165,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="DoubleSpinBox" name="dsbxPrecision">
      <property name="suffix">
       <string> mm</string>
@@ -187,7 +187,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="DoubleSpinBox" name="dsbxWidth">
      <property name="suffix">
       <string> mm</string>
@@ -200,7 +200,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
+   <item row="9" column="0">
     <widget class="QLabel" name="label_6">
      <property name="font">
       <font>
@@ -213,7 +213,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0" colspan="2">
+   <item row="8" column="0" colspan="2">
     <widget class="Line" name="line_2">
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
@@ -223,21 +223,48 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="9" column="1">
     <widget class="QLineEdit" name="leName"/>
    </item>
-   <item row="10" column="0" colspan="2">
+   <item row="11" column="0" colspan="2">
     <widget class="QPushButton" name="pbClose">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0" colspan="2">
+   <item row="10" column="0" colspan="2">
     <widget class="QPushButton" name="pbCreate">
      <property name="text">
       <string>Create</string>
      </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Solver:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="comboBox">
+     <item>
+      <property name="text">
+       <string>JC_VORONOI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CGAL</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

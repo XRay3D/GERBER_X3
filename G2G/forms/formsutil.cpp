@@ -30,7 +30,8 @@ FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     connect(this, &FormsUtil::createToolpath, [this] {
         if (!fileCount)
             fileCount = 1;
-        pd->setLabelText(m_fileName);
+        m_tpc->msg = m_fileName;
+        pd->setLabelText(m_tpc->msg);
         m_timerId = startTimer(100);
     });
     thread.start(QThread::HighestPriority);
@@ -132,6 +133,7 @@ void FormsUtil::timerEvent(QTimerEvent* event)
         const auto [max, val] = m_tpc->getProgress();
         pd->setMaximum(max);
         pd->setValue(val);
-        qDebug() << "timerEvent" << max << val;
+        //qDebug() << "timerEvent" << max << val;
+        pd->setLabelText(m_tpc->msg);
     }
 }

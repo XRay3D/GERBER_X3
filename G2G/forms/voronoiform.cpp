@@ -39,6 +39,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     settings.beginGroup("VoronoiForm");
     ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
     ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
+    ui->comboBox->setCurrentIndex(settings.value("comboBox").toInt());
     settings.endGroup();
 }
 
@@ -48,6 +49,7 @@ VoronoiForm::~VoronoiForm()
     settings.beginGroup("VoronoiForm");
     settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
+    settings.setValue("comboBox", ui->comboBox->currentIndex());
     settings.endGroup();
     delete ui;
 }
@@ -147,6 +149,7 @@ void VoronoiForm::createFile()
     gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
     gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
     gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
+    gpc.dParam[GCode::VorT] = ui->comboBox->currentIndex();
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
@@ -175,4 +178,9 @@ void VoronoiForm::setWidth(double /*w*/)
 
 void VoronoiForm::editFile(GCode::File* /*file*/)
 {
+}
+
+void VoronoiForm::on_comboBox_currentIndexChanged(int index)
+{
+    ui->dsbxPrecision->setEnabled(!index);
 }

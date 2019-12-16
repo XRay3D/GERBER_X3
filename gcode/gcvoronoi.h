@@ -54,8 +54,7 @@ private:
 
     void createVoronoi(const Tool& tool, double depth, const double tolerance, const double width);
     void createOffset(const Tool& tool, double depth, const double width);
-    void mergeSegments(QList<OrdPath*>& merge);
-    void mergePaths(Paths& paths);
+    void mergePaths(Paths& paths, const double dist);
     void clean(Path& path);
     Paths toPath(const Pairs& pairs);
 };
