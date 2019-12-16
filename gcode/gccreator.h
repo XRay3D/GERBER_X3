@@ -48,6 +48,8 @@ public:
     static void progress(int progressMax);
     static void progress(int progressMax, int progressVal);
     static void progress();
+    QString msg;
+
 signals:
     void fileReady(GCode::File* file);
 
@@ -75,6 +77,6 @@ protected:
     double m_stepOver = 0.0;
     GCodeParams m_gcp;
 };
-}
+} // namespace GCode
 
 #endif // TOOLPATHCREATOR_H
