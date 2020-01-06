@@ -2,7 +2,7 @@
 #define GERBERPARSER_H
 
 #include "gbrfile.h"
-#include "gbrvars.h"
+#include "gbrtypes.h"
 #include <QObject>
 #include <QStack>
 #include <parser.h>

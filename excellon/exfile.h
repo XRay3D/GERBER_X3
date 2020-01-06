@@ -1,7 +1,7 @@
 #ifndef EXFILE_H
 #define EXFILE_H
 
-#include "exvars.h"
+#include "extypes.h"
 #include <abstractfile.h>
 
 namespace Excellon {

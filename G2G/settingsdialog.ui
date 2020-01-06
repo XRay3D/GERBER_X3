@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
-    <height>664</height>
+    <width>443</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -302,6 +302,13 @@
            <widget class="QCheckBox" name="chbxSkipDuplicates">
             <property name="text">
              <string>Skip duplicates</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbxSimplifyRegions">
+            <property name="text">
+             <string>Simplify Regions</string>
             </property>
            </widget>
           </item>

@@ -2,7 +2,7 @@
 #define GFILE_H
 
 #include "gbraperture.h"
-#include "gbrvars.h"
+#include "gbrtypes.h"
 
 #include <QDebug>
 #include <abstractfile.h>
@@ -53,6 +53,7 @@ private:
     //Layer layer = Copper;
     //Miror miror = Vertical;
     QVector<int> rawIndex;
+    QList<QSharedPointer<Path>> checkList;
 
     // AbstractFile interface
 public:

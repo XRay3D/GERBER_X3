@@ -3,7 +3,7 @@
 
 #include "graphicsitem.h"
 #include <QObject>
-#include <gcvars.h>
+#include <gctypes.h>
 
 class GraphicsView;
 

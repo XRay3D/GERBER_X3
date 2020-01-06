@@ -110,8 +110,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if (maybeSave()) {
         writeSettings();
         dockWidget->close();
-        FileModel::closeProject();
+        //FileModel::closeProject();
         qApp->closeAllWindows();
+        FileModel::closeProject();
         event->accept();
     } else {
         event->ignore();
@@ -508,8 +509,6 @@ void MainWindow::readSettings()
         pro->setName(settings.value("project").toString());
         loadFile(pro->name());
     }
-
-    SettingsDialog().readSettings();
     settings.endGroup();
 }
 
@@ -552,7 +551,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
+                printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);

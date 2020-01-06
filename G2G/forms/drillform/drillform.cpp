@@ -14,7 +14,7 @@
 #include <QTimer>
 #include <gcpocket.h>
 #include <gcprofile.h>
-#include <gcvars.h>
+#include <gctypes.h>
 #include <graphicsview.h>
 
 DrillForm* DrillForm::self = nullptr;

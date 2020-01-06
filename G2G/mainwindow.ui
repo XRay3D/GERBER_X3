@@ -35,6 +35,9 @@
     </property>
     <item>
      <widget class="GraphicsView" name="graphicsView">
+      <property name="toolTip">
+       <string>фыв</string>
+      </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
       </property>

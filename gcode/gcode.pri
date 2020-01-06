@@ -24,7 +24,7 @@ HEADERS += \
     $$PWD/gcpocket.h \
     $$PWD/gcprofile.h \
     $$PWD/gcthermal.h \
-    $$PWD/gcvars.h \
+    $$PWD/gctypes.h \
     $$PWD/gcvoronoi.h \
     $$PWD/voroni/jc_voronoi.h \
 

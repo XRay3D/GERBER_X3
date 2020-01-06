@@ -1,5 +1,5 @@
 /**
- * https://habrahabr.ru/post/122397/
+ * @link   https://habrahabr.ru/post/122397/
  * @author shurik
  */
 

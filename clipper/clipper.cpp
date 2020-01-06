@@ -44,7 +44,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <gbrvars.h>
+#include <gbrtypes.h>
 #ifndef GTE
 #include <gccreator.h>
 #include <settings.h>
