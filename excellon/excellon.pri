@@ -19,7 +19,7 @@ HEADERS += \
     $$PWD/excellondialog.h \
     $$PWD/exfile.h \
     $$PWD/exparser.h \
-    $$PWD/exvars.h
+    $$PWD/extypes.h
 
 SOURCES += \
     $$PWD/excellondialog.cpp \

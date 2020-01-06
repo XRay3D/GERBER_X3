@@ -3,20 +3,12 @@
 #include "gcvoronoi.h"
 
 #include "voroni/jc_voronoi.h"
-
 #include <CGAL/Algebraic_structure_traits.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Segment_Delaunay_graph_2.h>
 #include <CGAL/Segment_Delaunay_graph_filtered_traits_2.h>
 #include <CGAL/Segment_Delaunay_graph_storage_traits_with_info_2.h>
 #include <CGAL/Segment_Delaunay_graph_traits_2.h>
-
-// an enum representing the color
-enum /*Red_blue*/ {
-    RED = 1,
-    BLUE = 2,
-    PURPLE = 3
-};
 
 struct convert_info {
     using Info = int;
@@ -32,7 +24,7 @@ struct merge_info {
     {
         if (info0 == info1)
             return info0;
-        return info0; /*PURPLE*/
+        return info0;
     }
 };
 
@@ -45,7 +37,7 @@ using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
 
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -122,13 +114,13 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
             CGAL::Object o = sdg.primal(e);
 
             if (CGAL::assign(sdgLine, o)) {
-                Path path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+                Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
                 segments.append(path);
             } else if (CGAL::assign(sdgRay, o)) {
-                Path path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+                Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
                 segments.append(path);
             } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                Path path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+                Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
                 segments.append(path);
             } else if (CGAL::assign(cgalParabola, o)) {
                 std::vector<SDG2::Point_2> points;
@@ -140,7 +132,7 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
                     path << toIntPoint(pt);
             }
         }
-        Path frame{
+        Path frame {
             { minX - uScale, minY - uScale },
             { minX - uScale, maxY + uScale },
             { maxX + uScale, maxY + uScale },
@@ -223,7 +215,7 @@ void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double 
                 jcv_graphedge* graph_edge = sites[i].edges;
                 while (graph_edge) {
                     const jcv_edge* edge = graph_edge->edge;
-                    const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                    const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                     if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                         frame.insert(pair); // frame
                     else if (edge->sites[0]->p.id != edge->sites[1]->p.id)

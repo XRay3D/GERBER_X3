@@ -1,7 +1,7 @@
 #ifndef GCODE_H
 #define GCODE_H
 
-#include "gcvars.h"
+#include "gctypes.h"
 #include <abstractfile.h>
 
 class Project;

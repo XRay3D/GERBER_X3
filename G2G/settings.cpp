@@ -29,8 +29,9 @@ QString Settings::m_startGCode = "G21 G17 G90";
 bool Settings::m_cleanPolygons = true;
 bool Settings::m_gcinfo = false;
 bool Settings::m_inch = false; //true;
-bool Settings::m_skipDuplicates = false;
+bool Settings::m_skipDuplicates = true;
 bool Settings::m_smoothScSh = false; //true;
+bool Settings::m_simplifyRegions = true;
 double Settings::m_minCircleSegmentLength = 0.5;
 int Settings::m_homePos = Qt::BottomLeftCorner;
 int Settings::m_zeroPos = Qt::BottomLeftCorner;
@@ -55,10 +56,13 @@ QPointF Settings::zeroOffset() { return m_zeroOffset; }
 QString Settings::endGCode() { return m_endGCode; }
 QString Settings::gCodeFormat() { return m_GCode; }
 QString Settings::startGCode() { return m_startGCode; }
+
 bool Settings::cleanPolygons() { return m_cleanPolygons; }
 bool Settings::gcinfo() { return m_gcinfo; }
 bool Settings::inch() { return m_inch; }
 bool Settings::skipDuplicates() { return m_skipDuplicates; }
+bool Settings::simplifyRegions() { return m_simplifyRegions; }
+
 int Settings::homePos() { return m_homePos; }
 int Settings::zeroPos() { return m_zeroPos; }
 void Settings::setInch(bool val) { m_inch = val; }

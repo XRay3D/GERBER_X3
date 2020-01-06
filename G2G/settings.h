@@ -34,6 +34,7 @@ public:
     static QColor& color(Colors id);
     static bool cleanPolygons();
     static bool skipDuplicates();
+    static bool simplifyRegions();
 
     static QString startGCode();
     static QString endGCode();
@@ -59,6 +60,7 @@ protected:
     static double m_minCircleSegmentLength;
     static bool m_cleanPolygons;
     static bool m_skipDuplicates;
+    static bool m_simplifyRegions;
     static bool m_gcinfo;
     static QString m_startGCode;
     static QString m_endGCode;

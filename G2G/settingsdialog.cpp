@@ -77,6 +77,7 @@ void SettingsDialog::readSettings()
     dsbxMinCircleSegmentLength->setValue(m_minCircleSegmentLength = settings.value("MinCircleSegmentLenght", 0.5).toDouble());
     chbxCleanPolygons->setChecked(m_cleanPolygons = settings.value("CleanPolygons", true).toBool());
     chbxSkipDuplicates->setChecked(m_skipDuplicates = settings.value("SkipDuplicates", false).toBool());
+    chbxSimplifyRegions->setChecked(m_simplifyRegions = settings.value("SimplifyRegions", false).toBool());
     chbxInfo->setChecked(m_gcinfo = settings.value("GCInfo", false).toBool());
     settings.endGroup();
 
@@ -142,6 +143,7 @@ void SettingsDialog::writeSettings()
     settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
     settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
     settings.setValue("SkipDuplicates", (m_skipDuplicates = chbxSkipDuplicates->isChecked()));
+    settings.setValue("SimplifyRegions", (m_simplifyRegions = chbxSimplifyRegions->isChecked()));
     settings.setValue("GCInfo", (m_gcinfo = chbxInfo->isChecked()));
     settings.endGroup();
 

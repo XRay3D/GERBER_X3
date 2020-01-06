@@ -2,8 +2,8 @@
 #define PREVIEWITEM_H
 
 #include "gi/graphicsitem.h"
-#include <exvars.h>
-#include <gbrvars.h>
+#include <extypes.h>
+#include <gbrtypes.h>
 #include <myclipper.h>
 
 class DrillPrGI : public QGraphicsItem {

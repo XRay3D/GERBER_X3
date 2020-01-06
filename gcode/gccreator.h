@@ -1,7 +1,7 @@
 #ifndef TOOLPATHCREATOR_H
 #define TOOLPATHCREATOR_H
 
-#include "gcvars.h"
+#include "gctypes.h"
 #include <QObject>
 #include <QThread>
 #include <QThreadPool>
