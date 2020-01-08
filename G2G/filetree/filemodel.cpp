@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>
+#include <project.h>
 
 FileModel* FileModel::m_self = nullptr;
 

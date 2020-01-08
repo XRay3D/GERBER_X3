@@ -16,7 +16,7 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
-    , m_name(qApp->applicationDirPath() + "/" + name + ".dat")
+    , m_name(qApp->applicationDirPath() + "/XrSoft/" + name + ".dat")
     , pd(new QProgressDialog(this))
 {
     readTools({ &tool, &tool2 });
@@ -124,7 +124,7 @@ void FormsUtil::setFile(GCode::File* file)
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
     file->m_usedItems = m_usedItems;
-    Project::addFile(file);
+    Project::instance()->addFile(file);
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)

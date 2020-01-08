@@ -1056,22 +1056,22 @@ Public License instead of this License.  But first, please read
 <context>
     <name>GCode::VoronoiCreator</name>
     <message>
-        <location filename="../../gcode/gcvoronoi.cpp" line="85"/>
+        <location filename="../../gcode/gcvoronoi.cpp" line="237"/>
         <source>Calc Voronoi</source>
         <translation>Рассчёт Вороного</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcvoronoi.cpp" line="262"/>
+        <location filename="../../gcode/gcvoronoi.cpp" line="91"/>
         <source>Create Offset</source>
         <translation>Создать отступ</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcvoronoi.cpp" line="311"/>
+        <location filename="../../gcode/gcvoronoi.cpp" line="140"/>
         <source>Merge Paths</source>
         <translation>Слияние путей</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcvoronoi.cpp" line="398"/>
+        <location filename="../../gcode/gcvoronoi.cpp" line="408"/>
         <source>Merge Segments</source>
         <translation>Объединение сегментов</translation>
     </message>
@@ -1108,9 +1108,9 @@ Public License instead of this License.  But first, please read
         <location filename="../forms/gcodepropertiesform.ui" line="319"/>
         <location filename="../forms/gcodepropertiesform.ui" line="366"/>
         <location filename="../forms/gcodepropertiesform.ui" line="392"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="452"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="471"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="570"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="455"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="474"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="573"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
@@ -1120,22 +1120,22 @@ Public License instead of this License.  But first, please read
         <translation>Толщина меди</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="411"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="414"/>
         <source>Layout</source>
         <translation>Раскладка</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="510"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="513"/>
         <source>X Steps</source>
         <translation>Шагов X</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="517"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="520"/>
         <source>Y Steps</source>
         <translation>Шагов Y</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="554"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="557"/>
         <source>Glue (for &quot;raw&quot;)</source>
         <translation>Клей (для «сырых»)</translation>
     </message>
@@ -1147,14 +1147,14 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="283"/>
         <location filename="../forms/gcodepropertiesform.ui" line="356"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="432"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="435"/>
         <source>X</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="309"/>
         <location filename="../forms/gcodepropertiesform.ui" line="382"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="442"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="445"/>
         <source>Y</source>
         <translation></translation>
     </message>
@@ -1184,7 +1184,7 @@ Public License instead of this License.  But first, please read
         <translation>Безопасная Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="595"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="598"/>
         <source>Ok</source>
         <translation>Да</translation>
     </message>
@@ -1192,19 +1192,19 @@ Public License instead of this License.  But first, please read
 <context>
     <name>Gerber::Parser</name>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="401"/>
-        <location filename="../../gerber/gbrparser.cpp" line="502"/>
+        <location filename="../../gerber/gbrparser.cpp" line="391"/>
+        <location filename="../../gerber/gbrparser.cpp" line="492"/>
         <source>Aperture %1 not found!</source>
         <translation>Апертура %1 не найдена!</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="457"/>
-        <location filename="../../gerber/gbrparser.cpp" line="460"/>
+        <location filename="../../gerber/gbrparser.cpp" line="447"/>
+        <location filename="../../gerber/gbrparser.cpp" line="450"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
         <translation>номер строки %1: «%2»,  ошибочное значение.</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="507"/>
+        <location filename="../../gerber/gbrparser.cpp" line="497"/>
         <source>Aperture D%1 (%2) not supported!</source>
         <translation>Апертура D%1 (%2) не поддерживается!</translation>
     </message>
@@ -2082,6 +2082,11 @@ X %2:Y %3</source>
 X %2:Y %3</translation>
     </message>
     <message>
+        <location filename="../tooldatabase/tool.cpp" line="50"/>
+        <source>Default</source>
+        <translation>По умолчанию</translation>
+    </message>
+    <message>
         <location filename="../tooldatabase/tool.cpp" line="275"/>
         <source>No valid tool...!!!</source>
         <translation>Ошибка в инструменте...!!!</translation>
@@ -2857,31 +2862,31 @@ X %2:Y %3</translation>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="112"/>
-        <location filename="../forms/voronoiform.cpp" line="124"/>
+        <location filename="../forms/voronoiform.cpp" line="114"/>
+        <location filename="../forms/voronoiform.cpp" line="126"/>
         <source>Working items from different files!</source>
         <translation>Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="112"/>
-        <location filename="../forms/voronoiform.cpp" line="124"/>
-        <location filename="../forms/voronoiform.cpp" line="141"/>
-        <location filename="../forms/voronoiform.cpp" line="174"/>
+        <location filename="../forms/voronoiform.cpp" line="114"/>
+        <location filename="../forms/voronoiform.cpp" line="126"/>
+        <location filename="../forms/voronoiform.cpp" line="143"/>
+        <location filename="../forms/voronoiform.cpp" line="176"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="141"/>
+        <location filename="../forms/voronoiform.cpp" line="143"/>
         <source>No selected items for working...</source>
         <translation>Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="161"/>
+        <location filename="../forms/voronoiform.cpp" line="163"/>
         <source>Voronoi</source>
         <translation>Вороной</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="174"/>
+        <location filename="../forms/voronoiform.cpp" line="176"/>
         <source>The width must be larger than the tool diameter!</source>
         <translation>Ширина должна быть больше диаметра инструмента!</translation>
     </message>

@@ -5,12 +5,11 @@
 #include <QSettings>
 #include <QTimer>
 #include <mainwindow.h>
+#include <project.h>
 #include <scene.h>
 
 GCodePropertiesForm* GCodePropertiesForm::self = nullptr;
 
-Marker* GCodePropertiesForm::homePoint = nullptr;
-Marker* GCodePropertiesForm::zeroPoint = nullptr;
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::boardThickness;
 double GCodePropertiesForm::copperThickness;
@@ -39,10 +38,21 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     });
 
     connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { glue = val; });
-    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { homePoint->setPosX(val); });
-    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { homePoint->setPosY(val); });
-    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { zeroPoint->setPosX(val); });
-    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { zeroPoint->setPosY(val); });
+    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosX(val); });
+    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosY(val); });
+    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosX(val); });
+    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
+
+    if (Project::instance()) {
+        connect(ui->dsbxSpasingX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpasingX);
+        connect(ui->dsbxSpasingY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpasingY);
+        connect(ui->sbxStepsX, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsX);
+        connect(ui->sbxStepsY, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsY);
+        ui->dsbxSpasingX->setValue(Project::instance()->spasingX());
+        ui->dsbxSpasingY->setValue(Project::instance()->spasingY());
+        ui->sbxStepsX->setValue(Project::instance()->stepsX());
+        ui->sbxStepsY->setValue(Project::instance()->stepsY());
+    }
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -63,11 +73,11 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     ui->dsbxGlue->setValue(settings.value("dsbxGlue", 0.05).toDouble());
     settings.endGroup();
 
-    ui->dsbxHomeX->setValue(homePoint->pos().x());
-    ui->dsbxHomeY->setValue(homePoint->pos().y());
+    ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
+    ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
 
-    ui->dsbxZeroX->setValue(zeroPoint->pos().x());
-    ui->dsbxZeroY->setValue(zeroPoint->pos().y());
+    ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
+    ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
 
     safeZ = ui->dsbxSafeZ->value();
     boardThickness = ui->dsbxThickness->value();
@@ -105,9 +115,10 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
 GCodePropertiesForm::~GCodePropertiesForm()
 {
     self = nullptr;
-
-    homePoint->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
-    zeroPoint->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
+    if (Marker::get(Marker::Home))
+        Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
+    if (Marker::get(Marker::Zero))
+        Marker::get(Marker::Zero)->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     QSettings settings;
     settings.beginGroup("GCodePropertiesForm");
@@ -132,8 +143,18 @@ void GCodePropertiesForm::updatePosDsbxs()
 {
     if (!self)
         return;
-    self->ui->dsbxHomeX->setValue(homePoint->pos().x());
-    self->ui->dsbxHomeY->setValue(homePoint->pos().y());
-    self->ui->dsbxZeroX->setValue(zeroPoint->pos().x());
-    self->ui->dsbxZeroY->setValue(zeroPoint->pos().y());
+    self->ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
+    self->ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
+    self->ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
+    self->ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
+}
+
+void GCodePropertiesForm::updateAll()
+{
+    if (!self)
+        return;
+    self->ui->dsbxSpasingX;
+    self->ui->dsbxSpasingY;
+    self->ui->sbxStepsX;
+    self->ui->sbxStepsY;
 }

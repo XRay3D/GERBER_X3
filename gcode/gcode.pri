@@ -10,9 +10,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += $$PWD
-INCLUDEPATH += C:/local/boost_1_71_0
-INCLUDEPATH += C:/dev/CGAL-5.0/include
-INCLUDEPATH += C:/dev/CGAL-5.0/auxiliary/gmp/include
+
+contains(QT_ARCH, i386) {
+    message("32-bit")
+} else {
+    message("64-bit")
+    msvc* {
+        INCLUDEPATH += C:/local/boost_1_71_0
+        INCLUDEPATH += C:/dev/CGAL-5.0/include
+        INCLUDEPATH += C:/dev/CGAL-5.0/auxiliary/gmp/include
+        DEFINES += _USE_CGAL_
+    }
+}
 
 LIBS += \
     -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \

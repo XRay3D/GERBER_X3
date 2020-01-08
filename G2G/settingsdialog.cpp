@@ -75,7 +75,7 @@ void SettingsDialog::readSettings()
     settings.beginGroup("Gerber");
     sbxMinCircleSegments->setValue(m_minCircleSegments = settings.value("MinCircleSegments", 36).toInt());
     dsbxMinCircleSegmentLength->setValue(m_minCircleSegmentLength = settings.value("MinCircleSegmentLenght", 0.5).toDouble());
-    chbxCleanPolygons->setChecked(m_cleanPolygons = settings.value("CleanPolygons", true).toBool());
+    chbxCleanPolygons->setChecked(m_cleanPolygons = settings.value("CleanPolygons", false).toBool());
     chbxSkipDuplicates->setChecked(m_skipDuplicates = settings.value("SkipDuplicates", false).toBool());
     chbxSimplifyRegions->setChecked(m_simplifyRegions = settings.value("SimplifyRegions", false).toBool());
     chbxInfo->setChecked(m_gcinfo = settings.value("GCInfo", false).toBool());

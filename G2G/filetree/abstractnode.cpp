@@ -19,12 +19,12 @@ AbstractNode::~AbstractNode()
     //        MainWindow::exportPdfAct()->setEnabled(Project::isEmpty());
     //    }
     if (m_id != -1) {
-        QGraphicsScene* scene = Project::file(m_id)->itemGroup()->first()->scene();
-        if (scene) {
-            scene->setSceneRect(scene->itemsBoundingRect());
-            scene->update();
-        }
-        Project::deleteFile(m_id);
+        //        QGraphicsScene* scene = Project::instance()->file(m_id)->itemGroup()->first()->scene();
+        //        if (scene) {
+        //            scene->setSceneRect(scene->itemsBoundingRect());
+        //            scene->update();
+        //        }
+        Project::instance()->deleteFile(m_id);
     }
     childItems.clear();
 }

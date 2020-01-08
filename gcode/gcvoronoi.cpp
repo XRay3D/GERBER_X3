@@ -3,6 +3,7 @@
 #include "gcvoronoi.h"
 
 #include "voroni/jc_voronoi.h"
+#ifdef _USE_CGAL_
 #include <CGAL/Algebraic_structure_traits.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Segment_Delaunay_graph_2.h>
@@ -39,7 +40,7 @@ inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
     return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
-
+#endif
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
 {
     return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint)));
@@ -49,193 +50,28 @@ namespace GCode {
 
 inline uint qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0)
 {
-    return ::qHash(tag.first.X ^ tag.second.X /*, seed ^ 0xa317a317*/) ^ ::qHash(tag.first.Y ^ tag.second.Y /*, seed ^ 0x17a317a3*/);
+    return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y);
 }
 
 void VoronoiCreator::create(const GCodeParams& gcp)
 {
     m_gcp = gcp;
-    createVoronoi(m_gcp.tool.first(),
-        m_gcp.dParam[Depth],
-        m_gcp.dParam[Tolerance],
-        m_gcp.dParam[Width]);
+    createVoronoi();
 }
 
-void VoronoiCreator::createVoronoi(const Tool& tool, double depth, const double tolerance, const double width)
+void VoronoiCreator::createVoronoi()
 {
     self = this;
+
+    const auto& tool = m_gcp.tool.first();
+    const auto depth = m_gcp.dParam[Depth];
+    const auto width = m_gcp.dParam[Width];
+
     groupedPaths(CopperPaths);
     if (static_cast<int>(m_gcp.dParam[VorT])) {
-        cInt minX = std::numeric_limits<cInt>::max(),
-             minY = minX,
-             maxX = std::numeric_limits<cInt>::min(),
-             maxY = maxX;
-        progress(4, 0);
-        SDG2 sdg;
-        int id = 0;
-        //add line segments to diagram
-        int c = 0;
-        msg = tr("Calc Voronoi");
-        for (const Paths& paths : m_groupedPss) {
-            progress(m_groupedPss.size(), ++c);
-            for (const Path& path : paths) {
-                for (int i = 0; i < path.size(); ++i) {
-                    const IntPoint& point = path[i];
-                    const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({ path.last().X, path.last().Y }, { point.X, point.Y })
-                                                 : SDG2::Site_2::construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
-                    sdg.insert(site, id);
-                    maxX = std::max(maxX, point.X);
-                    maxY = std::max(maxY, point.Y);
-                    minX = std::min(minX, point.X);
-                    minY = std::min(minY, point.Y);
-                }
-            }
-            ++id;
-        }
-        const cInt kx = (maxX - minX) * 2;
-        const cInt ky = (maxY - minY) * 2;
-        sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }), id);
-        sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { minX - kx, minY - ky }), id);
-        sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
-        sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
-        assert(sdg.is_valid(true, 1));
-        Paths segments;
-        segments.reserve(id * 2);
-        for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
-            const SDG2::Edge e = *eit;
-            CGAL_precondition(!sdg.is_infinite(e));
-            if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
-                continue;
-            SDG2::Geom_traits::Line_2 sdgLine;
-            SDG2::Geom_traits::Segment_2 sdgSegment;
-            SDG2::Geom_traits::Ray_2 sdgRay;
-            CGAL::Parabola_segment_2<Gt> cgalParabola;
-
-            CGAL::Object o = sdg.primal(e);
-
-            if (CGAL::assign(sdgLine, o)) {
-                Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
-                segments.append(path);
-            } else if (CGAL::assign(sdgRay, o)) {
-                Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
-                segments.append(path);
-            } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
-                segments.append(path);
-            } else if (CGAL::assign(cgalParabola, o)) {
-                std::vector<SDG2::Point_2> points;
-                cgalParabola.generate_points(points, 5);
-                segments.append(Path());
-                Path& path = segments.last();
-                path.reserve(static_cast<int>(points.size()));
-                for (const SDG2::Point_2& pt : points)
-                    path << toIntPoint(pt);
-            }
-        }
-        Path frame {
-            { minX - uScale, minY - uScale },
-            { minX - uScale, maxY + uScale },
-            { maxX + uScale, maxY + uScale },
-            { maxX + uScale, minY - uScale },
-            { minX - uScale, minY - uScale },
-        };
-        {
-            Clipper clipper;
-            clipper.AddPaths(segments, ptSubject, false);
-            clipper.AddPath(frame, ptClip, true);
-            clipper.Execute(ctIntersection, segments, pftNonZero);
-        }
-        mergePaths(segments, 0.02 * uScale);
-        m_returnPs = segments;
-        m_returnPs.append(frame);
+        cgalVoronoi();
     } else {
-        QVector<jcv_point> points;
-        points.reserve(100000);
-        CleanPolygons(m_workingPs, tolerance * 0.1 * uScale);
-        groupedPaths(CopperPaths);
-        int id = 0;
-        auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
-            QLineF line(toQPointF(tmp), toQPointF(point));
-            if (line.length() > tolerance) {
-                for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
-                    line.setLength(i * tolerance);
-                    IntPoint point(toIntPoint(line.p2()));
-                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                }
-            }
-        };
-        progress(7, 1); // progress
-        for (const Paths& paths : m_groupedPss) {
-            for (const Path& path : paths) {
-
-                IntPoint tmp(path.first());
-                for (const IntPoint& point : path) {
-                    condei(tmp, point);
-                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                    tmp = point;
-                }
-                condei(tmp, path.first());
-            }
-            ++id;
-        }
-        progress(7, 2); // progress
-        for (const Path& path : m_workingRawPs) {
-
-            IntPoint tmp(path.first());
-            for (const IntPoint& point : path) {
-                condei(tmp, point);
-                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                tmp = point;
-            }
-            condei(tmp, path.first());
-            ++id;
-        }
-
-        Clipper clipper;
-        for (const Paths& paths : m_groupedPss) {
-            clipper.AddPaths(paths, ptClip, true);
-        }
-        clipper.AddPaths(m_workingRawPs, ptClip, true);
-        const IntRect r(clipper.GetBounds());
-        QMap<int, Pairs> edges;
-        Pairs frame;
-        {
-            jcv_rect bounding_box = {
-                { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
-                { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
-            };
-            jcv_diagram diagram;
-            jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
-            auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
-                return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
-            };
-            const jcv_site* sites = jcv_diagram_get_sites(&diagram);
-            for (int i = 0; i < diagram.numsites; i++) {
-
-                jcv_graphedge* graph_edge = sites[i].edges;
-                while (graph_edge) {
-                    const jcv_edge* edge = graph_edge->edge;
-                    const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
-                    if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
-                        frame.insert(pair); // frame
-                    else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
-                        edges[edge->sites[0]->p.id * edge->sites[0]->p.id ^ edge->sites[1]->p.id * edge->sites[1]->p.id].insert(pair); // other
-                    graph_edge = graph_edge->next;
-                }
-            }
-            jcv_diagram_free(&diagram);
-        }
-
-        for (const Pairs& edge : edges) {
-            m_returnPs.append(toPath(edge));
-            progress(edges.size(), m_returnPs.size()); // progress
-        }
-        mergePaths(m_returnPs, 0.005 * uScale);
-        m_returnPs.append(toPath(frame));
-        for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
-            if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
-                m_returnPs.remove(i--);
-        }
+        jcVoronoi();
     }
     qDebug() << "m_returnPs" << m_returnPs.size();
     if (width < tool.getDiameter(depth)) {
@@ -383,6 +219,187 @@ void VoronoiCreator::clean(Path& path)
         if (abs(a1 - a2) < kAngle) {
             path.remove(i--);
         }
+    }
+}
+
+void VoronoiCreator::cgalVoronoi()
+{
+#ifdef _USE_CGAL_
+    cInt minX = std::numeric_limits<cInt>::max(),
+         minY = minX,
+         maxX = std::numeric_limits<cInt>::min(),
+         maxY = maxX;
+    progress(4, 0);
+    SDG2 sdg;
+    int id = 0;
+    //add line segments to diagram
+    int c = 0;
+    msg = tr("Calc Voronoi");
+    for (const Paths& paths : m_groupedPss) {
+        progress(m_groupedPss.size(), ++c);
+        for (const Path& path : paths) {
+            for (int i = 0; i < path.size(); ++i) {
+                const IntPoint& point = path[i];
+                const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({ path.last().X, path.last().Y }, { point.X, point.Y })
+                                             : SDG2::Site_2::construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
+                sdg.insert(site, id);
+                maxX = std::max(maxX, point.X);
+                maxY = std::max(maxY, point.Y);
+                minX = std::min(minX, point.X);
+                minY = std::min(minY, point.Y);
+            }
+        }
+        ++id;
+    }
+    const cInt kx = (maxX - minX) * 2;
+    const cInt ky = (maxY - minY) * 2;
+    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { minX - kx, minY - ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
+    assert(sdg.is_valid(true, 1));
+    Paths segments;
+    segments.reserve(id * 2);
+    for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
+        const SDG2::Edge e = *eit;
+        CGAL_precondition(!sdg.is_infinite(e));
+        if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
+            continue;
+        SDG2::Geom_traits::Line_2 sdgLine;
+        SDG2::Geom_traits::Segment_2 sdgSegment;
+        SDG2::Geom_traits::Ray_2 sdgRay;
+        CGAL::Parabola_segment_2<Gt> cgalParabola;
+
+        CGAL::Object o = sdg.primal(e);
+
+        if (CGAL::assign(sdgLine, o)) {
+            Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+            segments.append(path);
+        } else if (CGAL::assign(sdgRay, o)) {
+            Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+            segments.append(path);
+        } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
+            Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+            segments.append(path);
+        } else if (CGAL::assign(cgalParabola, o)) {
+            std::vector<SDG2::Point_2> points;
+            cgalParabola.generate_points(points, 5);
+            segments.append(Path());
+            Path& path = segments.last();
+            path.reserve(static_cast<int>(points.size()));
+            for (const SDG2::Point_2& pt : points)
+                path << toIntPoint(pt);
+        }
+    }
+    Path frame {
+        { minX - uScale, minY - uScale },
+        { minX - uScale, maxY + uScale },
+        { maxX + uScale, maxY + uScale },
+        { maxX + uScale, minY - uScale },
+        { minX - uScale, minY - uScale },
+    };
+    {
+        Clipper clipper;
+        clipper.AddPaths(segments, ptSubject, false);
+        clipper.AddPath(frame, ptClip, true);
+        clipper.Execute(ctIntersection, segments, pftNonZero);
+    }
+    mergePaths(segments, 0.02 * uScale);
+    m_returnPs = segments;
+    m_returnPs.append(frame);
+#endif
+}
+
+void VoronoiCreator::jcVoronoi()
+{
+    const auto tolerance = m_gcp.dParam[Tolerance];
+
+    QVector<jcv_point> points;
+    points.reserve(100000);
+    CleanPolygons(m_workingPs, tolerance * 0.1 * uScale);
+    groupedPaths(CopperPaths);
+    int id = 0;
+    auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
+        QLineF line(toQPointF(tmp), toQPointF(point));
+        if (line.length() > tolerance) {
+            for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
+                line.setLength(i * tolerance);
+                IntPoint point(toIntPoint(line.p2()));
+                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+            }
+        }
+    };
+    progress(7, 1); // progress
+    for (const Paths& paths : m_groupedPss) {
+        for (const Path& path : paths) {
+
+            IntPoint tmp(path.first());
+            for (const IntPoint& point : path) {
+                condei(tmp, point);
+                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                tmp = point;
+            }
+            condei(tmp, path.first());
+        }
+        ++id;
+    }
+    progress(7, 2); // progress
+    for (const Path& path : m_workingRawPs) {
+
+        IntPoint tmp(path.first());
+        for (const IntPoint& point : path) {
+            condei(tmp, point);
+            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+            tmp = point;
+        }
+        condei(tmp, path.first());
+        ++id;
+    }
+
+    Clipper clipper;
+    for (const Paths& paths : m_groupedPss) {
+        clipper.AddPaths(paths, ptClip, true);
+    }
+    clipper.AddPaths(m_workingRawPs, ptClip, true);
+    const IntRect r(clipper.GetBounds());
+    QMap<int, Pairs> edges;
+    Pairs frame;
+    {
+        jcv_rect bounding_box = {
+            { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
+            { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
+        };
+        jcv_diagram diagram;
+        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+        auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
+            return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
+        };
+        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+        for (int i = 0; i < diagram.numsites; i++) {
+
+            jcv_graphedge* graph_edge = sites[i].edges;
+            while (graph_edge) {
+                const jcv_edge* edge = graph_edge->edge;
+                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
+                    frame.insert(pair); // frame
+                else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
+                    edges[edge->sites[0]->p.id * edge->sites[0]->p.id ^ edge->sites[1]->p.id * edge->sites[1]->p.id].insert(pair); // other
+                graph_edge = graph_edge->next;
+            }
+        }
+        jcv_diagram_free(&diagram);
+    }
+
+    for (const Pairs& edge : edges) {
+        m_returnPs.append(toPath(edge));
+        progress(edges.size(), m_returnPs.size()); // progress
+    }
+    mergePaths(m_returnPs, 0.005 * uScale);
+    m_returnPs.append(toPath(frame));
+    for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
+        if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
+            m_returnPs.remove(i--);
     }
 }
 

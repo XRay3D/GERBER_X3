@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , gerberParser(new Gerber::Parser)
     , excellonParser(new Excellon::Parser)
-    , pro(new Project)
+    , m_project(new Project)
 {
     setupUi(this);
 
@@ -39,10 +39,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
 
-    GCodePropertiesForm::zeroPoint = new Marker(Marker::Zero);
-    GCodePropertiesForm::homePoint = new Marker(Marker::Home);
+    new Marker(Marker::Zero);
+    new Marker(Marker::Home);
     for (int i = 0; i < 4; ++i)
         new Pin(scene);
+    new LayoutFrames();
 
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
@@ -126,6 +127,7 @@ bool MainWindow::closeProject()
         dockWidget->close();
         FileModel::closeProject();
         setCurrentFile(QString());
+        Project::instance()->close();
         return true;
     }
     return false;
@@ -140,7 +142,7 @@ void MainWindow::about()
 void MainWindow::initWidgets()
 {
     createActions();
-    connect(pro, &Project::changed, this, &MainWindow::documentWasModified);
+    connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
     setUnifiedTitleAndToolBarOnMac(true);
 }
 
@@ -199,7 +201,7 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), pro, &Project::saveSelectedToolpaths);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), m_project, &Project::saveSelectedToolpaths);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
@@ -398,8 +400,8 @@ void MainWindow::createActionsToolPath()
     toolpathToolBar->addSeparator();
     toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         Pin::pins().first()->resetPos();
-        GCodePropertiesForm::homePoint->resetPos(false);
-        GCodePropertiesForm::zeroPoint->resetPos(false);
+        Marker::get(Marker::Home)->resetPos(false);
+        Marker::get(Marker::Zero)->resetPos(false);
         graphicsView->zoomFit();
     });
 }
@@ -486,7 +488,7 @@ void MainWindow::createPinsPath()
 
         GCode::File* gcode = new GCode::File({ { toPath(dst) } }, tool, depth, GCode::Drill);
         gcode->setFileName(tr("Pin (") + tool.name() + ")");
-        Project::addFile(gcode);
+        m_project->addFile(gcode);
     }
 }
 
@@ -506,8 +508,8 @@ void MainWindow::readSettings()
 
     lastPath = settings.value("lastPath").toString();
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
-        pro->setName(settings.value("project").toString());
-        loadFile(pro->name());
+        m_project->setName(settings.value("project").toString());
+        loadFile(m_project->name());
     }
     settings.endGroup();
 }
@@ -519,7 +521,7 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
-    settings.setValue("project", pro->name());
+    settings.setValue("project", m_project->name());
     settings.endGroup();
 }
 
@@ -696,16 +698,16 @@ void MainWindow::open()
 
 bool MainWindow::save()
 {
-    if (pro->isUntitled())
+    if (m_project->isUntitled())
         return saveAs();
     else
-        return saveFile(pro->name());
+        return saveFile(m_project->name());
 }
 
 bool MainWindow::saveAs()
 {
     QString file(
-        QFileDialog::getSaveFileName(this, tr("Open File"), pro->name(), tr("Project (*.g2g)")));
+        QFileDialog::getSaveFileName(this, tr("Open File"), m_project->name(), tr("Project (*.g2g)")));
     if (file.isEmpty())
         return false;
     return saveFile(file);
@@ -713,14 +715,14 @@ bool MainWindow::saveAs()
 
 void MainWindow::documentWasModified()
 {
-    setWindowModified(pro->isModified());
+    setWindowModified(m_project->isModified());
 }
 
 bool MainWindow::maybeSave()
 {
-    if (!pro->isModified() && pro->size()) {
+    if (!m_project->isModified() && m_project->size()) {
         return QMessageBox::warning(this, tr("Warning"), tr("Do you want to close this project?"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok;
-    } else if (!pro->size()) {
+    } else if (!m_project->size()) {
         return true;
     }
 
@@ -741,7 +743,7 @@ bool MainWindow::maybeSave()
 
 void MainWindow::loadFile(const QString& fileName)
 {
-    if (Project::contains(fileName) != -1
+    if (m_project->contains(fileName) != -1
         && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
             == QMessageBox::Cancel) {
         return;
@@ -753,7 +755,7 @@ void MainWindow::loadFile(const QString& fileName)
         lastPath = QFileInfo(fileName).absolutePath();
         if (fileName.endsWith(".g2g")) {
             if (closeProject()) {
-                Project::open(file);
+                m_project->open(file);
                 setCurrentFile(fileName);
                 QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
             }
@@ -771,7 +773,7 @@ bool MainWindow::saveFile(const QString& fileName)
     QFile file(fileName);
     if (file.open(QFile::WriteOnly)) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        pro->save(file);
+        m_project->save(file);
         QApplication::restoreOverrideCursor();
         setCurrentFile(fileName);
         statusBar()->showMessage(tr("File saved"), 2000);
@@ -786,24 +788,24 @@ bool MainWindow::saveFile(const QString& fileName)
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
-    pro->setName(fileName);
-    pro->setModified(false);
+    m_project->setName(fileName);
+    m_project->setModified(false);
     setWindowModified(false);
-    if (!pro->isUntitled())
-        prependToRecentFiles(pro->name());
-    m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(pro->name())));
-    setWindowFilePath(pro->name());
-    setWindowFilePath(pro->name());
-    setWindowFilePath(pro->name());
+    if (!m_project->isUntitled())
+        prependToRecentFiles(m_project->name());
+    m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(m_project->name())));
+    setWindowFilePath(m_project->name());
+    setWindowFilePath(m_project->name());
+    setWindowFilePath(m_project->name());
 }
 
 void MainWindow::addFileToPro(AbstractFile* file)
 {
-    if (Project::isUntitled()) {
+    if (m_project->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
     }
-    Project::addFile(file);
+    m_project->addFile(file);
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
         GerberNode::repaintTimer()->start();

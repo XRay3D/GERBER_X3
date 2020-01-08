@@ -59,18 +59,21 @@ void File::save(const QString& name)
     file.close();
 }
 
-void File::saveDrill()
+void File::saveDrill(const QPointF& offset)
 {
+
     QPolygonF path(toQPolygon(m_toolPathss.first().first()));
+    path.translate(offset);
+
     if (m_side) {
-        const double k = Pin::min() + Pin::max();
+        const double k = Pin::minX() + Pin::maxX();
         for (QPointF& point : path) {
             point.rx() = -point.x() + k;
         }
     }
 
     for (QPointF& point : path)
-        point -= GCodePropertiesForm::zeroPoint->pos();
+        point -= Marker::get(Marker::Zero)->pos();
 
     const QVector<double> depths(getDepths());
 
@@ -86,9 +89,9 @@ void File::saveDrill()
     }
 }
 
-void File::savePocket()
+void File::savePocket(const QPointF& offset)
 {
-    QVector<QVector<QPolygonF>> pathss(pss());
+    QVector<QVector<QPolygonF>> pathss(pss(offset));
     const QVector<double> depths(getDepths());
 
     for (QVector<QPolygonF>& paths : pathss) {
@@ -115,9 +118,9 @@ void File::savePocket()
     }
 }
 
-void File::saveProfile()
+void File::saveProfile(const QPointF& offset)
 {
-    QVector<QVector<QPolygonF>> pathss(pss());
+    QVector<QVector<QPolygonF>> pathss(pss(offset));
     const QVector<double> depths(getDepths());
     if (m_type != Raster) {
         for (QVector<QPolygonF>& paths : pathss) {
@@ -174,15 +177,20 @@ void File::saveProfile()
     }
 }
 
-QVector<QVector<QPolygonF>> File::pss()
+QVector<QVector<QPolygonF>> File::pss(const QPointF& offset)
 {
     QVector<QVector<QPolygonF>> pathss;
     pathss.reserve(m_toolPathss.size());
     for (const Paths& paths : m_toolPathss) {
         pathss.append(toQPolygons(paths));
     }
-    if (m_side) {
-        const double k = Pin::min() + Pin::max();
+
+    for (QVector<QPolygonF>& paths : pathss)
+        for (QPolygonF& path : paths)
+            path.translate(offset);
+
+    if (m_side == Bottom) {
+        const double k = Pin::minX() + Pin::maxX();
         for (QVector<QPolygonF>& paths : pathss) {
             for (QPolygonF& path : paths) {
                 std::reverse(path.begin(), path.end());
@@ -195,18 +203,23 @@ QVector<QVector<QPolygonF>> File::pss()
     for (QVector<QPolygonF>& paths : pathss) {
         for (QPolygonF& path : paths) {
             for (QPointF& point : path) {
-                point -= GCodePropertiesForm::zeroPoint->pos();
+                point -= Marker::get(Marker::Zero)->pos();
             }
         }
     }
+
     return pathss;
 }
 
-QVector<QPolygonF> File::ps()
+QVector<QPolygonF> File::ps(const QPointF& offset)
 {
     QVector<QPolygonF> paths(toQPolygons(m_toolPathss.first()));
-    if (m_side) {
-        const double k = Pin::min() + Pin::max();
+
+    for (QPolygonF& path : paths)
+        path.translate(offset);
+
+    if (m_side == Bottom) {
+        const double k = Pin::minX() + Pin::maxX();
         for (QPolygonF& path : paths) {
             std::reverse(path.begin(), path.end());
             for (QPointF& point : path) {
@@ -216,9 +229,10 @@ QVector<QPolygonF> File::ps()
     }
     for (QPolygonF& path : paths) {
         for (QPointF& point : path) {
-            point -= GCodePropertiesForm::zeroPoint->pos();
+            point -= Marker::get(Marker::Zero)->pos();
         }
     }
+
     return paths;
 }
 
@@ -260,26 +274,34 @@ void File::initSave()
 
 void File::genGcode()
 {
-    switch (m_type) {
-    case Pocket:
-        savePocket();
-        break;
-    case Voronoi:
-        if (m_toolPathss.size() > 1)
-            savePocket();
-        else
-            saveProfile();
-        break;
-    case Profile:
-    case Thermal:
-    case Raster:
-        saveProfile();
-        break;
-    case Drill:
-        saveDrill();
-        break;
-    default:
-        break;
+    QRectF rect = Project::instance()->worckRect();
+    for (int x = 0; x < Project::instance()->stepsX(); ++x) {
+        for (int y = 0; y < Project::instance()->stepsY(); ++y) {
+            QPointF offset(
+                (rect.width() + Project::instance()->spasingX()) * x,
+                (rect.height() + Project::instance()->spasingY()) * y);
+            switch (m_type) {
+            case Pocket:
+                savePocket(offset);
+                break;
+            case Voronoi:
+                if (m_toolPathss.size() > 1)
+                    savePocket(offset);
+                else
+                    saveProfile(offset);
+                break;
+            case Profile:
+            case Thermal:
+            case Raster:
+                saveProfile(offset);
+                break;
+            case Drill:
+                saveDrill(offset);
+                break;
+            default:
+                break;
+            }
+        }
     }
 }
 
@@ -309,7 +331,7 @@ QString File::getLastDir()
         QSettings settings;
         lastDir = settings.value("LastGCodeDir").toString();
         if (lastDir.isEmpty()) {
-            lastDir = Project::name();
+            lastDir = Project::instance()->name();
             lastDir = lastDir.left(lastDir.lastIndexOf('/') + 1);
         }
         settings.setValue("LastGCodeDir", lastDir);
@@ -351,7 +373,7 @@ void File::statFile()
 void File::endFile()
 {
     sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
-    QPointF home(GCodePropertiesForm::homePoint->pos() - GCodePropertiesForm::zeroPoint->pos());
+    QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
     sl.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
     sl.append(Settings::endGCode());
 }

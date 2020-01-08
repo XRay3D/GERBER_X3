@@ -16,6 +16,7 @@ enum GraphicsItemType {
     GiPointZero,
     GiRaw,
     GiPin,
+    GiLayoutFrames,
 
     GiThermalPr, // ThermalForm
     GiSlotPr, // DrillForm
@@ -24,6 +25,7 @@ enum GraphicsItemType {
 
     GiShapeC,
     GiShapeR = GiShapeC,
+
 };
 
 class AbstractFile;

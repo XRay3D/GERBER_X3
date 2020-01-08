@@ -388,7 +388,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 Paths& Creator::sortB(Paths& src)
 {
     IntPoint startPt(
-        toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -409,7 +409,7 @@ Paths& Creator::sortB(Paths& src)
 Paths& Creator::sortBE(Paths& src)
 {
     IntPoint startPt(
-        toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
@@ -444,7 +444,7 @@ Paths& Creator::sortBE(Paths& src)
 Pathss& Creator::sortB(Pathss& src)
 {
     IntPoint startPt(
-        toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -465,7 +465,7 @@ Pathss& Creator::sortB(Pathss& src)
 Pathss& Creator::sortBE(Pathss& src)
 {
     IntPoint startPt(
-        toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
