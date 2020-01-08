@@ -6,36 +6,37 @@
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
 
-bool Project::m_isUntitled = true;
-QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
-bool Project::m_isModified = false;
-QMutex Project::m_mutex;
-QString Project::m_fileName;
-Project* Project::self = nullptr;
-QSemaphore Project::sem;
-QString Project::m_name;
-int Project::m_ver = G2G_Ver_1_2;
+Project* Project::m_instance = nullptr;
 
-Project::Project() { self = this; }
+Project::Project() { m_instance = this; }
 
-Project::~Project() { self = nullptr; }
+Project::~Project() { m_instance = nullptr; }
 
 bool Project::save(QFile& file)
 {
     try {
         QDataStream out(&file);
-        out << G2G_Ver_1_1;
-        out << GCodePropertiesForm::homePoint->pos();
-        out << GCodePropertiesForm::zeroPoint->pos();
-        for (Pin* pin : Pin::pins())
-            out << pin->pos();
-        out << Pin::worckRect;
-        out << GCodePropertiesForm::safeZ;
-        out << GCodePropertiesForm::boardThickness;
-        out << GCodePropertiesForm::copperThickness;
-        out << GCodePropertiesForm::clearence;
-        out << GCodePropertiesForm::plunge;
-        out << GCodePropertiesForm::glue;
+        out << G2G_Ver_3;
+        switch (G2G_Ver_3) {
+        case G2G_Ver_3:
+            out << m_spasingX;
+            out << m_spasingY;
+            out << m_stepsX;
+            out << m_stepsY;
+        case G2G_Ver_2:
+            out << Marker::get(Marker::Home)->pos();
+            out << Marker::get(Marker::Zero)->pos();
+            for (Pin* pin : Pin::pins())
+                out << pin->pos();
+            out << m_worckRect;
+            out << GCodePropertiesForm::safeZ;
+            out << GCodePropertiesForm::boardThickness;
+            out << GCodePropertiesForm::copperThickness;
+            out << GCodePropertiesForm::clearence;
+            out << GCodePropertiesForm::plunge;
+            out << GCodePropertiesForm::glue;
+        case G2G_Ver_1:;
+        }
         out << m_files;
         m_isModified = false;
         return true;
@@ -51,23 +52,36 @@ bool Project::open(QFile& file)
         QElapsedTimer t;
         t.start();
         QDataStream in(&file);
-        in >> m_ver;
-        QPointF pt;
-        in >> pt;
-        GCodePropertiesForm::homePoint->setPos(pt);
-        in >> pt;
-        GCodePropertiesForm::zeroPoint->setPos(pt);
-        for (Pin* pin : Pin::pins()) {
-            in >> pt;
-            pin->setPos(pt);
+        int ver;
+        in >> ver;
+        qDebug() << "Project ver:" << ver;
+
+        QPointF tmpPt;
+
+        switch (ver) {
+        case G2G_Ver_3:
+            in >> m_spasingX;
+            in >> m_spasingY;
+            in >> m_stepsX;
+            in >> m_stepsY;
+        case G2G_Ver_2:
+            in >> tmpPt;
+            Marker::get(Marker::Home)->setPos(tmpPt);
+            in >> tmpPt;
+            Marker::get(Marker::Zero)->setPos(tmpPt);
+            for (Pin* pin : Pin::pins()) {
+                in >> tmpPt;
+                pin->setPos(tmpPt);
+            }
+            in >> m_worckRect;
+            in >> GCodePropertiesForm::safeZ;
+            in >> GCodePropertiesForm::boardThickness;
+            in >> GCodePropertiesForm::copperThickness;
+            in >> GCodePropertiesForm::clearence;
+            in >> GCodePropertiesForm::plunge;
+            in >> GCodePropertiesForm::glue;
+        case G2G_Ver_1:;
         }
-        in >> Pin::worckRect;
-        in >> GCodePropertiesForm::safeZ;
-        in >> GCodePropertiesForm::boardThickness;
-        in >> GCodePropertiesForm::copperThickness;
-        in >> GCodePropertiesForm::clearence;
-        in >> GCodePropertiesForm::plunge;
-        in >> GCodePropertiesForm::glue;
         in >> m_files;
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
             switch (filePtr->type()) {
@@ -84,12 +98,21 @@ bool Project::open(QFile& file)
         }
         m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
-        m_ver = G2G_Ver_1_1;
+        LayoutFrames::update();
         return true;
     } catch (...) {
         qDebug() << file.errorString();
     }
     return false;
+}
+
+void Project::close()
+{
+    setWorckRect({});
+    setStepsX(1);
+    setStepsY(1);
+    setSpasingX(0.0);
+    setSpasingY(0.0);
 }
 
 AbstractFile* Project::file(int id)
@@ -146,7 +169,13 @@ QRectF Project::getSelectedBoundingRect()
             }
         }
     }
-    return QRectF(toQPointF(topleft), toQPointF(bottomRight));
+
+    const QRectF rect(toQPointF(topleft), toQPointF(bottomRight));
+
+    if (!rect.isEmpty())
+        setWorckRect(rect);
+
+    return rect;
 }
 
 QRectF Project::getBoundingRect()
@@ -210,14 +239,11 @@ bool Project::reload(int id, AbstractFile* file)
             static_cast<Gerber::File*>(file)->rawItemGroup()->setZValue(-id);
             break;
         case FileType::Drill:
-            //            file->setColor(m_files[id]->color());
             static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
         default:
-            //            file->setColor(m_files[id]->color());
-            //            file->itemGroup()->setBrush(m_files[id]->itemGroup()->brush());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
@@ -254,8 +280,6 @@ void Project::setName(const QString& name)
         m_name = name;
 }
 
-int Project::ver() { return m_ver; }
-
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -263,7 +287,7 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 
 void Project::saveSelectedToolpaths()
 {
-    QVector<GCode::File*> files(files<GCode::File>());
+    QVector<GCode::File*> files(this->files<GCode::File>());
     for (int i = 0; i < files.size(); ++i) {
         if (!files[i]->itemGroup()->isVisible())
             files.remove(i--);
@@ -271,7 +295,7 @@ void Project::saveSelectedToolpaths()
 
     QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
     for (GCode::File* file : files)
-        mm[QPair{ file->getTool(), file->side() }].append(file);
+        mm[QPair { file->getTool(), file->side() }].append(file);
 
     for (const QPair<Tool, Side>& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));
@@ -321,26 +345,58 @@ void Project::saveSelectedToolpaths()
             file.close();
         }
     }
-    //    for (GCode::File* file : files) {
-    //        if (!file->itemGroup()->isVisible())
-    //            continue;
-    //        isEmpty = false;
-    //        QString name(GCode::File::getLastDir().append(file->shortName()));
-    //        if (!name.endsWith("tap"))
-    //            name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-    //        name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
-    //        if (name.isEmpty())
-    //            return;
-    //        file->save(name);
-    //        file->itemGroup()->setVisible(false);
-    //    }
+
     if (mm.isEmpty())
         QMessageBox::information(nullptr, "", tr("No selected toolpath files."));
 }
 
 bool Project::isUntitled() { return m_isUntitled; }
 
-void Project::setUntitled(bool value) { m_isUntitled = value; }
+void Project::setUntitled(bool value)
+{
+    m_isUntitled = value;
+    LayoutFrames::update();
+}
+
+double Project::spasingX() const { return m_spasingX; }
+
+void Project::setSpasingX(double value)
+{
+    m_spasingX = value;
+    LayoutFrames::update();
+}
+
+double Project::spasingY() const { return m_spasingY; }
+
+void Project::setSpasingY(double value)
+{
+    m_spasingY = value;
+    LayoutFrames::update();
+}
+
+int Project::stepsX() const { return m_stepsX; }
+
+void Project::setStepsX(int value)
+{
+    m_stepsX = value;
+    LayoutFrames::update();
+}
+
+int Project::stepsY() const { return m_stepsY; }
+
+void Project::setStepsY(int value)
+{
+    m_stepsY = value;
+    LayoutFrames::update();
+}
+
+QRectF Project::worckRect() const { return m_worckRect; }
+
+void Project::setWorckRect(const QRectF& worckRect)
+{
+    m_worckRect = worckRect;
+    LayoutFrames::update();
+}
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {

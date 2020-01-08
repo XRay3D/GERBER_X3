@@ -11,7 +11,12 @@ class Marker : public QGraphicsItem { //Object {
     //    Q_OBJECT
 
 public:
-    Marker(int type);
+    enum Type {
+        Zero,
+        Home
+    };
+
+    Marker(Type type);
     ~Marker() override;
 
     QRectF boundingRect() const override;
@@ -22,18 +27,14 @@ public:
     void resetPos(bool fl = true);
     void setPosX(double x);
     void setPosY(double y);
-
-    enum {
-        Null = -1,
-        Zero,
-        Home
-    };
+    static Marker* get(Type type) { return m_markers[type]; }
 
 private:
     QRectF m_rect;
     QPainterPath m_path;
     QPainterPath m_shape;
-    int m_type = Null;
+    Type m_type;
+    static Marker* m_markers[2];
     void updateGCPForm();
 
 protected:
@@ -44,7 +45,7 @@ protected:
 class Pin : public QObject, public QGraphicsItem {
 
 public:
-    Pin(QObject *parent);
+    Pin(QObject* parent);
     ~Pin() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -52,9 +53,10 @@ public:
     int type() const override;
 
     static QVector<Pin*> pins();
-    static double min() { return qMin(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
-    static double max() { return qMax(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
-    static QRectF worckRect;
+    static double minX() { return qMin(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
+    static double maxX() { return qMax(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
+    static double minY() { return qMin(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
+    static double maxY() { return qMax(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
 
     void resetPos(bool fl = true);
     void updateToolTip();
@@ -72,6 +74,20 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+};
+
+class LayoutFrames : public QObject, public QGraphicsItem {
+    static LayoutFrames* m_instance;
+    QPainterPath m_path;
+
+public:
+    LayoutFrames();
+    virtual ~LayoutFrames() override;
+    int type() const override;
+    QRectF boundingRect() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    static LayoutFrames* instance();
+    static void update();
 };
 
 #endif // POINT_H

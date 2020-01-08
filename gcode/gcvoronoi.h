@@ -52,10 +52,12 @@ private:
         }
     };
 
-    void createVoronoi(const Tool& tool, double depth, const double tolerance, const double width);
+    void createVoronoi();
     void createOffset(const Tool& tool, double depth, const double width);
     void mergePaths(Paths& paths, const double dist);
     void clean(Path& path);
+    void cgalVoronoi();
+    void jcVoronoi();
     Paths toPath(const Pairs& pairs);
 };
 }
