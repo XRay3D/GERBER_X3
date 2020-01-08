@@ -14,7 +14,7 @@
 #include <QTimer>
 #include <gcpocket.h>
 #include <gcprofile.h>
-#include <gcvars.h>
+#include <gctypes.h>
 #include <graphicsview.h>
 
 DrillForm* DrillForm::self = nullptr;
@@ -288,13 +288,13 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (Excellon::File* file : Project::files<Excellon::File>()) {
+    for (Excellon::File* file : Project::instance()->files<Excellon::File>()) {
         ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         ui->cbxFile->setItemIcon(ui->cbxFile->count() - 1, QIcon::fromTheme("drill-path"));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
     }
 
-    for (Gerber::File* file : Project::files<Gerber::File>()) {
+    for (Gerber::File* file : Project::instance()->files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(IconSize, IconSize);
@@ -313,10 +313,10 @@ void DrillForm::updateFiles()
 
 bool DrillForm::canToShow()
 {
-    if (Project::files<Excellon::File>().size() > 0)
+    if (Project::instance()->files<Excellon::File>().size() > 0)
         return true;
 
-    for (Gerber::File* file : Project::files<Gerber::File>())
+    for (Gerber::File* file : Project::instance()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
 
@@ -376,7 +376,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File({ pathsMap[selectedToolId].paths }, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), GCode::Profile);
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                Project::addFile(gcode);
+                Project::instance()->addFile(gcode);
             }
         }
     }
@@ -441,7 +441,7 @@ void DrillForm::on_pbCreate_clicked()
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
             if (!pathsMap[toolId].drillPath.isEmpty()) {
                 Path& path = pathsMap[toolId].drillPath;
-                IntPoint point1(toIntPoint(GCodePropertiesForm::homePoint->pos()));
+                IntPoint point1(toIntPoint(Marker::get(Marker::Home)->pos()));
                 { // sort by distance
                     int counter = 0;
                     while (counter < path.size()) {
@@ -461,7 +461,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File({ { path } }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
-                Project::addFile(gcode);
+                Project::instance()->addFile(gcode);
             }
             if (!pathsMap[toolId].paths.isEmpty()) {
                 Clipper clipper;
@@ -504,7 +504,7 @@ void DrillForm::on_pbCreate_clicked()
                     continue;
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[toolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                Project::addFile(gcode);
+                Project::instance()->addFile(gcode);
             }
         }
     }

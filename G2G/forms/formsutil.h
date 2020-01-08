@@ -7,7 +7,7 @@
 #include <QWidget>
 #include <abstractfile.h>
 #include <gccreator.h>
-#include <gcvars.h>
+#include <gctypes.h>
 
 namespace GCode {
 class File;

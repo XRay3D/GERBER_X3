@@ -43,10 +43,7 @@ void Creator::reset()
     m_stepOver = 0.0;
 }
 
-Creator::~Creator()
-{
-    self = nullptr;
-}
+Creator::~Creator() { self = nullptr; }
 
 Pathss& Creator::groupedPaths(Grouping group, cInt k)
 {
@@ -121,19 +118,18 @@ void Creator::addRawPaths(Paths rawPaths)
     const double glueLen = GCodePropertiesForm::glue * uScale;
     Clipper clipper;
     for (int i = 0; i < rawPaths.size(); ++i) {
-        Path& path = rawPaths[i];
-        if (path.size() > 3 && path.first() == path.last())
-            clipper.AddPath(rawPaths.takeAt(i--), ptSubject, true);
-        else if (path.size() > 3 && Length(path.first(), path.last()) < glueLen)
+        IntPoint& pf = rawPaths[i].first();
+        IntPoint& pl = rawPaths[i].last();
+        if (rawPaths[i].size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
             clipper.AddPath(rawPaths.takeAt(i--), ptSubject, true);
     }
 
     mergeSegments(rawPaths, GCodePropertiesForm::glue * uScale);
 
-    for (Path path : rawPaths) {
-        if (path.size() > 3 && path.first() == path.last())
-            clipper.AddPath(path, ptSubject, true);
-        else if (path.size() > 3 && Length(path.first(), path.last()) < glueLen)
+    for (Path& path : rawPaths) {
+        IntPoint& pf = path.first();
+        IntPoint& pl = path.last();
+        if (path.size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
             clipper.AddPath(path, ptSubject, true);
         else
             m_workingRawPs.append(path);
@@ -141,18 +137,16 @@ void Creator::addRawPaths(Paths rawPaths)
 
     IntRect r(clipper.GetBounds());
     int k = uScale;
-    Path outer = {
-        IntPoint(r.left - k, r.bottom + k),
-        IntPoint(r.right + k, r.bottom + k),
-        IntPoint(r.right + k, r.top - k),
-        IntPoint(r.left - k, r.top - k)
-    };
-
-    clipper.AddPath(outer, ptClip, true);
     Paths paths;
+    clipper.AddPath({ { r.left - k, r.bottom + k },
+                        { r.right + k, r.bottom + k },
+                        { r.right + k, r.top - k },
+                        { r.left - k, r.top - k } },
+        ptClip, true);
     clipper.Execute(ctXor, paths, pftEvenOdd);
-    //paths.takeFirst();
-    m_workingPs.append(paths.mid(1));
+    m_workingPs.append(paths.mid(1)); // paths.takeFirst();
+    qDebug() << "m_workingPs" << m_workingPs.size();
+    qDebug() << "m_workingRawPs" << m_workingRawPs.size();
 }
 
 void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(supportPaths); }
@@ -161,22 +155,21 @@ void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
 
 void Creator::createGc(const GCodeParams& gcp)
 {
+    QElapsedTimer t;
+    t.start();
     try {
-        qDebug() << "Creator::createGc() started";
+        qDebug() << "Creator::createGc() started" << t.elapsed();
         create(gcp);
-        qDebug() << "Creator::createGc() ended";
+        qDebug() << "Creator::createGc() ended" << t.elapsed();
     } catch (bool) {
         m_cancel = false;
-        qWarning() << "Creator::createGc() canceled";
+        qWarning() << "Creator::createGc() canceled" << t.elapsed();
     } catch (...) {
-        qWarning() << "Creator::createGc() exeption:" << strerror(errno);
+        qWarning() << "Creator::createGc() exeption:" << strerror(errno) << t.elapsed();
     }
 }
 
-GCode::File* Creator::file() const
-{
-    return m_file;
-}
+GCode::File* Creator::file() const { return m_file; }
 
 QPair<int, int> Creator::getProgress()
 {
@@ -197,12 +190,8 @@ void Creator::stacking(Paths& paths)
         clipper.AddPaths(paths, ptSubject, true);
         IntRect r(clipper.GetBounds());
         int k = uScale;
-        Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
+        Path outer = { IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
+            IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k) };
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         paths.clear();
@@ -247,7 +236,7 @@ void Creator::stacking(Paths& paths)
             if (m_returnPss.isEmpty() || newPaths) {
                 m_returnPss.append({ path });
             } else {
-                //check distance;
+                // check distance;
                 QPair<int, int> idx;
                 double d = std::numeric_limits<double>::max();
                 for (int id = 0; id < m_returnPss.last().last().size(); ++id) {
@@ -289,51 +278,72 @@ void Creator::stacking(Paths& paths)
 
 void Creator::mergeSegments(Paths& paths, double glue)
 {
-    for (int i = 0; i < paths.size(); ++i) {
-        for (int j = 0; j < paths.size(); ++j) {
-            if (i == j)
-                continue;
-            if (i >= paths.size() || i >= paths.size()) {
-                i = -1;
-                j = 0;
-                break;
-            }
-            if (paths[i].last() == paths[j].first()) {
-                paths[i].append(paths[j].mid(1));
-                paths.remove(j--);
-                continue;
-            }
-            if (paths[i].first() == paths[j].last()) {
-                paths[j].append(paths[i].mid(1));
-                paths.remove(i--);
-                break;
-            }
-            if (paths[i].last() == paths[j].last()) {
-                ReversePath(paths[j]);
-                paths[i].append(paths[j].mid(1));
-                paths.remove(j--);
-                continue;
-            }
-            if (qFuzzyIsNull(glue))
-                continue;
-            if (Length(paths[i].last(), paths[j].first()) < glue) {
-                paths[i].append(paths[j].mid(1));
-                paths.remove(j--);
-                continue;
-            }
-            if (Length(paths[i].first(), paths[j].last()) < glue) {
-                paths[j].append(paths[i].mid(1));
-                paths.remove(i--);
-                break;
-            }
-            if (Length(paths[i].last(), paths[j].last()) < glue) {
-                ReversePath(paths[j]);
-                paths[i].append(paths[j].mid(1));
-                paths.remove(j--);
-                continue;
+    int size;
+    do {
+        size = paths.size();
+        for (int i = 0; i < paths.size(); ++i) {
+            for (int j = 0; j < paths.size(); ++j) {
+                if (i == j)
+                    continue;
+                if (i >= paths.size() || i >= paths.size()) {
+                    i = -1;
+                    j = 0;
+                    break;
+                }
+                IntPoint& pif = paths[i].first();
+                IntPoint& pil = paths[i].last();
+                IntPoint& pjf = paths[j].first();
+                IntPoint& pjl = paths[j].last();
+                if (pil == pjf) {
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    continue;
+                }
+                if (pif == pjl) {
+                    paths[j].append(paths[i].mid(1));
+                    paths.remove(i--);
+                    break;
+                }
+                if (pil == pjl) {
+                    ReversePath(paths[j]);
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    continue;
+                }
             }
         }
-    }
+    } while (size != paths.size());
+    if (qFuzzyIsNull(glue))
+        return;
+    do {
+        size = paths.size();
+        for (int i = 0; i < paths.size(); ++i) {
+            for (int j = 0; j < paths.size(); ++j) {
+                if (i == j)
+                    continue;
+                IntPoint& pif = paths[i].first();
+                IntPoint& pil = paths[i].last();
+                IntPoint& pjf = paths[j].first();
+                IntPoint& pjl = paths[j].last();
+                if (Length(pil, pjf) < glue) {
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    continue;
+                }
+                if (Length(pif, pjl) < glue) {
+                    paths[j].append(paths[i].mid(1));
+                    paths.remove(i--);
+                    break;
+                }
+                if (Length(pil, pjl) < glue) {
+                    ReversePath(paths[j]);
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    continue;
+                }
+            }
+        }
+    } while (size != paths.size());
 }
 
 void Creator::progress(int progressMax)
@@ -367,10 +377,7 @@ void Creator::progress()
         }
 }
 
-GCodeParams Creator::getGcp() const
-{
-    return m_gcp;
-}
+GCodeParams Creator::getGcp() const { return m_gcp; }
 
 void Creator::setGcp(const GCodeParams& gcp)
 {
@@ -380,7 +387,8 @@ void Creator::setGcp(const GCodeParams& gcp)
 
 Paths& Creator::sortB(Paths& src)
 {
-    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+    IntPoint startPt(
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -400,8 +408,10 @@ Paths& Creator::sortB(Paths& src)
 
 Paths& Creator::sortBE(Paths& src)
 {
-    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+    IntPoint startPt(
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
@@ -433,7 +443,8 @@ Paths& Creator::sortBE(Paths& src)
 
 Pathss& Creator::sortB(Pathss& src)
 {
-    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+    IntPoint startPt(
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -453,7 +464,8 @@ Pathss& Creator::sortB(Pathss& src)
 
 Pathss& Creator::sortBE(Pathss& src)
 {
-    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
+    IntPoint startPt(
+        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -515,4 +527,4 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
     //    }
     return false;
 }
-}
+} // namespace GCode

@@ -4,6 +4,6 @@
 #include "excellondialog.h"
 #include "exfile.h"
 #include "exparser.h"
-#include "exvars.h"
+#include "extypes.h"
 
 #endif // EXCELLON_H

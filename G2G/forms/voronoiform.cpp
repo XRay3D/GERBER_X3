@@ -27,6 +27,8 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
+
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
@@ -39,6 +41,12 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     settings.beginGroup("VoronoiForm");
     ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
     ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
+#ifdef _USE_CGAL_
+    ui->cbxSolver->setCurrentIndex(settings.value("cbxSolver").toInt());
+#else
+    ui->cbxSolver->setCurrentIndex(0);
+    ui->cbxSolver->setEnabled(false);
+#endif
     settings.endGroup();
 }
 
@@ -48,6 +56,7 @@ VoronoiForm::~VoronoiForm()
     settings.beginGroup("VoronoiForm");
     settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
+    settings.setValue("cbxSolver", ui->cbxSolver->currentIndex());
     settings.endGroup();
     delete ui;
 }
@@ -72,11 +81,6 @@ void VoronoiForm::on_pbEdit_clicked()
         ui->lblToolName->setText(tool.name());
         updateName();
     }
-}
-
-void VoronoiForm::on_pbCreate_clicked()
-{
-    createFile();
 }
 
 void VoronoiForm::on_pbClose_clicked()
@@ -147,6 +151,7 @@ void VoronoiForm::createFile()
     gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
     gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
     gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
+    gpc.dParam[GCode::VorT] = ui->cbxSolver->currentIndex();
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
@@ -175,4 +180,9 @@ void VoronoiForm::setWidth(double /*w*/)
 
 void VoronoiForm::editFile(GCode::File* /*file*/)
 {
+}
+
+void VoronoiForm::on_cbxSolver_currentIndexChanged(int index)
+{
+    ui->dsbxPrecision->setEnabled(!index);
 }

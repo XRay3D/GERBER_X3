@@ -16,15 +16,16 @@ public:
     ~GCodePropertiesForm() override;
 
     static void updatePosDsbxs();
+    static void updateAll();
 
-    static Marker* homePoint;
-    static Marker* zeroPoint;
+
     static double safeZ;
     static double boardThickness;
     static double copperThickness;
     static double clearence;
     static double plunge;
     static double glue;
+
     static GCodePropertiesForm* self;
 
 private:

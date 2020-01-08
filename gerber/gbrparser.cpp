@@ -49,18 +49,8 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         }
 
         reset(fileName);
-        //    m_file->read();
-        //    if (m_file->size()) {
-        //        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
-        //        m_file->createGi();
-        //        emit fileReady(m_file);
-        //        emit fileProgress(m_file->shortName(), 1, 1);
-        //        mutex.unlock();
-        //        qDebug() << m_file->shortName() << "read" << t.elapsed();
-        //        return;
-        //    }
 
-        m_file->lines() = format(gerberLines);
+        m_file->lines() = cleanAndFormatFile(gerberLines);
         if (m_file->lines().isEmpty())
             emit fileError("", m_file->shortName() + "\n" + "Incorrect File!");
 
@@ -135,9 +125,12 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         if (file()->isEmpty()) {
             delete m_file;
         } else {
+            if (m_file->shortName().contains("bot", Qt::CaseInsensitive))
+                m_file->setSide(Bottom);
+            else if (m_file->shortName().contains(".gb", Qt::CaseInsensitive) && !m_file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
+                m_file->setSide(Bottom);
             m_file->mergedPaths();
             m_file->createGi();
-            //m_file->itemGroup()->setVisible(true);
             emit fileReady(m_file);
         }
         emit fileProgress(m_file->shortName(), 1, 1);
@@ -156,15 +149,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         file()->clear();
         emit fileProgress(m_file->shortName(), 1, 1);
     } catch (...) {
-        qWarning() << "exeption S:" << strerror(errno) << errno;
-        emit fileError("", m_file->shortName() + "\n" + "Unknown Error!");
+        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
+        qWarning() << "exeption S:" << errStr;
+        emit fileError("", m_file->shortName() + "\n" + errStr);
         file()->clear();
         emit fileProgress(m_file->shortName(), 1, 1);
     }
     mutex.unlock();
 }
 
-QList<QString> Parser::format(QString data)
+QList<QString> Parser::cleanAndFormatFile(QString data)
 {
     QList<QString> gerberLines;
 
@@ -537,20 +531,20 @@ Paths Parser::createPolygon()
 bool Parser::parseAperture(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
-    static const QList<QString> slApertureType({ "C", "R", "O", "P", "M" });
+    static const QStringList slApertureType({ "C", "R", "O", "P", "M" });
     if (match.exactMatch(gLine)) {
-        int aperture = /*state().aperture =*/match.cap(1).toInt();
+        int aperture = match.cap(1).toInt();
         QString apType = match.cap(2);
         QString apParameters = match.cap(3);
-
-        // Parse gerber aperture definition into dictionary of apertures.
-        // The following kinds and their attributes are supported:
-        // * Circular (C)*: size (float)
-        // * Rectangle (R)*: width (float), height (float)
-        // * Obround (O)*: width (float), height (float).
-        // * Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
-        // * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
-
+        /*
+         *    Parse gerber aperture definition into dictionary of apertures.
+         *    The following kinds and their attributes are supported:
+         *    * Circular (C)*: size (float)
+         *    * Rectangle (R)*: width (float), height (float)
+         *    * Obround (O)*: width (float), height (float).
+         *    * Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
+         *    * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
+         */
         QList<QString> paramList = apParameters.split("X");
         double hole = 0.0, rotation = 0.0;
         switch (slApertureType.indexOf(apType)) {
@@ -630,7 +624,7 @@ bool Parser::parseTransformations(const QString& gLine)
                 m_state.setImgPolarity(Negative);
                 break;
             default:
-                throw "Polarity error!";
+                throw "bool Parser::parseTransformations(const QString& gLine) - Polarity error!";
             }
             return true;
         case trMirror:
@@ -649,10 +643,11 @@ bool Parser::parseTransformations(const QString& gLine)
 
 bool Parser::parseStepRepeat(const QString& gLine)
 {
-    //    return false;
-    //<SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
-    //<SR close>     = %SR*%
-    //<SR statement> = <SR open>{<single command>|<region statement>}<SR close>
+    /*
+     *     <SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
+     *     <SR close>     = %SR*%
+     *     <SR statement> = <SR open>{<single command>|<region statement>}<SR close>
+     */
     static const QRegExp match(QStringLiteral("^%SRX(\\d+)Y(\\d+)I([+-]?\\d*\\.?\\d*)J([+-]?\\d*\\.?\\d*)\\*%$"));
     if (match.exactMatch(gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
@@ -670,7 +665,7 @@ bool Parser::parseStepRepeat(const QString& gLine)
             m_abSrIdStack.push({ StepRepeat, 0 });
         return true;
     }
-    QRegExp match2("^%SR\\*%$");
+    static const QRegExp match2("^%SR\\*%$");
     if (match2.exactMatch(gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
             closeStepRepeat();
@@ -717,36 +712,38 @@ bool Parser::parseAttributes(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
     if (match.exactMatch(gLine)) {
-        //const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
-        // switch (slAttributeType.indexOf(match.cap(1))) {
-        // case ATTRIBUTE:
-        // //FileFunction
-        // gerberFile.attributesStrings.push_back(match.cap(2));
-        // break;
-        // case APERTURE_ATTRIBUTE:
-        // gerberFile.apertureAttributesStrings.push_back(match.cap(2));
-        // break;
-        // case OBJECT_ATTRIBUTE:
-        // gerberFile.objectAttributesStrings.push_back(match.cap(2));
-        // break;
-        // case DELETE_ATTRIBUTE:
-        // for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
-        // if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.attributesStrings.removeAt(i);
-        // }
-        // }
-        // for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
-        // if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.apertureAttributesStrings.removeAt(i);
-        // }
-        // }
-        // for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
-        // if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.objectAttributesStrings.removeAt(i);
-        // }
-        // }
-        // break;
-        // }
+        /*
+        const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
+        switch (slAttributeType.indexOf(match.cap(1))) {
+        case ATTRIBUTE:
+      //FileFunction
+      gerberFile.attributesStrings.push_back(match.cap(2));
+      break;
+        case APERTURE_ATTRIBUTE:
+      gerberFile.apertureAttributesStrings.push_back(match.cap(2));
+      break;
+        case OBJECT_ATTRIBUTE:
+      gerberFile.objectAttributesStrings.push_back(match.cap(2));
+      break;
+        case DELETE_ATTRIBUTE:
+      for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
+          if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        gerberFile.attributesStrings.removeAt(i);
+          }
+      }
+      for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
+          if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        gerberFile.apertureAttributesStrings.removeAt(i);
+          }
+      }
+      for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
+          if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        gerberFile.objectAttributesStrings.removeAt(i);
+          }
+      }
+      break;
+        }
+        */
         return true;
     }
     return false;
@@ -886,11 +883,6 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             // break;
         }
         m_path.append(arcPolygon);
-        // if (arcPolygon.size() > 0) {
-        // for (Path::size_type i = 0, size = arcPolygon.size(); i < size && size; ++i) {
-        // curPath.push_back(arcPolygon[i]); //polygon.emplace_back(arcPolygon); //push_back
-        // }
-        // }
         return true;
     }
     return false;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>871</width>
-    <height>666</height>
+    <width>1600</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,6 +35,9 @@
     </property>
     <item>
      <widget class="GraphicsView" name="graphicsView">
+      <property name="toolTip">
+       <string>фыв</string>
+      </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
       </property>
@@ -50,7 +53,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>871</width>
+     <width>1600</width>
      <height>21</height>
     </rect>
    </property>

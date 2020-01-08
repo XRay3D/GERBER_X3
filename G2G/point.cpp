@@ -13,28 +13,28 @@
 using namespace ClipperLib;
 
 QVector<Pin*> Pin::m_pins;
-QRectF Pin::worckRect;
+Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
-    QRectF rect(Project::getSelectedBoundingRect());
+    QRectF rect(Project::instance()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
-        if (QMessageBox::question(nullptr, "", QObject::tr("There are no selected items to define the border.\n"
-                                                           "The old border will be used."),
+        if (QMessageBox::question(nullptr, "",
+                QObject::tr("There are no selected items to define the border.\n"
+                            "The old border will be used."),
                 QMessageBox::No, QMessageBox::Yes)
             == QMessageBox::No)
             return false;
-        return true;
     }
-    Pin::worckRect = rect;
+    LayoutFrames::update();
     return true;
 }
 
-Marker::Marker(int type)
+Marker::Marker(Type type)
     : m_type(type)
 {
+    m_markers[type] = this;
     setAcceptHoverEvents(true);
-    setFlags(QGraphicsItem::ItemIsMovable);
     if (m_type == Home) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
@@ -46,20 +46,12 @@ Marker::Marker(int type)
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
-
-    QSettings settings;
-    settings.beginGroup("Point");
-    setPos(settings.value("pos" + QString::number(m_type)).toPointF());
-    setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
     Scene::addItem(this);
 }
 
 Marker::~Marker()
 {
-    QSettings settings;
-    settings.beginGroup("Point");
-    settings.setValue("pos" + QString::number(m_type), pos());
-    settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
+    m_markers[m_type] = nullptr;
 }
 
 QRectF Marker::boundingRect() const
@@ -101,19 +93,22 @@ void Marker::resetPos(bool fl)
 {
     if (fl)
         updateRect();
+
+    const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
+
     if (m_type == Home)
         switch (Settings::homePos()) {
         case Qt::BottomLeftCorner:
-            setPos(Pin::worckRect.topLeft() + Settings::homeOffset());
+            setPos(rect.topLeft() + Settings::homeOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(Pin::worckRect.topRight() + Settings::homeOffset());
+            setPos(rect.topRight() + Settings::homeOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(Pin::worckRect.bottomLeft() + Settings::homeOffset());
+            setPos(rect.bottomLeft() + Settings::homeOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(Pin::worckRect.bottomRight() + Settings::homeOffset());
+            setPos(rect.bottomRight() + Settings::homeOffset());
             break;
         default:
             break;
@@ -121,16 +116,16 @@ void Marker::resetPos(bool fl)
     else {
         switch (Settings::zeroPos()) {
         case Qt::BottomLeftCorner:
-            setPos(Pin::worckRect.topLeft() + Settings::zeroOffset());
+            setPos(rect.topLeft() + Settings::zeroOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(Pin::worckRect.topRight() + Settings::zeroOffset());
+            setPos(rect.topRight() + Settings::zeroOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(Pin::worckRect.bottomLeft() + Settings::zeroOffset());
+            setPos(rect.bottomLeft() + Settings::zeroOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(Pin::worckRect.bottomRight() + Settings::zeroOffset());
+            setPos(rect.bottomRight() + Settings::zeroOffset());
             break;
         default:
             break;
@@ -163,7 +158,7 @@ void Marker::updateGCPForm()
     QSettings settings;
     settings.beginGroup("Points");
     settings.setValue("pos" + QString::number(m_type), pos());
-    Project::setChanged();
+    Project::instance()->setChanged();
     if (m_type == Zero)
         for (Pin* pin : Pin::pins())
             pin->updateToolTip();
@@ -212,27 +207,12 @@ Pin::Pin(QObject* parent)
     m_rect = m_path.boundingRect();
 
     setZValue(std::numeric_limits<qreal>::max() - m_pins.size());
-
     Scene::addItem(this);
-
-    QSettings settings;
-    settings.beginGroup("Pin");
-    setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
-    setPos(settings.value(QString("pos%1").arg(m_index)).toPointF());
-    if (!m_index)
-        worckRect = settings.value("worckRect").toRectF();
-    settings.endGroup();
     m_pins.append(this);
 }
 
 Pin::~Pin()
 {
-    QSettings settings;
-    settings.beginGroup("Pin");
-    settings.setValue(QString("pos%1").arg(m_index), pos());
-    if (!m_index)
-        settings.setValue("worckRect", worckRect);
-    settings.endGroup();
 }
 
 QRectF Pin::boundingRect() const
@@ -273,14 +253,15 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF pt[4]{
+    QPointF pt[4] {
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
         m_pins[3]->pos()
     };
 
-    const QPointF center(worckRect.center());
+    const QPointF center(LayoutFrames::instance()->boundingRect().center());
+    //const QPointF center(Project::instance()->worckRect().center());
 
     switch (m_index) {
     case 0:
@@ -332,7 +313,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
 
-    Project::setChanged();
+    Project::instance()->setChanged();
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -360,14 +341,17 @@ void Pin::resetPos(bool fl)
         updateRect();
     }
     const QPointF offset(Settings::pinOffset());
-    QPointF pt[]{
-        QPointF(Pin::worckRect.topLeft() + QPointF(-offset.x(), -offset.y())),
-        QPointF(Pin::worckRect.topRight() + QPointF(+offset.x(), -offset.y())),
-        QPointF(Pin::worckRect.bottomRight() + QPointF(+offset.x(), +offset.y())),
-        QPointF(Pin::worckRect.bottomLeft() + QPointF(-offset.x(), +offset.y())),
+
+    const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
+
+    QPointF pt[] {
+        QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
+        QPointF(rect.topRight() + QPointF(+offset.x(), -offset.y())),
+        QPointF(rect.bottomRight() + QPointF(+offset.x(), +offset.y())),
+        QPointF(rect.bottomLeft() + QPointF(-offset.x(), +offset.y())),
     };
 
-    const QPointF center(worckRect.center());
+    const QPointF center(rect.center());
 
     if (pt[0].x() > center.x())
         pt[0].rx() = center.x();
@@ -392,12 +376,12 @@ void Pin::resetPos(bool fl)
     QSettings settings;
     settings.beginGroup("Pin");
     settings.setValue("pos" + QString::number(m_pins.indexOf(this)), pos());
-    Project::setChanged();
+    Project::instance()->setChanged();
 }
 
 void Pin::updateToolTip()
 {
-    const QPointF p(pos() - GCodePropertiesForm::zeroPoint->pos());
+    const QPointF p(pos() - Marker::get(Marker::Zero)->pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3").arg(m_pins.indexOf(this) + 1).arg(p.x()).arg(p.y()));
 }
 
@@ -405,4 +389,69 @@ void Pin::setPos(const QPointF& pos)
 {
     QGraphicsItem::setPos(pos);
     updateToolTip();
+}
+
+////////////////////////////////////////////////
+LayoutFrames* LayoutFrames ::m_instance = nullptr;
+
+LayoutFrames::LayoutFrames()
+{
+    //setZValue(std::numeric_limits<double>::max());
+    m_instance = this;
+    Scene::addItem(this);
+}
+
+LayoutFrames::~LayoutFrames()
+{
+    m_instance = nullptr;
+}
+
+int LayoutFrames::type() const
+{
+    return GiLayoutFrames;
+}
+
+QRectF LayoutFrames::boundingRect() const
+{
+    return m_path.boundingRect();
+}
+
+void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setBrush(Qt::NoBrush);
+    QPen pen(QColor(100, 0, 100), 0.0);
+    pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+    pen.setJoinStyle(Qt::MiterJoin);
+    //    pen.setStyle(Qt::CustomDashLine);
+    //    pen.setCapStyle(Qt::FlatCap);
+    //    pen.setDashPattern({ 2.0, 5.0 });
+    painter->setPen(pen);
+    painter->drawPath(m_path);
+    painter->restore();
+}
+LayoutFrames* LayoutFrames::instance() { return m_instance; }
+
+void LayoutFrames::update()
+{
+    if (!m_instance)
+        return;
+    QPainterPath path;
+    QRectF rect = Project::instance()->worckRect();
+
+    for (int x = 0; x < Project::instance()->stepsX(); ++x) {
+        for (int y = 0; y < Project::instance()->stepsY(); ++y) {
+            path.addRect(rect.translated(
+                (rect.width() + Project::instance()->spasingX()) * x,
+                (rect.height() + Project::instance()->spasingY()) * y));
+        }
+    }
+    m_instance->m_path = path;
+    m_instance->QGraphicsItem::update();
+    m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
+    Marker::get(Marker::Home)->resetPos(false);
+    Marker::get(Marker::Zero)->resetPos(false);
+    for (Pin* pin : Pin::pins())
+        pin->resetPos(false);
 }

@@ -3,7 +3,7 @@
 
 #include "gi/graphicsitem.h"
 #include "tooldatabase/tool.h"
-#include <gbrvars.h>
+#include <gbrtypes.h>
 #include <myclipper.h>
 
 class ThermalNode;

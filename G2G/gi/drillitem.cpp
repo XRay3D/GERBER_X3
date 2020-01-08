@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <exfile.h>
-#include <exvars.h>
+#include <extypes.h>
 #include <gcfile.h>
 #include <graphicsview.h>
 

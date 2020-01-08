@@ -1,7 +1,7 @@
 #ifndef EXCELLONDIALOG_H
 #define EXCELLONDIALOG_H
 
-#include "exvars.h"
+#include "extypes.h"
 #include <QDialog>
 
 namespace Ui {

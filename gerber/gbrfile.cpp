@@ -17,9 +17,7 @@ void addData(QByteArray& dataArray, const T& data)
     dataArray.append(reinterpret_cast<const char*>(&data), sizeof(T));
 }
 
-File::~File()
-{
-}
+File::~File() {}
 
 const QMap<int, QSharedPointer<AbstractAperture>>* File::apertures() const { return &m_apertures; }
 
@@ -187,11 +185,28 @@ void Gerber::File::read(QDataStream& stream)
     _read(stream);
 }
 
+QDebug operator<<(QDebug debug, const Gerber::State& state)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "State("
+                    << "D0" << state.dCode() << ", "
+                    << "G0" << state.gCode() << ", "
+                    << QStringLiteral("Positive|Negative").split('|').at(state.imgPolarity()) << ", "
+                    << QStringLiteral("Linear|ClockwiseCircular|CounterclockwiseCircular").split('|').at(state.interpolation() - 1) << ", "
+                    << QStringLiteral("Aperture|Line|Region").split('|').at(state.type()) << ", "
+                    << QStringLiteral("Undef|Single|Multi").split('|').at(state.quadrant()) << ", "
+                    << QStringLiteral("Off|On").split('|').at(state.region()) << ", "
+                    << QStringLiteral("NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring").split('|').at(state.mirroring()) << ", "
+                    << QStringLiteral("aperture") << state.aperture() << ", "
+                    << state.curPos() << ", "
+                    << QStringLiteral("scaling") << state.scaling() << ", "
+                    << QStringLiteral("rotating") << state.rotating() << ", "
+                    << ')';
+    return debug;
+}
+
 void Gerber::File::createGi()
 {
-    if (shortName().contains("bot", Qt::CaseInsensitive))
-        setSide(Bottom);
-
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
         item->m_id = m_itemGroup->size();
@@ -199,47 +214,61 @@ void Gerber::File::createGi()
         m_itemGroup->append(item);
     }
 
-    setRawItemGroup(new ItemGroup);
-    if (!Settings::skipDuplicates()) {
-        for (const GraphicObject& go : *this) {
-            GraphicsItem* item = new RawItem(go.path(), this);
-            item->m_id = rawItemGroup()->size();
-            item->setToolTip(QString("ID: %1").arg(item->m_id));
-            m_rawItemGroup->append(item);
-        }
-    } else {
-        QList<Path> checkList;
-        for (int i = 0; i < size(); ++i) {
-            const GraphicObject& go = at(i);
-            if (go.path().size() > 1) { // skip empty
-                bool contains = false;
-                for (const Path& path : checkList) { // find copy
-                    int counter = 0;
-                    if (path.size() == go.path().size()) {
-                        for (const IntPoint& p1 : path) {
-                            for (const IntPoint& p2 : go.path()) {
-                                const double k = 0.001 * uScale;
-                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-                                    ++counter;
-                                    break;
-                                }
-                            }
+    auto adder = [&](const Path& path) {
+        GraphicsItem* item = new RawItem(path, this);
+        item->m_id = rawItemGroup()->size();
+        item->setToolTip(QString("ID: %1").arg(item->m_id));
+        m_rawItemGroup->append(item);
+    };
+
+    auto contains = [&](const Path& path) -> bool {
+        for (const QSharedPointer<Path>& chPath : checkList) { // find copy
+            int counter = 0;
+            if (chPath->size() == path.size()) {
+                for (const IntPoint& p1 : *chPath) {
+                    for (const IntPoint& p2 : path) {
+                        const double k = 0.001 * uScale;
+                        if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                            ++counter;
+                            break;
                         }
                     }
-                    if (counter == go.path().size()) {
-                        contains = true;
-                        break;
+                }
+            }
+            if (counter == path.size())
+                return true;
+        }
+        return false;
+    };
+
+    setRawItemGroup(new ItemGroup);
+
+    for (const GraphicObject& go : *this) {
+        if (!go.path().isEmpty()) {
+            if (Settings::simplifyRegions() && go.path().first() == go.path().last()) {
+                Paths paths;
+                SimplifyPolygon(go.path(), paths);
+                for (Path& path : paths) {
+                    path.append(path.first());
+                    if (!Settings::skipDuplicates()) {
+                        checkList.append(QSharedPointer<Path>(new Path(path)));
+                        adder(*checkList.last());
+                    } else if (!contains(path)) {
+                        checkList.append(QSharedPointer<Path>(new Path(path)));
+                        adder(*checkList.last());
                     }
                 }
-                if (!contains) {
-                    checkList.append(go.path());
-                    GraphicsItem* item = new RawItem(go.path(), this);
-                    item->m_id = rawItemGroup()->size();
-                    m_rawItemGroup->append(item);
+            } else {
+                if (!Settings::skipDuplicates()) {
+                    adder(go.path());
+                } else if (!contains(go.path())) {
+                    adder(go.path());
+                    checkList.append(QSharedPointer<Path>(new Path(go.path())));
                 }
             }
         }
     }
+
     if (m_itemsType == Normal)
         m_rawItemGroup->setVisible(false);
     else

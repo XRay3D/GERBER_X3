@@ -16,7 +16,7 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
-    , m_name(qApp->applicationDirPath() + "/" + name + ".dat")
+    , m_name(qApp->applicationDirPath() + "/XrSoft/" + name + ".dat")
     , pd(new QProgressDialog(this))
 {
     readTools({ &tool, &tool2 });
@@ -30,7 +30,8 @@ FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     connect(this, &FormsUtil::createToolpath, [this] {
         if (!fileCount)
             fileCount = 1;
-        pd->setLabelText(m_fileName);
+        m_tpc->msg = m_fileName;
+        pd->setLabelText(m_tpc->msg);
         m_timerId = startTimer(100);
     });
     thread.start(QThread::HighestPriority);
@@ -123,7 +124,7 @@ void FormsUtil::setFile(GCode::File* file)
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
     file->m_usedItems = m_usedItems;
-    Project::addFile(file);
+    Project::instance()->addFile(file);
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)
@@ -132,6 +133,7 @@ void FormsUtil::timerEvent(QTimerEvent* event)
         const auto [max, val] = m_tpc->getProgress();
         pd->setMaximum(max);
         pd->setValue(val);
-        qDebug() << "timerEvent" << max << val;
+        //qDebug() << "timerEvent" << max << val;
+        pd->setLabelText(m_tpc->msg);
     }
 }

@@ -1,7 +1,7 @@
 #ifndef GCODE_H
 #define GCODE_H
 
-#include "gcvars.h"
+#include "gctypes.h"
 #include <abstractfile.h>
 
 class Project;
@@ -23,12 +23,12 @@ public:
 
 private:
     static QString lastDir;
-    void saveDrill();
-    void savePocket();
-    void saveProfile();
+    void saveDrill(const QPointF& offset);
+    void savePocket(const QPointF &offset);
+    void saveProfile(const QPointF& offset);
 
-    QVector<QVector<QPolygonF>> pss();
-    QVector<QPolygonF> ps();
+    QVector<QVector<QPolygonF>> pss(const QPointF& offset);
+    QVector<QPolygonF> ps(const QPointF& offset);
 
     QVector<double> getDepths();
 

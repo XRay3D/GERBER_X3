@@ -1,7 +1,7 @@
 #ifndef GERBER_H
 #define GERBER_H
 
-//#include <QObject>
+#include <QDebug>
 #include <datastream.h>
 #include <myclipper.h>
 
@@ -56,19 +56,14 @@ enum DCode {
     D03 = 3
 };
 
-//enum Layer {
-//    Assy,
-//    Silk,
-//    Paste,
-//    Mask,
-//    Copper,
-//    Board,
-//};
-
-//enum Miror {
-//    Vertical,
-//    Horizontal
-//};
+enum Layer {
+    Assy,
+    Silk,
+    Paste,
+    Mask,
+    Copper,
+    Board,
+};
 
 enum Mirroring {
     NoMirroring,

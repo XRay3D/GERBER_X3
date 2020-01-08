@@ -1,7 +1,7 @@
 #ifndef GERBERAPERTURE_H
 #define GERBERAPERTURE_H
 
-#include "gbrvars.h"
+#include "gbrtypes.h"
 
 #include <QMap>
 #include <QtMath>
