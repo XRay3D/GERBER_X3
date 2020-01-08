@@ -1,9 +1,9 @@
 # GERBER_X2
 V0.7.8
 
-Программа для подготовки Г-кода из файлов Gerber (RS-274X) для фрезеровки плат на ЧПУ.
+Программа для подготовки Г-кода из файлов Gerber (RS-274X Revision 2019.06) для фрезеровки плат на ЧПУ.
 
-Program for preparing G-code from Gerber (RS-274X) files for CNC milling.
+Program for preparing G-code from Gerber (RS-274X Revision 2019.06) files for CNC milling.
 
 ![Window](Window.PNG)
 
@@ -18,7 +18,7 @@ Yandex Money
 
 Paypal
 
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7RPR86Q958RPY) 
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7RPR86Q958RPY) 
 
-[![Donate](https://www.paypalobjects.com/ru_RU/RU/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GQMPNYHH3PC68)
+[![Donate](https://www.paypalobjects.com/ru_RU/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GQMPNYHH3PC68)
 
