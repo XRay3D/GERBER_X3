@@ -14,6 +14,7 @@
 #include <QTranslator>
 
 #include "mainwindow.h"
+#include "settingsdialog.h"
 #include "version.h"
 
 void initIcon(const QString& path);
@@ -117,6 +118,11 @@ int main(int argc, char* argv[])
     splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
+
+    {
+        SettingsDialog().readSettings();
+    }
+
     MainWindow mainWin;
     mainWin.setIconSize({ 24, 24 });
     mainWin.show();

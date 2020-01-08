@@ -1,6 +1,6 @@
 #include "exfile.h"
 #include "exparser.h"
-#include "exvars.h"
+#include "extypes.h"
 
 namespace Excellon {
 

@@ -58,7 +58,7 @@ private:
 
     Scene* scene;
 
-    Project* pro;
+    Project* m_project;
     bool openFlag;
 
     QVector<QAction*> toolpathActionList;

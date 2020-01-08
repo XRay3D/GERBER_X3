@@ -48,6 +48,7 @@ enum Param {
     Tolerance,
     TwoTools,
     Width,
+    VorT,
     FileId,
     MinArea,
 };

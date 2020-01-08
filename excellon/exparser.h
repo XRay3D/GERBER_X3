@@ -1,7 +1,7 @@
 #ifndef EXPARSER_H
 #define EXPARSER_H
 
-#include "exvars.h"
+#include "extypes.h"
 #include <QObject>
 #include <parser.h>
 

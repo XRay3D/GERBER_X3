@@ -8,7 +8,7 @@
 DrillNode::DrillNode(int id)
     : AbstractNode(id)
 {
-    Project::file(m_id)->itemGroup()->addToScene();
+    Project::instance()->file(m_id)->itemGroup()->addToScene();
 }
 
 bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -17,7 +17,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case Name:
         switch (role) {
         case Qt::CheckStateRole:
-            Project::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            Project::instance()->file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -25,7 +25,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case Layer:
         switch (role) {
         case Qt::EditRole:
-            Project::file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            Project::instance()->file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -50,17 +50,17 @@ Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
 
 QVariant DrillNode::data(const QModelIndex& index, int role) const
 {
-    if (Project::file(m_id))
+    if (Project::instance()->file(m_id))
         switch (index.column()) {
         case Name:
             switch (role) {
             case Qt::DisplayRole:
-                return Project::file(m_id)->shortName();
+                return Project::instance()->file(m_id)->shortName();
             case Qt::ToolTipRole:
-                return Project::file(m_id)->shortName() + "\n"
-                    + Project::file(m_id)->name();
+                return Project::instance()->file(m_id)->shortName() + "\n"
+                    + Project::instance()->file(m_id)->name();
             case Qt::CheckStateRole:
-                return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+                return Project::instance()->file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
             case Qt::UserRole:
@@ -72,9 +72,9 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
-                return tbStrList[Project::file(m_id)->side()];
+                return tbStrList[Project::instance()->file(m_id)->side()];
             case Qt::EditRole:
-                return static_cast<bool>(Project::file(m_id)->side());
+                return static_cast<bool>(Project::instance()->file(m_id)->side());
             case Qt::UserRole:
                 return m_id;
             default:

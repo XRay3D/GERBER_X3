@@ -47,7 +47,7 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool)
 }
 
 Tool::Tool()
-    : m_name("Name")
+    : m_name(QObject::tr("Default"))
     , m_type(EndMill)
     , m_angle(0.0)
     , m_diameter(1.0)

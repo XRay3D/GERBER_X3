@@ -14,8 +14,8 @@ using namespace ClipperLib;
 
 enum FileVersion {
     G2G_Ver_1 = 1,
-    G2G_Ver_1_1,
-    G2G_Ver_1_2,
+    G2G_Ver_2,
+    G2G_Ver_3,
 };
 
 class Project : public QObject {
@@ -25,64 +25,35 @@ public:
     explicit Project();
     ~Project() override;
 
-    static bool save(QFile& file);
-    static bool open(QFile& file);
+    bool save(QFile& file);
+    bool open(QFile& file);
+    void close();
 
-    static AbstractFile* file(int id);
-    static void deleteFile(int id);
-    static bool isEmpty();
-    static int size();
+    AbstractFile* file(int id);
+    void deleteFile(int id);
+    bool isEmpty();
+    int size();
 
-    //    static Paths getPaths()
-    //    {
-    //        QMutexLocker locker(&m_mutex);
-    //        Paths paths;
-    //        for (const QSharedPointer<AbstractFile>& sp : m_files) {
-    //            AbstractFile* file = sp.data();
-    //            if (file
-    //                    && file->itemGroup()->isVisible()
-    //                    && (file->type() == FileType::Gerber || file->type() == FileType::Drill))
-    //                for (Paths& p : file->groupedPaths())
-    //                    paths.append(p);
-    //        }
-    //        return paths;
-    //    }
-    //    static Paths getSelectedPaths()
-    //    {
-    //        QMutexLocker locker(&m_mutex);
-    //        Paths paths;
-    //        for (const QSharedPointer<AbstractFile>& sp : m_files) {
-    //            AbstractFile* file = sp.data();
-    //            if (file
-    //                    && file->itemGroup()->isVisible()
-    //                    && (file->type() == FileType::Gerber || file->type() == FileType::Drill))
-    //                for (GraphicsItem* item : *file->itemGroup())
-    //                    if (item->isSelected())
-    //                        paths.append(item->paths());
-    //        }
-    //        return paths;
-    //    }
+    bool isModified() { return m_isModified; }
+    void setModified(bool fl) { m_isModified = fl; }
 
-    static bool isModified() { return m_isModified; }
-    static void setModified(bool fl) { m_isModified = fl; }
-
-    static QRectF getSelectedBoundingRect();
-    static QRectF getBoundingRect();
-    static QString fileNames();
-    static int contains(const QString& name);
-    static bool reload(int id, AbstractFile* file);
+    QRectF getSelectedBoundingRect();
+    QRectF getBoundingRect();
+    QString fileNames();
+    int contains(const QString& name);
+    bool reload(int id, AbstractFile* file);
 
     template <typename T>
-    static T* file(int id)
+    T* file(int id)
     {
         QMutexLocker locker(&m_mutex);
         return static_cast<T*>(m_files.value(id).data());
     }
 
-    static int addFile(AbstractFile* file);
+    int addFile(AbstractFile* file);
 
     template <typename T>
-    static bool replaceFile(int id, T* file)
+    bool replaceFile(int id, T* file)
     {
         QMutexLocker locker(&m_mutex);
         if (m_files.contains(id)) {
@@ -93,7 +64,7 @@ public:
     }
 
     template <typename T>
-    static QVector<T*> files()
+    QVector<T*> files()
     {
         QMutexLocker locker(&m_mutex);
         QVector<T*> rfiles;
@@ -106,7 +77,7 @@ public:
     }
 
     template <typename T>
-    static QVector<T*> count()
+    QVector<T*> count()
     {
         QMutexLocker locker(&m_mutex);
         int count;
@@ -117,34 +88,56 @@ public:
         return count;
     }
 
-    static bool contains(AbstractFile* file);
-    static void setIsModified(bool isModified) { m_isModified = isModified; }
-    static QString name() { return m_name; }
+    bool contains(AbstractFile* file);
+    void setIsModified(bool isModified) { m_isModified = isModified; }
+    QString name() { return m_name; }
     void setName(const QString& name);
-    static int ver();
-    static void setChanged()
+    void setChanged()
     {
         m_isModified = true;
-        self->changed();
+        changed();
     }
 
-    static void saveSelectedToolpaths();
-    static bool isUntitled();
-    static void setUntitled(bool value);
+    void saveSelectedToolpaths();
+    bool isUntitled();
+    void setUntitled(bool value);
+
+    static Project* instance() { return m_instance; }
+
+    double spasingX() const;
+    void setSpasingX(double value);
+
+    double spasingY() const;
+    void setSpasingY(double value);
+
+    int stepsX() const;
+    void setStepsX(int value);
+
+    int stepsY() const;
+    void setStepsY(int value);
+
+    QRectF worckRect() const;
+    void setWorckRect(const QRectF& worckRect);
 
 signals:
     void changed();
 
 private:
-    static bool m_isUntitled;
-    static QString m_name;
-    static int m_ver;
-    static bool m_isModified;
-    static QMutex m_mutex;
-    static QMap<int, QSharedPointer<AbstractFile>> m_files;
-    static QString m_fileName;
-    static Project* self;
-    static QSemaphore sem;
+    static Project* m_instance;
+    QMap<int, QSharedPointer<AbstractFile>> m_files;
+    QMutex m_mutex;
+    QSemaphore sem;
+    QString m_fileName;
+    QString m_name;
+    bool m_isModified = false;
+    bool m_isUntitled = true;
+
+    double m_spasingX = 0.0;
+    double m_spasingY = 0.0;
+    int m_stepsX = 1;
+    int m_stepsY = 1;
+
+    QRectF m_worckRect;
 };
 
 #endif // PROJECT_H
