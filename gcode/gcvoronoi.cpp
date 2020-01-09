@@ -38,7 +38,7 @@ using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
 #endif
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -270,13 +270,13 @@ void VoronoiCreator::cgalVoronoi()
         CGAL::Object o = sdg.primal(e);
 
         if (CGAL::assign(sdgLine, o)) {
-            Path path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+            Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(sdgRay, o)) {
-            Path path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+            Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-            Path path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+            Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(cgalParabola, o)) {
             std::vector<SDG2::Point_2> points;
@@ -289,7 +289,7 @@ void VoronoiCreator::cgalVoronoi()
         }
     }
     const cInt offset = static_cast<cInt>(m_gcp.dParam[FrameOffset].toDouble() * uScale);
-    Path frame{
+    Path frame {
         { minX - offset, minY - offset },
         { minX - offset, maxY + offset },
         { maxX + offset, maxY + offset },
@@ -378,7 +378,7 @@ void VoronoiCreator::jcVoronoi()
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
@@ -388,63 +388,63 @@ void VoronoiCreator::jcVoronoi()
         }
         jcv_diagram_free(&diagram);
     }
-
-    for (const Pairs& edge : edges) {
-        m_returnPs.append(toPath(edge));
+    for (auto&& edge : edges) {
+        m_returnPs.append(toPath(std::move(edge)));
         progress(edges.size(), m_returnPs.size()); // progress
     }
     mergePaths(m_returnPs, 0.005 * uScale);
-    m_returnPs.append(toPath(frame));
+    m_returnPs.append(toPath(std::move(frame)));
     for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
         if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
             m_returnPs.remove(i--);
     }
 }
 
-Paths VoronoiCreator::toPath(const Pairs& pairs)
+Paths VoronoiCreator::toPath(Pairs&& pairs)
 {
     msg = tr("Merge Segments");
     Paths paths;
     Pairs tmp = pairs;
     QList<Pair> tmp2(tmp.toList());
     std::sort(tmp2.begin(), tmp2.end(), [](const Pair& a, const Pair& b) { return a.id > b.id; });
-    QList<QSharedPointer<OrdPath>> holder;
-    QList<OrdPath*> merge;
-    for (const Pair& path : tmp2) {
-        OrdPath* pt1 = new OrdPath;
-        OrdPath* pt2 = new OrdPath;
-        pt1->Pt = path.first;
-        pt1->Next = pt2;
-        pt1->Last = pt2;
-        pt2->Pt = path.second;
-        pt2->Prev = pt1;
-        holder.append(QSharedPointer<OrdPath>(pt1));
-        holder.append(QSharedPointer<OrdPath>(pt2));
-        merge.append(pt1);
-    }
 
-    const int max = merge.size();
-    for (int i = 0; i < merge.size(); ++i) {
-        progress(max, max - merge.size()); // progress
-        for (int j = 0; j < merge.size(); ++j) {
-            if (i == j)
-                continue;
-            if (merge[i]->Last->Pt == merge[j]->Pt) {
-                merge[i]->append(merge[j]->Next);
-                merge.removeAt(j--);
-                continue;
-            }
-            if (merge[i]->Pt == merge[j]->Last->Pt) {
-                merge[j]->append(merge[i]->Next);
-                merge.removeAt(i--);
-                break;
+    {
+        QVector<OrdPath> holder(tmp2.count() * 2);
+        QList<OrdPath*> merge;
+        OrdPath* it = holder.data();
+        for (const Pair& path : tmp2) {
+            OrdPath* pt1 = it++;
+            OrdPath* pt2 = it++;
+            pt1->Pt = path.first;
+            pt1->Next = pt2;
+            pt1->Last = pt2;
+            pt2->Pt = path.second;
+            pt2->Prev = pt1;
+            merge.append(pt1);
+        }
+
+        const int max = merge.size();
+        for (int i = 0; i < merge.size(); ++i) {
+            progress(max, max - merge.size()); // progress
+            for (int j = 0; j < merge.size(); ++j) {
+                if (i == j)
+                    continue;
+                if (merge[i]->Last->Pt == merge[j]->Pt) {
+                    merge[i]->append(merge[j]->Next);
+                    merge.removeAt(j--);
+                    continue;
+                }
+                if (merge[i]->Pt == merge[j]->Last->Pt) {
+                    merge[j]->append(merge[i]->Next);
+                    merge.removeAt(i--);
+                    break;
+                }
             }
         }
-    }
-
-    paths.resize(merge.size());
-    for (int i = 0; i < merge.size(); ++i) {
-        paths[i] = merge[i]->toPath();
+        paths.reserve(merge.size());
+        for (auto& var : merge) {
+            paths.append(var->toPath());
+        }
     }
 
     mergePaths(paths, 0.005 * uScale);

@@ -59,8 +59,10 @@ static double const pi = 3.14159265358979323846;
 static double const two_pi = pi * 2;
 static double const def_arc_tolerance = 0.25;
 
-enum Direction { dRightToLeft,
-    dLeftToRight };
+enum Direction {
+    dRightToLeft,
+    dLeftToRight
+};
 
 static int const Unassigned = -1; //edge not currently 'owning' a solution
 static int const Skip = -2; //edge that would otherwise close a path
@@ -480,7 +482,7 @@ int PointInPolygon(const IntPoint& pt, const Path& path)
         return 0;
     IntPoint ip = path[0];
     for (int i = 1; i <= cnt; ++i) {
-        IntPoint ipNext = (i == cnt ? path[0] : path[i]);
+        const IntPoint& ipNext = (i == cnt ? path[0] : path[i]);
         if (ipNext.Y == pt.Y) {
             if ((ipNext.X == pt.X) || (ip.Y == pt.Y && ((ipNext.X > pt.X) == (ip.X < pt.X))))
                 return -1;
