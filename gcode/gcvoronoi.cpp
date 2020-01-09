@@ -382,7 +382,7 @@ void VoronoiCreator::jcVoronoi()
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
-                    edges[edge->sites[0]->p.id * edge->sites[0]->p.id ^ edge->sites[1]->p.id * edge->sites[1]->p.id].insert(pair); // other
+                    edges[edge->sites[0]->p.id ^ edge->sites[1]->p.id].insert(pair); // other
                 graph_edge = graph_edge->next;
             }
         }
