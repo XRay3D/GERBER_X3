@@ -24,8 +24,8 @@ using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
-const cInt uScale = 100000;
-const double dScale = 1.0 / uScale;
+constexpr cInt uScale = 100000;
+constexpr double dScale = 1.0 / uScale;
 
 Path toPath(const QPolygonF& p);
 Paths toPaths(const QVector<QPolygonF>& p);

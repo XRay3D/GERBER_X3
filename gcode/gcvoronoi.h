@@ -45,7 +45,7 @@ private:
             rp.append(Pt);
             OrdPath* next = Next;
             while (next) {
-                rp.append(next->Pt);
+                rp.append(std::move(next->Pt));
                 next = next->Next;
             }
             return rp;
@@ -57,7 +57,7 @@ private:
     void clean(Path& path);
     void cgalVoronoi();
     void jcVoronoi();
-    Paths toPath(const Pairs& pairs);
+    Paths toPath(Pairs&& pairs);
 };
 }
 
