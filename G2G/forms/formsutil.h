@@ -25,7 +25,7 @@ public:
     virtual void editFile(GCode::File* file) = 0;
 
 signals:
-    void createToolpath(const GCode::GCodeParams&);
+    void createToolpath();
 
 protected:
     void readTools(const QVector<Tool*>& tools) const;

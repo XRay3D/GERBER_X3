@@ -38,7 +38,7 @@ using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
 #endif
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -53,22 +53,17 @@ inline uint qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0)
     return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y);
 }
 
-void VoronoiCreator::create(const GCodeParams& gcp)
-{
-    m_gcp = gcp;
-    createVoronoi();
-}
-
-void VoronoiCreator::createVoronoi()
+void VoronoiCreator::create()
 {
     self = this;
 
     const auto& tool = m_gcp.tool.first();
-    const auto depth = m_gcp.dParam[Depth];
-    const auto width = m_gcp.dParam[Width];
+    const auto depth = m_gcp.dParam[Depth].toDouble();
+    const auto width = m_gcp.dParam[Width].toDouble();
+    const auto vorType = m_gcp.dParam[VorT].toInt();
 
     groupedPaths(CopperPaths);
-    if (static_cast<int>(m_gcp.dParam[VorT])) {
+    if (vorType) {
         cgalVoronoi();
     } else {
         jcVoronoi();
@@ -169,6 +164,7 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
             }
         }
     } while (max != paths.size());
+    sortBE(paths);
     do {
         max = paths.size();
         for (int k = 0; k < 10; ++k) {
@@ -204,9 +200,10 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
 
 void VoronoiCreator::clean(Path& path)
 {
+    const auto tolerance = m_gcp.dParam[Tolerance].toDouble();
     for (int i = 1; i < path.size() - 2; ++i) {
         QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
-        if (line.length() < m_gcp.dParam[Tolerance]) {
+        if (line.length() < tolerance) {
             path[i] = toIntPoint(line.center());
             path.remove(i + 1);
             --i;
@@ -273,13 +270,13 @@ void VoronoiCreator::cgalVoronoi()
         CGAL::Object o = sdg.primal(e);
 
         if (CGAL::assign(sdgLine, o)) {
-            Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
+            Path path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(sdgRay, o)) {
-            Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
+            Path path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-            Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
+            Path path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
             segments.append(path);
         } else if (CGAL::assign(cgalParabola, o)) {
             std::vector<SDG2::Point_2> points;
@@ -291,12 +288,13 @@ void VoronoiCreator::cgalVoronoi()
                 path << toIntPoint(pt);
         }
     }
-    Path frame {
-        { minX - uScale, minY - uScale },
-        { minX - uScale, maxY + uScale },
-        { maxX + uScale, maxY + uScale },
-        { maxX + uScale, minY - uScale },
-        { minX - uScale, minY - uScale },
+    const cInt offset = static_cast<cInt>(m_gcp.dParam[FrameOffset].toDouble() * uScale);
+    Path frame{
+        { minX - offset, minY - offset },
+        { minX - offset, maxY + offset },
+        { maxX + offset, maxY + offset },
+        { maxX + offset, minY - offset },
+        { minX - offset, minY - offset },
     };
     {
         Clipper clipper;
@@ -312,7 +310,7 @@ void VoronoiCreator::cgalVoronoi()
 
 void VoronoiCreator::jcVoronoi()
 {
-    const auto tolerance = m_gcp.dParam[Tolerance];
+    const auto tolerance = m_gcp.dParam[Tolerance].toDouble();
 
     QVector<jcv_point> points;
     points.reserve(100000);
@@ -365,9 +363,10 @@ void VoronoiCreator::jcVoronoi()
     QMap<int, Pairs> edges;
     Pairs frame;
     {
+        const cInt offset = static_cast<cInt>(m_gcp.dParam[FrameOffset].toDouble() * uScale);
         jcv_rect bounding_box = {
-            { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
-            { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
+            { static_cast<jcv_real>(r.left - offset), static_cast<jcv_real>(r.top - offset) },
+            { static_cast<jcv_real>(r.right + offset), static_cast<jcv_real>(r.bottom + offset) }
         };
         jcv_diagram diagram;
         jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
@@ -376,11 +375,10 @@ void VoronoiCreator::jcVoronoi()
         };
         const jcv_site* sites = jcv_diagram_get_sites(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
-
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)

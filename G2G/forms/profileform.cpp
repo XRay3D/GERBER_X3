@@ -146,7 +146,7 @@ void ProfileForm::createFile()
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:
-        case GiRaw:
+        case GiAperturePath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -186,7 +186,7 @@ void ProfileForm::createFile()
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    createToolpath(gcp);
+    createToolpath();
 }
 
 void ProfileForm::updateName()

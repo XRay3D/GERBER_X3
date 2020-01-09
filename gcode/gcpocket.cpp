@@ -7,14 +7,14 @@ PocketCreator::PocketCreator()
 {
 }
 
-void PocketCreator::create(const GCodeParams& /*gcp*/)
+void PocketCreator::create()
 {
-    if (!qFuzzyIsNull(m_gcp.dParam[TwoTools])) {
-        createPocket2({ m_gcp.tool.first(), m_gcp.tool.last() }, m_gcp.dParam[Depth], m_gcp.dParam[MinArea]);
-    } else if (!qFuzzyIsNull(m_gcp.dParam[UseRaster])) {
-        createRaster(m_gcp.tool.first(), m_gcp.dParam[Depth], m_gcp.dParam[UseAngle], static_cast<int>(m_gcp.dParam[Pass]));
+    if (m_gcp.dParam[TwoTools].toBool()) {
+        createPocket2({ m_gcp.tool.first(), m_gcp.tool.last() }, m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[MinArea].toDouble());
+    } else if (m_gcp.dParam[UseRaster].toBool()) {
+        createRaster(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[UseAngle].toDouble(), m_gcp.dParam[Pass].toInt());
     } else {
-        createPocket(m_gcp.tool.first(), m_gcp.dParam[Depth], static_cast<int>(m_gcp.dParam[Steps]));
+        createPocket(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[Steps].toInt());
     }
 }
 

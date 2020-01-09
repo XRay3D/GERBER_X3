@@ -11,7 +11,7 @@ public:
     ~VoronoiCreator() override = default;
 
 protected:
-    void create(const GCodeParams& gcp) override; // Creator interface
+    void create() override; // Creator interface
 
 private:
     struct Pair {
@@ -52,7 +52,6 @@ private:
         }
     };
 
-    void createVoronoi();
     void createOffset(const Tool& tool, double depth, const double width);
     void mergePaths(Paths& paths, const double dist);
     void clean(Path& path);

@@ -116,7 +116,7 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setGeometry(Header::getRect(cornerButton->rect()).translated(1, -4));
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
-                static const Qt::CheckState chState[] {
+                static const Qt::CheckState chState[]{
                     Qt::Unchecked,
                     Qt::Unchecked,
                     Qt::Checked,
@@ -536,10 +536,10 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
     if (current.column() == 1) {
         QVector<Tool::Type> tools;
         tools = model->isSlot(current.row())
-            ? QVector<Tool::Type> { Tool::EndMill }
+            ? QVector<Tool::Type>{ Tool::EndMill }
             : ((m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                    ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving }
-                    : QVector<Tool::Type> { Tool::Drill, Tool::EndMill });
+                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
+                      : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -596,11 +596,11 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
         QVector<Tool::Type> tools;
         if (fl)
-            tools = QVector<Tool::Type> { Tool::EndMill };
+            tools = QVector<Tool::Type>{ Tool::EndMill };
         else
             tools = (m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving }
-                : QVector<Tool::Type> { Tool::Drill, Tool::EndMill };
+                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
+                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {

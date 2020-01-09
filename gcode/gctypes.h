@@ -51,6 +51,7 @@ enum Param {
     VorT,
     FileId,
     MinArea,
+    FrameOffset,
 };
 
 struct GCodeParams {
@@ -58,15 +59,7 @@ struct GCodeParams {
     QVector<Tool> tool;
     SideOfMilling side;
     bool convent;
-    double dParam[20];
-    //    double angle;
-    //    double depth;
-    //    double tolerance;
-    //    double width;
-    //    int dst;
-    //    int pPass;
-    //    int steps;
-    //    int type;
+    QMap<int, QVariant> dParam;
 };
 }
 

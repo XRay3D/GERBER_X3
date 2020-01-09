@@ -9,7 +9,7 @@
 
 #include "forms/gcodepropertiesform.h"
 
-RawItem::RawItem(const Path& path, Gerber::File* file)
+AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
     : GraphicsItem(file)
     , m_path(path)
 {
@@ -20,14 +20,14 @@ RawItem::RawItem(const Path& path, Gerber::File* file)
     offset.AddPath(path, jtSquare, etOpenButt);
     offset.Execute(tmpPpath, 0.01 * uScale);
     for (const Path& path : tmpPpath)
-        m_shape_raw.addPolygon(toQPolygon(path));
+        m_selectionShape.addPolygon(toQPolygon(path));
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
-QRectF RawItem::boundingRect() const { return m_shape_raw.boundingRect().isValid() ? m_shape_raw.boundingRect() : shape().boundingRect(); }
+QRectF AperturePathItem::boundingRect() const { return shape().boundingRect(); }
 
-void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_penColor)
         m_pen.setColor(*m_penColor);
@@ -54,30 +54,29 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     painter->drawPolyline(toQPolygon(m_path));
 }
 
-int RawItem::type() const { return GiRaw; }
+int AperturePathItem::type() const { return GiAperturePath; }
 
-Paths RawItem::paths() const { return { m_path }; }
+Paths AperturePathItem::paths() const { return { m_path }; }
 
-QPainterPath RawItem::shape() const
+QPainterPath AperturePathItem::shape() const
 {
     if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
         m_scale = GraphicsView::scaleFactor();
-        m_shape_raw = QPainterPath();
+        m_selectionShape = QPainterPath();
         ClipperOffset offset;
         Paths tmpPpath;
         offset.AddPath(m_path, jtSquare, etOpenButt);
         offset.Execute(tmpPpath, 5 * uScale * m_scale);
         for (const Path& path : tmpPpath)
-            m_shape_raw.addPolygon(toQPolygon(path));
+            m_selectionShape.addPolygon(toQPolygon(path));
     }
-    return m_shape_raw;
+    return m_selectionShape;
 }
 
-void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
     if (event->modifiers() & Qt::ShiftModifier) {
-
         const double glueLen = GCodePropertiesForm::glue * uScale;
         IntPoint dest(m_path.last());
         IntPoint init(m_path.last());
@@ -94,14 +93,14 @@ void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                 dest = last;
                 skip.append(i);
                 ig->at(i)->setSelected(true);
-                if (Length(init, dest) < glueLen) //init == dest)
+                if (Length(init, dest) < glueLen)
                     break;
                 i = -1;
             } else if (Length(dest, last) < glueLen) {
                 dest = first;
                 skip.append(i);
                 ig->at(i)->setSelected(true);
-                if (Length(init, dest) < glueLen) //init == dest)
+                if (Length(init, dest) < glueLen)
                     break;
                 i = -1;
             }
@@ -111,4 +110,13 @@ void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     GraphicsItem::mouseReleaseEvent(event);
     if (event->modifiers() & Qt::ShiftModifier)
         setSelected(true);
+}
+
+QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemVisibleChange && !value.toBool()) {
+        m_selectionShape = QPainterPath();
+        m_scale = std::numeric_limits<double>::max();
+    }
+    return value;
 }

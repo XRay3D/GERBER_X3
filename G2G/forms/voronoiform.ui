@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>230</width>
-    <height>293</height>
+    <width>238</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -152,7 +152,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="label_5">
      <property name="font">
       <font>
@@ -187,7 +187,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="8" column="1">
     <widget class="DoubleSpinBox" name="dsbxWidth">
      <property name="suffix">
       <string> mm</string>
@@ -200,7 +200,7 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
+   <item row="10" column="0">
     <widget class="QLabel" name="label_6">
      <property name="font">
       <font>
@@ -213,7 +213,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
+   <item row="9" column="0" colspan="2">
     <widget class="Line" name="line_2">
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
@@ -223,17 +223,17 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="1">
+   <item row="10" column="1">
     <widget class="QLineEdit" name="leName"/>
    </item>
-   <item row="11" column="0" colspan="2">
+   <item row="12" column="0" colspan="2">
     <widget class="QPushButton" name="pbClose">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="0" colspan="2">
+   <item row="11" column="0" colspan="2">
     <widget class="QPushButton" name="pbCreate">
      <property name="text">
       <string>Create</string>
@@ -265,6 +265,32 @@
        <string>CGAL</string>
       </property>
      </item>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Frame Offset:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="DoubleSpinBox" name="dsbxOffset">
+     <property name="suffix">
+      <string> mm</string>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
     </widget>
    </item>
   </layout>

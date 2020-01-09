@@ -228,7 +228,7 @@ void PocketForm::createFile()
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:
-        case GiRaw:
+        case GiAperturePath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -281,18 +281,18 @@ void PocketForm::createFile()
 
     gcp.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
     gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
-
     gcp.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
     gcp.dParam[GCode::UseRaster] = ui->rbRaster->isChecked();
     gcp.dParam[GCode::Steps] = ui->sbxSteps->value();
     gcp.dParam[GCode::TwoTools] = ui->chbxUseTwoTools->isChecked();
     gcp.dParam[GCode::MinArea] = ui->dsbxMinArea->value();
+
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
     if (ui->chbxUseTwoTools->isChecked())
         fileCount = 2;
-    createToolpath(gcp);
+    createToolpath();
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)

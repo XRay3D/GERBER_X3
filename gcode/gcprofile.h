@@ -12,7 +12,7 @@ public:
 private:
     void createProfile(const Tool& tool, const double depth);
 protected:
-    void create(const GCodeParams& gcp) override; // Creator interface
+    void create() override; // Creator interface
 };
 }
 
