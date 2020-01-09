@@ -153,13 +153,13 @@ void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(support
 
 void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
 
-void Creator::createGc(const GCodeParams& gcp)
+void Creator::createGc()
 {
     QElapsedTimer t;
     t.start();
     try {
         qDebug() << "Creator::createGc() started" << t.elapsed();
-        create(gcp);
+        create();
         qDebug() << "Creator::createGc() ended" << t.elapsed();
     } catch (bool) {
         m_cancel = false;
@@ -167,6 +167,12 @@ void Creator::createGc(const GCodeParams& gcp)
     } catch (...) {
         qWarning() << "Creator::createGc() exeption:" << strerror(errno) << t.elapsed();
     }
+}
+
+void Creator::createGc(const GCodeParams& gcp)
+{
+    m_gcp = gcp;
+    createGc();
 }
 
 GCode::File* Creator::file() const { return m_file; }
@@ -408,8 +414,7 @@ Paths& Creator::sortB(Paths& src)
 
 Paths& Creator::sortBE(Paths& src)
 {
-    IntPoint startPt(
-        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
@@ -505,8 +510,8 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
         return false;
     QPointF p;
     for (int i = 0; i < cnt; ++i) {
-        IntPoint pt1(path[(i + 1) % cnt]);
-        IntPoint pt2(/*i == cnt ? path[0] :*/ path[i]);
+        const IntPoint& pt1 = path[(i + 1) % cnt];
+        const IntPoint& pt2 = path[i];
         QLineF l1(toQPointF(pt1), toQPointF(pt2));
         if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
             if (ret)
@@ -514,17 +519,7 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
             return true;
         }
     }
-    //    IntPoint pt1 = path[0];
-    //    for (int i = 1; i <= cnt; ++i) {
-    //        IntPoint pt2(i == cnt ? path[0] : path[i]);
-    //        QLineF l1(toQPointF(pt1), toQPointF(pt2));
-    //        if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
-    //            if (ret)
-    //                *ret = toIntPoint(p);
-    //            return true;
-    //        }
-    //        pt1 = pt2;
-    //    }
+
     return false;
 }
 } // namespace GCode

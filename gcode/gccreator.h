@@ -38,6 +38,7 @@ public:
     static Paths& sortBE(Paths& src);
     static Pathss& sortB(Pathss& src);
     static Pathss& sortBE(Pathss& src);
+    void createGc();
     void createGc(const GCodeParams& gcp);
 
     void cancel() { m_cancel = true; }
@@ -58,7 +59,7 @@ protected:
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
-    virtual void create(const GCodeParams& gcp) = 0;
+    virtual void create() = 0;
 
     static bool m_cancel;
     static int m_progressMax;
@@ -74,7 +75,7 @@ protected:
 
     double m_toolDiameter = 0.0;
     double m_dOffset = 0.0;
-    double m_stepOver = 0.0;
+    cInt m_stepOver = 0;
     GCodeParams m_gcp;
 };
 } // namespace GCode

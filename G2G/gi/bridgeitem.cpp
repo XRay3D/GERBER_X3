@@ -51,7 +51,7 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
         break;
     }
 
-    auto drawEllipse = [painter, halfSize, this](const QPointF& pt, bool fl = false) {
+    auto drawEllipse = [painter, halfSize](const QPointF& pt, bool fl = false) {
         const QRectF rectangle(pt + QPointF{ halfSize, halfSize }, pt - QPointF{ halfSize, halfSize });
         const int startAngle = (fl ? 0 : 180) * 16;
         const int spanAngle = 180 * 16;
@@ -92,14 +92,16 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiRaw)) {
+        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiAperturePath)) {
             if (!gi->isSelected())
                 continue;
             for (const Path& path : gi->paths()) {
                 for (int i = 0, s = path.size(); i < s; ++i) {
-                    const QLineF l1(pos, toQPointF(path[i]));
-                    const QLineF l2(pos, toQPointF(path[(i + 1) % s]));
-                    const QLineF l3(toQPointF(path[(i + 1) % s]), toQPointF(path[i]));
+                    const QPointF pt1(toQPointF(path[i]));
+                    const QPointF pt2(toQPointF(path[(i + 1) % s]));
+                    const QLineF l1(pos, pt1);
+                    const QLineF l2(pos, pt2);
+                    const QLineF l3(pt2, pt1);
                     if (lastAngle == 0.0)
                         lastAngle = l3.normalVector().angle();
                     const double p = (l1.length() + l2.length() + l3.length()) / 2;
@@ -107,9 +109,12 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                         const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
                         if (l > h) {
                             l = h;
-                            QLineF line(toQPointF(path[i]), toQPointF(path[(i + 1) % s]));
+                            QLineF line(pt1, pt2);
                             line.setLength(sqrt(l1.length() * l1.length() - h * h));
                             pt = line.p2();
+                            const QPointF center(l3.center());
+                            if (QLineF(center, pt).length() < m_lenght / 2)
+                                pt = center;
                             m_angle = line.normalVector().angle();
                         }
                     }

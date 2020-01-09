@@ -14,7 +14,7 @@ enum GraphicsItemType {
     GiPath,
     GiPointHome,
     GiPointZero,
-    GiRaw,
+    GiAperturePath,
     GiPin,
     GiLayoutFrames,
 

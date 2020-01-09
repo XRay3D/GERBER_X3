@@ -8,9 +8,9 @@ ThermalCreator::ThermalCreator()
 {
 }
 
-void ThermalCreator::create(const GCodeParams& /*gcp*/)
+void ThermalCreator::create()
 {
-    createThermal(Project::instance()->file<Gerber::File>(static_cast<int>(m_gcp.dParam[FileId])), m_gcp.tool.first(), m_gcp.dParam[Depth]);
+    createThermal(Project::instance()->file<Gerber::File>(m_gcp.dParam[FileId].toInt()), m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble());
 }
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)

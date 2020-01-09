@@ -14,7 +14,7 @@ private:
     void createPocket2(const QPair<Tool, Tool>& tool, double depth, double minArea);
 
 protected:
-    void create(const GCodeParams& gcp) override; // Creator interface
+    void create() override; // Creator interface
 };
 }
 

@@ -17,7 +17,7 @@ private:
     void createThermal(Gerber::File* file, const Tool& tool, const double depth);
 
 protected:
-    void create(const GCodeParams& gcp) override; // Creator interface
+    void create() override; // Creator interface
 };
 }
 #endif // THERMAL_H

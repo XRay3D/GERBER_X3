@@ -23,6 +23,7 @@ bool Project::save(QFile& file)
             out << m_spasingY;
             out << m_stepsX;
             out << m_stepsY;
+            [[fallthrough]];
         case G2G_Ver_2:
             out << Marker::get(Marker::Home)->pos();
             out << Marker::get(Marker::Zero)->pos();
@@ -35,6 +36,7 @@ bool Project::save(QFile& file)
             out << GCodePropertiesForm::clearence;
             out << GCodePropertiesForm::plunge;
             out << GCodePropertiesForm::glue;
+            [[fallthrough]];
         case G2G_Ver_1:;
         }
         out << m_files;
@@ -64,6 +66,7 @@ bool Project::open(QFile& file)
             in >> m_spasingY;
             in >> m_stepsX;
             in >> m_stepsY;
+            [[fallthrough]];
         case G2G_Ver_2:
             in >> tmpPt;
             Marker::get(Marker::Home)->setPos(tmpPt);
@@ -80,6 +83,7 @@ bool Project::open(QFile& file)
             in >> GCodePropertiesForm::clearence;
             in >> GCodePropertiesForm::plunge;
             in >> GCodePropertiesForm::glue;
+            [[fallthrough]];
         case G2G_Ver_1:;
         }
         in >> m_files;
@@ -295,7 +299,7 @@ void Project::saveSelectedToolpaths()
 
     QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
     for (GCode::File* file : files)
-        mm[QPair { file->getTool(), file->side() }].append(file);
+        mm[QPair{ file->getTool(), file->side() }].append(file);
 
     for (const QPair<Tool, Side>& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));

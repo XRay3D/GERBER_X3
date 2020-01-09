@@ -7,9 +7,9 @@ namespace Gerber {
 class File;
 }
 
-class RawItem : public GraphicsItem {
+class AperturePathItem : public GraphicsItem {
 public:
-    RawItem(const Path& path, Gerber::File* file);
+    AperturePathItem(const Path& path, Gerber::File* file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -21,11 +21,12 @@ public:
 protected:
     QPolygonF m_polygon;
     const Path& m_path;
-    mutable QPainterPath m_shape_raw;
+    mutable QPainterPath m_selectionShape;
     mutable double m_scale = std::numeric_limits<double>::max();
     // QGraphicsItem interface
 protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 };
 
 #endif // RAWITEM_H

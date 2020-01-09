@@ -215,7 +215,7 @@ void Gerber::File::createGi()
     }
 
     auto adder = [&](const Path& path) {
-        GraphicsItem* item = new RawItem(path, this);
+        GraphicsItem* item = new AperturePathItem(path, this);
         item->m_id = rawItemGroup()->size();
         item->setToolTip(QString("ID: %1").arg(item->m_id));
         m_rawItemGroup->append(item);

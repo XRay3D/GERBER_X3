@@ -26,7 +26,7 @@ FormsUtil::FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent)
     m_tpc->moveToThread(&thread);
     connect(m_tpc, &GCode::Creator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
     connect(&thread, &QThread::finished, m_tpc, &QObject::deleteLater);
-    connect(this, &FormsUtil::createToolpath, m_tpc, &GCode::Creator::createGc);
+    connect(this, &FormsUtil::createToolpath, m_tpc, qOverload<>(&GCode::Creator::createGc));
     connect(this, &FormsUtil::createToolpath, [this] {
         if (!fileCount)
             fileCount = 1;

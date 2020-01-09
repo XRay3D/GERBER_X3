@@ -10,10 +10,9 @@ ProfileCreator::ProfileCreator()
 {
 }
 
-void ProfileCreator::create(const GCodeParams& gcp)
+void ProfileCreator::create()
 {
-    m_gcp = gcp;
-    createProfile(gcp.tool.first(), gcp.dParam[Depth]);
+    createProfile(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble());
 }
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)

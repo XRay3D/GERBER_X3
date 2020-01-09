@@ -208,7 +208,7 @@ void ThermalForm::createFile()
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addSupportPaths(wBridgePaths);
-    createToolpath(gpc);
+    createToolpath();
 }
 
 void ThermalForm::updateName()

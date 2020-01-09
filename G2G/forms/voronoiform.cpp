@@ -47,6 +47,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->cbxSolver->setCurrentIndex(0);
     ui->cbxSolver->setEnabled(false);
 #endif
+    ui->dsbxOffset->setValue(settings.value("dsbxOffset", 1.0).toDouble());
     settings.endGroup();
 }
 
@@ -57,6 +58,7 @@ VoronoiForm::~VoronoiForm()
     settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
     settings.setValue("cbxSolver", ui->cbxSolver->currentIndex());
+    settings.setValue("dsbxOffset", ui->dsbxOffset->value());
     settings.endGroup();
     delete ui;
 }
@@ -116,7 +118,7 @@ void VoronoiForm::createFile()
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-        case GiRaw:
+        case GiAperturePath:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();
@@ -152,10 +154,12 @@ void VoronoiForm::createFile()
     gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
     gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
     gpc.dParam[GCode::VorT] = ui->cbxSolver->currentIndex();
+    gpc.dParam[GCode::FrameOffset] = ui->dsbxOffset->value();
+
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    createToolpath(gpc);
+    createToolpath();
 }
 
 void VoronoiForm::updateName()
