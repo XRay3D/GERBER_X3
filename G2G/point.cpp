@@ -13,7 +13,7 @@
 using namespace ClipperLib;
 
 QVector<Pin*> Pin::m_pins;
-Marker* Marker::m_markers[2] { nullptr, nullptr };
+Marker* Marker::m_markers[2]{ nullptr, nullptr };
 
 bool updateRect()
 {
@@ -253,7 +253,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF pt[4] {
+    QPointF pt[4]{
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
@@ -337,14 +337,14 @@ QVector<Pin*> Pin::pins() { return m_pins; }
 
 void Pin::resetPos(bool fl)
 {
-    if (fl) {
+    if (fl)
         updateRect();
-    }
+
     const QPointF offset(Settings::pinOffset());
 
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
-    QPointF pt[] {
+    QPointF pt[]{
         QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
         QPointF(rect.topRight() + QPointF(+offset.x(), -offset.y())),
         QPointF(rect.bottomRight() + QPointF(+offset.x(), +offset.y())),
@@ -373,9 +373,6 @@ void Pin::resetPos(bool fl)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
 
-    QSettings settings;
-    settings.beginGroup("Pin");
-    settings.setValue("pos" + QString::number(m_pins.indexOf(this)), pos());
     Project::instance()->setChanged();
 }
 
@@ -438,8 +435,7 @@ void LayoutFrames::update()
     if (!m_instance)
         return;
     QPainterPath path;
-    QRectF rect = Project::instance()->worckRect();
-
+    QRectF rect(Project::instance()->worckRect());
     for (int x = 0; x < Project::instance()->stepsX(); ++x) {
         for (int y = 0; y < Project::instance()->stepsY(); ++y) {
             path.addRect(rect.translated(
@@ -452,6 +448,5 @@ void LayoutFrames::update()
     m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
     Marker::get(Marker::Home)->resetPos(false);
     Marker::get(Marker::Zero)->resetPos(false);
-    for (Pin* pin : Pin::pins())
-        pin->resetPos(false);
+    Pin::resetPos(false);
 }
