@@ -53,11 +53,11 @@ private:
     };
 
     void createOffset(const Tool& tool, double depth, const double width);
-    void mergePaths(Paths& paths, const double dist);
+    void mergePaths(QList<Path>& paths, const double dist);
     void clean(Path& path);
     void cgalVoronoi();
     void jcVoronoi();
-    Paths toPath(Pairs&& pairs);
+    QList<Path> toPaths(Pairs&& pairs, bool bClean = false);
 };
 }
 
