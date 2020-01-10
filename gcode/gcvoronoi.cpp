@@ -86,7 +86,7 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     msg = tr("Create Offset");
     m_toolDiameter = tool.getDiameter(depth) * uScale;
     m_dOffset = m_toolDiameter / 2;
-    m_stepOver = tool.stepover() * uScale;
+    m_stepOver =static_cast<cInt>(tool.stepover() * uScale) ;
     const Path frame(m_returnPs.takeLast());
     { // create offset
         ClipperOffset offset;

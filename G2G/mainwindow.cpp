@@ -399,7 +399,7 @@ void MainWindow::createActionsToolPath()
     });
     toolpathToolBar->addSeparator();
     toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
-        Pin::pins().first()->resetPos();
+        Pin::resetPos();
         Marker::get(Marker::Home)->resetPos(false);
         Marker::get(Marker::Zero)->resetPos(false);
         graphicsView->zoomFit();
@@ -553,7 +553,7 @@ void MainWindow::printDialog()
         printer->setMargins({ 10, 10, 10, 10 });
         printer->setPageSizeMM(size
             + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
+                  printer->margins().top + printer->margins().bottom));
         printer->setResolution(4800);
 
         QPainter painter(printer);

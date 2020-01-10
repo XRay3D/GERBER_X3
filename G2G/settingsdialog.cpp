@@ -8,7 +8,7 @@
 
 const int gridColor = 100;
 
-const QColor defaultColor[(size_t)Colors::Count] {
+const QColor defaultColor[(size_t)Colors::Count]{
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
@@ -22,7 +22,7 @@ const QColor defaultColor[(size_t)Colors::Count] {
     QColor(Qt::red) //G0
 };
 
-const QString colorName[(size_t)Colors::Count] {
+const QString colorName[(size_t)Colors::Count]{
     "Background",
     "Pin",
     "CutArea",
@@ -103,8 +103,8 @@ void SettingsDialog::readSettings()
     dsbxHomeY->setValue(m_homeOffset.y());
     dsbxZeroX->setValue(m_zeroOffset.x());
     dsbxZeroY->setValue(m_zeroOffset.y());
-    cbxHomePos->setCurrentIndex(m_homePos = settings.value("homePos").toInt());
-    cbxZeroPos->setCurrentIndex(m_zeroPos = settings.value("zeroPos").toInt());
+    cbxHomePos->setCurrentIndex(m_homePos = settings.value("homePos", HomePosition::BottomLeft).toInt());
+    cbxZeroPos->setCurrentIndex(m_zeroPos = settings.value("zeroPos", HomePosition::BottomLeft).toInt());
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");

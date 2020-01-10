@@ -4,7 +4,7 @@
 #include <QColor>
 #include <QPointF>
 
-enum class Colors : unsigned {
+enum class Colors : int {
     Background,
     Pin,
     CutArea,
@@ -19,12 +19,14 @@ enum class Colors : unsigned {
     Count
 };
 
-enum class HomePosition : unsigned {
+namespace HomePosition {
+enum {
     BottomLeft,
     BottomRight,
     TopLeft,
     TopRight,
 };
+}
 
 class Settings {
 public:

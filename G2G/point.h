@@ -58,7 +58,7 @@ public:
     static double minY() { return qMin(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
     static double maxY() { return qMax(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
 
-    void resetPos(bool fl = true);
+    static void resetPos(bool fl = true);
     void updateToolTip();
     void setPos(const QPointF& pos);
 
