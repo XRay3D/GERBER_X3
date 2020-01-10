@@ -1,8 +1,8 @@
 #include "gcvoronoi.h"
 #include "gcfile.h"
 #include "gcvoronoi.h"
-
 #include "voroni/jc_voronoi.h"
+#include <type_traits>
 #ifdef _USE_CGAL_
 #include <CGAL/Algebraic_structure_traits.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -38,7 +38,7 @@ using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
 }
 #endif
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -86,7 +86,7 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     msg = tr("Create Offset");
     m_toolDiameter = tool.getDiameter(depth) * uScale;
     m_dOffset = m_toolDiameter / 2;
-    m_stepOver =static_cast<cInt>(tool.stepover() * uScale) ;
+    m_stepOver = static_cast<cInt>(tool.stepover() * uScale);
     const Path frame(m_returnPs.takeLast());
     { // create offset
         ClipperOffset offset;
@@ -130,10 +130,17 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     m_returnPss.append({ frame });
 }
 
-void VoronoiCreator::mergePaths(Paths& paths, const double dist)
+void VoronoiCreator::mergePaths(QList<Path>& paths, const double dist)
 {
     msg = tr("Merge Paths");
-    sortBE(paths);
+    auto mmm = [](Path& dst, Path& src) {
+        if (src.size() == 2)
+            dst.append(std::move(src.last()));
+        else {
+            src.takeFirst();
+            dst.append(std::move(src));
+        }
+    };
     int max;
     do {
         max = paths.size();
@@ -144,27 +151,32 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
                     continue;
                 else if (paths[i].first() == paths[j].first()) {
                     ReversePath(paths[j]);
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    mmm(paths[j], paths[i]);
+                    paths.removeAt(i--);
                     break;
                 } else if (paths[i].last() == paths[j].last()) {
                     ReversePath(paths[j]);
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
-                    break;
+                    mmm(paths[i], paths[j]);
+                    paths.removeAt(j--);
+                    if (j >= i)
+                        continue;
+                    else
+                        break;
                 } else if (paths[i].first() == paths[j].last()) {
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    mmm(paths[j], paths[i]);
+                    paths.removeAt(i--);
                     break;
                 } else if (paths[j].first() == paths[i].last()) {
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
-                    break;
+                    mmm(paths[i], paths[j]);
+                    paths.removeAt(j--);
+                    if (j >= i)
+                        continue;
+                    else
+                        break;
                 }
             }
         }
     } while (max != paths.size());
-    sortBE(paths);
     do {
         max = paths.size();
         for (int k = 0; k < 10; ++k) {
@@ -175,21 +187,27 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
                         continue;
                     else if (Length(paths[i].last(), paths[j].last()) < dist) {
                         ReversePath(paths[j]);
-                        paths[i].append(paths[j].mid(1));
-                        paths.remove(j--);
-                        continue; // break;
+                        mmm(paths[i], paths[j]);
+                        paths.removeAt(j--);
+                        if (j >= i)
+                            continue;
+                        else
+                            break;
                     } else if (Length(paths[i].last(), paths[j].first()) < dist) {
-                        paths[i].append(paths[j].mid(1));
-                        paths.remove(j--);
-                        continue; // break;
+                        mmm(paths[i], paths[j]);
+                        paths.removeAt(j--);
+                        if (j >= i)
+                            continue;
+                        else
+                            break;
                     } else if (Length(paths[i].first(), paths[j].last()) < dist) {
-                        paths[j].append(paths[i].mid(1));
-                        paths.remove(i--);
+                        mmm(paths[j], paths[i]);
+                        paths.removeAt(i--);
                         break;
                     } else if (Length(paths[i].first(), paths[j].first()) < dist) {
                         ReversePath(paths[j]);
-                        paths[j].append(paths[i].mid(1));
-                        paths.remove(i--);
+                        mmm(paths[j], paths[i]);
+                        paths.removeAt(i--);
                         break;
                     }
                 }
@@ -255,9 +273,10 @@ void VoronoiCreator::cgalVoronoi()
     sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
     sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
     assert(sdg.is_valid(true, 1));
-    Paths segments;
+    QList<Path> segments;
     segments.reserve(id * 2);
-    for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
+
+    for (auto eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
         const SDG2::Edge e = *eit;
         CGAL_precondition(!sdg.is_infinite(e));
         if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
@@ -270,14 +289,11 @@ void VoronoiCreator::cgalVoronoi()
         CGAL::Object o = sdg.primal(e);
 
         if (CGAL::assign(sdgLine, o)) {
-            Path path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) };
-            segments.append(path);
+            segments.append({ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
         } else if (CGAL::assign(sdgRay, o)) {
-            Path path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) };
-            segments.append(path);
+            segments.append({ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
         } else if (CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-            Path path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) };
-            segments.append(path);
+            segments.append({ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
         } else if (CGAL::assign(cgalParabola, o)) {
             std::vector<SDG2::Point_2> points;
             cgalParabola.generate_points(points, 5);
@@ -288,22 +304,23 @@ void VoronoiCreator::cgalVoronoi()
                 path << toIntPoint(pt);
         }
     }
+
     const cInt offset = static_cast<cInt>(m_gcp.dParam[FrameOffset].toDouble() * uScale);
-    Path frame {
+    Path frame{
         { minX - offset, minY - offset },
         { minX - offset, maxY + offset },
         { maxX + offset, maxY + offset },
         { maxX + offset, minY - offset },
         { minX - offset, minY - offset },
     };
+    mergePaths(segments, 0.02 * uScale);
+    m_returnPs = segments.toVector();
     {
         Clipper clipper;
-        clipper.AddPaths(segments, ptSubject, false);
+        clipper.AddPaths(m_returnPs, ptSubject, false);
         clipper.AddPath(frame, ptClip, true);
-        clipper.Execute(ctIntersection, segments, pftNonZero);
+        clipper.Execute(ctIntersection, m_returnPs, pftNonZero);
     }
-    mergePaths(segments, 0.02 * uScale);
-    m_returnPs = segments;
     m_returnPs.append(frame);
 #endif
 }
@@ -375,10 +392,11 @@ void VoronoiCreator::jcVoronoi()
         };
         const jcv_site* sites = jcv_diagram_get_sites(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
+            progress(diagram.numsites, i); // progress
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
@@ -388,22 +406,25 @@ void VoronoiCreator::jcVoronoi()
         }
         jcv_diagram_free(&diagram);
     }
+
+    QList<Path> segments;
     for (auto&& edge : edges) {
-        m_returnPs.append(toPath(std::move(edge)));
+        segments.append(toPaths(std::move(edge), true));
         progress(edges.size(), m_returnPs.size()); // progress
     }
-    mergePaths(m_returnPs, 0.005 * uScale);
-    m_returnPs.append(toPath(std::move(frame)));
+    mergePaths(segments, 0.005 * uScale);
+    m_returnPs = segments.toVector();
+    m_returnPs.append(toPaths(std::move(frame)).toVector());
     for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
         if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].last()) < tolerance * 0.5 * uScale)
             m_returnPs.remove(i--);
     }
 }
 
-Paths VoronoiCreator::toPath(Pairs&& pairs)
+QList<Path> VoronoiCreator::toPaths(Pairs&& pairs, bool bClean)
 {
     msg = tr("Merge Segments");
-    Paths paths;
+    QList<Path> paths;
     Pairs tmp = pairs;
     QList<Pair> tmp2(tmp.toList());
     std::sort(tmp2.begin(), tmp2.end(), [](const Pair& a, const Pair& b) { return a.id > b.id; });
@@ -448,8 +469,9 @@ Paths VoronoiCreator::toPath(Pairs&& pairs)
     }
 
     mergePaths(paths, 0.005 * uScale);
-    for (Path& path : paths)
-        clean(path);
+    if (bClean)
+        for (Path& path : paths)
+            clean(path);
 
     return paths;
 }
