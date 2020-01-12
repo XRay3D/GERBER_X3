@@ -45,19 +45,20 @@ private:
             rp.append(Pt);
             OrdPath* next = Next;
             while (next) {
-                rp.append(std::move(next->Pt));
+                rp.append(next->Pt);
                 next = next->Next;
             }
             return rp;
         }
     };
 
+    void createVoronoi();
     void createOffset(const Tool& tool, double depth, const double width);
-    void mergePaths(QList<Path>& paths, const double dist);
+    void mergePaths(Paths& paths, const double dist = 0.0);
     void clean(Path& path);
     void cgalVoronoi();
     void jcVoronoi();
-    QList<Path> toPaths(Pairs&& pairs, bool bClean = false);
+    Paths toPath(const Pairs& pairs);
 };
 }
 
