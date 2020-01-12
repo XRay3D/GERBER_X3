@@ -89,7 +89,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
-                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "R");
+                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "A");
             }
             return pixmap;
         }

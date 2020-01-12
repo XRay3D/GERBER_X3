@@ -11,6 +11,8 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 ICON = 256.png
 
+CONFIG += c++17
+
 #macx: ICON = resources/icon.icns
 
 #debug {
@@ -18,13 +20,13 @@ ICON = 256.png
 #}
 
 msvc* {
-    QMAKE_CXXFLAGS += /std:c++latest
+#    QMAKE_CXXFLAGS += /std:c++latest
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
 }
 
 gcc* {
-    QMAKE_CXXFLAGS += -std=c++1z
+#    QMAKE_CXXFLAGS += -std=c++1z
     RC_FILE = myapp.rc
     win32 {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
@@ -90,6 +92,7 @@ HEADERS += \
     sh/rectangle.h \
     sh/sh.h \
     sh/shape.h \
+    splashscreen.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
     tooldatabase/tooleditdialog.h \

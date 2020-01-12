@@ -27,7 +27,7 @@ public:
     // GraphicsItem interface
     void redraw() override;
     Paths paths() const override;
-    Paths& rPaths() override;
+    Paths* rPaths() override;
     //const Gerber::File* file() const;
 
 private:

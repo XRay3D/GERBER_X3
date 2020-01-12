@@ -90,6 +90,7 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     GCodePropertiesForm(); // init vars;
     QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
+    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     self = this;
 }
 
@@ -108,6 +109,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
     return;
 #endif
 #ifndef QT_DEBUG
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
+        writeSettings();
+        dockWidget->close();
+        qApp->closeAllWindows();
+        FileModel::closeProject();
+        event->accept();
+    }
     if (maybeSave()) {
         writeSettings();
         dockWidget->close();
@@ -435,14 +443,14 @@ void MainWindow::createActionsGraphics()
                 GerberItem* gitem = reinterpret_cast<GerberItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
-                for (QGraphicsItem* item : si)
-                    if (item->type() == GiShapeC)
-                        clipper.AddPaths(reinterpret_cast<GraphicsItem*>(item)->paths(), ptClip, true);
-                clipper.Execute(type, gitem->rPaths(), pftEvenOdd, pftPositive);
-                if (gitem->rPaths().isEmpty()) {
+                for (QGraphicsItem* clipItem : si)
+                    if (clipItem->type() == GiShapeC)
+                        clipper.AddPaths(reinterpret_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
+                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+                if (gitem->rPaths()->isEmpty()) {
                     rmi.append(gitem);
                 } else {
-                    ReversePaths(gitem->rPaths());
+                    ReversePaths(*gitem->rPaths());
                     gitem->redraw();
                 }
             }
@@ -543,25 +551,23 @@ void MainWindow::printDialog()
 {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
-    connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* printer) {
+    connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* pPrinter) {
         scene->m_drawPdf = true;
         QRectF rect;
         for (QGraphicsItem* item : Scene::items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
-        printer->setMargins({ 10, 10, 10, 10 });
-        printer->setPageSizeMM(size
-            + QSizeF(printer->margins().left + printer->margins().right,
-                  printer->margins().top + printer->margins().bottom));
-        printer->setResolution(4800);
+        pPrinter->setMargins({ 10, 10, 10, 10 });
+        pPrinter->setPageSizeMM(size + QSizeF(pPrinter->margins().left + pPrinter->margins().right, pPrinter->margins().top + pPrinter->margins().bottom));
+        pPrinter->setResolution(4800);
 
-        QPainter painter(printer);
+        QPainter painter(pPrinter);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
-        painter.translate(0, -(printer->resolution() / 25.4) * size.height());
+        painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
         scene->render(&painter,
-            QRectF(0, 0, printer->width(), printer->height()),
+            QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
         scene->m_drawPdf = false;
@@ -572,25 +578,25 @@ void MainWindow::printDialog()
 void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
-    QAction* a = nullptr;
+    QAction* action = nullptr;
     QGraphicsItem* item = scene->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
 
     if (!item)
         return;
 
     if (item->type() == GiPin) {
-        a = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
-        a = menu.addAction(tr("Fixed"), [](bool fl) {
-            for (Pin* item : Pin::pins())
-                item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
+        action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
+        action = menu.addAction(tr("Fixed"), [](bool fl) {
+            for (Pin* pin : Pin::pins())
+                pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
         });
-        a->setCheckable(true);
-        a->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
+        action->setCheckable(true);
+        action->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
     } else if (dynamic_cast<Marker*>(item)) {
-        a = menu.addAction(tr("Fixed"),
+        action = menu.addAction(tr("Fixed"),
             [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
-        a->setCheckable(true);
-        a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
+        action->setCheckable(true);
+        action->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
     }
     //    else if (item->type() == GiThermalPr) {
     //        if (item->flags() & QGraphicsItem::ItemIsSelectable)
@@ -602,13 +608,12 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
     //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
     //            });
     //    }
-    if (a)
+    if (action)
         menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)
 {
-    static QMap<QString, QProgressDialog*> progress;
     if (max && !value) {
         QProgressDialog* pd = new QProgressDialog(this);
         pd->setCancelButton(nullptr);
@@ -617,13 +622,13 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
         pd->setModal(true);
         pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
-        progress[fileName] = pd;
+        m_progressDialogs[fileName] = pd;
     } else if (max == 1 && value == 1) {
-        progress[fileName]->hide();
-        progress[fileName]->deleteLater();
-        progress.remove(fileName);
+        m_progressDialogs[fileName]->hide();
+        m_progressDialogs[fileName]->deleteLater();
+        m_progressDialogs.remove(fileName);
     } else
-        progress[fileName]->setValue(value);
+        m_progressDialogs[fileName]->setValue(value);
 }
 
 void MainWindow::fileError(const QString& fileName, const QString& error)

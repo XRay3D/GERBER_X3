@@ -40,6 +40,10 @@ private:
 
     QMap<QString, QString> m_apertureMacro;
 
+    QStringList attributesStrings;
+    QStringList apertureAttributesStrings;
+    Component m_component;
+
     enum WorkingType {
         Normal,
         StepRepeat,

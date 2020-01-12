@@ -186,10 +186,8 @@ void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 ////////////////////////////////////////////////
 /// \brief Pin::Pin
-/// \param type
-/// \param num
+/// \param parent
 ///
-
 Pin::Pin(QObject* parent)
     : QObject(parent)
     , QGraphicsItem(nullptr)
@@ -412,6 +410,8 @@ int LayoutFrames::type() const
 
 QRectF LayoutFrames::boundingRect() const
 {
+    if (Scene::drawPdf())
+        return QRectF();
     return m_path.boundingRect();
 }
 

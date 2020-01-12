@@ -3,9 +3,9 @@
 
 #include <QDateTime>
 #include <QFileInfo>
-#include <myclipper.h>
 #include <datastream.h>
 #include <gi/itemgroup.h>
+#include <myclipper.h>
 
 using namespace ClipperLib;
 
@@ -63,7 +63,7 @@ protected:
     int m_id = -1;
     virtual Paths merge() const = 0;
 
-    QSharedPointer<ItemGroup> m_itemGroup;
+    QVector<QSharedPointer<ItemGroup>> m_itemGroup;
     QList<QString> m_lines;
     QString m_name;
     mutable Paths m_mergedPaths;

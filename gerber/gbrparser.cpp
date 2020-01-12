@@ -710,40 +710,94 @@ bool Parser::parseApertureMacros(const QString& gLine)
 
 bool Parser::parseAttributes(const QString& gLine)
 {
-    static const QRegExp match(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
-    if (match.exactMatch(gLine)) {
-        /*
-        const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
-        switch (slAttributeType.indexOf(match.cap(1))) {
-        case ATTRIBUTE:
-      //FileFunction
-      gerberFile.attributesStrings.push_back(match.cap(2));
-      break;
-        case APERTURE_ATTRIBUTE:
-      gerberFile.apertureAttributesStrings.push_back(match.cap(2));
-      break;
-        case OBJECT_ATTRIBUTE:
-      gerberFile.objectAttributesStrings.push_back(match.cap(2));
-      break;
-        case DELETE_ATTRIBUTE:
-      for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
-          if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        gerberFile.attributesStrings.removeAt(i);
-          }
-      }
-      for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
-          if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        gerberFile.apertureAttributesStrings.removeAt(i);
-          }
-      }
-      for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
-          if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        gerberFile.objectAttributesStrings.removeAt(i);
-          }
-      }
-      break;
+    static const QRegExp matchAttr(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
+    if (matchAttr.exactMatch(gLine)) {
+        const QVector<QString> slAttributeType { "F", "A", "O", "D" };
+        switch (slAttributeType.indexOf(matchAttr.cap(1))) {
+        case Gerber::AttributeA:
+            attributesStrings.append(matchAttr.cap(2));
+            break;
+        case Gerber::ApertureAttribute:
+            apertureAttributesStrings.append(matchAttr.cap(2));
+            break;
+        case Gerber::ObjectAttribute: {
+            static const QRegExp matchObj(QStringLiteral("^\\.(\\S+),(.+)$"));
+            if (matchObj.exactMatch(matchAttr.cap(2))) {
+                qDebug() << matchObj.capturedTexts();
+                enum {
+                    TH,
+                    SMD,
+                    Fiducial,
+                    Other
+                };
+                m_component.m_objStack.push(Component::keys.indexOf(matchObj.cap(1)));
+                switch (m_component.m_objStack.top()) {
+                case Component::C: // <refdes>
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CRot: // <decimal> The rotation angle of the component.
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CMfr: // <field> Manufacturer
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CMPN: // <field> Manufacturer part number
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CVal: // <field> Value, e.g. 220nF
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CMnt: // (TH|SMD|Fiducial|Other) Mount type
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CFtp: // <field> Footprint name
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CPgN: // <field> Package name
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CPgD: // <field> Package description
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CHgt: // <decimal> Height, in the unit of the file.
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CLbN: // <field> Library name
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CLbD: // <field> Library description
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::CSup: // <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                case Component::P: // Reference descriptor and pin number - R301,1
+                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
+                    break;
+                }
+            }
+        } break;
+        case Gerber::DeleteAttribute:
+            qDebug() << "DeleteAttribute" << matchAttr.cap(1);
+            attributesStrings.clear();
+            apertureAttributesStrings.clear();
+            //            for (int i = 0; i < attributesStrings.size(); ++i) {
+            //                if (attributesStrings[i].indexOf(match.cap(1)) >= 0) {
+            //                    attributesStrings.removeAt(i);
+            //                }
+            //            }
+            //            for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
+            //                if (apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+            //                    apertureAttributesStrings.removeAt(i);
+            //                }
+            //            }
+            //            for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
+            //                if (objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+            //                    objectAttributesStrings.removeAt(i);
+            //                }
+            //            }
+            break;
         }
-        */
         return true;
     }
     return false;

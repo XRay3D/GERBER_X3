@@ -50,11 +50,7 @@ public:
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
-    virtual Paths& rPaths()
-    {
-        static Paths p;
-        return p;
-    }
+    virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() {}
 
     //    void setItemGroup(ItemGroup* itemGroup);
