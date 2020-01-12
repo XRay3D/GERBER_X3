@@ -75,41 +75,36 @@ QPainterPath AperturePathItem::shape() const
 
 void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    event->ignore();
     if (event->modifiers() & Qt::ShiftModifier) {
+        setSelected(true);
         const double glueLen = GCodePropertiesForm::glue * uScale;
         IntPoint dest(m_path.last());
-        IntPoint init(m_path.last());
-        QList<int> skip;
+        IntPoint init(m_path.first());
         ItemGroup* ig = typedFile<Gerber::File>()->rawItemGroup();
-
         for (int i = 0; i < ig->size(); ++i) {
-            if (skip.contains(i))
+            auto item = ig->at(i);
+            if (item->isSelected())
                 continue;
-            const Path path(ig->at(i)->paths().first());
-            const IntPoint& first = path.first();
-            const IntPoint& last = path.last();
+            const IntPoint& first = item->paths().first().first();
+            const IntPoint& last = item->paths().first().last();
             if (Length(dest, first) < glueLen) {
                 dest = last;
-                skip.append(i);
-                ig->at(i)->setSelected(true);
+                item->setSelected(true);
                 if (Length(init, dest) < glueLen)
                     break;
                 i = -1;
             } else if (Length(dest, last) < glueLen) {
                 dest = first;
-                skip.append(i);
-                ig->at(i)->setSelected(true);
+                item->setSelected(true);
                 if (Length(init, dest) < glueLen)
                     break;
                 i = -1;
             }
         }
+        event->accept();
         return;
     }
     GraphicsItem::mouseReleaseEvent(event);
-    if (event->modifiers() & Qt::ShiftModifier)
-        setSelected(true);
 }
 
 QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
