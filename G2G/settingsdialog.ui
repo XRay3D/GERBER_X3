@@ -489,6 +489,11 @@
               <string>Bottom Right</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Always Zero</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="2" column="0">
@@ -577,6 +582,11 @@
             <item>
              <property name="text">
               <string>Bottom Right</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Always Zero</string>
              </property>
             </item>
            </widget>
