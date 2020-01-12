@@ -87,7 +87,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     static LayoutFrames* instance();
-    static void update();
+    static void updateRect();
 };
 
 #endif // POINT_H

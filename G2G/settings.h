@@ -25,6 +25,7 @@ enum {
     BottomRight,
     TopLeft,
     TopRight,
+    AlwaysZero
 };
 }
 

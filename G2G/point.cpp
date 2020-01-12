@@ -13,7 +13,7 @@
 using namespace ClipperLib;
 
 QVector<Pin*> Pin::m_pins;
-Marker* Marker::m_markers[2]{ nullptr, nullptr };
+Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
@@ -26,7 +26,7 @@ bool updateRect()
             == QMessageBox::No)
             return false;
     }
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
     return true;
 }
 
@@ -111,6 +111,7 @@ void Marker::resetPos(bool fl)
             setPos(rect.bottomRight() + Settings::homeOffset());
             break;
         default:
+            setPos({});
             break;
         }
     else {
@@ -128,6 +129,7 @@ void Marker::resetPos(bool fl)
             setPos(rect.bottomRight() + Settings::zeroOffset());
             break;
         default:
+            setPos({});
             break;
         }
     }
@@ -253,7 +255,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
 
-    QPointF pt[4]{
+    QPointF pt[4] {
         m_pins[0]->pos(),
         m_pins[1]->pos(),
         m_pins[2]->pos(),
@@ -344,7 +346,7 @@ void Pin::resetPos(bool fl)
 
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
-    QPointF pt[]{
+    QPointF pt[] {
         QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
         QPointF(rect.topRight() + QPointF(+offset.x(), -offset.y())),
         QPointF(rect.bottomRight() + QPointF(+offset.x(), +offset.y())),
@@ -430,7 +432,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
 }
 LayoutFrames* LayoutFrames::instance() { return m_instance; }
 
-void LayoutFrames::update()
+void LayoutFrames::updateRect()
 {
     if (!m_instance)
         return;
