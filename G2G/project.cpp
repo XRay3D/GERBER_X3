@@ -102,7 +102,7 @@ bool Project::open(QFile& file)
         }
         m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
-        LayoutFrames::update();
+        LayoutFrames::updateRect();
         return true;
     } catch (...) {
         qDebug() << file.errorString();
@@ -359,7 +359,7 @@ bool Project::isUntitled() { return m_isUntitled; }
 void Project::setUntitled(bool value)
 {
     m_isUntitled = value;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 double Project::spasingX() const { return m_spasingX; }
@@ -367,7 +367,7 @@ double Project::spasingX() const { return m_spasingX; }
 void Project::setSpasingX(double value)
 {
     m_spasingX = value;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 double Project::spasingY() const { return m_spasingY; }
@@ -375,7 +375,7 @@ double Project::spasingY() const { return m_spasingY; }
 void Project::setSpasingY(double value)
 {
     m_spasingY = value;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 int Project::stepsX() const { return m_stepsX; }
@@ -383,7 +383,7 @@ int Project::stepsX() const { return m_stepsX; }
 void Project::setStepsX(int value)
 {
     m_stepsX = value;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 int Project::stepsY() const { return m_stepsY; }
@@ -391,7 +391,7 @@ int Project::stepsY() const { return m_stepsY; }
 void Project::setStepsY(int value)
 {
     m_stepsY = value;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
@@ -399,7 +399,7 @@ QRectF Project::worckRect() const { return m_worckRect; }
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
-    LayoutFrames::update();
+    LayoutFrames::updateRect();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)

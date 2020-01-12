@@ -97,8 +97,7 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
                 {
                     Clipper clipper;
                     clipper.AddPaths(src, ptClip, true);
-                    for (std::tuple<cInt, cInt, cInt, cInt> t : w) {
-                        auto [left, right, var, flag] = t;
+                    for (auto [left, right, var, flag] : w) {
                         Q_UNUSED(var)
                         Q_UNUSED(flag)
                         Path frame { { left, var }, { right, var } };
@@ -133,8 +132,7 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
                     Paths toNext;
                     Clipper clipper;
                     clipper.AddPaths(src, ptSubject, false);
-                    for (std::tuple<cInt, cInt, cInt, cInt> t : w) {
-                        auto [left, right, var, flag] = t;
+                    for (auto [left, right, var, flag] : w) {
                         Q_UNUSED(flag)
                         Path frame {
                             { left, var },

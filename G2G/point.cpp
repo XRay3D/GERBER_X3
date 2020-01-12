@@ -395,7 +395,7 @@ LayoutFrames* LayoutFrames ::m_instance = nullptr;
 
 LayoutFrames::LayoutFrames()
 {
-    //setZValue(std::numeric_limits<double>::max());
+    setZValue(-std::numeric_limits<double>::max());
     m_instance = this;
     Scene::addItem(this);
 }

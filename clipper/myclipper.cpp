@@ -56,7 +56,7 @@ double Length(const IntPoint& pt1, const IntPoint& pt2)
 {
     double x = pt2.X - pt1.X;
     double y = pt2.Y - pt1.Y;
-    return sqrt(static_cast<double>(x) * static_cast<double>(x) + static_cast<double>(y) * static_cast<double>(y));
+    return sqrt(x * x + y * y);
 }
 
 //static inline bool qt_is_finite(double d)
