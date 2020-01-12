@@ -9,7 +9,17 @@ using namespace Gerber;
 
 static Format* crutch;
 
-File::File(const QString& fileName) { m_name = fileName; }
+File::File(QDataStream& stream)
+{
+    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
+    read(stream);
+}
+
+File::File(const QString& fileName)
+{
+    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
+    m_name = fileName;
+}
 
 template <typename T>
 void addData(QByteArray& dataArray, const T& data)
@@ -83,9 +93,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 File::ItemsType File::itemsType() const { return m_itemsType; }
 
-void File::setRawItemGroup(ItemGroup* itemGroup) { m_rawItemGroup = QSharedPointer<ItemGroup>(itemGroup); }
-
-ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
+ItemGroup* File::rawItemGroup() const { return m_itemGroup[Raw].data(); }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -119,27 +127,21 @@ bool File::flashedApertures() const
     return false;
 }
 
-ItemGroup* File::itemGroup() const
-{
-    if (m_itemsType == Normal)
-        return m_itemGroup.data();
-    else
-        return m_rawItemGroup.data();
-}
+ItemGroup* File::itemGroup() const { return m_itemGroup[m_itemsType].data(); }
 
 void File::addToScene() const
 {
-    m_itemGroup.data()->addToScene();
-    m_rawItemGroup.data()->addToScene();
-    m_itemGroup.data()->setZValue(-m_id);
-    m_rawItemGroup.data()->setZValue(-m_id);
+    for (const QSharedPointer<ItemGroup>& var : m_itemGroup) {
+        var->addToScene();
+        var->setZValue(-m_id);
+    }
 }
 
 void File::setColor(const QColor& color)
 {
     AbstractFile::setColor(color);
-    m_itemGroup->setBrush(color);
-    m_rawItemGroup->setPen(QPen(color, 0.0));
+    m_itemGroup[Normal]->setBrush(color);
+    m_itemGroup[Raw]->setPen(QPen(color, 0.0));
 }
 
 void File::setItemType(File::ItemsType type)
@@ -148,11 +150,11 @@ void File::setItemType(File::ItemsType type)
         return;
     m_itemsType = type;
     if (m_itemsType == Normal) {
-        m_itemGroup.data()->setVisible(true);
-        m_rawItemGroup.data()->setVisible(false);
+        m_itemGroup[Normal]->setVisible(true);
+        m_itemGroup[Raw]->setVisible(false);
     } else {
-        m_itemGroup.data()->setVisible(false);
-        m_rawItemGroup.data()->setVisible(true);
+        m_itemGroup[Normal]->setVisible(false);
+        m_itemGroup[Raw]->setVisible(true);
     }
 }
 
@@ -185,40 +187,20 @@ void Gerber::File::read(QDataStream& stream)
     _read(stream);
 }
 
-QDebug operator<<(QDebug debug, const Gerber::State& state)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace() << "State("
-                    << "D0" << state.dCode() << ", "
-                    << "G0" << state.gCode() << ", "
-                    << QStringLiteral("Positive|Negative").split('|').at(state.imgPolarity()) << ", "
-                    << QStringLiteral("Linear|ClockwiseCircular|CounterclockwiseCircular").split('|').at(state.interpolation() - 1) << ", "
-                    << QStringLiteral("Aperture|Line|Region").split('|').at(state.type()) << ", "
-                    << QStringLiteral("Undef|Single|Multi").split('|').at(state.quadrant()) << ", "
-                    << QStringLiteral("Off|On").split('|').at(state.region()) << ", "
-                    << QStringLiteral("NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring").split('|').at(state.mirroring()) << ", "
-                    << QStringLiteral("aperture") << state.aperture() << ", "
-                    << state.curPos() << ", "
-                    << QStringLiteral("scaling") << state.scaling() << ", "
-                    << QStringLiteral("rotating") << state.rotating() << ", "
-                    << ')';
-    return debug;
-}
-
 void Gerber::File::createGi()
 {
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
-        item->m_id = m_itemGroup->size();
+        item->m_id = m_itemGroup[Normal]->size();
         item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_itemGroup->append(item);
+        m_itemGroup[Normal]->append(item);
     }
 
     auto adder = [&](const Path& path) {
         GraphicsItem* item = new AperturePathItem(path, this);
         item->m_id = rawItemGroup()->size();
         item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_rawItemGroup->append(item);
+        m_itemGroup[Raw]->append(item);
     };
 
     auto contains = [&](const Path& path) -> bool {
@@ -240,8 +222,6 @@ void Gerber::File::createGi()
         }
         return false;
     };
-
-    setRawItemGroup(new ItemGroup);
 
     for (const GraphicObject& go : *this) {
         if (!go.path().isEmpty()) {
@@ -270,9 +250,29 @@ void Gerber::File::createGi()
     }
 
     if (m_itemsType == Normal)
-        m_rawItemGroup->setVisible(false);
+        m_itemGroup[Raw]->setVisible(false);
     else
-        m_itemGroup->setVisible(false);
+        m_itemGroup[Normal]->setVisible(false);
+}
+
+QDebug operator<<(QDebug debug, const Gerber::State& state)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "State("
+                    << "D0" << state.dCode() << ", "
+                    << "G0" << state.gCode() << ", "
+                    << QStringLiteral("Positive|Negative").split('|').at(state.imgPolarity()) << ", "
+                    << QStringLiteral("Linear|ClockwiseCircular|CounterclockwiseCircular").split('|').at(state.interpolation() - 1) << ", "
+                    << QStringLiteral("Aperture|Line|Region").split('|').at(state.type()) << ", "
+                    << QStringLiteral("Undef|Single|Multi").split('|').at(state.quadrant()) << ", "
+                    << QStringLiteral("Off|On").split('|').at(state.region()) << ", "
+                    << QStringLiteral("NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring").split('|').at(state.mirroring()) << ", "
+                    << QStringLiteral("aperture") << state.aperture() << ", "
+                    << state.curPos() << ", "
+                    << QStringLiteral("scaling") << state.scaling() << ", "
+                    << QStringLiteral("rotating") << state.rotating() << ", "
+                    << ')';
+    return debug;
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& aperture)

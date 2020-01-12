@@ -299,7 +299,7 @@ void Project::saveSelectedToolpaths()
 
     QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
     for (GCode::File* file : files)
-        mm[QPair{ file->getTool(), file->side() }].append(file);
+        mm[QPair { file->getTool(), file->side() }].append(file);
 
     for (const QPair<Tool, Side>& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));

@@ -16,6 +16,7 @@ class Parser;
 
 class DockWidget;
 class Project;
+class QProgressDialog;
 class Scene;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
@@ -62,6 +63,8 @@ private:
     bool openFlag;
 
     QVector<QAction*> toolpathActionList;
+
+    QMap<QString, QProgressDialog*> m_progressDialogs;
 
     static MainWindow* self;
 

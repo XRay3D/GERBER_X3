@@ -19,7 +19,7 @@ public:
     FileType type() const override { return FileType::GCode; }
     Paths m_pocketPaths;
     QMap<int, QVector<int>> m_usedItems;
-    ItemGroup* itemGroup() const override { return m_itemGroup.data(); }
+    ItemGroup* itemGroup() const override { return m_itemGroup.last().data(); }
 
 private:
     static QString lastDir;

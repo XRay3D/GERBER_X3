@@ -15,10 +15,7 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     setFlag(ItemIsSelectable, true);
 }
 
-GerberItem::~GerberItem()
-{
-    //qDebug("~GerberItem()");
-}
+GerberItem::~GerberItem() {}
 
 QRectF GerberItem::boundingRect() const { return m_shape.boundingRect(); }
 
@@ -26,14 +23,13 @@ QPainterPath GerberItem::shape() const { return m_shape; }
 
 void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    //    const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
-    //    qDebug() << lod << GraphicsView::getScale() << painter->worldTransform().m11() << transform().m11();
     if (Scene::drawPdf()) {
         painter->setBrush(Qt::black);
-        painter->setPen(QPen(Qt::black, 0.0));
+        painter->setPen(Qt::NoPen); //QPen(Qt::black, 0.0));
         painter->drawPath(m_shape);
         return;
     }
+
     if (m_penColor)
         m_pen.setColor(*m_penColor);
     if (m_brushColor)
@@ -46,27 +42,27 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         return;
     }
 
-    QColor cb(m_brush.color());
-    QBrush b(cb);
-    QColor cp(cb);
-    QPen pen(m_brush.color(), 0.0); //Qt::NoPen);
+    QColor brColor(m_brush.color());
+    QColor pnColor(brColor);
 
     if (option->state & QStyle::State_Selected) {
-        cb.setAlpha(255);
-        b.setColor(cb);
-        cp.setAlpha(255);
-        pen = QPen(cp, 0.0);
+        brColor.setAlpha(255);
+        pnColor.setAlpha(255);
     }
     if (option->state & QStyle::State_MouseOver) {
-        cb = cb.darker(110);
-        b.setColor(cb);
-        //        b.setStyle(Qt::Dense4Pattern);
-        //        b.setMatrix(matrix().scale(2 * MyGraphicsView:: scaleFactor(), 2 * MyGraphicsView:: scaleFactor()));
-        cp.setAlpha(255);
-        pen = QPen(cp, 0.0);
+        if (option->state & QStyle::State_Selected) {
+            brColor = brColor.darker(120);
+            pnColor = pnColor.darker(120);
+        } else {
+            brColor.setAlpha(200);
+            pnColor.setAlpha(255);
+        }
     }
 
-    painter->setBrush(b);
+    QBrush brush(brColor);
+    QPen pen(pnColor, 0.0);
+
+    painter->setBrush(brush);
     painter->setPen(m_file ? pen : m_pen);
     painter->drawPath(m_shape);
 }
@@ -80,11 +76,11 @@ void GerberItem::redraw()
         path.append(path.first());
         m_shape.addPolygon(toQPolygon(path));
     }
-    setPos({ 1, 1 });
+    setPos({ 1, 1 }); // костыли
     setPos({ 0, 0 });
     //update();
 }
 
 Paths GerberItem::paths() const { return m_paths; }
 
-Paths& GerberItem::rPaths() { return m_paths; }
+Paths* GerberItem::rPaths() { return &m_paths; }

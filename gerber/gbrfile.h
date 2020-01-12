@@ -2,6 +2,7 @@
 #define GFILE_H
 
 #include "gbraperture.h"
+#include "gbrcomponent.h"
 #include "gbrtypes.h"
 
 #include <QDebug>
@@ -14,7 +15,7 @@ class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    explicit File(QDataStream& stream) { read(stream); }
+    explicit File(QDataStream& stream);
     explicit File(const QString& name = "");
     ~File() override;
 
@@ -33,7 +34,6 @@ public:
     bool flashedApertures() const;
     const QMap<int, QSharedPointer<AbstractAperture>>* apertures() const;
     void setItemType(ItemsType type);
-    void setRawItemGroup(ItemGroup* itemGroup);
     ItemGroup* rawItemGroup() const;
     ItemsType itemsType() const;
     FileType type() const override { return FileType::Gerber; }
@@ -45,9 +45,10 @@ protected:
     Paths merge() const override;
 
 private:
+    QList<Component> m_components;
+
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
     ItemsType m_itemsType = Normal;
-    QSharedPointer<ItemGroup> m_rawItemGroup;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
     //Layer layer = Copper;

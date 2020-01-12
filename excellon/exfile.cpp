@@ -106,7 +106,7 @@ QMap<int, double> File::tools() const
 
 Paths Excellon::File::merge() const
 {
-    for (GraphicsItem* item : *m_itemGroup.data())
+    for (GraphicsItem* item : *m_itemGroup.last().data())
         m_mergedPaths.append(item->paths());
     return m_mergedPaths;
 }

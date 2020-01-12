@@ -15,12 +15,22 @@
 #include <scene.h>
 #include <settings.h>
 
+#include <errno.h>
+#include <locale.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <string.h>
+
 namespace GCode {
 
 Creator* Creator::self = nullptr;
 bool Creator::m_cancel = false;
 int Creator::m_progressMax = 0;
 int Creator::m_progressVal = 0;
+
+struct Cancel {
+    Cancel() {}
+};
 
 void Creator::reset()
 {
@@ -161,11 +171,15 @@ void Creator::createGc()
         qDebug() << "Creator::createGc() started" << t.elapsed();
         create();
         qDebug() << "Creator::createGc() ended" << t.elapsed();
-    } catch (bool) {
-        m_cancel = false;
+    } catch (Cancel&) {
+        //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
     } catch (...) {
-        qWarning() << "Creator::createGc() exeption:" << strerror(errno) << t.elapsed();
+        //setlocale(LC_ALL, "ja_JP.utf8"); // printf needs CTYPE for multibyte output
+        const size_t errmsglen = 1024;
+        char errmsg[errmsglen];
+        strerror_s(errmsg, errmsglen, errno);
+        qWarning() << "Creator::createGc() exeption:" << errmsg << t.elapsed();
     }
 }
 
@@ -181,7 +195,7 @@ QPair<int, int> Creator::getProgress()
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
     return { m_progressMax, m_progressVal };
 }
@@ -362,7 +376,7 @@ void Creator::progress(int progressMax, int progressVal)
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
     m_progressVal = progressVal;
     m_progressMax = progressMax;
@@ -372,7 +386,7 @@ void Creator::progress()
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
     if (self != nullptr)
         if (m_progressMax < ++m_progressVal) {
