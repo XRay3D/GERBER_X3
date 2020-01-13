@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMutex>
+#include <QTextCodec>
 #include <QTextStream>
 #include <QThread>
 #include <settings.h>
@@ -41,7 +42,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         QElapsedTimer t;
         t.start();
 
-        static const QRegExp match(QStringLiteral("FS([L|T]?)([A|I]?)X(\\d)(\\d)Y(\\d)(\\d)\\*"));
+        static const QRegExp match(QStringLiteral("FS[L|T][A|I]X\\d{2}Y\\d{2}\\*"));
         if (match.indexIn(gerberLines) == -1) {
             emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
             mutex.unlock();
@@ -57,70 +58,102 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
 
         m_lineNum = 0;
-        for (const QString& gerberLine : m_file->lines()) {
-            m_currentGerbLine = gerberLine;
+        for (SLIter gerberLine = m_file->lines().begin(); gerberLine != m_file->lines().end();) {
+            //        }
+            //        for (const QString& gerberLine : m_file->lines()) {
+
+            m_currentGerbLine = *gerberLine;
             ++m_lineNum;
             if (!(m_lineNum % 1000))
                 emit fileProgress(m_file->shortName(), 0, m_lineNum);
 
-            if (parseGCode(gerberLine))
+            if (parseGCode(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
-            if (parseDCode(gerberLine))
+            if (parseDCode(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
-            if (parseStepRepeat(gerberLine))
-                continue; //////////
-
-            if (parseApertureBlock(gerberLine))
+            if (parseStepRepeat(gerberLine)) {
+                ++gerberLine;
                 continue;
+            } //////////
 
-            if (parseAttributes(gerberLine))
+            if (parseApertureBlock(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
-            if (parseImagePolarity(gerberLine))
+            if (parseAttributes(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
-            if (parseApertureMacros(gerberLine))
+            if (parseImagePolarity(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
+
+            if (parseApertureMacros(gerberLine)) {
+                ++gerberLine;
+                continue;
+            }
 
             // Aperture definitions %ADD...
-            if (parseAperture(gerberLine))
+            if (parseAperture(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // Polarity change
             // Example: %LPD*% or %LPC*%
             // If polarity changes, creates geometry from current
             // buffer, then adds or subtracts accordingly.
-            if (parseTransformations(gerberLine))
+            if (parseTransformations(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // Number format
             // Example: %FSLAX24Y24*%
             // TODO: This is ignoring most of the format-> Implement the rest.
-            if (parseFormat(gerberLine))
+            if (parseFormat(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // Mode (IN/MM)
             // Example: %MOIN*%
-            if (parseUnitMode(gerberLine))
+            if (parseUnitMode(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
-            if (parseEndOfFile(gerberLine))
+            if (parseEndOfFile(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // G01 - Linear interpolation plus flashes
             // Operation code (D0x) missing is deprecated... oh well I will support it.
-            if (parseLineInterpolation(gerberLine))
+            if (parseLineInterpolation(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // G02/G03 - Circular interpolation
             // 2-clockwise, 3-counterclockwise
-            if (parseCircularInterpolation(gerberLine))
+            if (parseCircularInterpolation(gerberLine)) {
+                ++gerberLine;
                 continue;
+            }
 
             // Line didn`t match any pattern. Warn user.
-            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
+            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(*gerberLine);
+            ++gerberLine;
         }
         if (file()->isEmpty()) {
             delete m_file;
@@ -149,11 +182,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         file()->clear();
         emit fileProgress(m_file->shortName(), 1, 1);
     } catch (...) {
-        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
-        qWarning() << "exeption S:" << errStr;
-        emit fileError("", m_file->shortName() + "\n" + errStr);
-        file()->clear();
-        emit fileProgress(m_file->shortName(), 1, 1);
+        //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
+        //        qWarning() << "exeption S:" << errStr;
+        //        emit fileError("", m_file->shortName() + "\n" + errStr);
+        //        file()->clear();
+        //        emit fileProgress(m_file->shortName(), 1, 1);
     }
     mutex.unlock();
 }
@@ -528,11 +561,11 @@ Paths Parser::createPolygon()
     return { m_path };
 }
 
-bool Parser::parseAperture(const QString& gLine)
+bool Parser::parseAperture(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QStringList slApertureType({ "C", "R", "O", "P", "M" });
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         int aperture = match.cap(1).toInt();
         QString apType = match.cap(2);
         QString apParameters = match.cap(3);
@@ -584,15 +617,15 @@ bool Parser::parseAperture(const QString& gLine)
     return false;
 }
 
-bool Parser::parseApertureBlock(const QString& gLine)
+bool Parser::parseApertureBlock(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ABD(\\d+)\\*%$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         m_abSrIdStack.push({ ApertureBlock, match.cap(1).toInt() });
         file()->m_apertures.insert(m_abSrIdStack.top().second, QSharedPointer<AbstractAperture>(new ApBlock(file()->format())));
         return true;
     }
-    if (gLine == "%AB*%") {
+    if (*gLine == "%AB*%") {
         addPath();
         m_abSrIdStack.pop();
         return true;
@@ -600,7 +633,7 @@ bool Parser::parseApertureBlock(const QString& gLine)
     return false;
 }
 
-bool Parser::parseTransformations(const QString& gLine)
+bool Parser::parseTransformations(const SLIter& gLine)
 {
     enum {
         trPolarity,
@@ -608,11 +641,11 @@ bool Parser::parseTransformations(const QString& gLine)
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations { "P", "M", "R", "S" };
-    static const QStringList slLevelPolarity { "D", "C" };
-    static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
+    static const QStringList slTransformations{ "P", "M", "R", "S" };
+    static const QStringList slLevelPolarity{ "D", "C" };
+    static const QStringList slLoadMirroring{ "N", "X", "Y", "XY" };
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (slTransformations.indexOf(match.cap(1))) {
         case trPolarity:
             addPath();
@@ -624,7 +657,7 @@ bool Parser::parseTransformations(const QString& gLine)
                 m_state.setImgPolarity(Negative);
                 break;
             default:
-                throw "bool Parser::parseTransformations(const QString& gLine) - Polarity error!";
+                throw "bool Parser::parseTransformations(const SLI & gLine) - Polarity error!";
             }
             return true;
         case trMirror:
@@ -641,7 +674,7 @@ bool Parser::parseTransformations(const QString& gLine)
     return false;
 }
 
-bool Parser::parseStepRepeat(const QString& gLine)
+bool Parser::parseStepRepeat(const SLIter& gLine)
 {
     /*
      *     <SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
@@ -649,7 +682,7 @@ bool Parser::parseStepRepeat(const QString& gLine)
      *     <SR statement> = <SR open>{<single command>|<region statement>}<SR close>
      */
     static const QRegExp match(QStringLiteral("^%SRX(\\d+)Y(\\d+)I([+-]?\\d*\\.?\\d*)J([+-]?\\d*\\.?\\d*)\\*%$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
             closeStepRepeat();
         m_stepRepeat.reset();
@@ -666,7 +699,7 @@ bool Parser::parseStepRepeat(const QString& gLine)
         return true;
     }
     static const QRegExp match2("^%SR\\*%$");
-    if (match2.exactMatch(gLine)) {
+    if (match2.exactMatch(*gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
             closeStepRepeat();
         return true;
@@ -695,11 +728,11 @@ void Parser::closeStepRepeat()
     m_abSrIdStack.pop();
 }
 
-bool Parser::parseApertureMacros(const QString& gLine)
+bool Parser::parseApertureMacros(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%AM([^\\*]+)\\*([^%]+)?(%)?$"));
     // Start macro if(match, else not an AM, carry on.
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         if (!match.cap(2).isEmpty() && !match.cap(3).isEmpty()) {
             m_apertureMacro[match.cap(1)] = match.cap(2);
             return true;
@@ -708,94 +741,114 @@ bool Parser::parseApertureMacros(const QString& gLine)
     return false;
 }
 
-bool Parser::parseAttributes(const QString& gLine)
+bool Parser::parseAttributes(SLIter& gLine)
 {
-    static const QRegExp matchAttr(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
-    if (matchAttr.exactMatch(gLine)) {
-        const QVector<QString> slAttributeType { "F", "A", "O", "D" };
-        switch (slAttributeType.indexOf(matchAttr.cap(1))) {
-        case Gerber::AttributeA:
-            attributesStrings.append(matchAttr.cap(2));
-            break;
-        case Gerber::ApertureAttribute:
-            apertureAttributesStrings.append(matchAttr.cap(2));
-            break;
-        case Gerber::ObjectAttribute: {
-            static const QRegExp matchObj(QStringLiteral("^\\.(\\S+),(.+)$"));
-            if (matchObj.exactMatch(matchAttr.cap(2))) {
-                qDebug() << matchObj.capturedTexts();
-                enum {
-                    TH,
-                    SMD,
-                    Fiducial,
-                    Other
-                };
-                m_component.m_objStack.push(Component::keys.indexOf(matchObj.cap(1)));
-                switch (m_component.m_objStack.top()) {
-                case Component::C: // <refdes>
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CRot: // <decimal> The rotation angle of the component.
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CMfr: // <field> Manufacturer
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CMPN: // <field> Manufacturer part number
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CVal: // <field> Value, e.g. 220nF
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CMnt: // (TH|SMD|Fiducial|Other) Mount type
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CFtp: // <field> Footprint name
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CPgN: // <field> Package name
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CPgD: // <field> Package description
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CHgt: // <decimal> Height, in the unit of the file.
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CLbN: // <field> Library name
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CLbD: // <field> Library description
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::CSup: // <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                case Component::P: // Reference descriptor and pin number - R301,1
-                    m_component.setData(m_component.m_objStack.top(), matchObj.cap(2));
-                    break;
-                }
+    static const QRegExp matchAttr(QStringLiteral("^%(T[FAOD])(\\.?)(.*)\\*%$"));
+    if (matchAttr.exactMatch(*gLine)) {
+        switch (Attributes::Command::value(matchAttr.cap(1))) {
+        case Attributes::Command::TF: {
+            QStringList sl(matchAttr.cap(3).split(','));
+            switch (int index = Attributes::File::value(sl.first()); index) {
+            case Attributes::File::Part:
+            case Attributes::File::FileFunction:
+            case Attributes::File::FilePolarity:
+            case Attributes::File::SameCoordinates:
+            case Attributes::File::CreationDate:
+            case Attributes::File::GenerationSoftware:
+            case Attributes::File::ProjectId:
+            case Attributes::File::MD5:
+            default:
+                qDebug() << matchAttr.cap(1) << index << sl;
             }
         } break;
-        case Gerber::DeleteAttribute:
-            qDebug() << "DeleteAttribute" << matchAttr.cap(1);
-            attributesStrings.clear();
-            apertureAttributesStrings.clear();
-            //            for (int i = 0; i < attributesStrings.size(); ++i) {
-            //                if (attributesStrings[i].indexOf(match.cap(1)) >= 0) {
-            //                    attributesStrings.removeAt(i);
-            //                }
-            //            }
-            //            for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
-            //                if (apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-            //                    apertureAttributesStrings.removeAt(i);
-            //                }
-            //            }
-            //            for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
-            //                if (objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-            //                    objectAttributesStrings.removeAt(i);
-            //                }
-            //            }
+        case Attributes::Command::TA: {
+            QStringList sl(matchAttr.cap(3).split(','));
+            switch (int index = Attributes::Aperture::value(sl.first()); index) {
+            case Attributes::Aperture::AperFunction:
+                switch (0) {
+                case Attributes::AperFunction::ComponentMain:
+                case Attributes::AperFunction::ComponentOutline:
+                case Attributes::AperFunction::ComponentPin:;
+                }
+            case Attributes::Aperture::DrillTolerance:
+            case Attributes::Aperture::FlashText:
+            default:
+                qDebug() << matchAttr.cap(1) << index << sl;
+            }
+            //apertureAttributesStrings.append(matchAttr.cap(2));
+            //qDebug() << matchAttr.cap(1);
+        } break;
+        case Attributes::Command::TO: {
+            QStringList sl(matchAttr.cap(3).remove('"').split(','));
+            switch (int index = GraphicsObject::value1(sl.first()); index) {
+            case GraphicsObject::N:
+                qDebug() << matchAttr.cap(1) << index << sl;
+                break;
+            case GraphicsObject::P:
+                if (parseLineInterpolation(gLine + 1)) {
+                    ++gLine;
+                    ccc[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), toQPointF(m_state.curPos()) });
+                } else {
+                    ccc[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), {} });
+                }
+                break;
+            case GraphicsObject::C:
+                switch (int index = GraphicsObject::value2(sl.first()); index) {
+                case GraphicsObject::Rot:
+                    ccc[refDes].rotation = sl.last().toDouble();
+                    break;
+                case GraphicsObject::Mfr:
+                    ccc[refDes].manufacturer.name = sl.last();
+                    break;
+                case GraphicsObject::MPN:
+                    ccc[refDes].manufacturer.partNumber = sl.last();
+                    break;
+                case GraphicsObject::Val:
+                    ccc[refDes].value = sl.last();
+                    break;
+                case GraphicsObject::Mnt:
+                    ccc[refDes].setMountType(sl.last());
+                    break;
+                case GraphicsObject::Ftp:
+                    ccc[refDes].footprintName = sl.last();
+                    break;
+                case GraphicsObject::PgN:
+                    ccc[refDes].package.name = sl.last();
+                    break;
+                case GraphicsObject::Hgt:
+                    ccc[refDes].height = sl.last().toDouble();
+                    break;
+                case GraphicsObject::LbN:
+                    ccc[refDes].library.name = sl.last();
+                    break;
+                case GraphicsObject::LbD:
+                    ccc[refDes].library.description = sl.last();
+                    break;
+                case GraphicsObject::Sup:
+                    qDebug() << static_cast<GraphicsObject::eC>(index) << sl;
+                    break;
+                default:
+                    QRegExp rx("(\\\\[0-9a-fA-F]{4})");
+                    int pos = 0;
+                    while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
+                        sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
+                    }
+                    qDebug() << matchAttr.cap(1) << index << sl.last();
+                    refDes = ccc[sl.last()].refdes = sl.last();
+                }
+                qDebug() << *(gLine + 1);
+                if (!(gLine + 1)->startsWith('%') && parseLineInterpolation(gLine + 1)) {
+                    ++gLine;
+                    ccc[refDes].referencePoint = toQPointF(m_state.curPos());
+                }
+                break;
+            default:
+                qDebug("default");
+            }
+        } break;
+        case Attributes::Command::TD:
+            qDebug() << matchAttr.cap(1);
+            refDes.clear();
             break;
         }
         return true;
@@ -803,11 +856,11 @@ bool Parser::parseAttributes(const QString& gLine)
     return false;
 }
 
-bool Parser::parseCircularInterpolation(const QString& gLine)
+bool Parser::parseCircularInterpolation(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$"));
 
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         if (match.cap(1).isEmpty() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
 
@@ -837,7 +890,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         default:
             if (m_state.interpolation() != ClockwiseCircular && m_state.interpolation() != CounterclockwiseCircular) {
                 qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(m_lineNum);
-                qWarning() << QString(gLine);
+                qWarning() << QString(*gLine);
                 m_state.setCurPos({ x, y });
                 m_state.setGCode(G01);
                 return false;
@@ -847,7 +900,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
 
         if (m_state.quadrant() == Undef) {
             qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(m_lineNum);
-            qWarning() << QString(gLine);
+            qWarning() << QString(*gLine);
             return true;
         }
 
@@ -928,7 +981,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 }
             }
             if (!valid)
-                qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
+                qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << *gLine;
             break;
         default:
             m_state.setCurPos({ x, y });
@@ -942,23 +995,23 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
     return false;
 }
 
-bool Parser::parseEndOfFile(const QString& gLine)
+bool Parser::parseEndOfFile(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^M[0]?[0123]\\*"));
     static const QRegExp match2(QStringLiteral("^D0?2M0?[02]\\*"));
-    if (match.exactMatch(gLine) || match2.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine) || match2.exactMatch(*gLine)) {
         addPath();
         return true;
     }
     return false;
 }
 
-bool Parser::parseFormat(const QString& gLine)
+bool Parser::parseFormat(const SLIter& gLine)
 {
     const QStringList zeroOmissionModeList = QString("L|T").split("|");
     const QStringList coordinateValuesNotationList = QString("A|I").split("|");
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (zeroOmissionModeList.indexOf(match.cap(1))) {
         case OmitLeadingZeros:
             m_state.format()->zeroOmisMode = OmitLeadingZeros;
@@ -986,30 +1039,30 @@ bool Parser::parseFormat(const QString& gLine)
 
         int intVal = m_state.format()->xInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->xDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         return true;
     }
     return false;
 }
 
-bool Parser::parseGCode(const QString& gLine)
+bool Parser::parseGCode(const SLIter& gLine)
 {
 
     static const QRegExp match(QStringLiteral("^G([0]?[0-9]{2})\\*$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (match.cap(1).toInt()) {
         case G01:
             m_state.setInterpolation(Linear);
@@ -1071,18 +1124,18 @@ bool Parser::parseGCode(const QString& gLine)
         }
         return true;
     }
-    if (QRegExp("^G0?4(.*)$").exactMatch(gLine)) {
+    if (QRegExp("^G0?4(.*)$").exactMatch(*gLine)) {
         m_state.setGCode(G04);
         return true;
     }
     return false;
 }
 
-bool Parser::parseImagePolarity(const QString& gLine)
+bool Parser::parseImagePolarity(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%IP(POS|NEG)\\*%$"));
     static const QList<QString> slImagePolarity(QString("POS|NEG").split("|"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (slImagePolarity.indexOf(match.cap(1))) {
         case Positive:
             m_state.setImgPolarity(Positive);
@@ -1096,12 +1149,12 @@ bool Parser::parseImagePolarity(const QString& gLine)
     return false;
 }
 
-bool Parser::parseLineInterpolation(const QString& gLine)
+bool Parser::parseLineInterpolation(const SLIter& gLine)
 {
     // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
     static const QRegExp match(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
-    if (match.exactMatch(gLine)) {
-        parsePosition(gLine);
+    if (match.exactMatch(*gLine)) {
+        parsePosition(*gLine);
 
         DCode dcode = m_state.dCode();
         if (!match.cap(2).isEmpty())
@@ -1127,10 +1180,10 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     return false;
 }
 
-bool Parser::parseDCode(const QString& gLine)
+bool Parser::parseDCode(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^D0?([123])\\*$"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (match.cap(1).toInt()) {
         case D01:
             m_state.setDCode(D01);
@@ -1148,7 +1201,7 @@ bool Parser::parseDCode(const QString& gLine)
         return true;
     }
     static const QRegExp match2(QStringLiteral("^(?:G54)?D(\\d+)\\*$"));
-    if (match2.exactMatch(gLine)) {
+    if (match2.exactMatch(*gLine)) {
         addPath();
         m_state.setAperture(match2.cap(1).toInt());
         m_state.setDCode(D02);
@@ -1161,11 +1214,11 @@ bool Parser::parseDCode(const QString& gLine)
     return false;
 }
 
-bool Parser::parseUnitMode(const QString& gLine)
+bool Parser::parseUnitMode(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%MO(IN|MM)\\*%$"));
     static const QList<QString> slUnitType(QString("IN|MM").split("|"));
-    if (match.exactMatch(gLine)) {
+    if (match.exactMatch(*gLine)) {
         switch (slUnitType.indexOf(match.cap(1))) {
         case Inches:
             m_state.format()->unitMode = Inches;

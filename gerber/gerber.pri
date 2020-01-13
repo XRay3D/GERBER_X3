@@ -12,6 +12,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/gbrattributes.h \
     $$PWD/gbrcomponent.h \
     $$PWD/gbrtypes.h \
     $$PWD/mathparser.h \
@@ -20,6 +21,7 @@ HEADERS += \
     $$PWD/gbrparser.h
 
 SOURCES += \
+    $$PWD/gbrattributes.cpp \
     $$PWD/gbrcomponent.cpp \
     $$PWD/mathparser.cpp \
     $$PWD/gbrparser.cpp \

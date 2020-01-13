@@ -97,10 +97,9 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
                 {
                     Clipper clipper;
                     clipper.AddPaths(src, ptClip, true);
-                    for (auto [left, right, var, flag] : w) {
-                        Q_UNUSED(var)
+                    for (auto& [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
-                        Path frame { { left, var }, { right, var } };
+                        Path frame { { left_, var }, { right_, var } };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptSubject, false);
                     }
@@ -132,13 +131,13 @@ void PocketCreator::createRaster(const Tool& tool, const double depth, const dou
                     Paths toNext;
                     Clipper clipper;
                     clipper.AddPaths(src, ptSubject, false);
-                    for (auto [left, right, var, flag] : w) {
+                    for (auto [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
                         Path frame {
-                            { left, var },
-                            { right, var },
-                            { right, var += m_stepOver },
-                            { left, var }
+                            { left_, var },
+                            { right_, var },
+                            { right_, var += m_stepOver },
+                            { left_, var }
                         };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptClip, true);

@@ -75,7 +75,7 @@ QList<QGraphicsItem*> Scene::selectedItems()
 {
     if (m_self)
         return m_self->QGraphicsScene::selectedItems();
-    return QList<QGraphicsItem*>();
+    return {};
 }
 
 void Scene::addItem(QGraphicsItem* item)
@@ -88,7 +88,7 @@ QList<QGraphicsItem*> Scene::items(Qt::SortOrder order)
 {
     if (m_self)
         return m_self->QGraphicsScene::items(order);
-    return QList<QGraphicsItem*>();
+    return {};
 }
 
 void Scene::update()

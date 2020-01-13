@@ -1,104 +1,116 @@
 #ifndef GBRCOMPONENT_H
 #define GBRCOMPONENT_H
 
+#include "gbrattributes.h"
 #include <QMap>
+#include <QObject>
+#include <QPolygonF>
 #include <QStack>
 #include <QString>
 #include <QVariant>
 #include <QVector>
 
-class Component {
+class GraphicsObject {
+    Q_GADGET
 public:
-    Component();
+    GraphicsObject();
     enum MountType {
         TH,
         SMD,
         Fiducial,
         Other
     };
-    enum {
-        C, // <refdes>
-        CFtp, // <field> Footprint name
-        CHgt, // <decimal> Height, in the unit of the file.
-        CLbD, // <field> Library description
-        CLbN, // <field> Library name
-        CMPN, // <field> Manufacturer part number
-        CMfr, // <field> Manufacturer
-        CMnt, // (TH|SMD|Fiducial|Other) Mount type
-        CPgD, // <field> Package description
-        CPgN, // <field> Package name
-        CRot, // <decimal> The rotation angle of the component.
-        CSup, // <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field
-        CVal, // <field> Value, e.g. 220nF
-        P, // Reference descriptor and pin number - R301,1
+    Q_ENUM(MountType)
+    void setMountType(const QString& key) { mount = static_cast<MountType>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data())); }
+
+    enum e1 {
+        N, /*
+        The CAD net name of a conducting object, e.g. Clk13. 5.6.13
+        Graphics Object*/
+        P, /*
+        The pin number (or name) and reference descriptor of a component pad on an outer layer, e.g. IC3,7. 5.6.14
+        Graphics Object*/
+        C,
+        /*<refdes>
+        <refdes>=<field>
+        This is an already existing attribute. See section 5.6.15
+        in the main specification for more information. It
+        identifies the component reference descriptor.
+        .CRot,<decimal> The rotation angle of the component.
+        The rotation angle is consistent with the one for graphics
+        objects. Positive rotation is counterclockwise viewed
+        from the top side, even if the component is on the
+        bottom side. The zero-rotation orientation of a top side
+        component as in IPC-7351. The base orientation of a
+        bottom side component is the one on the top side,
+        mirrored around the X axis.
+        The rotation is around the flash point.
+        The component reference designator linked to an object, e.g C2. 5.6.15
+        Graphics Object*/
     };
-    template <class T>
-    void setData(int key, const T& value)
-    {
-        switch (key) {
-        case C:
-            m_C = value; // <refdes>
-            break;
-        case CRot:
-            m_CRot = value.toDouble(); // <decimal> The rotation angle of the component.
-            break;
-        case CMfr:
-            m_CMfr = value; // <field> Manufacturer
-            break;
-        case CMPN:
-            m_CMPN = value; // <field> Manufacturer part number
-            break;
-        case CVal:
-            m_CVal = value; // <field> Value, e.g. 220nF
-            break;
-        case CMnt:
-            //// m_CMnt = value; // (TH|SMD|Fiducial|Other) Mount type
-            break;
-        case CFtp:
-            m_CFtp = value; // <field> Footprint name
-            break;
-        case CPgN:
-            m_CPgN = value; // <field> Package name
-            break;
-        case CPgD:
-            m_CPgD = value; // <field> Package description
-            break;
-        case CHgt:
-            m_CHgt = value.toDouble(); // <decimal> Height, in the unit of the file.
-            break;
-        case CLbN:
-            m_CLbN = value; // <field> Library name
-            break;
-        case CLbD:
-            m_CLbD = value; // <field> Library description
-            break;
-        case CSup:
-            m_CSup = value; // <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field
-            break;
-        case P:
-            ///    m_P = value; // Reference descriptor and pin number - R301,1
-            break;
-        }
-    }
-    QString m_C; // <refdes>
-    QString m_CFtp; // <field> Footprint name
-    double m_CHgt; // <decimal> Height, in the unit of the file.
-    QString m_CLbD; // <field> Library description
-    QString m_CLbN; // <field> Library name
-    QString m_CMPN; // <field> Manufacturer part number
-    QString m_CMfr; // <field> Manufacturer
-    MountType m_CMnt = Other; // (TH|SMD|Fiducial|Other) Mount type
-    QString m_CPgD; // <field> Package description
-    QString m_CPgN; // <field> Package name
-    double m_CRot; // <decimal> The rotation angle of the component.
-    QString m_CSup; // <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field
-    QString m_CVal; // <field> Value, e.g. 220nF
-    QVector<QPair<int, QString>> m_P; // Reference descriptor and pin number - R301,1
+    Q_ENUM(e1)
+    static int value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
 
-    static const QVector<QString> keys;
+    enum eC {
+        Rot, /*<decimal> The rotation angle of the component.
+        The rotation angle is consistent with the one for graphics
+        objects. Positive rotation is counterclockwise viewed
+        from the top side, even if the component is on the
+        bottom side. The zero-rotation orientation of a top side
+        component as in IPC-7351. The base orientation of a
+        bottom side component is the one on the top side,
+        mirrored around the X axis.
+        The rotation is around the flash point.*/
+        Mfr, /*<field> Manufacturer. */
+        MPN, /*<field> Manufacturer part number. */
+        Val, /*<field> E.g. 220nF. */
+        Mnt, /*(TH|SMD|BGA|Other) Mount type. */
+        Ftp, /*<field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
+        PgN, /*<field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
+        PgD, /*<field> Package description. */
+        Hgt, /*<decimal> Height, in the unit of the file. */
+        LbN, /*<field> Library name. */
+        LbD, /*<field> Library description. */
+        Sup, /*<SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
+    };
+    Q_ENUM(eC)
+    static int value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
 
-    QMap<int, QVariant> m_obj;
-    QStack<int> m_objStack;
+    double rotation = 0.0; /*<decimal> The rotation angle of the component.*/
+    double height = 0.0; /*<decimal> Height, in the unit of the file. */
+
+    MountType mount = Other; /*(TH|SMD|BGA|Other) Mount type. */
+
+    QString footprintName; /*<field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
+    QString refdes;
+    QString value; /*<field> E.g. 220nF. */
+
+    QPointF referencePoint;
+    QPolygonF footprint;
+
+    struct Library {
+        QString name; /*<field> Library name. */
+        QString description; /*<field> Library description. */
+    } library;
+    struct Manufacturer {
+        QString name; /*<field> Manufacturer. */
+        QString partNumber; /*<field> Manufacturer part number. */
+    } manufacturer;
+    struct Package {
+        QString name; /*<field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
+        QString description; /*<field> Package description. */
+    } package;
+    struct Supplier {
+        QString name; /*<field> Library name. */
+        QString description; /*<field> Library description. */
+    };
+    QList<Supplier> suppliers; /*<SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
+    struct Pins {
+        int number;
+        QString description;
+        QPointF pos;
+    };
+    QList<Pins> pins;
 };
 
 #endif // GBRCOMPONENT_H

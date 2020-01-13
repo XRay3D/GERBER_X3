@@ -45,7 +45,7 @@ protected:
     Paths merge() const override;
 
 private:
-    QList<Component> m_components;
+    QList<GraphicsObject> m_components;
 
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
     ItemsType m_itemsType = Normal;
