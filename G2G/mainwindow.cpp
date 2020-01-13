@@ -91,6 +91,8 @@ MainWindow::MainWindow(QWidget* parent)
     GCodePropertiesForm(); // init vars;
     QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
     QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
+    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
+    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     self = this;
 }
 
@@ -814,6 +816,7 @@ void MainWindow::addFileToPro(AbstractFile* file)
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
         GerberNode::repaintTimer()->start();
+    graphicsView->zoomFit();
 }
 
 void MainWindow::prependToRecentFiles(const QString& fileName)

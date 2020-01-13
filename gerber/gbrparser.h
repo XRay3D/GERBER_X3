@@ -1,6 +1,7 @@
 #ifndef GERBERPARSER_H
 #define GERBERPARSER_H
 
+#include "gbrattributes.h"
 #include "gbrfile.h"
 #include "gbrtypes.h"
 #include <QObject>
@@ -40,10 +41,6 @@ private:
 
     QMap<QString, QString> m_apertureMacro;
 
-    QStringList attributesStrings;
-    QStringList apertureAttributesStrings;
-    Component m_component;
-
     enum WorkingType {
         Normal,
         StepRepeat,
@@ -60,21 +57,28 @@ private:
     int m_goId = 0;
 
     StepRepeatStr m_stepRepeat;
+    QMap<QString, GraphicsObject> ccc;
+    QString refDes;
+    int aperFunction = 0;
+    QMap<int, int> apFunctionMap;
+    //Attributes att;
 
-    bool parseAperture(const QString& gLine);
-    bool parseApertureBlock(const QString& gLine);
-    bool parseApertureMacros(const QString& gLine);
-    bool parseAttributes(const QString& gLine);
-    bool parseCircularInterpolation(const QString& gLine);
-    bool parseDCode(const QString& gLine);
-    bool parseEndOfFile(const QString& gLine);
-    bool parseFormat(const QString& gLine);
-    bool parseGCode(const QString& gLine);
-    bool parseImagePolarity(const QString& gLine);
-    bool parseLineInterpolation(const QString& gLine);
-    bool parseStepRepeat(const QString& gLine);
-    bool parseTransformations(const QString& gLine);
-    bool parseUnitMode(const QString& gLine);
+    using SLIter = QList<QString>::iterator;
+
+    bool parseAperture(const SLIter& gLine);
+    bool parseApertureBlock(const SLIter& gLine);
+    bool parseApertureMacros(const SLIter& gLine);
+    bool parseAttributes(SLIter& gLine);
+    bool parseCircularInterpolation(const SLIter& gLine);
+    bool parseDCode(const SLIter& gLine);
+    bool parseEndOfFile(const SLIter& gLine);
+    bool parseFormat(const SLIter& gLine);
+    bool parseGCode(const SLIter& gLine);
+    bool parseImagePolarity(const SLIter& gLine);
+    bool parseLineInterpolation(const SLIter& gLine);
+    bool parseStepRepeat(const SLIter& gLine);
+    bool parseTransformations(const SLIter& gLine);
+    bool parseUnitMode(const SLIter& gLine);
     void closeStepRepeat();
 
     inline File* file() { return reinterpret_cast<File*>(m_file); }

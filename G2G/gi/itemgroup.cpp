@@ -5,7 +5,8 @@
 ItemGroup::~ItemGroup()
 {
     //qDebug("~ItemGroup()");
-    qDeleteAll(*this);
+    if (Scene::items().size())
+        qDeleteAll(*this);
 }
 
 void ItemGroup::append(GraphicsItem* value)

@@ -99,13 +99,6 @@ enum GCode {
 #endif
 };
 
-enum AttributeType {
-    AttributeA, //        TF
-    ApertureAttribute, // TA
-    ObjectAttribute, //   TO
-    DeleteAttribute //    TD
-};
-
 enum PrimitiveType {
     Aperture,
     Line,
