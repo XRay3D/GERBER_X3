@@ -26,7 +26,8 @@ public:
 
     enum ItemsType {
         Normal,
-        Raw,
+        ApPaths,
+        Components,
     };
 
     Format* format() { return &m_format; }
@@ -34,7 +35,7 @@ public:
     bool flashedApertures() const;
     const QMap<int, QSharedPointer<AbstractAperture>>* apertures() const;
     void setItemType(ItemsType type);
-    ItemGroup* rawItemGroup() const;
+    ItemGroup* itemGroup(ItemsType type) const;
     ItemsType itemsType() const;
     FileType type() const override { return FileType::Gerber; }
     ItemGroup* itemGroup() const override;
@@ -45,7 +46,7 @@ protected:
     Paths merge() const override;
 
 private:
-    QList<GraphicsObject> m_components;
+    QList<Component> m_components;
 
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
     ItemsType m_itemsType = Normal;

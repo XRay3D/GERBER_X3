@@ -1,4 +1,4 @@
-#include "rawitem.h"
+#include "aperturepathitem.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -80,7 +80,7 @@ void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         const double glueLen = GCodePropertiesForm::glue * uScale;
         IntPoint dest(m_path.last());
         IntPoint init(m_path.first());
-        ItemGroup* ig = typedFile<Gerber::File>()->rawItemGroup();
+        ItemGroup* ig = typedFile<Gerber::File>()->itemGroup(Gerber::File::ApPaths);
         for (int i = 0; i < ig->size(); ++i) {
             auto item = ig->at(i);
             if (item->isSelected())

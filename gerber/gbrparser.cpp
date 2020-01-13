@@ -163,6 +163,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             else if (m_file->shortName().contains(".gb", Qt::CaseInsensitive) && !m_file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
                 m_file->setSide(Bottom);
             m_file->mergedPaths();
+            file()->m_components = components.values();
             m_file->createGi();
             emit fileReady(m_file);
         }
@@ -414,6 +415,10 @@ void Parser::addPath()
         }
         break;
     }
+    if (apFunctionMap.contains(m_state.aperture())
+        && apFunctionMap[m_state.aperture()] == Att::AperFunction::ComponentOutline) {
+        components[refDes].footprint = toQPolygon(m_path);
+    }
     resetStep();
 }
 
@@ -440,6 +445,17 @@ void Parser::addFlash()
         apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, paths, file()));
         break;
     }
+    if (apFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
+        switch (apFunctionMap[m_state.aperture()]) {
+        case Att::AperFunction::ComponentPin:
+            components[refDes].pins.last().pos = toQPointF(m_state.curPos());
+            break;
+        case Att::AperFunction::ComponentMain:
+            components[refDes].referencePoint = toQPointF(m_state.curPos());
+            break;
+        }
+    }
+
     resetStep();
 }
 
@@ -454,6 +470,11 @@ void Parser::reset(const QString& fileName)
     m_abSrIdStack.push({ Normal, 0 });
     m_stepRepeat.reset();
     m_goId = 0;
+    ///////////////
+    components.clear();
+    refDes.clear();
+    aperFunction = -1;
+    apFunctionMap.clear();
 }
 
 void Parser::resetStep()
@@ -564,7 +585,7 @@ Paths Parser::createPolygon()
 bool Parser::parseAperture(const SLIter& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
-    static const QStringList slApertureType({ "C", "R", "O", "P", "M" });
+    static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (match.exactMatch(*gLine)) {
         int aperture = match.cap(1).toInt();
         QString apType = match.cap(2);
@@ -612,6 +633,8 @@ bool Parser::parseAperture(const SLIter& gLine)
             file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file()->format())));
             break;
         }
+        if (aperFunction > -1)
+            apFunctionMap[aperture] = aperFunction;
         return true;
     }
     return false;
@@ -641,9 +664,9 @@ bool Parser::parseTransformations(const SLIter& gLine)
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations{ "P", "M", "R", "S" };
-    static const QStringList slLevelPolarity{ "D", "C" };
-    static const QStringList slLoadMirroring{ "N", "X", "Y", "XY" };
+    static const QStringList slTransformations { "P", "M", "R", "S" };
+    static const QStringList slLevelPolarity { "D", "C" };
+    static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
     if (match.exactMatch(*gLine)) {
         switch (slTransformations.indexOf(match.cap(1))) {
@@ -745,110 +768,91 @@ bool Parser::parseAttributes(SLIter& gLine)
 {
     static const QRegExp matchAttr(QStringLiteral("^%(T[FAOD])(\\.?)(.*)\\*%$"));
     if (matchAttr.exactMatch(*gLine)) {
-        switch (Attributes::Command::value(matchAttr.cap(1))) {
-        case Attributes::Command::TF: {
+        switch (Att::Command::value(matchAttr.cap(1))) {
+        case Att::Command::TF: {
             QStringList sl(matchAttr.cap(3).split(','));
-            switch (int index = Attributes::File::value(sl.first()); index) {
-            case Attributes::File::Part:
-            case Attributes::File::FileFunction:
-            case Attributes::File::FilePolarity:
-            case Attributes::File::SameCoordinates:
-            case Attributes::File::CreationDate:
-            case Attributes::File::GenerationSoftware:
-            case Attributes::File::ProjectId:
-            case Attributes::File::MD5:
+            int index = Att::File::value(sl.first());
+            switch (index) {
+            case Att::File::Part:
+            case Att::File::FileFunction:
+            case Att::File::FilePolarity:
+            case Att::File::SameCoordinates:
+            case Att::File::CreationDate:
+            case Att::File::GenerationSoftware:
+            case Att::File::ProjectId:
+            case Att::File::MD5:
             default:
-                qDebug() << matchAttr.cap(1) << index << sl;
+                // qDebug() << matchAttr.cap(1) << index << sl
+                ;
             }
         } break;
-        case Attributes::Command::TA: {
+        case Att::Command::TA: {
             QStringList sl(matchAttr.cap(3).split(','));
-            switch (int index = Attributes::Aperture::value(sl.first()); index) {
-            case Attributes::Aperture::AperFunction:
-                switch (0) {
-                case Attributes::AperFunction::ComponentMain:
-                case Attributes::AperFunction::ComponentOutline:
-                case Attributes::AperFunction::ComponentPin:;
+            int index = Att::Aperture::value(sl.first());
+            switch (index) {
+            case Att::Aperture::AperFunction:
+                if (sl.size() > 1) {
+                    switch (int key = Att::AperFunction::value(sl[1])) {
+                    case Att::AperFunction::ComponentMain:
+                    case Att::AperFunction::ComponentOutline:
+                    case Att::AperFunction::ComponentPin:
+                        aperFunction = key;
+                        break;
+                    default:
+                        aperFunction = -1;
+                    }
                 }
-            case Attributes::Aperture::DrillTolerance:
-            case Attributes::Aperture::FlashText:
+                break;
+            case Att::Aperture::DrillTolerance:
+            case Att::Aperture::FlashText:
             default:
-                qDebug() << matchAttr.cap(1) << index << sl;
+                // qDebug() << matchAttr.cap(1) << index << sl
+                ;
             }
             //apertureAttributesStrings.append(matchAttr.cap(2));
             //qDebug() << matchAttr.cap(1);
         } break;
-        case Attributes::Command::TO: {
-            QStringList sl(matchAttr.cap(3).remove('"').split(','));
-            switch (int index = GraphicsObject::value1(sl.first()); index) {
-            case GraphicsObject::N:
-                qDebug() << matchAttr.cap(1) << index << sl;
+        case Att::Command::TO: {
+            QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
+            switch (int index = Component::value1(sl.first())) {
+            case Component::N:
+                // qDebug() << matchAttr.cap(1) << index << sl;
                 break;
-            case GraphicsObject::P:
-                if (parseLineInterpolation(gLine + 1)) {
-                    ++gLine;
-                    ccc[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), toQPointF(m_state.curPos()) });
-                } else {
-                    ccc[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), {} });
-                }
+            case Component::P:
+                components[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), {} });
                 break;
-            case GraphicsObject::C:
-                switch (int index = GraphicsObject::value2(sl.first()); index) {
-                case GraphicsObject::Rot:
-                    ccc[refDes].rotation = sl.last().toDouble();
-                    break;
-                case GraphicsObject::Mfr:
-                    ccc[refDes].manufacturer.name = sl.last();
-                    break;
-                case GraphicsObject::MPN:
-                    ccc[refDes].manufacturer.partNumber = sl.last();
-                    break;
-                case GraphicsObject::Val:
-                    ccc[refDes].value = sl.last();
-                    break;
-                case GraphicsObject::Mnt:
-                    ccc[refDes].setMountType(sl.last());
-                    break;
-                case GraphicsObject::Ftp:
-                    ccc[refDes].footprintName = sl.last();
-                    break;
-                case GraphicsObject::PgN:
-                    ccc[refDes].package.name = sl.last();
-                    break;
-                case GraphicsObject::Hgt:
-                    ccc[refDes].height = sl.last().toDouble();
-                    break;
-                case GraphicsObject::LbN:
-                    ccc[refDes].library.name = sl.last();
-                    break;
-                case GraphicsObject::LbD:
-                    ccc[refDes].library.description = sl.last();
-                    break;
-                case GraphicsObject::Sup:
-                    qDebug() << static_cast<GraphicsObject::eC>(index) << sl;
+            case Component::C:
+                switch (int key = Component::value2(sl.first())) {
+                case Component::Rot:
+                case Component::Mfr:
+                case Component::MPN:
+                case Component::Val:
+                case Component::Mnt:
+                case Component::Ftp:
+                case Component::PgN:
+                case Component::Hgt:
+                case Component::LbN:
+                case Component::LbD:
+                case Component::Sup:
+                    components[refDes].setData(key, sl);
                     break;
                 default:
-                    QRegExp rx("(\\\\[0-9a-fA-F]{4})");
+                    static const QRegExp rx("(\\\\[0-9a-fA-F]{4})");
                     int pos = 0;
                     while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
                         sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
                     }
-                    qDebug() << matchAttr.cap(1) << index << sl.last();
-                    refDes = ccc[sl.last()].refdes = sl.last();
-                }
-                qDebug() << *(gLine + 1);
-                if (!(gLine + 1)->startsWith('%') && parseLineInterpolation(gLine + 1)) {
-                    ++gLine;
-                    ccc[refDes].referencePoint = toQPointF(m_state.curPos());
+                    refDes = sl.last();
+                    components[refDes].refdes = refDes;
                 }
                 break;
             default:
                 qDebug("default");
             }
         } break;
-        case Attributes::Command::TD:
-            qDebug() << matchAttr.cap(1);
+        case Att::Command::TD:
             refDes.clear();
+            aperFunction = -1;
             break;
         }
         return true;
