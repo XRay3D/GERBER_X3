@@ -2817,11 +2817,11 @@ bool Clipper::ProcessIntersections(const cInt topY)
         else
             return false;
     } catch (...) {
-        m_SortedEdges = 0;
+        m_SortedEdges = nullptr;
         DisposeIntersectNodes();
         throw clipperException("ProcessIntersections error");
     }
-    m_SortedEdges = 0;
+    m_SortedEdges = nullptr;
     return true;
 }
 //------------------------------------------------------------------------------
@@ -2873,11 +2873,11 @@ void Clipper::BuildIntersectList(const cInt topY)
                 e = eNext;
         }
         if (e->PrevInSEL)
-            e->PrevInSEL->NextInSEL = 0;
+            e->PrevInSEL->NextInSEL = nullptr;
         else
             break;
     } while (isModified);
-    m_SortedEdges = 0; //important
+    m_SortedEdges = nullptr; //important
 }
 //------------------------------------------------------------------------------
 
@@ -3041,7 +3041,7 @@ void Clipper::ProcessEdgesAtTopOfScanbeam(const cInt topY)
     e = m_ActiveEdges;
     while (e) {
         if (IsIntermediate(e, topY)) {
-            OutPt* op = 0;
+            OutPt* op = nullptr;
             if (e->OutIdx >= 0)
                 op = AddOutPt(e, e->Top);
             UpdateEdgeIntoAEL(e);

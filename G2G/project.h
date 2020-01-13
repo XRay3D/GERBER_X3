@@ -16,6 +16,7 @@ enum FileVersion {
     G2G_Ver_1 = 1,
     G2G_Ver_2,
     G2G_Ver_3,
+    // G2G_Ver_4,
 };
 
 class Project : public QObject {

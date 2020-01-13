@@ -169,13 +169,36 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.setToolTipDuration(0);
         menu.setToolTipsVisible(true);
         Gerber::File* file = Project::instance()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
-        if (file->rawItemGroup()->size()) {
-            auto action = menu.addAction(tr("&Aperture paths"), [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked)); });
+        QActionGroup* group = new QActionGroup(&menu);
+
+        if (file->itemGroup(Gerber::File::ApPaths)->size()) {
+            auto action = menu.addAction(tr("&Aperture paths"),
+                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::ApPaths)); });
             action->setCheckable(true);
-            action->setChecked(file->itemsType());
+            action->setChecked(file->itemsType() == Gerber::File::ApPaths);
             action->setToolTip("Displays only aperture paths of copper\n"
                                "without width and without contacts.");
+            action->setActionGroup(group);
         }
+        if (file->itemGroup(Gerber::File::Components)->size()) {
+            auto action = menu.addAction(tr("&Components"),
+                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Components)); });
+            action->setCheckable(true);
+            action->setChecked(file->itemsType() == Gerber::File::Components);
+            //            action->setToolTip("Displays only aperture paths of copper\n"
+            //                               "without width and without contacts.");
+            action->setActionGroup(group);
+        }
+        if (menu.actions().size() > 1) {
+            auto action = menu.addAction(tr("&Normal"),
+                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Normal)); });
+            action->setCheckable(true);
+            action->setChecked(file->itemsType() == Gerber::File::Normal);
+            //            action->setToolTip("Displays only aperture paths of copper\n"
+            //                               "without width and without contacts.");
+            action->setActionGroup(group);
+        }
+
         menu.addAction(QIcon(), tr("&Show source"), [this] {
             QDialog* Dialog = new QDialog;
             Dialog->setObjectName(QString::fromUtf8("Dialog"));

@@ -12,11 +12,13 @@ static Format* crutch;
 File::File(QDataStream& stream)
 {
     m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
+    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
     read(stream);
 }
 
 File::File(const QString& fileName)
 {
+    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
     m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
     m_name = fileName;
 }
@@ -93,7 +95,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 File::ItemsType File::itemsType() const { return m_itemsType; }
 
-ItemGroup* File::rawItemGroup() const { return m_itemGroup[Raw].data(); }
+ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroup[type].data(); }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -141,7 +143,7 @@ void File::setColor(const QColor& color)
 {
     AbstractFile::setColor(color);
     m_itemGroup[Normal]->setBrush(color);
-    m_itemGroup[Raw]->setPen(QPen(color, 0.0));
+    m_itemGroup[ApPaths]->setPen(QPen(color, 0.0));
 }
 
 void File::setItemType(File::ItemsType type)
@@ -149,13 +151,12 @@ void File::setItemType(File::ItemsType type)
     if (m_itemsType == type)
         return;
     m_itemsType = type;
-    if (m_itemsType == Normal) {
-        m_itemGroup[Normal]->setVisible(true);
-        m_itemGroup[Raw]->setVisible(false);
-    } else {
-        m_itemGroup[Normal]->setVisible(false);
-        m_itemGroup[Raw]->setVisible(true);
-    }
+
+    m_itemGroup[Normal]->setVisible(false);
+    m_itemGroup[ApPaths]->setVisible(false);
+    m_itemGroup[Components]->setVisible(false);
+
+    m_itemGroup[m_itemsType]->setVisible(true);
 }
 
 void Gerber::File::write(QDataStream& stream) const
@@ -198,9 +199,9 @@ void Gerber::File::createGi()
 
     auto adder = [&](const Path& path) {
         GraphicsItem* item = new AperturePathItem(path, this);
-        item->m_id = rawItemGroup()->size();
+        item->m_id = m_itemGroup[ApPaths]->size();
         item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_itemGroup[Raw]->append(item);
+        m_itemGroup[ApPaths]->append(item);
     };
 
     auto contains = [&](const Path& path) -> bool {
@@ -249,10 +250,19 @@ void Gerber::File::createGi()
         }
     }
 
-    if (m_itemsType == Normal)
-        m_itemGroup[Raw]->setVisible(false);
-    else
-        m_itemGroup[Normal]->setVisible(false);
+    for (const Component& c : m_components) {
+        if (!c.referencePoint.isNull())
+            m_itemGroup[Components]->append(new ComponentItem(c, this));
+    }
+
+    if (m_itemGroup[Components]->size())
+        m_itemsType = Components; ////////////////////////
+
+    m_itemGroup[Normal]->setVisible(false);
+    m_itemGroup[ApPaths]->setVisible(false);
+    m_itemGroup[Components]->setVisible(false);
+
+    m_itemGroup[m_itemsType]->setVisible(true);
 }
 
 QDebug operator<<(QDebug debug, const Gerber::State& state)

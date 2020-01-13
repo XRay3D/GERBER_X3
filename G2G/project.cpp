@@ -233,21 +233,27 @@ bool Project::reload(int id, AbstractFile* file)
     file->m_id = id;
     if (m_files.contains(id)) {
         switch (file->type()) {
-        case FileType::Gerber:
+        case FileType::Gerber: {
+            Gerber::File* f = static_cast<Gerber::File*>(file);
             file->setColor(m_files[id]->color());
-            file->itemGroup()->setBrush(m_files[id]->itemGroup()->brush());
-            file->itemGroup()->addToScene();
-            file->itemGroup()->setZValue(-id);
-            static_cast<Gerber::File*>(file)->rawItemGroup()->setPen(static_cast<Gerber::File*>(m_files[id].data())->rawItemGroup()->pen());
-            static_cast<Gerber::File*>(file)->rawItemGroup()->addToScene();
-            static_cast<Gerber::File*>(file)->rawItemGroup()->setZValue(-id);
-            break;
+            // Normal
+            f->itemGroup(Gerber::File::Normal)->setBrush(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brush());
+            f->itemGroup(Gerber::File::Normal)->addToScene();
+            f->itemGroup(Gerber::File::Normal)->setZValue(-id);
+            // ApPaths
+            f->itemGroup(Gerber::File::ApPaths)->setPen(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::ApPaths)->pen());
+            f->itemGroup(Gerber::File::ApPaths)->addToScene();
+            f->itemGroup(Gerber::File::ApPaths)->setZValue(-id);
+            // Components
+            f->itemGroup(Gerber::File::Components)->addToScene();
+            f->itemGroup(Gerber::File::Components)->setZValue(-id);
+        } break;
         case FileType::Drill:
             static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
-        default:
+        case FileType::GCode:
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;

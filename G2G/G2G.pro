@@ -73,13 +73,14 @@ HEADERS += \
     forms/thermal/thermalnode.h \
     forms/thermal/thermalpreviewitem.h \
     forms/voronoiform.h \
+    gi/aperturepathitem.h \
     gi/bridgeitem.h \
+    gi/componentitem.h \
     gi/drillitem.h \
     gi/gerberitem.h \
     gi/graphicsitem.h \
     gi/itemgroup.h \
     gi/pathitem.h \
-    gi/rawitem.h \
     mainwindow.h \
     openingdialog.h \
     point.h \
@@ -128,13 +129,14 @@ SOURCES += \
     forms/thermal/thermalnode.cpp \
     forms/thermal/thermalpreviewitem.cpp \
     forms/voronoiform.cpp \
+    gi/aperturepathitem.cpp \
     gi/bridgeitem.cpp \
+    gi/componentitem.cpp \
     gi/drillitem.cpp \
     gi/gerberitem.cpp \
     gi/graphicsitem.cpp \
     gi/itemgroup.cpp \
     gi/pathitem.cpp \
-    gi/rawitem.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \

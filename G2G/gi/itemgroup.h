@@ -5,7 +5,8 @@
 #include "gerberitem.h"
 #include "graphicsitem.h"
 #include "pathitem.h"
-#include "rawitem.h"
+#include "aperturepathitem.h"
+#include "componentitem.h"
 
 class ItemGroup : public QList<GraphicsItem*> {
 public:

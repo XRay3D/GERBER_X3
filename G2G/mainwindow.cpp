@@ -90,6 +90,7 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     GCodePropertiesForm(); // init vars;
     QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
+    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
     QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
     QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });

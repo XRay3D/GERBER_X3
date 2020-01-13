@@ -85,11 +85,21 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
             QPainter p(&pixmap);
             p.setBrush(color);
             p.drawRect(3, 3, 15, 15);
-            if (Project::instance()->file<Gerber::File>(m_id)->itemsType() == Gerber::File::Raw) {
+            switch (Project::instance()->file<Gerber::File>(m_id)->itemsType()) {
+            case Gerber::File::ApPaths: {
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
                 p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "A");
+            } break;
+            case Gerber::File::Components: {
+                QFont f;
+                f.setBold(true);
+                p.setFont(f);
+                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "C");
+            } break;
+            case Gerber::File::Normal:
+                break;
             }
             return pixmap;
         }

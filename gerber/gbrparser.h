@@ -57,9 +57,9 @@ private:
     int m_goId = 0;
 
     StepRepeatStr m_stepRepeat;
-    QMap<QString, GraphicsObject> ccc;
+    QMap<QString, Component> components;
     QString refDes;
-    int aperFunction = 0;
+    int aperFunction = -1;
     QMap<int, int> apFunctionMap;
     //Attributes att;
 
