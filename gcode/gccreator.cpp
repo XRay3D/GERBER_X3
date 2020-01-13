@@ -174,12 +174,8 @@ void Creator::createGc()
     } catch (Cancel&) {
         //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
-    } catch (...) {
-        //setlocale(LC_ALL, "ja_JP.utf8"); // printf needs CTYPE for multibyte output
-        const size_t errmsglen = 1024;
-        char errmsg[errmsglen];
-        strerror_s(errmsg, errmsglen, errno);
-        qWarning() << "Creator::createGc() exeption:" << errmsg << t.elapsed();
+    } catch (std::exception e) {
+        qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
     }
 }
 
