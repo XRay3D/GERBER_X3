@@ -309,8 +309,6 @@ void ToolEditForm::on_pbApply_clicked()
         ui->dsbxDiameter->flicker();
         ui->dsbxFeedRate->flicker();
         ui->dsbxOneTurnCut->flicker();
-        ui->dsbxPassDepth->flicker();
-        ui->dsbxPlungeRate->flicker();
         ui->dsbxSpindleSpeed->flicker();
         ui->dsbxStepover->flicker();
         break;
