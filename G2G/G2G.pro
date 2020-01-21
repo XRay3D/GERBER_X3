@@ -72,6 +72,7 @@ HEADERS += \
     forms/thermal/thermalmodel.h \
     forms/thermal/thermalnode.h \
     forms/thermal/thermalpreviewitem.h \
+    forms/toolname.h \
     forms/voronoiform.h \
     gi/aperturepathitem.h \
     gi/bridgeitem.h \
@@ -128,6 +129,7 @@ SOURCES += \
     forms/thermal/thermalmodel.cpp \
     forms/thermal/thermalnode.cpp \
     forms/thermal/thermalpreviewitem.cpp \
+    forms/toolname.cpp \
     forms/voronoiform.cpp \
     gi/aperturepathitem.cpp \
     gi/bridgeitem.cpp \

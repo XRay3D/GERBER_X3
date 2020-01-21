@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>238</width>
-    <height>308</height>
+    <width>246</width>
+    <height>311</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -100,16 +100,6 @@
    </item>
    <item row="1" column="1">
     <widget class="DepthForm" name="dsbxDepth" native="true"/>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="lblToolName">
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
    </item>
    <item row="3" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -293,6 +283,9 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="1">
+    <widget class="ToolName" name="toolName" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -305,6 +298,12 @@
    <class>DepthForm</class>
    <extends>QWidget</extends>
    <header>forms/depthform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ToolName</class>
+   <extends>QWidget</extends>
+   <header>forms/toolname.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

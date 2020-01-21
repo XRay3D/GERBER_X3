@@ -31,6 +31,7 @@ private:
     int type = 0;
     void updatePixmap();
     void updateArea();
+    void rb_clicked();
 
     // QWidget interface
 protected:
