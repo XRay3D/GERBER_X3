@@ -107,16 +107,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="lblToolName">
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -354,6 +344,9 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="1">
+    <widget class="ToolName" name="toolName" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -366,6 +359,12 @@
    <class>DepthForm</class>
    <extends>QWidget</extends>
    <header>forms/depthform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ToolName</class>
+   <extends>QWidget</extends>
+   <header>toolname.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

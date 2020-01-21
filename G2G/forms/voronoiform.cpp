@@ -19,7 +19,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 {
     ui->setupUi(this);
 
-    ui->lblToolName->setText(tool.name());
+    ui->toolName->setTool(tool);
 
     updateName();
 
@@ -65,10 +65,10 @@ VoronoiForm::~VoronoiForm()
 
 void VoronoiForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
+    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
     if (tdb.exec()) {
         tool = tdb.tool();
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
     }
 }
@@ -80,7 +80,7 @@ void VoronoiForm::on_pbEdit_clicked()
     if (d.exec()) {
         tool = d.tool();
         tool.setId(-1);
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
     }
 }

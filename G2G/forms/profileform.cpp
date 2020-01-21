@@ -22,7 +22,7 @@ ProfileForm::ProfileForm(QWidget* parent)
 {
     ui->setupUi(this);
 
-    ui->lblToolName->setText(tool.name());
+    ui->toolName->setTool(tool);
 
     auto rb_clicked = [&] {
         if (ui->rbOn->isChecked())
@@ -97,10 +97,10 @@ ProfileForm::~ProfileForm()
 
 void ProfileForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
+    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
     if (tdb.exec()) {
         tool = tdb.tool();
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
     }
 }
@@ -112,7 +112,7 @@ void ProfileForm::on_pbEdit_clicked()
     if (d.exec()) {
         tool = d.tool();
         tool.setId(-1);
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
     }
 }

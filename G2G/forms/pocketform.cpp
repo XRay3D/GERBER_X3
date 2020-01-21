@@ -25,65 +25,16 @@ PocketForm::PocketForm(QWidget* parent)
     , ui(new Ui::PocketForm)
 {
     ui->setupUi(this);
-    ui->lblToolName->setText(tool.name());
-    ui->lblToolName_2->setText(tool2.name());
+    ui->toolName->setTool(tool);
+    ui->toolName_2->setTool(tool2);
 
-    auto rb_clicked = [this] {
-        if (ui->rbOutside->isChecked())
-            side = GCode::Outer;
-        else if (ui->rbInside->isChecked())
-            side = GCode::Inner;
-
-        if (ui->rbOffset->isChecked()) {
-            type = Offset;
-        } else if (ui->rbRaster->isChecked()) {
-            type = Raster;
-            ui->chbxUseTwoTools->setChecked(false);
-        }
-
-        if (ui->rbClimb->isChecked())
-            direction = GCode::Climb;
-        else if (ui->rbConventional->isChecked())
-            direction = GCode::Conventional;
-        {
-            ui->cbxPass->setVisible(ui->rbRaster->isChecked());
-            ui->labelPass->setVisible(ui->rbRaster->isChecked());
-            ui->dsbxAngle->setVisible(ui->rbRaster->isChecked());
-            ui->labelAngle->setVisible(ui->rbRaster->isChecked());
-        }
-        {
-            ui->chbxUseTwoTools->setVisible(!ui->rbRaster->isChecked());
-            ui->sbxSteps->setVisible(!ui->rbRaster->isChecked());
-            ui->labelSteps->setVisible(!ui->rbRaster->isChecked());
-        }
-        {
-            const bool checked = ui->chbxUseTwoTools->isChecked();
-            ui->chbxUseTwoTools->setChecked(checked);
-
-            ui->labelSteps->setVisible(!checked && type != Raster);
-            ui->sbxSteps->setVisible(!checked && type != Raster);
-
-            ui->dsbxMinArea->setVisible(checked);
-            ui->labelMinArea->setVisible(checked);
-
-            ui->labelToolName2->setVisible(checked);
-            ui->lblToolName_2->setVisible(checked);
-
-            ui->pbEdit_2->setVisible(checked);
-            ui->pbSelect_2->setVisible(checked);
-        }
-
-        updateName();
-        updatePixmap();
-    };
-
-    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOffset, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
-    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbOffset, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbRaster, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, this, &PocketForm::rb_clicked);
 
     QSettings settings;
     settings.beginGroup("PocketForm");
@@ -135,19 +86,20 @@ PocketForm::~PocketForm()
 
 void PocketForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
+    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
     if (tdb.exec()) {
         //        tool = tdb.tool();
-        //        ui->lblToolName->setText(tool.name);
+        //        ui->toolName->setText(tool.name);
         //        updateName();
         Tool mpTool(tdb.tool());
         if (ui->chbxUseTwoTools->isChecked() && tool2.id() > -1 && tool2.diameter() <= mpTool.diameter()) {
             QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
         } else {
             tool = mpTool;
-            ui->lblToolName->setText(tool.name());
+            ui->toolName->setTool(tool);
             updateArea();
         }
+        rb_clicked();
     }
 }
 void PocketForm::on_pbSelect_2_clicked()
@@ -159,7 +111,7 @@ void PocketForm::on_pbSelect_2_clicked()
             QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
         } else {
             tool2 = mpTool;
-            ui->lblToolName_2->setText(tool2.name());
+            ui->toolName_2->setTool(tool2);
         }
     }
 }
@@ -176,7 +128,7 @@ void PocketForm::on_pbEdit_clicked()
         updateArea();
         tool = d.tool();
         tool.setId(-1);
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
     }
 }
@@ -192,7 +144,7 @@ void PocketForm::on_pbEdit_2_clicked()
         }
         tool2 = d.tool();
         tool.setId(-1);
-        ui->lblToolName_2->setText(tool2.name());
+        ui->toolName_2->setTool(tool2);
         updateName();
     }
 }
@@ -322,6 +274,62 @@ void PocketForm::updateArea()
 {
     //    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
     ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
+}
+
+void PocketForm::rb_clicked()
+{
+    const bool rasterIsChecked = ui->rbRaster->isChecked();
+
+    if (ui->rbOutside->isChecked())
+        side = GCode::Outer;
+    else if (ui->rbInside->isChecked())
+        side = GCode::Inner;
+
+    if (ui->rbOffset->isChecked()) {
+        type = Offset;
+    } else if (rasterIsChecked) {
+        type = Raster;
+        ui->chbxUseTwoTools->setChecked(false);
+    }
+
+    if (tool.type() == Tool::Laser)
+        ui->chbxUseTwoTools->setChecked(false);
+
+    if (ui->rbClimb->isChecked())
+        direction = GCode::Climb;
+    else if (ui->rbConventional->isChecked())
+        direction = GCode::Conventional;
+
+    {
+        ui->cbxPass->setVisible(rasterIsChecked);
+        ui->labelPass->setVisible(rasterIsChecked);
+        ui->dsbxAngle->setVisible(rasterIsChecked);
+        ui->labelAngle->setVisible(rasterIsChecked);
+    }
+    {
+        ui->chbxUseTwoTools->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
+        ui->sbxSteps->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
+        ui->labelSteps->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
+    }
+    {
+        const bool checked = ui->chbxUseTwoTools->isChecked();
+        ui->chbxUseTwoTools->setChecked(checked);
+
+        ui->labelSteps->setVisible(!checked && type != Raster);
+        ui->sbxSteps->setVisible(!checked && type != Raster);
+
+        ui->dsbxMinArea->setVisible(checked);
+        ui->labelMinArea->setVisible(checked);
+
+        ui->labelToolName2->setVisible(checked);
+        ui->toolName_2->setVisible(checked);
+
+        ui->pbEdit_2->setVisible(checked);
+        ui->pbSelect_2->setVisible(checked);
+    }
+
+    updateName();
+    updatePixmap();
 }
 
 void PocketForm::resizeEvent(QResizeEvent* event)

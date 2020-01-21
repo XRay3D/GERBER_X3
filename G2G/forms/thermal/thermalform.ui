@@ -221,22 +221,15 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="lblToolName">
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="0" colspan="2">
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="ToolName" name="toolName" native="true"/>
    </item>
   </layout>
  </widget>
@@ -245,6 +238,12 @@
    <class>DepthForm</class>
    <extends>QWidget</extends>
    <header>forms/depthform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ToolName</class>
+   <extends>QWidget</extends>
+   <header>forms/toolname.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

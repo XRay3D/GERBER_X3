@@ -67,7 +67,7 @@ ThermalForm::ThermalForm(QWidget* parent)
 
     ui->treeView->setIconSize(QSize(Size, Size));
 
-    ui->lblToolName->setText(tool.name());
+    ui->toolName->setTool(tool);
 
     updateName();
 
@@ -148,10 +148,10 @@ bool ThermalForm::canToShow()
 
 void ThermalForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
+    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving , Tool::Laser});
     if (tdb.exec()) {
         tool = tdb.tool();
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
         redraw();
     }
@@ -164,7 +164,7 @@ void ThermalForm::on_pbEdit_clicked()
     if (d.exec()) {
         tool = d.tool();
         tool.setId(-1);
-        ui->lblToolName->setText(tool.name());
+        ui->toolName->setTool(tool);
         updateName();
         redraw();
     }
