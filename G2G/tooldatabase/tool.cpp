@@ -247,6 +247,8 @@ QIcon Tool::icon() const
         return QIcon::fromTheme("endmill");
     case Tool::Engraving:
         return QIcon::fromTheme("engraving");
+    case Tool::Laser:
+        return QIcon::fromTheme("laser");
     default:
         return QIcon();
     }

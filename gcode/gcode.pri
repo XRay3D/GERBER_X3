@@ -18,7 +18,7 @@ contains(QT_ARCH, i386) {
     msvc* {
         LIBS += \
             -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \
-            -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libgmp-10 \
+            -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libgmp-10
         INCLUDEPATH += C:/local/boost_1_71_0
         INCLUDEPATH += C:/dev/CGAL-5.0/include
         INCLUDEPATH += C:/dev/CGAL-5.0/auxiliary/gmp/include
