@@ -421,7 +421,7 @@ void DrillForm::on_pbCreate_clicked()
                         }
                         break;
                     case GCode::Drill:
-                        if (ToolHolder::tools[toolId].type() != Tool::Engraving) {
+                        if (ToolHolder::tools[toolId].type() != Tool::Engraving || ToolHolder::tools[toolId].type() != Tool::Laser) {
                             pathsMap[toolId].drillPath.append(item->pos());
                             model->setCreate(row, false);
                         }
@@ -538,7 +538,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
         tools = model->isSlot(current.row())
             ? QVector<Tool::Type>{ Tool::EndMill }
             : ((m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
+                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
                       : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
@@ -598,9 +598,9 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
         if (fl)
             tools = QVector<Tool::Type>{ Tool::EndMill };
         else
-            tools = (m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
-                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill };
+            tools = (m_worckType == GCode::Drill)
+                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }
+                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {

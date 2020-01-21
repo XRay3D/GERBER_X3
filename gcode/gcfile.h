@@ -24,11 +24,13 @@ public:
 private:
     static QString lastDir;
     void saveDrill(const QPointF& offset);
-    void savePocket(const QPointF &offset);
+    void savePocket(const QPointF& offset);
     void saveProfile(const QPointF& offset);
 
     QVector<QVector<QPolygonF>> pss(const QPointF& offset);
     QVector<QPolygonF> ps(const QPointF& offset);
+
+    static const QList<QChar> cl;
 
     QVector<double> getDepths();
 

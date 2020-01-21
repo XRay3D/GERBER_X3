@@ -23,6 +23,12 @@ public:
     void setItem(ToolItem* item);
     void setTool(const Tool& tool);
     void setDialog();
+    enum Feeds {
+        mm_sec,
+        mm_min,
+        cm_min,
+        m_min
+    };
 
 public slots:
     void on_pbApply_clicked();

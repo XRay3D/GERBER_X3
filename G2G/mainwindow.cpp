@@ -84,16 +84,19 @@ MainWindow::MainWindow(QWidget* parent)
                       "subcontrol-position: top center; }" /* position at the top center */
         );
     }
-
     ToolHolder::readTools();
     setCurrentFile(QString());
     readSettings();
     GCodePropertiesForm(); // init vars;
     QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
-    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
-    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
-    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
-    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
+    //    QTimer::singleShot(100, [this] {
+    //        ToolDatabase tdb(this, {});
+    //        tdb.exec();
+    //    });
+    //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
+    //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
+    //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
+    //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     self = this;
 }
 
@@ -110,8 +113,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     writeSettings();
     event->accept();
     return;
-#endif
-#ifndef QT_DEBUG
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
         writeSettings();
         dockWidget->close();
@@ -119,6 +120,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         FileModel::closeProject();
         event->accept();
     }
+#else
     if (maybeSave()) {
         writeSettings();
         dockWidget->close();
@@ -204,10 +206,7 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
     // Save As
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"),
-        tr("Save project &As..."),
-        this,
-        &MainWindow::saveAs);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
@@ -328,7 +327,7 @@ void MainWindow::createActionsSDS()
     // if (item->isSelected() && item->type() != DrillItemType)
     // list << item;
     // if (list.size() && QMessageBox::question(this,
-    //"", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+    // "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
     // for (QGraphicsItem* item : list)
     // if (item->isSelected() && item->type() != DrillItemType)
     // delete item;
@@ -516,11 +515,9 @@ void MainWindow::readSettings()
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
-
     lastPath = settings.value("lastPath").toString();
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
-        m_project->setName(settings.value("project").toString());
-        loadFile(m_project->name());
+        loadFile(settings.value("project").toString());
     }
     settings.endGroup();
 }

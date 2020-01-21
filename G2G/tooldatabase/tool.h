@@ -17,7 +17,8 @@ public:
         Drill,
         EndMill,
         Engraving,
-        Group
+        Laser,
+        Group = 100
     };
 
     enum {
@@ -30,7 +31,7 @@ public:
         SpindleSpeed,
         Stepover,
         OneTurnCutPercent,
-        StepoverPercent,
+        StepoverPercent
     };
 
     // name
