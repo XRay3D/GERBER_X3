@@ -408,12 +408,16 @@ void File::statFile()
     QString str(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
     str.replace(QRegExp("S\\?"), formated({ s(static_cast<int>(m_tool.spindleSpeed())) }));
     sl.append(str);
-    sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+    if (m_tool.type() != Tool::Laser) {
+        sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+    }
 }
 
 void File::endFile()
 {
-    sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+    if (m_tool.type() != Tool::Laser) {
+        sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+    }
     QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
     sl.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
     sl.append(Settings::endGCode());

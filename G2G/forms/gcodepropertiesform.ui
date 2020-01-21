@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
-    <height>1110</height>
+    <width>250</width>
+    <height>582</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -554,7 +554,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Glue (for &quot;raw&quot;)</string>
+         <string>Glue (for Aperture paths)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
