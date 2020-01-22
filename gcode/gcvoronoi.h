@@ -58,6 +58,7 @@ private:
     void clean(Path& path);
     void cgalVoronoi();
     void jcVoronoi();
+    void boostVoronoi();
     Paths toPath(const Pairs& pairs);
 };
 }
