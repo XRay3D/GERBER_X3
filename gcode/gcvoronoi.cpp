@@ -38,7 +38,124 @@ using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
-    return IntPoint{ static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
+}
+
+///////////////////////////////////
+
+#include <cstdio>
+#include <vector>
+
+#include <boost/polygon/voronoi.hpp>
+using boost::polygon::high;
+using boost::polygon::low;
+using boost::polygon::voronoi_builder;
+using boost::polygon::voronoi_diagram;
+using boost::polygon::x;
+using boost::polygon::y;
+
+//#include "voronoi_visual_utils.hpp"
+
+struct Segment {
+    IntPoint p0;
+    IntPoint p1;
+    Segment(cInt x1, cInt y1, cInt x2, cInt y2)
+        : p0(x1, y1)
+        , p1(x2, y2)
+    {
+    }
+    Segment(const IntPoint& p0_, const IntPoint& p1_)
+        : p0(p0_)
+        , p1(p1_)
+    {
+    }
+};
+
+namespace boost {
+namespace polygon {
+
+    template <>
+    struct geometry_concept<IntPoint> {
+        typedef point_concept type;
+    };
+
+    template <>
+    struct point_traits<IntPoint> {
+        typedef int coordinate_type;
+
+        static inline coordinate_type get(
+            const IntPoint& point, orientation_2d orient)
+        {
+            return (orient == HORIZONTAL) ? point.X : point.Y;
+        }
+    };
+
+    template <>
+    struct geometry_concept<Segment> {
+        typedef segment_concept type;
+    };
+
+    template <>
+    struct segment_traits<Segment> {
+        typedef int coordinate_type;
+        typedef IntPoint point_type;
+
+        static inline point_type get(const Segment& segment, direction_1d dir)
+        {
+            return dir.to_int() ? segment.p1 : segment.p0;
+        }
+    };
+} // polygon
+} // boost
+
+// Traversing Voronoi edges using edge iterator.
+int iterate_primary_edges1(const voronoi_diagram<double>& vd)
+{
+    int result = 0;
+    for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin();
+         it != vd.edges().end(); ++it) {
+        if (it->is_primary())
+            ++result;
+    }
+    return result;
+}
+
+// Traversing Voronoi edges using cell iterator.
+int iterate_primary_edges2(const voronoi_diagram<double>& vd)
+{
+    int result = 0;
+    for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
+         it != vd.cells().end(); ++it) {
+        const voronoi_diagram<double>::cell_type& cell = *it;
+        const voronoi_diagram<double>::edge_type* edge = cell.incident_edge();
+        // This is convenient way to iterate edges around Voronoi cell.
+        do {
+            if (edge->is_primary())
+                ++result;
+            edge = edge->next();
+        } while (edge != cell.incident_edge());
+    }
+    return result;
+}
+
+// Traversing Voronoi edges using vertex iterator.
+// As opposite to the above two functions this one will not iterate through
+// edges without finite endpoints and will iterate only once through edges
+// with single finite endpoint.
+int iterate_primary_edges3(const voronoi_diagram<double>& vd)
+{
+    int result = 0;
+    for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
+        const voronoi_diagram<double>::vertex_type& vertex = *it;
+        const voronoi_diagram<double>::edge_type* edge = vertex.incident_edge();
+        // This is convenient way to iterate edges around Voronoi vertex.
+        do {
+            if (edge->is_primary())
+                ++result;
+            edge = edge->rot_next();
+        } while (edge != vertex.incident_edge());
+    }
+    return result;
 }
 #endif
 inline uint qHash(const IntPoint& key, uint /*seed*/ = 0)
@@ -72,10 +189,11 @@ void VoronoiCreator::createVoronoi()
         jcVoronoi();
         break;
     case 1:
-        //        cgalVoronoi();
-        //        break;
+        cgalVoronoi();
+        break;
     case 2:
         boostVoronoi();
+        /**************/ return;
         break;
     }
 
@@ -265,11 +383,11 @@ void VoronoiCreator::cgalVoronoi()
             const int id = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
             CGAL::Object o = sdg.primal(e);
             /*  */ if (SDG2::Geom_traits::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
-                pathPairs[id].append(Path{ toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
+                pathPairs[id].append(Path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
             } else if (SDG2::Geom_traits::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
-                pathPairs[id].append(Path{ toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
+                pathPairs[id].append(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
             } else if (SDG2::Geom_traits::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                pathPairs[id].append(Path{ toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
+                pathPairs[id].append(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
             } else if (CGAL::Parabola_segment_2<Gt> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 std::vector<SDG2::Point_2> points;
                 cgalParabola.generate_points(points, 5);
@@ -287,7 +405,7 @@ void VoronoiCreator::cgalVoronoi()
         }
     }
     const cInt fo = m_gcp.dParam[FrameOffset].toDouble() * uScale;
-    Path frame{
+    Path frame {
         { minX - fo, minY - fo },
         { minX - fo, maxY + fo },
         { maxX + fo, maxY + fo },
@@ -375,7 +493,7 @@ void VoronoiCreator::jcVoronoi()
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair{ toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
@@ -397,120 +515,6 @@ void VoronoiCreator::jcVoronoi()
             m_returnPs.remove(i--);
     }
 }
-
-#ifdef _USE_CGAL_
-
-#include <cstdio>
-#include <vector>
-
-#include <boost/polygon/voronoi.hpp>
-using boost::polygon::high;
-using boost::polygon::low;
-using boost::polygon::voronoi_builder;
-using boost::polygon::voronoi_diagram;
-using boost::polygon::x;
-using boost::polygon::y;
-
-//#include "voronoi_visual_utils.hpp"
-
-struct Segment {
-    IntPoint p0;
-    IntPoint p1;
-    Segment(cInt x1, cInt y1, cInt x2, cInt y2)
-        : p0(x1, y1)
-        , p1(x2, y2)
-    {
-    }
-};
-
-namespace boost {
-    namespace polygon {
-
-        template <>
-        struct geometry_concept<IntPoint> {
-            typedef point_concept type;
-        };
-
-        template <>
-        struct point_traits<IntPoint> {
-            typedef int coordinate_type;
-
-            static inline coordinate_type get(
-                const IntPoint& point, orientation_2d orient)
-            {
-                return (orient == HORIZONTAL) ? point.X : point.Y;
-            }
-        };
-
-        template <>
-        struct geometry_concept<Segment> {
-            typedef segment_concept type;
-        };
-
-        template <>
-        struct segment_traits<Segment> {
-            typedef int coordinate_type;
-            typedef IntPoint point_type;
-
-            static inline point_type get(const Segment& segment, direction_1d dir)
-            {
-                return dir.to_int() ? segment.p1 : segment.p0;
-            }
-        };
-    } // polygon
-} // boost
-
-// Traversing Voronoi edges using edge iterator.
-int iterate_primary_edges1(const voronoi_diagram<double>& vd)
-{
-    int result = 0;
-    for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin();
-         it != vd.edges().end(); ++it) {
-        if (it->is_primary())
-            ++result;
-    }
-    return result;
-}
-
-// Traversing Voronoi edges using cell iterator.
-int iterate_primary_edges2(const voronoi_diagram<double>& vd)
-{
-    int result = 0;
-    for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
-         it != vd.cells().end(); ++it) {
-        const voronoi_diagram<double>::cell_type& cell = *it;
-        const voronoi_diagram<double>::edge_type* edge = cell.incident_edge();
-        // This is convenient way to iterate edges around Voronoi cell.
-        do {
-            if (edge->is_primary())
-                ++result;
-            edge = edge->next();
-        } while (edge != cell.incident_edge());
-    }
-    return result;
-}
-
-// Traversing Voronoi edges using vertex iterator.
-// As opposite to the above two functions this one will not iterate through
-// edges without finite endpoints and will iterate only once through edges
-// with single finite endpoint.
-int iterate_primary_edges3(const voronoi_diagram<double>& vd)
-{
-    int result = 0;
-    for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
-        const voronoi_diagram<double>::vertex_type& vertex = *it;
-        const voronoi_diagram<double>::edge_type* edge = vertex.incident_edge();
-        // This is convenient way to iterate edges around Voronoi vertex.
-        do {
-            if (edge->is_primary())
-                ++result;
-            edge = edge->rot_next();
-        } while (edge != vertex.incident_edge());
-    }
-    return result;
-}
-
-#endif
 
 void VoronoiCreator::boostVoronoi()
 {
@@ -535,9 +539,8 @@ void VoronoiCreator::boostVoronoi()
         for (const Path& path : paths) {
             for (int i = 0; i < path.size(); ++i) {
                 const IntPoint& point = path[i];
-
-                const SDG2::Site_2 site = !i ? points.push_back({ { path.last().X, path.last().Y }, { point.X, point.Y } })
-                                             : points.push_back({ { path[i - 1].X, path[i - 1].Y }, { point.X, point.Y } });
+                !i ? segments.push_back(Segment { path.last(), point })
+                   : segments.push_back(Segment { path[i - 1], point });
                 maxX = std::max(maxX, point.X);
                 maxY = std::max(maxY, point.Y);
                 minX = std::min(minX, point.X);
@@ -549,13 +552,14 @@ void VoronoiCreator::boostVoronoi()
     const cInt kx = (maxX - minX) * 2;
     const cInt ky = (maxY - minY) * 2;
 
-    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { minX - kx, minY - ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
+    segments.push_back(Segment({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }));
+    segments.push_back(Segment({ maxX + kx, minY - ky }, { minX - kx, minY - ky }));
+    segments.push_back(Segment({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }));
+    segments.push_back(Segment({ minX - kx, minY - ky }, { minX - kx, maxY + ky }));
 
-    Paths segments;
-    segments.reserve(id);
+    Paths segments_;
+
+    segments_.reserve(id);
 
     // Construction of the Voronoi Diagram.
     voronoi_diagram<double> vd;
@@ -588,6 +592,7 @@ void VoronoiCreator::boostVoronoi()
     }
 
     // Linking Voronoi cells with input geometries.
+    QMap<std::size_t, QPair<IntPoint, IntPoint>> m;
     {
         unsigned int cell_index = 0;
         for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
@@ -596,29 +601,37 @@ void VoronoiCreator::boostVoronoi()
                 if (it->source_category() == boost::polygon::SOURCE_CATEGORY_SINGLE_POINT) {
                     std::size_t index = it->source_index();
                     IntPoint p = points[index];
-                    printf("Cell #%u contains a point: (%d, %d).\n",
-                        cell_index, x(p), y(p));
+                    printf("Cell #%u contains a point: (%d, %d).\n", cell_index, x(p), y(p));
                 } else if (it->source_category() == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT) {
                     std::size_t index = it->source_index() - points.size();
                     IntPoint p0 = low(segments[index]);
-                    printf("Cell #%u contains segment start point: (%d, %d).\n",
-                        cell_index, x(p0), y(p0));
+                    printf("Cell #%u contains segment start point: (%d, %d).\n", cell_index, x(p0), y(p0));
+                    m[index].first = p0;
                 } else if (it->source_category() == boost::polygon::SOURCE_CATEGORY_SEGMENT_END_POINT) {
                     std::size_t index = it->source_index() - points.size();
                     IntPoint p1 = high(segments[index]);
-                    printf("Cell #%u contains segment end point: (%d, %d).\n",
-                        cell_index, x(p1), y(p1));
+                    printf("Cell #%u contains segment end point: (%d, %d).\n", cell_index, x(p1), y(p1));
+                    m[index].first = p1;
                 }
             } else {
                 std::size_t index = it->source_index() - points.size();
                 IntPoint p0 = low(segments[index]);
                 IntPoint p1 = high(segments[index]);
-                printf("Cell #%u contains a segment: ((%d, %d), (%d, %d)). \n",
-                    cell_index, x(p0), y(p0), x(p1), y(p1));
+                printf("Cell #%u contains a segment: ((%d, %d), (%d, %d)). \n", cell_index, x(p0), y(p0), x(p1), y(p1));
             }
             ++cell_index;
         }
     }
+
+    for (auto& pair : m) {
+        segments_.append({ pair.first, pair.second });
+    }
+
+    qDebug() << "boostVoronoi" << segments_.size();
+    m_file = new File({ sortBE(segments_) }, Tool {}, 0.0, Voronoi);
+    m_file->setFileName(Tool {}.name());
+    emit fileReady(m_file);
+
 #endif
 }
 
