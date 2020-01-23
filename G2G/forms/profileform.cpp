@@ -18,7 +18,15 @@
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil("ProfileForm", new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)
-
+    , names { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") }
+    , pixmaps {
+        QStringLiteral(":/toolpath/prof_on_climb.svg"),
+        QStringLiteral(":/toolpath/prof_out_climb.svg"),
+        QStringLiteral(":/toolpath/prof_in_climb.svg"),
+        QStringLiteral(":/toolpath/prof_on_conv.svg"),
+        QStringLiteral(":/toolpath/prof_out_conv.svg"),
+        QStringLiteral(":/toolpath/prof_in_conv.svg"),
+    }
 {
     ui->setupUi(this);
 
@@ -191,8 +199,7 @@ void ProfileForm::createFile()
 
 void ProfileForm::updateName()
 {
-    static const QStringList name = { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") };
-    ui->leName->setText(name[side]);
+    ui->leName->setText(names[side]);
     updateBridge();
 }
 
@@ -235,16 +242,8 @@ void ProfileForm::updateBridge()
 
 void ProfileForm::updatePixmap()
 {
-    static const QStringList pixmapList{
-        QStringLiteral(":/toolpath/prof_on_climb.svg"),
-        QStringLiteral(":/toolpath/prof_out_climb.svg"),
-        QStringLiteral(":/toolpath/prof_in_climb.svg"),
-        QStringLiteral(":/toolpath/prof_on_conv.svg"),
-        QStringLiteral(":/toolpath/prof_out_conv.svg"),
-        QStringLiteral(":/toolpath/prof_in_conv.svg"),
-    };
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-    ui->lblPixmap->setPixmap(QIcon(pixmapList[side + direction * 3]).pixmap(QSize(size, size)));
+    ui->lblPixmap->setPixmap(QIcon(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
 }
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }

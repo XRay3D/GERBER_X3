@@ -1,52 +1,49 @@
-#include "pocketform.h"
+#include "pocketoffsetform.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "tooldatabase/tooldatabase.h"
-#include "ui_pocketform.h"
+#include "ui_pocketoffsetform.h"
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QSettings>
 #include <gccreator.h>
 #include <gcfile.h>
-#include <gcpocket.h>
+#include <gcpocketoffset.h>
 #include <myclipper.h>
 #include <scene.h>
 #include <tooldatabase/tooleditdialog.h>
-
-const int QPairID = qRegisterMetaType<QPair<Tool, Tool>>("QPair<Tool,Tool>");
 
 enum {
     Offset,
     Raster,
 };
 
-PocketForm::PocketForm(QWidget* parent)
-    : FormsUtil("PocketForm", new GCode::PocketCreator, parent)
-    , ui(new Ui::PocketForm)
+PocketOffsetForm::PocketOffsetForm(QWidget* parent)
+    : FormsUtil("PocketOffsetForm", new GCode::PocketCreator, parent)
+    , ui(new Ui::PocketOffsetForm)
+    , names { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside") }
+    , pixmaps {
+        QStringLiteral(":/toolpath/pock_offs_climb.svg"),
+        QStringLiteral(":/toolpath/pock_offs_conv.svg"),
+    }
 {
     ui->setupUi(this);
     ui->toolName->setTool(tool);
     ui->toolName_2->setTool(tool2);
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->rbOffset, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->rbRaster, &QRadioButton::clicked, this, &PocketForm::rb_clicked);
-    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, this, &PocketForm::rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
+    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, this, &PocketOffsetForm::rb_clicked);
 
     QSettings settings;
-    settings.beginGroup("PocketForm");
-    ui->cbxPass->setCurrentIndex(settings.value("cbxPass").toInt());
+    settings.beginGroup("PocketOffsetForm");
     ui->chbxUseTwoTools->setChecked(settings.value("chbxUseTwoTools").toBool());
-    ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
     ui->rbClimb->setChecked(settings.value("rbClimb").toBool());
     ui->rbConventional->setChecked(settings.value("rbConventional").toBool());
     ui->rbInside->setChecked(settings.value("rbInside").toBool());
-    ui->rbOffset->setChecked(settings.value("rbOffset").toBool());
     ui->rbOutside->setChecked(settings.value("rbOutside").toBool());
-    ui->rbRaster->setChecked(settings.value("rbRaster").toBool());
     settings.endGroup();
 
     ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
@@ -67,24 +64,20 @@ PocketForm::PocketForm(QWidget* parent)
     parent->setWindowTitle(ui->label->text());
 }
 
-PocketForm::~PocketForm()
+PocketOffsetForm::~PocketOffsetForm()
 {
     QSettings settings;
-    settings.beginGroup("PocketForm");
-    settings.setValue("cbxPass", ui->cbxPass->currentIndex());
+    settings.beginGroup("PocketOffsetForm");
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
-    settings.setValue("dsbxAngle", ui->dsbxAngle->value());
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
     settings.setValue("rbConventional", ui->rbConventional->isChecked());
     settings.setValue("rbInside", ui->rbInside->isChecked());
-    settings.setValue("rbOffset", ui->rbOffset->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
-    settings.setValue("rbRaster", ui->rbRaster->isChecked());
     settings.endGroup();
     delete ui;
 }
 
-void PocketForm::on_pbSelect_clicked()
+void PocketOffsetForm::on_pbSelect_clicked()
 {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
     if (tdb.exec()) {
@@ -102,7 +95,7 @@ void PocketForm::on_pbSelect_clicked()
         rb_clicked();
     }
 }
-void PocketForm::on_pbSelect_2_clicked()
+void PocketOffsetForm::on_pbSelect_2_clicked()
 {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
@@ -116,7 +109,7 @@ void PocketForm::on_pbSelect_2_clicked()
     }
 }
 
-void PocketForm::on_pbEdit_clicked()
+void PocketOffsetForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
     d.setTool(tool);
@@ -133,7 +126,7 @@ void PocketForm::on_pbEdit_clicked()
     }
 }
 
-void PocketForm::on_pbEdit_2_clicked()
+void PocketOffsetForm::on_pbEdit_2_clicked()
 {
     ToolEditDialog d;
     d.setTool(tool2);
@@ -149,19 +142,19 @@ void PocketForm::on_pbEdit_2_clicked()
     }
 }
 
-void PocketForm::on_pbCreate_clicked()
+void PocketOffsetForm::on_pbCreate_clicked()
 {
     createFile();
 }
 
-void PocketForm::on_pbClose_clicked()
+void PocketOffsetForm::on_pbClose_clicked()
 {
     if (parent())
         if (auto* w = dynamic_cast<QWidget*>(parent()); w)
             w->close();
 }
 
-void PocketForm::createFile()
+void PocketOffsetForm::createFile()
 {
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -231,10 +224,7 @@ void PocketForm::createFile()
     gcp.tool.append(tool);
     gcp.tool.append(tool2);
 
-    gcp.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
     gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gcp.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
-    gcp.dParam[GCode::UseRaster] = ui->rbRaster->isChecked();
     gcp.dParam[GCode::Steps] = ui->sbxSteps->value();
     gcp.dParam[GCode::TwoTools] = ui->chbxUseTwoTools->isChecked();
     gcp.dParam[GCode::MinArea] = ui->dsbxMinArea->value();
@@ -247,50 +237,35 @@ void PocketForm::createFile()
     createToolpath();
 }
 
-void PocketForm::on_sbxSteps_valueChanged(int arg1)
+void PocketOffsetForm::on_sbxSteps_valueChanged(int arg1)
 {
     ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
 }
 
-void PocketForm::updateName()
+void PocketOffsetForm::updateName()
 {
-    static const QStringList name = { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside"), tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") };
-    ui->leName->setText(name[side + type * 3]);
+    ui->leName->setText(names[side]);
 }
 
-void PocketForm::updatePixmap()
+void PocketOffsetForm::updatePixmap()
 {
-    static const QStringList pixmapList = {
-        QStringLiteral(":/toolpath/pock_offs_climb.svg"),
-        QStringLiteral(":/toolpath/pock_rast_climb.svg"),
-        QStringLiteral(":/toolpath/pock_offs_conv.svg"),
-        QStringLiteral(":/toolpath/pock_rast_conv.svg"),
-    };
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-    ui->lblPixmap->setPixmap(QIcon(pixmapList[type + direction * 2]).pixmap(QSize(size, size)));
+    ui->lblPixmap->setPixmap(QIcon(pixmaps[direction]).pixmap(QSize(size, size)));
 }
 
-void PocketForm::updateArea()
+void PocketOffsetForm::updateArea()
 {
     //    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
     ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
 }
 
-void PocketForm::rb_clicked()
+void PocketOffsetForm::rb_clicked()
 {
-    const bool rasterIsChecked = ui->rbRaster->isChecked();
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;
     else if (ui->rbInside->isChecked())
         side = GCode::Inner;
-
-    if (ui->rbOffset->isChecked()) {
-        type = Offset;
-    } else if (rasterIsChecked) {
-        type = Raster;
-        ui->chbxUseTwoTools->setChecked(false);
-    }
 
     if (tool.type() == Tool::Laser)
         ui->chbxUseTwoTools->setChecked(false);
@@ -301,22 +276,11 @@ void PocketForm::rb_clicked()
         direction = GCode::Conventional;
 
     {
-        ui->cbxPass->setVisible(rasterIsChecked);
-        ui->labelPass->setVisible(rasterIsChecked);
-        ui->dsbxAngle->setVisible(rasterIsChecked);
-        ui->labelAngle->setVisible(rasterIsChecked);
-    }
-    {
-        ui->chbxUseTwoTools->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
-        ui->sbxSteps->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
-        ui->labelSteps->setVisible(!rasterIsChecked && tool.type() != Tool::Laser);
-    }
-    {
         const bool checked = ui->chbxUseTwoTools->isChecked();
         ui->chbxUseTwoTools->setChecked(checked);
 
-        ui->labelSteps->setVisible(!checked && type != Raster);
-        ui->sbxSteps->setVisible(!checked && type != Raster);
+        ui->labelSteps->setVisible(!checked);
+        ui->sbxSteps->setVisible(!checked);
 
         ui->dsbxMinArea->setVisible(checked);
         ui->labelMinArea->setVisible(checked);
@@ -332,20 +296,20 @@ void PocketForm::rb_clicked()
     updatePixmap();
 }
 
-void PocketForm::resizeEvent(QResizeEvent* event)
+void PocketOffsetForm::resizeEvent(QResizeEvent* event)
 {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void PocketForm::showEvent(QShowEvent* event)
+void PocketOffsetForm::showEvent(QShowEvent* event)
 {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void PocketOffsetForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void PocketForm::editFile(GCode::File* /*file*/)
+void PocketOffsetForm::editFile(GCode::File* /*file*/)
 {
 }

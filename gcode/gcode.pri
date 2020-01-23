@@ -31,7 +31,8 @@ contains(QT_ARCH, i386) {
 HEADERS += \
     $$PWD/gccreator.h \
     $$PWD/gcfile.h \
-    $$PWD/gcpocket.h \
+    $$PWD/gcpocketoffset.h \
+    $$PWD/gcpocketraster.h \
     $$PWD/gcprofile.h \
     $$PWD/gcthermal.h \
     $$PWD/gctypes.h \
@@ -41,7 +42,8 @@ HEADERS += \
 SOURCES += \
     $$PWD/gccreator.cpp \
     $$PWD/gcfile.cpp \
-    $$PWD/gcpocket.cpp \
+    $$PWD/gcpocketoffset.cpp \
+    $$PWD/gcpocketraster.cpp \
     $$PWD/gcprofile.cpp \
     $$PWD/gcthermal.cpp \
     $$PWD/gcvoronoi.cpp \
