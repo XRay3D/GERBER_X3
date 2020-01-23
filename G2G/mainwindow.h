@@ -62,7 +62,7 @@ private:
     Project* m_project;
     bool openFlag;
 
-    QVector<QAction*> toolpathActionList;
+    QMap<int, QAction*> toolpathActionList;
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
 

@@ -12,7 +12,8 @@ enum GCodeType {
     Thermal,
     Drill,
     GCodeProperties,
-    Raster
+    Raster,
+    Laser
 };
 
 enum Code {
@@ -52,6 +53,7 @@ enum Param {
     FileId,
     MinArea,
     FrameOffset,
+    AccDistance
 };
 
 struct GCodeParams {

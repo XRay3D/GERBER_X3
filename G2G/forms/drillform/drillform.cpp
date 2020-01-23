@@ -12,7 +12,7 @@
 #include <QPainter>
 #include <QSettings>
 #include <QTimer>
-#include <gcpocket.h>
+#include <gcpocketoffset.h>
 #include <gcprofile.h>
 #include <gctypes.h>
 #include <graphicsview.h>

@@ -9,7 +9,6 @@ public:
     PocketCreator();
 
 private:
-    void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth, double minArea);
 

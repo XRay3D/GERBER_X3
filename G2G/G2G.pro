@@ -65,7 +65,8 @@ HEADERS += \
     forms/drillform/drillpreviewgi.h \
     forms/formsutil.h \
     forms/gcodepropertiesform.h \
-    forms/pocketform.h \
+    forms/pocketoffsetform.h \
+    forms/pocketrasterform.h \
     forms/profileform.h \
     forms/thermal/thermaldelegate.h \
     forms/thermal/thermalform.h \
@@ -122,7 +123,8 @@ SOURCES += \
     forms/drillform/drillpreviewgi.cpp \
     forms/formsutil.cpp \
     forms/gcodepropertiesform.cpp \
-    forms/pocketform.cpp \
+    forms/pocketoffsetform.cpp \
+    forms/pocketrasterform.cpp \
     forms/profileform.cpp \
     forms/thermal/thermaldelegate.cpp \
     forms/thermal/thermalform.cpp \
@@ -164,7 +166,8 @@ FORMS += \
     colorselector.ui \
     forms/drillform/drillform.ui \
     forms/gcodepropertiesform.ui \
-    forms/pocketform.ui \
+    forms/pocketoffsetform.ui \
+    forms/pocketrasterform.ui \
     forms/profileform.ui \
     forms/thermal/thermalform.ui \
     forms/voronoiform.ui \

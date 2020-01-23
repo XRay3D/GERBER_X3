@@ -1,35 +1,32 @@
-#ifndef PROFILEFORM_H
-#define PROFILEFORM_H
+#ifndef POCKETRASTERFORM_H
+#define POCKETRASTERFORM_H
 
 #include "formsutil.h"
 
 namespace Ui {
-class ProfileForm;
+class PocketRasterForm;
 }
 
-class ProfileForm : public FormsUtil {
+class PocketRasterForm : public FormsUtil {
     Q_OBJECT
 
 public:
-    explicit ProfileForm(QWidget* parent = nullptr);
-    ~ProfileForm() override;
+    explicit PocketRasterForm(QWidget* parent = nullptr);
+    ~PocketRasterForm();
 
 private slots:
     void on_pbSelect_clicked();
     void on_pbEdit_clicked();
     void on_pbCreate_clicked();
     void on_pbClose_clicked();
-    void on_pbAddBridge_clicked();
-    void on_dsbxBridgeLenght_valueChanged(double arg1);
-    void on_dsbxDepth_valueChanged(double arg1);
     void on_leName_textChanged(const QString& arg1);
 
 private:
-    Ui::ProfileForm* ui;
-    double m_size = 0.0;
-    double m_lenght = 0.0;
-    void updateBridge();
+    Ui::PocketRasterForm* ui;
+
+    int direction = 0;
     void updatePixmap();
+    void rb_clicked();
     const QStringList names;
     const QStringList pixmaps;
     // QWidget interface
@@ -43,7 +40,7 @@ protected:
     void updateName() override;
 
 public:
-    virtual void editFile(GCode::File* file) override;
+    void editFile(GCode::File* file) override;
 };
 
-#endif // PROFILEFORM_H
+#endif // POCKETRASTERFORM_H
