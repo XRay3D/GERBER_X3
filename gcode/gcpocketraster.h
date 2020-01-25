@@ -15,6 +15,7 @@ protected:
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
+    //    Paths& sortBE(Paths& src);
 };
 }
 #endif // LASERCREATOR_H

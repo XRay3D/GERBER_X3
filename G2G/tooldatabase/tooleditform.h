@@ -3,6 +3,7 @@
 
 #include "tool.h"
 
+#include <QDoubleSpinBox>
 #include <QWidget>
 
 namespace Ui {
@@ -40,13 +41,31 @@ signals:
 private:
     Ui::ToolEditForm* ui;
 
+    struct State {
+        QMap<QDoubleSpinBox*, double> min;
+        QMap<QDoubleSpinBox*, double> max;
+        QMap<QDoubleSpinBox*, double> val;
+        void save(QDoubleSpinBox* dsbx)
+        {
+            min[dsbx] = dsbx->minimum();
+            max[dsbx] = dsbx->maximum();
+            val[dsbx] = dsbx->value();
+        }
+        void restore(QDoubleSpinBox* dsbx)
+        {
+            dsbx->setRange(min[dsbx], max[dsbx]);
+            dsbx->setValue(val[dsbx]);
+        }
+    };
+
+    QMap<int, State> saveRestoreMap;
+
     void valueChangedSlot(double value);
 
     ToolItem* m_item = nullptr;
     Tool m_tool;
     double m_feed = 1.0;
     bool m_dialog = true;
-    double m_angle = 0.0;
 
     void updateName();
     void setChanged(bool fl = true);

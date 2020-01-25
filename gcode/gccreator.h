@@ -34,10 +34,13 @@ public:
     void addPaths(const Paths& paths);
 
     Pathss& groupedPaths(Grouping group, cInt k = uScale);
+
     static Paths& sortB(Paths& src);
     static Paths& sortBE(Paths& src);
+
     static Pathss& sortB(Pathss& src);
     static Pathss& sortBE(Pathss& src);
+
     void createGc();
     void createGc(const GCodeParams& gcp);
 

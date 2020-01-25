@@ -2,9 +2,10 @@
 #define DOUBLESPINBOX_H
 
 #include <QDoubleSpinBox>
+#include <QStack>
 
 class DoubleSpinBox : public QDoubleSpinBox {
-//    Q_OBJECT
+    //    Q_OBJECT
 public:
     explicit DoubleSpinBox(QWidget* parent = nullptr);
     void setRange(double min, double max);

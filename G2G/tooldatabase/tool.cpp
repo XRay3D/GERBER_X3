@@ -225,13 +225,13 @@ bool Tool::isValid()
     do {
         if (qFuzzyIsNull(m_diameter))
             break;
-        if (qFuzzyIsNull(m_passDepth))
+        if (m_type != Laser && qFuzzyIsNull(m_passDepth))
             break;
-        if (type() != Drill && qFuzzyIsNull(m_feedRate))
+        if (m_type != Drill && qFuzzyIsNull(m_feedRate))
             break;
-        if (type() != Drill && qFuzzyIsNull(m_stepover))
+        if (m_type != Drill && qFuzzyIsNull(m_stepover))
             break;
-        if (qFuzzyIsNull(m_plungeRate))
+        if (m_type != Laser && qFuzzyIsNull(m_plungeRate))
             break;
         return true;
     } while (0);

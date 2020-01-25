@@ -14,7 +14,7 @@
 
 namespace GCode {
 
-const QList<QChar> File::cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
+const QList<QChar> File::cl { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 QString File::lastDir;
 /*
   G0X0Y0S1500M03
@@ -206,6 +206,51 @@ void File::saveProfile(const QPointF& offset)
     }
 }
 
+void File::saveLaser(const QPointF& offset)
+{
+    QVector<QVector<QPolygonF>> pathss(pss(offset));
+    const QVector<double> depths(getDepths());
+    int i = 0;
+    sl.append(formated({ g0(), x(pathss.first().first().first().x()), y(pathss.first().first().first().y()), z(0.0) }));
+    for (QPolygonF& path : pathss.first()) {
+        if (i++ % 2) { //laser on
+            sl.append("M03");
+            FormatFlags[AlwaysS] = true;
+            sl.append(formated({ g1(), s(static_cast<int>(m_tool.spindleSpeed())) }));
+            bool skip = true;
+            for (QPointF& point : path) {
+                if (skip)
+                    skip = false;
+                else
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+            }
+            sl.append("M05");
+        } else { //laser off
+            bool skip = true;
+            for (QPointF& point : path) {
+                if (skip)
+                    skip = false;
+                else
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+            }
+        }
+    }
+    qDebug() << "sl";
+    //    if (pathss.size() > 1) {
+    //        for (QPolygonF& path : pathss.last()) {
+    //            startPath(path.first());
+    //            bool skip = true;
+    //            for (QPointF& point : path) {
+    //                if (skip)
+    //                    skip = false;
+    //                else
+    //                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+    //            }
+    //            endPath();
+    //        }
+    //    }
+}
+
 QVector<QVector<QPolygonF>> File::pss(const QPointF& offset)
 {
     QVector<QVector<QPolygonF>> pathss;
@@ -282,7 +327,7 @@ QVector<double> File::getDepths()
 void File::initSave()
 {
     sl.clear();
-    static const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    static const QList<QChar> cl { 'G', 'X', 'Y', 'Z', 'F', 'S' };
     memset(FormatFlags, 0, sizeof(bool) * Size);
     //    for (bool& fl : FormatFlags) {
     //        fl = false;
@@ -327,6 +372,9 @@ void File::genGcode()
             case Drill:
                 saveDrill(offset);
                 break;
+            case Laser:
+                saveLaser(offset);
+                break;
             default:
                 break;
             }
@@ -345,7 +393,7 @@ void File::addInfo(bool fl)
         sl.append(QString(";\tName: %1").arg(shortName()));
         sl.append(QString(";\tTool: %1").arg(m_tool.name()));
         sl.append(QString(";\tDepth: %1").arg(m_depth));
-        sl.append(QString(";\tSide: %1").arg(QStringList{ "Top", "Bottom" }[side()]));
+        sl.append(QString(";\tSide: %1").arg(QStringList { "Top", "Bottom" }[side()]));
     }
 }
 
@@ -576,6 +624,39 @@ void File::createGiRaster()
     itemGroup()->append(item);
 }
 
+void File::createGiLaser()
+{
+    GraphicsItem* item;
+    Paths paths;
+    paths.reserve(m_toolPathss.first().size() / 2 + 1);
+    m_g0path.reserve(paths.size());
+    for (int i = 0; i < m_toolPathss.first().size(); ++i) {
+        if (i % 2)
+            paths.append(m_toolPathss.first()[i]);
+        else
+            m_g0path.append(m_toolPathss.first()[i]);
+    }
+    if (m_toolPathss.size() > 1) {
+        paths.append(m_toolPathss[1]);
+        m_g0path.append({ m_toolPathss[0].last().last(), m_toolPathss[1].first().first() });
+        for (int i = 0; i < m_toolPathss[1].count() - 1; ++i)
+            m_g0path.append({ m_toolPathss[1][i].last(), m_toolPathss[1][i + 1].first() });
+    }
+
+    item = new PathItem(paths, this);
+    item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    item->setPenColor(Settings::color(Colors::CutArea));
+    itemGroup()->append(item);
+
+    item = new PathItem(paths, this);
+    item->setPenColor(Settings::color(Colors::ToolPath));
+    itemGroup()->append(item);
+
+    item = new PathItem(m_g0path);
+    item->setPenColor(Settings::color(Colors::G0));
+    itemGroup()->append(item);
+}
+
 void File::write(QDataStream& stream) const
 {
     stream << m_pocketPaths;
@@ -623,6 +704,9 @@ void File::createGi()
         break;
     case Drill:
         createGiDrill();
+        break;
+    case Laser:
+        createGiLaser();
         break;
     default:
         break;

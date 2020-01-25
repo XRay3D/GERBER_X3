@@ -144,72 +144,86 @@ void ToolEditForm::setVisibleToolWidgets(bool visible)
 
 void ToolEditForm::setupToolWidgets(int type)
 {
+    const int lastType = m_tool.type();
     m_tool.setType(type);
-    ui->dsbxAngle->setEnabled(true);
-    ui->dsbxFeedRate->setEnabled(true);
-    ui->dsbxStepover->setEnabled(true);
-    ui->dsbxStepoverPercent->setEnabled(true);
+
+    auto setEnabled = [&, type](DoubleSpinBox* dsbx_, double min, double max) {
+        if (!dsbx_->isEnabled()) {
+            saveRestoreMap[type].restore(dsbx_);
+            dsbx_->setEnabled(true);
+        }
+        if (min != 0.0 || max != 0.0)
+            dsbx_->setRange(min, max);
+    };
+    auto setDisabled = [&, lastType](DoubleSpinBox* dsbx_) {
+        if (dsbx_->isEnabled()) {
+            saveRestoreMap[lastType].save(dsbx_);
+            dsbx_->setRange(0.0, 0.0);
+            dsbx_->setEnabled(false);
+        }
+    };
+
     switch (type) {
     case Tool::Drill:
+        setDisabled(ui->dsbxFeedRate);
+        setDisabled(ui->dsbxStepover);
+        setDisabled(ui->dsbxStepoverPercent);
+        setEnabled(ui->dsbxAngle, 90.0, 120.0);
+        setEnabled(ui->dsbxOneTurnCut, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxOneTurnCutPercent, 0.0, 100.0);
+        setEnabled(ui->dsbxPassDepth, 0.0, 10.0);
+        setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
+        if (qFuzzyCompare(ui->dsbxAngle->value(), 90.0))
+            ui->dsbxAngle->setValue(120.0); ////////////////////
+        //        if (ui->dsbxOneTurnCut->value() == 0.0) {
+        //            ui->dsbxOneTurnCut->setValue(ui->dsbxDiameter->value() * 0.5);
+        //            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+        //        }
         ui->label_3->setText(tr("Pass"));
-        ui->dsbxAngle->setRange(90.0, 180.0);
-        ui->dsbxAngle->setValue(qFuzzyIsNull(m_angle) ? 120.0 : m_angle);
-        ui->dsbxFeedRate->setEnabled(false);
-        ui->dsbxFeedRate->setMaximum(0.0);
-        ui->dsbxStepover->setEnabled(false);
-        ui->dsbxStepover->setMaximum(0.0);
-        ui->dsbxStepoverPercent->setEnabled(false);
-        ui->dsbxStepoverPercent->setMaximum(0.0);
         break;
     case Tool::EndMill:
+        setDisabled(ui->dsbxAngle);
+        setEnabled(ui->dsbxFeedRate, 0.0, 100000.0);
+        setEnabled(ui->dsbxOneTurnCut, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxOneTurnCutPercent, 0.0, 100.0);
+        setEnabled(ui->dsbxPassDepth, 0.0, 10.0);
+        setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
+        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value() * 0.5);
+        setEnabled(ui->dsbxStepoverPercent, 0.0, 50.0);
+        //        if (ui->dsbxStepover->value() == 0.0) {
+        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
+        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+        //        }
         ui->label_3->setText(tr("Depth"));
-        m_angle = ui->dsbxAngle->value();
-        ui->dsbxAngle->setEnabled(false);
-        ui->dsbxAngle->setRange(0.0, 0.0);
-        ui->dsbxFeedRate->setMaximum(100000.0);
-        ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
-        ui->dsbxStepoverPercent->setMaximum(100.0);
-        if (ui->dsbxStepover->value() == 0.0) {
-            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        }
         break;
     case Tool::Engraving:
+        setEnabled(ui->dsbxAngle, 0.0, 180.0);
+        setEnabled(ui->dsbxFeedRate, 0.0, 100000.0);
+        setEnabled(ui->dsbxOneTurnCut, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxOneTurnCutPercent, 0.0, 100.0);
+        setEnabled(ui->dsbxPassDepth, 0.0, 10.0);
+        setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
+        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value() * 0.5);
+        setEnabled(ui->dsbxStepoverPercent, 0.0, 50.0);
+        //        if (ui->dsbxStepover->value() == 0.0) {
+        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
+        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+        //        }
         ui->label_3->setText(tr("Depth"));
-        ui->dsbxAngle->setRange(0.0, 180.0);
-        ui->dsbxAngle->setValue(m_angle);
-        ui->dsbxFeedRate->setMaximum(100000.0);
-        ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
-        ui->dsbxStepoverPercent->setMaximum(100.0);
-        if (ui->dsbxStepover->value() == 0.0) {
-            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        }
         break;
     case Tool::Laser:
-        ui->label_3->setText(tr("Depth"));
-        m_angle = ui->dsbxAngle->value();
-
-        ui->dsbxAngle->setEnabled(false);
-        ui->dsbxAngle->setRange(0.0, 0.0);
-
-        ui->dsbxPassDepth->setEnabled(false);
-        ui->dsbxPassDepth->setRange(0.0, 0.0);
-
-        ui->dsbxPlungeRate->setEnabled(false);
-        ui->dsbxPlungeRate->setRange(0.0, 0.0);
-
-        ui->dsbxOneTurnCut->setEnabled(false);
-        ui->dsbxOneTurnCut->setRange(0.0, 0.0);
-        ui->dsbxOneTurnCutPercent->setEnabled(false);
-
-        ui->dsbxFeedRate->setMaximum(100000.0);
-        ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
-        ui->dsbxStepoverPercent->setMaximum(100.0);
-        if (ui->dsbxStepover->value() == 0.0) {
-            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        }
+        setDisabled(ui->dsbxAngle);
+        setDisabled(ui->dsbxOneTurnCut);
+        setDisabled(ui->dsbxOneTurnCutPercent);
+        setDisabled(ui->dsbxPassDepth);
+        setDisabled(ui->dsbxPlungeRate);
+        setEnabled(ui->dsbxFeedRate, 0.0, 100000.0);
+        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxStepoverPercent, 0.0, 100.0);
+        //        if (ui->dsbxStepover->value() == 0.0) {
+        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
+        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+        //        }
         break;
     }
     setChanged();
@@ -221,7 +235,6 @@ void ToolEditForm::valueChangedSlot(double value)
     switch (dsbx.indexOf(dynamic_cast<DoubleSpinBox*>(sender()))) {
     case Tool::Angle:
         m_tool.setAngle(value);
-        m_angle = value;
         break;
     case Tool::Diameter:
         m_tool.setDiameter(value);
@@ -308,7 +321,6 @@ void ToolEditForm::on_pbApply_clicked()
     case Tool::Laser:
         ui->dsbxDiameter->flicker();
         ui->dsbxFeedRate->flicker();
-        ui->dsbxOneTurnCut->flicker();
         ui->dsbxSpindleSpeed->flicker();
         ui->dsbxStepover->flicker();
         break;
