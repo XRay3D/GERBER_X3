@@ -446,6 +446,8 @@ Paths& Creator::sortBE(Paths& src)
                     reverse = true;
                 }
             }
+            if (qFuzzyIsNull(destLen))
+                break;
         }
         if (reverse)
             ReversePath(src[swapIdx]);
@@ -455,6 +457,8 @@ Paths& Creator::sortBE(Paths& src)
     }
     return src;
 }
+
+
 
 Pathss& Creator::sortB(Pathss& src)
 {

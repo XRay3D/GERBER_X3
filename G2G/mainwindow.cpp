@@ -90,6 +90,10 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     GCodePropertiesForm(); // init vars;
     QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
+    QTimer::singleShot(100, [this] { selectAll(); });
+    QTimer::singleShot(120, [this] { toolpathActionList[GCode::Raster]->triggered(); });
+    QTimer::singleShot(150, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+
     //    QTimer::singleShot(100, [this] {
     //        ToolDatabase tdb(this, {});
     //        tdb.exec();
@@ -374,7 +378,7 @@ void MainWindow::createActionsToolPath()
         toolpathActionList[GCode::Pocket] = action;
     }
     {
-        action = toolpathToolBar->addAction(/*QIcon::fromTheme("pocket-path"),*/ tr("&PocketR"), [this] {
+        action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
             createDockWidget(new PocketRasterForm(dockWidget), GCode::Raster);
         });
         action->setShortcut(QKeySequence("Ctrl+Shift+R"));

@@ -26,6 +26,7 @@ private:
     void saveDrill(const QPointF& offset);
     void savePocket(const QPointF& offset);
     void saveProfile(const QPointF& offset);
+    void saveLaser(const QPointF& offset);
 
     QVector<QVector<QPolygonF>> pss(const QPointF& offset);
     QVector<QPolygonF> ps(const QPointF& offset);
@@ -101,6 +102,7 @@ private:
     void createGiPocket();
     void createGiProfile();
     void createGiRaster();
+    void createGiLaser();
 
 protected:
     virtual Paths merge() const override { return Paths(); /*m_toolPaths;*/ }

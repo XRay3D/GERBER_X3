@@ -57,6 +57,7 @@
 #include <queue>
 #include <set>
 #include <stdexcept>
+#include <stdint.h>
 #include <vector>
 
 #include <QDataStream>
@@ -85,7 +86,7 @@ typedef int cInt;
 static cInt const loRange = 0x7FFF;
 static cInt const hiRange = 0x7FFF;
 #else
-typedef signed /*long*/ long cInt;
+typedef int32_t cInt;
 static cInt const loRange = 0x40000000;
 static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class

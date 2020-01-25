@@ -68,18 +68,19 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
             return m_file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             switch (static_cast<int>(Project::instance()->file<GCode::File>(m_id)->gtype())) {
-            case GCode ::Profile:
+            case GCode::Profile:
                 return QIcon::fromTheme("profile-path");
-            case GCode ::Pocket:
+            case GCode::Pocket:
                 return QIcon::fromTheme("pocket-path");
-            case GCode ::Voronoi:
+            case GCode::Voronoi:
                 return QIcon::fromTheme("voronoi-path");
-            case GCode ::Thermal:
+            case GCode::Thermal:
                 return QIcon::fromTheme("thermal-path");
-            case GCode ::Drill:
+            case GCode::Drill:
                 return QIcon::fromTheme("drill-path");
-            case GCode ::Raster:
-                return QIcon::fromTheme("pocket-path");
+            case GCode::Raster:
+            case GCode::Laser:
+                return QIcon::fromTheme("raster-path");
             }
             return QIcon();
         case Qt::UserRole:

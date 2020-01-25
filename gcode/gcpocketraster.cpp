@@ -3,6 +3,7 @@
 #include "gcfile.h"
 
 #include <QElapsedTimer>
+#include <point.h>
 
 namespace GCode {
 RasterCreator::RasterCreator()
@@ -268,7 +269,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
 
     switch (m_gcp.side) {
     case Outer:
-        groupedPaths(CutoffPaths, static_cast<cInt>(m_toolDiameter + 5));
+        groupedPaths(CutoffPaths, uScale);
         if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
             m_groupedPss.removeFirst();
         break;
@@ -288,8 +289,9 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     int c {};
     Path rrr;
     progress(10, ++c);
-    r.left -= m_gcp.dParam[AccDistance].toDouble() * uScale * 2;
-    r.right += m_gcp.dParam[AccDistance].toDouble() * uScale * 2;
+    qDebug() << m_gcp.dParam[AccDistance].toDouble() /** uScale*/ * 2;
+    r.left -= 5 * uScale; // m_gcp.dParam[AccDistance].toDouble() * uScale * 2;
+    r.right += 5 * uScale; // m_gcp.dParam[AccDistance].toDouble() * uScale * 2;
     for (cInt i = r.top; i <= r.bottom; /*++i*/) {
         rrr.append({ { r.left, i }, { r.right, i } });
         i += tool.stepover() * uScale;
@@ -297,58 +299,136 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         i += tool.stepover() * uScale;
     }
     progress(10, ++c);
-    //    {
-    //        ClipperOffset o;
-    //        for (auto& p : m_groupedPss)
-    //            o.AddPaths(p, jtRound, etClosedPolygon);
-    //        Paths ps;
-    //        o.Execute(ps, m_gcp.dParam[AccDistance].toDouble() * uScale);
-    //        progress(10, ++c);
-    //        Clipper c;
-    //        c.AddPath(rrr, ptSubject, false);
-    //        c.AddPaths(ps, ptClip, true);
-    //        c.Execute(ctIntersection, ps, pftNonZero);
-    //        sortBE(ps);
-    //        mergeSegments(ps, tool.stepover() * uScale * 1.01);
-    //        m_returnPss.append(ps);
-    //    }
+    Paths laserPath;
+
+    {
+        Paths tempPath;
+        ClipperOffset o;
+        for (auto& p : m_groupedPss)
+            o.AddPaths(p, jtRound, etClosedPolygon);
+        o.Execute(profilePaths, -tool.diameter() * uScale * 0.5);
+
+        progress(10, ++c);
+        {
+            Clipper c;
+            c.AddPath(rrr, ptSubject, false);
+            c.AddPaths(profilePaths, ptClip, true);
+            c.Execute(ctDifference, tempPath, pftNonZero);
+            for (auto& p : tempPath) {
+                if (auto s = p.size(); s > 4)
+                    p.remove(2, s - 4);
+            }
+            laserPath.append(tempPath);
+        }
+        progress(10, ++c);
+        {
+            Clipper c;
+            c.AddPath(rrr, ptSubject, false);
+            c.AddPaths(profilePaths, ptClip, true);
+            c.Execute(ctIntersection, tempPath, pftNonZero);
+            laserPath.append(tempPath);
+        }
+
+        progress(10, ++c);
+
+        auto sortBE2 = [r](Paths& src) {
+            IntPoint startPt { r.left, r.top };
+            for (int idx = 0; idx < src.size(); ++idx) {
+                if (startPt == src[idx].first()) {
+                    std::swap(src[0], src[idx]);
+                    startPt = src[0].last();
+                    break;
+                }
+            }
+            for (int firstIdx = 1; firstIdx < src.size(); ++firstIdx) {
+                progress(src.size(), firstIdx);
+                int swapIdx = firstIdx;
+                double destLen = std::numeric_limits<double>::max();
+                bool reverse = false;
+                for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+                    const double lenFirst = Length(startPt, src[secondIdx].first());
+                    const double lenLast = Length(startPt, src[secondIdx].last());
+                    if (lenFirst < lenLast) {
+                        if (destLen > lenFirst) {
+                            destLen = lenFirst;
+                            swapIdx = secondIdx;
+                            reverse = false;
+                        }
+                    } else {
+                        if (destLen > lenLast) {
+                            destLen = lenLast;
+                            swapIdx = secondIdx;
+                            reverse = true;
+                        }
+                    }
+                    if (qFuzzyIsNull(destLen))
+                        break;
+                }
+                if (reverse)
+                    ReversePath(src[swapIdx]);
+                startPt = src[swapIdx].last();
+                if (swapIdx != firstIdx)
+                    std::swap(src[firstIdx], src[swapIdx]);
+            }
+        };
+
+        sortBE2(laserPath /*, psss.first().last()*/ /*{ r.left, r.top }*/);
+
+        for (int i = 0; i < laserPath.size() - 1; ++i) {
+            if (double l = Length(laserPath[i].last(), laserPath[i + 1].first()); l > 1)
+                qDebug() << "sortBE2 err" << i << l;
+        }
+    }
     progress(10, ++c);
-    //    sortB(m_returnPs);
-    //    if (!profilePaths.isEmpty() && prPass) {
-    //        sortB(profilePaths);
-    //        if (m_gcp.convent)
-    //            ReversePaths(profilePaths);
-    //        for (Path& path : profilePaths)
-    //            path.append(path.first());
-    //    }
-
-    //    switch (prPass) {
-    //    case NoProfilePass:
-    //        m_returnPss.prepend(m_returnPs);
-    //        break;
-    //    case First:
-    //        if (!profilePaths.isEmpty())
-    //            m_returnPss.prepend(profilePaths);
-    //        m_returnPss.prepend(m_returnPs);
-    //        break;
-    //    case Last:
-    //        m_returnPss.prepend(m_returnPs);
-    //        if (!profilePaths.isEmpty())
-    //            m_returnPss.append(profilePaths);
-    //        break;
-    //    default:
-    //        break;
-    //    }
-
-    m_returnPss.append({ rrr });
+    m_returnPss.append(laserPath);
+    if (!profilePaths.isEmpty() && prPass != NoProfilePass) {
+        for (auto& p : profilePaths) {
+            p.append(p.first());
+        }
+        m_returnPss.append(sortB(profilePaths));
+    }
 
     qDebug() << "createRaster" << (t.elapsed() / 1000);
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, Raster /*Laser*/, fillPaths);
+        m_file = new File(m_returnPss, tool, depth, Laser, fillPaths);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
 }
+
+//Paths& RasterCreator::sortBE(Paths& src)
+//{
+//    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+//    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+//        progress(src.size(), firstIdx);
+//        int swapIdx = firstIdx;
+//        double destLen = std::numeric_limits<double>::max();
+//        bool reverse = false;
+//        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+//            const double lenFirst = Length(startPt, src[secondIdx].first());
+//            const double lenLast = Length(startPt, src[secondIdx].last());
+//            if (lenFirst < lenLast) {
+//                if (destLen > lenFirst) {
+//                    destLen = lenFirst;
+//                    swapIdx = secondIdx;
+//                    reverse = false;
+//                }
+//            } else {
+//                if (destLen > lenLast) {
+//                    destLen = lenLast;
+//                    swapIdx = secondIdx;
+//                    reverse = true;
+//                }
+//            }
+//        }
+//        if (reverse)
+//            ReversePath(src[swapIdx]);
+//        startPt = src[swapIdx].last();
+//        if (swapIdx != firstIdx)
+//            std::swap(src[firstIdx], src[swapIdx]);
+//    }
+//    return src;
+//}
 }
