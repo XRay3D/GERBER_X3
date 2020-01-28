@@ -93,7 +93,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     clipper.AddPaths(src, ptClip, true);
                     for (auto& [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
-                        Path frame{ { left_, var }, { right_, var } };
+                        Path frame { { left_, var }, { right_, var } };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptSubject, false);
                     }
@@ -127,7 +127,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     clipper.AddPaths(src, ptSubject, false);
                     for (auto [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
-                        Path frame{
+                        Path frame {
                             { left_, var },
                             { right_, var },
                             { right_, var += m_stepOver },
@@ -242,6 +242,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
 
 void RasterCreator::createRaster2(const Tool& tool, const double depth, const double angle, const int prPass)
 {
+    //self = this;
 
     QElapsedTimer t;
     t.start();
@@ -272,15 +273,25 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
             o.AddPaths(p, jtRound, etClosedPolygon);
         o.Execute(profilePaths, -tool.diameter() * uScale * 0.5);
     }
+
     { // get bounds of frames
         ClipperBase c;
         c.AddPaths(profilePaths, ptClip, true);
         rect = c.GetBounds();
     }
 
-    int progressCounter{};
+    const IntPoint center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
 
-    progress(10, ++progressCounter);
+    Paths tempPath(profilePaths);
+
+    if (!qFuzzyIsNull(angle)) { // Rotate Paths
+        for (Path& path : tempPath)
+            RotatePath(path, angle, center);
+        // get bounds of frames if angle > 0.0
+        ClipperBase c;
+        c.AddPaths(tempPath, ptClip, true);
+        rect = c.GetBounds();
+    }
 
     rect.left -= static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale * 2);
     rect.right += static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale * 2);
@@ -296,84 +307,63 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         }
     }
 
-    progress(10, ++progressCounter);
+    progress(0, 0);
+
     Paths laserPath;
-
-    Paths tempPath;
-
-    progress(10, ++progressCounter);
-    {
+    { // main calculate
         Clipper c;
         c.AddPath(zPath, ptSubject, false);
-        c.AddPaths(profilePaths, ptClip, true);
-        { // laser on
-            c.Execute(ctIntersection, tempPath, pftNonZero);
-            laserPath.append(tempPath);
-        }
-        { // laser off
-            c.Execute(ctDifference, tempPath, pftNonZero);
-            for (int i = 1; i < tempPath.size() - 1; ++i) {
-                auto& p = tempPath[i];
-                const auto s = p.size();
-                if (s > 4) {
-                    {
-                        QLineF line(toQPointF(p[0]), toQPointF(p[1]));
-                        line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                        p[1] = toIntPoint(line.p2());
-                    }
-                    {
-                        QLineF line(toQPointF(p[s - 1]), toQPointF(p[s - 2]));
-                        line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                        p[s - 2] = toIntPoint(line.p2());
-                    }
+        c.AddPaths(tempPath, ptClip, true);
+
+        // laser off
+        c.Execute(ctDifference, tempPath, pftNonZero);
+        msg = "laser resize";
+
+        const cInt accDistance = static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale);
+        auto setLen = [accDistance](const IntPoint& p1, IntPoint& p2) {
+            if (p1.X > p2.X)
+                p2.X = p1.X - accDistance;
+            else
+                p2.X = p1.X + accDistance;
+        };
+        for (int i = 1; i < tempPath.size() - 1; ++i) {
+            progress(tempPath.size(), i);
+            auto& p = tempPath[i];
+            const auto s = p.size();
+            if (s > 2) {
+                setLen(p[0], p[1]);
+                setLen(p[s - 1], p[s - 2]);
+                if (s > 4)
                     p.remove(2, s - 4);
-                } else if (s > 2) {
-                    {
-                        QLineF line(toQPointF(p[0]), toQPointF(p[1]));
-                        line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                        p[1] = toIntPoint(line.p2());
-                    }
-                    {
-                        QLineF line(toQPointF(p[s - 1]), toQPointF(p[s - 2]));
-                        line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                        p[s - 2] = toIntPoint(line.p2());
-                    }
-//                    if (p[0].X < p[1].X && p[2].X < p[1].X)
-//                        continue;
-//                    if (p[0].X > p[1].X && p[2].X > p[1].X)
-//                        continue;
-//                    p.remove(1 /*, s - 3*/);
-                }
             }
-            {
-                auto& p = tempPath.first();
-                p.resize(2);
-                QLineF line(toQPointF(p[0]), toQPointF(p[1]));
-                line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                p[1] = toIntPoint(line.p2());
-            }
-            {
-                auto& p = tempPath.last();
-                p.remove(0, p.size() - 2);
-                QLineF line(toQPointF(p[1]), toQPointF(p[0]));
-                line.setLength(m_gcp.dParam[AccDistance].toDouble());
-                p0 = p[0] = toIntPoint(line.p2());
-            }
-            mergeSegments(tempPath);
-            laserPath.append(tempPath);
         }
-    }
-    progress(10, ++progressCounter);
 
-    sortBE2(laserPath);
+        tempPath.first().resize(2);
+        setLen(tempPath.first()[0], tempPath.first()[1]);
 
-    for (int i = 0; i < laserPath.size() - 1; ++i) {
-        if (double l = Length(laserPath[i].last(), laserPath[i + 1].first()); l > 1) {
-            qDebug() << "sortBE2 err" << i << l;
+        tempPath.last().remove(0, tempPath.last().size() - 2);
+        setLen(tempPath.last()[1], tempPath.last()[0]);
+
+        laserPath.append(tempPath);
+
+        // laser on
+        c.Execute(ctIntersection, tempPath, pftNonZero);
+        laserPath.append(tempPath);
+
+        sortBE2(laserPath);
+
+        // test sorting
+        for (int i = 0; i < laserPath.size() - 1; ++i) {
+            if (double l = Length(laserPath[i].last(), laserPath[i + 1].first()); l > 1) {
+                qDebug() << "sortBE2 err" << i << l;
+            }
         }
     }
 
-    progress(10, ++progressCounter);
+    if (!qFuzzyIsNull(angle)) { // Rotate Paths
+        for (Path& path : laserPath)
+            RotatePath(path, -angle, center);
+    }
 
     m_returnPss.append(laserPath);
 
@@ -395,7 +385,13 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
 
 void RasterCreator::sortBE2(Paths& src)
 {
-    IntPoint startPt{ p0 /*rect.left, rect.top*/ };
+    msg = "laser sort 1";
+    IntPoint startPt { p0 /*rect.left, rect.top*/ };
+
+    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y < p2.last().Y; });
+
+    msg = "laser sort 2";
+
     for (int idx = 0; idx < src.size(); ++idx) {
         if (startPt == src[idx].first()) {
             std::swap(src[0], src[idx]);
@@ -403,288 +399,39 @@ void RasterCreator::sortBE2(Paths& src)
             break;
         }
     }
+
+    //    const cInt sor = m_stepOver / 2;
+
+    auto same = [/*sor*/](const IntPoint& p1, const IntPoint& p2) -> bool {
+        return p1 == p2;
+        //        return abs(p1.X - p2.X) < sor && abs(p1.Y - p2.Y) < sor;
+    };
+
     for (int firstIdx = 1; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
-        double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
         for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = Length(startPt, src[secondIdx].first());
-            const double lenLast = Length(startPt, src[secondIdx].last());
-            if (lenFirst < lenLast) {
-                if (destLen > lenFirst) {
-                    destLen = lenFirst;
-                    swapIdx = secondIdx;
-                    reverse = false;
-                }
-            } else {
-                if (destLen > lenLast) {
-                    destLen = lenLast;
-                    swapIdx = secondIdx;
-                    reverse = true;
-                }
-            }
-            if (qFuzzyIsNull(destLen))
+            if (same(startPt, src[secondIdx].first())) {
+                swapIdx = secondIdx;
+                reverse = false;
                 break;
+            } else if (same(startPt, src[secondIdx].last())) {
+                swapIdx = secondIdx;
+                reverse = true;
+                break;
+            }
         }
+
+        //        if (swapIdx == firstIdx)
+        //            continue;
+
         if (reverse)
             ReversePath(src[swapIdx]);
         startPt = src[swapIdx].last();
-        if (swapIdx != firstIdx)
-            std::swap(src[firstIdx], src[swapIdx]);
+        //        if (swapIdx != firstIdx)
+        std::swap(src[firstIdx], src[swapIdx]);
     }
 }
 
-//void RasterCreator::createRaster2(const Tool& tool, const double depth, const double angle, const int prPass)
-//{
-//    enum {
-//        NoProfilePass,
-//        First,
-//        Last
-//    };
-//    QElapsedTimer t;
-//    t.start();
-//    if (m_gcp.side() == On) {
-//        emit fileReady(nullptr);
-//        return;
-//    }
-
-//    m_toolDiameter = tool.getDiameter(depth) * uScale;
-//    m_dOffset = m_toolDiameter / 2;
-//    m_stepOver = static_cast<cInt>(tool.stepover() * uScale);
-
-//    switch (m_gcp.side()) {
-//    case Outer:
-//        groupedPaths(CutoffPaths, uScale);
-//        if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
-//            m_groupedPss.removeFirst();
-//        break;
-//    case Inner:
-//        groupedPaths(CopperPaths);
-//        break;
-//    case On:
-//        cancel();
-//    }
-
-//    int progressCounter{};
-//    progress(10, ++progressCounter);
-//    Paths laserPath;
-//    Paths expFrame;
-//    Paths fillPaths;
-//    Path accFrame;
-//    const cInt distance = static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale);
-//    { // exposure frame
-//        Paths tempPath;
-//        ClipperOffset o;
-//        for (auto& p : m_groupedPss)
-//            o.AddPaths(p, jtRound, etClosedPolygon);
-//        o.Execute(expFrame, -tool.diameter() * uScale * 0.5);
-//        o.Clear();
-//        o.AddPaths(expFrame, jtRound, etClosedPolygon);
-//        Paths tmp;
-//        o.Execute(tmp, distance);
-//        accFrame = tmp.first();
-//    }
-//    IntRect r;
-//    {
-//        Clipper c;
-//        c.AddPaths(expFrame, ptClip, true);
-//        r = c.GetBounds();
-//    }
-//    Path zz;
-//    progress(10, ++progressCounter);
-//    r.left -= distance * 2;
-//    r.right += distance * 2;
-//    for (cInt i = r.top; i <= r.bottom; /*++i*/) {
-//        zz.append({ { r.left, i }, { r.right, i } });
-//        i += static_cast<cInt>(tool.stepover() * uScale);
-//        zz.append({ { r.right, i }, { r.left, i } });
-//        i += static_cast<cInt>(tool.stepover() * uScale);
-//    }
-//    {
-//        progress(10, ++progressCounter);
-//        {
-//            Paths tempPath;
-//            Clipper c1;
-//            c1.AddPath(zz, ptSubject, false);
-//            c1.AddPaths(expFrame, ptClip, true);
-//            ReversePath(accFrame);
-//            //            c1.AddPath(accFrame, ptClip, true);
-//            //            c1.Execute(ctIntersection, tempPath, pftNonZero);
-//            c1.Execute(ctDifference, tempPath, pftNonZero);
-//            laserPath.append(tempPath);
-//            if (/* DISABLES CODE */ (0)) {
-//                QVector<QPair<int, int>> mmm;
-//                mmm.reserve(tempPath.size() / 2);
-//                cInt xMax = std::numeric_limits<cInt>::min();
-//                cInt xMin = std::numeric_limits<cInt>::max();
-//                cInt y = tempPath.last().last().Y;
-//                for (int i = 0, iMax, iMin, rev = 0; i < tempPath.size(); ++i) {
-//                    Path& path = tempPath[i];
-//                    if (rev % 2) {
-//                        if (path.first().X < path.last().X)
-//                            ReversePath(path);
-//                    } else {
-//                        if (path.first().X > path.last().X)
-//                            ReversePath(path);
-//                    }
-//                    //                    if (rev % 2 && path.first().X < path.last().X) {
-//                    //                        ReversePath(path);
-//                    //                    } else if (!(rev % 2) && path.first().X > path.last().X) {
-//                    //                        ReversePath(path);
-//                    //                    }
-//                    if (i && y != path.last().Y) {
-//                        ++rev;
-//                        y = path.last().Y;
-//                        mmm.append({ iMax, iMin });
-//                        xMax = std::numeric_limits<cInt>::min();
-//                        xMin = std::numeric_limits<cInt>::max();
-//                        //qDebug() << i << y << mmm.size() << iMax << iMin;
-//                    }
-//                    if (cInt val = std::max(path.first().X, path.last().X); xMax < val) {
-//                        iMax = i;
-//                        xMax = val;
-//                    }
-//                    if (cInt val = std::min(path.first().X, path.last().X); xMin > val) {
-//                        iMin = i;
-//                        xMin = val;
-//                    }
-//                }
-
-//                for (int i = mmm.size() - 1; i > 0; --i) {
-//                    if (i % 2) {
-//                        auto p = tempPath.takeAt(mmm[i].second);
-//                        tempPath[mmm[i - 1].second].append(p);
-//                    } else {
-//                        auto p = tempPath.takeAt(mmm[i].first);
-//                        tempPath[mmm[i - 1].first].append(p);
-//                    }
-//                }
-//            }
-//            for (auto& p : tempPath) {
-//                if (auto s = p.size(); s > 4)
-//                    p.remove(2, s - 4);
-//            }
-//            laserPath.append(tempPath);
-//        }
-
-//        progress(10, ++progressCounter);
-//        {
-//            Paths tempPath;
-//            Clipper c2;
-//            c2.AddPath(zz, ptSubject, false);
-//            c2.AddPaths(expFrame, ptClip, true);
-//            c2.Execute(ctIntersection, tempPath, pftNonZero);
-//            laserPath.append(tempPath);
-//        }
-
-//        progress(10, ++progressCounter);
-
-//        auto sortBE2 = [r](Paths& src) {
-//            IntPoint startPt{ r.left, r.top };
-//            for (int idx = 0; idx < src.size(); ++idx) {
-//                if (startPt == src[idx].first()) {
-//                    std::swap(src[0], src[idx]);
-//                    startPt = src[0].last();
-//                    break;
-//                }
-//            }
-//            for (int firstIdx = 1; firstIdx < src.size(); ++firstIdx) {
-//                progress(src.size(), firstIdx);
-//                int swapIdx = firstIdx;
-//                double destLen = std::numeric_limits<double>::max();
-//                bool reverse = false;
-//                for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-//                    const double lenFirst = Length(startPt, src[secondIdx].first());
-//                    const double lenLast = Length(startPt, src[secondIdx].last());
-//                    if (lenFirst < lenLast) {
-//                        if (destLen > lenFirst) {
-//                            destLen = lenFirst;
-//                            swapIdx = secondIdx;
-//                            reverse = false;
-//                        }
-//                    } else {
-//                        if (destLen > lenLast) {
-//                            destLen = lenLast;
-//                            swapIdx = secondIdx;
-//                            reverse = true;
-//                        }
-//                    }
-//                    if (qFuzzyIsNull(destLen))
-//                        break;
-//                }
-//                if (reverse)
-//                    ReversePath(src[swapIdx]);
-//                startPt = src[swapIdx].last();
-//                if (swapIdx != firstIdx)
-//                    std::swap(src[firstIdx], src[swapIdx]);
-//            }
-//        };
-
-//        sortBE2(laserPath /*, psss.first().last()*/ /*{ r.left, r.top }*/);
-
-//        for (int i = 0; i < laserPath.size() - 1; ++i) {
-//            if (double l = Length(laserPath[i].last(), laserPath[i + 1].first()); l > 1) {
-//                qDebug() << "sortBE2 err" << i << l;
-//                //cancel();
-//                //exit(-1);
-//                //emit fileReady(nullptr);
-//                //                break;
-//            }
-//            //                qDebug() << "sortBE2 err" << i << l;
-//            //            qDebug() << ((laserPath[i].last().Y - laserPath[i + 1].first().Y) * dScale);
-//        }
-//    }
-//    progress(10, ++progressCounter);
-//    m_returnPss.append(laserPath);
-//    if (!expFrame.isEmpty() && prPass != NoProfilePass) {
-//        for (auto& p : expFrame) {
-//            p.append(p.first());
-//        }
-//        m_returnPss.append(sortB(expFrame));
-//    }
-
-//    qDebug() << "createRaster" << (t.elapsed() / 1000);
-//    if (m_returnPss.isEmpty()) {
-//        emit fileReady(nullptr);
-//    } else {
-//        m_file = new File(m_returnPss, tool, depth, Laser, fillPaths);
-//        m_file->setFileName(tool.name());
-//        emit fileReady(m_file);
-//    }
-//}
-
-//Paths& RasterCreator::sortBE(Paths& src)
-//{
-//    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
-//    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-//        progress(src.size(), firstIdx);
-//        int swapIdx = firstIdx;
-//        double destLen = std::numeric_limits<double>::max();
-//        bool reverse = false;
-//        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-//            const double lenFirst = Length(startPt, src[secondIdx].first());
-//            const double lenLast = Length(startPt, src[secondIdx].last());
-//            if (lenFirst < lenLast) {
-//                if (destLen > lenFirst) {
-//                    destLen = lenFirst;
-//                    swapIdx = secondIdx;
-//                    reverse = false;
-//                }
-//            } else {
-//                if (destLen > lenLast) {
-//                    destLen = lenLast;
-//                    swapIdx = secondIdx;
-//                    reverse = true;
-//                }
-//            }
-//        }
-//        if (reverse)
-//            ReversePath(src[swapIdx]);
-//        startPt = src[swapIdx].last();
-//        if (swapIdx != firstIdx)
-//            std::swap(src[firstIdx], src[swapIdx]);
-//    }
-//    return src;
-//}
 }
