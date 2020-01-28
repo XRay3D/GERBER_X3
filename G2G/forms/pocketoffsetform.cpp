@@ -219,8 +219,8 @@ void PocketOffsetForm::createFile()
     }
 
     GCode::GCodeParams gcp;
-    gcp.convent = ui->rbConventional->isChecked();
-    gcp.side = side;
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
     gcp.tool.append(tool);
     gcp.tool.append(tool2);
 

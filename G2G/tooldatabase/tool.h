@@ -50,6 +50,7 @@ public:
     double diameter() const;
     void setDiameter(double diameter);
     // feedRate
+    double feedRateMmS() const;
     double feedRate() const;
     void setFeedRate(double feedRate);
     // oneTurnCut

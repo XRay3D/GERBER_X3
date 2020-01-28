@@ -116,7 +116,7 @@ void Creator::addRawPaths(Paths rawPaths)
     if (rawPaths.isEmpty())
         return;
 
-    if (m_gcp.side == On) {
+    if (m_gcp.side() == On) {
         m_workingRawPs.append(rawPaths);
         return;
     }
@@ -245,7 +245,7 @@ void Creator::stacking(Paths& paths)
         auto [node, newPaths] = w;
         if (!m_returnPss.isEmpty() || newPaths) {
             Path path(node->Contour);
-            if (!(m_gcp.convent ^ !node->IsHole()) ^ (m_gcp.side == Outer))
+            if (!(m_gcp.convent() ^ !node->IsHole()) ^ (m_gcp.side() == Outer))
                 ReversePath(path);
             if (Settings::cleanPolygons())
                 CleanPolygon(path, uScale * 0.0005);

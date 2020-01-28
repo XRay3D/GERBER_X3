@@ -147,8 +147,8 @@ void VoronoiForm::createFile()
     }
 
     GCode::GCodeParams gpc;
-    gpc.convent = true;
-    gpc.side = GCode::Outer;
+    gpc.setConvent(true);
+    gpc.setSide(GCode::Outer);
     gpc.tool.append(tool);
     gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
     gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();

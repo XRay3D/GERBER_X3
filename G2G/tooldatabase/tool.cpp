@@ -51,7 +51,7 @@ Tool::Tool()
     , m_type(EndMill)
     , m_angle(0.0)
     , m_diameter(1.0)
-    , m_feedRate(1200.0)
+    , m_feedRate(100.0)
     , m_oneTurnCut(0.1)
     , m_passDepth(2.0)
     , m_plungeRate(600.0)
@@ -101,6 +101,8 @@ void Tool::setDiameter(double diameter)
     m_hash = 0;
     m_diameter = diameter;
 }
+
+double Tool::feedRateMmS() const { return m_feedRate / 60.0; }
 
 double Tool::feedRate() const { return m_feedRate; }
 

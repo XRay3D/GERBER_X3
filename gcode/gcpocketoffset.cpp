@@ -19,7 +19,7 @@ void PocketCreator::create()
 void PocketCreator::createPocket(const Tool& tool, const double depth, const int steps)
 {
     self = this;
-    if (m_gcp.side == On)
+    if (m_gcp.side() == On)
         return;
     progress(0, 0);
     m_toolDiameter = tool.getDiameter(depth) * uScale;
@@ -28,7 +28,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
     Paths fillPaths;
     if (steps) {
         groupedPaths(CopperPaths);
-        if (m_gcp.side == Inner) {
+        if (m_gcp.side() == Inner) {
             m_dOffset *= -1;
             for (Paths paths : m_groupedPss) {
                 ClipperOffset offset(uScale);
@@ -77,7 +77,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
             }
         }
     } else {
-        switch (m_gcp.side) {
+        switch (m_gcp.side()) {
         case On:
             break;
         case Outer:
@@ -126,7 +126,7 @@ void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, d
 {
     self = this;
 
-    if (m_gcp.side == On)
+    if (m_gcp.side() == On)
         return;
 
     do {
@@ -136,7 +136,7 @@ void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, d
 
         Paths fillPaths;
 
-        switch (m_gcp.side) {
+        switch (m_gcp.side()) {
         case On:
             break;
         case Outer:
@@ -210,7 +210,7 @@ void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, d
                     offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
                     offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.95);
                 }
-                if (m_gcp.side != Inner)
+                if (m_gcp.side() != Inner)
                     ReversePaths(tmpPaths);
                 paths.append(tmpPaths);
             }
