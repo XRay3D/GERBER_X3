@@ -9,8 +9,8 @@
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil("PocketRasterForm", new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
-    , pixmaps {
+    , names{ tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
+    , pixmaps{
         QStringLiteral(":/toolpath/pock_rast_climb.svg"),
         QStringLiteral(":/toolpath/pock_rast_conv.svg"),
     }
@@ -161,18 +161,18 @@ void PocketRasterForm::createFile()
     }
 
     GCode::GCodeParams gcp;
-    gcp.convent = ui->rbConventional->isChecked();
-    gcp.side = side;
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
     gcp.tool.append(tool);
     gcp.tool.append(tool2);
 
     gcp.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
     gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
     gcp.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
-    if (ui->rbFast->isChecked())
-        gcp.dParam[GCode::AccDistance] = (tool.feedRate() * tool.feedRate()) / (2 * ui->dsbxAcc->value());
-    else
-        gcp.dParam[GCode::AccDistance] = 0;
+    if (ui->rbFast->isChecked()) {
+        gcp.dParam[GCode::Fast] = true;
+        gcp.dParam[GCode::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    }
 
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);

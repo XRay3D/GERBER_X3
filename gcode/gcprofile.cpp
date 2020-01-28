@@ -21,14 +21,14 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset
-    if (m_gcp.side == On) {
+    if (m_gcp.side() == On) {
         m_returnPs = m_workingPs;
 
         for (Path& path : m_returnPs)
             path.append(path.first());
 
         // fix direction
-        if (m_gcp.convent)
+        if (m_gcp.convent())
             ReversePaths(m_returnPs);
 
         if (m_workingRawPs.size())
@@ -36,7 +36,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     } else {
         // calc offset
-        const double dOffset = (m_gcp.side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
         // execute offset
         if (!m_workingPs.isEmpty()) {
@@ -55,9 +55,9 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
             m_returnPs.append(m_workingRawPs);
 
         // fix direction
-        if (m_gcp.side == Outer && !m_gcp.convent)
+        if (m_gcp.side() == Outer && !m_gcp.convent())
             ReversePaths(m_returnPs);
-        else if (m_gcp.side == Inner && m_gcp.convent)
+        else if (m_gcp.side() == Inner && m_gcp.convent())
             ReversePaths(m_returnPs);
 
         for (Path& path : m_returnPs)

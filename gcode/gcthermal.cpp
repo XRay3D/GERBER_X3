@@ -25,9 +25,9 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     offset.Execute(m_returnPs, dOffset);
 
     // fix direction
-    if (m_gcp.side == Outer && !m_gcp.convent)
+    if (m_gcp.side() == Outer && !m_gcp.convent())
         ReversePaths(m_returnPs);
-    else if (m_gcp.side == Inner && m_gcp.convent)
+    else if (m_gcp.side() == Inner && m_gcp.convent())
         ReversePaths(m_returnPs);
 
     for (Path& path : m_returnPs)

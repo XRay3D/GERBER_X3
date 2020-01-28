@@ -472,8 +472,8 @@ void DrillForm::on_pbCreate_clicked()
                 switch (m_worckType) {
                 case GCode::Profile: {
                     GCode::GCodeParams gcp;
-                    gcp.convent = ui->rbConventional->isChecked();
-                    gcp.side = m_side;
+                    gcp.setConvent(ui->rbConventional->isChecked());
+                    gcp.setSide(m_side);
                     gcp.tool.append(ToolHolder::tools[toolId]);
                     gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
                     GCode::ProfileCreator tpc;
@@ -483,8 +483,8 @@ void DrillForm::on_pbCreate_clicked()
                 } break;
                 case GCode::Pocket: {
                     GCode::GCodeParams gcp;
-                    gcp.convent = ui->rbConventional->isChecked();
-                    gcp.side = GCode::Inner;
+                    gcp.setConvent(ui->rbConventional->isChecked());
+                    gcp.setSide(GCode::Inner);
                     gcp.tool.append(ToolHolder::tools[toolId]);
                     gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
                     gcp.dParam[GCode::Pass] = 0;

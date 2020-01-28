@@ -3,6 +3,8 @@
 
 #include <tooldatabase/tool.h>
 
+#include <QVariant>
+
 namespace GCode {
 
 enum GCodeType {
@@ -53,15 +55,21 @@ enum Param {
     FileId,
     MinArea,
     FrameOffset,
-    AccDistance
+    AccDistance,
+    Side,
+    Convent,
+    Fast
 };
 
 struct GCodeParams {
-    QMap<int, QVector<int>> src;
     QVector<Tool> tool;
-    SideOfMilling side;
-    bool convent;
     QMap<int, QVariant> dParam;
+
+    SideOfMilling side() const { return static_cast<SideOfMilling>(dParam[Side].toInt()); }
+    bool convent() const { return dParam[Convent].toBool(); }
+
+    void setSide(SideOfMilling val) { dParam[Side] = val; }
+    void setConvent(bool val) { dParam[Convent] = val; }
 };
 }
 
