@@ -169,7 +169,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
 
             QVector<Worck> map;
 
-            if (0) {
+            if (/* DISABLES CODE */ (0)) {
                 for (cInt var = start, flag = 0; var < end + m_stepOver * 5; flag = (flag ? 0 : 1), var += flag ? m_stepOver : m_stepOver * 5) {
                     map.append({ { left, right, var, flag },
                         { left, right, static_cast<cInt>(var + m_stepOver * 2), flag },
@@ -180,7 +180,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     map.append({ { left, right, var, flag } });
                 }
             }
-            if (0) {
+            if (/* DISABLES CODE */ (0)) {
                 m_progressMax += m_groupedPss.size() + map.size();
                 for (int i = 0; i < map.size(); ++i) {
                     scan(map[i]);
@@ -310,7 +310,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     progress(0, 0);
 
     Paths laserPath;
-    { // main calculate
+    { //  calculate
         Clipper c;
         c.AddPath(zPath, ptSubject, false);
         c.AddPaths(tempPath, ptClip, true);
@@ -350,7 +350,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         c.Execute(ctIntersection, tempPath, pftNonZero);
         laserPath.append(tempPath);
 
-        sortBE2(laserPath);
+        sortSegments(laserPath);
 
         // test sorting
         for (int i = 0; i < laserPath.size() - 1; ++i) {
@@ -383,31 +383,37 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     }
 }
 
-void RasterCreator::sortBE2(Paths& src)
+void RasterCreator::sortSegments(Paths& src)
 {
-    msg = "laser sort 1";
-    IntPoint startPt { p0 /*rect.left, rect.top*/ };
+    msg = "laser sort";
 
-    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y < p2.last().Y; });
+    //    auto same = [l = uScale / 100](const IntPoint& p1, const IntPoint& p2) -> bool {
+    //        return Length(p1, p2) < l; //abs(p1.X - p2.X) < sor && abs(p1.Y - p2.Y) < sor;
+    //    };
 
-    msg = "laser sort 2";
+    auto same = [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1 == p2; };
 
-    for (int idx = 0; idx < src.size(); ++idx) {
-        if (startPt == src[idx].first()) {
-            std::swap(src[0], src[idx]);
-            startPt = src[0].last();
-            break;
+    IntPoint startPt;
+
+    if (src[0].size() > src[1].size()) {
+        if (src[0].first().X > src[1].first().X) {
+            startPt = { std::min(src[1].first().X, src[1].last().X), src[1].first().Y };
+        } else {
+            startPt = { std::max(src[1].first().X, src[1].last().X), src[1].first().Y };
+        }
+    } else {
+        if (src[1].first().X > src[0].first().X) {
+            startPt = { std::min(src[0].first().X, src[0].last().X), src[0].first().Y };
+        } else {
+            startPt = { std::max(src[0].first().X, src[0].last().X), src[0].first().Y };
         }
     }
 
-    //    const cInt sor = m_stepOver / 2;
+    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool {
+        return std::min(p1.first().Y, p1.last().Y) < std::min(p2.first().Y, p2.last().Y);
+    });
 
-    auto same = [/*sor*/](const IntPoint& p1, const IntPoint& p2) -> bool {
-        return p1 == p2;
-        //        return abs(p1.X - p2.X) < sor && abs(p1.Y - p2.Y) < sor;
-    };
-
-    for (int firstIdx = 1; firstIdx < src.size(); ++firstIdx) {
+    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
         bool reverse = false;
@@ -416,21 +422,21 @@ void RasterCreator::sortBE2(Paths& src)
                 swapIdx = secondIdx;
                 reverse = false;
                 break;
-            } else if (same(startPt, src[secondIdx].last())) {
+            }
+            if (same(startPt, src[secondIdx].last())) {
                 swapIdx = secondIdx;
                 reverse = true;
                 break;
             }
         }
 
-        //        if (swapIdx == firstIdx)
-        //            continue;
-
         if (reverse)
             ReversePath(src[swapIdx]);
+
         startPt = src[swapIdx].last();
-        //        if (swapIdx != firstIdx)
-        std::swap(src[firstIdx], src[swapIdx]);
+
+        if (swapIdx != firstIdx)
+            std::swap(src[firstIdx], src[swapIdx]);
     }
 }
 
