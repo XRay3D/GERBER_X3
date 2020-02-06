@@ -391,7 +391,7 @@ void RasterCreator::sortSegments(Paths& src)
     //        return Length(p1, p2) < l; //abs(p1.X - p2.X) < sor && abs(p1.Y - p2.Y) < sor;
     //    };
 
-    auto same = [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1 == p2; };
+    std::function<bool(const IntPoint&, const IntPoint&)> same = [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1 == p2; };
 
     IntPoint startPt;
 
@@ -409,35 +409,81 @@ void RasterCreator::sortSegments(Paths& src)
         }
     }
 
+    ReversePaths(src);
+
     std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool {
-        return std::min(p1.first().Y, p1.last().Y) < std::min(p2.first().Y, p2.last().Y);
+        return std::min(p1.first().Y, p1.last().Y) > std::min(p2.first().Y, p2.last().Y);
     });
 
-    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        progress(src.size(), firstIdx);
-        int swapIdx = firstIdx;
-        bool reverse = false;
-        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            if (same(startPt, src[secondIdx].first())) {
-                swapIdx = secondIdx;
-                reverse = false;
-                break;
+    {
+        using Worck = std::tuple<int, int, IntPoint>;
+        /////////////////////////////////////////////////////////
+        std::function<void(Worck)> scan = [src = src.data(), same](Worck w) {
+            auto [from, to, startPt] = w;
+            qDebug() << "scan" << from << to;
+            for (int firstIdx = from /*0*/; firstIdx < to /*src.size()*/; ++firstIdx) {
+                progress(to /*src.size()*/, firstIdx);
+                int swapIdx = firstIdx;
+                bool reverse = false;
+                for (int secondIdx = firstIdx; secondIdx < to /*src.size()*/; ++secondIdx) {
+                    if (same(startPt, src[secondIdx].first())) {
+                        swapIdx = secondIdx;
+                        reverse = false;
+                        break;
+                    }
+                    if (same(startPt, src[secondIdx].last())) {
+                        swapIdx = secondIdx;
+                        reverse = true;
+                        break;
+                    }
+                }
+                if (reverse)
+                    ReversePath(src[swapIdx]);
+                startPt = src[swapIdx].last();
+                if (swapIdx != firstIdx)
+                    std::swap(src[firstIdx], src[swapIdx]);
             }
-            if (same(startPt, src[secondIdx].last())) {
-                swapIdx = secondIdx;
-                reverse = true;
-                break;
+        };
+        constexpr int k = 20000;
+        if (src.size() > k * QThread::idealThreadCount()) {
+            QVector<Worck> map;
+
+            for (int i = 0; i < (src.size() - k); i += k) {
+                map.append({ i, i + k - 1, src[i].first() });
+            }
+            m_progressMax += map.size();
+            for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
+                auto m(map.mid(i, c));
+                QFuture<void> future = QtConcurrent::map(m, scan);
+                future.waitForFinished();
+                m_progressVal += m.size();
             }
         }
-
-        if (reverse)
-            ReversePath(src[swapIdx]);
-
-        startPt = src[swapIdx].last();
-
-        if (swapIdx != firstIdx)
-            std::swap(src[firstIdx], src[swapIdx]);
+        scan({ 0, src.size(), startPt });
     }
+
+    //    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    //        progress(src.size(), firstIdx);
+    //        int swapIdx = firstIdx;
+    //        bool reverse = false;
+    //        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+    //            if (same(startPt, src[secondIdx].first())) {
+    //                swapIdx = secondIdx;
+    //                reverse = false;
+    //                break;
+    //            }
+    //            if (same(startPt, src[secondIdx].last())) {
+    //                swapIdx = secondIdx;
+    //                reverse = true;
+    //                break;
+    //            }
+    //        }
+    //        if (reverse)
+    //            ReversePath(src[swapIdx]);
+    //        startPt = src[swapIdx].last();
+    //        if (swapIdx != firstIdx)
+    //            std::swap(src[firstIdx], src[swapIdx]);
+    //    }
 }
 
 }
