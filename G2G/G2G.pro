@@ -1,6 +1,13 @@
 QT += core gui opengl widgets printsupport concurrent
 
-TARGET = Getber2Gcode
+contains(QT_ARCH, i386) {
+    message("32-bit")
+    TARGET = Getber2Gcode_x32
+} else {
+    message("64-bit")
+    TARGET = Getber2Gcode_x64
+}
+
 TEMPLATE = app
 
 RESOURCES += res/resources.qrc
