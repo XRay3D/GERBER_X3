@@ -214,24 +214,24 @@ void File::saveLaser(const QPointF& offset)
     sl.append(formated({ g0(), x(pathss.first().first().first().x()), y(pathss.first().first().first().y()), z(0.0) }));
     for (QPolygonF& path : pathss.first()) {
         if (i++ % 2) { //laser on
-            sl.append("M03");
-            FormatFlags[AlwaysS] = true;
-            sl.append(formated({ g1(), s(static_cast<int>(m_tool.spindleSpeed())) }));
+            //            sl.append("M03");
+            //            FormatFlags[AlwaysS] = true;
+            //            sl.append(formated({ g1(), s(static_cast<int>(m_tool.spindleSpeed())) }));
             bool skip = true;
             for (QPointF& point : path) {
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()), s(static_cast<int>(m_tool.spindleSpeed())) }));
             }
-            sl.append("M05");
         } else { //laser off
+            //            sl.append("M05");
             bool skip = true;
             for (QPointF& point : path) {
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()), s(static_cast<int>(0)) }));
             }
         }
     }
