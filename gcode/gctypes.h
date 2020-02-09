@@ -15,7 +15,7 @@ enum GCodeType {
     Drill,
     GCodeProperties,
     Raster,
-    Laser
+    LaserHLDI
 };
 
 enum Code {

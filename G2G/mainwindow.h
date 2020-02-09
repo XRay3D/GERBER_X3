@@ -93,10 +93,10 @@ private:
     // create actions
     void createActions();
     void createActionsFile();
+    void createActionsEdit();
     void createActionsService();
     void createActionsHelp();
     void createActionsZoom();
-    void createActionsSDS();
     void createActionsToolPath();
     void createActionsGraphics();
 

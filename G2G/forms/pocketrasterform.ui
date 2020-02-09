@@ -292,7 +292,7 @@
         <item>
          <widget class="QRadioButton" name="rbNormal">
           <property name="text">
-           <string>Normal</string>
+           <string>Milling</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -302,7 +302,7 @@
         <item>
          <widget class="QRadioButton" name="rbFast">
           <property name="text">
-           <string>Fast</string>
+           <string>HLDI</string>
           </property>
          </widget>
         </item>
