@@ -377,7 +377,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, Laser, {});
+        m_file = new File(m_returnPss, tool, depth, LaserHLDI, {});
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }

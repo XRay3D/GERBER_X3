@@ -9,8 +9,8 @@
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil("PocketRasterForm", new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names{ tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
-    , pixmaps{
+    , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
+    , pixmaps {
         QStringLiteral(":/toolpath/pock_rast_climb.svg"),
         QStringLiteral(":/toolpath/pock_rast_conv.svg"),
     }
@@ -71,6 +71,9 @@ void PocketRasterForm::on_pbSelect_clicked()
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
     if (tdb.exec()) {
         tool = tdb.tool();
+        ui->rbFast->setEnabled(tool.type() == Tool::Laser);
+        ui->rbFast->setChecked(tool.type() == Tool::Laser);
+        ui->rbNormal->setChecked(tool.type() != Tool::Laser);
         ui->toolName->setTool(tool);
         updateName();
     }

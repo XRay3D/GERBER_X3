@@ -27,7 +27,7 @@ public:
 
     void saveFormat();
     void restoreFormat();
-    ItemGroup* itemGroup() const override { return m_itemGroup.last().data(); }
+    ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
 
 protected:
     Paths merge() const override;

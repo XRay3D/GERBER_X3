@@ -63,7 +63,7 @@ protected:
     int m_id = -1;
     virtual Paths merge() const = 0;
 
-    QVector<QSharedPointer<ItemGroup>> m_itemGroup;
+    QVector<ItemGroup*> m_itemGroup;
     QList<QString> m_lines;
     QString m_name;
     mutable Paths m_mergedPaths;

@@ -169,12 +169,12 @@ void MainWindow::createActions()
 {
     // fileMenu
     createActionsFile();
+    // fileEdit    // Selection / Delete selected
+    createActionsEdit();
     // serviceMenu
     createActionsService();
     // zoomToolBar
     createActionsZoom();
-    // Selection / Delete selected
-    createActionsSDS();
     // toolpathToolBar
     createActionsToolPath();
     // grafica
@@ -267,6 +267,47 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Exit the application"));
 }
 
+void MainWindow::createActionsEdit()
+{
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->setObjectName(QStringLiteral("editMenu"));
+    QAction* action = editMenu->addAction(QIcon::fromTheme("edit-select-all"),
+        tr("Select all"),
+        this,
+        &MainWindow::selectAll);
+    action->setShortcut(QKeySequence::SelectAll);
+
+    //    QToolBar* toolBar = addToolBar(tr("Selection"));
+    //    toolBar->setObjectName(QStringLiteral("s"));
+    // s->setMovable(false);
+    //    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
+    //        tr("Select all"),
+    //        this,
+    //        &MainWindow::selectAll);
+    //    action->setShortcut(QKeySequence::SelectAll);
+
+    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
+    // action->setShortcut(QKeySequence::Redo);
+    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
+    // QList<QGraphicsItem*> list;
+    // for (QGraphicsItem* item : MyScene::self->items())
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // list << item;
+    // if (list.size() && QMessageBox::question(this,
+    // "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+    // for (QGraphicsItem* item : list)
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // delete item;
+    // MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
+    // MyScene::self->update();
+    // MainWindow::self->zero()->resetPos();
+    // MainWindow::self->home()->resetPos();
+    // Pin::shtifts()[0]->resetPos();
+    // }
+    // });
+    // action->setShortcut(QKeySequence::Delete);
+}
+
 void MainWindow::createActionsService()
 {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
@@ -312,39 +353,6 @@ void MainWindow::createActionsZoom()
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), [this]() {
         graphicsView->zoomToSelected();
     });
-}
-
-void MainWindow::createActionsSDS()
-{
-    QToolBar* toolBar = addToolBar(tr("Selection"));
-    toolBar->setObjectName(QStringLiteral("s"));
-    // s->setMovable(false);
-    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
-        tr("Select all"),
-        this,
-        &MainWindow::selectAll);
-    action->setShortcut(QKeySequence::SelectAll);
-
-    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
-    // action->setShortcut(QKeySequence::Redo);
-    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
-    // QList<QGraphicsItem*> list;
-    // for (QGraphicsItem* item : MyScene::self->items())
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // list << item;
-    // if (list.size() && QMessageBox::question(this,
-    // "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-    // for (QGraphicsItem* item : list)
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // delete item;
-    // MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
-    // MyScene::self->update();
-    // MainWindow::self->zero()->resetPos();
-    // MainWindow::self->home()->resetPos();
-    // Pin::shtifts()[0]->resetPos();
-    // }
-    // });
-    // action->setShortcut(QKeySequence::Delete);
 }
 
 void MainWindow::createActionsToolPath()

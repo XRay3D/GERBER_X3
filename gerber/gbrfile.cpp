@@ -11,15 +11,15 @@ static Format* crutch;
 
 File::File(QDataStream& stream)
 {
-    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
-    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
+    m_itemGroup.append(new ItemGroup);
+    m_itemGroup.append(new ItemGroup);
     read(stream);
 }
 
 File::File(const QString& fileName)
 {
-    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
-    m_itemGroup.append(QSharedPointer<ItemGroup>(new ItemGroup));
+    m_itemGroup.append(new ItemGroup);
+    m_itemGroup.append(new ItemGroup);
     m_name = fileName;
 }
 
@@ -95,7 +95,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 File::ItemsType File::itemsType() const { return m_itemsType; }
 
-ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroup[type].data(); }
+ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroup[type]; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -129,11 +129,11 @@ bool File::flashedApertures() const
     return false;
 }
 
-ItemGroup* File::itemGroup() const { return m_itemGroup[m_itemsType].data(); }
+ItemGroup* File::itemGroup() const { return m_itemGroup[m_itemsType]; }
 
 void File::addToScene() const
 {
-    for (const QSharedPointer<ItemGroup>& var : m_itemGroup) {
+    for (const auto var : m_itemGroup) {
         var->addToScene();
         var->setZValue(-m_id);
     }

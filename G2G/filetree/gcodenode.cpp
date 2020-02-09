@@ -79,7 +79,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
             case GCode::Drill:
                 return QIcon::fromTheme("drill-path");
             case GCode::Raster:
-            case GCode::Laser:
+            case GCode::LaserHLDI:
                 return QIcon::fromTheme("raster-path");
             }
             return QIcon();

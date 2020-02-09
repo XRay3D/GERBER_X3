@@ -209,7 +209,6 @@ void File::saveProfile(const QPointF& offset)
 void File::saveLaser(const QPointF& offset)
 {
     QVector<QVector<QPolygonF>> pathss(pss(offset));
-    const QVector<double> depths(getDepths());
     int i = 0;
     sl.append(formated({ g0(), x(pathss.first().first().first().x()), y(pathss.first().first().first().y()), z(0.0) }));
     for (QPolygonF& path : pathss.first()) {
@@ -267,7 +266,8 @@ QVector<QVector<QPolygonF>> File::pss(const QPointF& offset)
         const double k = Pin::minX() + Pin::maxX();
         for (QVector<QPolygonF>& paths : pathss) {
             for (QPolygonF& path : paths) {
-                std::reverse(path.begin(), path.end());
+                if (m_tool.type() != Tool::Laser)
+                    std::reverse(path.begin(), path.end());
                 for (QPointF& point : path) {
                     point.rx() = -point.x() + k;
                 }
@@ -295,7 +295,8 @@ QVector<QPolygonF> File::ps(const QPointF& offset)
     if (m_side == Bottom) {
         const double k = Pin::minX() + Pin::maxX();
         for (QPolygonF& path : paths) {
-            std::reverse(path.begin(), path.end());
+            if (m_tool.type() != Tool::Laser)
+                std::reverse(path.begin(), path.end());
             for (QPointF& point : path) {
                 point.rx() = -point.x() + k;
             }
@@ -372,7 +373,7 @@ void File::genGcode()
             case Drill:
                 saveDrill(offset);
                 break;
-            case Laser:
+            case LaserHLDI:
                 saveLaser(offset);
                 break;
             default:
@@ -705,7 +706,7 @@ void File::createGi()
     case Drill:
         createGiDrill();
         break;
-    case Laser:
+    case LaserHLDI:
         createGiLaser();
         break;
     default:

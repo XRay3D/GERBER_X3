@@ -25,7 +25,8 @@ SplashScreen* SplashScreen::instance = nullptr;
 
 int main(int argc, char* argv[])
 {
-
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
 

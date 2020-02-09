@@ -3,11 +3,14 @@
 #include <splashscreen.h>
 
 AbstractFile::AbstractFile()
-    : m_itemGroup(1, QSharedPointer<ItemGroup>(new ItemGroup))
+    : m_itemGroup(1, new ItemGroup)
 {
 }
 
-AbstractFile::~AbstractFile() {}
+AbstractFile::~AbstractFile()
+{
+    qDeleteAll(m_itemGroup);
+}
 
 QString AbstractFile::shortName() const { return QFileInfo(m_name).fileName(); }
 
