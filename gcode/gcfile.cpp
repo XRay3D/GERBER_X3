@@ -234,20 +234,20 @@ void File::saveLaser(const QPointF& offset)
             }
         }
     }
-    qDebug() << "sl";
-    //    if (pathss.size() > 1) {
-    //        for (QPolygonF& path : pathss.last()) {
-    //            startPath(path.first());
-    //            bool skip = true;
-    //            for (QPointF& point : path) {
-    //                if (skip)
-    //                    skip = false;
-    //                else
-    //                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
-    //            }
-    //            endPath();
-    //        }
-    //    }
+    sl.append("M04");
+    if (pathss.size() > 1) {
+        for (QPolygonF& path : pathss.last()) {
+            startPath(path.first());
+            bool skip = true;
+            for (QPointF& point : path) {
+                if (skip)
+                    skip = false;
+                else
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
+            }
+            endPath();
+        }
+    }
 }
 
 QVector<QVector<QPolygonF>> File::pss(const QPointF& offset)
@@ -430,11 +430,8 @@ void File::setLastDir(QString value)
 void File::startPath(const QPointF& point)
 {
     if (m_tool.type() == Tool::Laser) {
-        sl.append(formated({ g0(), x(point.x()), y(point.y()) })); //start xy
-        sl.append("M03");
-        FormatFlags[AlwaysS] = true;
+        sl.append(formated({ g0(), x(point.x()), y(point.y()), s(0) })); //start xy
         sl.append(formated({ g1(), s(static_cast<int>(m_tool.spindleSpeed())) }));
-
     } else {
         sl.append(formated({ g0(), x(point.x()), y(point.y()), s(static_cast<int>(m_tool.spindleSpeed())) })); //start xy
         sl.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
@@ -445,7 +442,7 @@ void File::startPath(const QPointF& point)
 void File::endPath()
 {
     if (m_tool.type() == Tool::Laser) {
-        sl.append("M05");
+        //sl.append("M05");
     } else {
         sl.append(formated({ g0(), z(GCodePropertiesForm::clearence) }));
     }

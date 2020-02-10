@@ -277,6 +277,14 @@ void MainWindow::createActionsEdit()
         &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
+    editMenu->addSeparator();
+    action = editMenu->addAction(tr("Undo"));
+    action->setEnabled(false);
+    action->setShortcut(QKeySequence::Undo);
+    action = editMenu->addAction(tr("Redo"));
+    action->setEnabled(false);
+    action->setShortcut(QKeySequence::Redo);
+
     //    QToolBar* toolBar = addToolBar(tr("Selection"));
     //    toolBar->setObjectName(QStringLiteral("s"));
     // s->setMovable(false);
@@ -502,9 +510,6 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
     tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
-    tb->addSeparator();
-    tb->addAction(tr("Undo"))->setEnabled(false);
-    tb->addAction(tr("Redo"))->setEnabled(false);
     tb->addSeparator();
     tb->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); })->setCheckable(true);
 }
