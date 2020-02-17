@@ -3,6 +3,7 @@
 #include "gcfile.h"
 
 #include <QElapsedTimer>
+#include <execution>
 #include <point.h>
 
 namespace GCode {
@@ -282,19 +283,19 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
 
     const IntPoint center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
 
-    Paths tempPath(profilePaths);
+    Paths laserPath(profilePaths);
 
     if (!qFuzzyIsNull(angle)) { // Rotate Paths
-        for (Path& path : tempPath)
+        for (Path& path : laserPath)
             RotatePath(path, angle, center);
         // get bounds of frames if angle > 0.0
         ClipperBase c;
-        c.AddPaths(tempPath, ptClip, true);
+        c.AddPaths(laserPath, ptClip, true);
         rect = c.GetBounds();
     }
 
-    rect.left -= static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale * 2);
-    rect.right += static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale * 2);
+    rect.left -= uScale;
+    rect.right += uScale;
 
     Path zPath;
     { // create "snake"
@@ -309,55 +310,12 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
 
     progress(0, 0);
 
-    Paths laserPath;
     { //  calculate
         Clipper c;
         c.AddPath(zPath, ptSubject, false);
-        c.AddPaths(tempPath, ptClip, true);
-
-        // laser off
-        c.Execute(ctDifference, tempPath, pftNonZero);
-        msg = "laser resize";
-
-        const cInt accDistance = static_cast<cInt>(m_gcp.dParam[AccDistance].toDouble() * uScale);
-        auto setLen = [accDistance](const IntPoint& p1, IntPoint& p2) {
-            if (p1.X > p2.X)
-                p2.X = p1.X - accDistance;
-            else
-                p2.X = p1.X + accDistance;
-        };
-        for (int i = 1; i < tempPath.size() - 1; ++i) {
-            progress(tempPath.size(), i);
-            auto& p = tempPath[i];
-            const auto s = p.size();
-            if (s > 2) {
-                setLen(p[0], p[1]);
-                setLen(p[s - 1], p[s - 2]);
-                if (s > 4)
-                    p.remove(2, s - 4);
-            }
-        }
-
-        tempPath.first().resize(2);
-        setLen(tempPath.first()[0], tempPath.first()[1]);
-
-        tempPath.last().remove(0, tempPath.last().size() - 2);
-        setLen(tempPath.last()[1], tempPath.last()[0]);
-
-        laserPath.append(tempPath);
-
-        // laser on
-        c.Execute(ctIntersection, tempPath, pftNonZero);
-        laserPath.append(tempPath);
-
-        sortSegments(laserPath);
-
-        // test sorting
-        for (int i = 0; i < laserPath.size() - 1; ++i) {
-            if (double l = Length(laserPath[i].last(), laserPath[i + 1].first()); l > 1) {
-                qDebug() << "sortBE2 err" << i << l;
-            }
-        }
+        c.AddPaths(laserPath, ptClip, true);
+        c.Execute(ctIntersection, laserPath, pftNonZero); // laser on
+        addAcc(laserPath, m_gcp.dParam[AccDistance].toDouble() * uScale); // add laser off paths
     }
 
     if (!qFuzzyIsNull(angle)) { // Rotate Paths
@@ -373,7 +331,6 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         m_returnPss.append(sortB(profilePaths));
     }
 
-    qDebug() << "createRaster" << (t.elapsed() / 1000);
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
@@ -383,107 +340,89 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     }
 }
 
-void RasterCreator::sortSegments(Paths& src)
+void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 {
-    msg = "laser sort";
 
-    //    auto same = [l = uScale / 100](const IntPoint& p1, const IntPoint& p2) -> bool {
-    //        return Length(p1, p2) < l; //abs(p1.X - p2.X) < sor && abs(p1.Y - p2.Y) < sor;
-    //    };
+    Paths pPath;
+    pPath.reserve(src.size() * 2 + 1);
 
-    std::function<bool(const IntPoint&, const IntPoint&)> same = [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1 == p2; };
+    std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
 
-    IntPoint startPt;
+    bool reverse {};
 
-    if (src[0].size() > src[1].size()) {
-        if (src[0].first().X > src[1].first().X) {
-            startPt = { std::min(src[1].first().X, src[1].last().X), src[1].first().Y };
-        } else {
-            startPt = { std::max(src[1].first().X, src[1].last().X), src[1].first().Y };
-        }
-    } else {
-        if (src[1].first().X > src[0].first().X) {
-            startPt = { std::min(src[0].first().X, src[0].last().X), src[0].first().Y };
-        } else {
-            startPt = { std::max(src[0].first().X, src[0].last().X), src[0].first().Y };
-        }
-    }
+    auto format = [&reverse](Path& src) -> Path& {
+        if (reverse)
+            std::sort(src.begin(), src.end(), [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1.X > p2.X; });
+        else
+            std::sort(src.begin(), src.end(), [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1.X < p2.X; });
+        return src;
+    };
 
-    ReversePaths(src);
-
-    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool {
-        return std::min(p1.first().Y, p1.last().Y) > std::min(p2.first().Y, p2.last().Y);
-    });
-
-    {
-        using Worck = std::tuple<int, int, IntPoint>;
-        /////////////////////////////////////////////////////////
-        std::function<void(Worck)> scan = [src = src.data(), same](Worck w) {
-            auto [from, to, startPt] = w;
-            qDebug() << "scan" << from << to;
-            for (int firstIdx = from /*0*/; firstIdx < to /*src.size()*/; ++firstIdx) {
-                progress(to /*src.size()*/, firstIdx);
-                int swapIdx = firstIdx;
-                bool reverse = false;
-                for (int secondIdx = firstIdx; secondIdx < to /*src.size()*/; ++secondIdx) {
-                    if (same(startPt, src[secondIdx].first())) {
-                        swapIdx = secondIdx;
-                        reverse = false;
-                        break;
-                    }
-                    if (same(startPt, src[secondIdx].last())) {
-                        swapIdx = secondIdx;
-                        reverse = true;
-                        break;
-                    }
+    auto adder = [&reverse, &pPath, accDistance](Paths& paths) {
+        std::sort(paths.begin(), paths.end(), [reverse](const Path& p1, const Path& p2) -> bool {
+            if (reverse)
+                return p1.first().X > p2.first().X;
+            else
+                return p1.first().X < p2.first().X;
+        });
+        if (pPath.size()) { // acc
+            Path acc;
+            {
+                const Path& path = pPath.last();
+                if (path.first().X < path.last().X) { // acc
+                    acc.append(Path { path.last(), { path.last().X + accDistance, path.first().Y } });
+                } else {
+                    acc.append(Path { path.last(), { path.last().X - accDistance, path.first().Y } });
                 }
-                if (reverse)
-                    ReversePath(src[swapIdx]);
-                startPt = src[swapIdx].last();
-                if (swapIdx != firstIdx)
-                    std::swap(src[firstIdx], src[swapIdx]);
             }
-        };
-        constexpr int k = 20000;
-        if (src.size() > k * QThread::idealThreadCount()) {
-            QVector<Worck> map;
+            {
+                const Path& path = paths.first();
+                if (path.first().X > path.last().X) { // acc
+                    acc.append(Path { { path.first().X + accDistance, path.first().Y }, path.first() });
+                } else {
+                    acc.append(Path { { path.first().X - accDistance, path.first().Y }, path.first() });
+                }
+            }
+            pPath.append(acc);
+        } else { // acc first
+            pPath.append(Path { { paths.first().first().X - accDistance, paths.first().first().Y }, paths.first().first() });
+        }
+        for (int j = 0; j < paths.size(); ++j) {
+            if (j) // acc
+                pPath.append(Path { paths[j - 1].last(), paths[j].first() });
+            pPath.append(paths[j]);
+        }
+    };
 
-            for (int i = 0; i < (src.size() - k); i += k) {
-                map.append({ i, i + k - 1, src[i].first() });
-            }
-            m_progressMax += map.size();
-            for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
-                auto m(map.mid(i, c));
-                QFuture<void> future = QtConcurrent::map(m, scan);
-                future.waitForFinished();
-                m_progressVal += m.size();
+    { //  calculate
+        cInt yLast = src.first().first().Y;
+        Paths paths;
+
+        for (int i = 0; i < src.size(); ++i) {
+            progress(src.size(), i);
+            if (yLast != src[i].first().Y) {
+                adder(paths);
+                reverse = !reverse;
+                yLast = src[i].first().Y;
+                paths = { format(src[i]) };
+            } else {
+                paths.append(format(src[i]));
             }
         }
-        scan({ 0, src.size(), startPt });
+
+        adder(paths);
     }
 
-    //    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-    //        progress(src.size(), firstIdx);
-    //        int swapIdx = firstIdx;
-    //        bool reverse = false;
-    //        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-    //            if (same(startPt, src[secondIdx].first())) {
-    //                swapIdx = secondIdx;
-    //                reverse = false;
-    //                break;
-    //            }
-    //            if (same(startPt, src[secondIdx].last())) {
-    //                swapIdx = secondIdx;
-    //                reverse = true;
-    //                break;
-    //            }
-    //        }
-    //        if (reverse)
-    //            ReversePath(src[swapIdx]);
-    //        startPt = src[swapIdx].last();
-    //        if (swapIdx != firstIdx)
-    //            std::swap(src[firstIdx], src[swapIdx]);
-    //    }
+    { // acc last
+        Path& path = pPath.last();
+        if (path.first().X < path.last().X) {
+            pPath.append(Path { path.last(), { path.last().X + accDistance, path.first().Y } });
+        } else {
+            pPath.append(Path { path.last(), { path.last().X - accDistance, path.first().Y } });
+        }
+    }
+
+    src = std::move(pPath);
 }
 
 }
