@@ -179,12 +179,12 @@ void VoronoiCreator::createVoronoi()
 {
     self = this;
 
-    const auto& tool = m_gcp.tool.first();
-    const auto depth = m_gcp.dParam[Depth].toDouble();
-    const auto width = m_gcp.dParam[Width].toDouble();
+    const auto& tool = m_gcp.tools.first();
+    const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
+    const auto width = m_gcp.params[GCodeParams::Width].toDouble();
 
     groupedPaths(CopperPaths);
-    switch (m_gcp.dParam[VorT].toInt()) {
+    switch (m_gcp.params[GCodeParams::VorT].toInt()) {
     case 0:
         jcVoronoi();
         break;
@@ -199,12 +199,14 @@ void VoronoiCreator::createVoronoi()
 
     qDebug() << "m_returnPs" << m_returnPs.size();
     if (width < tool.getDiameter(depth)) {
-        m_file = new File({ sortBE(m_returnPs) }, tool, depth, Voronoi);
+        m_gcp.gcType = Voronoi;
+        m_file = new File({ sortBE(m_returnPs) }, m_gcp);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     } else {
         createOffset(tool, depth, width);
-        m_file = new File(m_returnPss, tool, depth, Voronoi, m_workingRawPs);
+        m_gcp.gcType = Voronoi;
+        m_file = new File(m_returnPss, m_gcp, m_workingRawPs);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
@@ -319,7 +321,7 @@ void VoronoiCreator::clean(Path& path)
 {
     for (int i = 1; i < path.size() - 2; ++i) {
         QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
-        if (line.length() < m_gcp.dParam[Tolerance].toDouble()) {
+        if (line.length() < m_gcp.params[GCodeParams::Tolerance].toDouble()) {
             path[i] = toIntPoint(line.center());
             path.remove(i + 1);
             --i;
@@ -404,7 +406,7 @@ void VoronoiCreator::cgalVoronoi()
             segments.append(edge);
         }
     }
-    const cInt fo = m_gcp.dParam[FrameOffset].toDouble() * uScale;
+    const cInt fo = m_gcp.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
         { minX - fo, minY - fo },
         { minX - fo, maxY + fo },
@@ -426,7 +428,7 @@ void VoronoiCreator::cgalVoronoi()
 
 void VoronoiCreator::jcVoronoi()
 {
-    const auto tolerance = m_gcp.dParam[Tolerance].toDouble();
+    const auto tolerance = m_gcp.params[GCodeParams::Tolerance].toDouble();
 
     QVector<jcv_point> points;
     points.reserve(100000);
@@ -477,7 +479,7 @@ void VoronoiCreator::jcVoronoi()
     QMap<int, Pairs> edges;
     Pairs frame;
     {
-        const cInt fo = m_gcp.dParam[FrameOffset].toDouble() * uScale;
+        const cInt fo = m_gcp.params[GCodeParams::FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo), static_cast<jcv_real>(r.top - fo) },
             { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
@@ -628,7 +630,8 @@ void VoronoiCreator::boostVoronoi()
     }
 
     qDebug() << "boostVoronoi" << segments_.size();
-    m_file = new File({ sortBE(segments_) }, Tool {}, 0.0, Voronoi);
+    m_gcp.gcType = Voronoi;
+    m_file = new File({ sortBE(segments_) }, m_gcp);
     m_file->setFileName(Tool {}.name());
     emit fileReady(m_file);
 

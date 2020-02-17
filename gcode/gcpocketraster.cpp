@@ -13,10 +13,10 @@ RasterCreator::RasterCreator()
 
 void RasterCreator::create()
 {
-    if (m_gcp.dParam[Fast].toBool())
-        createRaster2(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[UseAngle].toDouble(), m_gcp.dParam[Pass].toInt());
+    if (m_gcp.params[GCodeParams::Fast].toBool())
+        createRaster2(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
     else
-        createRaster(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[UseAngle].toDouble(), m_gcp.dParam[Pass].toInt());
+        createRaster(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass)
@@ -235,7 +235,8 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, Raster, fillPaths);
+        m_gcp.gcType = Raster;
+        m_file = new File(m_returnPss, m_gcp, fillPaths);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
@@ -315,7 +316,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         c.AddPath(zPath, ptSubject, false);
         c.AddPaths(laserPath, ptClip, true);
         c.Execute(ctIntersection, laserPath, pftNonZero); // laser on
-        addAcc(laserPath, m_gcp.dParam[AccDistance].toDouble() * uScale); // add laser off paths
+        addAcc(laserPath, m_gcp.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
     }
 
     if (!qFuzzyIsNull(angle)) { // Rotate Paths
@@ -334,7 +335,8 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, LaserHLDI, {});
+        m_gcp.gcType = LaserHLDI;
+        m_file = new File(m_returnPss, m_gcp);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }

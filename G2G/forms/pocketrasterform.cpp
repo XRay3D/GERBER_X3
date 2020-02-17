@@ -166,15 +166,15 @@ void PocketRasterForm::createFile()
     GCode::GCodeParams gcp;
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tool.append(tool);
-    gcp.tool.append(tool2);
+    gcp.tools.append(tool);
+    gcp.tools.append(tool2);
 
-    gcp.dParam[GCode::UseAngle] = ui->dsbxAngle->value();
-    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gcp.dParam[GCode::Pass] = ui->cbxPass->currentIndex();
+    gcp.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
+    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
-        gcp.dParam[GCode::Fast] = true;
-        gcp.dParam[GCode::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+        gcp.params[GCode::GCodeParams::Fast] = true;
+        gcp.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     }
 
     m_tpc->setGcp(gcp);

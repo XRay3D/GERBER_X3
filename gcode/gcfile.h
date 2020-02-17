@@ -13,7 +13,7 @@ class File : public AbstractFile {
 
 public:
     explicit File(QDataStream& stream) { read(stream); } // for project load
-    explicit File(const Pathss& toolPathss, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths = {});
     void save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
@@ -28,6 +28,8 @@ private:
     void saveProfile(const QPointF& offset);
     void saveLaser(const QPointF& offset);
 
+    const GCodeParams m_gcp;
+
     QVector<QVector<QPolygonF>> pss(const QPointF& offset);
     QVector<QPolygonF> ps(const QPointF& offset);
 
@@ -35,11 +37,8 @@ private:
 
     QVector<double> getDepths();
 
-    GCodeType m_type;
     Paths m_g0path;
     Pathss m_toolPathss;
-    Tool m_tool;
-    double m_depth;
 
     Code m_gCode = G_null;
 
@@ -54,6 +53,11 @@ private:
         m_gCode = G01;
         return "G1";
     }
+
+    const double feedRate = 0.0;
+    const double plungeRate = 0.0;
+    const double spindleSpeed = 0.0;
+    const int toolType = 0;
 
     inline QString x(double val) { return "X" + format(val); }
     inline QString y(double val) { return "Y" + format(val); }

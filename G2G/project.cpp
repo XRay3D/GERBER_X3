@@ -16,8 +16,9 @@ bool Project::save(QFile& file)
 {
     try {
         QDataStream out(&file);
-        out << G2G_Ver_3;
-        switch (G2G_Ver_3) {
+        out << (m_ver = G2G_Ver_4);
+        switch (m_ver) {
+        case G2G_Ver_4:
         case G2G_Ver_3:
             out << m_spasingX;
             out << m_spasingY;
@@ -54,13 +55,13 @@ bool Project::open(QFile& file)
         QElapsedTimer t;
         t.start();
         QDataStream in(&file);
-        int ver;
-        in >> ver;
-        qDebug() << "Project ver:" << ver;
+        in >> m_ver;
+        qDebug() << "Project ver:" << m_ver;
 
         QPointF tmpPt;
 
-        switch (ver) {
+        switch (m_ver) {
+        case G2G_Ver_4:
         case G2G_Ver_3:
             in >> m_spasingX;
             in >> m_spasingY;
@@ -92,7 +93,7 @@ bool Project::open(QFile& file)
             case FileType::Gerber:
                 FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
                 break;
-            case FileType::Drill:
+            case FileType::Excellon:
                 FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
                 break;
             case FileType::GCode:
@@ -141,7 +142,7 @@ bool Project::isEmpty()
 {
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Drill))
+        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Excellon))
             return true;
     }
     return false;
@@ -210,7 +211,7 @@ QString Project::fileNames()
     QString fileNames;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
+        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon))
             fileNames.append(item->name()).append('|');
     }
     return fileNames;
@@ -221,7 +222,7 @@ int Project::contains(const QString& name)
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item->type() == FileType::Gerber || item->type() == FileType::Drill)
+        if (item->type() == FileType::Gerber || item->type() == FileType::Excellon)
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
@@ -248,7 +249,7 @@ bool Project::reload(int id, AbstractFile* file)
             f->itemGroup(Gerber::File::Components)->addToScene();
             f->itemGroup(Gerber::File::Components)->setZValue(-id);
         } break;
-        case FileType::Drill:
+        case FileType::Excellon:
             static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
@@ -423,7 +424,7 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     case static_cast<int>(FileType::Gerber):
         file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
         break;
-    case static_cast<int>(FileType::Drill):
+    case static_cast<int>(FileType::Excellon):
         file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
         break;
     case static_cast<int>(FileType::GCode):

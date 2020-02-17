@@ -189,8 +189,8 @@ void ProfileForm::createFile()
     GCode::GCodeParams gcp;
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tool.append(tool);
-    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
+    gcp.tools.append(tool);
+    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);

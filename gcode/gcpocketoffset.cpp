@@ -9,10 +9,10 @@ PocketCreator::PocketCreator()
 
 void PocketCreator::create()
 {
-    if (m_gcp.dParam[TwoTools].toBool()) {
-        createPocket2({ m_gcp.tool.first(), m_gcp.tool.last() }, m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[MinArea].toDouble());
+    if (m_gcp.params[GCodeParams::TwoTools].toBool()) {
+        createPocket2({ m_gcp.tools.first(), m_gcp.tools.last() }, m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::MinArea].toDouble());
     } else {
-        createPocket(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble(), m_gcp.dParam[Steps].toInt());
+        createPocket(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::Steps].toInt());
     }
 }
 
@@ -116,7 +116,8 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new GCode::File(m_returnPss, tool, depth, Pocket, fillPaths);
+        m_gcp.gcType = Pocket;
+        m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
@@ -181,7 +182,9 @@ void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, d
         if (m_returnPss.isEmpty()) {
             emit fileReady(nullptr);
         } else {
-            m_file = new GCode::File(m_returnPss, tool.second, depth, Pocket, fillPaths);
+            m_gcp.gcType = Pocket;
+            m_gcp.params[GCodeParams::PocketIndex] = 1;
+            m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
             m_file->setFileName(tool.second.name());
             emit fileReady(m_file);
         }
@@ -249,7 +252,9 @@ void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, d
         if (m_returnPss.isEmpty()) {
             emit fileReady(nullptr);
         } else {
-            m_file = new GCode::File(m_returnPss, tool.first, depth, Pocket, fillPaths);
+            m_gcp.gcType = Pocket;
+            m_gcp.params[GCodeParams::PocketIndex] = 0;
+            m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
             m_file->setFileName(tool.first.name());
             emit fileReady(m_file);
         }

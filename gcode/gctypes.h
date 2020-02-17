@@ -1,13 +1,14 @@
-#ifndef GCVARS_H
-#define GCVARS_H
-
-#include <tooldatabase/tool.h>
+#ifndef GC_TYPES_H
+#define GC_TYPES_H
 
 #include <QVariant>
+#include <datastream.h>
+#include <tooldatabase/tool.h>
 
 namespace GCode {
 
 enum GCodeType {
+    Null = -1,
     Profile,
     Pocket,
     Voronoi,
@@ -42,35 +43,65 @@ enum Grouping {
     CutoffPaths,
 };
 
-enum Param {
-    UseAngle,
-    Depth,
-    Pass,
-    UseRaster,
-    Steps,
-    Tolerance,
-    TwoTools,
-    Width,
-    VorT,
-    FileId,
-    MinArea,
-    FrameOffset,
-    AccDistance,
-    Side,
-    Convent,
-    Fast
-};
-
 struct GCodeParams {
-    QVector<Tool> tool;
-    QMap<int, QVariant> dParam;
+    enum Param {
+        UseAngle,
+        Depth,
+        Pass,
+        UseRaster,
+        Steps,
+        Tolerance,
+        TwoTools,
+        Width,
+        VorT,
+        FileId,
+        MinArea,
+        FrameOffset,
+        AccDistance,
+        Side,
+        Convent,
+        Fast,
+        PocketIndex,
+    };
 
-    SideOfMilling side() const { return static_cast<SideOfMilling>(dParam[Side].toInt()); }
-    bool convent() const { return dParam[Convent].toBool(); }
+    GCodeParams() {}
+    GCodeParams(const Tool& tool, double depth, GCodeType type)
+    {
+        tools.append(tool);
+        params[GCodeParams::Depth] = depth;
+        gcType = type;
+    }
 
-    void setSide(SideOfMilling val) { dParam[Side] = val; }
-    void setConvent(bool val) { dParam[Convent] = val; }
+    QVector<Tool> tools;
+    QMap<int, QVariant> params;
+    GCodeType gcType = Null;
+
+    friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type)
+    {
+        stream >> type.tools;
+        stream >> type.params;
+        stream >> type.gcType;
+        return stream;
+    }
+
+    friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type)
+    {
+        stream << type.tools;
+        stream << type.params;
+        stream << type.gcType;
+        return stream;
+    }
+
+    const Tool& getTool() const { return tools[params.value(PocketIndex, int {}).toInt()]; }
+
+    SideOfMilling side() const { return static_cast<SideOfMilling>(params[Side].toInt()); }
+    bool convent() const { return params[Convent].toBool(); }
+    double getToolDiameter() const { return tools.at(params[PocketIndex].toInt()).getDiameter(params[Depth].toInt()); }
+    double getDepth() const { return params.value(Depth).toDouble(); }
+
+    void setSide(SideOfMilling val) { params[Side] = val; }
+    void setConvent(bool val) { params[Convent] = val; }
 };
 }
 
-#endif // GCVARS_H
+#endif // GC_TYPES_H

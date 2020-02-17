@@ -116,7 +116,7 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setGeometry(Header::getRect(cornerButton->rect()).translated(1, -4));
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
-                static const Qt::CheckState chState[]{
+                static const Qt::CheckState chState[] {
                     Qt::Unchecked,
                     Qt::Unchecked,
                     Qt::Checked,
@@ -373,7 +373,7 @@ void DrillForm::on_pbCreate_clicked()
             for (int id : v)
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
             if (!pathsMap[selectedToolId].paths.isEmpty()) {
-                GCode::File* gcode = new GCode::File({ pathsMap[selectedToolId].paths }, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), GCode::Profile);
+                GCode::File* gcode = new GCode::File({ pathsMap[selectedToolId].paths }, { ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), GCode::Profile });
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
                 Project::instance()->addFile(gcode);
@@ -458,7 +458,7 @@ void DrillForm::on_pbCreate_clicked()
                         point1 = path[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({ { path } }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill);
+                GCode::File* gcode = new GCode::File({ { path } }, {ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill});
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
                 Project::instance()->addFile(gcode);
@@ -474,8 +474,8 @@ void DrillForm::on_pbCreate_clicked()
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(m_side);
-                    gcp.tool.append(ToolHolder::tools[toolId]);
-                    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
+                    gcp.tools.append(ToolHolder::tools[toolId]);
+                    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
                     GCode::ProfileCreator tpc;
                     tpc.addPaths(pathsMap[toolId].paths);
                     tpc.createGc(gcp);
@@ -485,12 +485,12 @@ void DrillForm::on_pbCreate_clicked()
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
-                    gcp.tool.append(ToolHolder::tools[toolId]);
-                    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
-                    gcp.dParam[GCode::Pass] = 0;
-                    gcp.dParam[GCode::UseRaster] = 0;
-                    gcp.dParam[GCode::Steps] = 0;
-                    gcp.dParam[GCode::TwoTools] = 0;
+                    gcp.tools.append(ToolHolder::tools[toolId]);
+                    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+                    gcp.params[GCode::GCodeParams::Pass] = 0;
+                    gcp.params[GCode::GCodeParams::UseRaster] = 0;
+                    gcp.params[GCode::GCodeParams::Steps] = 0;
+                    gcp.params[GCode::GCodeParams::TwoTools] = 0;
                     GCode::PocketCreator tpc;
                     tpc.setGcp(gcp);
                     tpc.addPaths(pathsMap[toolId].paths);
@@ -536,10 +536,10 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
     if (current.column() == 1) {
         QVector<Tool::Type> tools;
         tools = model->isSlot(current.row())
-            ? QVector<Tool::Type>{ Tool::EndMill }
+            ? QVector<Tool::Type> { Tool::EndMill }
             : ((m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
-                      : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
+                    ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
+                    : QVector<Tool::Type> { Tool::Drill, Tool::EndMill });
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -558,6 +558,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
         int apertureId = model->apertureId(previous.row());
         setSelected(apertureId, false);
     }
+
     //    if (0) {
     //        for (int row = 0; row < model->rowCount(); ++row) {
     //            int apertureId = model->apertureId(row);
@@ -573,6 +574,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
     //            }
     //        }
     //    }
+
     if (previous.isValid() && previous.row() != current.row()) {
         int apertureId = model->apertureId(current.row());
         setSelected(apertureId, true);
@@ -596,11 +598,11 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
         QVector<Tool::Type> tools;
         if (fl)
-            tools = QVector<Tool::Type>{ Tool::EndMill };
+            tools = QVector<Tool::Type> { Tool::EndMill };
         else
             tools = (m_worckType == GCode::Drill)
-                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }
-                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
+                ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill }
+                : QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {

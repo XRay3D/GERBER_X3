@@ -12,7 +12,7 @@ ProfileCreator::ProfileCreator()
 
 void ProfileCreator::create()
 {
-    createProfile(m_gcp.tool.first(), m_gcp.dParam[Depth].toDouble());
+    createProfile(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
@@ -124,7 +124,8 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, Profile);
+        m_gcp.gcType = Profile;
+        m_file = new File(m_returnPss, m_gcp);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     }
