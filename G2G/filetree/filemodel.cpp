@@ -42,7 +42,7 @@ void FileModel::addFile(AbstractFile* file)
     case FileType ::Gerber:
         item->append(new GerberNode(file->id()));
         break;
-    case FileType ::Drill:
+    case FileType ::Excellon:
         item->append(new DrillNode(file->id()));
         break;
     case FileType::GCode:

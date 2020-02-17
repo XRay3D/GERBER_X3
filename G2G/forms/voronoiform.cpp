@@ -149,12 +149,12 @@ void VoronoiForm::createFile()
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    gpc.tool.append(tool);
-    gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
-    gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
-    gpc.dParam[GCode::VorT] = ui->cbxSolver->currentIndex();
-    gpc.dParam[GCode::FrameOffset] = ui->dsbxOffset->value();
+    gpc.tools.append(tool);
+    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::GCodeParams::Tolerance] = ui->dsbxPrecision->value();
+    gpc.params[GCode::GCodeParams::Width] = ui->dsbxWidth->value() + 0.001;
+    gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
+    gpc.params[GCode::GCodeParams::FrameOffset] = ui->dsbxOffset->value();
 
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);

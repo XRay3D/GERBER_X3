@@ -14,10 +14,7 @@ File::File()
 {
 }
 
-File::~File()
-{
-    saveFormat();
-}
+File::~File() {}
 
 Format File::format() const
 {
@@ -26,8 +23,6 @@ Format File::format() const
 
 void File::setFormat(const Format& value)
 {
-    //    m_format = value;
-    //    m_format.file = this;
     m_format.zeroMode = value.zeroMode;
     m_format.unitMode = value.unitMode;
     m_format.decimal = value.decimal;
@@ -37,50 +32,6 @@ void File::setFormat(const Format& value)
         hole.state.updatePos();
         hole.item->updateHole();
     }
-}
-
-void File::setFormatForFile(const Format& /*value*/)
-{
-    //    QList<QString> lines;
-    //    QFile file(fileName());
-    //    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    //        return;
-    //    QTextStream in(&file);
-    //    while (!in.atEnd()) {
-    //        lines.append(in.readLine());
-    //    }
-}
-
-void File::saveFormat()
-{
-    //    QFile file(m_name + ".fmt");
-    //    if (file.open(QFile::WriteOnly)) {
-    //        QDataStream out(&file);
-    //        qDebug("saveFormat()");
-    //        out << m_format.zeroMode;
-    //        out << m_format.unitMode;
-    //        out << m_format.decimal;
-    //        out << m_format.integer;
-    //        out << m_format.offsetPos;
-    //    }
-}
-
-void File::restoreFormat()
-{
-    //    QFile file(m_name + ".fmt");
-    //    if (file.exists() && file.open(QFile::ReadOnly)) {
-    //        QDataStream in(&file);
-    //        qDebug("saveFormat()");
-    //        int tmp;
-    //        in >> tmp;
-    //        m_format.zeroMode = static_cast<ZeroMode>(tmp);
-    //        in >> tmp;
-    //        m_format.unitMode = static_cast<UnitMode>(tmp);
-    //        in >> m_format.decimal;
-    //        in >> m_format.integer;
-    //        in >> m_format.offsetPos;
-    //        setFormat(m_format);
-    //    }
 }
 
 double File::tool(int t) const
@@ -110,9 +61,8 @@ Paths Excellon::File::merge() const
         m_mergedPaths.append(item->paths());
     return m_mergedPaths;
 }
-} //  namespace Excellon
 
-void Excellon::File::write(QDataStream& stream) const
+void File::write(QDataStream& stream) const
 {
     stream << *this;
     stream << m_tools;
@@ -120,7 +70,7 @@ void Excellon::File::write(QDataStream& stream) const
     _write(stream);
 }
 
-void Excellon::File::read(QDataStream& stream)
+void File::read(QDataStream& stream)
 {
     stream >> *this;
     stream >> m_tools;
@@ -133,12 +83,14 @@ void Excellon::File::read(QDataStream& stream)
     _read(stream);
 }
 
-void Excellon::File::createGi()
+void File::createGi()
 {
     for (Hole& hole : *this) {
         DrillItem* item = new DrillItem(&hole, this);
         hole.item = item;
+        item->m_id = itemGroup()->size();
         itemGroup()->append(item);
     }
-    restoreFormat();
 }
+
+} //  namespace Excellon

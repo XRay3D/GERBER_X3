@@ -16,7 +16,7 @@ enum FileVersion {
     G2G_Ver_1 = 1,
     G2G_Ver_2,
     G2G_Ver_3,
-    // G2G_Ver_4,
+    G2G_Ver_4,
 };
 
 class Project : public QObject {
@@ -119,11 +119,13 @@ public:
 
     QRectF worckRect() const;
     void setWorckRect(const QRectF& worckRect);
+    static int ver() { return m_instance ? m_instance->m_ver : -1; }
 
 signals:
     void changed();
 
 private:
+    int m_ver;
     static Project* m_instance;
     QMap<int, QSharedPointer<AbstractFile>> m_files;
     QMutex m_mutex;

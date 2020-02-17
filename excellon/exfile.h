@@ -16,17 +16,14 @@ public:
     explicit File();
     ~File() override;
 
-    FileType type() const override { return FileType::Drill; }
+    FileType type() const override { return FileType::Excellon; }
 
     double tool(int t) const;
     QMap<int, double> tools() const;
 
     Format format() const;
     void setFormat(const Format& value);
-    void setFormatForFile(const Format& value);
 
-    void saveFormat();
-    void restoreFormat();
     ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
 
 protected:

@@ -202,9 +202,9 @@ void ThermalForm::createFile()
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    gpc.tool.append(tool);
-    gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gpc.dParam[GCode::FileId] = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.tools.append(tool);
+    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::GCodeParams::FileId] = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->id();
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addSupportPaths(wBridgePaths);

@@ -540,7 +540,7 @@ void MainWindow::createPinsPath()
             return;
         settings.setValue("Pin/depth", depth);
 
-        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, tool, depth, GCode::Drill);
+        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, { tool, depth, GCode::Drill });
         gcode->setFileName(tr("Pin (") + tool.name() + ")");
         m_project->addFile(gcode);
     }

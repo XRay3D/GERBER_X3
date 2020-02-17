@@ -221,13 +221,13 @@ void PocketOffsetForm::createFile()
     GCode::GCodeParams gcp;
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tool.append(tool);
-    gcp.tool.append(tool2);
+    gcp.tools.append(tool);
+    gcp.tools.append(tool2);
 
-    gcp.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gcp.dParam[GCode::Steps] = ui->sbxSteps->value();
-    gcp.dParam[GCode::TwoTools] = ui->chbxUseTwoTools->isChecked();
-    gcp.dParam[GCode::MinArea] = ui->dsbxMinArea->value();
+    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
+    gcp.params[GCode::GCodeParams::TwoTools] = ui->chbxUseTwoTools->isChecked();
+    gcp.params[GCode::GCodeParams::MinArea] = ui->dsbxMinArea->value();
 
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);

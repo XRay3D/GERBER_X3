@@ -1,5 +1,5 @@
-#ifndef VARS_H
-#define VARS_H
+#ifndef EX_TYPES_H
+#define EX_TYPES_H
 
 #include <datastream.h>
 #include <QPolygonF>
@@ -273,4 +273,4 @@ public:
 
 } // namespace Excellon
 
-#endif // VARS_H
+#endif // EX_TYPES_H

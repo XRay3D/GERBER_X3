@@ -11,7 +11,7 @@ using namespace ClipperLib;
 
 enum class FileType {
     Gerber,
-    Drill,
+    Excellon,
     GCode,
 };
 

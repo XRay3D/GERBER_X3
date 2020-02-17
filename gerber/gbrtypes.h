@@ -1,5 +1,5 @@
-#ifndef GERBER_H
-#define GERBER_H
+#ifndef GBR_TYPES_H
+#define GBR_TYPES_H
 
 #include <QDebug>
 #include <datastream.h>
@@ -311,4 +311,4 @@ struct StepRepeatStr {
 
 } // namespace Gerber
 
-#endif //   GERBER_H
+#endif //   GBR_TYPES_H
