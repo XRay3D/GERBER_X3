@@ -90,10 +90,12 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     GCodePropertiesForm(); // init vars;
 
-    //    QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
-    //    QTimer::singleShot(100, [this] { selectAll(); });
-    //    QTimer::singleShot(120, [this] { toolpathActionList[GCode::Raster]->triggered(); });
-    //    QTimer::singleShot(150, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+    if constexpr (0) { // autocreate Raster
+        QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
+        QTimer::singleShot(120, [this] { selectAll(); });
+        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Raster]->triggered(); });
+        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+    }
     //    QTimer::singleShot(100, [this] {
     //        ToolDatabase tdb(this, {});
     //        tdb.exec();
