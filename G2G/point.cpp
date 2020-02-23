@@ -66,7 +66,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if (Scene::drawPdf())
         return;
 
-    QColor c(m_type == Home ? Settings::color(Colors::Home) : Settings::color(Colors::Zero));
+    QColor c(m_type == Home ? Settings::guiColor(Colors::Home) : Settings::guiColor(Colors::Zero));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -97,36 +97,36 @@ void Marker::resetPos(bool fl)
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
     if (m_type == Home)
-        switch (Settings::homePos()) {
+        switch (Settings::mkrHomePos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + Settings::homeOffset());
+            setPos(rect.topLeft() + Settings::mkrHomeOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + Settings::homeOffset());
+            setPos(rect.topRight() + Settings::mkrHomeOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + Settings::homeOffset());
+            setPos(rect.bottomLeft() + Settings::mkrHomeOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + Settings::homeOffset());
+            setPos(rect.bottomRight() + Settings::mkrHomeOffset());
             break;
         default:
             setPos({});
             break;
         }
     else {
-        switch (Settings::zeroPos()) {
+        switch (Settings::mkrZeroPos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + Settings::zeroOffset());
+            setPos(rect.topLeft() + Settings::mkrZeroOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + Settings::zeroOffset());
+            setPos(rect.topRight() + Settings::mkrZeroOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + Settings::zeroOffset());
+            setPos(rect.bottomLeft() + Settings::mkrZeroOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + Settings::zeroOffset());
+            setPos(rect.bottomRight() + Settings::mkrZeroOffset());
             break;
         default:
             setPos({});
@@ -227,7 +227,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (Scene::drawPdf())
         return;
 
-    QColor c(Settings::color(Colors::Pin));
+    QColor c(Settings::guiColor(Colors::Pin));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -340,7 +340,7 @@ void Pin::resetPos(bool fl)
     if (fl)
         updateRect();
 
-    const QPointF offset(Settings::pinOffset());
+    const QPointF offset(Settings::mkrPinOffset());
 
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
@@ -393,6 +393,10 @@ LayoutFrames* LayoutFrames ::m_instance = nullptr;
 
 LayoutFrames::LayoutFrames()
 {
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class LayoutFrames more than 2 times!!!");
+        exit(1);
+    }
     setZValue(-std::numeric_limits<double>::max());
     m_instance = this;
     Scene::addItem(this);

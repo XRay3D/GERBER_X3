@@ -395,7 +395,7 @@ been installed in ROM).
 requirement to continue to provide support service, warranty, or updates
 for a work that has been modified or installed by the recipient, or for
 the User Product in which it has been modified or installed.  Access to a
-network may be denied when the modification itself materially and
+network may be denied when the modification itm_instance materially and
 adversely affects the operation of the network or violates the rules and
 protocols for communication across the network.
 
@@ -566,7 +566,7 @@ and the Corresponding Source of the work is not available for anyone
 to copy, free of charge and under the terms of this License, through a
 publicly available network server or other readily accessible means,
 then you must either (1) cause the Corresponding Source to be so
-available, or (2) arrange to deprive yourself of the benefit of the
+available, or (2) arrange to deprive yourm_instance of the benefit of the
 patent license for this particular work, or (3) arrange, in a manner
 consistent with the requirements of this License, to extend the patent
 license to downstream recipients.  &quot;Knowingly relying&quot; means you have

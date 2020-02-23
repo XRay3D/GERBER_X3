@@ -33,49 +33,75 @@ class Settings {
 public:
     Settings();
 
-    static int circleSegments(double radius);
-    static QColor& color(Colors id);
-    static bool cleanPolygons();
-    static bool skipDuplicates();
-    static bool simplifyRegions();
+    /*G-Code*/
+    static QString gcEnd();
+    static QString gcFileExtension();
+    static QString gcFormat();
+    static bool gcInfo();
+    static QString gcLaserConstOn();
+    static QString gcLaserDynamOn();
+    static bool gcSameFolder();
+    static QString gcSpindleLaserOff();
+    static QString gcSpindleOn();
+    static QString gcStart();
 
-    static QString startGCode();
-    static QString endGCode();
-    static QString gCodeFormat();
+    /*GUI*/
+    static QColor& guiColor(Colors id);
+    static bool guiSmoothScSh();
 
-    static QPointF homeOffset();
-    static QPointF zeroOffset();
-    static int homePos();
-    static int zeroPos();
+    /*Gerber/G-Code*/
+    static int gbrGcCircleSegments(double radius);
 
-    static QPointF pinOffset();
+    /*Gerber*/
+    static bool gbrCleanPolygons();
+    static bool gbrSimplifyRegions();
+    static bool gbrSkipDuplicates();
 
-    static bool gcinfo();
+    static QPointF mkrHomeOffset();
+    static int mkrHomePos();
+    static QPointF mkrPinOffset();
+    static QPointF mkrZeroOffset();
+    static int mkrZeroPos();
+    /*Other*/
+    static double gridStep(double scale);
     static bool inch();
     static void setInch(bool val);
 
-    static double gridStep(double scale);
-    static bool smoothScSh();
-
 protected:
-    static QColor m_color[static_cast<int>(Colors::Count)];
-    static int m_minCircleSegments;
-    static double m_minCircleSegmentLength;
-    static bool m_cleanPolygons;
-    static bool m_skipDuplicates;
-    static bool m_simplifyRegions;
-    static bool m_gcinfo;
-    static QString m_startGCode;
-    static QString m_endGCode;
-    static QString m_GCode;
+    /*G-Code*/
+    static QString m_gcEnd;
+    static QString m_gcFileExtension;
+    static QString m_gcFormat;
+    static bool m_gcInfo;
+    static QString m_gcLaserConstOn;
+    static QString m_gcLaserDynamOn;
+    static bool m_gcSameFolder;
+    static QString m_gcSpindleLaserOff;
+    static QString m_gcSpindleOn;
+    static QString m_gcStart;
 
-    static QPointF m_pinOffset;
-    static QPointF m_homeOffset;
-    static QPointF m_zeroOffset;
-    static int m_homePos;
-    static int m_zeroPos;
+    /*GUI*/
+    static QColor m_guiColor[static_cast<int>(Colors::Count)];
+    static bool m_guiSmoothScSh;
+
+    /*Gerber/G-Code*/
+    static double m_gbrGcMinCircleSegmentLength;
+    static int m_gbrGcMinCircleSegments;
+
+    /*Gerber*/
+    static bool m_gbrCleanPolygons;
+    static bool m_gbrSimplifyRegions;
+    static bool m_gbrSkipDuplicates;
+
+    /*Markers*/
+    static QPointF m_mrkHomeOffset;
+    static int m_mrkHomePos;
+    static QPointF m_mrkPinOffset;
+    static QPointF m_mrkZeroOffset;
+    static int m_mrkZeroPos;
+
+    /*Other*/
     static bool m_inch;
-    static bool m_smoothScSh;
 };
 
 #endif // SETTINGS_H

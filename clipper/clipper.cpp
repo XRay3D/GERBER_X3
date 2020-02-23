@@ -3893,7 +3893,7 @@ void ClipperOffset::DoOffset(double delta)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
 #ifndef GTE
-        steps = Settings::circleSegments(delta * dScale);
+        steps = Settings::gbrGcCircleSegments(delta * dScale);
 #else
         steps = 36;
 #endif

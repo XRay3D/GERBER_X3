@@ -8,14 +8,18 @@
 #include <QMimeData>
 #include <project.h>
 
-FileModel* FileModel::m_self = nullptr;
+FileModel* FileModel::m_instance = nullptr;
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem"))
     , mimeType(QStringLiteral("application/GCodeItem"))
 {
-    m_self = this;
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class FileModel more than 2 times!!!");
+        exit(1);
+    }
+    m_instance = this;
     rootItem->append(new FolderNode(tr("Gerber Files")));
     rootItem->append(new FolderNode(tr("Excellon")));
     rootItem->append(new FolderNode(tr("Tool Paths")));
@@ -25,19 +29,19 @@ FileModel::FileModel(QObject* parent)
 FileModel::~FileModel()
 {
     delete rootItem;
-    m_self = nullptr;
+    m_instance = nullptr;
 }
 
 void FileModel::addFile(AbstractFile* file)
 {
-    if (!m_self || !file)
+    if (!m_instance || !file)
         return;
 
-    AbstractNode* item(m_self->rootItem->child(static_cast<int>(file->type())));
-    QModelIndex index = m_self->createIndex(0, 0, item);
+    AbstractNode* item(m_instance->rootItem->child(static_cast<int>(file->type())));
+    QModelIndex index = m_instance->createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    m_self->beginInsertRows(index, rowCount, rowCount);
+    m_instance->beginInsertRows(index, rowCount, rowCount);
     switch (file->type()) {
     case FileType ::Gerber:
         item->append(new GerberNode(file->id()));
@@ -51,25 +55,25 @@ void FileModel::addFile(AbstractFile* file)
     default:
         break;
     }
-    m_self->endInsertRows();
+    m_instance->endInsertRows();
 
-    QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));
-    emit m_self->select(selectIndex);
+    QModelIndex selectIndex = m_instance->createIndex(rowCount, 0, item->child(rowCount));
+    emit m_instance->select(selectIndex);
 }
 
 void FileModel::closeProject()
 {
-    if (m_self) {
+    if (m_instance) {
         AbstractNode* item;
-        for (int i = 0; i < m_self->rootItem->childCount(); ++i) {
-            item = m_self->rootItem->child(i);
-            QModelIndex index = m_self->createIndex(i, 0, item);
+        for (int i = 0; i < m_instance->rootItem->childCount(); ++i) {
+            item = m_instance->rootItem->child(i);
+            QModelIndex index = m_instance->createIndex(i, 0, item);
             int rowCount = item->childCount();
             if (rowCount) {
-                m_self->beginRemoveRows(index, 0, rowCount - 1);
+                m_instance->beginRemoveRows(index, 0, rowCount - 1);
                 for (int i = 0; i < rowCount; ++i)
                     item->remove(0);
-                m_self->endRemoveRows();
+                m_instance->endRemoveRows();
             }
         }
     }
@@ -159,7 +163,7 @@ int FileModel::rowCount(const QModelIndex& parent) const
     return getItem(parent)->childCount();
 }
 
-FileModel* FileModel::self() { return m_self; }
+FileModel* FileModel::instance() { return m_instance; }
 
 //QStringList FileModel::mimeTypes() const
 //{

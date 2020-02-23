@@ -6,21 +6,26 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
 #include <gi/graphicsitem.h>
 #include <settings.h>
 
-Scene* Scene::m_self = nullptr;
+Scene* Scene::m_instance = nullptr;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    m_self = this;
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
+        exit(1);
+    }
+    m_instance = this;
 }
 
-Scene::~Scene() { m_self = nullptr; }
+Scene::~Scene() { m_instance = nullptr; }
 
 void Scene::RenderPdf()
 {
@@ -66,35 +71,35 @@ QRectF Scene::itemsBoundingRect()
 
 bool Scene::drawPdf()
 {
-    if (m_self)
-        return m_self->m_drawPdf;
+    if (m_instance)
+        return m_instance->m_drawPdf;
     return false;
 }
 
 QList<QGraphicsItem*> Scene::selectedItems()
 {
-    if (m_self)
-        return m_self->QGraphicsScene::selectedItems();
+    if (m_instance)
+        return m_instance->QGraphicsScene::selectedItems();
     return {};
 }
 
 void Scene::addItem(QGraphicsItem* item)
 {
-    if (m_self)
-        m_self->QGraphicsScene::addItem(item);
+    if (m_instance)
+        m_instance->QGraphicsScene::addItem(item);
 }
 
 QList<QGraphicsItem*> Scene::items(Qt::SortOrder order)
 {
-    if (m_self)
-        return m_self->QGraphicsScene::items(order);
+    if (m_instance)
+        return m_instance->QGraphicsScene::items(order);
     return {};
 }
 
 void Scene::update()
 {
-    if (m_self)
-        m_self->QGraphicsScene::update();
+    if (m_instance)
+        m_instance->QGraphicsScene::update();
 }
 
 void Scene::setCross1(const QPointF& cross)
@@ -201,7 +206,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, Settings::color(Colors::Background));
+    painter->fillRect(rect, Settings::guiColor(Colors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -267,10 +272,10 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
 
-    const QColor color[3]{
-        Settings::color(Colors::Grid1),
-        Settings::color(Colors::Grid5),
-        Settings::color(Colors::Grid10),
+    const QColor color[3] {
+        Settings::guiColor(Colors::Grid1),
+        Settings::guiColor(Colors::Grid5),
+        Settings::guiColor(Colors::Grid10),
     };
 
     painter->save();

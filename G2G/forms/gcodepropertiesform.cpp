@@ -8,7 +8,7 @@
 #include <project.h>
 #include <scene.h>
 
-GCodePropertiesForm* GCodePropertiesForm::self = nullptr;
+GCodePropertiesForm* GCodePropertiesForm::m_instance = nullptr;
 
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::boardThickness;
@@ -21,6 +21,10 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     : QWidget(prnt)
     , ui(new Ui::GCodePropertiesForm)
 {
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class GCodePropertiesForm more than 2 times!!!");
+        exit(1);
+    }
     ui->setupUi(this);
 
     connect(ui->dsbxClearence, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
@@ -105,16 +109,16 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     });
     if (prnt != nullptr)
         prnt->setWindowTitle(ui->label->text());
-    self = this;
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
+    m_instance = this;
 }
 
 GCodePropertiesForm::~GCodePropertiesForm()
 {
-    self = nullptr;
+    m_instance = nullptr;
     if (Marker::get(Marker::Home))
         Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
     if (Marker::get(Marker::Zero))
@@ -141,20 +145,20 @@ GCodePropertiesForm::~GCodePropertiesForm()
 
 void GCodePropertiesForm::updatePosDsbxs()
 {
-    if (!self)
+    if (!m_instance)
         return;
-    self->ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
-    self->ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
-    self->ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
-    self->ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
+    m_instance->ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
+    m_instance->ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
+    m_instance->ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
+    m_instance->ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
 }
 
 void GCodePropertiesForm::updateAll()
 {
-    if (!self)
+    if (!m_instance)
         return;
-    self->ui->dsbxSpasingX;
-    self->ui->dsbxSpasingY;
-    self->ui->sbxStepsX;
-    self->ui->sbxStepsY;
+    m_instance->ui->dsbxSpasingX;
+    m_instance->ui->dsbxSpasingY;
+    m_instance->ui->sbxStepsX;
+    m_instance->ui->sbxStepsY;
 }

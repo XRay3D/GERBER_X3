@@ -33,7 +33,7 @@ private:
     QMap<long, long> hGrid;
     QMap<long, long> vGrid;
     void drawRuller(QPainter* painter);
-    static Scene* m_self;
+    static Scene* m_instance;
     // QGraphicsScene interface
 protected:
     void drawBackground(QPainter* painter, const QRectF& rect) override;

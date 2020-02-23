@@ -24,7 +24,7 @@ class DrillForm : public QWidget {
 public:
     explicit DrillForm(QWidget* parent = nullptr);
     ~DrillForm() override;
-    static DrillForm* self;
+    static DrillForm* m_instance;
 
     void setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
     void setHoles(const QMap<int, double>& value);

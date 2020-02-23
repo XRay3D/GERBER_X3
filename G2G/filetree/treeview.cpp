@@ -4,6 +4,7 @@
 #include "gerbernode.h"
 #include "layerdelegate.h"
 #include "project.h"
+#include "settings.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
 #include <QGraphicsScene>
@@ -131,8 +132,8 @@ void TreeView::hideOther()
 void TreeView::closeFile()
 {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
-    if (DrillForm::self)
-        DrillForm::self->on_pbClose_clicked();
+    if (DrillForm::m_instance)
+        DrillForm::m_instance->on_pbClose_clicked();
 }
 
 void TreeView::saveGcodeFile()
@@ -140,7 +141,7 @@ void TreeView::saveGcodeFile()
     auto* file = Project::instance()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::File::getLastDir().append(m_menuIndex.data().toString()),
-        tr("GCode (*.tap)")));
+        tr("GCode (*.%1)").arg(Settings::gcFileExtension())));
 
     if (name.isEmpty())
         return;
@@ -150,8 +151,8 @@ void TreeView::saveGcodeFile()
 
 void TreeView::showExcellonDialog()
 {
-    if (DrillForm::self)
-        DrillForm::self->on_pbClose_clicked();
+    if (DrillForm::m_instance)
+        DrillForm::m_instance->on_pbClose_clicked();
     m_exFormatDialog = new ExcellonDialog(Project::instance()->file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
     m_exFormatDialog->show();

@@ -40,7 +40,7 @@ public:
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
 
-    static FileModel* self();
+    static FileModel* instance();
 
     // Drag and Drop
     //    QStringList mimeTypes() const override;
@@ -54,7 +54,7 @@ private:
     const QString mimeType;
 
     static void addFile(AbstractFile* file);
-    static FileModel* m_self;
+    static FileModel* m_instance;
     AbstractNode* getItem(const QModelIndex& index) const;
 };
 

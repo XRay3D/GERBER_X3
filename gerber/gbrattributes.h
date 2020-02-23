@@ -162,7 +162,7 @@ namespace Att { //Attributes
         the first one ends. Thus, the order in which they are
         defined is significant. A contour is closed: the end point
         of the last draw/arc must coincide with the start point of
-        the first. Outlines cannot self-intersect.
+        the first. Outlines cannot m_instance-intersect.
         Four different types of outlines are defined. See drawing,
         courtesy Thiadmer Riemersma:
         Outlines of different types on the same component are

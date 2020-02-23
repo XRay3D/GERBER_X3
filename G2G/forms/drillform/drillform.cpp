@@ -17,7 +17,7 @@
 #include <gctypes.h>
 #include <graphicsview.h>
 
-DrillForm* DrillForm::self = nullptr;
+DrillForm* DrillForm::m_instance = nullptr;
 
 enum { IconSize = 24 };
 
@@ -97,6 +97,10 @@ DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
 {
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class DrillForm more than 2 times!!!");
+        exit(1);
+    }
     ui->setupUi(this);
     ui->toolTable->setIconSize(QSize(IconSize, IconSize));
     ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -177,12 +181,12 @@ DrillForm::DrillForm(QWidget* parent)
 
     parent->setWindowTitle(ui->label->text());
 
-    self = this;
+    m_instance = this;
 }
 
 DrillForm::~DrillForm()
 {
-    self = nullptr;
+    m_instance = nullptr;
     QSettings settings;
     settings.beginGroup("DrillForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
@@ -458,7 +462,7 @@ void DrillForm::on_pbCreate_clicked()
                         point1 = path[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({ { path } }, {ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill});
+                GCode::File* gcode = new GCode::File({ { path } }, { ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill });
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
                 Project::instance()->addFile(gcode);

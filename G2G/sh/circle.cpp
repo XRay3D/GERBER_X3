@@ -61,7 +61,7 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 void Circle::redraw()
 {
     m_radius = (QLineF(sh[Center]->pos(), sh[Point1]->pos()).length());
-    const int intSteps = Settings::circleSegments(m_radius);
+    const int intSteps = Settings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
     const IntPoint center(toIntPoint(sh[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;

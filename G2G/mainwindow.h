@@ -66,13 +66,14 @@ private:
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
 
-    static MainWindow* self;
+    static MainWindow* m_instance;
 
     inline QString fileKey();
     inline QString recentFilesKey();
     void about();
     bool closeProject();
-    void createDockWidget(QWidget* dwContent, int type);
+    template<class T>
+    void createDockWidget(/*QWidget* dwContent,*/ int type);
     void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
