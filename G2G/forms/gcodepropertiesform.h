@@ -26,7 +26,7 @@ public:
     static double plunge;
     static double glue;
 
-    static GCodePropertiesForm* self;
+    static GCodePropertiesForm* m_instance;
 
 private:
     Ui::GCodePropertiesForm* ui;

@@ -20,11 +20,15 @@
 
 const double zoomFactor = 1.5;
 
-GraphicsView* GraphicsView::self = nullptr;
+GraphicsView* GraphicsView::m_instance = nullptr;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class GraphicsView more than 2 times!!!");
+        exit(1);
+    }
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
     setViewportUpdateMode(FullViewportUpdate /*SmartViewportUpdate*/ /*NoViewportUpdate*/);
@@ -100,12 +104,12 @@ GraphicsView::GraphicsView(QWidget* parent)
     //    });
     //    t->start(16);
 
-    self = this;
+    m_instance = this;
 }
 
 GraphicsView::~GraphicsView()
 {
-    self = nullptr;
+    m_instance = nullptr;
 }
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
@@ -116,27 +120,27 @@ void GraphicsView::setScene(QGraphicsScene* Scene)
 
 void GraphicsView::zoomFit()
 {
-    self->scene()->setSceneRect(self->scene()->itemsBoundingRect());
-    self->fitInView(self->scene()->sceneRect(), Qt::KeepAspectRatio);
+    m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
+    m_instance->fitInView(m_instance->scene()->sceneRect(), Qt::KeepAspectRatio);
     //scale(0.95, 0.95);
-    self->updateRuler();
+    m_instance->updateRuler();
 }
 
 void GraphicsView::zoomToSelected()
 {
-    if (self == nullptr)
+    if (m_instance == nullptr)
         return;
     QRectF rect;
-    for (const QGraphicsItem* item : self->scene()->selectedItems()) {
+    for (const QGraphicsItem* item : m_instance->scene()->selectedItems()) {
         const QRectF tmpRect(item->pos().isNull() ? item->boundingRect() : item->boundingRect().translated(item->pos()));
         rect = rect.isEmpty() ? tmpRect : rect.united(tmpRect);
     }
     if (rect.isEmpty())
         return;
 
-    const double k = 5.0 / self->transform().m11();
+    const double k = 5.0 / m_instance->transform().m11();
     rect += QMarginsF(k, k, k, k);
-    if (Settings::smoothScSh() && /* DISABLES CODE */ (0)) {
+    if (Settings::guiSmoothScSh() && /* DISABLES CODE */ (0)) {
         //        // Reset the view scale to 1:1.
         //        QRectF unity = d->matrix.mapRect(QRectF(0, 0, 1, 1));
         //        if (unity.isEmpty())
@@ -166,62 +170,62 @@ void GraphicsView::zoomToSelected()
         //        // Scale and center on the center of \a rect.
         //        scale(xratio, yratio);
         //        centerOn(rect.center());
-        //        self->anim(self, "sceneRect", self->scene()->sceneRect(), rect);
-        self->fitInView(rect, Qt::KeepAspectRatio);
-        self->updateRuler();
+        //        m_instance->anim(m_instance, "sceneRect", m_instance->scene()->sceneRect(), rect);
+        m_instance->fitInView(rect, Qt::KeepAspectRatio);
+        m_instance->updateRuler();
     } else {
-        const double k = 10 * self->scaleFactor();
-        self->fitInView(rect + QMarginsF(k, k, k, k), Qt::KeepAspectRatio);
-        self->updateRuler();
+        const double k = 10 * m_instance->scaleFactor();
+        m_instance->fitInView(rect + QMarginsF(k, k, k, k), Qt::KeepAspectRatio);
+        m_instance->updateRuler();
     }
 }
 
 void GraphicsView::zoom100()
 {
-    if (self == nullptr)
+    if (m_instance == nullptr)
         return;
     double x = 1.0, y = 1.0;
-    const double m11 = self->QGraphicsView::transform().m11(), m22 = self->QGraphicsView::transform().m22();
+    const double m11 = m_instance->QGraphicsView::transform().m11(), m22 = m_instance->QGraphicsView::transform().m22();
     if (/* DISABLES CODE */ (0)) {
-        x = qAbs(1.0 / m11 / (25.4 / self->physicalDpiX()));
-        y = qAbs(1.0 / m22 / (25.4 / self->physicalDpiY()));
+        x = qAbs(1.0 / m11 / (25.4 / m_instance->physicalDpiX()));
+        y = qAbs(1.0 / m22 / (25.4 / m_instance->physicalDpiY()));
     } else {
         const QSizeF size(GetEdid()); // size in mm
         const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
         x = qAbs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
-    self->scale(x, y);
-    self->updateRuler();
+    m_instance->scale(x, y);
+    m_instance->updateRuler();
 }
 
 void GraphicsView::zoomIn()
 {
-    if (self == nullptr)
+    if (m_instance == nullptr)
         return;
     if (getScale() > 10000.0)
         return;
 
-    if (Settings::smoothScSh()) {
-        self->anim(self, "scale", getScale(), getScale() * zoomFactor);
+    if (Settings::guiSmoothScSh()) {
+        m_instance->anim(m_instance, "scale", getScale(), getScale() * zoomFactor);
     } else {
-        self->scale(zoomFactor, zoomFactor);
-        self->updateRuler();
+        m_instance->scale(zoomFactor, zoomFactor);
+        m_instance->updateRuler();
     }
 }
 
 void GraphicsView::zoomOut()
 {
-    if (self == nullptr)
+    if (m_instance == nullptr)
         return;
     if (getScale() < 1.0)
         return;
 
-    if (Settings::smoothScSh()) {
-        self->anim(self, "scale", getScale(), getScale() * (1.0 / zoomFactor));
+    if (Settings::guiSmoothScSh()) {
+        m_instance->anim(m_instance, "scale", getScale(), getScale() * (1.0 / zoomFactor));
     } else {
-        self->scale(1.0 / zoomFactor, 1.0 / zoomFactor);
-        self->updateRuler();
+        m_instance->scale(1.0 / zoomFactor, 1.0 / zoomFactor);
+        m_instance->updateRuler();
     }
 }
 
@@ -252,9 +256,9 @@ void GraphicsView::setScale(double s)
 
 double GraphicsView::getScale()
 {
-    if (self == nullptr)
+    if (m_instance == nullptr)
         return 1.0;
-    return self->transform().m11();
+    return m_instance->transform().m11();
 }
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
@@ -274,7 +278,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::ShiftModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::horizontalScrollBar();
-            if (Settings::smoothScSh()) {
+            if (Settings::guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (event->delta() > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - event->delta());
@@ -284,7 +288,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::NoModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::verticalScrollBar();
-            if (Settings::smoothScSh()) {
+            if (Settings::guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (event->delta() > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - event->delta());

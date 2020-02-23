@@ -38,7 +38,7 @@ private:
     QDRuler* hRuler;
     QDRuler* vRuler;
     Scene* m_scene;
-    static GraphicsView* self;
+    static GraphicsView* m_instance;
 
     void updateRuler();
     template <class T>

@@ -511,7 +511,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
 
-    const int intSteps = Settings::circleSegments(radius * dScale); //MinStepsPerCircle;
+    const int intSteps = Settings::gbrGcCircleSegments(radius * dScale); //MinStepsPerCircle;
 
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * M_PI;

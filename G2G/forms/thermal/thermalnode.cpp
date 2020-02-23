@@ -63,9 +63,9 @@ void ThermalNode::remove(int row) { childItems.removeAt(row); }
 
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    const QModelIndex i1(ThermalModel::m_self->createIndex(row(), ThermalModel::ThName, this));
-    const QModelIndex i2(ThermalModel::m_self->createIndex(row(), ThermalModel::ThGapCount, this));
-    ThermalModel::m_self->dataChanged(i1, i2, { role });
+    const QModelIndex i1(ThermalModel::m_instance->createIndex(row(), ThermalModel::ThName, this));
+    const QModelIndex i2(ThermalModel::m_instance->createIndex(row(), ThermalModel::ThGapCount, this));
+    ThermalModel::m_instance->dataChanged(i1, i2, { role });
 
     switch (role) {
     case Qt::EditRole:

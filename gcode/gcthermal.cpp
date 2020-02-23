@@ -15,7 +15,7 @@ void ThermalCreator::create()
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
 {
-    self = this;
+    m_instance = this;
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
@@ -62,7 +62,7 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
         clipper.Execute(ctIntersection, framePaths, pftPositive);
     }
     // create thermal
-    //self = nullptr;
+    //m_instance = nullptr;
     for (int index = 0; index < m_returnPs.size(); ++index) {
         const Path& path = m_returnPs.at(index);
         Paths paths;

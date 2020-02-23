@@ -177,7 +177,7 @@ void VoronoiCreator::create()
 
 void VoronoiCreator::createVoronoi()
 {
-    self = this;
+    m_instance = this;
 
     const auto& tool = m_gcp.tools.first();
     const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
@@ -396,7 +396,7 @@ void VoronoiCreator::cgalVoronoi()
                 Path path;
                 path.reserve(static_cast<int>(points.size()));
                 for (const SDG2::Point_2& pt : points)
-                    path << toIntPoint(pt);
+                    path.append(toIntPoint(pt));
                 pathPairs[id].append(path);
             }
         }

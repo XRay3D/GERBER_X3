@@ -17,7 +17,7 @@ void ProfileCreator::create()
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    self = this;
+    m_instance = this;
 
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset

@@ -33,7 +33,7 @@ private:
     QVector<QVector<QPolygonF>> pss(const QPointF& offset);
     QVector<QPolygonF> ps(const QPointF& offset);
 
-    static const QList<QChar> cl;
+    static const QVector<QChar> cl;
 
     QVector<double> getDepths();
 

@@ -23,7 +23,7 @@
 
 namespace GCode {
 
-Creator* Creator::self = nullptr;
+Creator* Creator::m_instance = nullptr;
 bool Creator::m_cancel = false;
 int Creator::m_progressMax = 0;
 int Creator::m_progressVal = 0;
@@ -34,7 +34,7 @@ struct Cancel {
 
 void Creator::reset()
 {
-    self = nullptr;
+    m_instance = nullptr;
     m_cancel = false;
     m_progressMax = 0;
     m_progressVal = 0;
@@ -53,7 +53,7 @@ void Creator::reset()
     m_stepOver = 0.0;
 }
 
-Creator::~Creator() { self = nullptr; }
+Creator::~Creator() { m_instance = nullptr; }
 
 Pathss& Creator::groupedPaths(Grouping group, cInt k)
 {
@@ -216,7 +216,7 @@ void Creator::stacking(Paths& paths)
     m_returnPss.clear();
     /***********************************************************************************************/
     t.start();
-    auto sss = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
+    auto mathBE = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
         QList<int> list;
         list.append(idx.first);
         for (int i = paths.count() - 1, index = idx.first; i; --i) {
@@ -241,13 +241,13 @@ void Creator::stacking(Paths& paths)
         return true;
     };
     using Worck = QPair<PolyNode*, bool>;
-    std::function<void(Worck)> stacker = [&stacker, &sss, this](Worck w) {
+    std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
         auto [node, newPaths] = w;
         if (!m_returnPss.isEmpty() || newPaths) {
             Path path(node->Contour);
-            if (!(m_gcp.convent() ^ !node->IsHole()) ^ (m_gcp.side() == Outer))
-                ReversePath(path);
-            if (Settings::cleanPolygons())
+            //            if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
+            //                ReversePath(path);
+            if (Settings::gbrCleanPolygons())
                 CleanPolygon(path, uScale * 0.0005);
             if (m_returnPss.isEmpty() || newPaths) {
                 m_returnPss.append({ path });
@@ -267,7 +267,7 @@ void Creator::stacking(Paths& paths)
                         }
                     }
                 }
-                if (d <= m_toolDiameter && sss(m_returnPss.last(), path, idx))
+                if (d <= m_toolDiameter && mathBE(m_returnPss.last(), path, idx))
                     m_returnPss.last().append(path);
                 else
                     m_returnPss.append({ path });
@@ -290,6 +290,20 @@ void Creator::stacking(Paths& paths)
             path.append(path.first());
     }
     sortB(m_returnPss);
+    for (auto& paths : m_returnPss) {
+        bool ff, fl;
+        for (int f = 0, l = paths.size() - 1; f < l; ++f, --l) {
+            if (f) {
+                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
+                    ReversePath(paths[f]);
+                if (!(m_gcp.convent() ^ (fl ? Area(paths[l]) > 0 : Area(paths[l]) < 0)) ^ (m_gcp.side() == Outer))
+                    ReversePath(paths[l]);
+            } else {
+                ff = Area(paths[f]) > 0;
+                fl = Area(paths[l]) > 0;
+            }
+        }
+    }
 }
 
 void Creator::mergeSegments(Paths& paths, double glue)
@@ -364,7 +378,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
 
 void Creator::progress(int progressMax)
 {
-    if (self != nullptr)
+    if (m_instance != nullptr)
         m_progressMax += progressMax;
 }
 
@@ -384,7 +398,7 @@ void Creator::progress()
         m_cancel = false;
         throw Cancel();
     }
-    if (self != nullptr)
+    if (m_instance != nullptr)
         if (m_progressMax < ++m_progressVal) {
             if (m_progressMax == 0)
                 m_progressMax = 100;
@@ -457,8 +471,6 @@ Paths& Creator::sortBE(Paths& src)
     }
     return src;
 }
-
-
 
 Pathss& Creator::sortB(Pathss& src)
 {

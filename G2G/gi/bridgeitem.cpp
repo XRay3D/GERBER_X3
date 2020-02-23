@@ -17,7 +17,7 @@ BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side,
     , m_size(size)
     , m_side(side)
 {
-    connect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    connect(GraphicsView::m_instance, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
@@ -77,7 +77,7 @@ QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value
 void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_lastPos = pos();
-    disconnect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    disconnect(GraphicsView::m_instance, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 

@@ -1,5 +1,6 @@
 #include "project.h"
 #include "mainwindow.h"
+#include "settings.h"
 
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -8,7 +9,14 @@
 
 Project* Project::m_instance = nullptr;
 
-Project::Project() { m_instance = this; }
+Project::Project()
+{
+    if (m_instance) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");
+        exit(1);
+    }
+    m_instance = this;
+}
 
 Project::~Project() { m_instance = nullptr; }
 
@@ -315,7 +323,7 @@ void Project::saveSelectedToolpaths()
                 QString name(GCode::File::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
                     name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(Settings::gcFileExtension()));
                 if (name.isEmpty())
                     return;
                 file->save(name);
@@ -325,7 +333,7 @@ void Project::saveSelectedToolpaths()
             QString name(GCode::File::getLastDir().append(files.first()->getTool().name()));
             if (!name.endsWith("tap"))
                 name += QStringList({ "(Top)", "(Bot)" })[files.first()->side()];
-            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(Settings::gcFileExtension()));
             if (name.isEmpty())
                 return;
             QList<QString> sl;

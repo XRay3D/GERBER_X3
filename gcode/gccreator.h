@@ -19,7 +19,7 @@ class Creator : public QObject {
     Q_OBJECT
 
 public:
-    static Creator* self;
+    static Creator* m_instance;
     Creator() {}
     void reset();
     //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);

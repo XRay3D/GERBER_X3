@@ -52,7 +52,7 @@ Paths File::merge() const
         else
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
     }
-    if (Settings::cleanPolygons())
+    if (Settings::gbrCleanPolygons())
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
     return m_mergedPaths;
 }
@@ -226,12 +226,12 @@ void Gerber::File::createGi()
 
     for (const GraphicObject& go : *this) {
         if (!go.path().isEmpty()) {
-            if (Settings::simplifyRegions() && go.path().first() == go.path().last()) {
+            if (Settings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
                 Paths paths;
                 SimplifyPolygon(go.path(), paths);
                 for (Path& path : paths) {
                     path.append(path.first());
-                    if (!Settings::skipDuplicates()) {
+                    if (!Settings::gbrSkipDuplicates()) {
                         checkList.append(QSharedPointer<Path>(new Path(path)));
                         adder(*checkList.last());
                     } else if (!contains(path)) {
@@ -240,7 +240,7 @@ void Gerber::File::createGi()
                     }
                 }
             } else {
-                if (!Settings::skipDuplicates()) {
+                if (!Settings::gbrSkipDuplicates()) {
                     adder(go.path());
                 } else if (!contains(go.path())) {
                     adder(go.path());

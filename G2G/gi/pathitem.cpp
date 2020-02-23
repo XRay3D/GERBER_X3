@@ -110,7 +110,7 @@ void PathItem::updateArrows()
                 //                        painter->save();
                 //                        const QString text = "   " + QString::number(i);
                 //                        const QRectF textRect = QFontMetricsF(painter->font()).boundingRect(QRectF(), Qt::AlignLeft, text);
-                //                        const double k = 1.0 / GraphicsView ::self->matrix().m11();
+                //                        const double k = 1.0 / GraphicsView ::m_instance->matrix().m11();
                 //                        painter->translate(path[i]);
                 //                        painter->scale(k, -k);
                 //                        //painter->setBrush(QColor(127, 127, 127, 255));

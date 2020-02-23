@@ -244,7 +244,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
 
 void RasterCreator::createRaster2(const Tool& tool, const double depth, const double angle, const int prPass)
 {
-    //self = this;
+    //m_instance = this;
 
     QElapsedTimer t;
     t.start();

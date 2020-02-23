@@ -79,7 +79,7 @@ Path CirclePath(double diametr, const IntPoint& center)
         return Path();
 
     const double radius = diametr * 0.5;
-    const int intSteps = Settings::circleSegments(radius * dScale);
+    const int intSteps = Settings::gbrGcCircleSegments(radius * dScale);
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
         poligon[i] = IntPoint(
