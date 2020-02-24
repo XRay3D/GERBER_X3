@@ -7,8 +7,8 @@
 
 #include <QDebug>
 #include <abstractfile.h>
+#include <forward_list>
 #include <gi/itemgroup.h>
-
 namespace Gerber {
 
 class File : public AbstractFile, public QList<GraphicObject> {
@@ -55,7 +55,7 @@ private:
     //Layer layer = Copper;
     //Miror miror = Vertical;
     QVector<int> rawIndex;
-    QList<QSharedPointer<Path>> checkList;
+    std::forward_list<Path> checkList;
 
     // AbstractFile interface
 public:
