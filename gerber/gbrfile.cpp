@@ -11,15 +11,13 @@ static Format* crutch;
 
 File::File(QDataStream& stream)
 {
-    m_itemGroup.append(new ItemGroup);
-    m_itemGroup.append(new ItemGroup);
+    m_itemGroup.append({ new ItemGroup, new ItemGroup });
     read(stream);
 }
 
 File::File(const QString& fileName)
 {
-    m_itemGroup.append(new ItemGroup);
-    m_itemGroup.append(new ItemGroup);
+    m_itemGroup.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
 }
 
@@ -190,6 +188,7 @@ void Gerber::File::read(QDataStream& stream)
 
 void Gerber::File::createGi()
 {
+    // fill copper
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
         item->m_id = m_itemGroup[Normal]->size();
@@ -197,6 +196,7 @@ void Gerber::File::createGi()
         m_itemGroup[Normal]->append(item);
     }
 
+    // ap paths
     auto adder = [&](const Path& path) {
         GraphicsItem* item = new AperturePathItem(path, this);
         item->m_id = m_itemGroup[ApPaths]->size();
@@ -205,12 +205,12 @@ void Gerber::File::createGi()
     };
 
     auto contains = [&](const Path& path) -> bool {
-        for (const QSharedPointer<Path>& chPath : checkList) { // find copy
+        constexpr double k = 0.001 * uScale;
+        for (const Path& chPath : checkList) { // find copy
             int counter = 0;
-            if (chPath->size() == path.size()) {
-                for (const IntPoint& p1 : *chPath) {
+            if (chPath.size() == path.size()) {
+                for (const IntPoint& p1 : chPath) {
                     for (const IntPoint& p2 : path) {
-                        const double k = 0.001 * uScale;
                         if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
                             ++counter;
                             break;
@@ -232,11 +232,11 @@ void Gerber::File::createGi()
                 for (Path& path : paths) {
                     path.append(path.first());
                     if (!Settings::gbrSkipDuplicates()) {
-                        checkList.append(QSharedPointer<Path>(new Path(path)));
-                        adder(*checkList.last());
+                        checkList.push_front(path);
+                        adder(checkList.front());
                     } else if (!contains(path)) {
-                        checkList.append(QSharedPointer<Path>(new Path(path)));
-                        adder(*checkList.last());
+                        checkList.push_front(path);
+                        adder(checkList.front());
                     }
                 }
             } else {
@@ -244,12 +244,13 @@ void Gerber::File::createGi()
                     adder(go.path());
                 } else if (!contains(go.path())) {
                     adder(go.path());
-                    checkList.append(QSharedPointer<Path>(new Path(go.path())));
+                    checkList.push_front(go.path());
                 }
             }
         }
     }
 
+    // add components
     for (const Component& c : m_components) {
         if (!c.referencePoint.isNull())
             m_itemGroup[Components]->append(new ComponentItem(c, this));

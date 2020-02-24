@@ -245,8 +245,8 @@ void Creator::stacking(Paths& paths)
         auto [node, newPaths] = w;
         if (!m_returnPss.isEmpty() || newPaths) {
             Path path(node->Contour);
-            //            if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
-            //                ReversePath(path);
+            if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
+                ReversePath(path);
             if (Settings::gbrCleanPolygons())
                 CleanPolygon(path, uScale * 0.0005);
             if (m_returnPss.isEmpty() || newPaths) {
@@ -290,20 +290,20 @@ void Creator::stacking(Paths& paths)
             path.append(path.first());
     }
     sortB(m_returnPss);
-    for (auto& paths : m_returnPss) {
-        bool ff, fl;
-        for (int f = 0, l = paths.size() - 1; f < l; ++f, --l) {
-            if (f) {
-                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
-                    ReversePath(paths[f]);
-                if (!(m_gcp.convent() ^ (fl ? Area(paths[l]) > 0 : Area(paths[l]) < 0)) ^ (m_gcp.side() == Outer))
-                    ReversePath(paths[l]);
-            } else {
-                ff = Area(paths[f]) > 0;
-                fl = Area(paths[l]) > 0;
-            }
-        }
-    }
+    //    for (auto& paths : m_returnPss) {
+    //        bool ff, fl;
+    //        for (int f = 0, l = paths.size() - 1; f < l; ++f, --l) {
+    //            if (f) {
+    //                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
+    //                    ReversePath(paths[f]);
+    //                if (!(m_gcp.convent() ^ (fl ? Area(paths[l]) > 0 : Area(paths[l]) < 0)) ^ (m_gcp.side() == Outer))
+    //                    ReversePath(paths[l]);
+    //            } else {
+    //                ff = Area(paths[f]) > 0;
+    //                fl = Area(paths[l]) > 0;
+    //            }
+    //        }
+    //    }
 }
 
 void Creator::mergeSegments(Paths& paths, double glue)

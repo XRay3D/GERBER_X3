@@ -111,6 +111,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
     }
 
     stacking(m_returnPs);
+
     //        ReversePaths(m_returnPaths);
     //        sortByStratDistance(m_returnPaths);
     if (m_returnPss.isEmpty()) {
