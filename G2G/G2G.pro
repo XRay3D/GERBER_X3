@@ -42,6 +42,7 @@ gcc* {
 
 linux {
     DEFINES += linux
+    LIBS += -ltbb # Why?????
 }
 
 DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""

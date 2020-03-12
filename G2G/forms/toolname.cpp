@@ -12,7 +12,7 @@ ToolName::ToolName(QWidget* parent)
     lblName = new QLabel(this);
     lblName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     l->addWidget(lblName);
-    l->setMargin(0);
+    l->setContentsMargins(0, 0, 0, 0);
     l->setSpacing(6);
     l->setStretch(1, 1);
 }

@@ -613,7 +613,11 @@ void MainWindow::printDialog()
         pPrinter->setResolution(4800);
 
         QPainter painter(pPrinter);
+#if QT_DEPRECATED_SINCE(5, 14)
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
+#else
+        painter.setRenderHint(QPainter::Antialiasing);
+#endif
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
         scene->render(&painter,

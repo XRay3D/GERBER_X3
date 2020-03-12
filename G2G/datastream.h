@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include <type_traits>
 
+#if QT_DEPRECATED_SINCE(5, 14)
 template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 inline QDataStream& operator>>(QDataStream& s, E& e)
 {
@@ -19,5 +20,6 @@ inline QDataStream& operator<<(QDataStream& s, E e)
     s << static_cast<qint32>(e);
     return s;
 }
+#endif
 
 #endif // DATASTREAM_H
