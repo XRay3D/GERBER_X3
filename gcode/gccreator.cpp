@@ -539,7 +539,7 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
         const IntPoint& pt1 = path[(i + 1) % cnt];
         const IntPoint& pt2 = path[i];
         QLineF l1(toQPointF(pt1), toQPointF(pt2));
-        if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
+        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
             if (ret)
                 *ret = toIntPoint(p);
             return true;

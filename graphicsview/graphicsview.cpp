@@ -30,7 +30,11 @@ GraphicsView::GraphicsView(QWidget* parent)
         exit(1);
     }
     setCacheMode(/*CacheBackground*/ CacheNone);
-    setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
+    setOptimizationFlags(DontSavePainterState
+#if QT_DEPRECATED_SINCE(5, 14)
+                         | DontClipPainter
+#endif
+                         | DontAdjustForAntialiasing);
     setViewportUpdateMode(FullViewportUpdate /*SmartViewportUpdate*/ /*NoViewportUpdate*/);
     setDragMode(RubberBandDrag);
     setInteractive(true);
@@ -264,11 +268,15 @@ double GraphicsView::getScale()
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
     const int scbarScale = 3;
+
+    const auto delta = event->angleDelta().y();
+    const auto pos = event->position().toPoint();
+
     switch (event->modifiers()) {
     case Qt::ControlModifier:
-        if (abs(event->delta()) == 120) {
+        if (abs(delta) == 120) {
             setInteractive(false);
-            if (event->delta() > 0)
+            if (delta > 0)
                 zoomIn();
             else
                 zoomOut();
@@ -279,9 +287,9 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::horizontalScrollBar();
             if (Settings::guiSmoothScSh()) {
-                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (event->delta() > 0 ? scbarScale : -scbarScale));
+                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
-                scrollBar->setValue(scrollBar->value() - event->delta());
+                scrollBar->setValue(scrollBar->value() - delta);
             }
         }
         break;
@@ -289,9 +297,9 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::verticalScrollBar();
             if (Settings::guiSmoothScSh()) {
-                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (event->delta() > 0 ? scbarScale : -scbarScale));
+                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
-                scrollBar->setValue(scrollBar->value() - event->delta());
+                scrollBar->setValue(scrollBar->value() - delta);
             }
         } else {
             //   QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
@@ -301,7 +309,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
         //QGraphicsView::wheelEvent(event);
         return;
     }
-    mouseMove(mapToScene(event->pos()));
+    mouseMove(mapToScene(pos));
     event->accept();
     update();
 }
