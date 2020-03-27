@@ -102,25 +102,30 @@ DrillForm::DrillForm(QWidget* parent)
         exit(1);
     }
     ui->setupUi(this);
-    ui->toolTable->setIconSize(QSize(IconSize, IconSize));
-    ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->toolTable->setWordWrap(false);
+    {
+        ui->toolTable->setIconSize(QSize(IconSize, IconSize));
+        ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
+        ui->toolTable->setWordWrap(false);
+        ui->toolTable->horizontalHeader()->setMinimumHeight(ui->toolTable->verticalHeader()->defaultSectionSize());
 
-    connect(ui->toolTable, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
-    connect(ui->toolTable, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
-    connect(ui->toolTable, &QTableView::clicked, this, &DrillForm::on_clicked);
+        connect(ui->toolTable, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
+        connect(ui->toolTable, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
+        connect(ui->toolTable, &QTableView::clicked, this, &DrillForm::on_clicked);
+    }
 
     {
+        auto h = ui->toolTable->verticalHeader()->defaultSectionSize();
+
         auto cornerButton = ui->toolTable->findChild<QAbstractButton*>();
         header = new Header(Qt::Vertical, ui->toolTable);
         ui->toolTable->setVerticalHeader(header);
         if (cornerButton) {
             checkBox = new QCheckBox(cornerButton);
             checkBox->setFocusPolicy(Qt::NoFocus);
-            checkBox->setGeometry(Header::getRect(cornerButton->rect()).translated(1, -4));
+            checkBox->setGeometry(Header::getRect(cornerButton->rect())/*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
-                static const Qt::CheckState chState[] {
+                static const Qt::CheckState chState[]{
                     Qt::Unchecked,
                     Qt::Unchecked,
                     Qt::Checked,
@@ -540,10 +545,10 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
     if (current.column() == 1) {
         QVector<Tool::Type> tools;
         tools = model->isSlot(current.row())
-            ? QVector<Tool::Type> { Tool::EndMill }
+            ? QVector<Tool::Type>{ Tool::EndMill }
             : ((m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                    ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
-                    : QVector<Tool::Type> { Tool::Drill, Tool::EndMill });
+                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
+                      : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -602,11 +607,11 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
         QVector<Tool::Type> tools;
         if (fl)
-            tools = QVector<Tool::Type> { Tool::EndMill };
+            tools = QVector<Tool::Type>{ Tool::EndMill };
         else
             tools = (m_worckType == GCode::Drill)
-                ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill }
-                : QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
+                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }
+                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {

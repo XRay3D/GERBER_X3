@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>219</width>
-    <height>455</height>
+    <width>222</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Pocket Toolpath</string>
+         <string>Pocket Raster Toolpath</string>
         </property>
        </widget>
       </item>

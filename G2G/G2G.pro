@@ -42,7 +42,9 @@ gcc* {
 
 linux {
     DEFINES += linux
-    LIBS += -ltbb # Why?????
+    greaterThan(QT_MINOR_VERSION,12){
+        LIBS += -ltbb # Why?????
+    }
 }
 
 DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
