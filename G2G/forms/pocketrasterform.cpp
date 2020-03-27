@@ -5,8 +5,8 @@
 #include <tooldatabase/tooleditdialog.h>
 
 #include <gcpocketraster.h>
-#include <settings.h>
 #include <scene.h>
+#include <settings.h>
 
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil(new GCode::RasterCreator, parent)
@@ -153,6 +153,11 @@ void PocketRasterForm::createFile()
 
 void PocketRasterForm::updateName()
 {
+    const auto& tool { ui->toolHolder->tool() };
+    if (tool.type() != Tool::Laser)
+        ui->rbNormal->setChecked(true);
+    ui->rbFast->setEnabled(tool.type() == Tool::Laser);
+
     ui->leName->setText(names[side]);
 }
 

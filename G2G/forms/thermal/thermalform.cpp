@@ -19,6 +19,7 @@
 #include <graphicsview.h>
 #include <myclipper.h>
 #include <scene.h>
+#include <settings.h>
 
 enum { Size = 24 };
 
@@ -65,34 +66,37 @@ ThermalForm::ThermalForm(QWidget* parent)
 {
     ui->setupUi(this);
 
-    ui->treeView->setIconSize(QSize(Size, Size));
-
-    // tool! ui->toolName->setTool(tool);
-
-    updateName();
-
-    lay = new QGridLayout(ui->treeView->header());
-    cbx = new QCheckBox("", ui->treeView);
-    lay->addWidget(cbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
-    lay->setContentsMargins(3, 0, 0, 0);
-    cbx->setMinimumHeight(ui->treeView->header()->height() - 4);
-
-    updateFiles();
-    if (ui->cbxFile->count() < 1) {
-        return;
-    }
+    parent->setWindowTitle(ui->label->text());
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-    parent->setWindowTitle(ui->label->text());
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
-    }
 
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("ThermalForm");
     settings.endGroup();
+
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(ui->pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ThermalForm::updateName);
+
+    ui->treeView->setIconSize(QSize(Size, Size));
+
+    updateName();
+
+    chbx = new QCheckBox("", ui->treeView);
+    chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
+    chbx->setEnabled(false);
+    auto lay = new QGridLayout(ui->treeView->header());
+    lay->addWidget(chbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
+    lay->setContentsMargins(3, 0, 0, 0);
+
+    updateFiles();
+
+    if (ui->cbxFile->count() < 1)
+        return;
 
     {
         int w = ui->treeView->indentation();
@@ -170,48 +174,14 @@ bool ThermalForm::canToShow()
     return false;
 }
 
-void ThermalForm::on_pbSelect_clicked()
-{
-    //    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving , Tool::Laser});
-    //    if (tdb.exec()) {
-    //        tool = tdb.tool();
-    //        ui->toolName->setTool(tool);
-    //        updateName();
-    //        redraw();
-    //    }
-}
-
-void ThermalForm::on_pbEdit_clicked()
-{
-    //    ToolEditDialog d;
-    //    d.setTool(tool);
-    //    if (d.exec()) {
-    //        tool = d.tool();
-    //        tool.setId(-1);
-    //        ui->toolName->setTool(tool);
-    //        updateName();
-    //        redraw();
-    //    }
-}
-
-void ThermalForm::on_pbCreate_clicked() { createFile(); }
-
-void ThermalForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void ThermalForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
 void ThermalForm::createFile()
 {
-    // tool!
-    //    if (!tool.isValid()) {
-    //        tool.errorMessageBox(this);
-    //        return;
-    //    }
+    if (!tool.isValid()) {
+        tool.errorMessageBox(this);
+        return;
+    }
 
     Paths wPaths;
     Pathss wBridgePaths;
@@ -226,7 +196,7 @@ void ThermalForm::createFile()
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    // tool!   gpc.tools.append(tool);
+    gpc.tools.append(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->id();
     m_tpc->setGcp(gpc);
@@ -237,7 +207,9 @@ void ThermalForm::createFile()
 
 void ThermalForm::updateName()
 {
+    tool = ui->toolHolder->tool();
     ui->leName->setText(tr("Thermal"));
+    redraw();
 }
 
 void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
@@ -249,10 +221,13 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
 {
     m_sourcePreview.clear();
     m_apertures = *value;
-    model = new ThermalModel(this);
-    const auto* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
-    boardSide = file->side();
 
+    if (model)
+        delete ui->treeView->model();
+
+    model = new ThermalModel(ui->treeView);
+    auto const file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+    boardSide = file->side();
     model->appendRow(QIcon(), tr("All"));
 
     using Worker = std::tuple<const Gerber::GraphicObject*, ThermalNode*, QString>;
@@ -260,11 +235,11 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     auto creator = [this](Worker w) {
         static QMutex m;
         auto [go, thermalNode, name] = w;
-        // tool!     auto item = new ThermalPreviewItem(*go, tool, m_depth);
-        // tool!    item->setToolTip(name);
+        auto item = new ThermalPreviewItem(*go, tool, m_depth);
+        item->setToolTip(name);
         QMutexLocker lock(&m);
-        // tool!     m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-        // tool! thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
+        m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
+        thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
     };
 
     ThermalNode* thermalNode = nullptr;
@@ -308,8 +283,9 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
 
     for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview)
         Scene::addItem(item.data());
+
     //    updateCreateButton();
-    delete ui->treeView->model();
+
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::on_selectionChanged);
 }

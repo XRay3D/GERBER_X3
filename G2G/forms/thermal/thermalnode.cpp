@@ -210,7 +210,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
         if (index.column() == 0) {
             if (icon.isNull()) {
                 QPixmap p(24, 24);
-                p.fill(Qt::white);
+                p.fill(Qt::transparent);
                 return QIcon(p);
             }
             return icon;

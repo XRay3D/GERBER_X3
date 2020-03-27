@@ -28,9 +28,9 @@ private slots:
     void on_pbEdit_clicked();
 
 private:
-    QString m_toolFileName;
     Tool m_tool;
-    const QString m_parentName;
+    const int counter;
+    const QString m_toolFileName;
 
     void readTool();
     void updateForm();

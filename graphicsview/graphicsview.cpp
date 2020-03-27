@@ -1,4 +1,5 @@
 ﻿#include "graphicsview.h"
+
 #include "edid.h"
 #include "qdruler.h"
 #include "scene.h"
@@ -8,7 +9,6 @@
 #include <QTransform>
 #include <QtWidgets>
 #include <gi/bridgeitem.h>
-//#include <gi/ruler.h>
 #include <mainwindow.h>
 #include <settings.h>
 
@@ -32,9 +32,12 @@ GraphicsView::GraphicsView(QWidget* parent)
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
-#if QT_DEPRECATED_SINCE(5, 14)
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
     setOptimizationFlag(DontClipPainter);
+#else
 #endif
+
     setViewportUpdateMode(FullViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
@@ -254,7 +257,8 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     const int scbarScale = 3;
 
     const auto delta = event->angleDelta().y();
-#if QT_DEPRECATED_SINCE(5, 14)
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
     const auto pos = event->pos();
 #else
     const auto pos = event->position().toPoint();

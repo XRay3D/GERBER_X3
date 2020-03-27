@@ -173,7 +173,7 @@
     </widget>
    </item>
    <item row="2" column="0" colspan="2">
-    <widget class="ToolSelectorForm" name="toolSelector" native="true"/>
+    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
    </item>
   </layout>
  </widget>
