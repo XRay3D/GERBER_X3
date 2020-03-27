@@ -3,7 +3,9 @@
 #include "gcfile.h"
 
 #include <QElapsedTimer>
-//#include <execution>
+#ifndef linux
+#include <execution>
+#endif
 #include <point.h>
 
 namespace GCode {
@@ -94,7 +96,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     clipper.AddPaths(src, ptClip, true);
                     for (auto& [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
-                        Path frame { { left_, var }, { right_, var } };
+                        Path frame{ { left_, var }, { right_, var } };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptSubject, false);
                     }
@@ -128,7 +130,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     clipper.AddPaths(src, ptSubject, false);
                     for (auto [left_, right_, var, flag] : w) {
                         Q_UNUSED(flag)
-                        Path frame {
+                        Path frame{
                             { left_, var },
                             { right_, var },
                             { right_, var += m_stepOver },
@@ -282,7 +284,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         rect = c.GetBounds();
     }
 
-    const IntPoint center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
+    const IntPoint center{ rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
 
     Paths laserPath(profilePaths);
 
@@ -347,11 +349,12 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
-
+#ifndef linux
     //std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
+#else
     std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
-
-    bool reverse {};
+#endif
+    bool reverse{};
 
     auto format = [&reverse](Path& src) -> Path& {
         if (reverse)
@@ -373,26 +376,26 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
             {
                 const Path& path = pPath.last();
                 if (path.first().X < path.last().X) { // acc
-                    acc.append(Path { path.last(), { path.last().X + accDistance, path.first().Y } });
+                    acc.append(Path{ path.last(), { path.last().X + accDistance, path.first().Y } });
                 } else {
-                    acc.append(Path { path.last(), { path.last().X - accDistance, path.first().Y } });
+                    acc.append(Path{ path.last(), { path.last().X - accDistance, path.first().Y } });
                 }
             }
             {
                 const Path& path = paths.first();
                 if (path.first().X > path.last().X) { // acc
-                    acc.append(Path { { path.first().X + accDistance, path.first().Y }, path.first() });
+                    acc.append(Path{ { path.first().X + accDistance, path.first().Y }, path.first() });
                 } else {
-                    acc.append(Path { { path.first().X - accDistance, path.first().Y }, path.first() });
+                    acc.append(Path{ { path.first().X - accDistance, path.first().Y }, path.first() });
                 }
             }
             pPath.append(acc);
         } else { // acc first
-            pPath.append(Path { { paths.first().first().X - accDistance, paths.first().first().Y }, paths.first().first() });
+            pPath.append(Path{ { paths.first().first().X - accDistance, paths.first().first().Y }, paths.first().first() });
         }
         for (int j = 0; j < paths.size(); ++j) {
             if (j) // acc
-                pPath.append(Path { paths[j - 1].last(), paths[j].first() });
+                pPath.append(Path{ paths[j - 1].last(), paths[j].first() });
             pPath.append(paths[j]);
         }
     };
@@ -419,13 +422,12 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
     { // acc last
         Path& path = pPath.last();
         if (path.first().X < path.last().X) {
-            pPath.append(Path { path.last(), { path.last().X + accDistance, path.first().Y } });
+            pPath.append(Path{ path.last(), { path.last().X + accDistance, path.first().Y } });
         } else {
-            pPath.append(Path { path.last(), { path.last().X - accDistance, path.first().Y } });
+            pPath.append(Path{ path.last(), { path.last().X - accDistance, path.first().Y } });
         }
     }
 
     src = std::move(pPath);
 }
-
 }
