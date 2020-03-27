@@ -1,7 +1,7 @@
 #ifndef POCKETFORM_H
 #define POCKETFORM_H
 
-#include "formsutil.h"
+#include "formsutil/formsutil.h"
 
 namespace Ui {
 class PocketOffsetForm;
@@ -15,12 +15,6 @@ public:
     ~PocketOffsetForm() override;
 
 private slots:
-    void on_pbSelect_clicked();
-    void on_pbEdit_clicked();
-    void on_pbCreate_clicked();
-    void on_pbClose_clicked();
-    void on_pbSelect_2_clicked();
-    void on_pbEdit_2_clicked();
     void on_sbxSteps_valueChanged(int arg1);
     void on_leName_textChanged(const QString& arg1);
 

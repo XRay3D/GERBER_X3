@@ -111,7 +111,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
     if (qFuzzyIsNull(rulerZoom))
         return;
 
-    gridStep = Settings::gridStep(rulerZoom);
+    gridStep = GlobalSettings::gridStep(rulerZoom);
 
     // drawing a scale of 0.1
     if ((gridStep * rulerZoom) > 35) {
@@ -200,7 +200,7 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
             painter->save();
             painter->setPen(textPen); // zero width pen is cosmetic pen
             painter->setFont(font());
-            QString number = QString::number((startTickNo * gridStep * tickKoef * (Settings ::inch() ? 1.0 / 25.4 : 1.0)));
+            QString number = QString::number((startTickNo * gridStep * tickKoef * (GlobalSettings ::inch() ? 1.0 / 25.4 : 1.0)));
             if (1) {
                 if (startTickNo != 0) {
                     if (step > 0.0)

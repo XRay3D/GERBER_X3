@@ -60,14 +60,14 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 }
 
 ThermalForm::ThermalForm(QWidget* parent)
-    : FormsUtil("ThermalForm", new GCode::ThermalCreator, parent)
+    : FormsUtil(new GCode::ThermalCreator, parent)
     , ui(new Ui::ThermalForm)
 {
     ui->setupUi(this);
 
     ui->treeView->setIconSize(QSize(Size, Size));
 
-    ui->toolName->setTool(tool);
+    // tool! ui->toolName->setTool(tool);
 
     updateName();
 
@@ -82,8 +82,6 @@ ThermalForm::ThermalForm(QWidget* parent)
         return;
     }
 
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     parent->setWindowTitle(ui->label->text());
@@ -148,26 +146,26 @@ bool ThermalForm::canToShow()
 
 void ThermalForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving , Tool::Laser});
-    if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->toolName->setTool(tool);
-        updateName();
-        redraw();
-    }
+    //    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving , Tool::Laser});
+    //    if (tdb.exec()) {
+    //        tool = tdb.tool();
+    //        ui->toolName->setTool(tool);
+    //        updateName();
+    //        redraw();
+    //    }
 }
 
 void ThermalForm::on_pbEdit_clicked()
 {
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        tool = d.tool();
-        tool.setId(-1);
-        ui->toolName->setTool(tool);
-        updateName();
-        redraw();
-    }
+    //    ToolEditDialog d;
+    //    d.setTool(tool);
+    //    if (d.exec()) {
+    //        tool = d.tool();
+    //        tool.setId(-1);
+    //        ui->toolName->setTool(tool);
+    //        updateName();
+    //        redraw();
+    //    }
 }
 
 void ThermalForm::on_pbCreate_clicked() { createFile(); }
@@ -183,11 +181,11 @@ void ThermalForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1
 
 void ThermalForm::createFile()
 {
-
-    if (!tool.isValid()) {
-        tool.errorMessageBox(this);
-        return;
-    }
+    // tool!
+    //    if (!tool.isValid()) {
+    //        tool.errorMessageBox(this);
+    //        return;
+    //    }
 
     Paths wPaths;
     Pathss wBridgePaths;
@@ -202,7 +200,7 @@ void ThermalForm::createFile()
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    gpc.tools.append(tool);
+    // tool!   gpc.tools.append(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->id();
     m_tpc->setGcp(gpc);
@@ -236,11 +234,11 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     auto creator = [this](Worker w) {
         static QMutex m;
         auto [go, thermalNode, name] = w;
-        auto item = new ThermalPreviewItem(*go, tool, m_depth);
-        item->setToolTip(name);
+        // tool!     auto item = new ThermalPreviewItem(*go, tool, m_depth);
+        // tool!    item->setToolTip(name);
         QMutexLocker lock(&m);
-        m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-        thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
+        // tool!     m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
+        // tool! thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
     };
 
     ThermalNode* thermalNode = nullptr;
@@ -254,7 +252,10 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
 
     thermalNode = nullptr;
     for (const Gerber::GraphicObject& go : *file) {
-        if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive && go.path().size() == 2 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
+        if (go.state().type() == Gerber::Line
+            && go.state().imgPolarity() == Gerber::Positive
+            && go.path().size() == 2
+            && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
             if (thermalNode == nullptr)
                 thermalNode = model->appendRow(QIcon(), tr("Lines"));
             map.append({ &go, thermalNode, tr("Line") });

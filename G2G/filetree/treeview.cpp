@@ -141,7 +141,7 @@ void TreeView::saveGcodeFile()
     auto* file = Project::instance()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::File::getLastDir().append(m_menuIndex.data().toString()),
-        tr("GCode (*.%1)").arg(Settings::gcFileExtension())));
+        tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension())));
 
     if (name.isEmpty())
         return;
@@ -190,7 +190,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             //                               "without width and without contacts.");
             action->setActionGroup(group);
         }
-        if (menu.actions().size() > 1) {
+        if (file->itemGroup(Gerber::File::Normal)->size()) {
             auto action = menu.addAction(tr("&Normal"),
                 [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Normal)); });
             action->setCheckable(true);

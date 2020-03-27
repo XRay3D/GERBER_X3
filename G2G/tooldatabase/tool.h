@@ -79,10 +79,10 @@ public:
     double getDepth() const;
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;
-    bool isValid();
+    bool isValid() const;
     QIcon icon() const;
-    QString errorStr();
-    void errorMessageBox(QWidget* parent = nullptr);
+    QString errorStr() const;
+    void errorMessageBox(QWidget* parent = nullptr) const;
     uint hash() const;
 
 private:

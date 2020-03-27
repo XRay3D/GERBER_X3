@@ -88,8 +88,12 @@ MainWindow::MainWindow(QWidget* parent)
     }
     ToolHolder::readTools();
     setCurrentFile(QString());
+
+    {
+        GCodePropertiesForm(); // init vars;
+    }
+
     readSettings();
-    GCodePropertiesForm(); // init vars;
 
     if constexpr (0) { // autocreate Raster
         QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
@@ -101,7 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     //        ToolDatabase tdb(this, {});
     //        tdb.exec();
     //    });
-    //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
+    //    QTimer::singleShot(200, [this] { loadFile(recentFileActs[0]->data().toString()); });
     //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
@@ -118,29 +122,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-#ifdef QT_DEBUG
-    writeSettings();
-    event->accept();
-    return;
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin") || maybeSave()) {
         writeSettings();
         dockWidget->close();
-        qApp->closeAllWindows();
-        FileModel::closeProject();
-        event->accept();
-    }
-#else
-    if (maybeSave()) {
-        writeSettings();
-        dockWidget->close();
-        //FileModel::closeProject();
         qApp->closeAllWindows();
         FileModel::closeProject();
         event->accept();
     } else {
         event->ignore();
     }
-#endif
 }
 
 bool MainWindow::closeProject()
@@ -346,9 +336,11 @@ void MainWindow::createActionsService()
     }));
     toolpathToolBar->addSeparator();
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
-        Pin::resetPos();
-        Marker::get(Marker::Home)->resetPos(false);
-        Marker::get(Marker::Zero)->resetPos(false);
+        if (updateRect()) {
+            Pin::resetPos(false);
+            Marker::get(Marker::Home)->resetPos(false);
+            Marker::get(Marker::Zero)->resetPos(false);
+        }
         graphicsView->zoomFit();
     }));
 
@@ -914,13 +906,12 @@ QString MainWindow::strippedName(const QString& fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 
-static int lastType = -1;
 template <class T>
 void MainWindow::createDockWidget(int type)
 {
-    if (lastType == type)
+    if (dynamic_cast<T*>(dockWidget->widget()))
         return;
-    lastType = type;
+
     auto dwContent = new T(dockWidget);
     dwContent->setObjectName(QStringLiteral("dwContents"));
 
@@ -964,6 +955,6 @@ QString MainWindow::recentFilesKey()
 
 void MainWindow::showEvent(QShowEvent* event)
 {
-    toolpathActionList[GCode::GCodeProperties]->trigger();
+    //toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
 }

@@ -11,89 +11,62 @@
 #include <gcvoronoi.h>
 #include <graphicsview.h>
 #include <myclipper.h>
+#include <settings.h>
 #include <scene.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
-    : FormsUtil("VoronoiForm", new GCode::VoronoiCreator, parent)
+    : FormsUtil(new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm)
 {
     ui->setupUi(this);
 
-    ui->toolName->setTool(tool);
-
-    updateName();
-
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
 
     parent->setWindowTitle(ui->label->text());
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
-    }
-    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("VoronoiForm");
-    ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
-    ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
+    settings.getValue(ui->dsbxPrecision, 0.1);
+    settings.getValue(ui->dsbxWidth);
+    settings.getValue(ui->dsbxOffset, 1.0);
 #ifdef _USE_CGAL_
-    ui->cbxSolver->setCurrentIndex(settings.value("cbxSolver").toInt());
+    settings.getValue(ui->cbxSolver);
 #else
     ui->cbxSolver->setCurrentIndex(0);
     ui->cbxSolver->setEnabled(false);
 #endif
-    ui->dsbxOffset->setValue(settings.value("dsbxOffset", 1.0).toDouble());
     settings.endGroup();
+
+    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
+
+    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+
+    updateName();
 }
 
 VoronoiForm::~VoronoiForm()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("VoronoiForm");
-    settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
-    settings.setValue("dsbxWidth", ui->dsbxWidth->value());
-    settings.setValue("cbxSolver", ui->cbxSolver->currentIndex());
-    settings.setValue("dsbxOffset", ui->dsbxOffset->value());
+    settings.setValue(ui->dsbxPrecision);
+    settings.setValue(ui->dsbxWidth);
+    settings.setValue(ui->cbxSolver);
+    settings.setValue(ui->dsbxOffset);
     settings.endGroup();
     delete ui;
 }
 
-void VoronoiForm::on_pbSelect_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
-    if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void VoronoiForm::on_pbEdit_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        tool = d.tool();
-        tool.setId(-1);
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void VoronoiForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void VoronoiForm::createFile()
 {
+    const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -173,8 +146,9 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1)
     m_fileName = arg1;
 }
 
-void VoronoiForm::setWidth(double /*w*/)
+void VoronoiForm::setWidth(double)
 {
+    const auto tool { ui->toolHolder->tool() };
     const double d = tool.getDiameter(ui->dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));

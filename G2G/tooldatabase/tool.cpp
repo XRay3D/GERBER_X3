@@ -222,7 +222,7 @@ void Tool::write(QJsonObject& json) const
     json["autoName"] = m_autoName;
 }
 
-bool Tool::isValid()
+bool Tool::isValid() const
 {
     do {
         if (qFuzzyIsNull(m_diameter))
@@ -256,7 +256,7 @@ QIcon Tool::icon() const
     }
 }
 
-QString Tool::errorStr()
+QString Tool::errorStr() const
 {
     QString errorString;
     if (qFuzzyIsNull(m_diameter))
@@ -276,7 +276,10 @@ QString Tool::errorStr()
     return errorString;
 }
 
-void Tool::errorMessageBox(QWidget* parent) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
+void Tool::errorMessageBox(QWidget* parent) const
+{
+    QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr());
+}
 
 uint Tool::hash() const
 {

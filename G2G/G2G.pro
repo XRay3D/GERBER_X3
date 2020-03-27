@@ -49,6 +49,8 @@ DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
 
 DESTDIR = $$_PRO_FILE_PWD_/../bin
 
+INCLUDEPATH += $$PWD/forms/formsutil/
+
 TRANSLATIONS += \
     translations/g2g_en.ts \
     translations/g2g_ru.ts \
@@ -67,11 +69,12 @@ HEADERS += \
     filetree/gerbernode.h \
     filetree/layerdelegate.h \
     filetree/treeview.h \
-    forms/depthform.h \
     forms/drillform/drillform.h \
     forms/drillform/drillmodel.h \
     forms/drillform/drillpreviewgi.h \
-    forms/formsutil.h \
+    forms/formsutil/depthform.h \
+    forms/formsutil/formsutil.h \
+    forms/formsutil/toolselectorform.h \
     forms/gcodepropertiesform.h \
     forms/pocketoffsetform.h \
     forms/pocketrasterform.h \
@@ -81,7 +84,6 @@ HEADERS += \
     forms/thermal/thermalmodel.h \
     forms/thermal/thermalnode.h \
     forms/thermal/thermalpreviewitem.h \
-    forms/toolname.h \
     forms/voronoiform.h \
     gi/aperturepathitem.h \
     gi/bridgeitem.h \
@@ -125,11 +127,12 @@ SOURCES += \
     filetree/gerbernode.cpp \
     filetree/layerdelegate.cpp \
     filetree/treeview.cpp \
-    forms/depthform.cpp \
     forms/drillform/drillform.cpp \
     forms/drillform/drillmodel.cpp \
     forms/drillform/drillpreviewgi.cpp \
-    forms/formsutil.cpp \
+    forms/formsutil/depthform.cpp \
+    forms/formsutil/formsutil.cpp \
+    forms/formsutil/toolselectorform.cpp \
     forms/gcodepropertiesform.cpp \
     forms/pocketoffsetform.cpp \
     forms/pocketrasterform.cpp \
@@ -139,7 +142,6 @@ SOURCES += \
     forms/thermal/thermalmodel.cpp \
     forms/thermal/thermalnode.cpp \
     forms/thermal/thermalpreviewitem.cpp \
-    forms/toolname.cpp \
     forms/voronoiform.cpp \
     gi/aperturepathitem.cpp \
     gi/bridgeitem.cpp \

@@ -1,7 +1,7 @@
 #ifndef VORONOIFORM_H
 #define VORONOIFORM_H
 
-#include "formsutil.h"
+#include "formsutil/formsutil.h"
 
 namespace Ui {
 class VoronoiForm;
@@ -15,9 +15,6 @@ public:
     ~VoronoiForm() override;
 
 private slots:
-    void on_pbSelect_clicked();
-    void on_pbEdit_clicked();
-    void on_pbClose_clicked();
     void on_leName_textChanged(const QString& arg1);
     void on_cbxSolver_currentIndexChanged(int index);
 

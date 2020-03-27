@@ -39,7 +39,7 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
     if (event->modifiers() & Qt::ALT || Constructor::snap()) {
-        const double gs = Settings::gridStep(GraphicsView::getScale());
+        const double gs = GlobalSettings::gridStep(GraphicsView::getScale());
         QPointF px(pos() / gs);
         px.setX(gs * round(px.x()));
         px.setY(gs * round(px.y()));

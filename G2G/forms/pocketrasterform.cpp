@@ -5,9 +5,11 @@
 #include <tooldatabase/tooleditdialog.h>
 
 #include <gcpocketraster.h>
+#include <settings.h>
+#include <scene.h>
 
 PocketRasterForm::PocketRasterForm(QWidget* parent)
-    : FormsUtil("PocketRasterForm", new GCode::RasterCreator, parent)
+    : FormsUtil(new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
     , pixmaps {
@@ -16,95 +18,61 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
     }
 {
     ui->setupUi(this);
-    ui->toolName->setTool(tool);
+    parent->setWindowTitle(ui->label->text());
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-
-    QSettings settings;
-    settings.beginGroup("PocketRasterForm");
-    ui->cbxPass->setCurrentIndex(settings.value("cbxPass").toInt());
-    ui->dsbxAcc->setValue(settings.value("dsbxAcc").toDouble());
-    ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
-    ui->rbClimb->setChecked(settings.value("rbClimb").toBool());
-    ui->rbConventional->setChecked(settings.value("rbConventional").toBool());
-    ui->rbFast->setChecked(settings.value("rbFast").toBool());
-    ui->rbInside->setChecked(settings.value("rbInside").toBool());
-    ui->rbNormal->setChecked(settings.value("rbNormal").toBool());
-    ui->rbOutside->setChecked(settings.value("rbOutside").toBool());
-    settings.endGroup();
-
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
 
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
 
+    MySettings settings;
+    settings.beginGroup("PocketRasterForm");
+    settings.getValue(ui->cbxPass);
+    settings.getValue(ui->dsbxAcc);
+    settings.getValue(ui->dsbxAngle);
+    settings.getValue(ui->rbClimb);
+    settings.getValue(ui->rbConventional);
+    settings.getValue(ui->rbFast);
+    settings.getValue(ui->rbInside);
+    settings.getValue(ui->rbNormal);
+    settings.getValue(ui->rbOutside);
+    settings.endGroup();
+
     rb_clicked();
 
-    parent->setWindowTitle(ui->label->text());
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
+
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
+
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(ui->pbCreate, &QPushButton::clicked, this, &PocketRasterForm::createFile);
 }
 
 PocketRasterForm::~PocketRasterForm()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("PocketRasterForm");
-    settings.setValue("cbxPass", ui->cbxPass->currentIndex());
-    settings.setValue("dsbxAcc", ui->dsbxAcc->value());
-    settings.setValue("dsbxAngle", ui->dsbxAngle->value());
-    settings.setValue("rbClimb", ui->rbClimb->isChecked());
-    settings.setValue("rbConventional", ui->rbConventional->isChecked());
-    settings.setValue("rbFast", ui->rbFast->isChecked());
-    settings.setValue("rbInside", ui->rbInside->isChecked());
-    settings.setValue("rbNormal", ui->rbNormal->isChecked());
-    settings.setValue("rbOutside", ui->rbOutside->isChecked());
+    settings.setValue(ui->cbxPass);
+    settings.setValue(ui->dsbxAcc);
+    settings.setValue(ui->dsbxAngle);
+    settings.setValue(ui->rbClimb);
+    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rbFast);
+    settings.setValue(ui->rbInside);
+    settings.setValue(ui->rbNormal);
+    settings.setValue(ui->rbOutside);
     settings.endGroup();
     delete ui;
 }
 
-void PocketRasterForm::on_pbSelect_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
-    if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->rbFast->setEnabled(tool.type() == Tool::Laser);
-        ui->rbFast->setChecked(tool.type() == Tool::Laser);
-        ui->rbNormal->setChecked(tool.type() != Tool::Laser);
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void PocketRasterForm::on_pbEdit_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        tool = d.tool();
-        tool.setId(-1);
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void PocketRasterForm::on_pbCreate_clicked()
-{
-    createFile();
-}
-
-void PocketRasterForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void PocketRasterForm::createFile()
 {
+    const auto tool { ui->toolHolder->tool() };
+
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -167,7 +135,6 @@ void PocketRasterForm::createFile()
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
     gcp.tools.append(tool);
-    gcp.tools.append(tool2);
 
     gcp.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();

@@ -7,6 +7,8 @@
 #include <QGraphicsItem>
 #include <QPen>
 
+bool updateRect();
+
 class Marker : public QGraphicsItem { //Object {
     //    Q_OBJECT
 
@@ -87,7 +89,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     static LayoutFrames* instance();
-    static void updateRect();
+    static void updateRect(bool fl = false);
 };
 
 #endif // POINT_H

@@ -66,7 +66,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if (Scene::drawPdf())
         return;
 
-    QColor c(m_type == Home ? Settings::guiColor(Colors::Home) : Settings::guiColor(Colors::Zero));
+    QColor c(m_type == Home ? GlobalSettings::guiColor(Colors::Home) : GlobalSettings::guiColor(Colors::Zero));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -92,41 +92,42 @@ int Marker::type() const { return m_type ? GiPointHome : GiPointZero; }
 void Marker::resetPos(bool fl)
 {
     if (fl)
-        updateRect();
+        if (!updateRect())
+            return;
 
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
     if (m_type == Home)
-        switch (Settings::mkrHomePos()) {
+        switch (GlobalSettings::mkrHomePos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + Settings::mkrHomeOffset());
+            setPos(rect.topLeft() + GlobalSettings::mkrHomeOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + Settings::mkrHomeOffset());
+            setPos(rect.topRight() + GlobalSettings::mkrHomeOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + Settings::mkrHomeOffset());
+            setPos(rect.bottomLeft() + GlobalSettings::mkrHomeOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + Settings::mkrHomeOffset());
+            setPos(rect.bottomRight() + GlobalSettings::mkrHomeOffset());
             break;
         default:
             setPos({});
             break;
         }
     else {
-        switch (Settings::mkrZeroPos()) {
+        switch (GlobalSettings::mkrZeroPos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + Settings::mkrZeroOffset());
+            setPos(rect.topLeft() + GlobalSettings::mkrZeroOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + Settings::mkrZeroOffset());
+            setPos(rect.topRight() + GlobalSettings::mkrZeroOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + Settings::mkrZeroOffset());
+            setPos(rect.bottomLeft() + GlobalSettings::mkrZeroOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + Settings::mkrZeroOffset());
+            setPos(rect.bottomRight() + GlobalSettings::mkrZeroOffset());
             break;
         default:
             setPos({});
@@ -227,7 +228,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (Scene::drawPdf())
         return;
 
-    QColor c(Settings::guiColor(Colors::Pin));
+    QColor c(GlobalSettings::guiColor(Colors::Pin));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -338,10 +339,10 @@ QVector<Pin*> Pin::pins() { return m_pins; }
 void Pin::resetPos(bool fl)
 {
     if (fl)
-        updateRect();
+        if (!updateRect())
+            return;
 
-    const QPointF offset(Settings::mkrPinOffset());
-
+    const QPointF offset(GlobalSettings::mkrPinOffset());
     const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
 
     QPointF pt[] {
@@ -436,7 +437,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
 }
 LayoutFrames* LayoutFrames::instance() { return m_instance; }
 
-void LayoutFrames::updateRect()
+void LayoutFrames::updateRect(bool fl)
 {
     if (!m_instance)
         return;
@@ -445,14 +446,16 @@ void LayoutFrames::updateRect()
     for (int x = 0; x < Project::instance()->stepsX(); ++x) {
         for (int y = 0; y < Project::instance()->stepsY(); ++y) {
             path.addRect(rect.translated(
-                (rect.width() + Project::instance()->spasingX()) * x,
-                (rect.height() + Project::instance()->spasingY()) * y));
+                (rect.width() + Project::instance()->spaceX()) * x,
+                (rect.height() + Project::instance()->spaceY()) * y));
         }
     }
     m_instance->m_path = path;
     m_instance->QGraphicsItem::update();
     m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
-    Marker::get(Marker::Home)->resetPos(false);
-    Marker::get(Marker::Zero)->resetPos(false);
-    Pin::resetPos(false);
+    if (fl) {
+        Marker::get(Marker::Home)->resetPos(false);
+        Marker::get(Marker::Zero)->resetPos(false);
+        Pin::resetPos(false);
+    }
 }

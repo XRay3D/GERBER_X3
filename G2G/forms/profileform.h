@@ -1,7 +1,7 @@
 #ifndef PROFILEFORM_H
 #define PROFILEFORM_H
 
-#include "formsutil.h"
+#include "formsutil/formsutil.h"
 
 namespace Ui {
 class ProfileForm;
@@ -15,13 +15,7 @@ public:
     ~ProfileForm() override;
 
 private slots:
-    void on_pbSelect_clicked();
-    void on_pbEdit_clicked();
-    void on_pbCreate_clicked();
-    void on_pbClose_clicked();
     void on_pbAddBridge_clicked();
-    void on_dsbxBridgeLenght_valueChanged(double arg1);
-    void on_dsbxDepth_valueChanged(double arg1);
     void on_leName_textChanged(const QString& arg1);
 
 private:
@@ -32,13 +26,13 @@ private:
     void updatePixmap();
     const QStringList names;
     const QStringList pixmaps;
-    // QWidget interface
+    void rb_clicked();
+
 protected:
+    // QWidget interface
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
-
     // FormsUtil interface
-protected:
     void createFile() override;
     void updateName() override;
 

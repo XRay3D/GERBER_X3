@@ -28,8 +28,8 @@ bool Project::save(QFile& file)
         switch (m_ver) {
         case G2G_Ver_4:
         case G2G_Ver_3:
-            out << m_spasingX;
-            out << m_spasingY;
+            out << m_spacingX;
+            out << m_spacingY;
             out << m_stepsX;
             out << m_stepsY;
             [[fallthrough]];
@@ -71,8 +71,8 @@ bool Project::open(QFile& file)
         switch (m_ver) {
         case G2G_Ver_4:
         case G2G_Ver_3:
-            in >> m_spasingX;
-            in >> m_spasingY;
+            in >> m_spacingX;
+            in >> m_spacingY;
             in >> m_stepsX;
             in >> m_stepsY;
             [[fallthrough]];
@@ -124,8 +124,8 @@ void Project::close()
     setWorckRect({});
     setStepsX(1);
     setStepsY(1);
-    setSpasingX(0.0);
-    setSpasingY(0.0);
+    setSpaceX(0.0);
+    setSpaceY(0.0);
 }
 
 AbstractFile* Project::file(int id)
@@ -323,7 +323,7 @@ void Project::saveSelectedToolpaths()
                 QString name(GCode::File::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
                     name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(Settings::gcFileExtension()));
+                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
                 if (name.isEmpty())
                     return;
                 file->save(name);
@@ -333,7 +333,7 @@ void Project::saveSelectedToolpaths()
             QString name(GCode::File::getLastDir().append(files.first()->getTool().name()));
             if (!name.endsWith("tap"))
                 name += QStringList({ "(Top)", "(Bot)" })[files.first()->side()];
-            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(Settings::gcFileExtension()));
+            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
             if (name.isEmpty())
                 return;
             QList<QString> sl;
@@ -377,19 +377,19 @@ void Project::setUntitled(bool value)
     LayoutFrames::updateRect();
 }
 
-double Project::spasingX() const { return m_spasingX; }
+double Project::spaceX() const { return m_spacingX; }
 
-void Project::setSpasingX(double value)
+void Project::setSpaceX(double value)
 {
-    m_spasingX = value;
+    m_spacingX = value;
     LayoutFrames::updateRect();
 }
 
-double Project::spasingY() const { return m_spasingY; }
+double Project::spaceY() const { return m_spacingY; }
 
-void Project::setSpasingY(double value)
+void Project::setSpaceY(double value)
 {
-    m_spasingY = value;
+    m_spacingY = value;
     LayoutFrames::updateRect();
 }
 

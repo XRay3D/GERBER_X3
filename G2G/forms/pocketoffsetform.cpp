@@ -10,6 +10,7 @@
 #include <gcfile.h>
 #include <gcpocketoffset.h>
 #include <myclipper.h>
+#include <settings.h>
 #include <scene.h>
 #include <tooldatabase/tooleditdialog.h>
 
@@ -19,7 +20,7 @@ enum {
 };
 
 PocketOffsetForm::PocketOffsetForm(QWidget* parent)
-    : FormsUtil("PocketOffsetForm", new GCode::PocketCreator, parent)
+    : FormsUtil(new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
     , names { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside") }
     , pixmaps {
@@ -28,8 +29,25 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     }
 {
     ui->setupUi(this);
-    ui->toolName->setTool(tool);
-    ui->toolName_2->setTool(tool2);
+    parent->setWindowTitle(ui->label->text());
+
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+
+    for (QPushButton* button : findChildren<QPushButton*>())
+        button->setIconSize({ 16, 16 });
+
+    MySettings settings;
+    settings.beginGroup("PocketOffsetForm");
+    settings.getValue(ui->chbxUseTwoTools);
+    settings.getValue(ui->rbClimb);
+    settings.getValue(ui->rbConventional);
+    settings.getValue(ui->rbInside);
+    settings.getValue(ui->rbOutside);
+    settings.endGroup();
+
+    updateArea();
+    rb_clicked();
 
     connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
     connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
@@ -37,125 +55,37 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
     connect(ui->chbxUseTwoTools, &QCheckBox::clicked, this, &PocketOffsetForm::rb_clicked);
 
-    QSettings settings;
-    settings.beginGroup("PocketOffsetForm");
-    ui->chbxUseTwoTools->setChecked(settings.value("chbxUseTwoTools").toBool());
-    ui->rbClimb->setChecked(settings.value("rbClimb").toBool());
-    ui->rbConventional->setChecked(settings.value("rbConventional").toBool());
-    ui->rbInside->setChecked(settings.value("rbInside").toBool());
-    ui->rbOutside->setChecked(settings.value("rbOutside").toBool());
-    settings.endGroup();
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
+    connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
+    connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
+    connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
 
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
-    ui->pbEdit_2->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect_2->setIcon(QIcon::fromTheme("view-form"));
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(ui->pbCreate, &QPushButton::clicked, this, &PocketOffsetForm::createFile);
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
-
-    updateArea();
-    rb_clicked();
-
-    parent->setWindowTitle(ui->label->text());
 }
 
 PocketOffsetForm::~PocketOffsetForm()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("PocketOffsetForm");
-    settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
-    settings.setValue("rbClimb", ui->rbClimb->isChecked());
-    settings.setValue("rbConventional", ui->rbConventional->isChecked());
-    settings.setValue("rbInside", ui->rbInside->isChecked());
-    settings.setValue("rbOutside", ui->rbOutside->isChecked());
+    settings.setValue(ui->chbxUseTwoTools);
+    settings.setValue(ui->rbClimb);
+    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rbInside);
+    settings.setValue(ui->rbOutside);
     settings.endGroup();
     delete ui;
 }
 
-void PocketOffsetForm::on_pbSelect_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
-    if (tdb.exec()) {
-        //        tool = tdb.tool();
-        //        ui->toolName->setText(tool.name);
-        //        updateName();
-        Tool mpTool(tdb.tool());
-        if (ui->chbxUseTwoTools->isChecked() && tool2.id() > -1 && tool2.diameter() <= mpTool.diameter()) {
-            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
-        } else {
-            tool = mpTool;
-            ui->toolName->setTool(tool);
-            updateArea();
-        }
-        rb_clicked();
-    }
-}
-void PocketOffsetForm::on_pbSelect_2_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
-    if (tdb.exec()) {
-        Tool mpTool(tdb.tool());
-        if (tool.id() > -1 && tool.diameter() >= mpTool.diameter()) {
-            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
-        } else {
-            tool2 = mpTool;
-            ui->toolName_2->setTool(tool2);
-        }
-    }
-}
-
-void PocketOffsetForm::on_pbEdit_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        if (ui->chbxUseTwoTools->isChecked() && tool2.id() > -1 && tool2.diameter() <= d.tool().diameter()) {
-            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
-            return;
-        }
-        updateArea();
-        tool = d.tool();
-        tool.setId(-1);
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void PocketOffsetForm::on_pbEdit_2_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool2);
-    if (d.exec()) {
-        if (tool.id() > -1 && tool.diameter() >= d.tool().diameter()) {
-            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
-            return;
-        }
-        tool2 = d.tool();
-        tool.setId(-1);
-        ui->toolName_2->setTool(tool2);
-        updateName();
-    }
-}
-
-void PocketOffsetForm::on_pbCreate_clicked()
-{
-    createFile();
-}
-
-void PocketOffsetForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void PocketOffsetForm::createFile()
 {
+    const auto tool { ui->toolHolder->tool() };
+    const auto tool2 { ui->toolHolder2->tool() };
+    const auto tool3 { ui->toolHolder3->tool() };
+    const auto tool4 { ui->toolHolder4->tool() };
+
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -255,12 +185,15 @@ void PocketOffsetForm::updatePixmap()
 
 void PocketOffsetForm::updateArea()
 {
-    //    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
-    ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
+    const auto tool { ui->toolHolder->tool() };
+
+    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
+        ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
 }
 
 void PocketOffsetForm::rb_clicked()
 {
+    const auto tool { ui->toolHolder->tool() };
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;
@@ -285,11 +218,9 @@ void PocketOffsetForm::rb_clicked()
         ui->dsbxMinArea->setVisible(checked);
         ui->labelMinArea->setVisible(checked);
 
-        ui->labelToolName2->setVisible(checked);
-        ui->toolName_2->setVisible(checked);
-
-        ui->pbEdit_2->setVisible(checked);
-        ui->pbSelect_2->setVisible(checked);
+        ui->toolHolder2->setVisible(checked);
+        ui->toolHolder3->setVisible(checked);
+        ui->toolHolder4->setVisible(checked);
     }
 
     updateName();

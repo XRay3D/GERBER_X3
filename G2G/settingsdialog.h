@@ -4,7 +4,7 @@
 #include "settings.h"
 #include "ui_settingsdialog.h"
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog, private Settings {
+class SettingsDialog : public QDialog, private Ui::SettingsDialog, private GlobalSettings {
     Q_OBJECT
 
 public:
