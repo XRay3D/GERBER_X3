@@ -36,7 +36,6 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto setValue(W* widget)
     {
-        qDebug(Q_FUNC_INFO);
         const QString name { widget->objectName() };
         assert(!name.isEmpty());
 
@@ -69,7 +68,6 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto getValue(W* widget, const QVariant& defaultValue = QVariant()) const
     {
-        qDebug(Q_FUNC_INFO);
         const QString name { widget->objectName() };
         assert(!name.isEmpty());
 

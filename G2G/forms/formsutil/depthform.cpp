@@ -74,17 +74,20 @@ void DepthForm::setupUi(QWidget* Form)
     {
         label = new QLabel(Form);
         label->setObjectName(QString::fromUtf8("label"));
-        {
-            QFont font;
-            font.setBold(true);
-            font.setWeight(75);
-            label->setFont(font);
-        }
-        label->setMidLineWidth(std::max(
-            QFontMetrics(font()).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
-            QFontMetrics(font()).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:  ", nullptr))));
+
+        QFont font;
+        font.setBold(true);
+        font.setWeight(75);
+        label->setFont(font);
+
+        label->setMinimumWidth(std::max(
+            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
+            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
+        label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         horizontalLayout->addWidget(label);
     }
+
+    horizontalLayout->addSpacing(6);
 
     {
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -133,7 +136,7 @@ void DepthForm::retranslateUi(QWidget* Form)
     dsbx->setSuffix(QApplication::translate("DepthForm", " mm", nullptr));
     dsbx->setToolTip(QApplication::translate("DepthForm", "Cutting depth", nullptr));
 
-    label->setText(QCoreApplication::translate("DepthForm", "Depth:  ", nullptr));
+    label->setText(QCoreApplication::translate("DepthForm", "Depth:", nullptr));
 
     rbBoard->setText(QApplication::translate("DepthForm", "B", nullptr));
     rbBoard->setToolTip(QApplication::translate("DepthForm", "Board", nullptr));

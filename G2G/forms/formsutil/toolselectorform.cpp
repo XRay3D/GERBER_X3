@@ -12,14 +12,17 @@
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
-    , m_parentName(parent->objectName())
+    , counter { parent->findChildren<ToolSelectorForm*>().count() }
+    , m_toolFileName {
+        qApp->applicationDirPath()
+        + "/XrSoft/"
+        + parent->objectName() + QString::number(counter)
+        + ".dat"
+    }
 {
     setupUi(this);
-    m_toolFileName = qApp->applicationDirPath()
-        + "/XrSoft/"
-        //+ QString("%1").arg(qHash(m_parentName + QString::number(parent->children().indexOf(this))), sizeof(uint) * 2, 16, QChar('0')).toUpper()
-        + m_parentName + QString::number(parent->children().indexOf(this))
-        + ".dat";
+
+    qDebug() << m_toolFileName;
     readTool();
 }
 
@@ -88,7 +91,7 @@ void ToolSelectorForm::writeTool() const
     }
 }
 
-QLabel *ToolSelectorForm::label() const
+QLabel* ToolSelectorForm::label() const
 {
     return m_label;
 }
@@ -108,13 +111,6 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
         m_label->setObjectName(QString::fromUtf8("label"));
 
         {
-            QFont font;
-            font.setBold(true);
-            font.setWeight(75);
-            m_label->setFont(font);
-        }
-
-        {
             QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
             sizePolicy.setHorizontalStretch(0);
             sizePolicy.setVerticalStretch(0);
@@ -122,9 +118,15 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
             m_label->setSizePolicy(sizePolicy);
         }
 
-        m_label->setMidLineWidth(std::max(
-            QFontMetrics(font()).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
-            QFontMetrics(font()).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:  ", nullptr))));
+        QFont font;
+        font.setBold(true);
+        font.setWeight(75);
+        m_label->setFont(font);
+
+        m_label->setMinimumWidth(std::max(
+            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
+            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
+        m_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         gridLayout->addWidget(m_label, 0, 0, 1, 1);
     }
 
@@ -165,7 +167,10 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
 void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm)
 {
     ToolSelectorForm->setWindowTitle(QCoreApplication::translate("ToolSelectorForm", "Form", nullptr));
-    m_label->setText(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr));
+    if (counter > 1)
+        m_label->setText(QCoreApplication::translate("ToolSelectorForm", "Tool %1:", nullptr).arg(counter));
+    else
+        m_label->setText(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr));
     pbEdit->setText(QCoreApplication::translate("ToolSelectorForm", "Edit", nullptr));
     pbSelect->setText(QCoreApplication::translate("ToolSelectorForm", "Select", nullptr));
 }

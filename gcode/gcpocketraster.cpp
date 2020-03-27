@@ -3,7 +3,7 @@
 #include "gcfile.h"
 
 #include <QElapsedTimer>
-#ifndef linux
+#ifndef __GNUC__
 #include <execution>
 #endif
 #include <point.h>
@@ -349,8 +349,8 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
-#ifndef linux
-    //std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
+#ifndef __GNUC__
+    std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
 #else
     std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
 #endif
