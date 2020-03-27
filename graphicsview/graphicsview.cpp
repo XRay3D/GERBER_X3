@@ -30,12 +30,12 @@ GraphicsView::GraphicsView(QWidget* parent)
         exit(1);
     }
     setCacheMode(/*CacheBackground*/ CacheNone);
-    setOptimizationFlags(DontSavePainterState
+    setOptimizationFlag(DontSavePainterState);
+    setOptimizationFlag(DontAdjustForAntialiasing);
 #if QT_DEPRECATED_SINCE(5, 14)
-                         | DontClipPainter
+    setOptimizationFlag(DontClipPainter);
 #endif
-                         | DontAdjustForAntialiasing);
-    setViewportUpdateMode(FullViewportUpdate /*SmartViewportUpdate*/ /*NoViewportUpdate*/);
+    setViewportUpdateMode(FullViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -47,7 +47,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     // add grid layout
     QGridLayout* gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(0);
-    //gridLayout->setMargin(0);
 
     // create rulers
     hRuler = new QDRuler(QDRuler::Horizontal, this);
@@ -56,8 +55,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler->SetMouseTrack(true);
 
     // add items to grid layout
-
-    //QLabel* corner = new QLabel("<html><head/><body><p><span style=\" color:#ffffff;\">mm</span></p></body></html>", this);
     QPushButton* corner = new QPushButton(GlobalSettings::inch() ? "I" : "M", this);
     connect(corner, &QPushButton::clicked, [this, corner](bool fl) {
         corner->setText(fl ? "I" : "M");
@@ -67,7 +64,6 @@ GraphicsView::GraphicsView(QWidget* parent)
         vRuler->update();
     });
     corner->setCheckable(true);
-    //corner->setAlignment(Qt::AlignCenter);
     corner->setFixedSize(RulerBreadth, RulerBreadth);
 
     gridLayout->addWidget(corner, 1, 0);
@@ -80,34 +76,22 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     scale(1.0, -1.0); //flip vertical
     zoom100();
-    QGLWidget* glw = nullptr;
-    QSettings settings;
-    settings.beginGroup("Viewer");
-    setViewport(settings.value("OpenGl").toBool()
-            ? (glw = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)))
-            : new QWidget);
-    if (glw) {
+
+    {
+        QSettings settings;
+        settings.beginGroup("Viewer");
+        setViewport(settings.value("chbxOpenGl").toBool()
+                ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
+                : new QWidget);
+        setRenderHint(QPainter::Antialiasing, settings.value("chbxAntialiasing", false).toBool());
+        viewport()->setObjectName("viewport");
+        settings.endGroup();
     }
 
-    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
-    viewport()->setObjectName("viewport");
-    settings.endGroup();
-
-    m_scene = new Scene(this);
-    setScene(m_scene);
+    setScene(m_scene = new Scene(this));
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
-    //    connect(this, &GraphicsView::mouseMove, hRuler, &QDRuler::setCross);
-    //    connect(this, &GraphicsView::mouseMove, vRuler, &QDRuler::setCross);
 
-    setStyleSheet("QGraphicsView { background: black }");
-
-    //    QTimer* t = new QTimer(this);
-    //    connect(t, &QTimer::timeout, [this] {
-    //        qDebug("timeout");
-    //        updateSceneRect(QRectF());
-    //    });
-    //    t->start(16);
-
+    setStyleSheet("QGraphicsView { background: " + GlobalSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
     m_instance = this;
 }
 
@@ -270,7 +254,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     const int scbarScale = 3;
 
     const auto delta = event->angleDelta().y();
-    const auto pos = event->pos();//.toPoint();
+    const auto pos = event->pos(); //.toPoint();
 
     switch (event->modifiers()) {
     case Qt::ControlModifier:

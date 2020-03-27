@@ -109,8 +109,8 @@ void SettingsDialog::readSettings()
     dsbxPinY->setValue(m_mrkPinOffset.y());
     dsbxZeroX->setValue(m_mrkZeroOffset.x());
     dsbxZeroY->setValue(m_mrkZeroOffset.y());
-    m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::BottomLeft);
-    m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::BottomLeft);
+    m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::TopLeft);
+    m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");

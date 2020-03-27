@@ -207,8 +207,14 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
         }
         return QVariant();
     case Qt::DecorationRole:
-        if (!index.column())
+        if (index.column() == 0) {
+            if (icon.isNull()) {
+                QPixmap p(24, 24);
+                p.fill(Qt::white);
+                return QIcon(p);
+            }
             return icon;
+        }
         return QVariant();
     case Qt::CheckStateRole:
         if (index.column())
@@ -221,7 +227,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
                 else if (item->m_checkState == Qt::Checked)
                     val |= 2;
             }
-            static const Qt::CheckState chState[] {
+            static const Qt::CheckState chState[]{
                 Qt::Unchecked, // index 0
                 Qt::Unchecked, // index 1
                 Qt::Checked, // index 2
