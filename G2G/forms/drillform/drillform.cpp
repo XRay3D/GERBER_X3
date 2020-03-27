@@ -114,7 +114,6 @@ DrillForm::DrillForm(QWidget* parent)
     }
 
     {
-        auto h = ui->toolTable->verticalHeader()->defaultSectionSize();
 
         auto cornerButton = ui->toolTable->findChild<QAbstractButton*>();
         header = new Header(Qt::Vertical, ui->toolTable);
@@ -122,7 +121,7 @@ DrillForm::DrillForm(QWidget* parent)
         if (cornerButton) {
             checkBox = new QCheckBox(cornerButton);
             checkBox->setFocusPolicy(Qt::NoFocus);
-            checkBox->setGeometry(Header::getRect(cornerButton->rect())/*.translated(1, -4)*/);
+            checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
                 static const Qt::CheckState chState[]{

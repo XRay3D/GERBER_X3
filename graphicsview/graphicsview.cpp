@@ -254,7 +254,11 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     const int scbarScale = 3;
 
     const auto delta = event->angleDelta().y();
-    const auto pos = event->pos(); //.toPoint();
+#if QT_DEPRECATED_SINCE(5, 14)
+    const auto pos = event->pos();
+#else
+    const auto pos = event->position().toPoint();
+#endif
 
     switch (event->modifiers()) {
     case Qt::ControlModifier:

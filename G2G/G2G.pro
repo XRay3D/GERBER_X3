@@ -27,13 +27,11 @@ CONFIG += c++17
 #}
 
 msvc* {
-#    QMAKE_CXXFLAGS += /std:c++latest
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
 }
 
 gcc* {
-#    QMAKE_CXXFLAGS += -std=c++1z
     RC_FILE = myapp.rc
     win32 {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
@@ -42,8 +40,8 @@ gcc* {
 
 linux {
     DEFINES += linux
-    greaterThan(QT_MINOR_VERSION,12){
-        LIBS += -ltbb # Why?????
+    greaterThan(QT_MINOR_VERSION, 12){
+        LIBS += -ltbb # Why????? sudo apt-get install libtbb-dev
     }
 }
 
