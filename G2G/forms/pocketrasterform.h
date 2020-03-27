@@ -1,7 +1,7 @@
 #ifndef POCKETRASTERFORM_H
 #define POCKETRASTERFORM_H
 
-#include "formsutil.h"
+#include "formsutil/formsutil.h"
 
 namespace Ui {
 class PocketRasterForm;
@@ -15,10 +15,6 @@ public:
     ~PocketRasterForm();
 
 private slots:
-    void on_pbSelect_clicked();
-    void on_pbEdit_clicked();
-    void on_pbCreate_clicked();
-    void on_pbClose_clicked();
     void on_leName_textChanged(const QString& arg1);
 
 private:

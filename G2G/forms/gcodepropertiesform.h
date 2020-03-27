@@ -28,6 +28,11 @@ public:
 
     static GCodePropertiesForm* m_instance;
 
+private slots:
+    void on_pbResetHome_clicked();
+
+    void on_pbResetZero_clicked();
+
 private:
     Ui::GCodePropertiesForm* ui;
 };

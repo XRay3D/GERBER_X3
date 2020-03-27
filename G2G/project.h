@@ -105,11 +105,11 @@ public:
 
     static Project* instance() { return m_instance; }
 
-    double spasingX() const;
-    void setSpasingX(double value);
+    double spaceX() const;
+    void setSpaceX(double value);
 
-    double spasingY() const;
-    void setSpasingY(double value);
+    double spaceY() const;
+    void setSpaceY(double value);
 
     int stepsX() const;
     void setStepsX(int value);
@@ -135,8 +135,8 @@ private:
     bool m_isModified = false;
     bool m_isUntitled = true;
 
-    double m_spasingX = 0.0;
-    double m_spasingY = 0.0;
+    double m_spacingX = 0.0;
+    double m_spacingY = 0.0;
     int m_stepsX = 1;
     int m_stepsY = 1;
 

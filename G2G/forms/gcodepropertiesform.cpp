@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <mainwindow.h>
+#include <settings.h>
 #include <project.h>
 #include <scene.h>
 
@@ -48,12 +49,12 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
 
     if (Project::instance()) {
-        connect(ui->dsbxSpasingX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpasingX);
-        connect(ui->dsbxSpasingY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpasingY);
+        connect(ui->dsbxSpaceX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpaceX);
+        connect(ui->dsbxSpaceY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpaceY);
         connect(ui->sbxStepsX, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsX);
         connect(ui->sbxStepsY, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsY);
-        ui->dsbxSpasingX->setValue(Project::instance()->spasingX());
-        ui->dsbxSpasingY->setValue(Project::instance()->spasingY());
+        ui->dsbxSpaceX->setValue(Project::instance()->spaceX());
+        ui->dsbxSpaceY->setValue(Project::instance()->spaceY());
         ui->sbxStepsX->setValue(Project::instance()->stepsX());
         ui->sbxStepsY->setValue(Project::instance()->stepsY());
     }
@@ -67,14 +68,14 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
             ui->dsbxPlunge->setValue(value);
     });
 
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("GCodePropertiesForm");
-    ui->dsbxSafeZ->setValue(settings.value("dsbxSafeZ", 20).toDouble());
-    ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
-    ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
-    ui->dsbxThickness->setValue(settings.value("dsbxThickness", 1).toDouble());
-    ui->dsbxCopperThickness->setValue(settings.value("dsbxCopperThickness", 0.03).toDouble());
-    ui->dsbxGlue->setValue(settings.value("dsbxGlue", 0.05).toDouble());
+    settings.getValue(ui->dsbxSafeZ, 20);
+    settings.getValue(ui->dsbxClearence, 10);
+    settings.getValue(ui->dsbxPlunge, 2);
+    settings.getValue(ui->dsbxThickness, 1);
+    settings.getValue(ui->dsbxCopperThickness, 0.03);
+    settings.getValue(ui->dsbxGlue, 0.05);
     settings.endGroup();
 
     ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
@@ -124,14 +125,14 @@ GCodePropertiesForm::~GCodePropertiesForm()
     if (Marker::get(Marker::Zero))
         Marker::get(Marker::Zero)->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("GCodePropertiesForm");
-    settings.setValue("dsbxSafeZ", ui->dsbxSafeZ->value());
-    settings.setValue("dsbxClearence", ui->dsbxClearence->value());
-    settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
-    settings.setValue("dsbxThickness", ui->dsbxThickness->value());
-    settings.setValue("dsbxCopperThickness", ui->dsbxCopperThickness->value());
-    settings.setValue("dsbxGlue", ui->dsbxGlue->value());
+    settings.setValue(ui->dsbxSafeZ);
+    settings.setValue(ui->dsbxClearence);
+    settings.setValue(ui->dsbxPlunge);
+    settings.setValue(ui->dsbxThickness);
+    settings.setValue(ui->dsbxCopperThickness);
+    settings.setValue(ui->dsbxGlue);
     settings.endGroup();
 
     safeZ = ui->dsbxSafeZ->value();
@@ -157,8 +158,20 @@ void GCodePropertiesForm::updateAll()
 {
     if (!m_instance)
         return;
-    m_instance->ui->dsbxSpasingX;
-    m_instance->ui->dsbxSpasingY;
+    m_instance->ui->dsbxSpaceX;
+    m_instance->ui->dsbxSpaceY;
     m_instance->ui->sbxStepsX;
     m_instance->ui->sbxStepsY;
+}
+
+void GCodePropertiesForm::on_pbResetHome_clicked()
+{
+    ui->dsbxHomeX->setValue(0);
+    ui->dsbxHomeY->setValue(0);
+}
+
+void GCodePropertiesForm::on_pbResetZero_clicked()
+{
+    ui->dsbxZeroX->setValue(0);
+    ui->dsbxZeroY->setValue(0);
 }

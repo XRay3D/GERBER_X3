@@ -1,7 +1,7 @@
 #ifndef THERMALFORM_H
 #define THERMALFORM_H
 
-#include "../formsutil.h"
+#include "../formsutil/formsutil.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
 #include <QItemSelection>

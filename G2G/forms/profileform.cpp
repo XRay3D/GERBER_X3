@@ -13,10 +13,11 @@
 #include <gcprofile.h>
 #include <graphicsview.h>
 #include <myclipper.h>
+#include <settings.h>
 #include <scene.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
-    : FormsUtil("ProfileForm", new GCode::ProfileCreator, parent)
+    : FormsUtil(new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)
     , names { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") }
     , pixmaps {
@@ -29,73 +30,56 @@ ProfileForm::ProfileForm(QWidget* parent)
     }
 {
     ui->setupUi(this);
+    parent->setWindowTitle(ui->label->text());
 
-    ui->toolName->setTool(tool);
-
-    auto rb_clicked = [&] {
-        if (ui->rbOn->isChecked())
-            side = GCode::On;
-        else if (ui->rbOutside->isChecked())
-            side = GCode::Outer;
-        else if (ui->rbInside->isChecked())
-            side = GCode::Inner;
-
-        if (ui->rbClimb->isChecked())
-            direction = GCode::Climb;
-        else if (ui->rbConventional->isChecked())
-            direction = GCode::Conventional;
-
-        updateName();
-        updatePixmap();
-    };
-
-    QSettings settings;
-    settings.beginGroup("ProfileForm");
-    if (settings.value("rbClimb").toBool())
-        ui->rbClimb->setChecked(true);
-    if (settings.value("rbConventional").toBool())
-        ui->rbConventional->setChecked(true);
-    if (settings.value("rbInside").toBool())
-        ui->rbInside->setChecked(true);
-    if (settings.value("rbOn").toBool())
-        ui->rbOn->setChecked(true);
-    if (settings.value("rbOutside").toBool())
-        ui->rbOutside->setChecked(true);
-    ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght", 1.0).toDouble());
-    settings.endGroup();
-
-    // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
-
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
-    }
+
+    MySettings settings;
+    settings.beginGroup("ProfileForm");
+    settings.getValue(ui->dsbxBridgeLenght, 1.0);
+    settings.getValue(ui->rbClimb);
+    settings.getValue(ui->rbConventional);
+    settings.getValue(ui->rbInside);
+    settings.getValue(ui->rbOn);
+    settings.getValue(ui->rbOutside);
+    settings.endGroup();
+
+    // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
 
     rb_clicked();
-    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOn, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
-    parent->setWindowTitle(ui->label->text());
+
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+    connect(ui->rbOn, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+
+    connect(ui->dsbxBridgeLenght, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ProfileForm::updateBridge);
+    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &ProfileForm::updateBridge);
+
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
+
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(ui->pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
 }
 
 ProfileForm::~ProfileForm()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("ProfileForm");
-    settings.setValue("rbClimb", ui->rbClimb->isChecked());
-    settings.setValue("rbConventional", ui->rbConventional->isChecked());
-    settings.setValue("rbInside", ui->rbInside->isChecked());
-    settings.setValue("rbOn", ui->rbOn->isChecked());
-    settings.setValue("rbOutside", ui->rbOutside->isChecked());
-    settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
+    settings.setValue(ui->dsbxBridgeLenght);
+    settings.setValue(ui->rbClimb);
+    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rbInside);
+    settings.setValue(ui->rbOn);
+    settings.setValue(ui->rbOutside);
     settings.endGroup();
+
     for (QGraphicsItem* item : Scene::items()) {
         if (item->type() == GiBridge)
             delete item;
@@ -103,44 +87,10 @@ ProfileForm::~ProfileForm()
     delete ui;
 }
 
-void ProfileForm::on_pbSelect_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
-    if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void ProfileForm::on_pbEdit_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        tool = d.tool();
-        tool.setId(-1);
-        ui->toolName->setTool(tool);
-        updateName();
-    }
-}
-
-void ProfileForm::on_pbCreate_clicked()
-{
-    createFile();
-}
-
-void ProfileForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void ProfileForm::createFile()
 {
     m_usedItems.clear();
-
+    const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -226,14 +176,10 @@ void ProfileForm::on_pbAddBridge_clicked()
     Scene::addItem(item);
 }
 
-void ProfileForm::on_dsbxBridgeLenght_valueChanged(double /*arg1*/) { updateBridge(); }
-
-void ProfileForm::on_dsbxDepth_valueChanged(double /*arg1*/) { updateBridge(); }
-
 void ProfileForm::updateBridge()
 {
     m_lenght = ui->dsbxBridgeLenght->value();
-    m_size = tool.getDiameter(ui->dsbxDepth->value());
+    m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : Scene::items()) {
         if (item->type() == GiBridge)
             dynamic_cast<BridgeItem*>(item)->update();
@@ -244,6 +190,24 @@ void ProfileForm::updatePixmap()
 {
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
+}
+
+void ProfileForm::rb_clicked()
+{
+    if (ui->rbOn->isChecked())
+        side = GCode::On;
+    else if (ui->rbOutside->isChecked())
+        side = GCode::Outer;
+    else if (ui->rbInside->isChecked())
+        side = GCode::Inner;
+
+    if (ui->rbClimb->isChecked())
+        direction = GCode::Climb;
+    else if (ui->rbConventional->isChecked())
+        direction = GCode::Conventional;
+
+    updateName();
+    updatePixmap();
 }
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }

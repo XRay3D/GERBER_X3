@@ -40,7 +40,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
 {
     setupUi(this);
-    chbOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
+    chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
         formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_guiColor[i], defaultColor[i], gbxColor));
@@ -60,11 +60,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 void SettingsDialog::readSettings()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("Viewer");
-    chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
-    chbOpenGl->setChecked(settings.value("OpenGl").toBool());
-    chbSmoothScSh->setChecked(m_guiSmoothScSh = settings.value("SmoothScSh").toBool());
+    settings.getValue(chbxOpenGl);
+    settings.getValue(chbxAntialiasing);
+    m_guiSmoothScSh = settings.getValue(chbxSmoothScSh);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -73,24 +73,24 @@ void SettingsDialog::readSettings()
     settings.endGroup();
 
     settings.beginGroup("Gerber");
-    chbxCleanPolygons->setChecked(m_gbrCleanPolygons = settings.value("CleanPolygons", false).toBool());
-    chbxSimplifyRegions->setChecked(m_gbrSimplifyRegions = settings.value("SimplifyRegions", false).toBool());
-    chbxSkipDuplicates->setChecked(m_gbrSkipDuplicates = settings.value("SkipDuplicates", false).toBool());
-    dsbxMinCircleSegmentLength->setValue(m_gbrGcMinCircleSegmentLength = settings.value("MinCircleSegmentLenght", 0.5).toDouble());
-    sbxMinCircleSegments->setValue(m_gbrGcMinCircleSegments = settings.value("MinCircleSegments", 36).toInt());
+    m_gbrCleanPolygons = settings.getValue(chbxCleanPolygons, false);
+    m_gbrSimplifyRegions = settings.getValue(chbxSimplifyRegions, false);
+    m_gbrSkipDuplicates = settings.getValue(chbxSkipDuplicates, false);
+    m_gbrGcMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, 0.5);
+    m_gbrGcMinCircleSegments = settings.getValue(sbxMinCircleSegments, 36);
     settings.endGroup();
 
     settings.beginGroup("GCode");
-    chbxInfo->setChecked(m_gcInfo = settings.value("Info", false).toBool());
-    chbxSameGFolder->setChecked(m_gcSameFolder = settings.value("SameGCodeFolder", true).toBool());
-    leFileExtension->setText(m_gcFileExtension = settings.value("FileExtension", "tap").toString());
-    leFormat->setText(m_gcFormat = settings.value("Format", "G?X?Y?Z?F?S?").toString());
-    leLaserCPC->setText(m_gcLaserConstOn = settings.value("LaserConstOn", "M3").toString());
-    leLaserDPC->setText(m_gcLaserDynamOn = settings.value("LaserDynamOn", "M4").toString());
-    leSpindleCC->setText(m_gcSpindleOn = settings.value("SpindleOn", "M3").toString());
-    leSpindleLaserOff->setText(m_gcSpindleLaserOff = settings.value("SpindleLaserOff", "M5").toString());
-    pteEnd->setPlainText(m_gcEnd = settings.value("End", "M5\nM30").toString());
-    pteStart->setPlainText(m_gcStart = settings.value("Start", "G21 G17 G90\nM3").toString());
+    m_gcInfo = settings.getValue(chbxInfo, false);
+    m_gcSameFolder = settings.getValue(chbxSameGFolder, true);
+    m_gcFileExtension = settings.getValue(leFileExtension, "tap");
+    m_gcFormat = settings.getValue(leFormat, "G?X?Y?Z?F?S?");
+    m_gcLaserConstOn = settings.getValue(leLaserCPC, "M3");
+    m_gcLaserDynamOn = settings.getValue(leLaserDPC, "M4");
+    m_gcSpindleOn = settings.getValue(leSpindleCC, "M3");
+    m_gcSpindleLaserOff = settings.getValue(leSpindleLaserOff, "M5");
+    m_gcEnd = settings.getValue(pteEnd, "M5\nM30");
+    m_gcStart = settings.getValue(pteStart, "G21 G17 G90\nM3");
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -100,43 +100,44 @@ void SettingsDialog::readSettings()
     settings.endGroup();
 
     settings.beginGroup("Home");
-    m_mrkHomeOffset = settings.value("homeOffset").toPointF();
-    m_mrkPinOffset = settings.value("pinOffset", QPointF(6, 6)).toPointF();
-    m_mrkZeroOffset = settings.value("zeroOffset").toPointF();
+    settings.getValue("homeOffset", m_mrkHomeOffset);
+    settings.getValue("pinOffset", m_mrkPinOffset, QPointF(6, 6));
+    settings.getValue("zeroOffset", m_mrkZeroOffset);
     dsbxHomeX->setValue(m_mrkHomeOffset.x());
     dsbxHomeY->setValue(m_mrkHomeOffset.y());
     dsbxPinX->setValue(m_mrkPinOffset.x());
     dsbxPinY->setValue(m_mrkPinOffset.y());
     dsbxZeroX->setValue(m_mrkZeroOffset.x());
     dsbxZeroY->setValue(m_mrkZeroOffset.y());
-    cbxHomePos->setCurrentIndex(m_mrkHomePos = settings.value("homePos", HomePosition::BottomLeft).toInt());
-    cbxZeroPos->setCurrentIndex(m_mrkZeroPos = settings.value("zeroPos", HomePosition::BottomLeft).toInt());
+    m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::BottomLeft);
+    m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::BottomLeft);
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");
-    if (isVisible())
-        settings.setValue("geometry", saveGeometry());
+    //    if (isVisible())
+    //        settings.setValue("geometry", saveGeometry());
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    settings.getValue(tabWidget);
     settings.endGroup();
 }
 
 void SettingsDialog::writeSettings()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("Viewer");
-    if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
-        GraphicsView::m_instance->setViewport(chbOpenGl->isChecked()
+    if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->checkState()) {
+        GraphicsView::m_instance->setViewport(chbxOpenGl->isChecked()
                 ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
                 : new QWidget);
         GraphicsView::m_instance->viewport()->setObjectName("viewport");
-        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
-        settings.setValue("OpenGl", chbOpenGl->isChecked());
+        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
+        settings.setValue(chbxOpenGl);
     }
-    if (settings.value("Antialiasing").toBool() != chbAntialiasing->isChecked()) {
-        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
-        settings.setValue("Antialiasing", chbAntialiasing->isChecked());
+    if (settings.value("chbxAntialiasing").toBool() != chbxAntialiasing->isChecked()) {
+        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
+        settings.setValue(chbxAntialiasing);
     }
-    settings.setValue("SmoothScSh", m_guiSmoothScSh = chbSmoothScSh->isChecked());
+    m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -145,24 +146,24 @@ void SettingsDialog::writeSettings()
     settings.endGroup();
 
     settings.beginGroup("Gerber");
-    settings.setValue("CleanPolygons", (m_gbrCleanPolygons = chbxCleanPolygons->isChecked()));
-    settings.setValue("MinCircleSegmentLenght", (m_gbrGcMinCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
-    settings.setValue("MinCircleSegments", (m_gbrGcMinCircleSegments = sbxMinCircleSegments->value()));
-    settings.setValue("SimplifyRegions", (m_gbrSimplifyRegions = chbxSimplifyRegions->isChecked()));
-    settings.setValue("SkipDuplicates", (m_gbrSkipDuplicates = chbxSkipDuplicates->isChecked()));
+    m_gbrCleanPolygons = settings.setValue(chbxCleanPolygons);
+    m_gbrGcMinCircleSegmentLength = settings.setValue(dsbxMinCircleSegmentLength);
+    m_gbrGcMinCircleSegments = settings.setValue(sbxMinCircleSegments);
+    m_gbrSimplifyRegions = settings.setValue(chbxSimplifyRegions);
+    m_gbrSkipDuplicates = settings.setValue(chbxSkipDuplicates);
     settings.endGroup();
 
     settings.beginGroup("GCode");
-    settings.setValue("End", m_gcEnd = pteEnd->toPlainText());
-    settings.setValue("FileExtension", m_gcFileExtension = leFileExtension->text());
-    settings.setValue("Format", m_gcFormat = leFormat->text());
-    settings.setValue("Info", (m_gcInfo = chbxInfo->isChecked()));
-    settings.setValue("LaserConstOn", m_gcLaserConstOn = leLaserCPC->text());
-    settings.setValue("LaserDynamOn", m_gcLaserDynamOn = leLaserDPC->text());
-    settings.setValue("SameGCodeFolder", m_gcSameFolder = chbxSameGFolder->isChecked());
-    settings.setValue("SpindleLaserOff", m_gcSpindleLaserOff = leSpindleLaserOff->text());
-    settings.setValue("SpindleOn", m_gcSpindleOn = leSpindleCC->text());
-    settings.setValue("Start", m_gcStart = pteStart->toPlainText());
+    m_gcEnd = settings.setValue(pteEnd);
+    m_gcFileExtension = settings.setValue(leFileExtension);
+    m_gcFormat = settings.setValue(leFormat);
+    m_gcInfo = settings.setValue(chbxInfo);
+    m_gcLaserConstOn = settings.setValue(leLaserCPC);
+    m_gcLaserDynamOn = settings.setValue(leLaserDPC);
+    m_gcSameFolder = settings.setValue(chbxSameGFolder);
+    m_gcSpindleLaserOff = settings.setValue(leSpindleLaserOff);
+    m_gcSpindleOn = settings.setValue(leSpindleCC);
+    m_gcStart = settings.setValue(pteStart);
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -170,15 +171,16 @@ void SettingsDialog::writeSettings()
     settings.endGroup();
 
     settings.beginGroup("Home");
-    settings.setValue("homeOffset", m_mrkHomeOffset = QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
-    settings.setValue("homePos", m_mrkHomePos = cbxHomePos->currentIndex());
-    settings.setValue("pinOffset", m_mrkPinOffset = QPointF(dsbxPinX->value(), dsbxPinY->value()));
-    settings.setValue("zeroOffset", m_mrkZeroOffset = QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
-    settings.setValue("zeroPos", m_mrkZeroPos = cbxZeroPos->currentIndex());
+    m_mrkHomeOffset = settings.setValue("homeOffset", QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
+    m_mrkHomePos = settings.setValue(cbxHomePos);
+    m_mrkPinOffset = settings.setValue("pinOffset", QPointF(dsbxPinX->value(), dsbxPinY->value()));
+    m_mrkZeroOffset = settings.setValue("zeroOffset", QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
+    m_mrkZeroPos = settings.setValue(cbxZeroPos);
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
+    settings.setValue(tabWidget);
     settings.endGroup();
 }
 

@@ -72,7 +72,7 @@ private:
     inline QString recentFilesKey();
     void about();
     bool closeProject();
-    template<class T>
+    template <class T>
     void createDockWidget(/*QWidget* dwContent,*/ int type);
     void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
@@ -133,6 +133,7 @@ public:
         : QDockWidget(parent)
     {
         hide();
+        setVisible(false);
     }
     ~DockWidget() override = default;
 
@@ -143,6 +144,15 @@ protected:
         if (widget())
             delete widget();
         event->accept();
+    }
+
+    void showEvent(QShowEvent* event) override
+    {
+        event->ignore();
+        //        close();
+        //        QDockWidget::showEvent(event);
+        if (widget() == nullptr)
+            QTimer::singleShot(1, this, &QDockWidget::close);
     }
 };
 

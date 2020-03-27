@@ -132,7 +132,7 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString(Settings::inch() ? "  ∆X = %1 in\n"
+    const QString text = QString(GlobalSettings::inch() ? "  ∆X = %1 in\n"
                                                     "  ∆Y = %2 in\n"
                                                     "  ∆ / = %3 in\n"
                                                     "  %4°"
@@ -140,9 +140,9 @@ void Scene::drawRuller(QPainter* painter)
                                                     "  ∆Y = %2 mm\n"
                                                     "  ∆ / = %3 mm\n"
                                                     "  %4°")
-                             .arg(rect.width() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(rect.height() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(length / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(length / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
@@ -206,7 +206,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, Settings::guiColor(Colors::Background));
+    painter->fillRect(rect, GlobalSettings::guiColor(Colors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -216,9 +216,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
     const long k = 1000000;
     const double invK = 1.0 / k;
-    static bool in = Settings::inch();
-    if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != Settings::inch()) {
-        in = Settings::inch();
+    static bool in = GlobalSettings::inch();
+    if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != GlobalSettings::inch()) {
+        in = GlobalSettings::inch();
         m_scale = views().first()->matrix().m11();
         if (qFuzzyIsNull(m_scale))
             return;
@@ -228,7 +228,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         hGrid.clear();
         vGrid.clear();
 
-        double gridStep = Settings::gridStep(m_scale);
+        double gridStep = GlobalSettings::gridStep(m_scale);
 
         for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * k),
                   right = static_cast<long>(rect.right() * k),
@@ -273,9 +273,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     }
 
     const QColor color[3] {
-        Settings::guiColor(Colors::Grid1),
-        Settings::guiColor(Colors::Grid5),
-        Settings::guiColor(Colors::Grid10),
+        GlobalSettings::guiColor(Colors::Grid1),
+        GlobalSettings::guiColor(Colors::Grid5),
+        GlobalSettings::guiColor(Colors::Grid10),
     };
 
     painter->save();

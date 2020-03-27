@@ -26,6 +26,8 @@ ThermalModel::ThermalModel(QObject* parent)
 
 ThermalModel::~ThermalModel()
 {
+    qDebug(Q_FUNC_INFO);
+    m_instance = nullptr;
     delete rootItem;
 }
 

@@ -3,6 +3,100 @@
 
 #include <QColor>
 #include <QPointF>
+#include <QSettings>
+
+class DoubleSpinBox;
+class QAbstractButton;
+class QComboBox;
+class QDoubleSpinBox;
+class QLineEdit;
+class QPlainTextEdit;
+class QRadioButton;
+class QSpinBox;
+class QTabWidget;
+
+class MySettings : public QSettings {
+public:
+    template <typename T>
+    auto setValue(const QString& key, const T& value)
+    {
+        QSettings::setValue(key, value);
+        return value;
+    }
+
+    template <typename T>
+    auto getValue(const QString& key, T& value, const QVariant& defaultValue = QVariant()) const
+    {
+        value = QSettings::value(key, defaultValue).value<T>();
+        return value;
+    }
+
+    template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
+    auto setValue(W* widget)
+    {
+        qDebug(Q_FUNC_INFO);
+        const QString name { widget->objectName() };
+        assert(!name.isEmpty());
+
+        if constexpr (std::is_base_of_v<QAbstractButton, W>) {
+            QSettings::setValue(name, widget->isChecked());
+            return widget->isChecked();
+        } else if constexpr (std::is_base_of_v<QDoubleSpinBox, W>) {
+            QSettings::setValue(name, widget->value());
+            return widget->value();
+        } else if constexpr (std::is_same_v<W, QSpinBox>) {
+            QSettings::setValue(name, widget->value());
+            return widget->value();
+        } else if constexpr (std::is_same_v<W, QComboBox>) {
+            QSettings::setValue(name, widget->currentIndex());
+            return widget->currentIndex();
+        } else if constexpr (std::is_same_v<W, QLineEdit>) {
+            QSettings::setValue(name, widget->text());
+            return widget->text();
+        } else if constexpr (std::is_same_v<W, QPlainTextEdit>) {
+            QSettings::setValue(name, widget->toPlainText());
+            return widget->toPlainText();
+        } else if constexpr (std::is_same_v<W, QTabWidget>) {
+            QSettings::setValue(name, widget->currentIndex());
+            return widget->currentIndex();
+        } else {
+            throw std::logic_error(typeid(W).name());
+        }
+    }
+
+    template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
+    auto getValue(W* widget, const QVariant& defaultValue = QVariant()) const
+    {
+        qDebug(Q_FUNC_INFO);
+        const QString name { widget->objectName() };
+        assert(!name.isEmpty());
+
+        if constexpr (std::is_base_of_v<QAbstractButton, W>) {
+            widget->setChecked(QSettings::value(name, defaultValue).toBool());
+            return widget->isChecked();
+        } else if constexpr (std::is_base_of_v<QDoubleSpinBox, W>) {
+            widget->setValue(QSettings::value(name, defaultValue).toDouble());
+            return widget->value();
+        } else if constexpr (std::is_same_v<W, QSpinBox>) {
+            widget->setValue(QSettings::value(name, defaultValue).toInt());
+            return widget->value();
+        } else if constexpr (std::is_same_v<W, QComboBox>) {
+            widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
+            return widget->currentIndex();
+        } else if constexpr (std::is_same_v<W, QLineEdit>) {
+            widget->setText(QSettings::value(name, defaultValue).toString());
+            return widget->text();
+        } else if constexpr (std::is_same_v<W, QPlainTextEdit>) {
+            widget->setPlainText(QSettings::value(name, defaultValue).toString());
+            return widget->toPlainText();
+        } else if constexpr (std::is_same_v<W, QTabWidget>) {
+            widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
+            return widget->currentIndex();
+        } else {
+            throw std::logic_error(typeid(W).name());
+        }
+    }
+};
 
 enum class Colors : int {
     Background,
@@ -29,9 +123,9 @@ enum {
 };
 }
 
-class Settings {
+class GlobalSettings {
 public:
-    Settings();
+    GlobalSettings();
 
     /*G-Code*/
     static QString gcEnd();
