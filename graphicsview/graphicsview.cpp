@@ -228,7 +228,11 @@ double GraphicsView::scaleFactor()
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
     if (event->modifiers() & Qt::AltModifier || ShapePr::Constructor::snap()) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         const double gs = GlobalSettings::gridStep(matrix().m11());
+#else
+        const double gs = GlobalSettings::gridStep(transform().m11());
+#endif
         QPointF px(mapToScene(event->pos()) / gs);
         px.setX(gs * round(px.x()));
         px.setY(gs * round(px.y()));
@@ -239,10 +243,14 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 
 void GraphicsView::setScale(double s)
 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     const auto trf = transform();
     setTransform({ +s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
         /*      */ trf.m31(), trf.m32(), trf.m33() });
+#else
+    setTransform(transform().scale(s, -s));
+#endif
 }
 
 double GraphicsView::getScale()
@@ -346,7 +354,11 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, nullptr, event->modifiers());
+#else
+        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
+#endif
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
         QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());

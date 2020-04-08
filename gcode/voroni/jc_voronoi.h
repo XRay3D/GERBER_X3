@@ -151,6 +151,7 @@ USAGE:
     }
 
  */
+#pragma once
 
 #ifndef JC_VORONOI_H
 #define JC_VORONOI_H

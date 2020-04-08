@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GERBERITEM_H
 #define GERBERITEM_H
 

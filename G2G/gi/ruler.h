@@ -1,3 +1,4 @@
+#pragma once
 #ifndef RULER_H
 #define RULER_H
 

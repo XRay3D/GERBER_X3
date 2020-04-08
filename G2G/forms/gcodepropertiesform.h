@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GCODEPROPERTIESFORM_H
 #define GCODEPROPERTIESFORM_H
 

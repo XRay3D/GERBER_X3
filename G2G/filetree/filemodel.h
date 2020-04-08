@@ -1,13 +1,15 @@
+#pragma once
 #ifndef MODEL_H
 #define MODEL_H
 
 #include <QAbstractItemModel>
-
+    
 enum RootNodes {
     NodeGerberFiles,
     NodeDrillFiles,
     NodeToolPath,
     NodeSpecial,
+    NodeCount,
 };
 
 class AbstractFile;

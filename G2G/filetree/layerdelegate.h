@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LAYERDELEGATE_H
 #define LAYERDELEGATE_H
 

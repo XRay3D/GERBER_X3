@@ -186,10 +186,6 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
 {
     bool isHorzRuler = (Horizontal == rulerType);
     for (qreal current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
-        //        qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
-        //        qreal y1 = isHorzRuler ? rulerRect.top() + startPosition : current;
-        //        qreal x2 = isHorzRuler ? current : rulerRect.right();
-        //        qreal y2 = isHorzRuler ? rulerRect.bottom() : current;
         qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
         qreal y1 = isHorzRuler ? rulerRect.top() : current;
         qreal x2 = isHorzRuler ? current : rulerRect.right();

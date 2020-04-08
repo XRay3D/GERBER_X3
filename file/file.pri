@@ -13,8 +13,10 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/abstractfile.h \
+    $$PWD/abstractnode.h \
     $$PWD/parser.h
 
 SOURCES += \
     $$PWD/abstractfile.cpp \
+    $$PWD/abstractnode.cpp \
     $$PWD/parser.cpp

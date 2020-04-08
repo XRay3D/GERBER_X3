@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ABOUTFORM_H
 #define ABOUTFORM_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLEDITDIALOG_H
 #define TOOLEDITDIALOG_H
 

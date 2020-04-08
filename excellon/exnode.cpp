@@ -1,17 +1,17 @@
-#include "drillnode.h"
-#include "gerbernode.h"
+#include "exnode.h"
+#include "gbrnode.h"
 #include "project.h"
 #include <QFileInfo>
 #include <exfile.h>
 #include <mainwindow.h>
 
-DrillNode::DrillNode(int id)
+ExcellonNode::ExcellonNode(int id)
     : AbstractNode(id)
 {
     Project::instance()->file(m_id)->itemGroup()->addToScene();
 }
 
-bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case Name:
@@ -35,7 +35,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     }
 }
 
-Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
+Qt::ItemFlags ExcellonNode::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
@@ -48,7 +48,7 @@ Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
     }
 }
 
-QVariant DrillNode::data(const QModelIndex& index, int role) const
+QVariant ExcellonNode::data(const QModelIndex& index, int role) const
 {
     if (Project::instance()->file(m_id))
         switch (index.column()) {

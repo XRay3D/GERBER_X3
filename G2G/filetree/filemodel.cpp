@@ -1,8 +1,8 @@
 #include "filemodel.h"
-#include "drillnode.h"
+#include "exnode.h"
 #include "foldernode.h"
-#include "gcodenode.h"
-#include "gerbernode.h"
+#include "gcnode.h"
+#include "gbrnode.h"
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>
@@ -47,7 +47,7 @@ void FileModel::addFile(AbstractFile* file)
         item->append(new GerberNode(file->id()));
         break;
     case FileType ::Excellon:
-        item->append(new DrillNode(file->id()));
+        item->append(new ExcellonNode(file->id()));
         break;
     case FileType::GCode:
         item->append(new GcodeNode(file->id()));

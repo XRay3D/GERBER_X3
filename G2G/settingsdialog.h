@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 

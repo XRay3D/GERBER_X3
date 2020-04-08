@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EXFILE_H
 #define EXFILE_H
 

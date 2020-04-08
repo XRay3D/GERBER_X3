@@ -142,9 +142,11 @@ ThermalForm::~ThermalForm()
 
 void ThermalForm::updateFiles()
 {
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
-
+#else
+    disconnect(ui->cbxFile, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+#endif
     ui->cbxFile->clear();
 
     for (Gerber::File* file : Project::instance()->files<Gerber::File>()) {
@@ -160,8 +162,11 @@ void ThermalForm::updateFiles()
     }
 
     on_cbxFileCurrentIndexChanged(0);
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+#else
+    connect(ui->cbxFile, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+#endif
 }
 
 bool ThermalForm::canToShow()

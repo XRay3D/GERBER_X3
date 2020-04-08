@@ -1,5 +1,6 @@
 #include "gerberitem.h"
 
+#include <QElapsedTimer>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <gbrfile.h>
@@ -10,7 +11,11 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     : GraphicsItem(file)
     , m_paths(paths)
 {
-    redraw();
+    for (Path path : m_paths) {
+        path.append(path.first());
+        m_shape.addPolygon(toQPolygon(path));
+    }
+    fillPolygon = m_shape.toFillPolygon();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
@@ -62,9 +67,16 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     QBrush brush(brColor);
     QPen pen(pnColor, 0.0);
 
-    painter->setBrush(brush);
-    painter->setPen(m_file ? pen : m_pen);
-    painter->drawPath(m_shape);
+    if constexpr (false) {
+        painter->setBrush(brush);
+        painter->setPen(m_file ? pen : m_pen);
+        painter->drawPath(m_shape);
+    } else {
+        painter->setBrush(brush);
+        painter->setPen(Qt::NoPen);
+        painter->drawPolygon(fillPolygon /*m_shape.toFillPolygon()*/);
+        painter->strokePath(m_shape, m_file ? pen : m_pen);
+    }
 }
 
 int GerberItem::type() const { return GiGerber; }
@@ -76,6 +88,7 @@ void GerberItem::redraw()
         path.append(path.first());
         m_shape.addPolygon(toQPolygon(path));
     }
+    fillPolygon = m_shape.toFillPolygon();
     setPos({ 1, 1 }); // костыли
     setPos({ 0, 0 });
     //update();

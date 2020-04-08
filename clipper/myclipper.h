@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MYCLIPPER_H
 #define MYCLIPPER_H
 

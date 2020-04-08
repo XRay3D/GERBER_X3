@@ -69,7 +69,11 @@ void ToolSelectorForm::readTool()
 {
     QFile file(m_toolFileName);
     if (file.open(QIODevice::ReadOnly)) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
+#else
+        QJsonDocument loadDoc(QJsonDocument::fromJson(file.readAll()));
+#endif
         QJsonObject json = loadDoc.object();
         m_tool.read(json);
     } else {
@@ -85,7 +89,11 @@ void ToolSelectorForm::writeTool() const
         QJsonObject json;
         m_tool.write(json);
         QJsonDocument saveDoc(json);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         file.write(saveDoc.toBinaryData());
+#else
+        file.write(saveDoc.toJson());
+#endif
     } else {
         qWarning("Couldn't open tools file.");
     }

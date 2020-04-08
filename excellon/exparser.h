@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EXPARSER_H
 #define EXPARSER_H
 

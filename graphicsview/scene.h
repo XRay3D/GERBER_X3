@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MYGRAPHICSSCENE_H
 #define MYGRAPHICSSCENE_H
 

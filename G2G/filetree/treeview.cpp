@@ -1,7 +1,7 @@
 #include "treeview.h"
 #include "abstractnode.h"
 #include "forms/drillform/drillform.h"
-#include "gerbernode.h"
+#include "gbrnode.h"
 #include "layerdelegate.h"
 #include "project.h"
 #include "settings.h"
@@ -87,12 +87,13 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 {
     if (!index.column()) {
         m_menuIndex = index;
-        if (index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex()))
+        if (index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex())) {
             hideOther();
-        if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex()))
+        } else if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
             hideOther();
-        if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex()))
+        } else if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex())) {
             hideOther();
+        }
     }
 }
 

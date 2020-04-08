@@ -1,3 +1,4 @@
+#pragma once
 #ifndef POCKETRASTERFORM_H
 #define POCKETRASTERFORM_H
 

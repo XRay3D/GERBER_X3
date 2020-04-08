@@ -14,6 +14,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/gbrattributes.h \
     $$PWD/gbrcomponent.h \
+    $$PWD/gbrnode.h \
     $$PWD/gbrtypes.h \
     $$PWD/mathparser.h \
     $$PWD/gbraperture.h \
@@ -23,6 +24,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/gbrattributes.cpp \
     $$PWD/gbrcomponent.cpp \
+    $$PWD/gbrnode.cpp \
     $$PWD/mathparser.cpp \
     $$PWD/gbrparser.cpp \
     $$PWD/gbrfile.cpp \

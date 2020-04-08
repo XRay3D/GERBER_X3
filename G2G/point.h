@@ -1,3 +1,4 @@
+#pragma once
 #ifndef POINT_H
 #define POINT_H
 
@@ -9,9 +10,7 @@
 
 bool updateRect();
 
-class Marker : public QGraphicsItem { //Object {
-    //    Q_OBJECT
-
+class Marker : public QGraphicsItem {
 public:
     enum Type {
         Zero,
@@ -45,7 +44,6 @@ protected:
 };
 
 class Pin : public QObject, public QGraphicsItem {
-
 public:
     Pin(QObject* parent);
     ~Pin() override;

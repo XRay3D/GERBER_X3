@@ -29,8 +29,11 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     for (DoubleSpinBox* pPsbx : dsbx) {
         connect(pPsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
     }
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFeedSpeeds, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+#else
+    connect(ui->cbxFeedSpeeds, QOverload<int, const QString&>::of(&QComboBox::currentIndexChanged), [this](int index) {
+#endif
         double tmpFeed = m_feed;
         switch (index) {
         case mm_sec: // mm/sec
@@ -57,8 +60,11 @@ ToolEditForm::ToolEditForm(QWidget* parent)
         parentWidget()->setWindowModified(fl1);
         ui->pbApply->setEnabled(fl2);
     });
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxToolType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
+#else
+    connect(ui->cbxToolType, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
+#endif
 
     connect(ui->leName, &QLineEdit::textChanged, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); });
     connect(ui->leName, &QLineEdit::textEdited, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); ui->chbxAutoName->setChecked(false); });

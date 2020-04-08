@@ -1,3 +1,4 @@
+#pragma once
 #ifndef THERMALNODE_H
 #define THERMALNODE_H
 

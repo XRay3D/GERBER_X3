@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GFILE_H
 #define GFILE_H
 

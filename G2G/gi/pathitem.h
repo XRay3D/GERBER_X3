@@ -1,3 +1,4 @@
+#pragma once
 #ifndef PATHITEM_H
 #define PATHITEM_H
 

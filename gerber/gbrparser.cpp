@@ -10,6 +10,29 @@
 #include <QThread>
 #include <settings.h>
 
+/*
+.WHL Aperture Wheel File.PLC Silk Screen Component side
+.CMP Copper Component side        .STC Solder Stop mask Component side
+.SOL Copper Solder side          .STS Solder Stop mask Solder side
+
+Then you need to zip the following files and deliver it to PCB Manufacturer
+
+Gerber Files                    Extension
+Top (copper) Layer              .GTL
+Bottom (copper) Layer           .GBL
+Top Overlay                     .GTO
+Bottom Overlay                  .GBO
+Top Paste Mask                  .GTP
+Bottom Paste Mask               .GBP
+Top Solder Mask                 .GTS
+Bottom Solder Mask              .GBS
+Keep-Out Layer                  .GKO
+Drill Drawing                   .GD1
+Drill Guide                     .GG1
+Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
+
+*The GTP file isn’t necessary for the PCB fabrication, because it is used to create a stencil(if your design had SMD parts).
+*/
 namespace Gerber {
 
 #ifndef M_PI
@@ -814,7 +837,7 @@ bool Parser::parseAttributes(SLIter& gLine)
         } break;
         case Att::Command::TO: {
             QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
-            switch (int index = Component::value1(sl.first())) {
+            switch (int index = Component::value1(sl.first()); index) {
             case Component::N:
                 // qDebug() << matchAttr.cap(1) << index << sl;
                 break;

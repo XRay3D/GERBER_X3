@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DRILLITEM_H
 #define DRILLITEM_H
 

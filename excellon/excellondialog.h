@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EXCELLONDIALOG_H
 #define EXCELLONDIALOG_H
 

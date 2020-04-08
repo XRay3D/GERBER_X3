@@ -1,3 +1,4 @@
+#pragma once
 #ifndef RAWITEM_H
 #define RAWITEM_H
 

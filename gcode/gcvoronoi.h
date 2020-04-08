@@ -1,3 +1,4 @@
+#pragma once
 #ifndef VORONOI_H
 #define VORONOI_H
 

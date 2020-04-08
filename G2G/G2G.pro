@@ -61,12 +61,8 @@ HEADERS += \
     colorselector.h \
     datastream.h \
     doublespinbox.h \
-    filetree/abstractnode.h \
-    filetree/drillnode.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
-    filetree/gcodenode.h \
-    filetree/gerbernode.h \
     filetree/layerdelegate.h \
     filetree/treeview.h \
     forms/drillform/drillform.h \
@@ -119,12 +115,8 @@ SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
     doublespinbox.cpp \
-    filetree/abstractnode.cpp \
-    filetree/drillnode.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
-    filetree/gcodenode.cpp \
-    filetree/gerbernode.cpp \
     filetree/layerdelegate.cpp \
     filetree/treeview.cpp \
     forms/drillform/drillform.cpp \

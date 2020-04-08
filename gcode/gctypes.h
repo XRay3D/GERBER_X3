@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GC_TYPES_H
 #define GC_TYPES_H
 

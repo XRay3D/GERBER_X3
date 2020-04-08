@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLNAME_H
 #define TOOLNAME_H
 

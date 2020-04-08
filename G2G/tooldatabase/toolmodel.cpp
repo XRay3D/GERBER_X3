@@ -194,7 +194,11 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
         beginRow = rowCount(QModelIndex());
 
     QString encodedData = data->data(mimeType);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
+#else
+    QList<QString> list = encodedData.split('|', Qt::SkipEmptyParts);
+#endif
 
     for (QString& item : list) {
         ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
@@ -219,7 +223,11 @@ Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction 
 
 void ToolModel::exportTools()
 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
+#else
+    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+#endif
     do {
         if (file.open(QIODevice::WriteOnly))
             break;
@@ -272,20 +280,35 @@ void ToolModel::exportTools()
     }
     jsonObject["tree"] = treeArray;
     QJsonDocument saveDoc(jsonObject);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     file.write(saveDoc.toBinaryData());
+#else
+    file.write(saveDoc.toJson());
+#endif
 }
 
 void ToolModel::importTools()
 {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     do {
         if (file.open(QIODevice::ReadOnly))
             break;
         qWarning() << file.errorString();
         return;
-    } while (1);
-
+    } while (0);
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
+#else
+    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    do {
+        if (file.open(QIODevice::ReadOnly))
+            break;
+        qWarning() << file.errorString();
+        return;
+    } while (0);
+    QJsonDocument loadDoc(QJsonDocument::fromJson(file.readAll()));
+#endif
     ToolHolder::readTools(loadDoc.object());
 
     QList<ToolItem*> parentsStack;

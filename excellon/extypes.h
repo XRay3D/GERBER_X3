@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EX_TYPES_H
 #define EX_TYPES_H
 

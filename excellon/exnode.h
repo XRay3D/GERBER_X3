@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DRILL_H
 #define DRILL_H
 
@@ -8,12 +9,12 @@ namespace Excellon {
 class File;
 }
 
-class DrillNode : public QObject, public AbstractNode {
+class ExcellonNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    explicit DrillNode(int id);
-    ~DrillNode() override = default;
+    explicit ExcellonNode(int id);
+    ~ExcellonNode() override = default;
 
     // AbstractItem interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;

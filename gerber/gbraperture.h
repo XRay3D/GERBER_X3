@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GERBERAPERTURE_H
 #define GERBERAPERTURE_H
 
