@@ -1,3 +1,4 @@
+#pragma once
 #ifndef VORONOIFORM_H
 #define VORONOIFORM_H
 

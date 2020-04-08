@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLSELECTORFORM_H
 #define TOOLSELECTORFORM_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
@@ -20,7 +21,6 @@ public:
     template <typename T>
     auto setValue(const QString& key, const T& value)
     {
-        qDebug(Q_FUNC_INFO);
         QSettings::setValue(key, value);
         return value;
     }
@@ -28,7 +28,6 @@ public:
     template <typename T>
     auto getValue(const QString& key, T& value, const QVariant& defaultValue = QVariant()) const
     {
-        qDebug(Q_FUNC_INFO);
         value = QSettings::value(key, defaultValue).value<T>();
         return value;
     }

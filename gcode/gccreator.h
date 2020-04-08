@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLPATHCREATOR_H
 #define TOOLPATHCREATOR_H
 

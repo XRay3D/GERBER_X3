@@ -124,7 +124,7 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
-                static const Qt::CheckState chState[]{
+                static const Qt::CheckState chState[] {
                     Qt::Unchecked,
                     Qt::Unchecked,
                     Qt::Checked,
@@ -292,8 +292,11 @@ void DrillForm::setHoles(const QMap<int, double>& value)
 
 void DrillForm::updateFiles()
 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
-
+#else
+    disconnect(ui->cbxFile, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+#endif
     ui->cbxFile->clear();
 
     for (Excellon::File* file : Project::instance()->files<Excellon::File>()) {
@@ -315,8 +318,11 @@ void DrillForm::updateFiles()
     }
 
     on_cbxFileCurrentIndexChanged(0);
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+#else
+    connect(ui->cbxFile, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+#endif
 }
 
 bool DrillForm::canToShow()
@@ -544,10 +550,10 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
     if (current.column() == 1) {
         QVector<Tool::Type> tools;
         tools = model->isSlot(current.row())
-            ? QVector<Tool::Type>{ Tool::EndMill }
+            ? QVector<Tool::Type> { Tool::EndMill }
             : ((m_worckType == GCode::Profile || m_worckType == GCode::Pocket)
-                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
-                      : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
+                    ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser }
+                    : QVector<Tool::Type> { Tool::Drill, Tool::EndMill });
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -606,11 +612,11 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
         QVector<Tool::Type> tools;
         if (fl)
-            tools = QVector<Tool::Type>{ Tool::EndMill };
+            tools = QVector<Tool::Type> { Tool::EndMill };
         else
             tools = (m_worckType == GCode::Drill)
-                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }
-                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
+                ? QVector<Tool::Type> { Tool::Drill, Tool::EndMill }
+                : QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraving, Tool::Laser };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {

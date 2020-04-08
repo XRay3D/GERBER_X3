@@ -1,3 +1,4 @@
+#pragma once
 #ifndef BRIDGEITEM_H
 #define BRIDGEITEM_H
 

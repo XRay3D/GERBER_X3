@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LASERCREATOR_H
 #define LASERCREATOR_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLEDITFORM_H
 #define TOOLEDITFORM_H
 

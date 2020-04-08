@@ -1,3 +1,4 @@
+#pragma once
 #ifndef WORKITEM_H
 #define WORKITEM_H
 
@@ -32,5 +33,6 @@ public:
 
 private:
     Paths& m_paths;
+    QPolygonF fillPolygon;
 };
 #endif // WORKITEM_H

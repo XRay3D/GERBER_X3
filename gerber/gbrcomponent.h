@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GBRCOMPONENT_H
 #define GBRCOMPONENT_H
 

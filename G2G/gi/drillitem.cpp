@@ -42,7 +42,11 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     QBrush brush(m_brush);
     if (brush.style() != Qt::SolidPattern) {
         const double scale = GraphicsView::scaleFactor();
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         brush.setMatrix(QMatrix().scale(scale, scale));
+#else
+        brush.setTransform(QTransform().scale(scale, scale));
+#endif
     }
 
     if (option->state & QStyle::State_Selected)
@@ -51,9 +55,16 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     if (option->state & QStyle::State_MouseOver)
         brush.setColor(brush.color().darker(150));
 
-    painter->setBrush(brush);
-    painter->setPen(m_pen);
-    painter->drawPath(m_shape);
+    if constexpr (false) {
+        painter->setBrush(brush);
+        painter->setPen(m_pen);
+        painter->drawPath(m_shape);
+    } else {
+        painter->setBrush(brush);
+        painter->setPen(Qt::NoPen);
+        painter->drawPolygon(m_shape.toFillPolygon());
+        painter->strokePath(m_shape, m_pen);
+    }
     painter->restore();
 }
 
@@ -104,13 +115,19 @@ void DrillItem::updateHole()
 
 void DrillItem::create()
 {
-    m_shape= QPainterPath();
+    m_shape = QPainterPath();
     if (!m_hole) {
-        m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
+        //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
+        auto p = toQPolygon(CirclePath(m_diameter * uScale));
+        p.append(p.first());
+        m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
     } else if (m_hole->state.path.isEmpty()) {
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-        m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
+        //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
+        auto p = toQPolygon(CirclePath(m_diameter * uScale, toIntPoint(m_hole->state.offsetedPos())));
+        p.append(p.first());
+        m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
     } else {
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));

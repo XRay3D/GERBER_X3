@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DOUBLESPINBOX_H
 #define DOUBLESPINBOX_H
 

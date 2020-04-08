@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GERBERPARSER_H
 #define GERBERPARSER_H
 

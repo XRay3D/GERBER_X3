@@ -347,11 +347,18 @@ QMap<int, Tool> ToolHolder::tools;
 
 void ToolHolder::readTools()
 {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QFile loadFile(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     if (!loadFile.open(QIODevice::ReadOnly))
         return;
-
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
+#else
+    QFile loadFile(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    if (!loadFile.open(QIODevice::ReadOnly))
+        return;
+    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+#endif
     QJsonArray toolArray = loadDoc.object()["tools"].toArray();
     for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;

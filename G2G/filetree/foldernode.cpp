@@ -1,5 +1,5 @@
 #include "foldernode.h"
-#include "gerbernode.h"
+#include "gbrnode.h"
 #include <QIcon>
 
 FolderNode::FolderNode(const QString& name)

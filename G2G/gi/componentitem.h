@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COMPONENTITEM_H
 #define COMPONENTITEM_H
 

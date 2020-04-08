@@ -1,3 +1,4 @@
+#pragma once
 #ifndef THERMALFORM_H
 #define THERMALFORM_H
 

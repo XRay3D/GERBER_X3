@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MYMODEL_H
 #define MYMODEL_H
 

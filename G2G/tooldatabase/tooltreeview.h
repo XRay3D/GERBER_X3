@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 

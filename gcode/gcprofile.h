@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GCPROFILE_H
 #define GCPROFILE_H
 

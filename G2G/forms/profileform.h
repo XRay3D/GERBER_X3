@@ -1,3 +1,4 @@
+#pragma once
 #ifndef PROFILEFORM_H
 #define PROFILEFORM_H
 

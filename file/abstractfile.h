@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GAbstractFile_H
 #define GAbstractFile_H
 

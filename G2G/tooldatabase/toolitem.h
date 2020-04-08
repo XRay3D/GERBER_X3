@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TREEITEM_H
 #define TREEITEM_H
 

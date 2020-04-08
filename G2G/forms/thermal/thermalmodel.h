@@ -1,3 +1,4 @@
+#pragma once
 #ifndef THERMALMODEL_H
 #define THERMALMODEL_H
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COLORSELECTOR_H
 #define COLORSELECTOR_H
 

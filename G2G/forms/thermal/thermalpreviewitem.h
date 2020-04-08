@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ThermalPreviewItem_H
 #define ThermalPreviewItem_H
 

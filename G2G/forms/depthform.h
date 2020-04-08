@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DEPTHFORM_H
 #define DEPTHFORM_H
 

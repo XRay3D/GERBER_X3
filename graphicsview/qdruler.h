@@ -1,3 +1,4 @@
+#pragma once
 #ifndef QDRULER_H
 #define QDRULER_H
 

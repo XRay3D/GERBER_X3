@@ -21,7 +21,7 @@
 #include <QToolBar>
 #include <excellondialog.h>
 #include <exparser.h>
-#include <filetree/gerbernode.h>
+#include <gbrnode.h>
 #include <gbrparser.h>
 #include <gcfile.h>
 #include <sh/constructor.h>
@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (0) { // autocreate Raster
+    if constexpr (0) { // autocreate Raster (need for debug)
         QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
         QTimer::singleShot(120, [this] { selectAll(); });
         QTimer::singleShot(150, [this] { toolpathActionList[GCode::Raster]->triggered(); });
@@ -162,12 +162,12 @@ void MainWindow::createActions()
 {
     // fileMenu
     createActionsFile();
+    // zoomToolBar
+    createActionsZoom();
     // fileEdit    // Selection / Delete selected
     createActionsEdit();
     // serviceMenu
     createActionsService();
-    // zoomToolBar
-    createActionsZoom();
     // toolpathToolBar
     createActionsToolPath();
     // grafica
@@ -187,34 +187,37 @@ void MainWindow::createActionsFile()
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
     // New
-    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"),
-        tr("&New project"),
-        this,
-        &MainWindow::newFile);
+    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"),
+        this, &MainWindow::newFile);
     action->setShortcuts(QKeySequence::New);
     action->setStatusTip(tr("Create a new file"));
     fileToolBar->addAction(action);
     // Open
-    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."),
+        this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
     fileToolBar->addAction(action);
     // Save
-    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"),
+        this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
     // Save As
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."),
+        this, &MainWindow::saveAs);
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), m_project, &Project::saveSelectedToolpaths);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
+        m_project, &Project::saveSelectedToolpaths);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), scene, &Scene::RenderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."),
+        scene, &Scene::RenderPdf);
     action->setStatusTip(tr("Export to PDF file"));
     fileToolBar->addAction(action);
 
@@ -362,30 +365,33 @@ void MainWindow::createActionsHelp()
 
 void MainWindow::createActionsZoom()
 {
+    auto vievMenu = menuBar()->addMenu(tr("&Viev"));
+    vievMenu->setObjectName("vievMenu");
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
-    //zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
-    // zoomToolBar->setMovable(false);
-    QAction* action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), [this]() {
-        graphicsView->zoomFit();
-    });
+    // Fit best
+    auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), graphicsView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), [this]() {
-        graphicsView->zoom100();
-    });
+    vievMenu->addAction(action);
+    // 100%
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), graphicsView, &GraphicsView::zoom100);
     action->setShortcut(tr("Ctrl+0"));
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), [this]() {
-        graphicsView->zoomIn();
-    });
+    vievMenu->addAction(action);
+    // Zoom in
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), graphicsView, &GraphicsView::zoomIn);
     action->setShortcut(QKeySequence::ZoomIn);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [this]() {
-        graphicsView->zoomOut();
-    });
+    vievMenu->addAction(action);
+    // Zoom out
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), graphicsView, &GraphicsView::zoomOut);
     action->setShortcut(QKeySequence::ZoomOut);
+    vievMenu->addAction(action);
+    // Separator
     zoomToolBar->addSeparator();
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), [this]() {
-        graphicsView->zoomToSelected();
-    });
+    vievMenu->addSeparator();
+    // Zoom to selected
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), graphicsView, &GraphicsView::zoomToSelected);
+    action->setShortcut(QKeySequence("F12"));
+    vievMenu->addAction(action);
 }
 
 void MainWindow::createActionsToolPath()
@@ -533,7 +539,15 @@ void MainWindow::createPinsPath()
         qDebug() << dst.size();
 
         QSettings settings;
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
+#else
+        bool ok;
+        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
+        if (!ok)
+            return;
+#endif
+
         if (depth == 0.0)
             return;
         settings.setValue("Pin/depth", depth);

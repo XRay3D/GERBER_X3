@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DRILLMODEL_H
 #define DRILLMODEL_H
 

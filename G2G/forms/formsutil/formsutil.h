@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLPATHUTIL_H
 #define TOOLPATHUTIL_H
 

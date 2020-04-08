@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GBR_TYPES_H
 #define GBR_TYPES_H
 

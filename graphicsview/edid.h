@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EDID_H
 #define EDID_H
 

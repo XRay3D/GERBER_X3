@@ -1,3 +1,4 @@
+#pragma once
 #ifndef EXCELLON_H
 #define EXCELLON_H
 

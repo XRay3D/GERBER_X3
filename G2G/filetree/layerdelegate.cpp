@@ -1,5 +1,5 @@
 #include "layerdelegate.h"
-#include "gerbernode.h"
+#include "gbrnode.h"
 
 #include <QApplication>
 #include <QComboBox>

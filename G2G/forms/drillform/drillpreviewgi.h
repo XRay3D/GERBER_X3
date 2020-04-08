@@ -1,3 +1,4 @@
+#pragma once
 #ifndef PREVIEWITEM_H
 #define PREVIEWITEM_H
 

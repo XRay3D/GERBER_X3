@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOOLEDIT_H
 #define TOOLEDIT_H
 
