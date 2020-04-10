@@ -10,7 +10,9 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+
 namespace Gerber {
+
 class Component {
     Q_GADGET
 public:

@@ -6,11 +6,14 @@
 #include <QIcon>
 #include <QModelIndex>
 
+class ThermalModel;
+
 class ThermalNode {
 
 public:
     explicit ThermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, ThermalPreviewItem* item);
     explicit ThermalNode(const QIcon& icon, const QString& name);
+    explicit ThermalNode(ThermalModel* _model) { model = _model; }
 
     ~ThermalNode();
 
@@ -58,6 +61,8 @@ private:
     ThermalNode* m_parentItem = nullptr;
     QList<QSharedPointer<ThermalNode>> childItems;
     Qt::CheckState m_checkState = Qt::Checked;
+
+    static ThermalModel* model;
 };
 
 #endif // THERMALNODE_H

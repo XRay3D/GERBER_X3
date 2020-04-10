@@ -22,8 +22,8 @@ QRectF ComponentItem::boundingRect() const
 
 QPainterPath ComponentItem::shape() const
 {
-    if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
-        m_scale = GraphicsView::scaleFactor();
+    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
+        m_scale = App::graphicsView()->scaleFactor();
         QFont font;
         font.setPixelSize(16);
         {

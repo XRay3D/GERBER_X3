@@ -26,8 +26,6 @@
 #include <gcfile.h>
 #include <sh/constructor.h>
 
-MainWindow* MainWindow::m_instance = nullptr;
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , gerberParser(new Gerber::Parser)
@@ -90,7 +88,7 @@ MainWindow::MainWindow(QWidget* parent)
     setCurrentFile(QString());
 
     {
-        GCodePropertiesForm(); // init vars;
+        GCodePropertiesForm(nullptr); // init vars;
     }
 
     readSettings();
@@ -109,15 +107,12 @@ MainWindow::MainWindow(QWidget* parent)
     //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
-
-    m_instance = this;
 }
 
 MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
-    m_instance = nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -126,7 +121,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         writeSettings();
         dockWidget->close();
         qApp->closeAllWindows();
-        FileModel::closeProject();
+        App::fileModel()->closeProject();
         event->accept();
     } else {
         event->ignore();
@@ -137,9 +132,9 @@ bool MainWindow::closeProject()
 {
     if (maybeSave()) {
         dockWidget->close();
-        FileModel::closeProject();
+        App::fileModel()->closeProject();
         setCurrentFile(QString());
-        Project::instance()->close();
+        m_project->close();
         return true;
     }
     return false;
@@ -294,7 +289,7 @@ void MainWindow::createActionsEdit()
     // action->setShortcut(QKeySequence::Redo);
     // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
     // QList<QGraphicsItem*> list;
-    // for (QGraphicsItem* item : MyScene::m_instance->items())
+    // for (QGraphicsItem* item : MyApp::scene()->123->items())
     // if (item->isSelected() && item->type() != DrillItemType)
     // list << item;
     // if (list.size() && QMessageBox::question(this,
@@ -302,10 +297,10 @@ void MainWindow::createActionsEdit()
     // for (QGraphicsItem* item : list)
     // if (item->isSelected() && item->type() != DrillItemType)
     // delete item;
-    // MyScene::m_instance->setSceneRect(MyScene::m_instance->itemsBoundingRect());
-    // MyScene::m_instance->update();
-    // MainWindow::m_instance->zero()->resetPos();
-    // MainWindow::m_instance->home()->resetPos();
+    // MyApp::scene()->123->setSceneRect(MyApp::scene()->123->itemsBoundingRect());
+    // MyApp::scene()->123->update();
+    // MainWindow::123->zero()->resetPos();
+    // MainWindow::123->home()->resetPos();
     // Pin::shtifts()[0]->resetPos();
     // }
     // });
@@ -491,7 +486,7 @@ void MainWindow::createActionsGraphics()
     tb->addSeparator();
 
     auto ex = [](ClipType type) {
-        QList<QGraphicsItem*> si = Scene::selectedItems();
+        QList<QGraphicsItem*> si = App::scene()->selectedItems();
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
             if (item->type() == GiGerber) {
@@ -595,7 +590,7 @@ void MainWindow::selectAll()
         static_cast<QTableView*>(focusWidget())->selectAll();
         return;
     } else {
-        for (QGraphicsItem* item : Scene::items())
+        for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible())
                 item->setSelected(true);
     }
@@ -610,7 +605,7 @@ void MainWindow::printDialog()
     connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* pPrinter) {
         scene->m_drawPdf = true;
         QRectF rect;
-        for (QGraphicsItem* item : Scene::items())
+        for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());

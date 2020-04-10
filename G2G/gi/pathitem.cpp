@@ -50,14 +50,14 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     if (m_pen.widthF() == 0) {
         QPen pen(m_pen);
-        pen.setWidthF(1.5 * GraphicsView::scaleFactor());
+        pen.setWidthF(1.5 * App::graphicsView()->scaleFactor());
         painter->setPen(pen);
     } else
         painter->setPen(m_pen);
 #ifdef QT_DEBUG
     if (option->state & QStyle::State_MouseOver) {
         QPen pen(m_pen);
-        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
         pen.setDashPattern({ 2.0, 2.0 });
@@ -72,7 +72,7 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
-    if (m_sc != GraphicsView::scaleFactor())
+    if (m_sc != App::graphicsView()->scaleFactor())
         updateArrows();
     painter->drawPath(m_arrows);
 #endif
@@ -84,13 +84,13 @@ Paths PathItem::paths() const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
 void PathItem::updateArrows()
 {
-    m_sc = GraphicsView::scaleFactor();
+    m_sc = App::graphicsView()->scaleFactor();
     m_arrows = QPainterPath(); //.clear();
     if (qFuzzyIsNull(m_pen.widthF())) {
         for (const QPolygonF& path : m_shape.toSubpathPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
-                double length = 20 * GraphicsView::scaleFactor();
+                double length = 20 * App::graphicsView()->scaleFactor();
                 if (line.length() < length && i)
                     continue;
                 if (length > 0.5)
@@ -110,7 +110,7 @@ void PathItem::updateArrows()
                 //                        painter->save();
                 //                        const QString text = "   " + QString::number(i);
                 //                        const QRectF textRect = QFontMetricsF(painter->font()).boundingRect(QRectF(), Qt::AlignLeft, text);
-                //                        const double k = 1.0 / GraphicsView ::m_instance->matrix().m11();
+                //                        const double k = 1.0 / GraphicsView ::123->matrix().m11();
                 //                        painter->translate(path[i]);
                 //                        painter->scale(k, -k);
                 //                        //painter->setBrush(QColor(127, 127, 127, 255));

@@ -125,16 +125,16 @@ void SettingsDialog::writeSettings()
 {
     MySettings settings;
     settings.beginGroup("Viewer");
-    if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->checkState()) {
-        GraphicsView::m_instance->setViewport(chbxOpenGl->isChecked()
+    if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
+        App::graphicsView()->setViewport(chbxOpenGl->isChecked()
                 ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
                 : new QWidget);
-        GraphicsView::m_instance->viewport()->setObjectName("viewport");
-        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
+        App::graphicsView()->viewport()->setObjectName("viewport");
+        App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxOpenGl);
     }
     if (settings.value("chbxAntialiasing").toBool() != chbxAntialiasing->isChecked()) {
-        GraphicsView::m_instance->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
+        App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxAntialiasing);
     }
     m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);

@@ -13,19 +13,17 @@
 #include <gi/graphicsitem.h>
 #include <settings.h>
 
-Scene* Scene::m_instance = nullptr;
-
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    if (m_instance) {
+    if (App::mInstance->m_scene) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
         exit(1);
     }
-    m_instance = this;
+    App::mInstance->m_scene = this;
 }
 
-Scene::~Scene() { m_instance = nullptr; }
+Scene::~Scene() { App::mInstance->m_scene = nullptr; }
 
 void Scene::RenderPdf()
 {
@@ -71,35 +69,7 @@ QRectF Scene::itemsBoundingRect()
 
 bool Scene::drawPdf()
 {
-    if (m_instance)
-        return m_instance->m_drawPdf;
-    return false;
-}
-
-QList<QGraphicsItem*> Scene::selectedItems()
-{
-    if (m_instance)
-        return m_instance->QGraphicsScene::selectedItems();
-    return {};
-}
-
-void Scene::addItem(QGraphicsItem* item)
-{
-    if (m_instance)
-        m_instance->QGraphicsScene::addItem(item);
-}
-
-QList<QGraphicsItem*> Scene::items(Qt::SortOrder order)
-{
-    if (m_instance)
-        return m_instance->QGraphicsScene::items(order);
-    return {};
-}
-
-void Scene::update()
-{
-    if (m_instance)
-        m_instance->QGraphicsScene::update();
+    return m_drawPdf;
 }
 
 void Scene::setCross1(const QPointF& cross)
@@ -150,7 +120,7 @@ void Scene::drawRuller(QPainter* painter)
     if (qFuzzyIsNull(line.length()))
         return;
 
-    const double k = GraphicsView::scaleFactor();
+    const double k = App::graphicsView()->scaleFactor();
 
     painter->setBrush(QColor(127, 127, 127, 100));
     painter->setPen(QPen(Qt::green, 0.0)); //1.5 * k));

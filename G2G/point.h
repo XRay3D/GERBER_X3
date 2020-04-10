@@ -77,7 +77,6 @@ protected:
 };
 
 class LayoutFrames : public QObject, public QGraphicsItem {
-    static LayoutFrames* m_instance;
     QPainterPath m_path;
 
 public:
@@ -86,8 +85,7 @@ public:
     int type() const override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    static LayoutFrames* instance();
-    static void updateRect(bool fl = false);
+    void updateRect(bool fl = false);
 };
 
 #endif // POINT_H

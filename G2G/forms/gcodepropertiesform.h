@@ -13,12 +13,11 @@ class GCodePropertiesForm : public QWidget {
     Q_OBJECT
 
 public:
-    explicit GCodePropertiesForm(QWidget* prnt = nullptr);
+    explicit GCodePropertiesForm(QWidget* parent);
     ~GCodePropertiesForm() override;
 
-    static void updatePosDsbxs();
-    static void updateAll();
-
+    void updatePosDsbxs();
+    void updateAll();
 
     static double safeZ;
     static double boardThickness;
@@ -26,8 +25,6 @@ public:
     static double clearence;
     static double plunge;
     static double glue;
-
-    static GCodePropertiesForm* m_instance;
 
 private slots:
     void on_pbResetHome_clicked();

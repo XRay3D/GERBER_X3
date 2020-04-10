@@ -7,18 +7,16 @@
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
 
-Project* Project::m_instance = nullptr;
-
 Project::Project()
 {
-    if (m_instance) {
+    if (App::mInstance->m_project) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");
         exit(1);
     }
-    m_instance = this;
+    App::mInstance->m_project = this;
 }
 
-Project::~Project() { m_instance = nullptr; }
+Project::~Project() { App::mInstance->m_project = nullptr; }
 
 bool Project::save(QFile& file)
 {
@@ -99,19 +97,19 @@ bool Project::open(QFile& file)
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
             switch (filePtr->type()) {
             case FileType::Gerber:
-                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
+                App::fileModel()->addFile(static_cast<Gerber::File*>(filePtr.data()));
                 break;
             case FileType::Excellon:
-                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
+                App::fileModel()->addFile(static_cast<Excellon::File*>(filePtr.data()));
                 break;
             case FileType::GCode:
-                FileModel::addFile(static_cast<GCode::File*>(filePtr.data()));
+                App::fileModel()->addFile(static_cast<GCode::File*>(filePtr.data()));
                 break;
             }
         }
         m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
-        LayoutFrames::updateRect();
+        App::layoutFrames()->updateRect();
         return true;
     } catch (...) {
         qDebug() << file.errorString();
@@ -282,7 +280,7 @@ int Project::addFile(AbstractFile* file)
     } else if (file->m_id == -1) {
         file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
-        FileModel::addFile(file);
+        App::fileModel()->addFile(file);
     }
     setChanged();
     return file->m_id;
@@ -374,7 +372,7 @@ bool Project::isUntitled() { return m_isUntitled; }
 void Project::setUntitled(bool value)
 {
     m_isUntitled = value;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 double Project::spaceX() const { return m_spacingX; }
@@ -382,7 +380,7 @@ double Project::spaceX() const { return m_spacingX; }
 void Project::setSpaceX(double value)
 {
     m_spacingX = value;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 double Project::spaceY() const { return m_spacingY; }
@@ -390,7 +388,7 @@ double Project::spaceY() const { return m_spacingY; }
 void Project::setSpaceY(double value)
 {
     m_spacingY = value;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 int Project::stepsX() const { return m_stepsX; }
@@ -398,7 +396,7 @@ int Project::stepsX() const { return m_stepsX; }
 void Project::setStepsX(int value)
 {
     m_stepsX = value;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 int Project::stepsY() const { return m_stepsY; }
@@ -406,7 +404,7 @@ int Project::stepsY() const { return m_stepsY; }
 void Project::setStepsY(int value)
 {
     m_stepsY = value;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
@@ -414,7 +412,7 @@ QRectF Project::worckRect() const { return m_worckRect; }
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
-    LayoutFrames::updateRect();
+     App::layoutFrames()->updateRect();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)

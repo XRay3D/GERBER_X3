@@ -29,7 +29,7 @@ void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QW
 
 QRectF SH::rect() const
 {
-    const double scale = GraphicsView::scaleFactor();
+    const double scale = App::graphicsView()->scaleFactor();
     const double k = 5 * scale;
     const double s = k * 2;
     return { QPointF(-k, -k), QSizeF(s, s) };
@@ -39,7 +39,7 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
     if (event->modifiers() & Qt::ALT || Constructor::snap()) {
-        const double gs = GlobalSettings::gridStep(GraphicsView::getScale());
+        const double gs = GlobalSettings::gridStep(App::graphicsView()->getScale());
         QPointF px(pos() / gs);
         px.setX(gs * round(px.x()));
         px.setY(gs * round(px.y()));

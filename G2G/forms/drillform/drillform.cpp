@@ -17,8 +17,6 @@
 #include <gctypes.h>
 #include <graphicsview.h>
 
-DrillForm* DrillForm::m_instance = nullptr;
-
 enum { IconSize = 24 };
 
 Paths offset(const Path& path, double offset, bool fl = false)
@@ -97,7 +95,7 @@ DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
 {
-    if (m_instance) {
+    if (App::mInstance->m_drillForm) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class DrillForm more than 2 times!!!");
         exit(1);
     }
@@ -185,12 +183,12 @@ DrillForm::DrillForm(QWidget* parent)
 
     parent->setWindowTitle(ui->label->text());
 
-    m_instance = this;
+    App::mInstance->m_drillForm = this;
 }
 
 DrillForm::~DrillForm()
 {
-    m_instance = nullptr;
+    App::mInstance->m_drillForm = nullptr;
     QSettings settings;
     settings.beginGroup("DrillForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
@@ -230,7 +228,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     DrillPrGI* item = new DrillPrGI(go, apertureIt.key());
                     m_sourcePreview[apertureIt.key()].append(QSharedPointer<DrillPrGI>(item));
-                    Scene::addItem(item);
+                    App::scene()->addItem(item);
                 }
             }
             if (drillDiameter != 0.0)
@@ -270,7 +268,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
                 if (!hole.state.path.isEmpty())
                     isSlot = true;
                 m_sourcePreview[toolIt.key()].append(QSharedPointer<DrillPrGI>(item));
-                Scene::addItem(item);
+                App::scene()->addItem(item);
             }
         }
         model->setSlot(model->rowCount() - 1, isSlot);
@@ -299,13 +297,13 @@ void DrillForm::updateFiles()
 #endif
     ui->cbxFile->clear();
 
-    for (Excellon::File* file : Project::instance()->files<Excellon::File>()) {
+    for (Excellon::File* file : App::project()->files<Excellon::File>()) {
         ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         ui->cbxFile->setItemIcon(ui->cbxFile->count() - 1, QIcon::fromTheme("drill-path"));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
     }
 
-    for (Gerber::File* file : Project::instance()->files<Gerber::File>()) {
+    for (Gerber::File* file : App::project()->files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(IconSize, IconSize);
@@ -327,10 +325,10 @@ void DrillForm::updateFiles()
 
 bool DrillForm::canToShow()
 {
-    if (Project::instance()->files<Excellon::File>().size() > 0)
+    if (App::project()->files<Excellon::File>().size() > 0)
         return true;
 
-    for (Gerber::File* file : Project::instance()->files<Gerber::File>())
+    for (Gerber::File* file : App::project()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
 
@@ -390,7 +388,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File({ pathsMap[selectedToolId].paths }, { ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), GCode::Profile });
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                Project::instance()->addFile(gcode);
+                App::project()->addFile(gcode);
             }
         }
     }
@@ -475,7 +473,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File({ { path } }, { ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill });
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
-                Project::instance()->addFile(gcode);
+                App::project()->addFile(gcode);
             }
             if (!pathsMap[toolId].paths.isEmpty()) {
                 Clipper clipper;
@@ -518,7 +516,7 @@ void DrillForm::on_pbCreate_clicked()
                     continue;
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[toolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                Project::instance()->addFile(gcode);
+                App::project()->addFile(gcode);
             }
         }
     }
@@ -714,12 +712,12 @@ void DrillForm::setSelected(int id, bool fl)
 void DrillForm::zoonToSelected()
 {
     if (ui->chbxZoomToSelected->isChecked())
-        GraphicsView::zoomToSelected();
+        App::graphicsView()->zoomToSelected();
 }
 
 void DrillForm::deselectAll()
 {
-    for (QGraphicsItem* item : Scene::selectedItems())
+    for (QGraphicsItem* item : App::scene()->selectedItems())
         item->setSelected(false);
 }
 

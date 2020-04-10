@@ -70,7 +70,7 @@ void FormsUtil::setFile(GCode::File* file)
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
     file->m_usedItems = m_usedItems;
-    Project::instance()->addFile(file);
+    App::project()->addFile(file);
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)

@@ -20,7 +20,6 @@ class Creator : public QObject {
     Q_OBJECT
 
 public:
-    static Creator* m_instance;
     Creator() {}
     void reset();
     //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
@@ -82,6 +81,8 @@ protected:
     cInt m_stepOver = 0;
     GCodeParams m_gcp;
 };
+
 } // namespace GCode
+#include <app.h>
 
 #endif // TOOLPATHCREATOR_H

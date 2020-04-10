@@ -149,7 +149,7 @@ void ThermalForm::updateFiles()
 #endif
     ui->cbxFile->clear();
 
-    for (Gerber::File* file : Project::instance()->files<Gerber::File>()) {
+    for (Gerber::File* file : App::project()->files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
@@ -171,7 +171,7 @@ void ThermalForm::updateFiles()
 
 bool ThermalForm::canToShow()
 {
-    for (Gerber::File* file : Project::instance()->files<Gerber::File>())
+    for (Gerber::File* file : App::project()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
 
@@ -287,7 +287,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     }
 
     for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview)
-        Scene::addItem(item.data());
+        App::scene()->addItem(item.data());
 
     //    updateCreateButton();
 

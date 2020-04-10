@@ -81,103 +81,75 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
 
         m_lineNum = 0;
-        for (SLIter gerberLine = m_file->lines().begin(); gerberLine != m_file->lines().end();) {
-            //        }
-            //        for (const QString& gerberLine : m_file->lines()) {
 
-            m_currentGerbLine = *gerberLine;
+        for (const QString& gerberLine : m_file->lines()) {
+
+            m_currentGerbLine = gerberLine;
             ++m_lineNum;
             if (!(m_lineNum % 1000))
                 emit fileProgress(m_file->shortName(), 0, m_lineNum);
 
-            if (parseGCode(gerberLine)) {
-                ++gerberLine;
+            if (parseGCode(gerberLine))
                 continue;
-            }
 
-            if (parseDCode(gerberLine)) {
-                ++gerberLine;
+            if (parseDCode(gerberLine))
                 continue;
-            }
 
-            if (parseStepRepeat(gerberLine)) {
-                ++gerberLine;
+            if (parseStepRepeat(gerberLine))
                 continue;
-            } //////////
 
-            if (parseApertureBlock(gerberLine)) {
-                ++gerberLine;
+            if (parseApertureBlock(gerberLine))
                 continue;
-            }
 
-            if (parseAttributes(gerberLine)) {
-                ++gerberLine;
+            if (parseAttributes(gerberLine))
                 continue;
-            }
 
-            if (parseImagePolarity(gerberLine)) {
-                ++gerberLine;
+            if (parseImagePolarity(gerberLine))
                 continue;
-            }
 
-            if (parseApertureMacros(gerberLine)) {
-                ++gerberLine;
+            if (parseApertureMacros(gerberLine))
                 continue;
-            }
 
             // Aperture definitions %ADD...
-            if (parseAperture(gerberLine)) {
-                ++gerberLine;
+            if (parseAperture(gerberLine))
                 continue;
-            }
 
             // Polarity change
             // Example: %LPD*% or %LPC*%
             // If polarity changes, creates geometry from current
             // buffer, then adds or subtracts accordingly.
-            if (parseTransformations(gerberLine)) {
-                ++gerberLine;
+            if (parseTransformations(gerberLine))
                 continue;
-            }
 
             // Number format
             // Example: %FSLAX24Y24*%
             // TODO: This is ignoring most of the format-> Implement the rest.
-            if (parseFormat(gerberLine)) {
-                ++gerberLine;
+            if (parseFormat(gerberLine))
                 continue;
-            }
 
             // Mode (IN/MM)
             // Example: %MOIN*%
-            if (parseUnitMode(gerberLine)) {
-                ++gerberLine;
+            if (parseUnitMode(gerberLine))
                 continue;
-            }
 
-            if (parseEndOfFile(gerberLine)) {
-                ++gerberLine;
+            if (parseEndOfFile(gerberLine))
                 continue;
-            }
 
             // G01 - Linear interpolation plus flashes
             // Operation code (D0x) missing is deprecated... oh well I will support it.
-            if (parseLineInterpolation(gerberLine)) {
-                ++gerberLine;
+            if (parseLineInterpolation(gerberLine))
                 continue;
-            }
 
             // G02/G03 - Circular interpolation
             // 2-clockwise, 3-counterclockwise
-            if (parseCircularInterpolation(gerberLine)) {
-                ++gerberLine;
+            if (parseCircularInterpolation(gerberLine))
                 continue;
-            }
 
             // Line didn`t match any pattern. Warn user.
-            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(*gerberLine);
-            ++gerberLine;
-        }
+            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
+
+        } // End of file parsing
+
         if (file()->isEmpty()) {
             delete m_file;
         } else {
@@ -411,35 +383,35 @@ void Parser::addPath()
     switch (m_state.region()) {
     case On:
         m_state.setType(Region);
-        switch (m_abSrIdStack.top().first) {
-        case Normal:
+        switch (m_abSrIdStack.top().workingType) {
+        case WorkingType::Normal:
             file()->append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
-        case StepRepeat:
+        case WorkingType::StepRepeat:
             m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
-        case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
+        case WorkingType::ApertureBlock:
+            apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
         }
         break;
     case Off:
         m_state.setType(Line);
-        switch (m_abSrIdStack.top().first) {
-        case Normal:
+        switch (m_abSrIdStack.top().workingType) {
+        case WorkingType::Normal:
             file()->append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
             break;
-        case StepRepeat:
+        case WorkingType::StepRepeat:
             m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), file(), m_path));
             break;
-        case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, createLine(), file(), m_path));
+        case WorkingType::ApertureBlock:
+            apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(apBlock(m_abSrIdStack.top().apertureBlockId)->size(), m_state, createLine(), file(), m_path));
             break;
         }
         break;
     }
-    if (apFunctionMap.contains(m_state.aperture())
-        && apFunctionMap[m_state.aperture()] == Att::AperFunction::ComponentOutline) {
+    if (aperFunctionMap.contains(m_state.aperture())
+        && aperFunctionMap[m_state.aperture()] == Att::AperFunction::ComponentOutline) {
         components[refDes].footprint = toQPolygon(m_path);
     }
     resetStep();
@@ -452,24 +424,24 @@ void Parser::addFlash()
         throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
     AbstractAperture* ap = file()->m_apertures[m_state.aperture()].data();
-    Paths paths(ap->draw(m_state, m_abSrIdStack.top().first != ApertureBlock));
+    Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->isDrilled())
         paths.push_back(ap->drawDrill(m_state));
 
-    switch (m_abSrIdStack.top().first) {
-    case Normal:
+    switch (m_abSrIdStack.top().workingType) {
+    case WorkingType::Normal:
         file()->append(GraphicObject(m_goId++, m_state, paths, file()));
         break;
-    case StepRepeat:
+    case WorkingType::StepRepeat:
         m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, file()));
         break;
-    case ApertureBlock:
-        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, paths, file()));
+    case WorkingType::ApertureBlock:
+        apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(apBlock(m_abSrIdStack.top().apertureBlockId)->size(), m_state, paths, file()));
         break;
     }
-    if (apFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
-        switch (apFunctionMap[m_state.aperture()]) {
+    if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
+        switch (aperFunctionMap[m_state.aperture()]) {
         case Att::AperFunction::ComponentPin:
             components[refDes].pins.last().pos = toQPointF(m_state.curPos());
             break;
@@ -490,14 +462,14 @@ void Parser::reset(const QString& fileName)
     m_file = new File(fileName);
     m_state = State(file()->format());
     m_abSrIdStack.clear();
-    m_abSrIdStack.push({ Normal, 0 });
+    m_abSrIdStack.push({ WorkingType::Normal, 0 });
     m_stepRepeat.reset();
     m_goId = 0;
     ///////////////
     components.clear();
     refDes.clear();
     aperFunction = -1;
-    apFunctionMap.clear();
+    aperFunctionMap.clear();
 }
 
 void Parser::resetStep()
@@ -605,11 +577,11 @@ Paths Parser::createPolygon()
     return { m_path };
 }
 
-bool Parser::parseAperture(const SLIter& gLine)
+bool Parser::parseAperture(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         int aperture = match.cap(1).toInt();
         QString apType = match.cap(2);
         QString apParameters = match.cap(3);
@@ -657,21 +629,21 @@ bool Parser::parseAperture(const SLIter& gLine)
             break;
         }
         if (aperFunction > -1)
-            apFunctionMap[aperture] = aperFunction;
+            aperFunctionMap[aperture] = aperFunction;
         return true;
     }
     return false;
 }
 
-bool Parser::parseApertureBlock(const SLIter& gLine)
+bool Parser::parseApertureBlock(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%ABD(\\d+)\\*%$"));
-    if (match.exactMatch(*gLine)) {
-        m_abSrIdStack.push({ ApertureBlock, match.cap(1).toInt() });
-        file()->m_apertures.insert(m_abSrIdStack.top().second, QSharedPointer<AbstractAperture>(new ApBlock(file()->format())));
+    if (match.exactMatch(gLine)) {
+        m_abSrIdStack.push({ WorkingType::ApertureBlock, match.cap(1).toInt() });
+        file()->m_apertures.insert(m_abSrIdStack.top().apertureBlockId, QSharedPointer<AbstractAperture>(new ApBlock(file()->format())));
         return true;
     }
-    if (*gLine == "%AB*%") {
+    if (gLine == "%AB*%") {
         addPath();
         m_abSrIdStack.pop();
         return true;
@@ -679,7 +651,7 @@ bool Parser::parseApertureBlock(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseTransformations(const SLIter& gLine)
+bool Parser::parseTransformations(const QString& gLine)
 {
     enum {
         trPolarity,
@@ -691,7 +663,7 @@ bool Parser::parseTransformations(const SLIter& gLine)
     static const QStringList slLevelPolarity { "D", "C" };
     static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (slTransformations.indexOf(match.cap(1))) {
         case trPolarity:
             addPath();
@@ -720,7 +692,7 @@ bool Parser::parseTransformations(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseStepRepeat(const SLIter& gLine)
+bool Parser::parseStepRepeat(const QString& gLine)
 {
     /*
      *     <SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
@@ -728,8 +700,8 @@ bool Parser::parseStepRepeat(const SLIter& gLine)
      *     <SR statement> = <SR open>{<single command>|<region statement>}<SR close>
      */
     static const QRegExp match(QStringLiteral("^%SRX(\\d+)Y(\\d+)I([+-]?\\d*\\.?\\d*)J([+-]?\\d*\\.?\\d*)\\*%$"));
-    if (match.exactMatch(*gLine)) {
-        if (m_abSrIdStack.top().first == StepRepeat)
+    if (match.exactMatch(gLine)) {
+        if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
         m_stepRepeat.reset();
         m_stepRepeat.x = match.cap(1).toInt();
@@ -741,12 +713,12 @@ bool Parser::parseStepRepeat(const SLIter& gLine)
             m_stepRepeat.j *= 25.4;
         }
         if (m_stepRepeat.x > 1 || m_stepRepeat.y > 1)
-            m_abSrIdStack.push({ StepRepeat, 0 });
+            m_abSrIdStack.push({ WorkingType::StepRepeat, 0 });
         return true;
     }
     static const QRegExp match2("^%SR\\*%$");
-    if (match2.exactMatch(*gLine)) {
-        if (m_abSrIdStack.top().first == StepRepeat)
+    if (match2.exactMatch(gLine)) {
+        if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
         return true;
     }
@@ -774,11 +746,11 @@ void Parser::closeStepRepeat()
     m_abSrIdStack.pop();
 }
 
-bool Parser::parseApertureMacros(const SLIter& gLine)
+bool Parser::parseApertureMacros(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%AM([^\\*]+)\\*([^%]+)?(%)?$"));
     // Start macro if(match, else not an AM, carry on.
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         if (!match.cap(2).isEmpty() && !match.cap(3).isEmpty()) {
             m_apertureMacro[match.cap(1)] = match.cap(2);
             return true;
@@ -787,10 +759,10 @@ bool Parser::parseApertureMacros(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseAttributes(SLIter& gLine)
+bool Parser::parseAttributes(const QString& gLine)
 {
     static const QRegExp matchAttr(QStringLiteral("^%(T[FAOD])(\\.?)(.*)\\*%$"));
-    if (matchAttr.exactMatch(*gLine)) {
+    if (matchAttr.exactMatch(gLine)) {
         switch (Att::Command::value(matchAttr.cap(1))) {
         case Att::Command::TF: {
             QStringList sl(matchAttr.cap(3).split(','));
@@ -883,11 +855,11 @@ bool Parser::parseAttributes(SLIter& gLine)
     return false;
 }
 
-bool Parser::parseCircularInterpolation(const SLIter& gLine)
+bool Parser::parseCircularInterpolation(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$"));
 
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         if (match.cap(1).isEmpty() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
 
@@ -917,7 +889,7 @@ bool Parser::parseCircularInterpolation(const SLIter& gLine)
         default:
             if (m_state.interpolation() != ClockwiseCircular && m_state.interpolation() != CounterclockwiseCircular) {
                 qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(m_lineNum);
-                qWarning() << QString(*gLine);
+                qWarning() << QString(gLine);
                 m_state.setCurPos({ x, y });
                 m_state.setGCode(G01);
                 return false;
@@ -927,7 +899,7 @@ bool Parser::parseCircularInterpolation(const SLIter& gLine)
 
         if (m_state.quadrant() == Undef) {
             qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(m_lineNum);
-            qWarning() << QString(*gLine);
+            qWarning() << QString(gLine);
             return true;
         }
 
@@ -1008,7 +980,7 @@ bool Parser::parseCircularInterpolation(const SLIter& gLine)
                 }
             }
             if (!valid)
-                qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << *gLine;
+                qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
             break;
         default:
             m_state.setCurPos({ x, y });
@@ -1022,23 +994,23 @@ bool Parser::parseCircularInterpolation(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseEndOfFile(const SLIter& gLine)
+bool Parser::parseEndOfFile(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^M[0]?[0123]\\*"));
     static const QRegExp match2(QStringLiteral("^D0?2M0?[02]\\*"));
-    if (match.exactMatch(*gLine) || match2.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine) || match2.exactMatch(gLine)) {
         addPath();
         return true;
     }
     return false;
 }
 
-bool Parser::parseFormat(const SLIter& gLine)
+bool Parser::parseFormat(const QString& gLine)
 {
     const QStringList zeroOmissionModeList = QString("L|T").split("|");
     const QStringList coordinateValuesNotationList = QString("A|I").split("|");
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (zeroOmissionModeList.indexOf(match.cap(1))) {
         case OmitLeadingZeros:
             m_state.format()->zeroOmisMode = OmitLeadingZeros;
@@ -1066,30 +1038,30 @@ bool Parser::parseFormat(const SLIter& gLine)
 
         int intVal = m_state.format()->xInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->xDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + *gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         return true;
     }
     return false;
 }
 
-bool Parser::parseGCode(const SLIter& gLine)
+bool Parser::parseGCode(const QString& gLine)
 {
 
     static const QRegExp match(QStringLiteral("^G([0]?[0-9]{2})\\*$"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (match.cap(1).toInt()) {
         case G01:
             m_state.setInterpolation(Linear);
@@ -1151,18 +1123,18 @@ bool Parser::parseGCode(const SLIter& gLine)
         }
         return true;
     }
-    if (QRegExp("^G0?4(.*)$").exactMatch(*gLine)) {
+    if (QRegExp("^G0?4(.*)$").exactMatch(gLine)) {
         m_state.setGCode(G04);
         return true;
     }
     return false;
 }
 
-bool Parser::parseImagePolarity(const SLIter& gLine)
+bool Parser::parseImagePolarity(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%IP(POS|NEG)\\*%$"));
     static const QList<QString> slImagePolarity(QString("POS|NEG").split("|"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (slImagePolarity.indexOf(match.cap(1))) {
         case Positive:
             m_state.setImgPolarity(Positive);
@@ -1176,12 +1148,12 @@ bool Parser::parseImagePolarity(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseLineInterpolation(const SLIter& gLine)
+bool Parser::parseLineInterpolation(const QString& gLine)
 {
     // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
     static const QRegExp match(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
-    if (match.exactMatch(*gLine)) {
-        parsePosition(*gLine);
+    if (match.exactMatch(gLine)) {
+        parsePosition(gLine);
 
         DCode dcode = m_state.dCode();
         if (!match.cap(2).isEmpty())
@@ -1207,10 +1179,10 @@ bool Parser::parseLineInterpolation(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseDCode(const SLIter& gLine)
+bool Parser::parseDCode(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^D0?([123])\\*$"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (match.cap(1).toInt()) {
         case D01:
             m_state.setDCode(D01);
@@ -1228,7 +1200,7 @@ bool Parser::parseDCode(const SLIter& gLine)
         return true;
     }
     static const QRegExp match2(QStringLiteral("^(?:G54)?D(\\d+)\\*$"));
-    if (match2.exactMatch(*gLine)) {
+    if (match2.exactMatch(gLine)) {
         addPath();
         m_state.setAperture(match2.cap(1).toInt());
         m_state.setDCode(D02);
@@ -1241,11 +1213,11 @@ bool Parser::parseDCode(const SLIter& gLine)
     return false;
 }
 
-bool Parser::parseUnitMode(const SLIter& gLine)
+bool Parser::parseUnitMode(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%MO(IN|MM)\\*%$"));
     static const QList<QString> slUnitType(QString("IN|MM").split("|"));
-    if (match.exactMatch(*gLine)) {
+    if (match.exactMatch(gLine)) {
         switch (slUnitType.indexOf(match.cap(1))) {
         case Inches:
             m_state.format()->unitMode = Inches;

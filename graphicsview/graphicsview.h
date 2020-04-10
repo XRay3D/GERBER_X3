@@ -13,24 +13,22 @@ class GraphicsView : public QGraphicsView {
     Q_OBJECT
 
     Q_PROPERTY(double scale READ getScale WRITE setScale)
-    friend class BridgeItem;
-    friend class SettingsDialog;
 
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
     ~GraphicsView() override;
     void setScene(QGraphicsScene* Scene);
-    static void zoom100();
-    static void zoomFit();
-    static void zoomToSelected();
-    static void zoomIn();
-    static void zoomOut();
+    void zoom100();
+    void zoomFit();
+    void zoomToSelected();
+    void zoomIn();
+    void zoomOut();
 
-    static double scaleFactor();
+    double scaleFactor();
     QPointF mappedPos(QMouseEvent* event) const;
 
     void setScale(double s);
-    static double getScale();
+    double getScale();
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
@@ -39,7 +37,6 @@ private:
     QDRuler* hRuler;
     QDRuler* vRuler;
     Scene* m_scene;
-    static GraphicsView* m_instance;
 
     void updateRuler();
     template <class T>
@@ -58,5 +55,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
 };
+
+#include <app.h>
 
 #endif // VIEW_H

@@ -20,12 +20,10 @@
 
 const double zoomFactor = 1.5;
 
-GraphicsView* GraphicsView::m_instance = nullptr;
-
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    if (m_instance) {
+    if (App::mInstance->m_graphicsView) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class GraphicsView more than 2 times!!!");
         exit(1);
     }
@@ -95,12 +93,12 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + GlobalSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
-    m_instance = this;
+    App::mInstance->m_graphicsView = this;
 }
 
 GraphicsView::~GraphicsView()
 {
-    m_instance = nullptr;
+    App::mInstance->m_graphicsView = nullptr;
 }
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
@@ -111,25 +109,24 @@ void GraphicsView::setScene(QGraphicsScene* Scene)
 
 void GraphicsView::zoomFit()
 {
-    m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
-    m_instance->fitInView(m_instance->scene()->sceneRect(), Qt::KeepAspectRatio);
+    scene()->setSceneRect(scene()->itemsBoundingRect());
+    fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
     //scale(0.95, 0.95);
-    m_instance->updateRuler();
+    updateRuler();
 }
 
 void GraphicsView::zoomToSelected()
 {
-    if (m_instance == nullptr)
-        return;
+
     QRectF rect;
-    for (const QGraphicsItem* item : m_instance->scene()->selectedItems()) {
+    for (const QGraphicsItem* item : scene()->selectedItems()) {
         const QRectF tmpRect(item->pos().isNull() ? item->boundingRect() : item->boundingRect().translated(item->pos()));
         rect = rect.isEmpty() ? tmpRect : rect.united(tmpRect);
     }
     if (rect.isEmpty())
         return;
 
-    const double k = 5.0 / m_instance->transform().m11();
+    const double k = 5.0 / transform().m11();
     rect += QMarginsF(k, k, k, k);
     if (GlobalSettings::guiSmoothScSh() && /* DISABLES CODE */ (0)) {
         //        // Reset the view scale to 1:1.
@@ -161,62 +158,57 @@ void GraphicsView::zoomToSelected()
         //        // Scale and center on the center of \a rect.
         //        scale(xratio, yratio);
         //        centerOn(rect.center());
-        //        m_instance->anim(m_instance, "sceneRect", m_instance->scene()->sceneRect(), rect);
-        m_instance->fitInView(rect, Qt::KeepAspectRatio);
-        m_instance->updateRuler();
+        //        123->anim(123, "sceneRect", 123->scene()->sceneRect(), rect);
+        fitInView(rect, Qt::KeepAspectRatio);
+        updateRuler();
     } else {
-        const double k = 10 * m_instance->scaleFactor();
-        m_instance->fitInView(rect + QMarginsF(k, k, k, k), Qt::KeepAspectRatio);
-        m_instance->updateRuler();
+        const double k = 10 * scaleFactor();
+        fitInView(rect + QMarginsF(k, k, k, k), Qt::KeepAspectRatio);
+        updateRuler();
     }
 }
 
 void GraphicsView::zoom100()
 {
-    if (m_instance == nullptr)
-        return;
     double x = 1.0, y = 1.0;
-    const double m11 = m_instance->QGraphicsView::transform().m11(), m22 = m_instance->QGraphicsView::transform().m22();
+    const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
     if (/* DISABLES CODE */ (0)) {
-        x = qAbs(1.0 / m11 / (25.4 / m_instance->physicalDpiX()));
-        y = qAbs(1.0 / m22 / (25.4 / m_instance->physicalDpiY()));
+        x = qAbs(1.0 / m11 / (25.4 / physicalDpiX()));
+        y = qAbs(1.0 / m22 / (25.4 / physicalDpiY()));
     } else {
         const QSizeF size(GetEdid()); // size in mm
         const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
         x = qAbs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
-    m_instance->scale(x, y);
-    m_instance->updateRuler();
+    scale(x, y);
+    updateRuler();
 }
 
 void GraphicsView::zoomIn()
 {
-    if (m_instance == nullptr)
-        return;
+
     if (getScale() > 10000.0)
         return;
 
     if (GlobalSettings::guiSmoothScSh()) {
-        m_instance->anim(m_instance, "scale", getScale(), getScale() * zoomFactor);
+        anim(this, "scale", getScale(), getScale() * zoomFactor);
     } else {
-        m_instance->scale(zoomFactor, zoomFactor);
-        m_instance->updateRuler();
+        scale(zoomFactor, zoomFactor);
+        updateRuler();
     }
 }
 
 void GraphicsView::zoomOut()
 {
-    if (m_instance == nullptr)
-        return;
     if (getScale() < 1.0)
         return;
 
     if (GlobalSettings::guiSmoothScSh()) {
-        m_instance->anim(m_instance, "scale", getScale(), getScale() * (1.0 / zoomFactor));
+        anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor));
     } else {
-        m_instance->scale(1.0 / zoomFactor, 1.0 / zoomFactor);
-        m_instance->updateRuler();
+        scale(1.0 / zoomFactor, 1.0 / zoomFactor);
+        updateRuler();
     }
 }
 
@@ -255,9 +247,7 @@ void GraphicsView::setScale(double s)
 
 double GraphicsView::getScale()
 {
-    if (m_instance == nullptr)
-        return 1.0;
-    return m_instance->transform().m11();
+    return transform().m11();
 }
 
 void GraphicsView::wheelEvent(QWheelEvent* event)

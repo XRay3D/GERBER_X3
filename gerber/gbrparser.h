@@ -42,13 +42,17 @@ private:
 
     QMap<QString, QString> m_apertureMacro;
 
-    enum WorkingType {
-        Normal,
-        StepRepeat,
-        ApertureBlock,
+    struct WorkingType {
+        enum eWT {
+            Normal,
+            StepRepeat,
+            ApertureBlock,
+        };
+        eWT workingType = Normal;
+        int apertureBlockId = 0;
     };
 
-    QStack<QPair<WorkingType, int>> m_abSrIdStack;
+    QStack<WorkingType> m_abSrIdStack;
 
     Path m_path;
     State m_state;
@@ -61,25 +65,24 @@ private:
     QMap<QString, Component> components;
     QString refDes;
     int aperFunction = -1;
-    QMap<int, int> apFunctionMap;
+    QMap<int, int> aperFunctionMap;
     //Attributes att;
 
-    using SLIter = QList<QString>::iterator;
 
-    bool parseAperture(const SLIter& gLine);
-    bool parseApertureBlock(const SLIter& gLine);
-    bool parseApertureMacros(const SLIter& gLine);
-    bool parseAttributes(SLIter& gLine);
-    bool parseCircularInterpolation(const SLIter& gLine);
-    bool parseDCode(const SLIter& gLine);
-    bool parseEndOfFile(const SLIter& gLine);
-    bool parseFormat(const SLIter& gLine);
-    bool parseGCode(const SLIter& gLine);
-    bool parseImagePolarity(const SLIter& gLine);
-    bool parseLineInterpolation(const SLIter& gLine);
-    bool parseStepRepeat(const SLIter& gLine);
-    bool parseTransformations(const SLIter& gLine);
-    bool parseUnitMode(const SLIter& gLine);
+    bool parseAperture(const QString& gLine);
+    bool parseApertureBlock(const QString& gLine);
+    bool parseApertureMacros(const QString& gLine);
+    bool parseAttributes(const QString& gLine);
+    bool parseCircularInterpolation(const QString& gLine);
+    bool parseDCode(const QString& gLine);
+    bool parseEndOfFile(const QString& gLine);
+    bool parseFormat(const QString& gLine);
+    bool parseGCode(const QString& gLine);
+    bool parseImagePolarity(const QString& gLine);
+    bool parseLineInterpolation(const QString& gLine);
+    bool parseStepRepeat(const QString& gLine);
+    bool parseTransformations(const QString& gLine);
+    bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
     inline File* file() { return reinterpret_cast<File*>(m_file); }

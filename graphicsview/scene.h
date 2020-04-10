@@ -14,11 +14,7 @@ public:
     void RenderPdf();
     QRectF itemsBoundingRect();
 
-    static bool drawPdf();
-    static QList<QGraphicsItem*> selectedItems();
-    static void addItem(QGraphicsItem* item);
-    static QList<QGraphicsItem*> items(Qt::SortOrder order = Qt::DescendingOrder);
-    static void update();
+    bool drawPdf();
 
     void setCross1(const QPointF& cross);
     void setCross2(const QPointF& cross2);
@@ -34,11 +30,13 @@ private:
     QMap<long, long> hGrid;
     QMap<long, long> vGrid;
     void drawRuller(QPainter* painter);
-    static Scene* m_instance;
+
     // QGraphicsScene interface
 protected:
     void drawBackground(QPainter* painter, const QRectF& rect) override;
     void drawForeground(QPainter* painter, const QRectF& rect) override;
 };
+
+#include <app.h>
 
 #endif // MYGRAPHICSSCENE_H

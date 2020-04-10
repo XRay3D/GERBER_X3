@@ -99,7 +99,7 @@ void PocketOffsetForm::createFile()
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
 
-    for (auto* item : Scene::selectedItems()) {
+    for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:

@@ -6,9 +6,10 @@
 
 GcodeNode::GcodeNode(int id)
     : AbstractNode(id)
-    , m_file(Project::instance()->file<GCode::File>(m_id))
+    , m_file(App::project()->file<GCode::File>(m_id))
 {
-    Project::instance()->file(id)->itemGroup()->addToScene();
+
+    App::project()->file(id)->itemGroup()->addToScene();
 }
 
 bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -67,7 +68,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return m_file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            switch (static_cast<int>(Project::instance()->file<GCode::File>(m_id)->gtype())) {
+            switch (static_cast<int>(App::project()->file<GCode::File>(m_id)->gtype())) {
             case GCode::Profile:
                 return QIcon::fromTheme("profile-path");
             case GCode::Pocket:

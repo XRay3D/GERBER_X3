@@ -3,7 +3,7 @@
 #define MODEL_H
 
 #include <QAbstractItemModel>
-    
+
 enum RootNodes {
     NodeGerberFiles,
     NodeDrillFiles,
@@ -28,7 +28,7 @@ public:
     explicit FileModel(QObject* parent = nullptr);
     ~FileModel() override;
 
-    static void closeProject();
+    void closeProject();
 
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
@@ -42,8 +42,6 @@ public:
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
 
-    static FileModel* instance();
-
     // Drag and Drop
     //    QStringList mimeTypes() const override;
     //    QMimeData* mimeData(const QModelIndexList& indexes) const override;
@@ -55,9 +53,10 @@ public:
 private:
     const QString mimeType;
 
-    static void addFile(AbstractFile* file);
-    static FileModel* m_instance;
+    void addFile(AbstractFile* file);
     AbstractNode* getItem(const QModelIndex& index) const;
 };
+
+#include <app.h>
 
 #endif // MODEL_H
