@@ -104,8 +104,6 @@ public:
     bool isUntitled();
     void setUntitled(bool value);
 
-    static Project* instance() { return m_instance; }
-
     double spaceX() const;
     void setSpaceX(double value);
 
@@ -120,14 +118,13 @@ public:
 
     QRectF worckRect() const;
     void setWorckRect(const QRectF& worckRect);
-    static int ver() { return m_instance ? m_instance->m_ver : -1; }
+    int ver()const { return m_ver; }
 
 signals:
     void changed();
 
 private:
     int m_ver;
-    static Project* m_instance;
     QMap<int, QSharedPointer<AbstractFile>> m_files;
     QMutex m_mutex;
     QSemaphore sem;
@@ -143,5 +140,6 @@ private:
 
     QRectF m_worckRect;
 };
+#include <app.h>
 
 #endif // PROJECT_H

@@ -1,5 +1,6 @@
 #include "abstractfile.h"
 
+#include <QApplication>
 #include <splashscreen.h>
 
 AbstractFile::AbstractFile()
@@ -63,8 +64,8 @@ void AbstractFile::_read(QDataStream& stream)
     stream >> m_color;
     stream >> m_date;
 
-    if (SplashScreen::instance)
-        SplashScreen::instance->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+    if (App::splashScreen())
+        App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
 
     createGi();
     bool fl;

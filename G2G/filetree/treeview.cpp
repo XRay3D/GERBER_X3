@@ -92,6 +92,7 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
         } else if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
             hideOther();
         } else if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex())) {
+            //qDebug()<< ;
             hideOther();
         }
     }
@@ -105,7 +106,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
         const int row = index.parent().row();
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
             const int id = index.data(Qt::UserRole).toInt();
-            AbstractFile* file = Project::instance()->file(id);
+            AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(id);
         }
     }
@@ -114,7 +115,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
         const int row = index.parent().row();
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
             const int id = index.data(Qt::UserRole).toInt();
-            AbstractFile* file = Project::instance()->file(id);
+            AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(-id);
         }
     }
@@ -138,13 +139,13 @@ void TreeView::hideOther()
 void TreeView::closeFile()
 {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
-    if (DrillForm::m_instance)
-        DrillForm::m_instance->on_pbClose_clicked();
+    if (App::drillForm())
+        App::drillForm()->on_pbClose_clicked();
 }
 
 void TreeView::saveGcodeFile()
 {
-    auto* file = Project::instance()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
+    auto* file = App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::File::getLastDir().append(m_menuIndex.data().toString()),
         tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension())));
@@ -157,9 +158,9 @@ void TreeView::saveGcodeFile()
 
 void TreeView::showExcellonDialog()
 {
-    if (DrillForm::m_instance)
-        DrillForm::m_instance->on_pbClose_clicked();
-    m_exFormatDialog = new ExcellonDialog(Project::instance()->file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
+    if (App::drillForm())
+        App::drillForm()->on_pbClose_clicked();
+    m_exFormatDialog = new ExcellonDialog(App::project()->file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
     m_exFormatDialog->show();
 }
@@ -175,7 +176,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         menu.setToolTipDuration(0);
         menu.setToolTipsVisible(true);
-        Gerber::File* file = Project::instance()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
+        Gerber::File* file = App::project()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         QActionGroup* group = new QActionGroup(&menu);
 
         if (file->itemGroup(Gerber::File::ApPaths)->size()) {
@@ -215,7 +216,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             QTextBrowser* textBrowser = new QTextBrowser(Dialog);
             textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
             verticalLayout->addWidget(textBrowser);
-            for (const QString& str : Project::instance()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
+            for (const QString& str : App::project()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
                 textBrowser->append(str);
             Dialog->exec();
             delete Dialog;
@@ -242,7 +243,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
         });
-        menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { Project::instance()->saveSelectedToolpaths(); });
+        menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
     }
 
     if (a) {

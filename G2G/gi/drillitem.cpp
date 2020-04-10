@@ -41,7 +41,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     painter->save();
     QBrush brush(m_brush);
     if (brush.style() != Qt::SolidPattern) {
-        const double scale = GraphicsView::scaleFactor();
+        const double scale = App::graphicsView()->scaleFactor();
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         brush.setMatrix(QMatrix().scale(scale, scale));
 #else

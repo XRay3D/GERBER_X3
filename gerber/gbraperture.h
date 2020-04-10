@@ -69,15 +69,15 @@ public:
     {
         read(stream);
     }
-    QString name() const override;
-    ApertureType type() const override;
-    bool fit(double toolDiam) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 
 private:
     double m_diam = 0.0;
@@ -96,15 +96,15 @@ public:
     {
         read(stream);
     }
-    QString name()const override;
-    ApertureType type() const override;
-    bool fit(double toolDiam) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 
 private:
     double m_height = 0.0;
@@ -122,15 +122,15 @@ public:
     {
         read(stream);
     }
-    QString name()const override;
-    ApertureType type() const override;
-    bool fit(double toolDiam) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 
 private:
     double m_height = 0.0;
@@ -151,15 +151,15 @@ public:
     double rotation() const;
     int verticesCount() const;
 
-    QString name() const override;
-    ApertureType type() const override;
-    bool fit(double toolDiam) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 
 private:
     double m_diam = 0.0;
@@ -178,15 +178,15 @@ public:
     {
         read(stream);
     }
-    QString name()const override;
-    ApertureType type() const override;
-    bool fit(double) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 
 private:
     QList<QString> m_modifiers;
@@ -212,15 +212,15 @@ public:
     {
         read(stream);
     }
-    QString name()const override;
-    ApertureType type() const override;
-    bool fit(double) const override;
+    QString name() const final;
+    ApertureType type() const final;
+    bool fit(double) const final;
 
-    virtual void read(QDataStream& stream) override;
-    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 protected:
-    void draw() override;
+    void draw() final;
 };
 }
 #endif // GERBERAPERTURE_H

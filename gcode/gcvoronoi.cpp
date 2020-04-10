@@ -177,7 +177,7 @@ void VoronoiCreator::create()
 
 void VoronoiCreator::createVoronoi()
 {
-    m_instance = this;
+    App::mInstance->m_creator = this;
 
     const auto& tool = m_gcp.tools.first();
     const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();

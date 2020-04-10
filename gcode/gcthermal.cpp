@@ -10,12 +10,12 @@ ThermalCreator::ThermalCreator()
 
 void ThermalCreator::create()
 {
-    createThermal(Project::instance()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()), m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
+    createThermal(App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()), m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
 {
-    m_instance = this;
+    App::mInstance->m_creator = this;
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
@@ -62,7 +62,6 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
         clipper.Execute(ctIntersection, framePaths, pftPositive);
     }
     // create thermal
-    //m_instance = nullptr;
     for (int index = 0; index < m_returnPs.size(); ++index) {
         const Path& path = m_returnPs.at(index);
         Paths paths;

@@ -40,10 +40,10 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
-        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
     }
     if (option->state & QStyle::State_MouseOver) {
-        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
         pen.setDashPattern({ 3.0, 3.0 });
@@ -60,8 +60,8 @@ Paths AperturePathItem::paths() const { return { m_path }; }
 
 QPainterPath AperturePathItem::shape() const
 {
-    if (!qFuzzyCompare(m_scale, GraphicsView::scaleFactor())) {
-        m_scale = GraphicsView::scaleFactor();
+    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
+        m_scale = App::graphicsView()->scaleFactor();
         m_selectionShape = QPainterPath();
         ClipperOffset offset;
         Paths tmpPpath;

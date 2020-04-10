@@ -13,6 +13,7 @@
 #include <QSystemSemaphore>
 #include <QTranslator>
 
+#include "app.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "splashscreen.h"
@@ -21,7 +22,7 @@
 void initIcon(const QString& path);
 void translation(QApplication* app);
 
-SplashScreen* SplashScreen::instance = nullptr;
+App* App::mInstance = nullptr;
 
 int main(int argc, char* argv[])
 {
@@ -29,6 +30,8 @@ int main(int argc, char* argv[])
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
+
+    App stHolder;
 
     app.setApplicationName("G2G");
     app.setOrganizationName(VER_COMPANYNAME_STR);
@@ -124,6 +127,7 @@ int main(int argc, char* argv[])
     }
 
     MainWindow mainWin;
+    mainWin.setObjectName("MainWindow");
     mainWin.setIconSize({ 24, 24 });
     mainWin.show();
     splash->finish(&mainWin);

@@ -1,7 +1,5 @@
 #include "thermalmodel.h"
 
-ThermalModel* ThermalModel::m_instance = nullptr;
-
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
     QImage image(icon.pixmap(24, 24).toImage());
@@ -16,18 +14,11 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 ThermalModel::ThermalModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
-    if (m_instance) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class ThermalModel more than 2 times!!!");
-        exit(1);
-    }
-    m_instance = this;
-    rootItem = new ThermalNode(QIcon(), "");
+    rootItem = new ThermalNode(this);
 }
 
 ThermalModel::~ThermalModel()
 {
-    qDebug(Q_FUNC_INFO);
-    m_instance = nullptr;
     delete rootItem;
 }
 

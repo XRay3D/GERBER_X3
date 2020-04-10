@@ -1,14 +1,16 @@
 #include "gbrnode.h"
 #include "project.h"
 #include <QFileInfo>
-#include <mainwindow.h>
+#include <QPainter>
+#include <QTimer>
+#include <scene.h>
 
 QTimer GerberNode::m_repaintTimer;
 
 GerberNode::GerberNode(int id)
     : AbstractNode(id)
 {
-    Project::instance()->file<Gerber::File>(m_id)->addToScene();
+    App::project()->file<Gerber::File>(m_id)->addToScene();
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
@@ -25,7 +27,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case Name:
         switch (role) {
         case Qt::CheckStateRole:
-            Project::instance()->file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            App::project()->file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -33,7 +35,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case Layer:
         switch (role) {
         case Qt::EditRole:
-            Project::instance()->file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            App::project()->file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -72,20 +74,20 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     case Name:
         switch (role) {
         case Qt::DisplayRole:
-            return Project::instance()->file(m_id)->shortName();
+            return App::project()->file(m_id)->shortName();
         case Qt::ToolTipRole:
-            return Project::instance()->file(m_id)->shortName() + "\n" + Project::instance()->file(m_id)->name();
+            return App::project()->file(m_id)->shortName() + "\n" + App::project()->file(m_id)->name();
         case Qt::CheckStateRole:
-            return Project::instance()->file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return App::project()->file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: {
-            QColor color(Project::instance()->file(m_id)->color());
+            QColor color(App::project()->file(m_id)->color());
             color.setAlpha(255);
             QPixmap pixmap(22, 22);
             pixmap.fill(Qt::transparent);
             QPainter p(&pixmap);
             p.setBrush(color);
             p.drawRect(3, 3, 15, 15);
-            switch (Project::instance()->file<Gerber::File>(m_id)->itemsType()) {
+            switch (App::project()->file<Gerber::File>(m_id)->itemsType()) {
             case Gerber::File::ApPaths: {
                 QFont f;
                 f.setBold(true);
@@ -112,9 +114,9 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return tbStrList[Project::instance()->file(m_id)->side()];
+            return tbStrList[App::project()->file(m_id)->side()];
         case Qt::EditRole:
-            return static_cast<bool>(Project::instance()->file(m_id)->side());
+            return static_cast<bool>(App::project()->file(m_id)->side());
         case Qt::UserRole:
             return m_id;
         default:
@@ -145,6 +147,6 @@ void GerberNode::repaint()
     //    int k = -60 + static_cast<int>((count > 1) ? (240.0 / (count - 1)) * row() : 0);
     //    if (k < 0)
     //        k += 360;
-    Project::instance()->file<Gerber::File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
-    Scene::update();
+    App::project()->file<Gerber::File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
+    App::scene()->update();
 }

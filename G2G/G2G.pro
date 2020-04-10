@@ -57,6 +57,7 @@ TRANSLATIONS += \
 
 HEADERS += \
     aboutform.h \
+    app.h \
     application.h \
     colorselector.h \
     datastream.h \

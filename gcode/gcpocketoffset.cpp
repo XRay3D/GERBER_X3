@@ -18,7 +18,7 @@ void PocketCreator::create()
 
 void PocketCreator::createPocket(const Tool& tool, const double depth, const int steps)
 {
-    m_instance = this;
+    App::mInstance->m_creator = this;
     if (m_gcp.side() == On)
         return;
     progress(0, 0);
@@ -126,7 +126,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
 
 void PocketCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth, double minArea)
 {
-    m_instance = this;
+    App::mInstance->m_creator = this;
 
     if (m_gcp.side() == On)
         return;

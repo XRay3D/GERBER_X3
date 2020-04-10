@@ -17,7 +17,7 @@ void ProfileCreator::create()
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    m_instance = this;
+    App::mInstance->m_creator = this;
 
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset
@@ -71,7 +71,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     // find Bridges
     QVector<BridgeItem*> bridgeItems;
-    for (QGraphicsItem* item : Scene::items()) {
+    for (QGraphicsItem* item : App::scene()->items()) {
         if (item->type() == GiBridge)
             bridgeItems.append(static_cast<BridgeItem*>(item));
     }

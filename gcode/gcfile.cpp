@@ -360,12 +360,12 @@ void File::initSave()
 
 void File::genGcode()
 {
-    QRectF rect = Project::instance()->worckRect();
-    for (int x = 0; x < Project::instance()->stepsX(); ++x) {
-        for (int y = 0; y < Project::instance()->stepsY(); ++y) {
+    QRectF rect = App::project()->worckRect();
+    for (int x = 0; x < App::project()->stepsX(); ++x) {
+        for (int y = 0; y < App::project()->stepsY(); ++y) {
             QPointF offset(
-                (rect.width() + Project::instance()->spaceX()) * x,
-                (rect.height() + Project::instance()->spaceY()) * y);
+                (rect.width() + App::project()->spaceX()) * x,
+                (rect.height() + App::project()->spaceY()) * y);
             switch (m_gcp.gcType) {
             case Pocket:
                 savePocket(offset);
@@ -417,12 +417,12 @@ GCodeType File::gtype() const
 QString File::getLastDir()
 {
     if (GlobalSettings::gcSameFolder())
-        return Project::instance()->name();
+        return App::project()->name();
     if (lastDir.isEmpty()) {
         QSettings settings;
         lastDir = settings.value("LastGCodeDir").toString();
         if (lastDir.isEmpty()) {
-            lastDir = Project::instance()->name();
+            lastDir = App::project()->name();
             lastDir = lastDir.left(lastDir.lastIndexOf('/') + 1);
         }
         settings.setValue("LastGCodeDir", lastDir);
@@ -687,7 +687,7 @@ void File::write(QDataStream& stream) const
 void File::read(QDataStream& stream)
 {
     auto &gcp = *const_cast<GCodeParams*>(&m_gcp);
-    switch (Project::ver()) {
+    switch (App::project()->ver()) {
     case G2G_Ver_4:
         stream >> gcp;
         stream >> m_pocketPaths;

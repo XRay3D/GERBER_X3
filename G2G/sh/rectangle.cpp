@@ -24,10 +24,10 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
     setAcceptHoverEvents(true);
     setZValue(std::numeric_limits<double>::max());
 
-    Scene::addItem(this);
-    Scene::addItem(sh[Center]);
-    Scene::addItem(sh[Point1]);
-    Scene::addItem(sh[Point2]);
+    App::scene()->addItem(this);
+    App::scene()->addItem(sh[Center]);
+    App::scene()->addItem(sh[Point1]);
+    App::scene()->addItem(sh[Point2]);
 }
 
 void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
@@ -43,11 +43,11 @@ void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
-        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
     }
     if (option->state & QStyle::State_MouseOver) {
         pen.setColor(Qt::red);
-        //        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        //        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         //        pen.setStyle(Qt::CustomDashLine);
         //        pen.setCapStyle(Qt::FlatCap);
         //        pen.setDashPattern({ 3.0, 3.0 });

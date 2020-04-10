@@ -80,7 +80,7 @@ ProfileForm::~ProfileForm()
     settings.setValue(ui->rbOutside);
     settings.endGroup();
 
-    for (QGraphicsItem* item : Scene::items()) {
+    for (QGraphicsItem* item : App::scene()->items()) {
         if (item->type() == GiBridge)
             delete item;
     }
@@ -100,7 +100,7 @@ void ProfileForm::createFile()
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
 
-    for (auto* item : Scene::selectedItems()) {
+    for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:
@@ -173,14 +173,14 @@ void ProfileForm::on_pbAddBridge_clicked()
             delete item;
     }
     item = new BridgeItem(m_lenght, m_size, side, item);
-    Scene::addItem(item);
+    App::scene()->addItem(item);
 }
 
 void ProfileForm::updateBridge()
 {
     m_lenght = ui->dsbxBridgeLenght->value();
     m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
-    for (QGraphicsItem* item : Scene::items()) {
+    for (QGraphicsItem* item : App::scene()->items()) {
         if (item->type() == GiBridge)
             dynamic_cast<BridgeItem*>(item)->update();
     }

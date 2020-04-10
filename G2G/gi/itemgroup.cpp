@@ -1,11 +1,11 @@
 #include "itemgroup.h"
 
-#include <mainwindow.h>
+#include <scene.h>
 
 ItemGroup::~ItemGroup()
 {
     //qDebug("~ItemGroup()");
-    if (Scene::items().size())
+    if (App::scene()->items().size())
         qDeleteAll(*this);
 }
 
@@ -27,7 +27,7 @@ void ItemGroup::setVisible(bool visible)
 void ItemGroup::addToScene()
 {
     for (QGraphicsItem* item : *this)
-        Scene::addItem(item);
+        App::scene()->addItem(item);
 }
 
 void ItemGroup::setBrush(const QBrush& brush)

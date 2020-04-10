@@ -5,11 +5,9 @@
 #include <QSettings>
 #include <QTimer>
 #include <mainwindow.h>
-#include <settings.h>
 #include <project.h>
 #include <scene.h>
-
-GCodePropertiesForm* GCodePropertiesForm::m_instance = nullptr;
+#include <settings.h>
 
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::boardThickness;
@@ -18,11 +16,11 @@ double GCodePropertiesForm::clearence;
 double GCodePropertiesForm::plunge;
 double GCodePropertiesForm::glue;
 
-GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
-    : QWidget(prnt)
+GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
+    : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm)
 {
-    if (m_instance) {
+    if (App::mInstance->m_gCodePropertiesForm) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class GCodePropertiesForm more than 2 times!!!");
         exit(1);
     }
@@ -48,15 +46,15 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosX(val); });
     connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
 
-    if (Project::instance()) {
-        connect(ui->dsbxSpaceX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpaceX);
-        connect(ui->dsbxSpaceY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), Project::instance(), &Project::setSpaceY);
-        connect(ui->sbxStepsX, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsX);
-        connect(ui->sbxStepsY, QOverload<int>::of(&QSpinBox::valueChanged), Project::instance(), &Project::setStepsY);
-        ui->dsbxSpaceX->setValue(Project::instance()->spaceX());
-        ui->dsbxSpaceY->setValue(Project::instance()->spaceY());
-        ui->sbxStepsX->setValue(Project::instance()->stepsX());
-        ui->sbxStepsY->setValue(Project::instance()->stepsY());
+    if (App::project()) {
+        connect(ui->dsbxSpaceX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
+        connect(ui->dsbxSpaceY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceY);
+        connect(ui->sbxStepsX, QOverload<int>::of(&QSpinBox::valueChanged), App::project(), &Project::setStepsX);
+        connect(ui->sbxStepsY, QOverload<int>::of(&QSpinBox::valueChanged), App::project(), &Project::setStepsY);
+        ui->dsbxSpaceX->setValue(App::project()->spaceX());
+        ui->dsbxSpaceY->setValue(App::project()->spaceY());
+        ui->sbxStepsX->setValue(App::project()->stepsX());
+        ui->sbxStepsY->setValue(App::project()->stepsY());
     }
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
@@ -90,15 +88,14 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();
 
-    connect(ui->pbOk, &QPushButton::clicked, [this] {
-        if (this->parent()
+    connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
+        if (parent
             && ui->dsbxThickness->value() > 0.0
             && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
-            if (parent())
-                if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-                    w->close();
+            if (parent)
+                parent->close();
             return;
         }
         if (ui->dsbxCopperThickness->value() == 0.0)
@@ -108,18 +105,21 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
         if (ui->dsbxClearence->value() == 0.0)
             ui->dsbxClearence->flicker();
     });
-    if (prnt != nullptr)
-        prnt->setWindowTitle(ui->label->text());
+
+    if (parent != nullptr)
+        parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
-    m_instance = this;
+
+    App::mInstance->m_gCodePropertiesForm = this;
 }
 
 GCodePropertiesForm::~GCodePropertiesForm()
 {
-    m_instance = nullptr;
+    App::mInstance->m_gCodePropertiesForm = nullptr;
+
     if (Marker::get(Marker::Home))
         Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
     if (Marker::get(Marker::Zero))
@@ -146,22 +146,18 @@ GCodePropertiesForm::~GCodePropertiesForm()
 
 void GCodePropertiesForm::updatePosDsbxs()
 {
-    if (!m_instance)
-        return;
-    m_instance->ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
-    m_instance->ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
-    m_instance->ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
-    m_instance->ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
+    ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
+    ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
+    ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
+    ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
 }
 
 void GCodePropertiesForm::updateAll()
 {
-    if (!m_instance)
-        return;
-    m_instance->ui->dsbxSpaceX;
-    m_instance->ui->dsbxSpaceY;
-    m_instance->ui->sbxStepsX;
-    m_instance->ui->sbxStepsY;
+    ui->dsbxSpaceX;
+    ui->dsbxSpaceY;
+    ui->sbxStepsX;
+    ui->sbxStepsY;
 }
 
 void GCodePropertiesForm::on_pbResetHome_clicked()

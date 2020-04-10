@@ -17,7 +17,7 @@ Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
-    QRectF rect(Project::instance()->getSelectedBoundingRect());
+    QRectF rect(App::project()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
                 QObject::tr("There are no selected items to define the border.\n"
@@ -26,7 +26,7 @@ bool updateRect()
             == QMessageBox::No)
             return false;
     }
-    LayoutFrames::updateRect();
+    App::layoutFrames()->updateRect();
     return true;
 }
 
@@ -46,7 +46,7 @@ Marker::Marker(Type type)
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
-    Scene::addItem(this);
+    App::scene()->addItem(this);
 }
 
 Marker::~Marker()
@@ -56,14 +56,14 @@ Marker::~Marker()
 
 QRectF Marker::boundingRect() const
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return QRectF();
     return m_rect;
 }
 
 void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return;
 
     QColor c(m_type == Home ? GlobalSettings::guiColor(Colors::Home) : GlobalSettings::guiColor(Colors::Zero));
@@ -82,7 +82,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
 QPainterPath Marker::shape() const
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return QPainterPath();
     return /*m_shape*/ m_path;
 }
@@ -95,7 +95,7 @@ void Marker::resetPos(bool fl)
         if (!updateRect())
             return;
 
-    const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
+    const QRectF rect(App::layoutFrames()->boundingRect()); //App::project()->worckRect()
 
     if (m_type == Home)
         switch (GlobalSettings::mkrHomePos()) {
@@ -157,11 +157,12 @@ void Marker::setPosY(double y)
 
 void Marker::updateGCPForm()
 {
-    GCodePropertiesForm::updatePosDsbxs();
+    if (App::gCodePropertiesForm())
+        App::gCodePropertiesForm()->updatePosDsbxs();
     QSettings settings;
     settings.beginGroup("Points");
     settings.setValue("pos" + QString::number(m_type), pos());
-    Project::instance()->setChanged();
+    App::project()->setChanged();
     if (m_type == Zero)
         for (Pin* pin : Pin::pins())
             pin->updateToolTip();
@@ -208,7 +209,7 @@ Pin::Pin(QObject* parent)
     m_rect = m_path.boundingRect();
 
     setZValue(std::numeric_limits<qreal>::max() - m_pins.size());
-    Scene::addItem(this);
+    App::scene()->addItem(this);
     m_pins.append(this);
 }
 
@@ -218,14 +219,14 @@ Pin::~Pin()
 
 QRectF Pin::boundingRect() const
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return QRectF();
     return m_rect;
 }
 
 void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return;
 
     QColor c(GlobalSettings::guiColor(Colors::Pin));
@@ -245,7 +246,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
 
 QPainterPath Pin::shape() const
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return QPainterPath();
     return m_shape;
 }
@@ -261,8 +262,8 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         m_pins[3]->pos()
     };
 
-    const QPointF center(LayoutFrames::instance()->boundingRect().center());
-    //const QPointF center(Project::instance()->worckRect().center());
+    const QPointF center(App::layoutFrames()->boundingRect().center());
+    //const QPointF center(App::project()->worckRect().center());
 
     switch (m_index) {
     case 0:
@@ -314,7 +315,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
 
-    Project::instance()->setChanged();
+    App::project()->setChanged();
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -343,7 +344,7 @@ void Pin::resetPos(bool fl)
             return;
 
     const QPointF offset(GlobalSettings::mkrPinOffset());
-    const QRectF rect(LayoutFrames::instance()->boundingRect()); //Project::instance()->worckRect()
+    const QRectF rect(App::layoutFrames()->boundingRect()); //App::project()->worckRect()
 
     QPointF pt[] {
         QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
@@ -374,7 +375,7 @@ void Pin::resetPos(bool fl)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
 
-    Project::instance()->setChanged();
+    App::project()->setChanged();
 }
 
 void Pin::updateToolTip()
@@ -390,22 +391,20 @@ void Pin::setPos(const QPointF& pos)
 }
 
 ////////////////////////////////////////////////
-LayoutFrames* LayoutFrames ::m_instance = nullptr;
-
 LayoutFrames::LayoutFrames()
 {
-    if (m_instance) {
+    if (App::mInstance->m_layoutFrames) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class LayoutFrames more than 2 times!!!");
         exit(1);
     }
     setZValue(-std::numeric_limits<double>::max());
-    m_instance = this;
-    Scene::addItem(this);
+    App::mInstance->m_layoutFrames = this;
+    App::scene()->addItem(this);
 }
 
 LayoutFrames::~LayoutFrames()
 {
-    m_instance = nullptr;
+    App::mInstance->m_layoutFrames = nullptr;
 }
 
 int LayoutFrames::type() const
@@ -415,7 +414,7 @@ int LayoutFrames::type() const
 
 QRectF LayoutFrames::boundingRect() const
 {
-    if (Scene::drawPdf())
+    if (App::scene()->drawPdf())
         return QRectF();
     return m_path.boundingRect();
 }
@@ -426,7 +425,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
     QPen pen(QColor(100, 0, 100), 0.0);
-    pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+    pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
     pen.setJoinStyle(Qt::MiterJoin);
     //    pen.setStyle(Qt::CustomDashLine);
     //    pen.setCapStyle(Qt::FlatCap);
@@ -435,24 +434,21 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->drawPath(m_path);
     painter->restore();
 }
-LayoutFrames* LayoutFrames::instance() { return m_instance; }
 
 void LayoutFrames::updateRect(bool fl)
 {
-    if (!m_instance)
-        return;
     QPainterPath path;
-    QRectF rect(Project::instance()->worckRect());
-    for (int x = 0; x < Project::instance()->stepsX(); ++x) {
-        for (int y = 0; y < Project::instance()->stepsY(); ++y) {
+    QRectF rect(App::project()->worckRect());
+    for (int x = 0; x < App::project()->stepsX(); ++x) {
+        for (int y = 0; y < App::project()->stepsY(); ++y) {
             path.addRect(rect.translated(
-                (rect.width() + Project::instance()->spaceX()) * x,
-                (rect.height() + Project::instance()->spaceY()) * y));
+                (rect.width() + App::project()->spaceX()) * x,
+                (rect.height() + App::project()->spaceY()) * y));
         }
     }
-    m_instance->m_path = path;
-    m_instance->QGraphicsItem::update();
-    m_instance->scene()->setSceneRect(m_instance->scene()->itemsBoundingRect());
+    m_path = path;
+    QGraphicsItem::update();
+    scene()->setSceneRect(scene()->itemsBoundingRect());
     if (fl) {
         Marker::get(Marker::Home)->resetPos(false);
         Marker::get(Marker::Zero)->resetPos(false);

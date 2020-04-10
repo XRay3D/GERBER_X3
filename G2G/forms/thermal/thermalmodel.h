@@ -27,7 +27,6 @@ class ThermalModel : public QAbstractItemModel {
 
     ThermalNode* rootItem = nullptr;
     QList<ThermalNode*> m_data;
-    static ThermalModel* m_instance;
 
 public:
     enum {

@@ -8,7 +8,7 @@
 ExcellonNode::ExcellonNode(int id)
     : AbstractNode(id)
 {
-    Project::instance()->file(m_id)->itemGroup()->addToScene();
+    App::project()->file(m_id)->itemGroup()->addToScene();
 }
 
 bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -17,7 +17,7 @@ bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int 
     case Name:
         switch (role) {
         case Qt::CheckStateRole:
-            Project::instance()->file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            App::project()->file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -25,7 +25,7 @@ bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int 
     case Layer:
         switch (role) {
         case Qt::EditRole:
-            Project::instance()->file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            App::project()->file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -50,17 +50,17 @@ Qt::ItemFlags ExcellonNode::flags(const QModelIndex& index) const
 
 QVariant ExcellonNode::data(const QModelIndex& index, int role) const
 {
-    if (Project::instance()->file(m_id))
+    if (App::project()->file(m_id))
         switch (index.column()) {
         case Name:
             switch (role) {
             case Qt::DisplayRole:
-                return Project::instance()->file(m_id)->shortName();
+                return App::project()->file(m_id)->shortName();
             case Qt::ToolTipRole:
-                return Project::instance()->file(m_id)->shortName() + "\n"
-                    + Project::instance()->file(m_id)->name();
+                return App::project()->file(m_id)->shortName() + "\n"
+                    + App::project()->file(m_id)->name();
             case Qt::CheckStateRole:
-                return Project::instance()->file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+                return App::project()->file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
             case Qt::UserRole:
@@ -72,9 +72,9 @@ QVariant ExcellonNode::data(const QModelIndex& index, int role) const
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
-                return tbStrList[Project::instance()->file(m_id)->side()];
+                return tbStrList[App::project()->file(m_id)->side()];
             case Qt::EditRole:
-                return static_cast<bool>(Project::instance()->file(m_id)->side());
+                return static_cast<bool>(App::project()->file(m_id)->side());
             case Qt::UserRole:
                 return m_id;
             default:

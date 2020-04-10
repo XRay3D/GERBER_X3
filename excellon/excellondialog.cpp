@@ -82,18 +82,18 @@ void ExcellonDialog::updateFormat()
     m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
 
     m_file->setFormat(m_tmpFormat);
-    GraphicsView::zoomFit();
+    App::graphicsView()->zoomFit();
 }
 
 void ExcellonDialog::acceptFormat()
 {
-    GraphicsView::zoomFit();
+    App::graphicsView()->zoomFit();
     deleteLater();
 }
 
 void ExcellonDialog::rejectFormat()
 {
-    GraphicsView::zoomFit();
+    App::graphicsView()->zoomFit();
     //if (Project::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
@@ -111,7 +111,7 @@ void ExcellonDialog::on_pushButton_clicked()
 {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for (QGraphicsItem* item : Scene::selectedItems()) {
+    for (QGraphicsItem* item : App::scene()->selectedItems()) {
         if (item->type() == GiDrill) {
             pair.first = item->boundingRect().center();
             ++c;
@@ -126,7 +126,7 @@ void ExcellonDialog::on_pushButton_clicked()
                 return;
             ui->dsbxX->setValue(p.x());
             ui->dsbxY->setValue(p.y());
-            GraphicsView::zoomFit();
+            App::graphicsView()->zoomFit();
             return;
         }
     }

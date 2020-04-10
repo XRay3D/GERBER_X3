@@ -2,7 +2,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "point.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
@@ -19,6 +18,10 @@ class DockWidget;
 class Project;
 class QProgressDialog;
 class Scene;
+
+struct sing {
+    sing() {}
+};
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -66,8 +69,6 @@ private:
     QMap<int, QAction*> toolpathActionList;
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
-
-    static MainWindow* m_instance;
 
     inline QString fileKey();
     inline QString recentFilesKey();
