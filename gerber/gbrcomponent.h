@@ -10,13 +10,14 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <datastream.h>
 
 namespace Gerber {
 
 class Component {
     Q_GADGET
 public:
-    Component() {}
+    Component();
     enum MountType {
         TH,
         SMD,
@@ -24,12 +25,7 @@ public:
         Other
     };
     Q_ENUM(MountType)
-    bool setMountType(const QString& key)
-    {
-        int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
-        mount = static_cast<MountType>(val);
-        return val > -1 ? true : false;
-    }
+    bool setMountType(const QString& key);
 
     enum e1 {
         N, /*
@@ -57,7 +53,7 @@ public:
         Graphics Object*/
     };
     Q_ENUM(e1)
-    static int value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
+    static int value1(const QString& key);
 
     enum eC {
         Rot, /* <decimal> The rotation angle of the component.
@@ -82,55 +78,10 @@ public:
         Sup, /* <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
     };
     Q_ENUM(eC)
-    static int value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
+    static int value2(const QString& key);
 
-    bool setData(int key, const QStringList& data)
-    {
-        bool fl = false;
-        switch (key) {
-        case Component::Rot:
-            rotation = data.last().toDouble(&fl);
-            break;
-        case Component::Mfr:
-            manufacturer.name = data.last();
-            break;
-        case Component::MPN:
-            manufacturer.partNumber = data.last();
-            break;
-        case Component::Val:
-            value = data.last();
-            break;
-        case Component::Mnt:
-            return setMountType(data.last());
-        case Component::Ftp:
-            footprintName = data.last();
-            break;
-        case Component::PgN:
-            package.name = data.last();
-            break;
-        case Component::Hgt:
-            height = data.last().toDouble(&fl);
-            break;
-        case Component::LbN:
-            library.name = data.last();
-            break;
-        case Component::LbD:
-            library.description = data.last();
-            break;
-        case Component::Sup:
-            break;
-        default:;
-        }
-        return fl;
-    }
-    QString toolTip() const
-    {
-        QString tt;
-        tt += QString("Rotation: %1\n").arg(rotation);
-        tt += QString("Value: %1\n").arg(value);
-        tt += QString("Footprint: %1\n").arg(footprintName);
-        return tt;
-    }
+    bool setData(int key, const QStringList& data);
+    QString toolTip() const;
 
     double rotation = 0.0; /* <decimal> The rotation angle of the component.*/
     double height = 0.0; /* <decimal> Height, in the unit of the file. */
@@ -147,26 +98,125 @@ public:
     struct Library {
         QString name; /* <field> Library name. */
         QString description; /* <field> Library description. */
+        friend QDataStream& operator<<(QDataStream& stream, const Library& l)
+        {
+            stream << l.name;
+            stream << l.description;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Library& l)
+        {
+            stream >> l.name;
+            stream >> l.description;
+            return stream;
+        }
     } library;
     struct Manufacturer {
         QString name; /* <field> Manufacturer. */
         QString partNumber; /* <field> Manufacturer part number. */
+        friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m)
+        {
+            stream << m.name;
+            stream << m.partNumber;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m)
+        {
+            stream >> m.name;
+            stream >> m.partNumber;
+            return stream;
+        }
     } manufacturer;
     struct Package {
         QString name; /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
         QString description; /* <field> Package description. */
+        friend QDataStream& operator<<(QDataStream& stream, const Package& p)
+        {
+            stream << p.name;
+            stream << p.description;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Package& p)
+        {
+            stream >> p.name;
+            stream >> p.description;
+            return stream;
+        }
     } package;
     struct Supplier {
         QString name; /* <field> Library name. */
         QString description; /* <field> Library description. */
+        friend QDataStream& operator<<(QDataStream& stream, const Supplier& s)
+        {
+            stream << s.name;
+            stream << s.description;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Supplier& s)
+        {
+            stream >> s.name;
+            stream >> s.description;
+            return stream;
+        }
     };
     QList<Supplier> suppliers; /* <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
     struct Pins {
         int number;
         QString description;
         QPointF pos;
+        friend QDataStream& operator<<(QDataStream& stream, const Pins& p)
+        {
+            stream << p.number;
+            stream << p.description;
+            stream << p.pos;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Pins& p)
+        {
+            stream >> p.number;
+            stream >> p.description;
+            stream >> p.pos;
+            return stream;
+        }
     };
+
     QList<Pins> pins;
+
+    friend QDataStream& operator<<(QDataStream& stream, const Component& c)
+    {
+        stream << c.rotation;
+        stream << c.height;
+        stream << c.mount;
+        stream << c.footprintName;
+        stream << c.refdes;
+        stream << c.value;
+        stream << c.referencePoint;
+        stream << c.footprint;
+        stream << c.library;
+        stream << c.manufacturer;
+        stream << c.package;
+        stream << c.suppliers;
+        stream << c.pins;
+        return stream;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, Component& c)
+    {
+        stream >> c.rotation;
+        stream >> c.height;
+        stream >> c.mount;
+        stream >> c.footprintName;
+        stream >> c.refdes;
+        stream >> c.value;
+        stream >> c.referencePoint;
+        stream >> c.footprint;
+        stream >> c.library;
+        stream >> c.manufacturer;
+        stream >> c.package;
+        stream >> c.suppliers;
+        stream >> c.pins;
+        return stream;
+    }
 };
 }
 #endif // GBRCOMPONENT_H

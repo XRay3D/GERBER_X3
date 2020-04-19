@@ -148,6 +148,7 @@ void File::setItemType(File::ItemsType type)
 {
     if (m_itemsType == type)
         return;
+
     m_itemsType = type;
 
     m_itemGroup[Normal]->setVisible(false);
@@ -166,12 +167,13 @@ void Gerber::File::write(QDataStream& stream) const
     //stream << miror;
     stream << rawIndex;
     stream << m_itemsType;
+    stream << m_components;
     _write(stream);
 }
 
 void Gerber::File::read(QDataStream& stream)
 {
-    crutch = &m_format;
+    crutch = &m_format; ///////////////////
     stream >> *this;
     stream >> m_apertures;
     stream >> m_format;
@@ -179,6 +181,7 @@ void Gerber::File::read(QDataStream& stream)
     //stream >> miror;
     stream >> rawIndex;
     stream >> m_itemsType;
+    stream >> m_components;
     for (GraphicObject& go : *this) {
         go.m_gFile = this;
         go.m_state.m_format = format();
