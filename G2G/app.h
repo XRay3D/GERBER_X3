@@ -13,6 +13,15 @@ class VoronoiCreator;
 class ThermalCreator;
 }
 
+class DrillForm;
+class FileModel;
+class GCodePropertiesForm;
+class GraphicsView;
+class LayoutFrames;
+class Project;
+class Scene;
+class SplashScreen;
+
 class App {
     static App* mInstance;
     //    Q_DISABLE_COPY(App)
