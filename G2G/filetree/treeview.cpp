@@ -92,6 +92,7 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
         } else if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
             hideOther();
         } else if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex())) {
+            qDebug(Q_FUNC_INFO);
             //qDebug()<< ;
             hideOther();
         }
