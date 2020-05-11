@@ -14,6 +14,7 @@ namespace GCode {
 class File;
 }
 
+class GraphicsItem;
 class QProgressDialog;
 
 class FormsUtil : public QWidget {
@@ -42,11 +43,16 @@ protected:
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
 
-    QMap<int, QVector<int>> m_usedItems;
+    void addUsedGi(GraphicsItem* gi);
+
+    UsedItems m_usedItems;
 
     QString m_fileName;
     Side boardSide = Top;
+
     bool m_editMode = false;
+    int fileId = -1;
+
     int fileCount;
 
 private:
@@ -57,5 +63,7 @@ private:
     QProgressDialog* pd;
     int m_timerId = 0;
 };
+
+//Q_DECLARE_METATYPE(QMap<int, QVector<int>>)
 
 #endif // TOOLPATHUTIL_H

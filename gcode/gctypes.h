@@ -6,6 +6,8 @@
 #include <datastream.h>
 #include <tooldatabase/tool.h>
 
+using UsedItems = QMap<QPair<int, int>, QVector<int>>;
+
 namespace GCode {
 
 enum GCodeType {
@@ -63,6 +65,10 @@ struct GCodeParams {
         Convent,
         Fast,
         PocketIndex,
+        GrItems,
+        Node,
+        Bridges,
+        BridgeLen,
     };
 
     GCodeParams() {}
@@ -76,9 +82,12 @@ struct GCodeParams {
     QVector<Tool> tools;
     QMap<int, QVariant> params;
     GCodeType gcType = Null;
+    mutable int fileId = -1;
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type)
     {
+        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<QPair<int, int>, QVector<int>>");
+        qRegisterMetaTypeStreamOperators<QVector<QPointF>>("QVector<QPointF>");
         stream >> type.tools;
         stream >> type.params;
         stream >> type.gcType;
@@ -87,6 +96,8 @@ struct GCodeParams {
 
     friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type)
     {
+        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<QPair<int, int>, QVector<int>>");
+        qRegisterMetaTypeStreamOperators<QVector<QPointF>>("QVector<QPointF>");
         stream << type.tools;
         stream << type.params;
         stream << type.gcType;

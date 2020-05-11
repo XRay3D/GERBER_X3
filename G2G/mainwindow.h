@@ -13,18 +13,18 @@ class Parser;
 namespace Excellon {
 class Parser;
 }
+namespace GCode {
+class File;
+}
 
 class DockWidget;
 class Project;
 class QProgressDialog;
 class Scene;
 
-struct sing {
-    sing() {}
-};
-
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
+    friend void TreeView::on_doubleClicked(const QModelIndex&);
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -112,6 +112,8 @@ private:
     bool saveAs();
     void documentWasModified();
     bool maybeSave();
+
+    void editGcFile(GCode::File* file);
 
 public:
     void loadFile(const QString& fileName);

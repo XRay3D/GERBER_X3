@@ -7,6 +7,7 @@
 namespace Ui {
 class ProfileForm;
 }
+class BridgeItem;
 
 class ProfileForm : public FormsUtil {
     Q_OBJECT
@@ -28,6 +29,7 @@ private:
     const QStringList names;
     const QStringList pixmaps;
     void rb_clicked();
+    BridgeItem* item = nullptr;
 
 protected:
     // QWidget interface

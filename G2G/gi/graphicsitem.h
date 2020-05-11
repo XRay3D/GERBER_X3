@@ -41,6 +41,7 @@ class File;
 class GraphicsItem : public QGraphicsItem {
     friend class Gerber::File;
     friend class Excellon::File;
+    friend class ItemGroup;
 
 public:
     explicit GraphicsItem(AbstractFile* file = nullptr);

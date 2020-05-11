@@ -6,12 +6,13 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QSettings>
+#include <gbrfile.h>
 #include <gccreator.h>
 #include <gcfile.h>
 #include <gcpocketoffset.h>
 #include <myclipper.h>
-#include <settings.h>
 #include <scene.h>
+#include <settings.h>
 #include <tooldatabase/tooleditdialog.h>
 
 enum {
@@ -98,6 +99,7 @@ void PocketOffsetForm::createFile()
     Paths wPaths;
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
+    bool skip { true };
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
@@ -108,39 +110,26 @@ void PocketOffsetForm::createFile()
                 file = gi->file();
                 boardSide = file->side();
             } else if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             if (item->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
-            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         case GiShapeC:
             wRawPaths.append(gi->paths());
-            //m_used[gi->file()->id()].append(gi->id());
             break;
         case GiDrill:
             wPaths.append(gi->paths());
-            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         default:
             break;
         }
-
-        //        if (item->type() == GerberItemType) {
-        //            GerberItem* gi = static_cast<GerberItem*>(item);
-        //            if (!file)
-        //                file = gi->typedFile<Gerber::File>();
-        //            if (file != gi->file()) {
-        //                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-        //                return;
-        //            }
-        //            boardSide = gi->file()->side();
-        //        }
-        //        if (item->type() == GerberItemType || item->type() == DrillItemType)
-        //            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        addUsedGi(gi);
     }
 
     if (wRawPaths.isEmpty() && wPaths.isEmpty()) {

@@ -52,6 +52,12 @@ public:
         return static_cast<T*>(m_files.value(id).data());
     }
 
+    AbstractFile* aFile(int id)
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_files.value(id).data();
+    }
+
     int addFile(AbstractFile* file);
 
     template <typename T>
@@ -76,6 +82,17 @@ public:
                 rfiles.append(file);
         }
         return rfiles;
+    }
+
+    void showFiles(const QList<QPair<int, int>>&& fileIds)
+    {
+        for (auto file : m_files)
+            file->itemGroup()->setVisible(false);
+        for (auto [fileId, giType] : fileIds) {
+            if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
+                file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
+            m_files[fileId]->itemGroup()->setVisible(true);
+        }
     }
 
     template <typename T>
@@ -118,7 +135,7 @@ public:
 
     QRectF worckRect() const;
     void setWorckRect(const QRectF& worckRect);
-    int ver()const { return m_ver; }
+    int ver() const { return m_ver; }
 
 signals:
     void changed();

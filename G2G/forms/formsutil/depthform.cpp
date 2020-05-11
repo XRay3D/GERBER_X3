@@ -61,6 +61,12 @@ DepthForm::~DepthForm()
 
 double DepthForm::value() const { return dsbx->value(); }
 
+void DepthForm::setValue(double value)
+{
+    rbCustom->setChecked(true);
+    dsbx->setValue(value);
+}
+
 void DepthForm::setupUi(QWidget* Form)
 {
     if (Form->objectName().isEmpty())

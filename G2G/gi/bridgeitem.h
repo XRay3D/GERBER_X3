@@ -10,6 +10,8 @@ class GraphicsView;
 
 class BridgeItem : public QObject, public GraphicsItem {
     Q_OBJECT
+    friend class ProfileForm;
+
 public:
     explicit BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr);
     ~BridgeItem() override { m_ptr = nullptr; }
@@ -31,6 +33,8 @@ public:
 
     IntPoint getPoint(const int side) const;
     QLineF getPath() const;
+
+    void setOk(bool ok);
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
