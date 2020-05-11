@@ -5,6 +5,10 @@
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>
+#include <app.h>
+#include <project.h>
+
+class AbstractFile;
 
 class AbstractNode {
 public:
@@ -40,6 +44,7 @@ protected:
     const QStringList tbStrList;
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
+    inline AbstractFile* file() const { return App::project()->file(m_id); }
     //Qt::CheckState m_checkState = Qt::Checked;
 };
 

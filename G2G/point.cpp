@@ -91,11 +91,10 @@ int Marker::type() const { return m_type ? GiPointHome : GiPointZero; }
 
 void Marker::resetPos(bool fl)
 {
-    if (fl)
-        if (!updateRect())
-            return;
+    if (fl && !updateRect())
+        return;
 
-    const QRectF rect(App::layoutFrames()->boundingRect()); //App::project()->worckRect()
+    const QRectF rect(App::layoutFrames()->boundingRect());
 
     if (m_type == Home)
         switch (GlobalSettings::mkrHomePos()) {
@@ -198,7 +197,7 @@ Pin::Pin(QObject* parent)
     setObjectName("Pin");
     setAcceptHoverEvents(true);
 
-    if (m_pins.size() % 2) {
+    if (m_index % 2) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
     } else {
@@ -208,7 +207,7 @@ Pin::Pin(QObject* parent)
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
 
-    setZValue(std::numeric_limits<qreal>::max() - m_pins.size());
+    setZValue(std::numeric_limits<qreal>::max() - m_index);
     App::scene()->addItem(this);
     m_pins.append(this);
 }

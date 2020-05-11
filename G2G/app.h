@@ -18,6 +18,7 @@ class FileModel;
 class GCodePropertiesForm;
 class GraphicsView;
 class LayoutFrames;
+class MainWindow;
 class Project;
 class Scene;
 class SplashScreen;
@@ -36,6 +37,7 @@ class App {
     friend class GCodePropertiesForm;
     friend class GraphicsView;
     friend class LayoutFrames;
+    friend class MainWindow;
     friend class Project;
     friend class Scene;
     friend class SplashScreen;
@@ -46,6 +48,7 @@ class App {
     GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
     GraphicsView* m_graphicsView = nullptr;
     LayoutFrames* m_layoutFrames = nullptr;
+    MainWindow* m_mainWindow = nullptr;
     Project* m_project = nullptr;
     Scene* m_scene = nullptr;
     SplashScreen* m_splashScreen = nullptr;
@@ -64,6 +67,7 @@ public:
     static GCodePropertiesForm* gCodePropertiesForm() { return mInstance->m_gCodePropertiesForm; }
     static GraphicsView* graphicsView() { return mInstance->m_graphicsView; }
     static LayoutFrames* layoutFrames() { return mInstance->m_layoutFrames; }
+    static MainWindow* mainWindow() { return mInstance->m_mainWindow; }
     static Project* project() { return mInstance->m_project; }
     static Scene* scene() { return mInstance->m_scene; }
     static SplashScreen* splashScreen() { return mInstance->m_splashScreen; }

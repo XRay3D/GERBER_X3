@@ -18,7 +18,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
 private:
-    GCode::File* const m_file;
 };
 
 #endif // MILLING_H

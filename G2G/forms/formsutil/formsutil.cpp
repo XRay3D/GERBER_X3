@@ -69,8 +69,13 @@ void FormsUtil::setFile(GCode::File* file)
 
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
-    file->m_usedItems = m_usedItems;
-    App::project()->addFile(file);
+    if (fileId > -1) {
+        App::project()->reload(fileId, file);
+        m_editMode = false;
+        fileId = -1;
+    } else {
+        App::project()->addFile(file);
+    }
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)
@@ -81,5 +86,17 @@ void FormsUtil::timerEvent(QTimerEvent* event)
         pd->setValue(val);
         //qDebug() << "timerEvent" << max << val;
         pd->setLabelText(m_tpc->msg);
+    }
+}
+
+void FormsUtil::addUsedGi(GraphicsItem* gi)
+{
+    if (gi->file()) {
+        AbstractFile const* file = gi->file();
+        if (file->type() == FileType::Gerber) {
+            m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].append(gi->id());
+        } else {
+            m_usedItems[{ file->id(), -1 }].append(gi->id());
+        }
     }
 }

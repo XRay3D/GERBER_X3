@@ -38,11 +38,15 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
 
-    new Marker(Marker::Zero);
-    new Marker(Marker::Home);
-    for (int i = 0; i < 4; ++i)
+    {
+        new Marker(Marker::Home);
+        new Marker(Marker::Zero);
         new Pin(scene);
-    new LayoutFrames();
+        new Pin(scene);
+        new Pin(scene);
+        new Pin(scene);
+        new LayoutFrames();
+    }
 
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
@@ -107,12 +111,14 @@ MainWindow::MainWindow(QWidget* parent)
     //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
     //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
+    App::mInstance->m_mainWindow = this;
 }
 
 MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
+    App::mInstance->m_mainWindow = nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -799,6 +805,26 @@ bool MainWindow::maybeSave()
         break;
     }
     return true;
+}
+
+void MainWindow::editGcFile(GCode::File* file)
+{
+    switch (file->gtype()) {
+    case GCode::Null:
+    case GCode::Profile:
+        toolpathActionList[GCode::Profile]->triggered();
+        reinterpret_cast<FormsUtil*>(dockWidget->widget())->editFile(file);
+        break;
+    case GCode::Pocket:
+    case GCode::Voronoi:
+    case GCode::Thermal:
+    case GCode::Drill:
+    case GCode::GCodeProperties:
+    case GCode::Raster:
+    case GCode::LaserHLDI:
+    default:
+        break;
+    }
 }
 
 void MainWindow::loadFile(const QString& fileName)

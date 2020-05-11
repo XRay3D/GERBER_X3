@@ -194,69 +194,61 @@ void Gerber::File::createGi()
     // fill copper
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
-        item->m_id = m_itemGroup[Normal]->size();
-        item->setToolTip(QString("ID: %1").arg(item->m_id));
         m_itemGroup[Normal]->append(item);
-    }
-
-    // ap paths
-    auto adder = [&](const Path& path) {
-        GraphicsItem* item = new AperturePathItem(path, this);
-        item->m_id = m_itemGroup[ApPaths]->size();
-        item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_itemGroup[ApPaths]->append(item);
-    };
-
-    auto contains = [&](const Path& path) -> bool {
-        constexpr double k = 0.001 * uScale;
-        for (const Path& chPath : checkList) { // find copy
-            int counter = 0;
-            if (chPath.size() == path.size()) {
-                for (const IntPoint& p1 : chPath) {
-                    for (const IntPoint& p2 : path) {
-                        if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-                            ++counter;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (counter == path.size())
-                return true;
-        }
-        return false;
-    };
-
-    for (const GraphicObject& go : *this) {
-        if (!go.path().isEmpty()) {
-            if (GlobalSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
-                Paths paths;
-                SimplifyPolygon(go.path(), paths);
-                for (Path& path : paths) {
-                    path.append(path.first());
-                    if (!GlobalSettings::gbrSkipDuplicates()) {
-                        checkList.push_front(path);
-                        adder(checkList.front());
-                    } else if (!contains(path)) {
-                        checkList.push_front(path);
-                        adder(checkList.front());
-                    }
-                }
-            } else {
-                if (!GlobalSettings::gbrSkipDuplicates()) {
-                    adder(go.path());
-                } else if (!contains(go.path())) {
-                    adder(go.path());
-                    checkList.push_front(go.path());
-                }
-            }
-        }
     }
 
     // add components
     for (const Component& c : m_components) {
         if (!c.referencePoint.isNull())
             m_itemGroup[Components]->append(new ComponentItem(c, this));
+    }
+
+    {
+        auto contains = [&](const Path& path) -> bool {
+            constexpr double k = 0.001 * uScale;
+            for (const Path& chPath : checkList) { // find copy
+                int counter = 0;
+                if (chPath.size() == path.size()) {
+                    for (const IntPoint& p1 : chPath) {
+                        for (const IntPoint& p2 : path) {
+                            if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                                ++counter;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (counter == path.size())
+                    return true;
+            }
+            return false;
+        };
+
+        for (const GraphicObject& go : *this) {
+            if (!go.path().isEmpty()) {
+                if (GlobalSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
+                    Paths paths;
+                    SimplifyPolygon(go.path(), paths);
+                    for (Path& path : paths) {
+                        path.append(path.first());
+                        if (!GlobalSettings::gbrSkipDuplicates()) {
+                            checkList.push_front(path);
+                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                        } else if (!contains(path)) {
+                            checkList.push_front(path);
+                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                        }
+                    }
+                } else {
+                    if (!GlobalSettings::gbrSkipDuplicates()) {
+                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                    } else if (!contains(go.path())) {
+                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        checkList.push_front(go.path());
+                    }
+                }
+            }
+        }
     }
 
     if (m_itemGroup[Components]->size())

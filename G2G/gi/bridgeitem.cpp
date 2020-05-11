@@ -52,7 +52,7 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
     }
 
     auto drawEllipse = [painter, halfSize](const QPointF& pt, bool fl = false) {
-        const QRectF rectangle(pt + QPointF{ halfSize, halfSize }, pt - QPointF{ halfSize, halfSize });
+        const QRectF rectangle(pt + QPointF { halfSize, halfSize }, pt - QPointF { halfSize, halfSize });
         const int startAngle = (fl ? 0 : 180) * 16;
         const int spanAngle = 180 * 16;
         painter->drawArc(rectangle, startAngle, spanAngle);
@@ -130,6 +130,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     m_ok = false;
     return pos;
 }
+
+void BridgeItem::setOk(bool ok) { m_ok = ok; }
 
 double BridgeItem::angle() const { return m_angle; }
 

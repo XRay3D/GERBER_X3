@@ -6,11 +6,13 @@
 #include <abstractfile.h>
 
 class Project;
+class TreeView;
 
 namespace GCode {
 class File : public AbstractFile {
     friend class ::PathItem;
     friend class ::Project;
+    friend class ::TreeView;
 
 public:
     explicit File(QDataStream& stream) { read(stream); } // for project load
@@ -19,7 +21,6 @@ public:
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
     Paths m_pocketPaths;
-    QMap<int, QVector<int>> m_usedItems;
     ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
 
 private:
@@ -122,6 +123,7 @@ public:
     static void setLastDir(QString value);
     QList<QString> getSl() const;
     Tool getTool() const;
+    GCodeParams gcp() const;
 };
 }
 #endif // GCODE_H

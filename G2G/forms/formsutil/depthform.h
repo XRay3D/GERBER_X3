@@ -14,6 +14,7 @@ public:
     explicit DepthForm(QWidget* parent = nullptr);
     ~DepthForm() override;
     double value() const;
+    void setValue(double value);
 
 signals:
     void valueChanged(double);

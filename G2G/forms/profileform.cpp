@@ -1,6 +1,7 @@
 #include "profileform.h"
 #include "ui_profileform.h"
 
+#include "../project.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
@@ -13,8 +14,8 @@
 #include <gcprofile.h>
 #include <graphicsview.h>
 #include <myclipper.h>
-#include <settings.h>
 #include <scene.h>
+#include <settings.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)
@@ -99,6 +100,7 @@ void ProfileForm::createFile()
     Paths wPaths;
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
+    bool skip { true };
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
@@ -109,26 +111,26 @@ void ProfileForm::createFile()
                 file = gi->file();
                 boardSide = file->side();
             } else if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             if (item->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
-            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         case GiShapeC:
             wRawPaths.append(gi->paths());
-            //m_used[gi->file()->id()].append(gi->id());
             break;
         case GiDrill:
             wPaths.append(gi->paths());
-            m_usedItems[gi->file()->id()].append(gi->id());
             break;
         default:
             break;
         }
+        addUsedGi(gi);
     }
 
     if (wRawPaths.isEmpty() && wPaths.isEmpty()) {
@@ -141,6 +143,20 @@ void ProfileForm::createFile()
     gcp.setSide(side);
     gcp.tools.append(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
+
+    {
+        QVector<QPointF> brv;
+        for (QGraphicsItem* item : App::scene()->items()) {
+            if (item->type() == GiBridge)
+                brv.append(item->pos());
+        }
+        if (!brv.isEmpty()) {
+            gcp.params[GCode::GCodeParams::Bridges].setValue(brv);
+            gcp.params[GCode::GCodeParams::BridgeLen].setValue(ui->dsbxBridgeLenght->value());
+        }
+    }
+
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
@@ -167,7 +183,6 @@ void ProfileForm::showEvent(QShowEvent* event)
 
 void ProfileForm::on_pbAddBridge_clicked()
 {
-    static BridgeItem* item = nullptr;
     if (item) {
         if (!item->ok())
             delete item;
@@ -212,6 +227,67 @@ void ProfileForm::rb_clicked()
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void ProfileForm::editFile(GCode::File* /*file*/)
+void ProfileForm::editFile(GCode::File* file)
 {
+    qDebug(Q_FUNC_INFO);
+    GCode::GCodeParams gcp { file->gcp() };
+
+    fileId = gcp.fileId;
+    m_editMode = true;
+
+    { // GUI
+        side = gcp.side();
+        direction = static_cast<GCode::Direction>(gcp.convent());
+        ui->toolHolder->setTool(gcp.tools.first());
+        ui->dsbxDepth->setValue(gcp.params[GCode::GCodeParams::Depth].toDouble());
+
+        switch (side) {
+        case GCode::On:
+            ui->rbOn->setChecked(true);
+            break;
+        case GCode::Outer:
+            ui->rbOutside->setChecked(true);
+            break;
+        case GCode::Inner:
+            ui->rbInside->setChecked(true);
+            break;
+        }
+
+        switch (direction) {
+        case GCode::Climb:
+            ui->rbClimb->setChecked(true);
+            break;
+        case GCode::Conventional:
+            ui->rbConventional->setChecked(true);
+            break;
+        }
+    }
+
+    { // GrItems
+        m_usedItems.clear();
+        auto items { gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
+        qDebug() << items;
+        auto i = items.constBegin();
+        while (i != items.constEnd()) {
+            qDebug() << i.key() << i.value();
+            auto [fileId, giType] = i.key();
+            App::project()->aFile(fileId)->itemGroup()->setSelected(i.value());
+            ++i;
+        }
+    }
+
+    { // Bridges
+        if (gcp.params.contains(GCode::GCodeParams::Bridges)) {
+            ui->dsbxBridgeLenght->setValue(gcp.params[GCode::GCodeParams::BridgeLen].toDouble());
+            for (auto& pos : gcp.params[GCode::GCodeParams::Bridges].value<QVector<QPointF>>()) {
+                item = new BridgeItem(m_lenght, m_size, side, item);
+                App::scene()->addItem(item);
+                item->setPos(pos);
+                item->m_lastPos = pos;
+            }
+            updateBridge();
+            item = new BridgeItem(m_lenght, m_size, side, item);
+            //        delete item;
+        }
+    }
 }

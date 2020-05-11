@@ -6,10 +6,8 @@
 
 GcodeNode::GcodeNode(int id)
     : AbstractNode(id)
-    , m_file(App::project()->file<GCode::File>(m_id))
 {
-
-    App::project()->file(id)->itemGroup()->addToScene();
+    file()->itemGroup()->addToScene();
 }
 
 bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -18,7 +16,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case 0:
         switch (role) {
         case Qt::CheckStateRole:
-            m_file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -26,7 +24,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case 1:
         switch (role) {
         case Qt::EditRole:
-            m_file->setSide(static_cast<Side>(value.toBool()));
+            file()->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -43,7 +41,7 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;
     case 1: {
-        if (m_file->shortName().contains(".tap"))
+        if (file()->shortName().contains(".tap"))
             return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }
@@ -58,15 +56,15 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole: {
-            if (m_file->shortName().endsWith("tap"))
-                return m_file->shortName();
+            if (file()->shortName().endsWith("tap"))
+                return file()->shortName();
             else
-                return m_file->shortName() + QStringList({ "(Top)", "(Bot)" })[m_file->side()];
+                return file()->shortName() + QStringList({ "(Top)", "(Bot)" })[file()->side()];
         }
         case Qt::ToolTipRole:
-            return m_file->shortName() + "\n" + m_file->name();
+            return file()->shortName() + "\n" + file()->name();
         case Qt::CheckStateRole:
-            return m_file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return file()->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             switch (static_cast<int>(App::project()->file<GCode::File>(m_id)->gtype())) {
             case GCode::Profile:
@@ -93,9 +91,9 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return tbStrList[m_file->side()];
+            return tbStrList[file()->side()];
         case Qt::EditRole:
-            return static_cast<bool>(m_file->side());
+            return static_cast<bool>(file()->side());
         default:
             return QVariant();
         }

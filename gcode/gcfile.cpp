@@ -259,6 +259,11 @@ void File::saveLaser(const QPointF& offset)
     }
 }
 
+GCodeParams File::gcp() const
+{
+    return m_gcp;
+}
+
 QVector<QVector<QPolygonF>> File::pss(const QPointF& offset)
 {
     QVector<QVector<QPolygonF>> pathss;

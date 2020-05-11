@@ -11,7 +11,9 @@ ItemGroup::~ItemGroup()
 
 void ItemGroup::append(GraphicsItem* value)
 {
-    //    value->setItemGroup(this);
+    value->m_id = QList::size() ? QList::last()->m_id + 1 : 0;
+    value->setToolTip((value->toolTip().isEmpty() ? QString() : value->toolTip() + '\n')
+        + QString("ID(%1): %2").arg(value->type()).arg(value->m_id));
     QList::append(value);
 }
 
@@ -22,6 +24,12 @@ void ItemGroup::setVisible(bool visible)
         for (QGraphicsItem* item : *this)
             item->setVisible(m_visible);
     }
+}
+
+void ItemGroup::setSelected(const QVector<int>& ids)
+{
+    for (GraphicsItem* item : *this)
+        item->setSelected(ids.contains(item->id()));
 }
 
 void ItemGroup::addToScene()

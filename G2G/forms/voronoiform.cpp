@@ -11,8 +11,8 @@
 #include <gcvoronoi.h>
 #include <graphicsview.h>
 #include <myclipper.h>
-#include <settings.h>
 #include <scene.h>
+#include <settings.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)
@@ -75,19 +75,21 @@ void VoronoiForm::createFile()
     Paths wPaths;
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
+    bool skip { true };
 
     for (auto* item : App::scene()->selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:
-            //GerberItem* gi = static_cast<GerberItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
@@ -98,8 +100,10 @@ void VoronoiForm::createFile()
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
@@ -112,6 +116,7 @@ void VoronoiForm::createFile()
         default:
             break;
         }
+        addUsedGi(gi);
     }
 
     if (wPaths.isEmpty() && wRawPaths.isEmpty()) {

@@ -51,6 +51,7 @@ public:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void createGi() = 0;
+    //    virtual void selected() = 0;
 
     Side side() const;
     void setSide(Side side);

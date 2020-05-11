@@ -14,6 +14,8 @@ class ExcellonDialog;
 
 class TreeView : public QTreeView {
     Q_OBJECT
+    friend class MainWindow;
+
 public:
     explicit TreeView(QWidget* parent = nullptr);
     ~TreeView() override = default;
