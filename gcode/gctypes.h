@@ -54,7 +54,6 @@ struct GCodeParams {
         UseRaster,
         Steps,
         Tolerance,
-        TwoTools,
         Width,
         VorT,
         FileId,

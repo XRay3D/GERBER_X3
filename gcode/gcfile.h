@@ -9,6 +9,7 @@ class Project;
 class TreeView;
 
 namespace GCode {
+
 class File : public AbstractFile {
     friend class ::PathItem;
     friend class ::Project;
@@ -125,5 +126,6 @@ public:
     Tool getTool() const;
     GCodeParams gcp() const;
 };
+
 }
 #endif // GCODE_H

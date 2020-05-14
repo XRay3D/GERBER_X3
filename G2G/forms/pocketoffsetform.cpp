@@ -30,6 +30,11 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     }
 {
     ui->setupUi(this);
+    ui->toolHolder->label()->setText("Tool 1:");
+    ui->toolHolder2->label()->setText("Tool 2:");
+    ui->toolHolder3->label()->setText("Tool 3:");
+    ui->toolHolder4->label()->setText("Tool 4:");
+
     parent->setWindowTitle(ui->label->text());
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
@@ -40,7 +45,7 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
-    settings.getValue(ui->chbxUseTwoTools);
+    settings.getValue(ui->sbxToolQty);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
     settings.getValue(ui->rbInside);
@@ -54,7 +59,7 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
     connect(ui->rbInside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
-    connect(ui->chbxUseTwoTools, &QCheckBox::clicked, this, &PocketOffsetForm::rb_clicked);
+    connect(ui->sbxToolQty, qOverload<int>(&QSpinBox::valueChanged), this, &PocketOffsetForm::rb_clicked);
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
@@ -71,7 +76,7 @@ PocketOffsetForm::~PocketOffsetForm()
 {
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
-    settings.setValue(ui->chbxUseTwoTools);
+    settings.setValue(ui->sbxToolQty);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rbInside);
@@ -91,10 +96,23 @@ void PocketOffsetForm::createFile()
         tool.errorMessageBox(this);
         return;
     }
-    if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
+    if (!tool2.isValid()) {
         tool2.errorMessageBox(this);
         return;
     }
+    if (!tool3.isValid()) {
+        tool3.errorMessageBox(this);
+        return;
+    }
+    if (!tool4.isValid()) {
+        tool4.errorMessageBox(this);
+        return;
+    }
+
+    //    if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
+    //        tool2.errorMessageBox(this);
+    //        return;
+    //    }
 
     Paths wPaths;
     Paths wRawPaths;
@@ -145,14 +163,14 @@ void PocketOffsetForm::createFile()
 
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
-    gcp.params[GCode::GCodeParams::TwoTools] = ui->chbxUseTwoTools->isChecked();
+    //    gcp.params[GCode::GCodeParams::TwoTools] = ui->chbxUseTwoTools->isChecked();
     gcp.params[GCode::GCodeParams::MinArea] = ui->dsbxMinArea->value();
 
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    if (ui->chbxUseTwoTools->isChecked())
-        fileCount = 2;
+    //    if (ui->chbxUseTwoTools->isChecked())
+    //        fileCount = 2;
     createToolpath();
 }
 
@@ -189,8 +207,8 @@ void PocketOffsetForm::rb_clicked()
     else if (ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    if (tool.type() == Tool::Laser)
-        ui->chbxUseTwoTools->setChecked(false);
+    //    if (tool.type() == Tool::Laser)
+    //        ui->chbxUseTwoTools->setChecked(false);
 
     if (ui->rbClimb->isChecked())
         direction = GCode::Climb;
@@ -198,8 +216,9 @@ void PocketOffsetForm::rb_clicked()
         direction = GCode::Conventional;
 
     {
-        const bool checked = ui->chbxUseTwoTools->isChecked();
-        ui->chbxUseTwoTools->setChecked(checked);
+        //        const bool checked = ui->chbxUseTwoTools->isChecked();
+        //        ui->chbxUseTwoTools->setChecked(checked);
+        const bool checked { ui->sbxToolQty->value() > 1 };
 
         ui->labelSteps->setVisible(!checked);
         ui->sbxSteps->setVisible(!checked);
@@ -207,9 +226,28 @@ void PocketOffsetForm::rb_clicked()
         ui->dsbxMinArea->setVisible(checked);
         ui->labelMinArea->setVisible(checked);
 
-        ui->toolHolder2->setVisible(checked);
-        ui->toolHolder3->setVisible(checked);
-        ui->toolHolder4->setVisible(checked);
+        switch (ui->sbxToolQty->value()) {
+        case 1:
+            ui->toolHolder2->setVisible(checked);
+            ui->toolHolder3->setVisible(checked);
+            ui->toolHolder4->setVisible(checked);
+            break;
+        case 2:
+            ui->toolHolder2->setVisible(checked);
+            ui->toolHolder3->setVisible(!checked);
+            ui->toolHolder4->setVisible(!checked);
+            break;
+        case 3:
+            ui->toolHolder2->setVisible(checked);
+            ui->toolHolder3->setVisible(checked);
+            ui->toolHolder4->setVisible(!checked);
+            break;
+        case 4:
+            ui->toolHolder2->setVisible(checked);
+            ui->toolHolder3->setVisible(checked);
+            ui->toolHolder4->setVisible(checked);
+            break;
+        }
     }
 
     updateName();

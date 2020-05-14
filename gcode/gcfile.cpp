@@ -90,10 +90,11 @@ void File::saveDrill(const QPointF& offset)
 
 void File::savePocket(const QPointF& offset)
 {
-    if (toolType == Tool::Laser)
+    if (toolType == Tool::Laser) {
         sl.append(GlobalSettings::gcSpindleOn());
-    else
+    } else {
         sl.append(GlobalSettings::gcLaserDynamOn());
+    }
 
     QVector<QVector<QPolygonF>> pathss(pss(offset));
     const QVector<double> depths(getDepths());
@@ -691,7 +692,7 @@ void File::write(QDataStream& stream) const
 
 void File::read(QDataStream& stream)
 {
-    auto &gcp = *const_cast<GCodeParams*>(&m_gcp);
+    auto& gcp = *const_cast<GCodeParams*>(&m_gcp);
     switch (App::project()->ver()) {
     case G2G_Ver_4:
         stream >> gcp;
