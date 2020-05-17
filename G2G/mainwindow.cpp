@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // autocreate Raster (need for debug)
+    if constexpr (0) { // autocreate Raster (need for debug)
         //        QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
         //        QTimer::singleShot(120, [this] { selectAll(); });
 

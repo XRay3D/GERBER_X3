@@ -326,8 +326,8 @@
       </font>
      </property>
      <property name="text">
-      <string>Number
-of tools:</string>
+      <string>Qty of
+tools:</string>
      </property>
     </widget>
    </item>

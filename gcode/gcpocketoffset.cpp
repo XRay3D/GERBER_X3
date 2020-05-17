@@ -253,7 +253,7 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
             m_gcp.gcType = Pocket;
             m_gcp.params[GCodeParams::PocketIndex] = i;
             m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
-            m_file->setFileName(tool.name());
+            m_file->setFileName(tool.nameEnc());
             emit fileReady(m_file);
         }
     }
