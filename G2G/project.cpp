@@ -310,17 +310,19 @@ void Project::saveSelectedToolpaths()
             files.remove(i--);
     }
 
-    QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
-    for (GCode::File* file : files)
-        mm[QPair { file->getTool(), file->side() }].append(file);
+    using Key = QPair<uint, Side>;
 
-    for (const QPair<Tool, Side>& key : mm.keys()) {
+    QMap<Key, QList<GCode::File*>> mm;
+    for (GCode::File* file : files)
+        mm[{ file->getTool().hash(), file->side() }].append(file);
+
+    for (const Key& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));
-        if (files.size() < 2 /*|| key.first == -1*/) {
+        if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::File::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
-                    name += QStringList({ "(Top)", "(Bot)" })[file->side()];
+                    name += QStringList({ "_TS", "_BS" })[file->side()];
                 name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
                 if (name.isEmpty())
                     return;
@@ -328,9 +330,9 @@ void Project::saveSelectedToolpaths()
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::File::getLastDir().append(files.first()->getTool().name()));
+            QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith("tap"))
-                name += QStringList({ "(Top)", "(Bot)" })[files.first()->side()];
+                name += QStringList({ "_TS", "_BS" })[files.first()->side()];
             name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
             if (name.isEmpty())
                 return;
@@ -342,8 +344,8 @@ void Project::saveSelectedToolpaths()
                 if (i == 0)
                     file->statFile();
                 file->addInfo(true);
-                file->genGcode();
-                if (i == files.size() - 1)
+                file->genGcodeAndTile();
+                if (i == (files.size() - 1))
                     file->endFile();
                 sl.append(file->getSl());
             }
@@ -372,7 +374,7 @@ bool Project::isUntitled() { return m_isUntitled; }
 void Project::setUntitled(bool value)
 {
     m_isUntitled = value;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 double Project::spaceX() const { return m_spacingX; }
@@ -380,7 +382,7 @@ double Project::spaceX() const { return m_spacingX; }
 void Project::setSpaceX(double value)
 {
     m_spacingX = value;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 double Project::spaceY() const { return m_spacingY; }
@@ -388,7 +390,7 @@ double Project::spaceY() const { return m_spacingY; }
 void Project::setSpaceY(double value)
 {
     m_spacingY = value;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 int Project::stepsX() const { return m_stepsX; }
@@ -396,7 +398,7 @@ int Project::stepsX() const { return m_stepsX; }
 void Project::setStepsX(int value)
 {
     m_stepsX = value;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 int Project::stepsY() const { return m_stepsY; }
@@ -404,7 +406,7 @@ int Project::stepsY() const { return m_stepsY; }
 void Project::setStepsY(int value)
 {
     m_stepsY = value;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
@@ -412,7 +414,7 @@ QRectF Project::worckRect() const { return m_worckRect; }
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
-     App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)

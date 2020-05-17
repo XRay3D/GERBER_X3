@@ -46,6 +46,13 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool)
     return stream;
 }
 
+QDebug operator<<(QDebug debug, const Tool& t)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << t.diameter() << ')';
+    return debug;
+}
+
 Tool::Tool()
     : m_name(QObject::tr("Default"))
     , m_type(EndMill)
@@ -63,6 +70,22 @@ Tool::Tool()
 }
 
 QString Tool::name() const { return m_name; }
+
+QString Tool::nameEnc() const
+{
+    switch (m_type) {
+    case Tool::Drill:
+        return QString("D-D%1MM").arg(m_diameter);
+    case Tool::EndMill:
+        return QString("M-D%1MM").arg(m_diameter);
+    case Tool::Engraver:
+        return QString("V-D%1MMA%2DEG").arg(m_diameter).arg(m_angle);
+    case Tool::Laser:
+        return QString("L-D%1MM").arg(m_diameter);
+    default:
+        return {};
+    }
+}
 
 void Tool::setName(const QString& name)
 {
@@ -170,7 +193,7 @@ void Tool::setId(int id)
 
 double Tool::getDiameter(double depth) const
 {
-    if (type() == Engraving && depth > 0.0 && angle() > 0.0 && angle() < 90.0) {
+    if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() < 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
         return d * 2 + diameter();
@@ -184,7 +207,7 @@ double Tool::getDepth() const
     case Tool::Drill:
         return m_diameter * 0.5 * tan(qDegreesToRadians((180.0 - m_angle) * 0.5));
     case Tool::EndMill:
-    case Tool::Engraving:
+    case Tool::Engraver:
     default:
         return 0.0;
     }
@@ -247,7 +270,7 @@ QIcon Tool::icon() const
         return QIcon::fromTheme("drill");
     case Tool::EndMill:
         return QIcon::fromTheme("endmill");
-    case Tool::Engraving:
+    case Tool::Engraver:
         return QIcon::fromTheme("engraving");
     case Tool::Laser:
         return QIcon::fromTheme("laser");

@@ -57,7 +57,6 @@ struct GCodeParams {
         Width,
         VorT,
         FileId,
-        MinArea,
         FrameOffset,
         AccDistance,
         Side,
@@ -68,6 +67,7 @@ struct GCodeParams {
         Node,
         Bridges,
         BridgeLen,
+        NotTile
     };
 
     GCodeParams() {}

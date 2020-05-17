@@ -41,7 +41,7 @@ void File::save(const QString& name)
     initSave();
     addInfo();
     statFile();
-    genGcode();
+    genGcodeAndTile();
     endFile();
     QFile file(m_name);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -64,7 +64,7 @@ void File::saveDrill(const QPointF& offset)
     QPolygonF path(toQPolygon(m_toolPathss.first().first()));
     path.translate(offset);
 
-    if (m_side) {
+    if (m_side == Bottom) {
         const double k = Pin::minX() + Pin::maxX();
         for (QPointF& point : path) {
             point.rx() = -point.x() + k;
@@ -364,7 +364,7 @@ void File::initSave()
     *const_cast<int*>(&toolType) = m_gcp.getTool().type();
 }
 
-void File::genGcode()
+void File::genGcodeAndTile()
 {
     QRectF rect = App::project()->worckRect();
     for (int x = 0; x < App::project()->stepsX(); ++x) {
@@ -396,6 +396,8 @@ void File::genGcode()
             default:
                 break;
             }
+            if (m_gcp.params.contains(GCodeParams::NotTile))
+                return;
         }
     }
 }
@@ -423,24 +425,23 @@ GCodeType File::gtype() const
 QString File::getLastDir()
 {
     if (GlobalSettings::gcSameFolder())
-        return App::project()->name();
-    if (lastDir.isEmpty()) {
+        lastDir = QFileInfo(App::project()->name()).absolutePath();
+    else if (lastDir.isEmpty()) {
         QSettings settings;
         lastDir = settings.value("LastGCodeDir").toString();
-        if (lastDir.isEmpty()) {
-            lastDir = App::project()->name();
-            lastDir = lastDir.left(lastDir.lastIndexOf('/') + 1);
-        }
+        if (lastDir.isEmpty())
+            lastDir = QFileInfo(App::project()->name()).absolutePath();
         settings.setValue("LastGCodeDir", lastDir);
     }
-    return lastDir;
+    qDebug() << QFileInfo(lastDir).absolutePath() << lastDir;
+    return lastDir += '/';
 }
 
 void File::setLastDir(QString value)
 {
     if (GlobalSettings::gcSameFolder())
         return;
-    value = value.left(value.lastIndexOf('/') + 1);
+    value = QFileInfo(value).absolutePath(); //value.left(value.lastIndexOf('/') + 1);
     if (lastDir != value) {
         lastDir = value;
         QSettings settings;

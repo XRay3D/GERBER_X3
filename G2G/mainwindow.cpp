@@ -100,17 +100,17 @@ MainWindow::MainWindow(QWidget* parent)
     if constexpr (1) { // autocreate Raster (need for debug)
         //        QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
         //        QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
+
+        QTimer::singleShot(150, [this] {
+            if (auto menu = findChild<QMenu*>("editMenu"); menu != nullptr) {
+                menu->actions().first()->trigger();
+                toolpathActionList[GCode::Pocket]->triggered();
+                //                dockWidget->findChild<QPushButton*>("pbCreate")->click();
+            }
+        });
+
         //        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
-    //    QTimer::singleShot(100, [this] {
-    //        ToolDatabase tdb(this, {});
-    //        tdb.exec();
-    //    });
-    //    QTimer::singleShot(200, [this] { loadFile(recentFileActs[0]->data().toString()); });
-    //    QTimer::singleShot(200, [this] { loadFile("C:/Users/X-Ray/Downloads/gbr/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
-    //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"); });
-    //    QTimer::singleShot(200, [this] { loadFile("D:/Downloads/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_top.gbr"); });
     App::mInstance->m_mainWindow = this;
 }
 
@@ -523,7 +523,7 @@ void MainWindow::createActionsGraphics()
 
 void MainWindow::createPinsPath()
 {
-    ToolDatabase tdb(this, { Tool::Drill });
+    ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
     if (tdb.exec()) {
         Tool tool(tdb.tool());
 
@@ -553,8 +553,12 @@ void MainWindow::createPinsPath()
             return;
         settings.setValue("Pin/depth", depth);
 
-        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, { tool, depth, GCode::Drill });
-        gcode->setFileName(tr("Pin (") + tool.name() + ")");
+        GCode::GCodeParams gcp(tool, depth, GCode::Drill);
+
+        gcp.params[GCode::GCodeParams::NotTile];
+
+        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, gcp);
+        gcode->setFileName(tr("Pin_") + tool.nameEnc());
         m_project->addFile(gcode);
     }
 }

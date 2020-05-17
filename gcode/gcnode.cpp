@@ -59,7 +59,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
             if (file()->shortName().endsWith("tap"))
                 return file()->shortName();
             else
-                return file()->shortName() + QStringList({ "(Top)", "(Bot)" })[file()->side()];
+                return file()->shortName() + QStringList({ "_TS", "_BS" })[file()->side()];
         }
         case Qt::ToolTipRole:
             return file()->shortName() + "\n" + file()->name();

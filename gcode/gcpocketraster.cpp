@@ -239,7 +239,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     } else {
         m_gcp.gcType = Raster;
         m_file = new File(m_returnPss, m_gcp, fillPaths);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }
@@ -338,7 +338,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     } else {
         m_gcp.gcType = LaserHLDI;
         m_file = new File(m_returnPss, m_gcp);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }

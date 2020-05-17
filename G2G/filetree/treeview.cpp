@@ -96,15 +96,15 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
             hideOther();
         } else if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex())) {
             qDebug(Q_FUNC_INFO);
-            //hideOther();
-            {
-                const int id = m_menuIndex.data(Qt::UserRole).toInt();
-                GCode::File* file = static_cast<GCode::File*>(App::project()->file(id));
-                App::project()->showFiles(file->m_gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
-                file->m_gcp.fileId = file->id();
-                App::mainWindow()->editGcFile(file);
-                updateTree();
-            }
+            hideOther();
+            //            {
+            //                const int id = m_menuIndex.data(Qt::UserRole).toInt();
+            //                GCode::File* file = static_cast<GCode::File*>(App::project()->file(id));
+            //                App::project()->showFiles(file->m_gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
+            //                file->m_gcp.fileId = file->id();
+            //                App::mainWindow()->editGcFile(file);
+            //                updateTree();
+            //            }
         }
     }
 }

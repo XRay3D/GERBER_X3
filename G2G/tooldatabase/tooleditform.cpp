@@ -32,7 +32,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFeedSpeeds, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
 #else
-    connect(ui->cbxFeedSpeeds, QOverload<int, const QString&>::of(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(ui->cbxFeedSpeeds, QOverload<int/*, const QString&*/>::of(&QComboBox::currentIndexChanged), [this](int index) {
 #endif
         double tmpFeed = m_feed;
         switch (index) {
@@ -63,7 +63,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxToolType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
 #else
-    connect(ui->cbxToolType, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
+    connect(ui->cbxToolType, qOverload<int/*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
 #endif
 
     connect(ui->leName, &QLineEdit::textChanged, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); });
@@ -74,7 +74,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     ui->cbxToolType->setItemIcon(Tool::Drill, QIcon::fromTheme("drill"));
     ui->cbxToolType->setItemIcon(Tool::EndMill, QIcon::fromTheme("endmill"));
-    ui->cbxToolType->setItemIcon(Tool::Engraving, QIcon::fromTheme("engraving"));
+    ui->cbxToolType->setItemIcon(Tool::Engraver, QIcon::fromTheme("engraving"));
     ui->cbxToolType->setItemIcon(Tool::Laser, QIcon::fromTheme("laser"));
 
     QSettings settings;
@@ -202,7 +202,7 @@ void ToolEditForm::setupToolWidgets(int type)
         //        }
         ui->label_3->setText(tr("Depth"));
         break;
-    case Tool::Engraving:
+    case Tool::Engraver:
         setEnabled(ui->dsbxAngle, 0.0, 180.0);
         setEnabled(ui->dsbxFeedRate, 0.0, 100000.0);
         setEnabled(ui->dsbxOneTurnCut, 0.0, ui->dsbxDiameter->value());
@@ -315,7 +315,7 @@ void ToolEditForm::on_pbApply_clicked()
         ui->dsbxSpindleSpeed->flicker();
         break;
     case Tool::EndMill:
-    case Tool::Engraving:
+    case Tool::Engraver:
         ui->dsbxDiameter->flicker();
         ui->dsbxFeedRate->flicker();
         ui->dsbxOneTurnCut->flicker();
@@ -351,7 +351,7 @@ void ToolEditForm::updateName()
     case Tool::EndMill:
         ui->leName->setText(QString(tr("End Mill (Ø%1 mm)")).arg(ui->dsbxDiameter->value()));
         return;
-    case Tool::Engraving:
+    case Tool::Engraver:
         ui->leName->setText(QString(tr("Engrave (%2\302\260 %1 mm tip)")).arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value()));
         return;
     case Tool::Drill:
