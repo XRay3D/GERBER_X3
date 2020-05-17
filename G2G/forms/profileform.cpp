@@ -270,7 +270,7 @@ void ProfileForm::editFile(GCode::File* file)
         auto i = items.constBegin();
         while (i != items.constEnd()) {
             qDebug() << i.key() << i.value();
-            auto [fileId, giType] = i.key();
+            auto [fileId, _] = i.key();
             App::project()->aFile(fileId)->itemGroup()->setSelected(i.value());
             ++i;
         }

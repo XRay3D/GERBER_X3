@@ -75,7 +75,7 @@ private:
         return str;
     }
     void initSave();
-    void genGcode();
+    void genGcodeAndTile();
     void addInfo(bool fl = false);
     void startPath(const QPointF& point);
     void endPath();

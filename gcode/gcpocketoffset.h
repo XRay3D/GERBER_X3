@@ -11,7 +11,7 @@ public:
 
 private:
     void createPocket(const Tool& tool, const double depth, const int steps);
-    void createPocket2(const QVector<Tool> &tool, double depth, double minArea);
+    void createPocket2(QVector<Tool>& tools, double depth);
 
 protected:
     void create() override; // Creator interface

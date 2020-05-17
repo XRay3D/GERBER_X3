@@ -41,7 +41,7 @@ const Tool& ToolSelectorForm::tool() const { return m_tool; }
 
 void ToolSelectorForm::on_pbSelect_clicked()
 {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving, Tool::Laser });
+    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraver, Tool::Laser });
     if (tdb.exec()) {
         setTool(tdb.tool());
     }

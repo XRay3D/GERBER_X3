@@ -257,7 +257,8 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing, false);
-
+        QElapsedTimer t;
+        t.start();
         for (int i = 0; i < 3; ++i) {
             painter->setPen(QPen(color[i], 1.0 / m_scale));
             for (long hPos : hGrid.keys(i)) {
@@ -269,6 +270,8 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
                     painter->drawLine(QLineF(rect.left(), vPos * downScale, rect.right(), vPos * downScale));
             }
         }
+
+//        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
 
         const double k2 = 0.5 / m_scale;
 

@@ -201,13 +201,13 @@ void VoronoiCreator::createVoronoi()
     if (width < tool.getDiameter(depth)) {
         m_gcp.gcType = Voronoi;
         m_file = new File({ sortBE(m_returnPs) }, m_gcp);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     } else {
         createOffset(tool, depth, width);
         m_gcp.gcType = Voronoi;
         m_file = new File(m_returnPss, m_gcp, m_workingRawPs);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }
@@ -644,9 +644,9 @@ Paths VoronoiCreator::toPath(const Pairs& pairs)
     Paths paths;
     Pairs tmp = pairs;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QList<Pair> tmp2(tmp.toList());
-#else
     QList<Pair> tmp2(tmp.values());
+#else
+    QList<Pair> tmp2(tmp.toList());
 #endif
     std::sort(tmp2.begin(), tmp2.end(), [](const Pair& a, const Pair& b) { return a.id > b.id; });
     {

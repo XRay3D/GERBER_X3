@@ -90,7 +90,7 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     } else {
         m_gcp.gcType = Thermal;
         m_file = new GCode::File(sortB(m_returnPss), m_gcp);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }

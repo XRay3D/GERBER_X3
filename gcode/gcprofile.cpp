@@ -126,7 +126,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     } else {
         m_gcp.gcType = Profile;
         m_file = new File(m_returnPss, m_gcp);
-        m_file->setFileName(tool.name());
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }

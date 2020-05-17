@@ -67,7 +67,7 @@ void FormsUtil::setFile(GCode::File* file)
         return;
     }
 
-    file->setFileName(m_fileName + " (" + file->name() + ")");
+    file->setFileName(m_fileName + "_" + file->name());
     file->setSide(boardSide);
     if (fileId > -1) {
         App::project()->reload(fileId, file);

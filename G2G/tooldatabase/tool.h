@@ -2,6 +2,7 @@
 #ifndef TOOL_H
 #define TOOL_H
 
+#include <QDebug>
 #include <QJsonObject>
 #include <QMap>
 #include <QMessageBox>
@@ -10,6 +11,7 @@
 class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
     friend QDataStream& operator>>(QDataStream& stream, Tool& tool);
+    friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
     Tool();
@@ -17,7 +19,7 @@ public:
     enum Type {
         Drill,
         EndMill,
-        Engraving,
+        Engraver,
         Laser,
         Group = 100
     };
@@ -37,6 +39,7 @@ public:
 
     // name
     QString name() const;
+    QString nameEnc() const;
     void setName(const QString& name);
     // note
     QString note() const;

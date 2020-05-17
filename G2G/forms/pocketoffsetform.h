@@ -24,7 +24,6 @@ private:
 
     int direction = 0;
     void updatePixmap();
-    void updateArea();
     void rb_clicked();
     const QStringList names;
     const QStringList pixmaps;

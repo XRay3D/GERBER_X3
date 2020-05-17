@@ -52,7 +52,6 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     settings.getValue(ui->rbOutside);
     settings.endGroup();
 
-    updateArea();
     rb_clicked();
 
     connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
@@ -87,26 +86,18 @@ PocketOffsetForm::~PocketOffsetForm()
 
 void PocketOffsetForm::createFile()
 {
-    const auto tool { ui->toolHolder->tool() };
-    const auto tool2 { ui->toolHolder2->tool() };
-    const auto tool3 { ui->toolHolder3->tool() };
-    const auto tool4 { ui->toolHolder4->tool() };
+    const Tool tool[] {
+        ui->toolHolder->tool(),
+        ui->toolHolder2->tool(),
+        ui->toolHolder3->tool(),
+        ui->toolHolder4->tool()
+    };
 
-    if (!tool.isValid()) {
-        tool.errorMessageBox(this);
-        return;
-    }
-    if (!tool2.isValid()) {
-        tool2.errorMessageBox(this);
-        return;
-    }
-    if (!tool3.isValid()) {
-        tool3.errorMessageBox(this);
-        return;
-    }
-    if (!tool4.isValid()) {
-        tool4.errorMessageBox(this);
-        return;
+    for (const Tool& t : tool) {
+        if (!t.isValid()) {
+            t.errorMessageBox(this);
+            return;
+        }
     }
 
     //    if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
@@ -156,21 +147,23 @@ void PocketOffsetForm::createFile()
     }
 
     GCode::GCodeParams gcp;
+    for (const Tool& t : tool) {
+        gcp.tools.append(t);
+        if (gcp.tools.size() == ui->sbxToolQty->value())
+            break;
+    }
+    std::sort(gcp.tools.begin(), gcp.tools.end(), [this](const Tool& t1, const Tool& t2) -> bool {
+        return t1.getDiameter(ui->dsbxDepth->value()) > t2.getDiameter(ui->dsbxDepth->value());
+    });
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tools.append(tool);
-    gcp.tools.append(tool2);
-
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
-    //    gcp.params[GCode::GCodeParams::TwoTools] = ui->chbxUseTwoTools->isChecked();
-    gcp.params[GCode::GCodeParams::MinArea] = ui->dsbxMinArea->value();
 
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    //    if (ui->chbxUseTwoTools->isChecked())
-    //        fileCount = 2;
+    fileCount = ui->sbxToolQty->value();
     createToolpath();
 }
 
@@ -188,14 +181,6 @@ void PocketOffsetForm::updatePixmap()
 {
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon(pixmaps[direction]).pixmap(QSize(size, size)));
-}
-
-void PocketOffsetForm::updateArea()
-{
-    const auto tool { ui->toolHolder->tool() };
-
-    if (qFuzzyIsNull(ui->dsbxMinArea->value()))
-        ui->dsbxMinArea->setValue((tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * (tool.getDiameter(ui->dsbxDepth->value() * 0.5)) * M_PI * 0.5);
 }
 
 void PocketOffsetForm::rb_clicked()
@@ -216,38 +201,14 @@ void PocketOffsetForm::rb_clicked()
         direction = GCode::Conventional;
 
     {
-        //        const bool checked = ui->chbxUseTwoTools->isChecked();
-        //        ui->chbxUseTwoTools->setChecked(checked);
-        const bool checked { ui->sbxToolQty->value() > 1 };
+        int fl = ui->sbxToolQty->value();
 
-        ui->labelSteps->setVisible(!checked);
-        ui->sbxSteps->setVisible(!checked);
+        ui->labelSteps->setVisible(fl < 2);
+        ui->sbxSteps->setVisible(fl < 2);
 
-        ui->dsbxMinArea->setVisible(checked);
-        ui->labelMinArea->setVisible(checked);
-
-        switch (ui->sbxToolQty->value()) {
-        case 1:
-            ui->toolHolder2->setVisible(checked);
-            ui->toolHolder3->setVisible(checked);
-            ui->toolHolder4->setVisible(checked);
-            break;
-        case 2:
-            ui->toolHolder2->setVisible(checked);
-            ui->toolHolder3->setVisible(!checked);
-            ui->toolHolder4->setVisible(!checked);
-            break;
-        case 3:
-            ui->toolHolder2->setVisible(checked);
-            ui->toolHolder3->setVisible(checked);
-            ui->toolHolder4->setVisible(!checked);
-            break;
-        case 4:
-            ui->toolHolder2->setVisible(checked);
-            ui->toolHolder3->setVisible(checked);
-            ui->toolHolder4->setVisible(checked);
-            break;
-        }
+        ui->toolHolder2->setVisible(--fl > 0);
+        ui->toolHolder3->setVisible(--fl > 0);
+        ui->toolHolder4->setVisible(--fl > 0);
     }
 
     updateName();
