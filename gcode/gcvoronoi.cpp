@@ -632,7 +632,7 @@ void VoronoiCreator::boostVoronoi()
     qDebug() << "boostVoronoi" << segments_.size();
     m_gcp.gcType = Voronoi;
     m_file = new File({ sortBE(segments_) }, m_gcp);
-    m_file->setFileName(Tool {}.name());
+    m_file->setFileName(Tool {}.nameEnc());
     emit fileReady(m_file);
 
 #endif
