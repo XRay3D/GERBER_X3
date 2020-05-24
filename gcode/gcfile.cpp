@@ -14,7 +14,7 @@
 
 namespace GCode {
 
-const QVector<QChar> File::cl { 'G', 'X', 'Y', 'Z', 'F', 'S' };
+const QVector<QChar> File::cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 QString File::lastDir;
 /*
   G0X0Y0S1500M03
@@ -25,8 +25,8 @@ QString File::lastDir;
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
     : m_pocketPaths(pocketPaths)
-    , m_gcp(gcp)
     , m_toolPathss(toolPathss)
+    , m_gcp(gcp)
 {
     createGi();
 }
@@ -47,7 +47,7 @@ void File::save(const QString& name)
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         QString str;
-        for (QString& s : sl) {
+        for (QString& s : m_gCodeText) {
             if (!s.isEmpty())
                 str.append(s);
             if (!str.endsWith('\n'))
@@ -79,10 +79,10 @@ void File::saveDrill(const QPointF& offset)
     for (QPointF& point : path) {
         startPath(point);
         for (int i = 0;;) {
-            sl.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
+            m_gCodeText.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
             if (++i == depths.count())
                 break;
-            sl.append(formated({ g0(), z(0.0) }));
+            m_gCodeText.append(formated({ g0(), z(0.0) }));
         }
         endPath();
     }
@@ -91,9 +91,9 @@ void File::saveDrill(const QPointF& offset)
 void File::savePocket(const QPointF& offset)
 {
     if (toolType == Tool::Laser) {
-        sl.append(GlobalSettings::gcSpindleOn());
+        m_gCodeText.append(GlobalSettings::gcSpindleOn());
     } else {
-        sl.append(GlobalSettings::gcLaserDynamOn());
+        m_gCodeText.append(GlobalSettings::gcLaserDynamOn());
     }
 
     QVector<QVector<QPolygonF>> pathss(pss(offset));
@@ -107,27 +107,27 @@ void File::savePocket(const QPointF& offset)
                     if (skip)
                         skip = false;
                     else
-                        sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                        m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                 }
             }
         } else {
             for (int i = 0; i < depths.count(); ++i) {
-                sl.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
+                m_gCodeText.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
                 bool skip = true;
                 for (QPolygonF& path : paths) {
                     for (QPointF& point : path) {
                         if (skip)
                             skip = false;
                         else
-                            sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                            m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                     }
                 }
                 for (int j = paths.size() - 2; j >= 0 && i < depths.count() - 1; --j) {
                     QPointF& point = paths[j].last();
-                    sl.append(formated({ g0(), x(point.x()), y(point.y()) }));
+                    m_gCodeText.append(formated({ g0(), x(point.x()), y(point.y()) }));
                 }
                 if (paths.size() > 1 && i < (depths.count() - 1))
-                    sl.append(formated({ g0(), x(paths.first().first().x()), y(paths.first().first().y()) }));
+                    m_gCodeText.append(formated({ g0(), x(paths.first().first().x()), y(paths.first().first().y()) }));
             }
         }
         endPath();
@@ -137,9 +137,9 @@ void File::savePocket(const QPointF& offset)
 void File::saveProfile(const QPointF& offset)
 {
     if (toolType == Tool::Laser)
-        sl.append(GlobalSettings::gcSpindleOn());
+        m_gCodeText.append(GlobalSettings::gcSpindleOn());
     else
-        sl.append(GlobalSettings::gcLaserDynamOn());
+        m_gCodeText.append(GlobalSettings::gcLaserDynamOn());
 
     QVector<QVector<QPolygonF>> pathss(pss(offset));
     const QVector<double> depths(getDepths());
@@ -153,7 +153,7 @@ void File::saveProfile(const QPointF& offset)
                     if (skip)
                         skip = false;
                     else
-                        sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                        m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                 }
                 endPath();
             }
@@ -167,13 +167,13 @@ void File::saveProfile(const QPointF& offset)
                         if (path.first() == path.last()) {
                             startPath(path.first());
                             for (int i = 0; i < depths.count(); ++i) {
-                                sl.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
+                                m_gCodeText.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
                                 bool skip = true;
                                 for (QPointF& point : path) {
                                     if (skip)
                                         skip = false;
                                     else
-                                        sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                                        m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                                 }
                             }
                             endPath();
@@ -181,13 +181,13 @@ void File::saveProfile(const QPointF& offset)
                             continue;
                         } else {
                             startPath(path.first());
-                            sl.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
+                            m_gCodeText.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
                             bool skip = true;
                             for (QPointF& point : path) {
                                 if (skip)
                                     skip = false;
                                 else
-                                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                                    m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                             }
                             endPath();
                         }
@@ -199,13 +199,13 @@ void File::saveProfile(const QPointF& offset)
                 for (int i = 0; i < depths.count(); ++i) {
                     for (QPolygonF& path : paths) {
                         startPath(path.first());
-                        sl.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
+                        m_gCodeText.append(formated({ g1(), z(depths[i]), feed(plungeRate) }));
                         bool skip = true;
                         for (QPointF& point : path) {
                             if (skip)
                                 skip = false;
                             else
-                                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                                m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
                         }
                         endPath();
                     }
@@ -218,13 +218,13 @@ void File::saveProfile(const QPointF& offset)
 void File::saveLaser(const QPointF& offset)
 {
     if (toolType == Tool::Laser)
-        sl.append(GlobalSettings::gcSpindleOn());
+        m_gCodeText.append(GlobalSettings::gcSpindleOn());
     else
-        sl.append(GlobalSettings::gcLaserConstOn());
+        m_gCodeText.append(GlobalSettings::gcLaserConstOn());
 
     QVector<QVector<QPolygonF>> pathss(pss(offset));
     int i = 0;
-    sl.append(formated({ g0(), x(pathss.first().first().first().x()), y(pathss.first().first().first().y()), z(0.0) }));
+    m_gCodeText.append(formated({ g0(), x(pathss.first().first().first().x()), y(pathss.first().first().first().y()), z(0.0) }));
     for (QPolygonF& path : pathss.first()) {
         if (i++ % 2) {
             bool skip = true;
@@ -232,7 +232,7 @@ void File::saveLaser(const QPointF& offset)
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate), s(static_cast<int>(spindleSpeed)) }));
+                    m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate), speed(spindleSpeed) }));
             }
         } else {
             bool skip = true;
@@ -240,11 +240,11 @@ void File::saveLaser(const QPointF& offset)
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate), s(static_cast<int>(0)) }));
+                    m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate), speed(static_cast<int>(0)) }));
             }
         }
     }
-    sl.append(GlobalSettings::gcLaserDynamOn());
+    m_gCodeText.append(GlobalSettings::gcLaserDynamOn());
     if (pathss.size() > 1) {
         for (QPolygonF& path : pathss.last()) {
             startPath(path.first());
@@ -253,7 +253,7 @@ void File::saveLaser(const QPointF& offset)
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
+                    m_gCodeText.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate) }));
             }
             endPath();
         }
@@ -343,15 +343,18 @@ QVector<double> File::getDepths()
 
 void File::initSave()
 {
-    sl.clear();
-    memset(FormatFlags, 0, sizeof(bool) * Size);
+    m_gCodeText.clear();
+
+    for (bool& fl : formatFlags)
+        fl = false;
+
     const QString format(GlobalSettings::gcFormat());
-    for (int i = 0; i < cl.size(); ++i) {
-        const int index = format.indexOf(cl[i], 0, Qt::CaseInsensitive);
+    for (int i = 0; i < cmdList.size(); ++i) {
+        const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
         if (index != -1) {
-            FormatFlags[i + AlwaysG] = format[index + 1] == '+';
+            formatFlags[i + AlwaysG] = format[index + 1] == '+';
             if ((index + 2) < format.size())
-                FormatFlags[i + SpaceG] = format[index + 2] == ' ';
+                formatFlags[i + SpaceG] = format[index + 2] == ' ';
         }
     }
 
@@ -360,16 +363,16 @@ void File::initSave()
 
     *const_cast<double*>(&feedRate) = m_gcp.getTool().feedRate();
     *const_cast<double*>(&plungeRate) = m_gcp.getTool().plungeRate();
-    *const_cast<double*>(&spindleSpeed) = m_gcp.getTool().spindleSpeed();
+    *const_cast<int*>(&spindleSpeed) = m_gcp.getTool().spindleSpeed();
     *const_cast<int*>(&toolType) = m_gcp.getTool().type();
 }
 
 void File::genGcodeAndTile()
 {
-    QRectF rect = App::project()->worckRect();
+    const QRectF rect = App::project()->worckRect();
     for (int x = 0; x < App::project()->stepsX(); ++x) {
         for (int y = 0; y < App::project()->stepsY(); ++y) {
-            QPointF offset(
+            const QPointF offset(
                 (rect.width() + App::project()->spaceX()) * x,
                 (rect.height() + App::project()->spaceY()) * y);
             switch (m_gcp.gcType) {
@@ -402,18 +405,15 @@ void File::genGcodeAndTile()
     }
 }
 
-Tool File::getTool() const
-{
-    return m_gcp.getTool();
-}
+Tool File::getTool() const { return m_gcp.getTool(); }
 
 void File::addInfo(bool fl)
 {
     if (GlobalSettings::gcInfo() || fl) {
-        sl.append(QString(";\tName:\t%1").arg(shortName()));
-        sl.append(QString(";\tTool:\t%1").arg(m_gcp.getTool().name()));
-        sl.append(QString(";\tDepth:\t%1").arg(m_gcp.getDepth()));
-        sl.append(QString(";\tSide:\t%1").arg(QStringList { "Top", "Bottom" }[side()]));
+        m_gCodeText.append(QString(";\tName:\t%1").arg(shortName()));
+        m_gCodeText.append(QString(";\tTool:\t%1").arg(m_gcp.getTool().name()));
+        m_gCodeText.append(QString(";\tDepth:\t%1").arg(m_gcp.getDepth()));
+        m_gCodeText.append(QString(";\tSide:\t%1").arg(QStringList { "Top", "Bottom" }[side()]));
     }
 }
 
@@ -452,11 +452,11 @@ void File::setLastDir(QString value)
 void File::startPath(const QPointF& point)
 {
     if (toolType == Tool::Laser) {
-        sl.append(formated({ g0(), x(point.x()), y(point.y()), s(0) })); //start xy
-        sl.append(formated({ g1(), s(static_cast<int>(spindleSpeed)) }));
+        m_gCodeText.append(formated({ g0(), x(point.x()), y(point.y()), speed(0) })); //start xy
+        m_gCodeText.append(formated({ g1(), speed(spindleSpeed) }));
     } else {
-        sl.append(formated({ g0(), x(point.x()), y(point.y()), s(static_cast<int>(spindleSpeed)) })); //start xy
-        sl.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
+        m_gCodeText.append(formated({ g0(), x(point.x()), y(point.y()), speed(spindleSpeed) })); //start xy
+        m_gCodeText.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
         lastValues[AlwaysF].clear();
     }
 }
@@ -465,49 +465,46 @@ void File::endPath()
 {
     if (toolType == Tool::Laser) {
     } else {
-        sl.append(formated({ g0(), z(GCodePropertiesForm::clearence) }));
+        m_gCodeText.append(formated({ g0(), z(GCodePropertiesForm::clearence) }));
     }
 }
 
 void File::statFile()
 {
     QString str(GlobalSettings::gcStart()); //"G21 G17 G90"); //G17 XY plane
-    str.replace(QRegExp("S\\?"), formated({ s(static_cast<int>(spindleSpeed)) }));
-    sl.append(str);
+    str.replace(QRegExp("S\\?"), formated({ speed(spindleSpeed) }));
+    m_gCodeText.append(str);
     if (toolType != Tool::Laser) {
-        sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+        m_gCodeText.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
     }
 }
 
 void File::endFile()
 {
     if (toolType != Tool::Laser) {
-        sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+        m_gCodeText.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
     }
     QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
-    sl.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
-    sl.append(GlobalSettings::gcEnd());
+    m_gCodeText.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
+    m_gCodeText.append(GlobalSettings::gcEnd());
 }
 
-QString File::formated(const QList<QString> data)
+QString File::formated(const QList<QString>& data)
 {
     QString ret;
     for (const QString& str : data) {
-        const int index = cl.indexOf(str.front().toUpper());
+        const int index = cmdList.indexOf(str.front().toUpper());
         if (index != -1) {
-            if (lastValues[index] != str || FormatFlags[AlwaysG + index]) {
+            if (formatFlags[AlwaysG + index] || lastValues[index] != str) {
                 lastValues[index] = str;
-                ret += str + (FormatFlags[SpaceG + index] ? " " : "");
+                ret += str + (formatFlags[SpaceG + index] ? " " : "");
             }
         }
     }
     return ret.trimmed();
 }
 
-QList<QString> File::getSl() const
-{
-    return sl;
-}
+QList<QString> File::gCodeText() const { return m_gCodeText; }
 
 void File::createGiDrill()
 {

@@ -292,7 +292,7 @@ void DrillForm::updateFiles()
 {
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    disconnect(ui->cbxFile, qOverload<int, const QString&>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int/*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #else

@@ -73,24 +73,24 @@ void SettingsDialog::readSettings()
     settings.endGroup();
 
     settings.beginGroup("Gerber");
-    m_gbrCleanPolygons = settings.getValue(chbxCleanPolygons, false);
-    m_gbrSimplifyRegions = settings.getValue(chbxSimplifyRegions, false);
-    m_gbrSkipDuplicates = settings.getValue(chbxSkipDuplicates, false);
-    m_gbrGcMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, 0.5);
-    m_gbrGcMinCircleSegments = settings.getValue(sbxMinCircleSegments, 36);
+    m_gbrCleanPolygons = settings.getValue(chbxCleanPolygons, m_gbrCleanPolygons);
+    m_gbrSimplifyRegions = settings.getValue(chbxSimplifyRegions, m_gbrSimplifyRegions);
+    m_gbrSkipDuplicates = settings.getValue(chbxSkipDuplicates, m_gbrSkipDuplicates);
+    m_gbrGcMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, m_gbrGcMinCircleSegmentLength);
+    m_gbrGcMinCircleSegments = settings.getValue(sbxMinCircleSegments, m_gbrGcMinCircleSegments);
     settings.endGroup();
 
     settings.beginGroup("GCode");
-    m_gcInfo = settings.getValue(chbxInfo, false);
-    m_gcSameFolder = settings.getValue(chbxSameGFolder, true);
-    m_gcFileExtension = settings.getValue(leFileExtension, "tap");
-    m_gcFormat = settings.getValue(leFormat, "G?X?Y?Z?F?S?");
-    m_gcLaserConstOn = settings.getValue(leLaserCPC, "M3");
-    m_gcLaserDynamOn = settings.getValue(leLaserDPC, "M4");
-    m_gcSpindleOn = settings.getValue(leSpindleCC, "M3");
-    m_gcSpindleLaserOff = settings.getValue(leSpindleLaserOff, "M5");
-    m_gcEnd = settings.getValue(pteEnd, "M5\nM30");
-    m_gcStart = settings.getValue(pteStart, "G21 G17 G90\nM3");
+    m_gcInfo = settings.getValue(chbxInfo, m_gcInfo);
+    m_gcSameFolder = settings.getValue(chbxSameGFolder, m_gcSameFolder);
+    m_gcFileExtension = settings.getValue(leFileExtension, m_gcFileExtension);
+    m_gcFormat = settings.getValue(leFormat, m_gcFormat);
+    m_gcLaserConstOn = settings.getValue(leLaserCPC, m_gcLaserConstOn);
+    m_gcLaserDynamOn = settings.getValue(leLaserDPC, m_gcLaserDynamOn);
+    m_gcSpindleOn = settings.getValue(leSpindleCC, m_gcSpindleOn);
+    m_gcSpindleLaserOff = settings.getValue(leSpindleLaserOff, m_gcSpindleLaserOff);
+    m_gcEnd = settings.getValue(pteEnd, m_gcEnd);
+    m_gcStart = settings.getValue(pteStart, m_gcStart);
     settings.endGroup();
 
     settings.beginGroup("Application");
