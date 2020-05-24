@@ -185,8 +185,8 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         return;
 
     { // draw grid
-        const long upScale = 1000000;
-        const long forLimit = 10000;
+        const long upScale = 100000;
+        const long forLimit = 1000;
         const double downScale = 1.0 / upScale;
         static bool in = GlobalSettings::inch();
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -259,23 +259,23 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->setRenderHint(QPainter::Antialiasing, false);
         QElapsedTimer t;
         t.start();
+        const double k2 = 0.5 / m_scale;
+
         for (int i = 0; i < 3; ++i) {
-            painter->setPen(QPen(color[i], 1.0 / m_scale));
+            painter->setPen(QPen(color[i], 0.0));
             for (long hPos : hGrid.keys(i)) {
                 if (hPos)
-                    painter->drawLine(QLineF(hPos * downScale, rect.top(), hPos * downScale, rect.bottom()));
+                    painter->drawLine(QLineF(hPos * downScale + k2, rect.top(), hPos * downScale + k2, rect.bottom()));
             }
             for (long vPos : vGrid.keys(i)) {
                 if (vPos)
-                    painter->drawLine(QLineF(rect.left(), vPos * downScale, rect.right(), vPos * downScale));
+                    painter->drawLine(QLineF(rect.left(), vPos * downScale + k2, rect.right(), vPos * downScale + k2));
             }
         }
 
-//        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
+        //        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
 
-        const double k2 = 0.5 / m_scale;
-
-        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
+        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));
         painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
         painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
     }
@@ -290,9 +290,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
             }
         }
         if (fl)
-            painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0 /*1.0 / scale*/));
+            painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0));
         else
-            painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0 /*1.0 / scale*/));
+            painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0));
 
         painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
         painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));

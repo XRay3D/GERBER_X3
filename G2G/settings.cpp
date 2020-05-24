@@ -6,19 +6,19 @@
 #endif
 
 /*G-Code*/
-QString GlobalSettings::m_gcEnd = "M30";
-QString GlobalSettings::m_gcFileExtension = "tap";
-QString GlobalSettings::m_gcFormat = "G?X?Y?Z?F?S?";
+QString GlobalSettings::m_gcEnd { "M5\nM30" };
+QString GlobalSettings::m_gcFileExtension = { "tap" };
+QString GlobalSettings::m_gcFormat { "G?X?Y?Z?F?S?" };
 QString GlobalSettings::m_gcLaserConstOn { "M3" };
 QString GlobalSettings::m_gcLaserDynamOn { "M4" };
 QString GlobalSettings::m_gcSpindleLaserOff { "M5" };
 QString GlobalSettings::m_gcSpindleOn { "M3" };
-QString GlobalSettings::m_gcStart = "G21 G17 G90";
-bool GlobalSettings::m_gcInfo = false;
+QString GlobalSettings::m_gcStart { "G21 G17 G90\nM3 S?" };
+bool GlobalSettings::m_gcInfo { false };
 bool GlobalSettings::m_gcSameFolder { true };
 
 /*GUI*/
-constexpr int gridColor = 100;
+enum { gridColor = 100 };
 QColor GlobalSettings::m_guiColor[static_cast<int>(Colors::Count)] {
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
@@ -32,23 +32,24 @@ QColor GlobalSettings::m_guiColor[static_cast<int>(Colors::Count)] {
     QColor(255, 0, 0, 120), //Zero
     QColor(Qt::red) //G0
 };
-bool GlobalSettings::m_guiSmoothScSh = false;
+
+bool GlobalSettings::m_guiSmoothScSh { false };
 
 /*Gerber/G-Code*/
-double GlobalSettings::m_gbrGcMinCircleSegmentLength = 0.5;
-int GlobalSettings::m_gbrGcMinCircleSegments = 36;
+double GlobalSettings::m_gbrGcMinCircleSegmentLength { 0.5 };
+int GlobalSettings::m_gbrGcMinCircleSegments { 36 };
 
 /*Gerber*/
-bool GlobalSettings::m_gbrCleanPolygons = false;
-bool GlobalSettings::m_gbrSimplifyRegions = false;
-bool GlobalSettings::m_gbrSkipDuplicates = false;
+bool GlobalSettings::m_gbrCleanPolygons { false };
+bool GlobalSettings::m_gbrSimplifyRegions { false };
+bool GlobalSettings::m_gbrSkipDuplicates { false };
 
 /*Markers*/
 QPointF GlobalSettings::m_mrkHomeOffset;
 QPointF GlobalSettings::m_mrkPinOffset;
 QPointF GlobalSettings::m_mrkZeroOffset;
-int GlobalSettings::m_mrkHomePos = Qt::BottomLeftCorner;
-int GlobalSettings::m_mrkZeroPos = Qt::BottomLeftCorner;
+int GlobalSettings::m_mrkHomePos { Qt::BottomLeftCorner };
+int GlobalSettings::m_mrkZeroPos { Qt::BottomLeftCorner };
 
 /*Other*/
 bool GlobalSettings::m_inch = false;

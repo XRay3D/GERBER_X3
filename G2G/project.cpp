@@ -162,18 +162,18 @@ int Project::size()
 QRectF Project::getSelectedBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-        if (filePtr->itemGroup()->isVisible()) {
-            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
+        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
+            for (const GraphicsItem* const item : *itemGroup) {
                 if (item->isSelected()) {
                     for (const Path& path : item->paths()) {
                         for (const IntPoint& pt : path) {
-                            topleft.X = qMin(pt.X, topleft.X);
-                            topleft.Y = qMin(pt.Y, topleft.Y);
-                            bottomRight.X = qMax(pt.X, bottomRight.X);
-                            bottomRight.Y = qMax(pt.Y, bottomRight.Y);
+                            topLeft.X = qMin(pt.X, topLeft.X);
+                            topLeft.Y = qMin(pt.Y, topLeft.Y);
+                            botRight.X = qMax(pt.X, botRight.X);
+                            botRight.Y = qMax(pt.Y, botRight.Y);
                         }
                     }
                 }
@@ -181,7 +181,7 @@ QRectF Project::getSelectedBoundingRect()
         }
     }
 
-    const QRectF rect(toQPointF(topleft), toQPointF(bottomRight));
+    const QRectF rect(toQPointF(topLeft), toQPointF(botRight));
 
     if (!rect.isEmpty())
         setWorckRect(rect);
@@ -192,23 +192,23 @@ QRectF Project::getSelectedBoundingRect()
 QRectF Project::getBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-        if (filePtr->itemGroup()->isVisible()) {
-            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
+        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
+            for (const GraphicsItem* const item : *itemGroup) {
                 for (const Path& path : item->paths()) {
                     for (const IntPoint& pt : path) {
-                        topleft.X = qMin(pt.X, topleft.X);
-                        topleft.Y = qMin(pt.Y, topleft.Y);
-                        bottomRight.X = qMax(pt.X, bottomRight.X);
-                        bottomRight.Y = qMax(pt.Y, bottomRight.Y);
+                        topLeft.X = qMin(pt.X, topLeft.X);
+                        topLeft.Y = qMin(pt.Y, topLeft.Y);
+                        botRight.X = qMax(pt.X, botRight.X);
+                        botRight.Y = qMax(pt.Y, botRight.Y);
                     }
                 }
             }
         }
     }
-    return QRectF(toQPointF(topleft), toQPointF(bottomRight));
+    return QRectF(toQPointF(topLeft), toQPointF(botRight));
 }
 
 QString Project::fileNames()
@@ -347,7 +347,7 @@ void Project::saveSelectedToolpaths()
                 file->genGcodeAndTile();
                 if (i == (files.size() - 1))
                     file->endFile();
-                sl.append(file->getSl());
+                sl.append(file->gCodeText());
             }
             QFile file(name);
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {

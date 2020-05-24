@@ -643,7 +643,8 @@ Paths VoronoiCreator::toPath(const Pairs& pairs)
     msg = tr("Merge Segments");
     Paths paths;
     Pairs tmp = pairs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     QList<Pair> tmp2(tmp.values());
 #else
     QList<Pair> tmp2(tmp.toList());
