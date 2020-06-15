@@ -132,6 +132,14 @@ bool Parser::parseGCode(const QString& line)
             m_state.gCode = G01;
             parsePos(line);
             break;
+        case G02:
+            m_state.gCode = G02;
+            parsePos(line);
+            break;
+        case G03:
+            m_state.gCode = G03;
+            parsePos(line);
+            break;
         case G05:
             m_state.gCode = G05;
             break;
@@ -224,26 +232,40 @@ bool Parser::parseTCode(const QString& line)
 
 bool Parser::parsePos(const QString& line)
 {
+    enum {
+        G = 1,
+        X,
+        Y,
+        A
+    };
+
     QRegExp match("^(?:G(\\d+))?"
                   "(?:X([+-]?\\d*\\.?\\d*))?"
                   "(?:Y([+-]?\\d*\\.?\\d*))?"
+                  "(?:A([+-]?\\d*\\.?\\d*))?"
                   ".*$");
+
     if (match.exactMatch(line)) {
 
-        if (match.cap(2).isEmpty() && match.cap(3).isEmpty())
+        if (match.cap(X).isEmpty() && match.cap(Y).isEmpty())
             return false;
 
-        if (!match.cap(2).isEmpty())
-            m_state.rawPos.first = match.cap(2);
+        if (!match.cap(X).isEmpty())
+            m_state.rawPos.first = match.cap(X);
 
-        if (!match.cap(3).isEmpty())
-            m_state.rawPos.second = match.cap(3);
+        if (!match.cap(Y).isEmpty())
+            m_state.rawPos.second = match.cap(Y);
 
-        parseNumber(match.cap(2), m_state.pos.rx());
-        parseNumber(match.cap(3), m_state.pos.ry());
+        parseNumber(match.cap(X), m_state.pos.rx());
+        parseNumber(match.cap(Y), m_state.pos.ry());
 
-        if (!(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
+        //        if (!(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
+        //            file()->append(Hole(m_state, file()));
+        //        }
+        if (m_state.gCode == G05 && !(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
             file()->append(Hole(m_state, file()));
+        } else if (m_state.gCode == G00) {
+            m_state.path.append(m_state.pos);
         }
         return true;
     }

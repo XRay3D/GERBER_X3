@@ -3,13 +3,14 @@
 #define GCODE_H
 
 #include "gctypes.h"
+#include "gcutils.h"
 #include <abstractfile.h>
 
 class Project;
 
 namespace GCode {
 
-class File : public AbstractFile {
+class File : public AbstractFile, private GCUtils {
     friend class ::PathItem;
     friend class ::Project;
 
@@ -31,11 +32,6 @@ private:
     Paths m_pocketPaths; /////
     Pathss m_toolPathss; /////
     const GCodeParams m_gcp; ////
-
-    const double feedRate = 0.0;
-    const double plungeRate = 0.0;
-    const int spindleSpeed = 0.0;
-    const int toolType = 0;
 
     enum {
         AlwaysG,
@@ -125,6 +121,5 @@ public:
     Tool getTool() const;
     GCodeParams gcp() const;
 };
-
 }
 #endif // GCODE_H
