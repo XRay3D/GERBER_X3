@@ -37,6 +37,7 @@ HEADERS += \
     $$PWD/gcprofile.h \
     $$PWD/gcthermal.h \
     $$PWD/gctypes.h \
+    $$PWD/gcutils.h \
     $$PWD/gcvoronoi.h \
     $$PWD/voroni/jc_voronoi.h \
 
@@ -48,5 +49,6 @@ SOURCES += \
     $$PWD/gcpocketraster.cpp \
     $$PWD/gcprofile.cpp \
     $$PWD/gcthermal.cpp \
+    $$PWD/gcutils.cpp \
     $$PWD/gcvoronoi.cpp \
     $$PWD/voroni/jc_voronoi.cpp \
