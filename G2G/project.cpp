@@ -320,7 +320,7 @@ void Project::saveSelectedToolpaths()
         QList<GCode::File*> files(mm.value(key));
         if (files.size() < 2) {
             for (GCode::File* file : files) {
-                QString name(GCode::File::getLastDir().append(file->shortName()));
+                QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
                     name += QStringList({ "_TS", "_BS" })[file->side()];
                 name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
@@ -330,7 +330,7 @@ void Project::saveSelectedToolpaths()
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
+            QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith("tap"))
                 name += QStringList({ "_TS", "_BS" })[files.first()->side()];
             name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));

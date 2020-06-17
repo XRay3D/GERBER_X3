@@ -35,7 +35,7 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto setValue(W* widget)
     {
-        const QString name { widget->objectName() };
+        const QString name{ widget->objectName() };
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -67,7 +67,7 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto getValue(W* widget, const QVariant& defaultValue = QVariant()) const
     {
-        const QString name { widget->objectName() };
+        const QString name{ widget->objectName() };
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -127,16 +127,22 @@ public:
     GlobalSettings();
 
     /*G-Code*/
-    static QString gcEnd();
+
     static QString gcFileExtension();
     static QString gcFormat();
-    static bool gcInfo();
     static QString gcLaserConstOn();
     static QString gcLaserDynamOn();
-    static bool gcSameFolder();
     static QString gcSpindleLaserOff();
     static QString gcSpindleOn();
+
     static QString gcStart();
+    static QString gcEnd();
+
+    static QString gcLaserStart();
+    static QString gcLaserEnd();
+
+    static bool gcInfo();
+    static bool gcSameFolder();
 
     /*GUI*/
     static QColor& guiColor(Colors id);
@@ -162,16 +168,21 @@ public:
 
 protected:
     /*G-Code*/
-    static QString m_gcEnd;
     static QString m_gcFileExtension;
     static QString m_gcFormat;
-    static bool m_gcInfo;
     static QString m_gcLaserConstOn;
     static QString m_gcLaserDynamOn;
-    static bool m_gcSameFolder;
     static QString m_gcSpindleLaserOff;
     static QString m_gcSpindleOn;
+
     static QString m_gcStart;
+    static QString m_gcEnd;
+
+    static QString m_gcLaserStart;
+    static QString m_gcLaserEnd;
+
+    static bool m_gcInfo;
+    static bool m_gcSameFolder;
 
     /*GUI*/
     static QColor m_guiColor[static_cast<int>(Colors::Count)];
