@@ -15,6 +15,7 @@
 #include <excellondialog.h>
 
 #include "../mainwindow.h"
+#include "gch.h"
 #include <gcfile.h>
 
 TreeView::TreeView(QWidget* parent)
@@ -158,7 +159,7 @@ void TreeView::saveGcodeFile()
 {
     auto* file = App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCode::File::getLastDir().append(m_menuIndex.data().toString()),
+        GCode::GCUtils::getLastDir().append(m_menuIndex.data().toString()),
         tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension())));
 
     if (name.isEmpty())
@@ -219,18 +220,18 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         }
 
         menu.addAction(QIcon(), tr("&Show source"), [this] {
-            QDialog* Dialog = new QDialog;
-            Dialog->setObjectName(QString::fromUtf8("Dialog"));
-            //Dialog->resize(400, 300);
-            QVBoxLayout* verticalLayout = new QVBoxLayout(Dialog);
+            QDialog* dialog = new QDialog;
+            dialog->setObjectName(QString::fromUtf8("dialog"));
+            dialog->resize(600, 600);
+            QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-            QTextBrowser* textBrowser = new QTextBrowser(Dialog);
+            QTextBrowser* textBrowser = new QTextBrowser(dialog);
             textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
             verticalLayout->addWidget(textBrowser);
             for (const QString& str : App::project()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
                 textBrowser->append(str);
-            Dialog->exec();
-            delete Dialog;
+            dialog->exec();
+            delete dialog;
         });
         a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
     } break;
@@ -244,6 +245,23 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
         a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
+        menu.addAction(QIcon(), tr("&Show source"), [this] {
+            QDialog* dialog = new QDialog;
+            dialog->setObjectName(QString::fromUtf8("dialog"));
+            dialog->resize(600, 600);
+            //Dialog->resize(400, 300);
+            QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+            QTextBrowser* textBrowser = new QTextBrowser(dialog);
+            textBrowser->setFont(QFont("Consolas"));
+            /*auto gch =*/new GCH(textBrowser->document());
+            textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+            verticalLayout->addWidget(textBrowser);
+            for (const QString& str : App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
+                textBrowser->append(str);
+            dialog->exec();
+            delete dialog;
+        });
         break;
     default:
         break;

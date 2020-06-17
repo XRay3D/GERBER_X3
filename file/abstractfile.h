@@ -66,8 +66,8 @@ protected:
     virtual Paths merge() const = 0;
 
     QVector<ItemGroup*> m_itemGroup;
-    QList<QString> m_lines;
     QString m_name;
+    QList<QString> m_lines;
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
 

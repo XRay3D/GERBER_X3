@@ -3,10 +3,20 @@
 #ifndef GCUTILS_H
 #define GCUTILS_H
 
+#include "gctypes.h"
+#include <QList>
+#include <QString>
+#include <myclipper.h>
+
+class Project;
+
 namespace GCode {
+
 class GCUtils {
+    friend class ::Project;
+
 public:
-    GCUtils();
+    GCUtils(const GCodeParams& gcp);
 
     inline double feedRate() { return m_feedRate; }
     inline double plungeRate() { return m_plungeRate; }
@@ -18,11 +28,70 @@ public:
     void setSpindleSpeed(int val) { m_spindleSpeed = val; }
     void setToolType(int val) { m_toolType = val; }
 
+    static QString getLastDir();
+    static void setLastDir(QString value);
+
 private:
     double m_feedRate = 0.0;
     double m_plungeRate = 0.0;
     int m_spindleSpeed = 0;
     int m_toolType = 0;
+    const GCodeParams& m_gcp; ////
+
+protected:
+    enum {
+        AlwaysG,
+        AlwaysX,
+        AlwaysY,
+        AlwaysZ,
+        AlwaysF,
+        AlwaysS,
+
+        SpaceG,
+        SpaceX,
+        SpaceY,
+        SpaceZ,
+        SpaceF,
+        SpaceS,
+
+        Size
+    };
+
+    Paths m_g0path;
+
+    static QString lastDir;
+    static const QVector<QChar> cmdList;
+
+    QVector<double> getDepths();
+
+    bool formatFlags[Size];
+    QString lastValues[6];
+    Code m_gCode = G_null;
+
+    inline QString g0()
+    {
+        m_gCode = G00;
+        return "G0";
+    }
+
+    inline QString g1()
+    {
+        m_gCode = G01;
+        return "G1";
+    }
+
+    inline QString x(double val) { return 'X' + format(val); }
+    inline QString y(double val) { return 'Y' + format(val); }
+    inline QString z(double val) { return 'Z' + format(val); }
+    inline QString feed(double val) { return 'F' + format(val); }
+    inline QString speed(int val) { return 'S' + QString::number(val); }
+    inline QString format(double val)
+    {
+        QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
+        if (str.contains('e'))
+            return QString::number(val, 'f', 3);
+        return str;
+    }
 };
 }
 

@@ -8,7 +8,7 @@
 
 const int gridColor = 100;
 
-const QColor defaultColor[static_cast<size_t>(Colors::Count)] {
+const QColor defaultColor[static_cast<size_t>(Colors::Count)]{
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
@@ -22,7 +22,7 @@ const QColor defaultColor[static_cast<size_t>(Colors::Count)] {
     QColor(Qt::red) //G0
 };
 
-const QString colorName[static_cast<size_t>(Colors::Count)] {
+const QString colorName[static_cast<size_t>(Colors::Count)]{
     QObject::tr("Background"),
     QObject::tr("Pin"),
     QObject::tr("CutArea"),
@@ -89,8 +89,13 @@ void SettingsDialog::readSettings()
     m_gcLaserDynamOn = settings.getValue(leLaserDPC, m_gcLaserDynamOn);
     m_gcSpindleOn = settings.getValue(leSpindleCC, m_gcSpindleOn);
     m_gcSpindleLaserOff = settings.getValue(leSpindleLaserOff, m_gcSpindleLaserOff);
+
     m_gcEnd = settings.getValue(pteEnd, m_gcEnd);
     m_gcStart = settings.getValue(pteStart, m_gcStart);
+
+    m_gcLaserEnd = settings.getValue(pteLaserEnd, m_gcLaserEnd);
+    m_gcLaserStart = settings.getValue(pteLaserStart, m_gcLaserStart);
+
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -154,7 +159,7 @@ void SettingsDialog::writeSettings()
     settings.endGroup();
 
     settings.beginGroup("GCode");
-    m_gcEnd = settings.setValue(pteEnd);
+
     m_gcFileExtension = settings.setValue(leFileExtension);
     m_gcFormat = settings.setValue(leFormat);
     m_gcInfo = settings.setValue(chbxInfo);
@@ -163,7 +168,12 @@ void SettingsDialog::writeSettings()
     m_gcSameFolder = settings.setValue(chbxSameGFolder);
     m_gcSpindleLaserOff = settings.setValue(leSpindleLaserOff);
     m_gcSpindleOn = settings.setValue(leSpindleCC);
+
     m_gcStart = settings.setValue(pteStart);
+    m_gcEnd = settings.setValue(pteEnd);
+
+    m_gcLaserStart = settings.setValue(pteLaserStart);
+    m_gcLaserEnd = settings.setValue(pteLaserEnd);
     settings.endGroup();
 
     settings.beginGroup("Application");
