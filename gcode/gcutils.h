@@ -80,6 +80,36 @@ protected:
         return "G1";
     }
 
+    QList<QString> savePath(const QPolygonF& path, double spindleSpeed)
+    {
+        QList<QString> lines;
+        bool skip = true;
+        for (const QPointF& point : path) {
+            if (skip)
+                skip = false;
+            else
+                lines.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed) }));
+        }
+        return lines;
+    }
+
+    QString formated(const QList<QString>& data)
+    {
+        QString ret;
+        for (const QString& str : data) {
+            const int index = cmdList.indexOf(str.front().toUpper());
+            if (index != -1) {
+                if (formatFlags[AlwaysG + index] || lastValues[index] != str) {
+                    lastValues[index] = str;
+                    ret += str + (formatFlags[SpaceG + index] ? " " : "");
+                }
+            }
+        }
+        if (ret.trimmed().isEmpty())
+            qDebug("");
+        return ret.trimmed();
+    }
+
     inline QString x(double val) { return 'X' + format(val); }
     inline QString y(double val) { return 'Y' + format(val); }
     inline QString z(double val) { return 'Z' + format(val); }

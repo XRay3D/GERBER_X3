@@ -39,8 +39,6 @@ private:
     void statFile();
     void endFile();
 
-    QString formated(const QList<QString>& data);
-
     void createGiDrill();
     void createGiPocket();
     void createGiProfile();
