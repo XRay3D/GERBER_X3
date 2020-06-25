@@ -12,9 +12,9 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 contains(QT_ARCH, i386) {
-    message("32-bit")
+    #message("32-bit")
 } else {
-    message("64-bit")
+    #message("64-bit")
     msvc* {
         LIBS += \
             -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \

@@ -1,11 +1,21 @@
 QT += core gui opengl widgets printsupport concurrent
 
 contains(QT_ARCH, i386) {
-    message("32-bit")
-    TARGET = Getber2Gcode_x32
+    CONFIG(debug, debug|release){
+        message("32-bit debug")
+        TARGET = Getber2Gcode_x32d
+    }else{
+        message("32-bit")
+        TARGET = Getber2Gcode_x32
+    }
 } else {
-    message("64-bit")
-    TARGET = Getber2Gcode_x64
+    CONFIG(debug, debug|release){
+        message("64-bit debug")
+        TARGET = Getber2Gcode_x64d
+    }else{
+        message("64-bit")
+        TARGET = Getber2Gcode_x64
+    }
 }
 
 TEMPLATE = app
