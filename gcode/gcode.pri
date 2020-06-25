@@ -40,6 +40,7 @@ HEADERS += \
     $$PWD/gcutils.h \
     $$PWD/gcvoronoi.h \
     $$PWD/voroni/jc_voronoi.h \
+    $$PWD/gch.h \
 
 SOURCES += \
     $$PWD/gccreator.cpp \
@@ -52,3 +53,4 @@ SOURCES += \
     $$PWD/gcutils.cpp \
     $$PWD/gcvoronoi.cpp \
     $$PWD/voroni/jc_voronoi.cpp \
+    $$PWD/gch.cpp \

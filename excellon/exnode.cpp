@@ -1,8 +1,11 @@
 #include "exnode.h"
+#include "excellondialog.h"
 #include "gbrnode.h"
 #include "project.h"
 #include <QFileInfo>
+#include <app.h>
 #include <exfile.h>
+#include <forms/drillform/drillform.h>
 #include <mainwindow.h>
 
 ExcellonNode::ExcellonNode(int id)
@@ -84,4 +87,19 @@ QVariant ExcellonNode::data(const QModelIndex& index, int role) const
             return QVariant();
         }
     return QVariant();
+}
+
+void ExcellonNode::menu(QMenu* menu, TreeView* tv) const
+{
+    menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &TreeView::hideOther);
+    if (!m_exFormatDialog) {
+        menu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), [this] {
+            if (App::drillForm())
+                App::drillForm()->on_pbClose_clicked();
+            m_exFormatDialog = new ExcellonDialog(App::project()->file<Excellon::File>(m_id));
+            connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
+            m_exFormatDialog->show();
+        });
+    }
+    menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &TreeView::closeFile);
 }

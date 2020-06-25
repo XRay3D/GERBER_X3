@@ -64,7 +64,6 @@ HEADERS += \
     doublespinbox.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
-    filetree/gch.h \
     filetree/layerdelegate.h \
     filetree/treeview.h \
     forms/drillform/drillform.h \
@@ -119,7 +118,6 @@ SOURCES += \
     doublespinbox.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
-    filetree/gch.cpp \
     filetree/layerdelegate.cpp \
     filetree/treeview.cpp \
     forms/drillform/drillform.cpp \

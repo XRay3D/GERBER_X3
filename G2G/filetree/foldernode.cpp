@@ -43,3 +43,7 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
         return false;
     }
 }
+
+void FolderNode::menu(QMenu* menu, TreeView* tv) const
+{
+}

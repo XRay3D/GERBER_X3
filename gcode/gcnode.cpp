@@ -1,8 +1,15 @@
 #include "gcnode.h"
+#include "gch.h"
 #include "project.h"
 
+#include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
+#include <QMenu>
+#include <QTextBrowser>
+#include <qboxlayout.h>
+
+#include <filetree/treeview.h>
 
 GcodeNode::GcodeNode(int id)
     : AbstractNode(id)
@@ -100,4 +107,28 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     default:
         return QVariant();
     }
+}
+
+void GcodeNode::menu(QMenu* menu, TreeView* tv) const
+{
+    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
+    menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &TreeView::saveGcodeFile);
+    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &TreeView::closeFile);
+    menu->addAction(QIcon(), QObject::tr("&Show source"), [this] {
+        QDialog* dialog = new QDialog;
+        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->resize(600, 600);
+        //Dialog->resize(400, 300);
+        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+        textBrowser->setFont(QFont("Consolas"));
+        /*auto gch =*/new GCH(textBrowser->document());
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        verticalLayout->addWidget(textBrowser);
+        for (const QString& str : App::project()->file<GCode::File>(m_id)->lines())
+            textBrowser->append(str);
+        dialog->exec();
+        delete dialog;
+    });
 }
