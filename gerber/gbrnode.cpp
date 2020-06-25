@@ -201,7 +201,7 @@ void GerberNode::menu(QMenu* menu, TreeView* tv) const
         QTextBrowser* textBrowser = new QTextBrowser(dialog);
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
-        for (const QString& str : App::project()->file<Gerber::File>(m_id)->lines())
+        for (const QString& str : App::project()->file(m_id)->lines())
             textBrowser->append(str);
         dialog->exec();
         delete dialog;

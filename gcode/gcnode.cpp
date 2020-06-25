@@ -126,7 +126,7 @@ void GcodeNode::menu(QMenu* menu, TreeView* tv) const
         /*auto gch =*/new GCH(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
-        for (const QString& str : App::project()->file<GCode::File>(m_id)->lines())
+        for (const QString& str : App::project()->file(m_id)->lines())
             textBrowser->append(str);
         dialog->exec();
         delete dialog;
