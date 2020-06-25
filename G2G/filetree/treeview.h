@@ -10,7 +10,6 @@
 #include <QStandardItemModel>
 #include <QTimer>
 #include <QTreeView>
-class ExcellonDialog;
 
 class TreeView : public QTreeView {
     Q_OBJECT
@@ -19,6 +18,9 @@ class TreeView : public QTreeView {
 public:
     explicit TreeView(QWidget* parent = nullptr);
     ~TreeView() override = default;
+    void hideOther();
+    void closeFile();
+    void saveGcodeFile();
 
 private:
     void updateTree();
@@ -27,12 +29,11 @@ private:
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    //void hideOther();
 
-    void hideOther();
-    ExcellonDialog* m_exFormatDialog = nullptr;
     QModelIndex m_menuIndex;
-    void closeFile();
-    void saveGcodeFile();
+    //void closeFile();
+    //void saveGcodeFile();
     void showExcellonDialog();
 
 protected:

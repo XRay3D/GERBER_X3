@@ -12,7 +12,6 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include <excellondialog.h>
 
 #include "../mainwindow.h"
 #include "gch.h"
@@ -168,115 +167,28 @@ void TreeView::saveGcodeFile()
     file->save(name);
 }
 
-void TreeView::showExcellonDialog()
-{
-    if (App::drillForm())
-        App::drillForm()->on_pbClose_clicked();
-    m_exFormatDialog = new ExcellonDialog(App::project()->file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
-    connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
-    m_exFormatDialog->show();
-}
+void TreeView::showExcellonDialog() {}
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
     m_menuIndex = indexAt(event->pos());
-    QAction* a = nullptr;
 
     switch (m_menuIndex.parent().row()) {
-    case NodeGerberFiles: {
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        menu.setToolTipDuration(0);
-        menu.setToolTipsVisible(true);
-        Gerber::File* file = App::project()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
-        QActionGroup* group = new QActionGroup(&menu);
-
-        if (file->itemGroup(Gerber::File::ApPaths)->size()) {
-            auto action = menu.addAction(tr("&Aperture paths"),
-                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::ApPaths)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == Gerber::File::ApPaths);
-            action->setToolTip("Displays only aperture paths of copper\n"
-                               "without width and without contacts.");
-            action->setActionGroup(group);
+    case -1:
+        if (m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
+            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [this] {
+                if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                    m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+            });
+            menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
         }
-        if (file->itemGroup(Gerber::File::Components)->size()) {
-            auto action = menu.addAction(tr("&Components"),
-                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Components)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == Gerber::File::Components);
-            //            action->setToolTip("Displays only aperture paths of copper\n"
-            //                               "without width and without contacts.");
-            action->setActionGroup(group);
-        }
-        if (file->itemGroup(Gerber::File::Normal)->size()) {
-            auto action = menu.addAction(tr("&Normal"),
-                [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Normal)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == Gerber::File::Normal);
-            //            action->setToolTip("Displays only aperture paths of copper\n"
-            //                               "without width and without contacts.");
-            action->setActionGroup(group);
-        }
-
-        menu.addAction(QIcon(), tr("&Show source"), [this] {
-            QDialog* dialog = new QDialog;
-            dialog->setObjectName(QString::fromUtf8("dialog"));
-            dialog->resize(600, 600);
-            QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-            QTextBrowser* textBrowser = new QTextBrowser(dialog);
-            textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-            verticalLayout->addWidget(textBrowser);
-            for (const QString& str : App::project()->file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
-                textBrowser->append(str);
-            dialog->exec();
-            delete dialog;
-        });
-        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
-    } break;
-    case NodeDrillFiles:
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        if (!m_exFormatDialog)
-            menu.addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), this, &TreeView::showExcellonDialog);
-        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
-        break;
-    case NodeToolPath:
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
-        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
-        menu.addAction(QIcon(), tr("&Show source"), [this] {
-            QDialog* dialog = new QDialog;
-            dialog->setObjectName(QString::fromUtf8("dialog"));
-            dialog->resize(600, 600);
-            //Dialog->resize(400, 300);
-            QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-            QTextBrowser* textBrowser = new QTextBrowser(dialog);
-            textBrowser->setFont(QFont("Consolas"));
-            /*auto gch =*/new GCH(textBrowser->document());
-            textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-            verticalLayout->addWidget(textBrowser);
-            for (const QString& str : App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt())->lines())
-                textBrowser->append(str);
-            dialog->exec();
-            delete dialog;
-        });
         break;
     default:
+        reinterpret_cast<AbstractNode*>(m_menuIndex.internalId())->menu(&menu, this);
         break;
     }
 
-    if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
-        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [this] {
-            if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-                m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
-        });
-        menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
-    }
-
-    if (a) {
-        m_menuIndex = indexAt(event->pos());
+    if (!menu.isEmpty())
         menu.exec(mapToGlobal(event->pos()));
-    }
 }
