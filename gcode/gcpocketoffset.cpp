@@ -44,7 +44,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                             fillPaths.append(paths);
                         tmpPaths.append(paths);
                         offset.Clear();
-                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                        offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
                         offset.Execute(paths, m_dOffset);
                     } while (paths.size() && --counter);
                 } else {
@@ -69,7 +69,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                         fillPaths.append(paths);
                     m_returnPs.append(paths);
                     offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
                     offset.Execute(paths, m_stepOver);
                 } while (paths.size() && --counter);
             } else {
@@ -99,7 +99,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
             do {
                 offsetPaths.append(paths);
                 offset.Clear();
-                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
                 offset.Execute(paths, -m_stepOver);
             } while (paths.size());
             m_returnPs.append(offsetPaths);
@@ -198,7 +198,7 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                         offsetPaths.append(paths);
                     }
                     offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
                     offset.Execute(paths, -m_stepOver);
                 } while (paths.size());
                 m_returnPs.append(offsetPaths);
@@ -233,7 +233,7 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                 do {
                     tmpPaths.append(paths);
                     offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
                     offset.Execute(paths, -m_stepOver);
                 } while (paths.size());
                 m_returnPs.append(tmpPaths);

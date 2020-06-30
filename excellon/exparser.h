@@ -28,6 +28,10 @@ private:
     bool parseFormat(const QString& line);
     bool parseNumber(QString Str, double& val);
 
+    void circularRout();
+
+    QPolygonF arc(QPointF p1, QPointF p2, QPointF center);
+
     inline File* file() { return reinterpret_cast<File*>(m_file); }
 
     State m_state;
