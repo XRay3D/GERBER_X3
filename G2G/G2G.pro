@@ -61,6 +61,8 @@ DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 INCLUDEPATH += $$PWD/forms/formsutil/
 
+
+
 TRANSLATIONS += \
     translations/g2g_en.ts \
     translations/g2g_ru.ts \
@@ -190,10 +192,10 @@ FORMS += \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
 
-DISTFILES += \
-    translations/g2g_en.ts \
-    translations/g2g_ru.ts\
-    G2G_TR.pro
+#DISTFILES += \
+#    translations/g2g_en.ts \
+#    translations/g2g_ru.ts\
+#    G2G_TR.pro
 
 include(../clipper/clipper.pri)
 include(../excellon/excellon.pri)
@@ -201,3 +203,9 @@ include(../file/file.pri)
 include(../gcode/gcode.pri)
 include(../gerber/gerber.pri)
 include(../graphicsview/graphicsview.pri)
+
+pvs_studio.target = pvs
+pvs_studio.output = true
+pvs_studio.cxxflags = -std=c++17
+pvs_studio.sources = $${SOURCES}
+include(../PVS-Studio.pri)
