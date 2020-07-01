@@ -99,7 +99,7 @@ public:
     QVector<T*> count()
     {
         QMutexLocker locker(&m_mutex);
-        int count;
+        int count = 0;
         for (const QSharedPointer<AbstractFile>& sp : m_files) {
             if (dynamic_cast<T*>(sp.data()))
                 ++count;

@@ -31,7 +31,7 @@ void addData(QByteArray& dataArray, const T& data)
     dataArray.append(reinterpret_cast<const char*>(&data), sizeof(T));
 }
 
-File::~File() {}
+File::~File() { }
 
 const QMap<int, QSharedPointer<AbstractAperture>>* File::apertures() const { return &m_apertures; }
 
@@ -283,13 +283,6 @@ QDebug operator<<(QDebug debug, const Gerber::State& state)
                     << QStringLiteral("rotating") << state.rotating() << ", "
                     << ')';
     return debug;
-}
-
-QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& aperture)
-{
-    stream << aperture->type();
-    aperture->write(stream);
-    return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& aperture)

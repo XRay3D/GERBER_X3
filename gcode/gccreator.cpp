@@ -177,7 +177,7 @@ void Creator::createGc()
     } catch (Cancel&) {
         //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
-    } catch (std::exception e) {
+    } catch (std::exception &e) {
         qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
     }
 }
@@ -318,7 +318,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
             for (int j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                if (i >= paths.size() || i >= paths.size()) {
+                if (i >= paths.size() || j >= paths.size()) {
                     i = -1;
                     j = 0;
                     break;

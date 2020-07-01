@@ -489,7 +489,6 @@ void File::endFile()
         m_lines.append(GlobalSettings::gcEnd());
     }
     for (int i = 0; i < m_lines.size(); ++i) { // remove epty lines
-        qDebug() << i << m_lines[i];
         if (m_lines[i].isEmpty())
             m_lines.removeAt(i--);
     }

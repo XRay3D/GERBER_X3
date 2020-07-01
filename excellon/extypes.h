@@ -20,6 +20,11 @@ enum ZeroMode {
     TrailingZeros,
 };
 
+enum WorkMode {
+    DrillMode,
+    RouteMode,
+};
+
 enum MCode {
     M_NULL = -1,
     M00 = 0, //  End of Program - No Rewind (X#Y#)
@@ -204,6 +209,7 @@ struct State {
     Format* format = nullptr;
     GCode gCode = G05 /*G_NULL*/;
     MCode mCode = M_NULL;
+    WorkMode wm = DrillMode;
     int tCode = -1;
     QPointF pos;
     QPointF offsetedPos() const { return pos + format->offsetPos; }
@@ -215,6 +221,7 @@ struct State {
         stream << stt.rawPosList;
         stream << stt.gCode;
         stream << stt.mCode;
+        stream << stt.wm;
         stream << stt.tCode;
         stream << stt.pos;
         stream << stt.path;
@@ -226,6 +233,7 @@ struct State {
         stream >> stt.rawPosList;
         stream >> stt.gCode;
         stream >> stt.mCode;
+        stream >> stt.wm;
         stream >> stt.tCode;
         stream >> stt.pos;
         stream >> stt.path;
@@ -235,7 +243,7 @@ struct State {
 
 class Hole {
 public:
-    Hole() {}
+    Hole() { }
     Hole(const State& state, File* file)
         : file(file)
         , state(state)

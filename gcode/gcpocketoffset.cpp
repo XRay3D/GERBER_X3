@@ -6,6 +6,7 @@
 #include "gcfile.h"
 #include <QElapsedTimer>
 #include <project.h>
+#include <settings.h>
 
 namespace GCode {
 PocketCreator::PocketCreator()
@@ -39,6 +40,8 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                 ClipperOffset offset(uScale);
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
                 offset.Execute(paths, m_dOffset);
+                if (GlobalSettings::gbrCleanPolygons())
+                    CleanPolygons(paths, uScale * 0.0005);
                 fillPaths.append(paths);
                 Paths tmpPaths;
                 int counter = steps;
@@ -48,7 +51,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                             fillPaths.append(paths);
                         tmpPaths.append(paths);
                         offset.Clear();
-                        offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
+                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
                         offset.Execute(paths, m_dOffset);
                     } while (paths.size() && --counter);
                 } else {
@@ -64,6 +67,8 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
             }
             Paths paths;
             offset.Execute(paths, m_dOffset);
+            if (GlobalSettings::gbrCleanPolygons())
+                CleanPolygons(paths, uScale * 0.0005);
             fillPaths.append(paths);
             int counter = steps;
 
@@ -73,7 +78,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                         fillPaths.append(paths);
                     m_returnPs.append(paths);
                     offset.Clear();
-                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
+                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
                     offset.Execute(paths, m_stepOver);
                 } while (paths.size() && --counter);
             } else {
@@ -98,12 +103,14 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
             ClipperOffset offset(uScale);
             offset.AddPaths(paths, jtRound, etClosedPolygon);
             offset.Execute(paths, -m_dOffset);
+            if (GlobalSettings::gbrCleanPolygons())
+                CleanPolygons(paths, uScale * 0.0005);
             fillPaths.append(paths);
             Paths offsetPaths;
             do {
                 offsetPaths.append(paths);
                 offset.Clear();
-                offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
                 offset.Execute(paths, -m_stepOver);
             } while (paths.size());
             m_returnPs.append(offsetPaths);
@@ -168,11 +175,15 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                             ClipperOffset offset(uScale);
                             offset.AddPaths(paths, jtRound, etClosedPolygon);
                             offset.Execute(tmpPaths, -dOffset);
+                            if (GlobalSettings::gbrCleanPolygons())
+                                CleanPolygons(tmpPaths, uScale * 0.0005);
                         }
                         {
                             ClipperOffset offset(uScale);
                             offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
                             offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.999);
+                            if (GlobalSettings::gbrCleanPolygons())
+                                CleanPolygons(tmpPaths, uScale * 0.0005);
                         }
                         {
                             Clipper cliper;
@@ -188,6 +199,8 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                 ClipperOffset offset(uScale);
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
                 offset.Execute(paths, -m_dOffset);
+                if (GlobalSettings::gbrCleanPolygons())
+                    CleanPolygons(paths, uScale * 0.0005);
                 fillPaths.append(paths);
                 Paths offsetPaths;
                 const auto area = M_PI * (m_dOffset * 0.5) * (m_dOffset * 0.5);
@@ -202,7 +215,7 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                         offsetPaths.append(paths);
                     }
                     offset.Clear();
-                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
+                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
                     offset.Execute(paths, -m_stepOver);
                 } while (paths.size());
                 m_returnPs.append(offsetPaths);
@@ -231,13 +244,15 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                 ClipperOffset offset(uScale);
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
                 offset.Execute(paths, -m_dOffset);
+                if (GlobalSettings::gbrCleanPolygons())
+                    CleanPolygons(paths, uScale * 0.0005);
                 fillPaths.append(paths);
 
                 Paths tmpPaths;
                 do {
                     tmpPaths.append(paths);
                     offset.Clear();
-                    offset.AddPaths(paths, /*jtMiter*/jtRound, etClosedPolygon);
+                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
                     offset.Execute(paths, -m_stepOver);
                 } while (paths.size());
                 m_returnPs.append(tmpPaths);
