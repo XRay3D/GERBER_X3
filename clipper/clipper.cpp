@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
@@ -2951,7 +2955,7 @@ void Clipper::DoMaxima(TEdge* e)
         DeleteFromAEL(e);
         DeleteFromAEL(eMaxPair);
     } else if (e->OutIdx >= 0 && eMaxPair->OutIdx >= 0) {
-        if (e->OutIdx >= 0)
+        //pvs  if (e->OutIdx >= 0)
             AddLocalMaxPoly(e, eMaxPair, e->Top);
         DeleteFromAEL(e);
         DeleteFromAEL(eMaxPair);
@@ -3415,7 +3419,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Next = op1;
             op1b->Next = op2b;
             op2b->Prev = op1b;
-            j->OutPt1 = op1;
+            //pvs  j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         } else {
@@ -3425,7 +3429,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Prev = op1;
             op1b->Prev = op2b;
             op2b->Next = op1b;
-            j->OutPt1 = op1;
+            //pvs   j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         }
@@ -3514,7 +3518,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Next = op1;
             op1b->Next = op2b;
             op2b->Prev = op1b;
-            j->OutPt1 = op1;
+            //pvs             j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         } else {
@@ -3524,7 +3528,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Prev = op1;
             op1b->Prev = op2b;
             op2b->Next = op1b;
-            j->OutPt1 = op1;
+            //pvs             j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         }
