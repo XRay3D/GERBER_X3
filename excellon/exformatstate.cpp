@@ -22,7 +22,8 @@ void State::reset(Format* f)
         format->integer = 3;
     }
     rawPos.clear();
-    gCode = G05 /*G_NULL*/;
+    gCode = G_NULL;
+    wm = DrillMode;
     mCode = M_NULL;
     tCode = 0;
     pos = QPointF();

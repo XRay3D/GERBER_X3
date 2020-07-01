@@ -98,8 +98,8 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
             && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
-            if (parent)
-                parent->close();
+            
+            parent->close();
             return;
         }
         if (ui->dsbxCopperThickness->value() == 0.0)
@@ -158,10 +158,10 @@ void GCodePropertiesForm::updatePosDsbxs()
 
 void GCodePropertiesForm::updateAll()
 {
-    ui->dsbxSpaceX;
-    ui->dsbxSpaceY;
-    ui->sbxStepsX;
-    ui->sbxStepsY;
+    //ui->dsbxSpaceX;
+    //ui->dsbxSpaceY;
+    //ui->sbxStepsX;
+    //ui->sbxStepsY;
 }
 
 void GCodePropertiesForm::on_pbResetHome_clicked()

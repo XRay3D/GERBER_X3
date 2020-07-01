@@ -164,13 +164,13 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             m_file->mergedPaths();
             file()->m_components = components.values();
             m_file->createGi();
-            emit fileReady(m_file);
+            emit fileReady(m_file);  
+            emit fileProgress(m_file->shortName(), 1, 1);
+            qDebug() << m_file->shortName() << "Parser" << t.elapsed();
         }
-        emit fileProgress(m_file->shortName(), 1, 1);
         m_currentGerbLine.clear();
         m_apertureMacro.clear();
         m_path.clear();
-        qDebug() << m_file->shortName() << "Parser" << t.elapsed();
     } catch (const QString& errStr) {
         qWarning() << "exeption Q:" << errStr;
         emit fileError("", m_file->shortName() + "\n" + errStr);

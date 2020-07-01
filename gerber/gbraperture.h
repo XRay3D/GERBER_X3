@@ -20,8 +20,21 @@ enum ApertureType {
 
 struct Format;
 
+class ApBlock;
+class ApCircle;
+class ApMacro;
+class ApObround;
+class ApPolygon;
+class ApRectangle;
+
 class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)
+    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& aperture)
+    {
+        stream << aperture->type();
+        aperture->write(stream);
+        return stream;
+    }
 
 public:
     AbstractAperture(const Format* m_format);
@@ -43,9 +56,6 @@ public:
 
     virtual bool fit(double toolDiam) const = 0;
 
-    virtual void read(QDataStream& stream) = 0;
-    virtual void write(QDataStream& stream) const = 0;
-
 protected:
     bool m_isFlashed = false;
     double m_drillDiam = 0.0;
@@ -53,6 +63,8 @@ protected:
 
     Paths m_paths;
     virtual void draw() = 0;
+    virtual void read(QDataStream& stream) = 0;
+    virtual void write(QDataStream& stream) const = 0;
     const Format* m_format;
 
     void transform(Path& poligon, const State& state);
@@ -73,11 +85,10 @@ public:
     ApertureType type() const final;
     bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 private:
     double m_diam = 0.0;
@@ -100,11 +111,10 @@ public:
     ApertureType type() const final;
     bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 private:
     double m_height = 0.0;
@@ -126,11 +136,10 @@ public:
     ApertureType type() const final;
     bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 private:
     double m_height = 0.0;
@@ -155,11 +164,10 @@ public:
     ApertureType type() const final;
     bool fit(double toolDiam) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 private:
     double m_diam = 0.0;
@@ -182,11 +190,10 @@ public:
     ApertureType type() const final;
     bool fit(double) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 
 private:
     QList<QString> m_modifiers;
@@ -216,11 +223,10 @@ public:
     ApertureType type() const final;
     bool fit(double) const final;
 
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
-
 protected:
     void draw() final;
+    virtual void read(QDataStream& stream) final;
+    virtual void write(QDataStream& stream) const final;
 };
 }
 #endif // GERBERAPERTURE_H

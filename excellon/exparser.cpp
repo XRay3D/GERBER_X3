@@ -29,7 +29,6 @@ AbstractFile* Parser::parseFile(const QString& fileName)
     QTextStream in(&file);
     QString line;
     while (in.readLineInto(&line)) {
-        qDebug() << line;
         m_file->lines().append(line);
         try {
             if (line == "%")
@@ -58,9 +57,7 @@ AbstractFile* Parser::parseFile(const QString& fileName)
 
             if (parsePos(line))
                 continue;
-
-            qWarning() << "фигня какаято:" << line;
-
+            qWarning() << "Excellon unparsed:" << line;
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
             emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
@@ -136,6 +133,7 @@ bool Parser::parseGCode(const QString& line)
         switch (match.cap(1).toInt()) {
         case G00:
             m_state.gCode = G00;
+            m_state.wm = RouteMode;
             parsePos(line);
             break;
         case G01:
@@ -152,6 +150,7 @@ bool Parser::parseGCode(const QString& line)
             break;
         case G05:
             m_state.gCode = G05;
+            m_state.wm = DrillMode;
             break;
         case G90:
             m_state.gCode = G90;
@@ -176,11 +175,13 @@ bool Parser::parseMCode(const QString& line)
         } break;
         case M15:
             m_state.mCode = M15;
+            m_state.wm = RouteMode;
             m_state.rawPosList = { m_state.rawPos };
             m_state.path = QPolygonF({ m_state.pos });
             break;
         case M16:
             m_state.mCode = M16;
+            m_state.wm = RouteMode;
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
             file()->append(Hole(m_state, file()));
@@ -256,7 +257,6 @@ bool Parser::parsePos(const QString& line)
                   ".*$");
 
     if (match.exactMatch(line)) {
-
         if (match.cap(X).isEmpty() && match.cap(Y).isEmpty())
             return false;
 
@@ -270,21 +270,24 @@ bool Parser::parsePos(const QString& line)
         parseNumber(match.cap(X), m_state.pos.rx());
         parseNumber(match.cap(Y), m_state.pos.ry());
 
-        //        if (!(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
-        //            file()->append(Hole(m_state, file()));
-        //        }
-        if (m_state.gCode == G05
-            && !(m_state.mCode == M15 || m_state.mCode == M16)
-            && !(m_state.gCode == G00 || m_state.gCode == G01 || m_state.gCode == G02 || m_state.gCode == G03)) {
+        switch (m_state.wm) {
+        case DrillMode:
             file()->append(Hole(m_state, file()));
-        } else if (m_state.gCode == G00) {
-            m_state.path.append(m_state.pos);
-        } else if (m_state.gCode == G01) {
-            m_state.path.append(m_state.pos);
-        } else if (m_state.gCode == G02) {
-            circularRout();
-        } else if (m_state.gCode == G03) {
-            circularRout();
+            break;
+        case RouteMode:
+            switch (m_state.gCode) {
+            case G00:
+            case G01:
+                m_state.path.append(m_state.pos);
+                break;
+            case G02:
+            case G03:
+                circularRout();
+                break;
+            default:
+                break;
+            }
+            break;
         }
         return true;
     }
@@ -465,19 +468,8 @@ void Parser::circularRout()
     };
 
     QPointF center(CalcCircleCenter(m_state.path.last(), m_state.pos, radius));
-
-    switch (m_state.gCode) {
-    case G02: {
-        m_state.path.append(arc(m_state.path.last(), m_state.pos, center));
-        m_state.path.last() = m_state.pos;
-    } break;
-    case G03: {
-        m_state.path.append(arc(m_state.path.last(), m_state.pos, center));
-        m_state.path.last() = m_state.pos;
-    } break;
-    default:
-        break;
-    }
+    m_state.path.append(arc(m_state.path.last(), m_state.pos, center));
+    m_state.path.last() = m_state.pos;
 }
 
 QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center)

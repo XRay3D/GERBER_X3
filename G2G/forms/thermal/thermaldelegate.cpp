@@ -48,20 +48,13 @@ void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
     switch (index.column()) {
     case ThermalModel::ThName:
     case ThermalModel::ThPos:
-        break;
-    case ThermalModel::ThGapAngle: {
-        auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
-            return;
-        dsbx->setValue(index.data(Qt::EditRole).toDouble());
         return;
-    }
-    case ThermalModel::ThGapThickness: {
+    case ThermalModel::ThGapAngle:
+    case ThermalModel::ThGapThickness:{
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
         dsbx->setValue(index.data(Qt::EditRole).toDouble());
-
         return;
     }
     case ThermalModel::ThGapCount: {
@@ -79,15 +72,9 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
     switch (index.column()) {
     case ThermalModel::ThName:
     case ThermalModel::ThPos:
-        break;
-    case ThermalModel::ThGapAngle: {
-        auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
-            return;
-        model->setData(index, dsbx->value());
         return;
-    }
-    case ThermalModel::ThGapThickness: {
+    case ThermalModel::ThGapAngle:
+    case ThermalModel::ThGapThickness:  {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
