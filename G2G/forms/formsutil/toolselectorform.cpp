@@ -135,9 +135,11 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
         font.setWeight(75);
         m_label->setFont(font);
 
+        QFontMetrics fm(font);
+
         m_label->setMinimumWidth(std::max(
-            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
-            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
+            fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
+            fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
         m_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         gridLayout->addWidget(m_label, 0, 0, 1, 1);
     }

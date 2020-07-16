@@ -145,8 +145,7 @@ public:
 protected:
     void closeEvent(QCloseEvent* event) override
     {
-        if (widget())
-            delete widget();
+        delete widget();
         event->accept();
     }
 

@@ -164,7 +164,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             m_file->mergedPaths();
             file()->m_components = components.values();
             m_file->createGi();
-            emit fileReady(m_file);  
+            emit fileReady(m_file);
             emit fileProgress(m_file->shortName(), 1, 1);
             qDebug() << m_file->shortName() << "Parser" << t.elapsed();
         }
@@ -600,28 +600,29 @@ bool Parser::parseAperture(const QString& gLine)
          */
         QList<QString> paramList = apParameters.split("X");
         double hole = 0.0, rotation = 0.0;
+        auto& apertures = file()->m_apertures;
         switch (slApertureType.indexOf(apType)) {
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            file()->m_apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, file()->format()));
+            apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, file()->format()));
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
+            apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
+            apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
             break;
         case Polygon:
             if (paramList.length() > 2)
                 rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file()->format())));
+            apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file()->format())));
             break;
         case Macro:
         default:
@@ -629,7 +630,7 @@ bool Parser::parseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             }
-            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file()->format())));
+            apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file()->format())));
             break;
         }
         if (aperFunction > -1)
@@ -741,8 +742,9 @@ void Parser::closeStepRepeat()
                     TranslatePath(path, pt);
                 Path path(go.path());
                 TranslatePath(path, pt);
-                go.state().setCurPos({ go.state().curPos().X + pt.X, go.state().curPos().Y + pt.Y });
-                file()->append(GraphicObject(m_goId++, go.state(), paths, go.gFile(), path));
+                auto state = go.state();
+                state.setCurPos({ state.curPos().X + pt.X, state.curPos().Y + pt.Y });
+                file()->append(GraphicObject(m_goId++, state, paths, go.gFile(), path));
             }
         }
     }

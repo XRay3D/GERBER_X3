@@ -582,8 +582,7 @@ bool SlopesEqual(const TEdge& e1, const TEdge& e2, bool UseFullInt64Range)
 }
 //------------------------------------------------------------------------------
 
-bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
-    const IntPoint pt3, bool UseFullInt64Range)
+bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2, const IntPoint& pt3, bool UseFullInt64Range)
 {
 #ifndef use_int32
     if (UseFullInt64Range)
@@ -594,7 +593,7 @@ bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
 }
 //------------------------------------------------------------------------------
 
-bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
+bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2,
     const IntPoint pt3, const IntPoint pt4, bool UseFullInt64Range)
 {
 #ifndef use_int32
@@ -612,7 +611,7 @@ inline bool IsHorizontal(TEdge& e)
 }
 //------------------------------------------------------------------------------
 
-inline double GetDx(const IntPoint pt1, const IntPoint pt2)
+inline double GetDx(const IntPoint &pt1, const IntPoint& pt2)
 {
     return (pt1.Y == pt2.Y) ? HORIZONTAL : (double)(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
 }
@@ -889,8 +888,7 @@ OutPt* GetBottomPt(OutPt* pp)
 }
 //------------------------------------------------------------------------------
 
-bool Pt2IsBetweenPt1AndPt3(const IntPoint pt1,
-    const IntPoint pt2, const IntPoint pt3)
+bool Pt2IsBetweenPt1AndPt3(const IntPoint& pt1,    const IntPoint &pt2, const IntPoint& pt3)
 {
     if ((pt1 == pt3) || (pt1 == pt2) || (pt3 == pt2))
         return false;
