@@ -146,8 +146,8 @@ void QDRuler::paintEvent(QPaintEvent* event)
 
     // drawing no man's land between the ruler & view
     if (/* DISABLES CODE */ (1)) {
-        QPointF starPt(Horizontal == rulerType ? rulerRect.bottomLeft() : rulerRect.topRight());
-        QPointF endPt(Horizontal == rulerType ? rulerRect.bottomRight() : rulerRect.bottomRight());//same branches!!!!!!
+        QPointF starPt((Horizontal == rulerType) ? rulerRect.bottomLeft() : rulerRect.topRight());
+        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight());//same branches!!!!!!
         painter.setPen(QPen(Qt::red, 2));
         painter.drawLine(starPt, endPt);
     }

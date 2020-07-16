@@ -90,9 +90,10 @@ void DepthForm::setupUi(QWidget* Form)
         font.setWeight(75);
         label->setFont(font);
 
+        QFontMetrics fm(font); 
         label->setMinimumWidth(std::max(
-            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
-            QFontMetrics(font).horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
+            fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
+            fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
         label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         horizontalLayout->addWidget(label);
     }

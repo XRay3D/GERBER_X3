@@ -118,10 +118,15 @@ struct Format {
     CoordinateValuesNotation coordValueNotation = AbsoluteNotation;
 
     // Warning: Using less than 4 decimal places is deprecated.
-    int xInteger = 3;
-    int xDecimal = 4;
-    int yInteger = 3;
-    int yDecimal = 4;
+    enum {
+        IntegerDefVal = 3,
+        DecimalDefVal = 4
+    };
+
+    int xInteger = IntegerDefVal;
+    int xDecimal = DecimalDefVal;
+    int yInteger = IntegerDefVal;
+    int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format)
     {

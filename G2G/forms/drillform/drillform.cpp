@@ -217,16 +217,17 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
 
     QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
     for (apertureIt = m_apertures.cbegin(); apertureIt != m_apertures.cend(); ++apertureIt) {
-        if (apertureIt.value()->isFlashed()) {
+        const auto aperture = apertureIt.value();
+        if (aperture && aperture->isFlashed()) {
             double drillDiameter = 0.0;
-            QString name(apertureIt.value()->name());
-            if (apertureIt.value()->isDrilled()) {
-                drillDiameter = apertureIt.value()->drillDiameter();
+            QString name(aperture->name());
+            if (aperture->isDrilled()) {
+                drillDiameter = aperture->drillDiameter();
                 name += tr(", drill Ø%1mm").arg(drillDiameter);
-            } else if (apertureIt.value()->type() == Gerber::Circle) {
-                drillDiameter = apertureIt.value()->apertureSize();
+            } else if (aperture->type() == Gerber::Circle) {
+                drillDiameter = aperture->apertureSize();
             }
-            model->appendRow(name, drawApertureIcon(apertureIt.value().data()), apertureIt.key());
+            model->appendRow(name, drawApertureIcon(aperture.data()), apertureIt.key());
             const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
             for (const Gerber::GraphicObject& go : *file) {
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
@@ -682,21 +683,23 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
     const double drillDiameterMax = diameter * (1.0 + k);
     QMap<int, Tool>::const_iterator toolIt;
     for (toolIt = ToolHolder::tools.cbegin(); !isSlot && toolIt != ToolHolder::tools.cend(); ++toolIt) {
-        if (toolIt.value().type() == Tool::Drill && drillDiameterMin <= toolIt.value().diameter() && drillDiameterMax >= toolIt.value().diameter()) {
+        const auto& tool = toolIt.value();
+        if (tool.type() == Tool::Drill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
-            createHoles(apertureId, toolIt.value().id());
+            createHoles(apertureId, tool.id());
             for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
-                item->setToolId(toolIt.value().id());
+                item->setToolId(tool.id());
             }
             return;
         }
     }
     for (toolIt = ToolHolder::tools.cbegin(); toolIt != ToolHolder::tools.cend(); ++toolIt) {
-        if (toolIt.value().type() == Tool::EndMill && drillDiameterMin <= toolIt.value().diameter() && drillDiameterMax >= toolIt.value().diameter()) {
+        const auto& tool = toolIt.value(); 
+        if (tool.type() == Tool::EndMill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
-            createHoles(apertureId, toolIt.value().id());
+            createHoles(apertureId, tool.id());
             for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
-                item->setToolId(toolIt.value().id());
+                item->setToolId(tool.id());
             }
             return;
         }

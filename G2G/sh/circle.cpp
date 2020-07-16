@@ -69,16 +69,17 @@ void Circle::redraw()
     const cInt radius = static_cast<cInt>(m_radius * uScale);
     const IntPoint center(toIntPoint(sh[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
-    m_paths.first().clear();
+    Path& path = m_paths.first();
+    path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        m_paths.first().append(IntPoint(
+        path.append(IntPoint(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }
-    m_paths.first().append(m_paths.first().first());
+    path.append(path.first());
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(m_paths.first()));
+    m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
