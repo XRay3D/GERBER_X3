@@ -101,19 +101,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (0) { // autocreate Raster (need for debug)
-        //        QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
-        //        QTimer::singleShot(120, [this] { selectAll(); });
-
-        QTimer::singleShot(150, [this] {
-            if (auto menu = findChild<QMenu*>("editMenu"); menu != nullptr) {
-                menu->actions().first()->trigger();
-                toolpathActionList[GCode::Pocket]->triggered();
-                //                dockWidget->findChild<QPushButton*>("pbCreate")->click();
-            }
-        });
-
-        //        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+    if constexpr (1) { // (need for debug)
+        QTimer::singleShot(120, [this] { selectAll(); });
+        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
+        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::mInstance->m_mainWindow = this;
 }

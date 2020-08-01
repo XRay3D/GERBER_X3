@@ -4,7 +4,6 @@
 
 #include "gccreator.h"
 #include "forms/gcodepropertiesform.h"
-#include "gccreator.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
