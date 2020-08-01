@@ -153,116 +153,189 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
         break;
     }
 
-    qDebug() << tools;
+    auto dbg = [this](Paths ps, const Tool& tool, const QString& fileName) {
+        GCodeParams gcp { tool, 0.0, Profile };
+        auto file = new GCode::File({ ps }, gcp);
+        file->setFileName(fileName);
+        emit fileReady(file);
+    };
 
+    qDebug() << tools;
+    Paths lf;
     for (int i = 0; i < tools.size(); ++i) {
         const Tool& tool = tools[i];
         Paths fillPaths;
         m_returnPs.clear();
-        if (i) {
-            m_toolDiameter = tool.getDiameter(depth) * uScale;
-            m_dOffset = m_toolDiameter / 2;
-            m_stepOver = tool.stepover() * uScale;
+        m_toolDiameter = tool.getDiameter(depth) * uScale;
+        m_dOffset = m_toolDiameter / 2;
+        m_stepOver = tool.stepover() * uScale;
 
-            for (Paths paths : m_groupedPss) {
-                { //create frame
-                    Paths framePaths;
-                    for (int ii = 0; ii < i; ++ii) {
-                        double toolDiameter = tools[ii].getDiameter(depth) * uScale;
-                        double dOffset = toolDiameter / 2;
-                        Paths tmpPaths;
-                        {
-                            ClipperOffset offset(uScale);
-                            offset.AddPaths(paths, jtRound, etClosedPolygon);
-                            offset.Execute(tmpPaths, -dOffset);
-                            if (GlobalSettings::gbrCleanPolygons())
-                                CleanPolygons(tmpPaths, uScale * 0.0005);
-                        }
-                        {
-                            ClipperOffset offset(uScale);
-                            offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
-                            offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.999);
-                            if (GlobalSettings::gbrCleanPolygons())
-                                CleanPolygons(tmpPaths, uScale * 0.0005);
-                        }
-                        {
-                            Clipper cliper;
-                            cliper.AddPaths(framePaths, ptSubject, true);
-                            cliper.AddPaths(tmpPaths, ptClip, true);
-                            cliper.Execute(ctUnion, framePaths, pftPositive);
-                        }
+        for (Paths paths : m_groupedPss) {
+            if (i) { //create frame
+                Paths framePaths;
+                for (int ii = 0; ii < i; ++ii) {
+                    double toolDiameter = tools[ii].getDiameter(depth) * uScale;
+                    double dOffset = toolDiameter / 2;
+                    Paths tmpPaths;
+                    {
+                        ClipperOffset offset(uScale);
+                        offset.AddPaths(paths, jtRound, etClosedPolygon);
+                        offset.Execute(tmpPaths, -dOffset);
+                        if (GlobalSettings::gbrCleanPolygons())
+                            CleanPolygons(tmpPaths, uScale * 0.0005);
+                        //dbg(tmpPaths, "S1_" + QString::number(i));
                     }
-                    if (m_gcp.side() != Inner)
-                        ReversePaths(framePaths);
-                    paths.append(framePaths);
+                    {
+                        ClipperOffset offset(uScale);
+                        offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
+                        offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.9);
+                        if (GlobalSettings::gbrCleanPolygons())
+                            CleanPolygons(tmpPaths, uScale * 0.0005);
+                        //dbg(tmpPaths, "S2_" + QString::number(i));
+                    }
+                    {
+                        Clipper cliper;
+                        cliper.AddPaths(framePaths, ptSubject, true);
+                        cliper.AddPaths(tmpPaths, ptClip, true);
+                        cliper.Execute(ctUnion, framePaths, pftPositive);
+                        //                            dbg(framePaths, "S3_" + QString::number(i));
+                    }
                 }
-                ClipperOffset offset(uScale);
-                offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(paths, -m_dOffset);
-                if (GlobalSettings::gbrCleanPolygons())
-                    CleanPolygons(paths, uScale * 0.0005);
-                fillPaths.append(paths);
-                Paths offsetPaths;
-                const auto area = M_PI * (m_dOffset * 0.5) * (m_dOffset * 0.5);
-                do {
-                    if (offsetPaths.size() && paths.size()) {
-                        for (const auto& p : paths) {
-                            const auto a = abs(Area(p));
-                            if (!qFuzzyIsNull(a) && a >= area)
-                                offsetPaths.append(p); //                                    paths.remove(i--);
-                        }
-                    } else {
-                        offsetPaths.append(paths);
-                    }
-                    offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                    offset.Execute(paths, -m_stepOver);
-                } while (paths.size());
-                m_returnPs.append(offsetPaths);
+                if (m_gcp.side() != Inner)
+                    ReversePaths(framePaths);
+                paths.append(framePaths);
+                //dbg(paths, "S_" + QString::number(i));
             }
-
-            if (m_returnPs.isEmpty()) {
-                emit fileReady(nullptr);
-                continue;
+            ClipperOffset offset(uScale);
+            offset.AddPaths(paths, jtRound, etClosedPolygon);
+            offset.Execute(paths, -m_dOffset);
+            if (GlobalSettings::gbrCleanPolygons())
+                CleanPolygons(paths, uScale * 0.0005);
+            //dbg(paths, tool, "paths");
+            if (i) {
+                { // обрезка текущего пути предыдущим
+                    ClipperOffset offset(uScale);
+                    offset.AddPaths(lf, jtRound, etClosedPolygon);
+                    offset.Execute(lf, m_dOffset * 0.7);
+                    //dbg(lf, tool, "lf");
+                }
+                {
+                    Clipper cliper;
+                    cliper.AddPaths(paths, ptSubject, true);
+                    cliper.AddPaths(lf, ptClip, true);
+                    cliper.Execute(ctDifference, paths, pftNonZero);
+                    //dbg(paths, tool, "cliper");
+                }
             }
-
-            //                for (int i = 0; i < m_returnPs.size(); ++i) {
-            //                    if (Perimeter(m_returnPs[i]) < m_dOffset)
-            //                        m_returnPs.remove(i--);
-            //                }
-            //                for (int i = 0; i < fillPaths.size(); ++i) {
-            //                    if (Perimeter(fillPaths[i]) < m_dOffset)
-            //                        fillPaths.remove(i--);
-            //                }
-
-        } else {
-            m_toolDiameter = tool.getDiameter(depth) * uScale;
-            m_dOffset = m_toolDiameter / 2;
-            m_stepOver = tool.stepover() * uScale;
-
-            for (Paths paths : m_groupedPss) {
-                ClipperOffset offset(uScale);
-                offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(paths, -m_dOffset);
-                if (GlobalSettings::gbrCleanPolygons())
-                    CleanPolygons(paths, uScale * 0.0005);
-                fillPaths.append(paths);
-
-                Paths tmpPaths;
-                do {
-                    tmpPaths.append(paths);
-                    offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                    offset.Execute(paths, -m_stepOver);
-                } while (paths.size());
-                m_returnPs.append(tmpPaths);
-            }
-
-            if (m_returnPs.isEmpty()) {
-                emit fileReady(nullptr);
-                continue;
-            }
+            fillPaths.append(paths);
+            //dbg(paths, tool, "fillPaths");
+            lf = fillPaths; ////////////////////
+            Paths offsetPaths;
+            do {
+                offsetPaths.append(paths);
+                offset.Clear();
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.Execute(paths, -m_stepOver);
+            } while (paths.size());
+            m_returnPs.append(offsetPaths);
         }
+
+        if (m_returnPs.isEmpty()) {
+            emit fileReady(nullptr);
+            continue;
+        }
+
+        //        if (i) {
+        //            for (Paths paths : m_groupedPss) {
+        //                { //create frame
+        //                    Paths framePaths;
+        //                    for (int ii = 0; ii < i; ++ii) {
+        //                        double toolDiameter = tools[ii].getDiameter(depth) * uScale;
+        //                        double dOffset = toolDiameter / 2;
+        //                        Paths tmpPaths;
+        //                        {
+        //                            ClipperOffset offset(uScale);
+        //                            offset.AddPaths(paths, jtRound, etClosedPolygon);
+        //                            offset.Execute(tmpPaths, -dOffset);
+        //                            if (GlobalSettings::gbrCleanPolygons())
+        //                                CleanPolygons(tmpPaths, uScale * 0.0005);
+        //                        }
+        //                        {
+        //                            ClipperOffset offset(uScale);
+        //                            offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
+        //                            offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.999);
+        //                            if (GlobalSettings::gbrCleanPolygons())
+        //                                CleanPolygons(tmpPaths, uScale * 0.0005);
+        //                        }
+        //                        {
+        //                            Clipper cliper;
+        //                            cliper.AddPaths(framePaths, ptSubject, true);
+        //                            cliper.AddPaths(tmpPaths, ptClip, true);
+        //                            cliper.Execute(ctUnion, framePaths, pftPositive);
+        //                        }
+        //                    }
+        //                    if (m_gcp.side() != Inner)
+        //                        ReversePaths(framePaths);
+        //                    paths.append(framePaths);
+        //                }
+        //                ClipperOffset offset(uScale);
+        //                offset.AddPaths(paths, jtRound, etClosedPolygon);
+        //                offset.Execute(paths, -m_dOffset);
+        //                if (GlobalSettings::gbrCleanPolygons())
+        //                    CleanPolygons(paths, uScale * 0.0005);
+        //                fillPaths.append(paths);
+        //                Paths offsetPaths;
+        //                const auto area = M_PI * (m_dOffset * 0.5) * (m_dOffset * 0.5);
+        //                do {
+        //                    if (offsetPaths.size() && paths.size()) {
+        //                        for (const auto& p : paths) {
+        //                            const auto a = abs(Area(p));
+        //                            if (!qFuzzyIsNull(a) && a >= area)
+        //                                offsetPaths.append(p); //                                    paths.remove(i--);
+        //                        }
+        //                    } else {
+        //                        offsetPaths.append(paths);
+        //                    }
+        //                    offset.Clear();
+        //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+        //                    offset.Execute(paths, -m_stepOver);
+        //                } while (paths.size());
+        //                m_returnPs.append(offsetPaths);
+        //            }
+        //            if (m_returnPs.isEmpty()) {
+        //                emit fileReady(nullptr);
+        //                continue;
+        //            }
+        //            //                for (int i = 0; i < m_returnPs.size(); ++i) {
+        //            //                    if (Perimeter(m_returnPs[i]) < m_dOffset)
+        //            //                        m_returnPs.remove(i--);
+        //            //                }
+        //            //                for (int i = 0; i < fillPaths.size(); ++i) {
+        //            //                    if (Perimeter(fillPaths[i]) < m_dOffset)
+        //            //                        fillPaths.remove(i--);
+        //            //                }
+        //        } else {
+        //            for (Paths paths : m_groupedPss) {
+        //                ClipperOffset offset(uScale);
+        //                offset.AddPaths(paths, jtRound, etClosedPolygon);
+        //                offset.Execute(paths, -m_dOffset);
+        //                if (GlobalSettings::gbrCleanPolygons())
+        //                    CleanPolygons(paths, uScale * 0.0005);
+        //                fillPaths.append(paths);
+        //                Paths tmpPaths;
+        //                do {
+        //                    tmpPaths.append(paths);
+        //                    offset.Clear();
+        //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+        //                    offset.Execute(paths, -m_stepOver);
+        //                } while (paths.size());
+        //                m_returnPs.append(tmpPaths);
+        //            }
+        //            if (m_returnPs.isEmpty()) {
+        //                emit fileReady(nullptr);
+        //                continue;
+        //            }
+        //        }
 
         stacking(m_returnPs);
 

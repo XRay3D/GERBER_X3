@@ -32,6 +32,7 @@ HEADERS += \
     $$PWD/gccreator.h \
     $$PWD/gcfile.h \
     $$PWD/gcnode.h \
+    $$PWD/gcode.h \
     $$PWD/gcpocketoffset.h \
     $$PWD/gcpocketraster.h \
     $$PWD/gcprofile.h \
