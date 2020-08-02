@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MYCLIPPER_H
-#define MYCLIPPER_H
+//#ifndef MYCLIPPER_H
+//#define MYCLIPPER_H
 
 #include "clipper.hpp"
 #include <QDebug>
@@ -51,4 +51,4 @@ Path RectanglePath(double width, double height, const IntPoint& center = IntPoin
 void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
 void TranslatePath(Path& path, const IntPoint& pos);
 
-#endif // MYCLIPPER_H
+//#endif // MYCLIPPER_H

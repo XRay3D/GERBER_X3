@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GBRFILE_H
-#define GBRFILE_H
+//#ifndef GBRFILE_H
+//#define GBRFILE_H
 
 #include "abstractnode.h"
 #include <QObject>
@@ -28,4 +28,4 @@ private:
     Qt::CheckState m_current = Qt::Unchecked;
 };
 
-#endif // GBRFILE_H
+//#endif // GBRFILE_H

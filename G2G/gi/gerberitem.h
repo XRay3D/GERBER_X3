@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WORKITEM_H
-#define WORKITEM_H
+//#ifndef WORKITEM_H
+//#define WORKITEM_H
 
 #include "graphicsitem.h"
 
@@ -35,4 +35,4 @@ private:
     Paths& m_paths;
     QPolygonF fillPolygon;
 };
-#endif // WORKITEM_H
+//#endif // WORKITEM_H

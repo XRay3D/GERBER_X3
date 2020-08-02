@@ -1,6 +1,6 @@
 #pragma once
-#ifndef VERSION_H
-#define VERSION_H
+//#ifndef VERSION_H
+//#define VERSION_H
 
 #define VER_FILEVERSION             0,7,8,9
 #define VER_FILEVERSION_STR         "0.7.8.9b\0"
@@ -19,4 +19,4 @@
 
 #define VER_COMPANYDOMAIN_STR       ""//"example.org"
 
-#endif // VERSION_H
+//#endif // VERSION_H

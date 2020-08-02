@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DATASTREAM_H
-#define DATASTREAM_H
+//#ifndef DATASTREAM_H
+//#define DATASTREAM_H
 
 #include <QDataStream>
 #include <type_traits>
@@ -23,4 +23,4 @@ inline QDataStream& operator<<(QDataStream& s, E e)
 }
 #endif
 
-#endif // DATASTREAM_H
+//#endif // DATASTREAM_H

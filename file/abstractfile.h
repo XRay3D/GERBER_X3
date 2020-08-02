@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAbstractFile_H
-#define GAbstractFile_H
+//#ifndef GAbstractFile_H
+//#define GAbstractFile_H
 
 #include <QDateTime>
 #include <QFileInfo>
@@ -81,4 +81,4 @@ protected:
 
 //Q_DECLARE_METATYPE(AbstractFile)
 
-#endif // GAbstractFile_H
+//#endif // GAbstractFile_H

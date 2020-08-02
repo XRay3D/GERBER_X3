@@ -1,6 +1,6 @@
 #pragma once
-#ifndef APP_H
-#define APP_H
+//#ifndef APP_H
+//#define APP_H
 
 #include <QtGlobal>
 #include <exception>
@@ -73,4 +73,4 @@ public:
     static SplashScreen* splashScreen() { return mInstance->m_splashScreen; }
 };
 
-#endif // APP_H
+//#endif // APP_H

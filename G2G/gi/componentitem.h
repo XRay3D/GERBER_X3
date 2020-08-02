@@ -1,6 +1,6 @@
 #pragma once
-#ifndef COMPONENTITEM_H
-#define COMPONENTITEM_H
+//#ifndef COMPONENTITEM_H
+//#define COMPONENTITEM_H
 
 #include "graphicsitem.h"
 #include <QObject>
@@ -29,4 +29,4 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
-#endif // COMPONENTITEM_H
+//#endif // COMPONENTITEM_H

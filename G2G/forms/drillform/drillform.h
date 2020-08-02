@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DRILLFORM_H
-#define DRILLFORM_H
+//#ifndef DRILLFORM_H
+//#define DRILLFORM_H
 
 #include <QHeaderView>
 #include <QWidget>
@@ -104,4 +104,4 @@ private:
 
 #include <app.h>
 
-#endif // DRILLFORM_H
+//#endif // DRILLFORM_H

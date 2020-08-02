@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DEPTHFORM_H
-#define DEPTHFORM_H
+//#ifndef DEPTHFORM_H
+//#define DEPTHFORM_H
 
 #include <QWidget>
 
@@ -34,4 +34,4 @@ private:
     void retranslateUi(QWidget* Form);
 };
 
-#endif // DEPTHFORM_H
+//#endif // DEPTHFORM_H

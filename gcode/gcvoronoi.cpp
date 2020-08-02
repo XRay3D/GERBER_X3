@@ -659,6 +659,7 @@ Paths VoronoiCreator::toPath(const Pairs& pairs)
         QVector<OrdPath> holder(tmp2.size() * 2);
         OrdPath* it = holder.data();
         for (auto [p1, p2, _skip] : tmp2) {
+            Q_UNUSED(_skip)
             OrdPath* pt1 = it++;
             OrdPath* pt2 = it++;
             pt1->Pt = p1;

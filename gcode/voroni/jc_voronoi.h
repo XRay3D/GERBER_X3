@@ -153,8 +153,8 @@ USAGE:
  */
 #pragma once
 
-#ifndef JC_VORONOI_H
-#define JC_VORONOI_H
+//#ifndef JC_VORONOI_H
+//#define JC_VORONOI_H
 
 #include <limits>
 #include <math.h>
@@ -271,4 +271,4 @@ extern const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge);
 }
 #endif
 
-#endif // JC_VORONOI_H
+//#endif // JC_VORONOI_H

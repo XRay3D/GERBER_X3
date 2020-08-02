@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CIRCLE_H
-#define CIRCLE_H
+//#ifndef CIRCLE_H
+//#define CIRCLE_H
 
 #include "shape.h"
 
@@ -30,4 +30,4 @@ private:
 };
 }
 
-#endif // CIRCLE_H
+//#endif // CIRCLE_H

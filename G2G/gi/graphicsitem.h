@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GERBERITEM_H
-#define GERBERITEM_H
+//#ifndef GERBERITEM_H
+//#define GERBERITEM_H
 
 #include <QGraphicsItem>
 #include <QPen>
@@ -82,4 +82,4 @@ protected:
     //    ItemGroup* m_ig = nullptr;
 };
 
-#endif // GERBERITEM_H
+//#endif // GERBERITEM_H

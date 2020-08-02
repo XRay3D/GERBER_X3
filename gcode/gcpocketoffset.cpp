@@ -153,15 +153,21 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
         break;
     }
 
-    auto dbg = [this](Paths ps, const Tool& tool, const QString& fileName) {
+    auto dbg = [](Paths ps, const Tool& tool, const QString& fileName) {
+        return;
+        for (Path p : ps)
+            p.append(p.first());
+        qDebug() << fileName;
+        //assert(ps.isEmpty());
         GCodeParams gcp { tool, 0.0, Profile };
         auto file = new GCode::File({ ps }, gcp);
         file->setFileName(fileName);
-        emit fileReady(file);
+        //file->itemGroup()->setPen({ Qt::green, 0.0 });
+        App::project()->addFile(file);
     };
 
     qDebug() << tools;
-    Paths lf;
+    Paths cFrame;
     for (int i = 0; i < tools.size(); ++i) {
         const Tool& tool = tools[i];
         Paths fillPaths;
@@ -170,73 +176,65 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
         m_dOffset = m_toolDiameter / 2;
         m_stepOver = tool.stepover() * uScale;
 
-        for (Paths paths : m_groupedPss) {
-            if (i) { //create frame
-                Paths framePaths;
-                for (int ii = 0; ii < i; ++ii) {
-                    double toolDiameter = tools[ii].getDiameter(depth) * uScale;
-                    double dOffset = toolDiameter / 2;
-                    Paths tmpPaths;
-                    {
-                        ClipperOffset offset(uScale);
-                        offset.AddPaths(paths, jtRound, etClosedPolygon);
-                        offset.Execute(tmpPaths, -dOffset);
-                        if (GlobalSettings::gbrCleanPolygons())
-                            CleanPolygons(tmpPaths, uScale * 0.0005);
-                        //dbg(tmpPaths, "S1_" + QString::number(i));
-                    }
-                    {
-                        ClipperOffset offset(uScale);
-                        offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
-                        offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.9);
-                        if (GlobalSettings::gbrCleanPolygons())
-                            CleanPolygons(tmpPaths, uScale * 0.0005);
-                        //dbg(tmpPaths, "S2_" + QString::number(i));
-                    }
-                    {
-                        Clipper cliper;
-                        cliper.AddPaths(framePaths, ptSubject, true);
-                        cliper.AddPaths(tmpPaths, ptClip, true);
-                        cliper.Execute(ctUnion, framePaths, pftPositive);
-                        //                            dbg(framePaths, "S3_" + QString::number(i));
-                    }
-                }
-                if (m_gcp.side() != Inner)
-                    ReversePaths(framePaths);
-                paths.append(framePaths);
-                //dbg(paths, "S_" + QString::number(i));
-            }
+        for (const Paths& paths : m_groupedPss) {
+            Paths wp;
             ClipperOffset offset(uScale);
             offset.AddPaths(paths, jtRound, etClosedPolygon);
-            offset.Execute(paths, -m_dOffset);
+            offset.Execute(wp, -m_dOffset);
             if (GlobalSettings::gbrCleanPolygons())
-                CleanPolygons(paths, uScale * 0.0005);
-            //dbg(paths, tool, "paths");
+                CleanPolygons(wp, uScale * 0.0005);
             if (i) {
-                { // обрезка текущего пути предыдущим
+                auto dOffset = tools[i - 1].getDiameter(depth) * uScale * 0.5;
+                { // cFrame
                     ClipperOffset offset(uScale);
-                    offset.AddPaths(lf, jtRound, etClosedPolygon);
-                    offset.Execute(lf, m_dOffset * 0.7);
-                    //dbg(lf, tool, "lf");
+                    offset.AddPaths(paths, jtRound, etClosedPolygon);
+                    offset.Execute(cFrame, -dOffset);
+                    if (GlobalSettings::gbrCleanPolygons())
+                        CleanPolygons(cFrame, uScale * 0.0005);
+                    dbg(cFrame, tools[i - 1], "lf1");
+
+                    const auto cp = M_PI * dOffset;
+                    for (int i = 0; i < cFrame.size(); ++i) {
+                        const auto p = Perimeter(cFrame[i]);
+                        if (!qFuzzyIsNull(p) && p < cp)
+                            cFrame.remove(i--);
+                    }
                 }
                 {
+                    ClipperOffset offset(uScale);
+                    offset.AddPaths(cFrame, jtRound, etClosedPolygon);
+                    offset.Execute(cFrame, m_dOffset * 1.1);
+                    dbg(cFrame, tool, "lf2");
+                }
+                { // обрезка текущего пути предыдущим
                     Clipper cliper;
-                    cliper.AddPaths(paths, ptSubject, true);
-                    cliper.AddPaths(lf, ptClip, true);
-                    cliper.Execute(ctDifference, paths, pftNonZero);
-                    //dbg(paths, tool, "cliper");
+                    cliper.AddPaths(wp, ptSubject, true);
+                    cliper.AddPaths(cFrame, ptClip, true);
+                    cliper.Execute(ctDifference, wp, pftNonZero);
+                    dbg(wp, tool, "clip");
                 }
             }
-            fillPaths.append(paths);
-            //dbg(paths, tool, "fillPaths");
-            lf = fillPaths; ////////////////////
+            if (1 || i != tools.size() - 1) {
+                const auto cp = M_PI * m_dOffset;
+                for (int i = 0; i < wp.size(); ++i) {
+                    const auto p = Perimeter(wp[i]);
+                    if (!qFuzzyIsNull(p) && p < cp)
+                        wp.remove(i--);
+                }
+            }
+            { // fillPaths
+                fillPaths.append(wp);
+                ClipperOffset offset(uScale);
+                offset.AddPaths(fillPaths, jtRound, etClosedPolygon);
+                offset.Execute(fillPaths, m_dOffset);
+            }
             Paths offsetPaths;
             do {
-                offsetPaths.append(paths);
+                offsetPaths.append(wp);
                 offset.Clear();
-                offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                offset.Execute(paths, -m_stepOver);
-            } while (paths.size());
+                offset.AddPaths(wp, jtMiter, etClosedPolygon);
+                offset.Execute(wp, -m_stepOver);
+            } while (wp.size());
             m_returnPs.append(offsetPaths);
         }
 

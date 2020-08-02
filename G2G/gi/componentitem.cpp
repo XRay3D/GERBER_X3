@@ -40,6 +40,7 @@ QPainterPath ComponentItem::shape() const
         }
         int i = 0;
         for (auto [number, description, pos] : m_component.pins) {
+            Q_UNUSED(number)
             QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, description);
             pathPins[i].second = pos;
             pathPins[i].second.rx() -= textRect.width() * m_scale * 0.5;
@@ -75,6 +76,7 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     if (m_scale < 0.05) {
         const double k = m_scale * 20; //m_scale > 0.05 ? 1./10 / m_scale : 10;
         for (auto [number, description, pos] : m_component.pins) {
+            Q_UNUSED(number)
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(Qt::green, 2 * m_scale, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             painter->drawLine(

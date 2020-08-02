@@ -1,6 +1,6 @@
 #pragma once
-#ifndef THERMALDELEGATE_H
-#define THERMALDELEGATE_H
+//#ifndef THERMALDELEGATE_H
+//#define THERMALDELEGATE_H
 
 #include <QStyledItemDelegate>
 
@@ -19,4 +19,4 @@ public:
     void emitCommitData();
 };
 
-#endif // THERMALDELEGATE_H
+//#endif // THERMALDELEGATE_H

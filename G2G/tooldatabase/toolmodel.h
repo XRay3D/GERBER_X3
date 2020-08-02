@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MYMODEL_H
-#define MYMODEL_H
+//#ifndef MYMODEL_H
+//#define MYMODEL_H
 
 #include <QAbstractItemModel>
 
@@ -55,4 +55,4 @@ private:
     }
 };
 
-#endif // MYMODEL_H
+//#endif // MYMODEL_H

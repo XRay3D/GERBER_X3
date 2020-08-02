@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef GCUTILS_H
-#define GCUTILS_H
+//#ifndef GCUTILS_H
+//#define GCUTILS_H
 
 #include "gctypes.h"
 #include <QList>
@@ -105,8 +105,8 @@ protected:
                 }
             }
         }
-        if (ret.trimmed().isEmpty())
-            qDebug("");
+        if constexpr (0 && ret.trimmed().isEmpty())
+            qDebug(" ");
         return ret.trimmed();
     }
 
@@ -125,4 +125,4 @@ protected:
 };
 }
 
-#endif // GCUTILS_H
+//#endif // GCUTILS_H

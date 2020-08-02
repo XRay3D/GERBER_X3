@@ -1,5 +1,5 @@
-#ifndef GCH_H
-#define GCH_H
+//#ifndef GCH_H
+//#define GCH_H
 
 #include <QObject>
 #include <QRegularExpression>
@@ -22,4 +22,4 @@ protected:
 private:
 };
 
-#endif // GCH_H
+//#endif // GCH_H
