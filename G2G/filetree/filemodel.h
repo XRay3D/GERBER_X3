@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MODEL_H
-#define MODEL_H
+//#ifndef MODEL_H
+//#define MODEL_H
 
 #include <QAbstractItemModel>
 
@@ -59,4 +59,4 @@ private:
 
 #include <app.h>
 
-#endif // MODEL_H
+//#endif // MODEL_H

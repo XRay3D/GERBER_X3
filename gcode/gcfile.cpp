@@ -516,8 +516,9 @@ void File::createGiPocket()
     GraphicsItem* item;
     if (m_pocketPaths.size()) {
         item = new GerberItem(m_pocketPaths, nullptr);
-        item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPenColor(GlobalSettings::guiColor(Colors::CutArea));
+        item->setPen(Qt::NoPen);
+        //        item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        //        item->setPenColor(GlobalSettings::guiColor(Colors::CutArea));
         item->setBrushColor(GlobalSettings::guiColor(Colors::CutArea));
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);

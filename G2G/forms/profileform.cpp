@@ -275,6 +275,7 @@ void ProfileForm::editFile(GCode::File* file)
         while (i != items.constEnd()) {
             qDebug() << i.key() << i.value();
             auto [fileId, _] = i.key();
+            Q_UNUSED(_)
             App::project()->aFile(fileId)->itemGroup()->setSelected(i.value());
             ++i;
         }

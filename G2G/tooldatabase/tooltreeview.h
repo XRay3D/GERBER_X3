@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MYTREEVIEW_H
-#define MYTREEVIEW_H
+//#ifndef MYTREEVIEW_H
+//#define MYTREEVIEW_H
 
 #include "toolmodel.h"
 
@@ -41,4 +41,4 @@ private:
     QVector<QPushButton*> m_buttons;
 };
 
-#endif // MYTREEVIEW_H
+//#endif // MYTREEVIEW_H

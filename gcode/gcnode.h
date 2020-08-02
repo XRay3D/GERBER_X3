@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MILLING_H
-#define MILLING_H
+//#ifndef MILLING_H
+//#define MILLING_H
 
 #include "abstractnode.h"
 #include <QGraphicsItemGroup>
@@ -20,4 +20,4 @@ public:
     void menu(QMenu* menu , TreeView * tv) const override;
 };
 
-#endif // MILLING_H
+//#endif // MILLING_H

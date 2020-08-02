@@ -1,6 +1,6 @@
 #pragma once
-#ifndef COLORSELECTOR_H
-#define COLORSELECTOR_H
+//#ifndef COLORSELECTOR_H
+//#define COLORSELECTOR_H
 
 #include <QWidget>
 
@@ -29,4 +29,4 @@ public:
     void setColor(QColor* color);
 };
 
-#endif // COLORSELECTOR_H
+//#endif // COLORSELECTOR_H

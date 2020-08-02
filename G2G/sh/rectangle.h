@@ -1,6 +1,6 @@
 #pragma once
-#ifndef Rectangle_H
-#define Rectangle_H
+//#ifndef Rectangle_H
+//#define Rectangle_H
 
 #include "shape.h"
 
@@ -26,4 +26,4 @@ public:
 };
 }
 
-#endif // Rectangle_H
+//#endif // Rectangle_H

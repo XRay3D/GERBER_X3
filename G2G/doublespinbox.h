@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DOUBLESPINBOX_H
-#define DOUBLESPINBOX_H
+//#ifndef DOUBLESPINBOX_H
+//#define DOUBLESPINBOX_H
 
 #include <QDoubleSpinBox>
 #include <QStack>
@@ -27,4 +27,4 @@ public:
     bool eventFilter(QObject* watched, QEvent* event) override;
 };
 
-#endif // DOUBLESPINBOX_H
+//#endif // DOUBLESPINBOX_H

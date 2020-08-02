@@ -1,6 +1,6 @@
 //#pragma once
-//#ifndef LINE_H
-//#define LINE_H
+////#ifndef LINE_H
+////#define LINE_H
 
 //#include "clipper.hpp"
 //#include <QPolygonF>
@@ -223,4 +223,4 @@
 //    return pt1 == d.pt1 && pt2 == d.pt2;
 //}
 
-//#endif // LINE_H
+////#endif // LINE_H

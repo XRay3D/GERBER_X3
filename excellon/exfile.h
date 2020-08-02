@@ -1,6 +1,6 @@
 #pragma once
-#ifndef EXFILE_H
-#define EXFILE_H
+//#ifndef EXFILE_H
+//#define EXFILE_H
 
 #include "extypes.h"
 #include <abstractfile.h>
@@ -38,4 +38,4 @@ public:
 };
 } // namespace Excellon
 
-#endif // EXFILE_H
+//#endif // EXFILE_H

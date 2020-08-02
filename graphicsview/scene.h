@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MYGRAPHICSSCENE_H
-#define MYGRAPHICSSCENE_H
+//#ifndef MYGRAPHICSSCENE_H
+//#define MYGRAPHICSSCENE_H
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
@@ -39,4 +39,4 @@ protected:
 
 #include <app.h>
 
-#endif // MYGRAPHICSSCENE_H
+//#endif // MYGRAPHICSSCENE_H

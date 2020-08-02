@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GERBERAPERTURE_H
-#define GERBERAPERTURE_H
+//#ifndef GERBERAPERTURE_H
+//#define GERBERAPERTURE_H
 
 #include "gbrtypes.h"
 
@@ -73,7 +73,7 @@ protected:
 /////////////////////////////////////////////////////
 /// \brief The GACircular class
 ///
-class ApCircle : public AbstractAperture {
+class ApCircle final : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const Format* format);
     ApCircle(QDataStream& stream, const Format* format)
@@ -81,14 +81,14 @@ public:
     {
         read(stream);
     }
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double toolDiam) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double toolDiam) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 
 private:
     double m_diam = 0.0;
@@ -97,7 +97,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GARectangle class
 ///
-class ApRectangle : public AbstractAperture {
+class ApRectangle final : public AbstractAperture {
     friend class Parser;
 
 public:
@@ -107,14 +107,14 @@ public:
     {
         read(stream);
     }
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double toolDiam) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double toolDiam) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 
 private:
     double m_height = 0.0;
@@ -124,7 +124,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAObround class
 ///
-class ApObround : public AbstractAperture {
+class ApObround final : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const Format* format);
     ApObround(QDataStream& stream, const Format* format)
@@ -132,14 +132,14 @@ public:
     {
         read(stream);
     }
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double toolDiam) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double toolDiam) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 
 private:
     double m_height = 0.0;
@@ -149,7 +149,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAPolygon class
 ///
-class ApPolygon : public AbstractAperture {
+class ApPolygon final : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format);
     ApPolygon(QDataStream& stream, const Format* format)
@@ -160,14 +160,14 @@ public:
     double rotation() const;
     int verticesCount() const;
 
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double toolDiam) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double toolDiam) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 
 private:
     double m_diam = 0.0;
@@ -178,7 +178,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAMacro class
 ///
-class ApMacro : public AbstractAperture {
+class ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format);
     ApMacro(QDataStream& stream, const Format* format)
@@ -186,19 +186,19 @@ public:
     {
         read(stream);
     }
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 
 private:
+    QString m_macro;
     QList<QString> m_modifiers;
     QMap<QString, double> m_coefficients;
-    QString m_macro;
 
     Path drawCenterLine(const QList<double>& mod);
     Path drawCircle(const QList<double>& mod);
@@ -211,7 +211,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The ApBlock class
 ///
-class ApBlock : public AbstractAperture, public QList<GraphicObject> {
+class ApBlock final : public AbstractAperture, public QList<GraphicObject> {
 public:
     ApBlock(const Format* format);
     ApBlock(QDataStream& stream, const Format* format)
@@ -219,14 +219,14 @@ public:
     {
         read(stream);
     }
-    QString name() const final;
-    ApertureType type() const final;
-    bool fit(double) const final;
+    QString name() const;
+    ApertureType type() const;
+    bool fit(double) const;
 
 protected:
-    void draw() final;
-    virtual void read(QDataStream& stream) final;
-    virtual void write(QDataStream& stream) const final;
+    void draw();
+    virtual void read(QDataStream& stream);
+    virtual void write(QDataStream& stream) const;
 };
 }
-#endif // GERBERAPERTURE_H
+//#endif // GERBERAPERTURE_H

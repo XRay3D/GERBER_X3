@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TREEITEM_H
-#define TREEITEM_H
+//#ifndef TREEITEM_H
+//#define TREEITEM_H
 
 #include "tool.h"
 
@@ -62,4 +62,4 @@ private:
     QString m_name;
     QString m_note;
 };
-#endif // TREEITEM_H
+//#endif // TREEITEM_H

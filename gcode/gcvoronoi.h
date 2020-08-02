@@ -1,6 +1,6 @@
 #pragma once
-#ifndef VORONOI_H
-#define VORONOI_H
+//#ifndef VORONOI_H
+//#define VORONOI_H
 
 #include "gccreator.h"
 
@@ -64,4 +64,4 @@ private:
 };
 }
 
-#endif // VORONOI_H
+//#endif // VORONOI_H

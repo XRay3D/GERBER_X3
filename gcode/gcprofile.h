@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GCPROFILE_H
-#define GCPROFILE_H
+//#ifndef GCPROFILE_H
+//#define GCPROFILE_H
 
 #include "gccreator.h"
 
@@ -17,4 +17,4 @@ protected:
 };
 }
 
-#endif // GCPROFILE_H
+//#endif // GCPROFILE_H

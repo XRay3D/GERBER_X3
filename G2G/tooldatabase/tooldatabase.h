@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TOOLEDIT_H
-#define TOOLEDIT_H
+//#ifndef TOOLEDIT_H
+//#define TOOLEDIT_H
 
 #include "tool.h"
 #include <QDialog>
@@ -33,4 +33,4 @@ protected:
     void keyPressEvent(QKeyEvent* evt) override;
 };
 
-#endif // TOOLEDIT_H
+//#endif // TOOLEDIT_H

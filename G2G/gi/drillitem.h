@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DRILLITEM_H
-#define DRILLITEM_H
+//#ifndef DRILLITEM_H
+//#define DRILLITEM_H
 
 #include "graphicsitem.h"
 
@@ -43,4 +43,4 @@ private:
     double m_diameter = 0.0;
 };
 
-#endif // DRILLITEM_H
+//#endif // DRILLITEM_H

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef POINT_H
-#define POINT_H
+//#ifndef POINT_H
+//#define POINT_H
 
 #include "scene.h"
 
@@ -88,4 +88,4 @@ public:
     void updateRect(bool fl = false);
 };
 
-#endif // POINT_H
+//#endif // POINT_H

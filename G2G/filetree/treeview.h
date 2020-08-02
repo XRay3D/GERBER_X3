@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MYTREEVIEW_H
-#define MYTREEVIEW_H
+//#ifndef MYTREEVIEW_H
+//#define MYTREEVIEW_H
 
 #include "filemodel.h"
 
@@ -40,4 +40,4 @@ protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
 };
 
-#endif // MYTREEVIEW_H
+//#endif // MYTREEVIEW_H

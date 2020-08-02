@@ -1,6 +1,6 @@
 #pragma once
-#ifndef SHAPE_H
-#define SHAPE_H
+//#ifndef SHAPE_H
+//#define SHAPE_H
 
 #include <gi/graphicsitem.h>
 
@@ -29,4 +29,4 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }
-#endif // SHAPE_H
+//#endif // SHAPE_H

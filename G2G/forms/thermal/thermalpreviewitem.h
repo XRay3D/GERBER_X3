@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ThermalPreviewItem_H
-#define ThermalPreviewItem_H
+//#ifndef ThermalPreviewItem_H
+//#define ThermalPreviewItem_H
 
 #include "gi/graphicsitem.h"
 #include "tooldatabase/tool.h"
@@ -63,4 +63,4 @@ private:
     ThermalNode* m_node = nullptr;
 };
 
-#endif // ThermalPreviewItem_H
+//#endif // ThermalPreviewItem_H

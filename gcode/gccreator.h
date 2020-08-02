@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TOOLPATHCREATOR_H
-#define TOOLPATHCREATOR_H
+//#ifndef TOOLPATHCREATOR_H
+//#define TOOLPATHCREATOR_H
 
 #include "gctypes.h"
 #include <QObject>
@@ -85,4 +85,4 @@ protected:
 } // namespace GCode
 #include <app.h>
 
-#endif // TOOLPATHCREATOR_H
+//#endif // TOOLPATHCREATOR_H
