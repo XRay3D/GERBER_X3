@@ -4,25 +4,45 @@
 
 #include "gccreator.h"
 #include "forms/gcodepropertiesform.h"
+#include "gcfile.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
+#include <errno.h>
 #include <filetree/filemodel.h>
 #include <gbraperture.h>
 #include <gcvoronoi.h>
 #include <gi/bridgeitem.h>
 #include <limits>
+#include <locale.h>
+#include <project.h>
 #include <scene.h>
 #include <settings.h>
-
-#include <errno.h>
-#include <locale.h>
 #include <stdexcept>
 #include <stdio.h>
 #include <string.h>
+
+auto dbgPaths(Paths ps, const Tool& tool, const QString& fileName)
+{
+    if (ps.isEmpty()) {
+        qDebug("dbgPaths - ps.isEmpty()");
+        return;
+    }
+    for (int i = 0; i < ps.size(); ++i)
+        if (ps[i].isEmpty())
+            ps.remove(i--);
+    for (Path& p : ps)
+        p.append(p.first());
+    //assert(ps.isEmpty());
+    GCode::GCodeParams gcp { tool, 0.0, GCode::Profile };
+    auto file = new GCode::File({ ps }, gcp);
+    file->setFileName(fileName + "_" + tool.name());
+    //file->itemGroup()->setPen({ Qt::green, 0.0 });
+    App::project()->addFile(file);
+};
 
 namespace GCode {
 

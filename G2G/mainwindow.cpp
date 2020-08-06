@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // (need for debug)
+    if constexpr (0) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
         QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
         QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -879,8 +879,6 @@ void MainWindow::setCurrentFile(const QString& fileName)
     if (!m_project->isUntitled())
         prependToRecentFiles(m_project->name());
     m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(m_project->name())));
-    setWindowFilePath(m_project->name());
-    setWindowFilePath(m_project->name());
     setWindowFilePath(m_project->name());
 }
 
