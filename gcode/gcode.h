@@ -13,6 +13,6 @@
 #include "gctypes.h"
 #include "gcutils.h"
 #include "gcvoronoi.h"
-#include "voroni\jc_voronoi.h"
+#include "voroni/jc_voronoi.h"
 
 //#endif // GCODE_H
