@@ -11,6 +11,7 @@ public:
 
 private:
     void createPocket(const Tool& tool, const double depth, const int steps);
+    void createPocket3(const Tool& tool, const double depth);
     void createPocket2(QVector<Tool>& tools, double depth);
 
 protected:

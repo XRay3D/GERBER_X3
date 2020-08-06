@@ -54,6 +54,7 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     settings.getValue(ui->rbConventional);
     settings.getValue(ui->rbInside);
     settings.getValue(ui->rbOutside);
+    settings.getValue(ui->sbxSteps);
     settings.endGroup();
 
     rb_clicked();
@@ -84,6 +85,7 @@ PocketOffsetForm::~PocketOffsetForm()
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rbInside);
     settings.setValue(ui->rbOutside);
+    settings.setValue(ui->sbxSteps);
     settings.endGroup();
     delete ui;
 }
@@ -156,18 +158,29 @@ void PocketOffsetForm::createFile()
         if (gcp.tools.size() == ui->sbxToolQty->value())
             break;
     }
-    std::sort(gcp.tools.begin(), gcp.tools.end(), [this](const Tool& t1, const Tool& t2) -> bool {
-        return t1.getDiameter(ui->dsbxDepth->value()) > t2.getDiameter(ui->dsbxDepth->value());
-    });
+
+    { // sort and unique
+        auto cmp = [this](const Tool& t1, const Tool& t2) -> bool {
+            return t1.getDiameter(ui->dsbxDepth->value()) > t2.getDiameter(ui->dsbxDepth->value());
+        };
+        auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
+            return qFuzzyCompare(t1.getDiameter(ui->dsbxDepth->value()), t2.getDiameter(ui->dsbxDepth->value()));
+        };
+        std::sort(gcp.tools.begin(), gcp.tools.end(), cmp);
+        auto last = std::unique(gcp.tools.begin(), gcp.tools.end(), cmp2);
+        gcp.tools.erase(last, gcp.tools.end());
+    }
+
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
+    if (ui->sbxSteps->isVisible())
+        gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
 
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    fileCount = ui->sbxToolQty->value();
+    fileCount = gcp.tools.size(); //    ui->sbxToolQty->value();
     createToolpath();
 }
 

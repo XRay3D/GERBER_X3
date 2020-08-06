@@ -515,10 +515,13 @@ void File::createGiPocket()
 {
     GraphicsItem* item;
     if (m_pocketPaths.size()) {
+        //        {
+        //            ClipperOffset offset(uScale);
+        //            offset.AddPaths(m_pocketPaths, jtRound, etClosedPolygon);
+        //            offset.Execute(m_pocketPaths, uScale * m_gcp.getToolDiameter() * 0.5);
+        //        }
         item = new GerberItem(m_pocketPaths, nullptr);
         item->setPen(Qt::NoPen);
-        //        item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        //        item->setPenColor(GlobalSettings::guiColor(Colors::CutArea));
         item->setBrushColor(GlobalSettings::guiColor(Colors::CutArea));
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
