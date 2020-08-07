@@ -197,7 +197,7 @@ void Tool::setId(int id)
 
 double Tool::getDiameter(double depth) const
 {
-    if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() < 90.0) {
+    if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
         return d * 2 + diameter();

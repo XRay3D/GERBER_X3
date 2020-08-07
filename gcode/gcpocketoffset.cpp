@@ -46,7 +46,6 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
             int counter = steps;
             if (counter > 1) {
                 do {
-                    //if (counter == 1)
                     tmpPaths.append(paths);
                     offset.Clear();
                     offset.AddPaths(paths, jtMiter, etClosedPolygon);
@@ -54,7 +53,6 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
                 } while (paths.size() && --counter);
             } else {
                 tmpPaths.append(paths);
-                //fillPaths.append(paths);
             }
             m_returnPs.append(tmpPaths);
         }
@@ -86,23 +84,20 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
     }
     Paths fillPaths { m_returnPs };
     stacking(m_returnPs);
-
-    //        ReversePaths(m_returnPaths);
-    //        sortByStratDistance(m_returnPaths);
-
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
-    } else {
-        m_gcp.gcType = Pocket;
-        {
-            ClipperOffset offset(uScale);
-            offset.AddPaths(fillPaths, jtRound, etClosedLine);
-            offset.Execute(fillPaths, m_dOffset + 10);
-        }
-        m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        return;
     }
+
+    m_gcp.gcType = Pocket;
+    {
+        ClipperOffset offset(uScale);
+        offset.AddPaths(fillPaths, jtRound, etClosedLine);
+        offset.Execute(fillPaths, m_dOffset + 10);
+    }
+    m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
+    m_file->setFileName(tool.nameEnc());
+    emit fileReady(m_file);
 }
 
 void PocketCreator::createPocket3(const Tool& tool, const double depth)
@@ -128,6 +123,7 @@ void PocketCreator::createPocket3(const Tool& tool, const double depth)
         groupedPaths(CopperPaths);
         break;
     }
+
     for (Paths paths : m_groupedPss) {
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, jtRound, etClosedPolygon);
@@ -149,24 +145,21 @@ void PocketCreator::createPocket3(const Tool& tool, const double depth)
         emit fileReady(nullptr);
         return;
     }
-
     stacking(m_returnPs);
-
-    //        ReversePaths(m_returnPaths);
-    //        sortByStratDistance(m_returnPaths);
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
-    } else {
-        m_gcp.gcType = Pocket;
-        {
-            ClipperOffset offset(uScale);
-            offset.AddPaths(fillPaths, jtRound, etClosedPolygon);
-            offset.Execute(fillPaths, m_dOffset);
-        }
-        m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        return;
     }
+
+    m_gcp.gcType = Pocket;
+    {
+        ClipperOffset offset(uScale);
+        offset.AddPaths(fillPaths, jtRound, etClosedPolygon);
+        offset.Execute(fillPaths, m_dOffset);
+    }
+    m_file = new GCode::File(m_returnPss, m_gcp, fillPaths);
+    m_file->setFileName(tool.nameEnc());
+    emit fileReady(m_file);
 }
 
 void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
@@ -213,7 +206,7 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
         Paths clipFrame; // "обтравочная" рамка
         for (int i = 0; tIdx && i <= tIdx; ++i) {
             Paths tmp;
-            { // "обтравочная" рамка для текущего инстпумента и предыдущих УП
+            { // "обтравочная" рамка для текущего инструмента и предыдущих УП
                 ClipperOffset offset(uScale);
                 offset.AddPaths(fillPaths[i], jtRound, etClosedPolygon);
                 offset.Execute(tmp, -m_dOffset + uScale * 0.001);
@@ -263,20 +256,18 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
             emit fileReady(nullptr);
             continue;
         }
-
         stacking(m_returnPs);
-
         if (m_returnPss.isEmpty()) {
             emit fileReady(nullptr);
             continue;
         }
+
         m_gcp.gcType = Pocket;
         m_gcp.params[GCodeParams::PocketIndex] = tIdx;
         {
             ClipperOffset offset(uScale);
             offset.AddPaths(fillPaths[tIdx], jtRound, etClosedPolygon);
             offset.Execute(fillPaths[tIdx], m_dOffset);
-            //dbg(fillPaths[tIdx], tool, QString::number(tIdx) + "_FP");
         }
         m_file = new GCode::File(m_returnPss, m_gcp, fillPaths[tIdx]);
         m_file->setFileName(tool.nameEnc());
