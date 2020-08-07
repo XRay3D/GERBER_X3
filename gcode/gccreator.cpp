@@ -51,7 +51,7 @@ int Creator::m_progressMax = 0;
 int Creator::m_progressVal = 0;
 
 struct Cancel {
-    Cancel() {}
+    Cancel() { }
 };
 
 void Creator::reset()
@@ -196,7 +196,7 @@ void Creator::createGc()
     } catch (Cancel&) {
         //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
-    } catch (std::exception &e) {
+    } catch (std::exception& e) {
         qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
     }
 }
@@ -220,6 +220,8 @@ QPair<int, int> Creator::getProgress()
 
 void Creator::stacking(Paths& paths)
 {
+    if (paths.isEmpty())
+        return;
     QElapsedTimer t;
     t.start();
     PolyTree polyTree;

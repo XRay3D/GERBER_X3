@@ -820,7 +820,7 @@ bool Parser::parseAttributes(const QString& gLine)
                 // qDebug() << matchAttr.cap(1) << index << sl;
                 break;
             case Component::P:
-                components[sl.value(1)].pins.append({ sl.value(2).toInt(), sl.value(3), {} });
+                components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
                 break;
             case Component::C:
                 switch (int key = Component::value2(sl.first())) {

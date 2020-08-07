@@ -160,18 +160,18 @@ public:
         }
     };
     QList<Supplier> suppliers; /* <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
-    struct Pins {
-        int number;
+    struct Pin {
+        QString number;
         QString description;
         QPointF pos;
-        friend QDataStream& operator<<(QDataStream& stream, const Pins& p)
+        friend QDataStream& operator<<(QDataStream& stream, const Pin& p)
         {
             stream << p.number;
             stream << p.description;
             stream << p.pos;
             return stream;
         }
-        friend QDataStream& operator>>(QDataStream& stream, Pins& p)
+        friend QDataStream& operator>>(QDataStream& stream, Pin& p)
         {
             stream >> p.number;
             stream >> p.description;
@@ -180,7 +180,7 @@ public:
         }
     };
 
-    QList<Pins> pins;
+    QList<Pin> pins;
 
     friend QDataStream& operator<<(QDataStream& stream, const Component& c)
     {
