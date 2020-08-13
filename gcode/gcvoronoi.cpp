@@ -35,10 +35,10 @@ struct merge_info {
 
 typedef CGAL::Simple_cartesian<double> K;
 //using K = CGAL::Exact_predicates_inexact_constructions_kernel;
-using Gt = CGAL::Segment_Delaunay_graph_filtered_traits_2<K>;
-using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<Gt, int, convert_info, merge_info>;
-using D_S = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<Gt>>;
-using SDG2 = CGAL::Segment_Delaunay_graph_2<Gt, ST, D_S>;
+using GT = CGAL::Segment_Delaunay_graph_filtered_traits_2<K>;
+using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<GT, int, convert_info, merge_info>;
+using DS = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<GT>>;
+using SDG2 = CGAL::Segment_Delaunay_graph_2<GT, ST, DS>;
 
 inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 {
@@ -208,8 +208,24 @@ void VoronoiCreator::createVoronoi()
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     } else {
+        Paths copy { m_returnPs };
         createOffset(tool, depth, width);
         m_gcp.gcType = Voronoi;
+        { // создание пермычек.
+            Clipper clipper;
+            clipper.AddPaths(m_workingRawPs, ptClip, true);
+            clipper.AddPaths(copy, ptSubject, false);
+            clipper.Execute(ctDifference, copy, pftNonZero);
+            sortBE(copy);
+            for (auto&& p : copy)
+                m_returnPss.append({ p });
+        }
+        { // создание заливки.
+            ClipperOffset offset(uScale);
+            offset.AddPaths(m_workingRawPs, jtRound, etClosedPolygon);
+            offset.AddPaths(copy, jtRound, etOpenRound);
+            offset.Execute(m_workingRawPs, m_dOffset + 10);
+        }
         m_file = new File(m_returnPss, m_gcp, m_workingRawPs);
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
@@ -394,7 +410,7 @@ void VoronoiCreator::cgalVoronoi()
                 pathPairs[id].append(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
             } else if (SDG2::Geom_traits::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
                 pathPairs[id].append(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
-            } else if (CGAL::Parabola_segment_2<Gt> cgalParabola; CGAL::assign(cgalParabola, o)) {
+            } else if (CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 std::vector<SDG2::Point_2> points;
                 cgalParabola.generate_points(points, 5);
                 Path path;
