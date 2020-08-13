@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+
 template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 inline QDataStream& operator>>(QDataStream& s, E& e)
 {
