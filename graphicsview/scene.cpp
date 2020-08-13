@@ -264,6 +264,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         QElapsedTimer t;
         t.start();
         const double k2 = 0.5 / m_scale;
+        //painter->setCompositionMode(QPainter::CompositionMode_Lighten);
 
         for (int i = 0; i < 3; ++i) {
             painter->setPen(QPen(color[i], 0.0));
