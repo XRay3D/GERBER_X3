@@ -25,16 +25,13 @@ RESOURCES += res/resources.qrc
 #DEFINES += QT_DEBUG
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
 
 ICON = 256.png
 
 CONFIG += c++17
 
 #macx: ICON = resources/icon.icns
-
-#debug {
-#    CONFIG += console
-#}
 
 msvc* {
     LIBS += -lsetupapi -lAdvapi32
@@ -49,19 +46,17 @@ gcc* {
 }
 
 linux {
+# sudo apt install mesa-common-dev
+# sudo apt install mesa-common-dev
     DEFINES += linux
     greaterThan(QT_MINOR_VERSION, 12){
         LIBS += -ltbb # Why????? sudo apt-get install libtbb-dev
     }
 }
 
-DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
-
 DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 INCLUDEPATH += $$PWD/forms/formsutil/
-
-
 
 TRANSLATIONS += \
     translations/g2g_en.ts \
