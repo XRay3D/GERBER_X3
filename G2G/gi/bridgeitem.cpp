@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "bridgeitem.h"
 #include "itemgroup.h"
 
@@ -17,7 +21,7 @@ BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side,
     , m_size(size)
     , m_side(side)
 {
-    connect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    connect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
@@ -35,7 +39,7 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
     painter->setPen(Qt::NoPen);
     painter->drawPath(m_path);
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(QPen(Qt::white, 2 * GraphicsView::scaleFactor()));
+    painter->setPen(QPen(Qt::white, 2 * App::graphicsView()->scaleFactor()));
 
     const double halfSize = m_size / 2;
 
@@ -51,8 +55,8 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
         break;
     }
 
-    auto drawEllipse = [painter, halfSize, this](const QPointF& pt, bool fl = false) {
-        const QRectF rectangle(pt + QPointF{ halfSize, halfSize }, pt - QPointF{ halfSize, halfSize });
+    auto drawEllipse = [painter, halfSize](const QPointF& pt, bool fl = false) {
+        const QRectF rectangle(pt + QPointF { halfSize, halfSize }, pt - QPointF { halfSize, halfSize });
         const int startAngle = (fl ? 0 : 180) * 16;
         const int spanAngle = 180 * 16;
         painter->drawArc(rectangle, startAngle, spanAngle);
@@ -77,7 +81,7 @@ QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value
 void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_lastPos = pos();
-    disconnect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 
@@ -92,24 +96,29 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiRaw)) {
+        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiAperturePath)) {
             if (!gi->isSelected())
                 continue;
             for (const Path& path : gi->paths()) {
                 for (int i = 0, s = path.size(); i < s; ++i) {
-                    const QLineF l1(pos, toQPointF(path[i]));
-                    const QLineF l2(pos, toQPointF(path[(i + 1) % s]));
-                    const QLineF l3(toQPointF(path[(i + 1) % s]), toQPointF(path[i]));
-                    if (lastAngle == 0.0)
-                        lastAngle = l3.normalVector().angle();
+                    const QPointF pt1(toQPointF(path[i]));
+                    const QPointF pt2(toQPointF(path[(i + 1) % s]));
+                    const QLineF l1(pos, pt1);
+                    const QLineF l2(pos, pt2);
+                    const QLineF l3(pt2, pt1);
+                 //pvs   if (lastAngle == 0.0)
+                  //pvs        lastAngle = l3.normalVector().angle();
                     const double p = (l1.length() + l2.length() + l3.length()) / 2;
                     if (l1.length() < l3.length() && l2.length() < l3.length()) {
                         const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
                         if (l > h) {
                             l = h;
-                            QLineF line(toQPointF(path[i]), toQPointF(path[(i + 1) % s]));
+                            QLineF line(pt1, pt2);
                             line.setLength(sqrt(l1.length() * l1.length() - h * h));
                             pt = line.p2();
+                            const QPointF center(l3.center());
+                            if (QLineF(center, pt).length() < m_lenght / 2)
+                                pt = center;
                             m_angle = line.normalVector().angle();
                         }
                     }
@@ -125,6 +134,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     m_ok = false;
     return pos;
 }
+
+void BridgeItem::setOk(bool ok) { m_ok = ok; }
 
 double BridgeItem::angle() const { return m_angle; }
 

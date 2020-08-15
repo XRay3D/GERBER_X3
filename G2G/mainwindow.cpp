@@ -1,8 +1,13 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "mainwindow.h"
 #include "aboutform.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
-#include "forms/pocketform.h"
+#include "forms/pocketoffsetform.h"
+#include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
 #include "forms/thermal/thermalform.h"
 #include "forms/voronoiform.h"
@@ -20,12 +25,10 @@
 #include <QToolBar>
 #include <excellondialog.h>
 #include <exparser.h>
-#include <filetree/gerbernode.h>
+#include <gbrnode.h>
 #include <gbrparser.h>
 #include <gcfile.h>
 #include <sh/constructor.h>
-
-MainWindow* MainWindow::self = nullptr;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -39,11 +42,15 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
 
-    new Marker(Marker::Zero);
-    new Marker(Marker::Home);
-    for (int i = 0; i < 4; ++i)
+    {
+        new Marker(Marker::Home);
+        new Marker(Marker::Zero);
         new Pin(scene);
-    new LayoutFrames();
+        new Pin(scene);
+        new Pin(scene);
+        new Pin(scene);
+        new LayoutFrames();
+    }
 
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
@@ -54,6 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
     excellonParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseExcellonFile, excellonParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(excellonParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
+    connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
     connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
 
     connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
@@ -84,50 +92,50 @@ MainWindow::MainWindow(QWidget* parent)
                       "subcontrol-position: top center; }" /* position at the top center */
         );
     }
-
     ToolHolder::readTools();
     setCurrentFile(QString());
+
+    {
+        GCodePropertiesForm(nullptr); // init vars;
+    }
+
     readSettings();
-    GCodePropertiesForm(); // init vars;
-    QTimer::singleShot(100, [this] { zoomToolBar->actions().first()->triggered(); });
-    self = this;
+
+    if constexpr (0) { // (need for debug)
+        QTimer::singleShot(120, [this] { selectAll(); });
+        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
+        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+    }
+    App::mInstance->m_mainWindow = this;
 }
 
 MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
-    self = nullptr;
+    App::mInstance->m_mainWindow = nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-#ifdef QT_DEBUG
-    writeSettings();
-    event->accept();
-    return;
-#endif
-#ifndef QT_DEBUG
-    if (maybeSave()) {
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin") || maybeSave()) {
         writeSettings();
         dockWidget->close();
-        //FileModel::closeProject();
         qApp->closeAllWindows();
-        FileModel::closeProject();
+        App::fileModel()->closeProject();
         event->accept();
     } else {
         event->ignore();
     }
-#endif
 }
 
 bool MainWindow::closeProject()
 {
     if (maybeSave()) {
         dockWidget->close();
-        FileModel::closeProject();
+        App::fileModel()->closeProject();
         setCurrentFile(QString());
-        Project::instance()->close();
+        m_project->close();
         return true;
     }
     return false;
@@ -150,12 +158,12 @@ void MainWindow::createActions()
 {
     // fileMenu
     createActionsFile();
-    // serviceMenu
-    createActionsService();
     // zoomToolBar
     createActionsZoom();
-    // Selection / Delete selected
-    createActionsSDS();
+    // fileEdit    // Selection / Delete selected
+    createActionsEdit();
+    // serviceMenu
+    createActionsService();
     // toolpathToolBar
     createActionsToolPath();
     // grafica
@@ -175,37 +183,37 @@ void MainWindow::createActionsFile()
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
     // New
-    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"),
-        tr("&New project"),
-        this,
-        &MainWindow::newFile);
+    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"),
+        this, &MainWindow::newFile);
     action->setShortcuts(QKeySequence::New);
     action->setStatusTip(tr("Create a new file"));
     fileToolBar->addAction(action);
     // Open
-    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."),
+        this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
     fileToolBar->addAction(action);
     // Save
-    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"),
+        this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
     // Save As
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"),
-        tr("Save project &As..."),
-        this,
-        &MainWindow::saveAs);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."),
+        this, &MainWindow::saveAs);
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), m_project, &Project::saveSelectedToolpaths);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
+        m_project, &Project::saveSelectedToolpaths);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), scene, &Scene::RenderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."),
+        scene, &Scene::RenderPdf);
     action->setStatusTip(tr("Export to PDF file"));
     fileToolBar->addAction(action);
 
@@ -251,6 +259,55 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Exit the application"));
 }
 
+void MainWindow::createActionsEdit()
+{
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->setObjectName(QStringLiteral("editMenu"));
+    QAction* action = editMenu->addAction(QIcon::fromTheme("edit-select-all"),
+        tr("Select all"),
+        this,
+        &MainWindow::selectAll);
+    action->setShortcut(QKeySequence::SelectAll);
+
+    editMenu->addSeparator();
+    action = editMenu->addAction(tr("Undo"));
+    action->setEnabled(false);
+    action->setShortcut(QKeySequence::Undo);
+    action = editMenu->addAction(tr("Redo"));
+    action->setEnabled(false);
+    action->setShortcut(QKeySequence::Redo);
+
+    //    QToolBar* toolBar = addToolBar(tr("Selection"));
+    //    toolBar->setObjectName(QStringLiteral("s"));
+    // s->setMovable(false);
+    //    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
+    //        tr("Select all"),
+    //        this,
+    //        &MainWindow::selectAll);
+    //    action->setShortcut(QKeySequence::SelectAll);
+
+    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
+    // action->setShortcut(QKeySequence::Redo);
+    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
+    // QList<QGraphicsItem*> list;
+    // for (QGraphicsItem* item : MyApp::scene()->123->items())
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // list << item;
+    // if (list.size() && QMessageBox::question(this,
+    // "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+    // for (QGraphicsItem* item : list)
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // delete item;
+    // MyApp::scene()->123->setSceneRect(MyApp::scene()->123->itemsBoundingRect());
+    // MyApp::scene()->123->update();
+    // MainWindow::123->zero()->resetPos();
+    // MainWindow::123->home()->resetPos();
+    // Pin::shtifts()[0]->resetPos();
+    // }
+    // });
+    // action->setShortcut(QKeySequence::Delete);
+}
+
 void MainWindow::createActionsService()
 {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
@@ -258,6 +315,38 @@ void MainWindow::createActionsService()
         SettingsDialog(this).exec();
     });
     action->setStatusTip(tr("Show the application's settings box"));
+
+    QToolBar* toolpathToolBar = addToolBar(tr("Service"));
+    toolpathToolBar->setObjectName("tbService");
+    //toolpathToolBar->addSeparator();
+    serviceMenu->addSeparator();
+    {
+        action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] {
+            createDockWidget<GCodePropertiesForm>(/*new GCodePropertiesForm(dockWidget),*/ GCode::GCodeProperties);
+        });
+        action->setShortcut(QKeySequence("Ctrl+Shift+G"));
+        serviceMenu->addAction(action);
+        toolpathActionList[GCode::GCodeProperties] = action;
+    }
+
+    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] {
+        ToolDatabase tdb(this, {});
+        tdb.exec();
+    }));
+    toolpathToolBar->addSeparator();
+    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
+        if (updateRect()) {
+            Pin::resetPos(false);
+            Marker::get(Marker::Home)->resetPos(false);
+            Marker::get(Marker::Zero)->resetPos(false);
+        }
+        graphicsView->zoomFit();
+    }));
+
+    serviceMenu->addSeparator();
+    toolpathToolBar->addSeparator();
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); }));
+    action->setCheckable(true);
 }
 
 void MainWindow::createActionsHelp()
@@ -272,63 +361,33 @@ void MainWindow::createActionsHelp()
 
 void MainWindow::createActionsZoom()
 {
+    auto vievMenu = menuBar()->addMenu(tr("&Viev"));
+    vievMenu->setObjectName("vievMenu");
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
-    //zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
-    // zoomToolBar->setMovable(false);
-    QAction* action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), [this]() {
-        graphicsView->zoomFit();
-    });
+    // Fit best
+    auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), graphicsView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), [this]() {
-        graphicsView->zoom100();
-    });
+    vievMenu->addAction(action);
+    // 100%
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), graphicsView, &GraphicsView::zoom100);
     action->setShortcut(tr("Ctrl+0"));
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), [this]() {
-        graphicsView->zoomIn();
-    });
+    vievMenu->addAction(action);
+    // Zoom in
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), graphicsView, &GraphicsView::zoomIn);
     action->setShortcut(QKeySequence::ZoomIn);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [this]() {
-        graphicsView->zoomOut();
-    });
+    vievMenu->addAction(action);
+    // Zoom out
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), graphicsView, &GraphicsView::zoomOut);
     action->setShortcut(QKeySequence::ZoomOut);
+    vievMenu->addAction(action);
+    // Separator
     zoomToolBar->addSeparator();
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), [this]() {
-        graphicsView->zoomToSelected();
-    });
-}
-
-void MainWindow::createActionsSDS()
-{
-    QToolBar* toolBar = addToolBar(tr("Selection"));
-    toolBar->setObjectName(QStringLiteral("s"));
-    // s->setMovable(false);
-    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
-        tr("Select all"),
-        this,
-        &MainWindow::selectAll);
-    action->setShortcut(QKeySequence::SelectAll);
-
-    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
-    // action->setShortcut(QKeySequence::Redo);
-    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
-    // QList<QGraphicsItem*> list;
-    // for (QGraphicsItem* item : MyScene::self->items())
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // list << item;
-    // if (list.size() && QMessageBox::question(this,
-    //"", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-    // for (QGraphicsItem* item : list)
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // delete item;
-    // MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
-    // MyScene::self->update();
-    // MainWindow::self->zero()->resetPos();
-    // MainWindow::self->home()->resetPos();
-    // Pin::shtifts()[0]->resetPos();
-    // }
-    // });
-    // action->setShortcut(QKeySequence::Delete);
+    vievMenu->addSeparator();
+    // Zoom to selected
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), graphicsView, &GraphicsView::zoomToSelected);
+    action->setShortcut(QKeySequence("F12"));
+    vievMenu->addAction(action);
 }
 
 void MainWindow::createActionsToolPath()
@@ -345,65 +404,65 @@ void MainWindow::createActionsToolPath()
     connect(dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, dockWidget);
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
-        createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+F"));
-    menu->addAction(toolpathActionList.last());
+    {
+        toolpathActionList[GCode::Profile] = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
+            createDockWidget<ProfileForm>(GCode::Profile); //createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
+            toolpathActionList[GCode::Profile]->setChecked(true);
+        });
+        toolpathActionList[GCode::Profile]->setShortcut(QKeySequence("Ctrl+Shift+F"));
+        menu->addAction(toolpathActionList[GCode::Profile]);
+    }
+    {
+        toolpathActionList[GCode::Pocket] = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
+            createDockWidget<PocketOffsetForm>(GCode::Pocket); //createDockWidget(new PocketOffsetForm(dockWidget), GCode::Pocket);
+            toolpathActionList[GCode::Pocket]->setChecked(true);
+        });
+        toolpathActionList[GCode::Pocket]->setShortcut(QKeySequence("Ctrl+Shift+P"));
+        menu->addAction(toolpathActionList[GCode::Pocket]);
+    }
+    {
+        toolpathActionList[GCode::Raster] = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
+            createDockWidget<PocketRasterForm>(GCode::Raster); //createDockWidget(new PocketRasterForm(dockWidget), GCode::Raster);
+            toolpathActionList[GCode::Raster]->setChecked(true);
+        });
+        toolpathActionList[GCode::Raster]->setShortcut(QKeySequence("Ctrl+Shift+R"));
+        menu->addAction(toolpathActionList[GCode::Raster]);
+    }
+    {
+        toolpathActionList[GCode::Voronoi] = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
+            createDockWidget<VoronoiForm>(GCode::Voronoi); //createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
+            toolpathActionList[GCode::Voronoi]->setChecked(true);
+        });
+        toolpathActionList[GCode::Voronoi]->setShortcut(QKeySequence("Ctrl+Shift+V"));
+        menu->addAction(toolpathActionList[GCode::Voronoi]);
+    }
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
-        createDockWidget(new PocketForm(dockWidget), GCode::Pocket);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+P"));
-    menu->addAction(toolpathActionList.last());
+    {
+        toolpathActionList[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
+            if (ThermalForm::canToShow()) {
+                createDockWidget<ThermalForm>(GCode::Thermal); //createDockWidget(new ThermalForm(dockWidget), GCode::Thermal);
+                toolpathActionList[GCode::Thermal]->setChecked(true);
+            } else
+                toolpathActionList[GCode::Thermal]->setChecked(false);
+        });
+        toolpathActionList[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
+        menu->addAction(toolpathActionList[GCode::Thermal]);
+    }
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
-        createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+V"));
-    menu->addAction(toolpathActionList.last());
+    {
+        toolpathActionList[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
+            if (DrillForm::canToShow()) {
+                createDockWidget<DrillForm>(GCode::Drill); //createDockWidget(new DrillForm(dockWidget), GCode::Drill);
+                toolpathActionList[GCode::Drill]->setChecked(true);
+            } else
+                toolpathActionList[GCode::Drill]->setChecked(false);
+        });
+        toolpathActionList[GCode::Drill]->setShortcut(QKeySequence("Ctrl+Shift+D"));
+        menu->addAction(toolpathActionList[GCode::Drill]);
+    }
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
-        if (ThermalForm::canToShow())
-            createDockWidget(new ThermalForm(dockWidget), GCode::Thermal);
-        else
-            toolpathActionList[GCode::Thermal]->setChecked(false);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+T"));
-    menu->addAction(toolpathActionList.last());
-
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
-        if (DrillForm::canToShow())
-            createDockWidget(new DrillForm(dockWidget), GCode::Drill);
-        else
-            toolpathActionList[GCode::Drill]->setChecked(false);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+D"));
-    menu->addAction(toolpathActionList.last());
-
-    toolpathToolBar->addSeparator();
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] {
-        createDockWidget(new GCodePropertiesForm(dockWidget), GCode::GCodeProperties);
-    }));
-    toolpathActionList.last()->setShortcut(QKeySequence("Ctrl+Shift+G"));
-    menu->addSeparator();
-    menu->addAction(toolpathActionList.last());
-
-    toolpathToolBar->addSeparator();
-    for (QAction* action : toolpathActionList)
-        action->setCheckable(true);
-
-    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] {
-        ToolDatabase tdb(this, {});
-        tdb.exec();
-    });
-    toolpathToolBar->addSeparator();
-    toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
-        Pin::pins().first()->resetPos();
-        Marker::get(Marker::Home)->resetPos(false);
-        Marker::get(Marker::Zero)->resetPos(false);
-        graphicsView->zoomFit();
-    });
+    for (QAction* action_ : toolpathActionList)
+        action_->setCheckable(true);
 }
 
 void MainWindow::createActionsGraphics()
@@ -428,21 +487,21 @@ void MainWindow::createActionsGraphics()
     tb->addSeparator();
 
     auto ex = [](ClipType type) {
-        QList<QGraphicsItem*> si = Scene::selectedItems();
+        QList<QGraphicsItem*> si = App::scene()->selectedItems();
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
             if (item->type() == GiGerber) {
                 GerberItem* gitem = reinterpret_cast<GerberItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
-                for (QGraphicsItem* item : si)
-                    if (item->type() == GiShapeC)
-                        clipper.AddPaths(reinterpret_cast<GraphicsItem*>(item)->paths(), ptClip, true);
-                clipper.Execute(type, gitem->rPaths(), pftEvenOdd, pftPositive);
-                if (gitem->rPaths().isEmpty()) {
+                for (QGraphicsItem* clipItem : si)
+                    if (clipItem->type() == GiShapeC)
+                        clipper.AddPaths(reinterpret_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
+                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+                if (gitem->rPaths()->isEmpty()) {
                     rmi.append(gitem);
                 } else {
-                    ReversePaths(gitem->rPaths());
+                    ReversePaths(*gitem->rPaths());
                     gitem->redraw();
                 }
             }
@@ -455,16 +514,11 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
     tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
-    tb->addSeparator();
-    tb->addAction(tr("Undo"))->setEnabled(false);
-    tb->addAction(tr("Redo"))->setEnabled(false);
-    tb->addSeparator();
-    tb->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); })->setCheckable(true);
 }
 
 void MainWindow::createPinsPath()
 {
-    ToolDatabase tdb(this, { Tool::Drill });
+    ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
     if (tdb.exec()) {
         Tool tool(tdb.tool());
 
@@ -481,13 +535,25 @@ void MainWindow::createPinsPath()
         qDebug() << dst.size();
 
         QSettings settings;
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
+#else
+        bool ok;
+        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
+        if (!ok)
+            return;
+#endif
+
         if (depth == 0.0)
             return;
         settings.setValue("Pin/depth", depth);
 
-        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, tool, depth, GCode::Drill);
-        gcode->setFileName(tr("Pin (") + tool.name() + ")");
+        GCode::GCodeParams gcp(tool, depth, GCode::Drill);
+
+        gcp.params[GCode::GCodeParams::NotTile];
+
+        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, gcp);
+        gcode->setFileName(tr("Pin_") + tool.nameEnc());
         m_project->addFile(gcode);
     }
 }
@@ -505,11 +571,9 @@ void MainWindow::readSettings()
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
-
     lastPath = settings.value("lastPath").toString();
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
-        m_project->setName(settings.value("project").toString());
-        loadFile(m_project->name());
+        loadFile(settings.value("project").toString());
     }
     settings.endGroup();
 }
@@ -531,7 +595,7 @@ void MainWindow::selectAll()
         static_cast<QTableView*>(focusWidget())->selectAll();
         return;
     } else {
-        for (QGraphicsItem* item : Scene::items())
+        for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible())
                 item->setSelected(true);
     }
@@ -543,25 +607,27 @@ void MainWindow::printDialog()
 {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
-    connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* printer) {
+    connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* pPrinter) {
         scene->m_drawPdf = true;
         QRectF rect;
-        for (QGraphicsItem* item : Scene::items())
+        for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
-        printer->setMargins({ 10, 10, 10, 10 });
-        printer->setPageSizeMM(size
-            + QSizeF(printer->margins().left + printer->margins().right,
-                printer->margins().top + printer->margins().bottom));
-        printer->setResolution(4800);
+        pPrinter->setMargins({ 10, 10, 10, 10 });
+        pPrinter->setPageSizeMM(size + QSizeF(pPrinter->margins().left + pPrinter->margins().right, pPrinter->margins().top + pPrinter->margins().bottom));
+        pPrinter->setResolution(4800);
 
-        QPainter painter(printer);
+        QPainter painter(pPrinter);
+#if QT_DEPRECATED_SINCE(5, 14)
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
+#else
+        painter.setRenderHint(QPainter::Antialiasing);
+#endif
         painter.setTransform(QTransform().scale(1.0, -1.0));
-        painter.translate(0, -(printer->resolution() / 25.4) * size.height());
+        painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
         scene->render(&painter,
-            QRectF(0, 0, printer->width(), printer->height()),
+            QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
         scene->m_drawPdf = false;
@@ -572,25 +638,25 @@ void MainWindow::printDialog()
 void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
-    QAction* a = nullptr;
+    QAction* action = nullptr;
     QGraphicsItem* item = scene->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
 
     if (!item)
         return;
 
     if (item->type() == GiPin) {
-        a = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
-        a = menu.addAction(tr("Fixed"), [](bool fl) {
-            for (Pin* item : Pin::pins())
-                item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
+        action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
+        action = menu.addAction(tr("Fixed"), [](bool fl) {
+            for (Pin* pin : Pin::pins())
+                pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
         });
-        a->setCheckable(true);
-        a->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
+        action->setCheckable(true);
+        action->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
     } else if (dynamic_cast<Marker*>(item)) {
-        a = menu.addAction(tr("Fixed"),
+        action = menu.addAction(tr("Fixed"),
             [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
-        a->setCheckable(true);
-        a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
+        action->setCheckable(true);
+        action->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
     }
     //    else if (item->type() == GiThermalPr) {
     //        if (item->flags() & QGraphicsItem::ItemIsSelectable)
@@ -602,13 +668,12 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
     //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
     //            });
     //    }
-    if (a)
+    if (action)
         menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)
 {
-    static QMap<QString, QProgressDialog*> progress;
     if (max && !value) {
         QProgressDialog* pd = new QProgressDialog(this);
         pd->setCancelButton(nullptr);
@@ -617,13 +682,13 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
         pd->setModal(true);
         pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
-        progress[fileName] = pd;
+        m_progressDialogs[fileName] = pd;
     } else if (max == 1 && value == 1) {
-        progress[fileName]->hide();
-        progress[fileName]->deleteLater();
-        progress.remove(fileName);
+        m_progressDialogs[fileName]->hide();
+        m_progressDialogs[fileName]->deleteLater();
+        m_progressDialogs.remove(fileName);
     } else
-        progress[fileName]->setValue(value);
+        m_progressDialogs[fileName]->setValue(value);
 }
 
 void MainWindow::fileError(const QString& fileName, const QString& error)
@@ -741,6 +806,26 @@ bool MainWindow::maybeSave()
     return true;
 }
 
+void MainWindow::editGcFile(GCode::File* file)
+{
+    switch (file->gtype()) {
+    case GCode::Null:
+    case GCode::Profile:
+        toolpathActionList[GCode::Profile]->triggered();
+        reinterpret_cast<FormsUtil*>(dockWidget->widget())->editFile(file);
+        break;
+    case GCode::Pocket:
+    case GCode::Voronoi:
+    case GCode::Thermal:
+    case GCode::Drill:
+    case GCode::GCodeProperties:
+    case GCode::Raster:
+    case GCode::LaserHLDI:
+    default:
+        break;
+    }
+}
+
 void MainWindow::loadFile(const QString& fileName)
 {
     if (m_project->contains(fileName) != -1
@@ -795,8 +880,6 @@ void MainWindow::setCurrentFile(const QString& fileName)
         prependToRecentFiles(m_project->name());
     m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(m_project->name())));
     setWindowFilePath(m_project->name());
-    setWindowFilePath(m_project->name());
-    setWindowFilePath(m_project->name());
 }
 
 void MainWindow::addFileToPro(AbstractFile* file)
@@ -809,6 +892,7 @@ void MainWindow::addFileToPro(AbstractFile* file)
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
         GerberNode::repaintTimer()->start();
+    graphicsView->zoomFit();
 }
 
 void MainWindow::prependToRecentFiles(const QString& fileName)
@@ -854,8 +938,13 @@ QString MainWindow::strippedName(const QString& fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 
-void MainWindow::createDockWidget(QWidget* dwContent, int type)
+template <class T>
+void MainWindow::createDockWidget(int type)
 {
+    if (dynamic_cast<T*>(dockWidget->widget()))
+        return;
+
+    auto dwContent = new T(dockWidget);
     dwContent->setObjectName(QStringLiteral("dwContents"));
 
     for (QAction* action : toolpathActionList)
@@ -898,6 +987,6 @@ QString MainWindow::recentFilesKey()
 
 void MainWindow::showEvent(QShowEvent* event)
 {
-    toolpathActionList[GCode::GCodeProperties]->trigger();
+    //toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
 }

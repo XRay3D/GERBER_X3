@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GERBER_H
 #define GERBER_H
 

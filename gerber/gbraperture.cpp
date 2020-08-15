@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "gbraperture.h"
 #include "mathparser.h"
 #include <QDebug>
@@ -10,7 +14,7 @@ AbstractAperture::AbstractAperture(const Format* format)
 {
 }
 
-AbstractAperture::~AbstractAperture() {}
+AbstractAperture::~AbstractAperture() { }
 
 double AbstractAperture::drillDiameter() const
 {
@@ -335,13 +339,13 @@ void ApPolygon::draw()
 ///
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
     : AbstractAperture(format)
+    , m_macro(macro)
+    , m_modifiers(modifiers) 
+    , m_coefficients(coefficients)
 {
-    m_macro = macro;
-    m_modifiers = modifiers;
     while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
         m_modifiers.removeLast();
     }
-    m_coefficients = coefficients;
 }
 
 QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } //MACRO
@@ -630,10 +634,13 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
         static_cast<cInt>(mod[CenterY] * uScale));
 
     Path polygon;
-    for (int j = 0; j < num; ++j)
+    for (int j = 0; j < num; ++j) {
+        auto angle = qDegreesToRadians(j * 360.0 / num);
         polygon.push_back(IntPoint(
-            static_cast<cInt>(qCos(qDegreesToRadians(j * 360.0 / num)) * diameter),
-            static_cast<cInt>(qSin(qDegreesToRadians(j * 360.0 / num)) * diameter)));
+            static_cast<cInt>(qCos(angle) * diameter),
+            static_cast<cInt>(qSin(angle) * diameter))
+        );
+    }
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);

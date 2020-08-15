@@ -2,7 +2,7 @@
  * https://habrahabr.ru/post/122397/
  * @author shurik
  */
-
+#pragma once
 #ifndef MATCHPARSER_H
 #define MATCHPARSER_H
 

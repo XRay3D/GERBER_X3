@@ -12,10 +12,13 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 contains(QT_ARCH, i386) {
-    message("32-bit")
+    #message("32-bit")
 } else {
-    message("64-bit")
+    #message("64-bit")
     msvc* {
+        LIBS += \
+            -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \
+            -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libgmp-10
         INCLUDEPATH += C:/local/boost_1_71_0
         INCLUDEPATH += C:/dev/CGAL-5.0/include
         INCLUDEPATH += C:/dev/CGAL-5.0/auxiliary/gmp/include
@@ -23,25 +26,32 @@ contains(QT_ARCH, i386) {
     }
 }
 
-LIBS += \
-    -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libmpfr-4 \
-    -lC:/dev/CGAL-5.0/auxiliary/gmp/lib/libgmp-10 \
+
 
 HEADERS += \
     $$PWD/gccreator.h \
     $$PWD/gcfile.h \
-    $$PWD/gcpocket.h \
+    $$PWD/gcnode.h \
+    $$PWD/gcode.h \
+    $$PWD/gcpocketoffset.h \
+    $$PWD/gcpocketraster.h \
     $$PWD/gcprofile.h \
     $$PWD/gcthermal.h \
     $$PWD/gctypes.h \
+    $$PWD/gcutils.h \
     $$PWD/gcvoronoi.h \
     $$PWD/voroni/jc_voronoi.h \
+    $$PWD/gch.h \
 
 SOURCES += \
     $$PWD/gccreator.cpp \
     $$PWD/gcfile.cpp \
-    $$PWD/gcpocket.cpp \
+    $$PWD/gcnode.cpp \
+    $$PWD/gcpocketoffset.cpp \
+    $$PWD/gcpocketraster.cpp \
     $$PWD/gcprofile.cpp \
     $$PWD/gcthermal.cpp \
+    $$PWD/gcutils.cpp \
     $$PWD/gcvoronoi.cpp \
     $$PWD/voroni/jc_voronoi.cpp \
+    $$PWD/gch.cpp \

@@ -1,5 +1,6 @@
-#ifndef PREVIEWITEM_H
-#define PREVIEWITEM_H
+#pragma once
+//#ifndef PREVIEWITEM_H
+//#define PREVIEWITEM_H
 
 #include "gi/graphicsitem.h"
 #include <extypes.h>
@@ -46,4 +47,4 @@ private:
     QBrush m_brush;
 };
 
-#endif // PREVIEWITEM_H
+//#endif // PREVIEWITEM_H

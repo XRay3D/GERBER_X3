@@ -1,5 +1,6 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
+//#ifndef APPLICATION_H
+//#define APPLICATION_H
 
 #include <QApplication>
 #include <QSharedMemory>
@@ -36,4 +37,4 @@ public:
 private:
     QSharedMemory* _singular; // shared memory !! SINGLE ACCESS
 };
-#endif // APPLICATION_H
+//#endif // APPLICATION_H

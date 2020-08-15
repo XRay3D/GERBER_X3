@@ -1,5 +1,6 @@
-#ifndef MYCLIPPER_H
-#define MYCLIPPER_H
+#pragma once
+//#ifndef MYCLIPPER_H
+//#define MYCLIPPER_H
 
 #include "clipper.hpp"
 #include <QDebug>
@@ -24,8 +25,8 @@ using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
-const cInt uScale = 100000;
-const double dScale = 1.0 / uScale;
+constexpr cInt uScale = 100000;
+constexpr double dScale = 1.0 / uScale;
 
 Path toPath(const QPolygonF& p);
 Paths toPaths(const QVector<QPolygonF>& p);
@@ -50,4 +51,4 @@ Path RectanglePath(double width, double height, const IntPoint& center = IntPoin
 void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
 void TranslatePath(Path& path, const IntPoint& pos);
 
-#endif // MYCLIPPER_H
+//#endif // MYCLIPPER_H

@@ -1,5 +1,6 @@
-#ifndef ABOUTFORM_H
-#define ABOUTFORM_H
+#pragma once
+//#ifndef ABOUTFORM_H
+//#define ABOUTFORM_H
 
 #pragma once
 
@@ -20,4 +21,4 @@ private:
     Ui::AboutForm* ui;
 };
 
-#endif // ABOUTFORM_H
+//#endif // ABOUTFORM_H

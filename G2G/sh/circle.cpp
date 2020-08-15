@@ -1,4 +1,8 @@
-﻿#include "circle.h"
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+#include "circle.h"
 #include "constructor.h"
 #include "sh.h"
 
@@ -25,9 +29,9 @@ Circle::Circle(QPointF center, QPointF pt)
     setAcceptHoverEvents(true);
     setZValue(std::numeric_limits<double>::max());
 
-    Scene::addItem(this);
-    Scene::addItem(sh[Center]);
-    Scene::addItem(sh[Point1]);
+    App::scene()->addItem(this);
+    App::scene()->addItem(sh[Center]);
+    App::scene()->addItem(sh[Point1]);
 }
 
 void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
@@ -43,11 +47,11 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
-        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
     }
     if (option->state & QStyle::State_MouseOver) {
         pen.setColor(Qt::red);
-        //        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
+        //        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         //        pen.setStyle(Qt::CustomDashLine);
         //        pen.setCapStyle(Qt::FlatCap);
         //        pen.setDashPattern({ 3.0, 3.0 });
@@ -61,20 +65,21 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 void Circle::redraw()
 {
     m_radius = (QLineF(sh[Center]->pos(), sh[Point1]->pos()).length());
-    const int intSteps = Settings::circleSegments(m_radius);
+    const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
     const IntPoint center(toIntPoint(sh[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
-    m_paths.first().clear();
+    Path& path = m_paths.first();
+    path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        m_paths.first().append(IntPoint(
+        path.append(IntPoint(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }
-    m_paths.first().append(m_paths.first().first());
+    path.append(path.first());
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(m_paths.first()));
+    m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });

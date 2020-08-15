@@ -1,5 +1,6 @@
-#ifndef QDRULER_H
-#define QDRULER_H
+#pragma once
+//#ifndef QDRULER_H
+//#define QDRULER_H
 
 #include <QPen>
 #include <QWidget>
@@ -59,4 +60,4 @@ private:
     RULER_TYPE rulerType;
 };
 
-#endif // QDRULER_H
+//#endif // QDRULER_H

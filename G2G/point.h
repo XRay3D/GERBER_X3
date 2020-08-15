@@ -1,5 +1,6 @@
-#ifndef POINT_H
-#define POINT_H
+#pragma once
+//#ifndef POINT_H
+//#define POINT_H
 
 #include "scene.h"
 
@@ -7,9 +8,9 @@
 #include <QGraphicsItem>
 #include <QPen>
 
-class Marker : public QGraphicsItem { //Object {
-    //    Q_OBJECT
+bool updateRect();
 
+class Marker : public QGraphicsItem {
 public:
     enum Type {
         Zero,
@@ -43,7 +44,6 @@ protected:
 };
 
 class Pin : public QObject, public QGraphicsItem {
-
 public:
     Pin(QObject* parent);
     ~Pin() override;
@@ -58,7 +58,7 @@ public:
     static double minY() { return qMin(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
     static double maxY() { return qMax(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
 
-    void resetPos(bool fl = true);
+    static void resetPos(bool fl = true);
     void updateToolTip();
     void setPos(const QPointF& pos);
 
@@ -77,7 +77,6 @@ protected:
 };
 
 class LayoutFrames : public QObject, public QGraphicsItem {
-    static LayoutFrames* m_instance;
     QPainterPath m_path;
 
 public:
@@ -86,8 +85,7 @@ public:
     int type() const override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    static LayoutFrames* instance();
-    static void update();
+    void updateRect(bool fl = false);
 };
 
-#endif // POINT_H
+//#endif // POINT_H

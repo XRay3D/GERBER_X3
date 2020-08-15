@@ -1,8 +1,9 @@
-#ifndef VARS_H
-#define VARS_H
+#pragma once
+//#ifndef EX_TYPES_H
+//#define EX_TYPES_H
 
-#include <datastream.h>
 #include <QPolygonF>
+#include <datastream.h>
 #include <type_traits>
 
 class DrillItem;
@@ -17,6 +18,11 @@ enum UnitMode {
 enum ZeroMode {
     LeadingZeros,
     TrailingZeros,
+};
+
+enum WorkMode {
+    DrillMode,
+    RouteMode,
 };
 
 enum MCode {
@@ -131,7 +137,6 @@ M17
 M30
 */
 
-
 class File;
 
 #pragma pack(push, 1)
@@ -169,51 +174,46 @@ struct Format {
 
 struct State {
     double currentToolDiameter() const;
-    //    double parseNumber(QString Str)
-    //    {
-    //        double val = 0.0;
-    //        int sign = +1;
-    //        if (!Str.isEmpty()) {
-    //            if (Str.contains('.')) {
-    //                val = Str.toDouble();
-    //            } else {
-    //                if (Str.startsWith('+')) {
-    //                    Str.remove(0, 1);
-    //                    sign = +1;
-    //                } else if (Str.startsWith('-')) {
-    //                    Str.remove(0, 1);
-    //                    sign = -1;
-    //                }
-    //                if (Str.length() < format->integer + format->decimal) {
-    //                    switch (format->zeroMode) {
-    //                    case LeadingZeros:
-    //                        Str = Str + QString(format->integer + format->decimal - Str.length(), '0');
-    //                        break;
-    //                    case TrailingZeros:
-    //                        Str = QString(format->integer + format->decimal - Str.length(), '0') + Str;
-    //                        break;
-    //                    }
-    //                }
-    //                val = Str.toDouble() * pow(10.0, -format->decimal) * sign;
-    //            }
-    //            if (format->unitMode == Inches)
-    //                val *= 25.4;
-    //        }
-    //        return val;
-    //    }
+
     void reset(Format* f);
     void updatePos();
 
-    QPair<QString, QString> rawPos;
-    QList<QPair<QString, QString>> rawPosList;
+    struct Pos {
+        QString A;
+        QString X;
+        QString Y;
+        friend QDataStream& operator<<(QDataStream& stream, const Pos& p)
+        {
+            stream << p.A;
+            stream << p.X;
+            stream << p.Y;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Pos& p)
+        {
+            stream >> p.A;
+            stream >> p.X;
+            stream >> p.Y;
+            return stream;
+        }
+        void clear()
+        {
+            A.clear();
+            X.clear();
+            Y.clear();
+        }
+    };
+
+    Pos rawPos;
+    QList<Pos> rawPosList;
     Format* format = nullptr;
-    GCode gCode = G_NULL;
+    GCode gCode = G05 /*G_NULL*/;
     MCode mCode = M_NULL;
+    WorkMode wm = DrillMode;
     int tCode = -1;
     QPointF pos;
     QPointF offsetedPos() const { return pos + format->offsetPos; }
     QPolygonF path;
-    int line = 0;
 
     friend QDataStream& operator<<(QDataStream& stream, const State& stt)
     {
@@ -221,10 +221,10 @@ struct State {
         stream << stt.rawPosList;
         stream << stt.gCode;
         stream << stt.mCode;
+        stream << stt.wm;
         stream << stt.tCode;
         stream << stt.pos;
         stream << stt.path;
-        stream << stt.line;
         return stream;
     }
     friend QDataStream& operator>>(QDataStream& stream, State& stt)
@@ -233,17 +233,17 @@ struct State {
         stream >> stt.rawPosList;
         stream >> stt.gCode;
         stream >> stt.mCode;
+        stream >> stt.wm;
         stream >> stt.tCode;
         stream >> stt.pos;
         stream >> stt.path;
-        stream >> stt.line;
         return stream;
     }
 };
 
 class Hole {
 public:
-    Hole() {}
+    Hole() { }
     Hole(const State& state, File* file)
         : file(file)
         , state(state)
@@ -263,14 +263,15 @@ public:
         stream << hole.state;
         return stream;
     }
+
     friend QDataStream& operator>>(QDataStream& stream, Hole& hole)
     {
         stream >> hole.state;
         return stream;
     }
-//    friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
+    //    friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
 };
 
 } // namespace Excellon
 
-#endif // VARS_H
+//#endif // EX_TYPES_H

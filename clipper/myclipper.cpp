@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "myclipper.h"
 #include <QElapsedTimer>
 #include <QLineF>
@@ -56,7 +60,7 @@ double Length(const IntPoint& pt1, const IntPoint& pt2)
 {
     double x = pt2.X - pt1.X;
     double y = pt2.Y - pt1.Y;
-    return sqrt(static_cast<double>(x) * static_cast<double>(x) + static_cast<double>(y) * static_cast<double>(y));
+    return sqrt(x * x + y * y);
 }
 
 //static inline bool qt_is_finite(double d)
@@ -79,7 +83,7 @@ Path CirclePath(double diametr, const IntPoint& center)
         return Path();
 
     const double radius = diametr * 0.5;
-    const int intSteps = Settings::circleSegments(radius * dScale);
+    const int intSteps = GlobalSettings::gbrGcCircleSegments(radius * dScale);
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
         poligon[i] = IntPoint(
@@ -133,9 +137,11 @@ void TranslatePath(Path& path, const IntPoint& pos)
 double Perimeter(const Path& path)
 {
     double p = 0.0;
-    for (int i = 0; i < path.size() - 1; ++i) {
-        p += Length(path[i], path[i + 1]);
+    for (int i = 0, j = path.size() - 1; i < path.size(); ++i) {
+        double x = path[j].X - path[i].X;
+        double y = path[j].Y - path[i].Y;
+        p += x * x + y * y;
+        j = i;
     }
-    p += Length(path.first(), path.last());
-    return p;
+    return sqrt(p);
 }

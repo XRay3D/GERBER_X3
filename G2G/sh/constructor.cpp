@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "constructor.h"
 #include "circle.h"
 #include "rectangle.h"
@@ -21,15 +25,16 @@ void Constructor::setSnap(bool snap) { m_snap = snap; }
 void Constructor::addShapePoint(const QPointF& value)
 {
     point = value;
+    qDebug() << type << counter << item << point;
     switch (type) {
     case Rect:
-        qDebug() << type << counter << item << point;
         switch (counter) {
         case 0:
-            item = new Rectangle(point, point + QPointF{ 1, 1 });
+            item = new Rectangle(point, point + QPointF { 1, 1 });
             break;
         default:
             type = NullPT;
+            item->setSelected(true);
             item = nullptr;
             action->setChecked(false);
             action = nullptr;
@@ -38,13 +43,13 @@ void Constructor::addShapePoint(const QPointF& value)
     case Line:
         break;
     case Elipse:
-        qDebug() << type << counter << item << point;
         switch (counter) {
         case 0:
-            item = new Circle(point, point + QPointF{ 1, 1 });
+            item = new Circle(point, point + QPointF { 1, 1 });
             break;
         default:
             type = NullPT;
+            item->setSelected(true);
             item = nullptr;
             action->setChecked(false);
             action = nullptr;

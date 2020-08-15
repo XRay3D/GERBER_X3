@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "scene.h"
 #include "graphicsview.h"
 #include <QDebug>
@@ -6,21 +10,24 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
 #include <gi/graphicsitem.h>
 #include <settings.h>
 
-Scene* Scene::m_self = nullptr;
-
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    m_self = this;
+    if (App::mInstance->m_scene) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
+        exit(1);
+    }
+    App::mInstance->m_scene = this;
 }
 
-Scene::~Scene() { m_self = nullptr; }
+Scene::~Scene() { App::mInstance->m_scene = nullptr; }
 
 void Scene::RenderPdf()
 {
@@ -66,35 +73,7 @@ QRectF Scene::itemsBoundingRect()
 
 bool Scene::drawPdf()
 {
-    if (m_self)
-        return m_self->m_drawPdf;
-    return false;
-}
-
-QList<QGraphicsItem*> Scene::selectedItems()
-{
-    if (m_self)
-        return m_self->QGraphicsScene::selectedItems();
-    return QList<QGraphicsItem*>();
-}
-
-void Scene::addItem(QGraphicsItem* item)
-{
-    if (m_self)
-        m_self->QGraphicsScene::addItem(item);
-}
-
-QList<QGraphicsItem*> Scene::items(Qt::SortOrder order)
-{
-    if (m_self)
-        return m_self->QGraphicsScene::items(order);
-    return QList<QGraphicsItem*>();
-}
-
-void Scene::update()
-{
-    if (m_self)
-        m_self->QGraphicsScene::update();
+    return m_drawPdf;
 }
 
 void Scene::setCross1(const QPointF& cross)
@@ -127,17 +106,17 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString(Settings::inch() ? "  ∆X = %1 in\n"
-                                                    "  ∆Y = %2 in\n"
-                                                    "  ∆ / = %3 in\n"
-                                                    "  %4°"
-                                                  : "  ∆X = %1 mm\n"
-                                                    "  ∆Y = %2 mm\n"
-                                                    "  ∆ / = %3 mm\n"
-                                                    "  %4°")
-                             .arg(rect.width() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(rect.height() / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(length / (Settings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+    const QString text = QString(GlobalSettings::inch() ? "  ∆X = %1 in\n"
+                                                          "  ∆Y = %2 in\n"
+                                                          "  ∆ / = %3 in\n"
+                                                          "  %4°"
+                                                        : "  ∆X = %1 mm\n"
+                                                          "  ∆Y = %2 mm\n"
+                                                          "  ∆ / = %3 mm\n"
+                                                          "  %4°")
+                             .arg(rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(length / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
@@ -145,7 +124,7 @@ void Scene::drawRuller(QPainter* painter)
     if (qFuzzyIsNull(line.length()))
         return;
 
-    const double k = GraphicsView::scaleFactor();
+    const double k = App::graphicsView()->scaleFactor();
 
     painter->setBrush(QColor(127, 127, 127, 100));
     painter->setPen(QPen(Qt::green, 0.0)); //1.5 * k));
@@ -201,7 +180,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, Settings::color(Colors::Background));
+    painter->fillRect(rect, GlobalSettings::guiColor(Colors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -209,106 +188,120 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    const long k = 1000000;
-    const double invK = 1.0 / k;
-    static bool in = Settings::inch();
-    if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != Settings::inch()) {
-        in = Settings::inch();
-        m_scale = views().first()->matrix().m11();
-        if (qFuzzyIsNull(m_scale))
-            return;
+    { // draw grid
+        const long upScale = 100000;
+        const long forLimit = 1000;
+        const double downScale = 1.0 / upScale;
+        static bool in = GlobalSettings::inch();
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != GlobalSettings::inch()) {
+            in = GlobalSettings::inch();
+            m_scale = views().first()->matrix().m11();
+#else
+        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != GlobalSettings::inch()) {
+            in = GlobalSettings::inch();
+            m_scale = views().first()->transform().m11();
+#endif
+            if (qFuzzyIsNull(m_scale))
+                return;
 
-        m_rect = rect;
+            m_rect = rect;
+            hGrid.clear();
+            vGrid.clear();
 
-        hGrid.clear();
-        vGrid.clear();
+            // Grid Step 0.1
+            double gridStep = GlobalSettings::gridStep(m_scale);
+            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+                      right = static_cast<long>(rect.right() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 hPos < right && ++nlp < forLimit; hPos += step) {
+                hGrid[hPos] = 0;
+            }
+            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+                      bottom = static_cast<long>(rect.bottom() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+                vGrid[vPos] = 0;
+            }
+            // Grid Step  0.5
+            gridStep *= 5;
+            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+                      right = static_cast<long>(rect.right() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 hPos < right && ++nlp < forLimit; hPos += step) {
+                hGrid[hPos] = 1;
+            }
+            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+                      bottom = static_cast<long>(rect.bottom() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+                vGrid[vPos] = 1;
+            }
+            // Grid Step  1.0
+            gridStep *= 2;
+            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+                      right = static_cast<long>(rect.right() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 hPos < right && ++nlp < forLimit; hPos += step) {
+                hGrid[hPos] = 2;
+            }
+            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+                      bottom = static_cast<long>(rect.bottom() * upScale),
+                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+                vGrid[vPos] = 2;
+            }
+        }
 
-        double gridStep = Settings::gridStep(m_scale);
+        const QColor color[] {
+            GlobalSettings::guiColor(Colors::Grid1),
+            GlobalSettings::guiColor(Colors::Grid5),
+            GlobalSettings::guiColor(Colors::Grid10),
+        };
 
-        for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * k),
-                  right = static_cast<long>(rect.right() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             hPos < right && ++nlp < 10000; hPos += step) {
-            hGrid[hPos] = 0;
-        }
-        for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * k),
-                  bottom = static_cast<long>(rect.bottom() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             vPos < bottom && ++nlp < 10000; vPos += step) {
-            vGrid[vPos] = 0;
-        }
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        QElapsedTimer t;
+        t.start();
+        const double k2 = 0.5 / m_scale;
+        //painter->setCompositionMode(QPainter::CompositionMode_Lighten);
 
-        gridStep *= 5; // 0.5;
-        for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * k),
-                  right = static_cast<long>(rect.right() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             hPos < right && ++nlp < 10000; hPos += step) {
-            hGrid[hPos] = 1;
-        }
-        for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * k),
-                  bottom = static_cast<long>(rect.bottom() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             vPos < bottom && ++nlp < 10000; vPos += step) {
-            vGrid[vPos] = 1;
+        for (int i = 0; i < 3; ++i) {
+            painter->setPen(QPen(color[i], 0.0));
+            for (long hPos : hGrid.keys(i)) {
+                if (hPos)
+                    painter->drawLine(QLineF(hPos * downScale + k2, rect.top(), hPos * downScale + k2, rect.bottom()));
+            }
+            for (long vPos : vGrid.keys(i)) {
+                if (vPos)
+                    painter->drawLine(QLineF(rect.left(), vPos * downScale + k2, rect.right(), vPos * downScale + k2));
+            }
         }
 
-        gridStep *= 2; // 1.0;
-        for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * k),
-                  right = static_cast<long>(rect.right() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             hPos < right && ++nlp < 10000; hPos += step) {
-            hGrid[hPos] = 2;
-        }
-        for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * k),
-                  bottom = static_cast<long>(rect.bottom() * k),
-                  step = static_cast<long>(gridStep * k), nlp = 0;
-             vPos < bottom && ++nlp < 10000; vPos += step) {
-            vGrid[vPos] = 2;
-        }
+        //        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
+
+        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));
+        painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
+        painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
     }
 
-    const QColor color[3]{
-        Settings::color(Colors::Grid1),
-        Settings::color(Colors::Grid5),
-        Settings::color(Colors::Grid10),
-    };
-
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing, false);
-
-    for (int i = 0; i < 3; ++i) {
-        painter->setPen(QPen(color[i], 1.0 / m_scale));
-        for (long hPos : hGrid.keys(i)) {
-            if (hPos)
-                painter->drawLine(QLineF(hPos * invK, rect.top(), hPos * invK, rect.bottom()));
+    { // screen mouse cross
+        QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
+        bool fl = false;
+        for (QGraphicsItem* item : items) {
+            if (item && item->type() != GiBridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
+                fl = true;
+                break;
+            }
         }
-        for (long vPos : vGrid.keys(i)) {
-            if (vPos)
-                painter->drawLine(QLineF(rect.left(), vPos * invK, rect.right(), vPos * invK));
-        }
+        if (fl)
+            painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0));
+        else
+            painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0));
+
+        painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
+        painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));
     }
-
-    const double k2 = 0.5 / m_scale;
-
-    painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
-    painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
-    painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
-
-    QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
-    bool fl = false;
-    for (QGraphicsItem* item : items) {
-        if (item && item->type() != GiBridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
-            fl = true;
-            break;
-        }
-    }
-    if (fl)
-        painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0 /*1.0 / scale*/));
-    else
-        painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0 /*1.0 / scale*/));
-
-    painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
-    painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));
 
     if (m_drawRuller)
         drawRuller(painter);

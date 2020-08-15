@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
@@ -59,8 +63,10 @@ static double const pi = 3.14159265358979323846;
 static double const two_pi = pi * 2;
 static double const def_arc_tolerance = 0.25;
 
-enum Direction { dRightToLeft,
-    dLeftToRight };
+enum Direction {
+    dRightToLeft,
+    dLeftToRight
+};
 
 static int const Unassigned = -1; //edge not currently 'owning' a solution
 static int const Skip = -2; //edge that would otherwise close a path
@@ -480,7 +486,7 @@ int PointInPolygon(const IntPoint& pt, const Path& path)
         return 0;
     IntPoint ip = path[0];
     for (int i = 1; i <= cnt; ++i) {
-        IntPoint ipNext = (i == cnt ? path[0] : path[i]);
+        const IntPoint& ipNext = (i == cnt ? path[0] : path[i]);
         if (ipNext.Y == pt.Y) {
             if ((ipNext.X == pt.X) || (ip.Y == pt.Y && ((ipNext.X > pt.X) == (ip.X < pt.X))))
                 return -1;
@@ -576,8 +582,7 @@ bool SlopesEqual(const TEdge& e1, const TEdge& e2, bool UseFullInt64Range)
 }
 //------------------------------------------------------------------------------
 
-bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
-    const IntPoint pt3, bool UseFullInt64Range)
+bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2, const IntPoint& pt3, bool UseFullInt64Range)
 {
 #ifndef use_int32
     if (UseFullInt64Range)
@@ -588,7 +593,7 @@ bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
 }
 //------------------------------------------------------------------------------
 
-bool SlopesEqual(const IntPoint pt1, const IntPoint pt2,
+bool SlopesEqual(const IntPoint& pt1, const IntPoint& pt2,
     const IntPoint pt3, const IntPoint pt4, bool UseFullInt64Range)
 {
 #ifndef use_int32
@@ -606,7 +611,7 @@ inline bool IsHorizontal(TEdge& e)
 }
 //------------------------------------------------------------------------------
 
-inline double GetDx(const IntPoint pt1, const IntPoint pt2)
+inline double GetDx(const IntPoint &pt1, const IntPoint& pt2)
 {
     return (pt1.Y == pt2.Y) ? HORIZONTAL : (double)(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
 }
@@ -883,8 +888,7 @@ OutPt* GetBottomPt(OutPt* pp)
 }
 //------------------------------------------------------------------------------
 
-bool Pt2IsBetweenPt1AndPt3(const IntPoint pt1,
-    const IntPoint pt2, const IntPoint pt3)
+bool Pt2IsBetweenPt1AndPt3(const IntPoint& pt1,    const IntPoint &pt2, const IntPoint& pt3)
 {
     if ((pt1 == pt3) || (pt1 == pt2) || (pt3 == pt2))
         return false;
@@ -2815,11 +2819,11 @@ bool Clipper::ProcessIntersections(const cInt topY)
         else
             return false;
     } catch (...) {
-        m_SortedEdges = 0;
+        m_SortedEdges = nullptr;
         DisposeIntersectNodes();
         throw clipperException("ProcessIntersections error");
     }
-    m_SortedEdges = 0;
+    m_SortedEdges = nullptr;
     return true;
 }
 //------------------------------------------------------------------------------
@@ -2871,11 +2875,11 @@ void Clipper::BuildIntersectList(const cInt topY)
                 e = eNext;
         }
         if (e->PrevInSEL)
-            e->PrevInSEL->NextInSEL = 0;
+            e->PrevInSEL->NextInSEL = nullptr;
         else
             break;
     } while (isModified);
-    m_SortedEdges = 0; //important
+    m_SortedEdges = nullptr; //important
 }
 //------------------------------------------------------------------------------
 
@@ -2949,8 +2953,8 @@ void Clipper::DoMaxima(TEdge* e)
         DeleteFromAEL(e);
         DeleteFromAEL(eMaxPair);
     } else if (e->OutIdx >= 0 && eMaxPair->OutIdx >= 0) {
-        if (e->OutIdx >= 0)
-            AddLocalMaxPoly(e, eMaxPair, e->Top);
+        //pvs  if (e->OutIdx >= 0)
+        AddLocalMaxPoly(e, eMaxPair, e->Top);
         DeleteFromAEL(e);
         DeleteFromAEL(eMaxPair);
     }
@@ -3039,7 +3043,7 @@ void Clipper::ProcessEdgesAtTopOfScanbeam(const cInt topY)
     e = m_ActiveEdges;
     while (e) {
         if (IsIntermediate(e, topY)) {
-            OutPt* op = 0;
+            OutPt* op = nullptr;
             if (e->OutIdx >= 0)
                 op = AddOutPt(e, e->Top);
             UpdateEdgeIntoAEL(e);
@@ -3413,7 +3417,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Next = op1;
             op1b->Next = op2b;
             op2b->Prev = op1b;
-            j->OutPt1 = op1;
+            //pvs  j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         } else {
@@ -3423,7 +3427,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Prev = op1;
             op1b->Prev = op2b;
             op2b->Next = op1b;
-            j->OutPt1 = op1;
+            //pvs   j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         }
@@ -3512,7 +3516,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Next = op1;
             op1b->Next = op2b;
             op2b->Prev = op1b;
-            j->OutPt1 = op1;
+            //pvs             j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         } else {
@@ -3522,7 +3526,7 @@ bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2)
             op2->Prev = op1;
             op1b->Prev = op2b;
             op2b->Next = op1b;
-            j->OutPt1 = op1;
+            //pvs             j->OutPt1 = op1;
             j->OutPt2 = op1b;
             return true;
         }
@@ -3891,7 +3895,7 @@ void ClipperOffset::DoOffset(double delta)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
 #ifndef GTE
-        steps = Settings::circleSegments(delta * dScale);
+        steps = GlobalSettings::gbrGcCircleSegments(delta * dScale);
 #else
         steps = 36;
 #endif

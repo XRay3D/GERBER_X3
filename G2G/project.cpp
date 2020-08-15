@@ -1,28 +1,40 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "project.h"
 #include "mainwindow.h"
+#include "settings.h"
 
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
 
-Project* Project::m_instance = nullptr;
+Project::Project()
+{
+    if (App::mInstance->m_project) {
+        QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");
+        exit(1);
+    }
+    App::mInstance->m_project = this;
+}
 
-Project::Project() { m_instance = this; }
-
-Project::~Project() { m_instance = nullptr; }
+Project::~Project() { App::mInstance->m_project = nullptr; }
 
 bool Project::save(QFile& file)
 {
     try {
         QDataStream out(&file);
-        out << G2G_Ver_3;
-        switch (G2G_Ver_3) {
+        out << (m_ver = G2G_Ver_4);
+        switch (m_ver) {
+        case G2G_Ver_4:
         case G2G_Ver_3:
-            out << m_spasingX;
-            out << m_spasingY;
+            out << m_spacingX;
+            out << m_spacingY;
             out << m_stepsX;
             out << m_stepsY;
+            [[fallthrough]];
         case G2G_Ver_2:
             out << Marker::get(Marker::Home)->pos();
             out << Marker::get(Marker::Zero)->pos();
@@ -35,6 +47,7 @@ bool Project::save(QFile& file)
             out << GCodePropertiesForm::clearence;
             out << GCodePropertiesForm::plunge;
             out << GCodePropertiesForm::glue;
+            [[fallthrough]];
         case G2G_Ver_1:;
         }
         out << m_files;
@@ -52,18 +65,19 @@ bool Project::open(QFile& file)
         QElapsedTimer t;
         t.start();
         QDataStream in(&file);
-        int ver;
-        in >> ver;
-        qDebug() << "Project ver:" << ver;
+        in >> m_ver;
+        qDebug() << "Project ver:" << m_ver;
 
         QPointF tmpPt;
 
-        switch (ver) {
+        switch (m_ver) {
+        case G2G_Ver_4:
         case G2G_Ver_3:
-            in >> m_spasingX;
-            in >> m_spasingY;
+            in >> m_spacingX;
+            in >> m_spacingY;
             in >> m_stepsX;
             in >> m_stepsY;
+            [[fallthrough]];
         case G2G_Ver_2:
             in >> tmpPt;
             Marker::get(Marker::Home)->setPos(tmpPt);
@@ -80,25 +94,26 @@ bool Project::open(QFile& file)
             in >> GCodePropertiesForm::clearence;
             in >> GCodePropertiesForm::plunge;
             in >> GCodePropertiesForm::glue;
+            [[fallthrough]];
         case G2G_Ver_1:;
         }
         in >> m_files;
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
             switch (filePtr->type()) {
             case FileType::Gerber:
-                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
+                App::fileModel()->addFile(static_cast<Gerber::File*>(filePtr.data()));
                 break;
-            case FileType::Drill:
-                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
+            case FileType::Excellon:
+                App::fileModel()->addFile(static_cast<Excellon::File*>(filePtr.data()));
                 break;
             case FileType::GCode:
-                FileModel::addFile(static_cast<GCode::File*>(filePtr.data()));
+                App::fileModel()->addFile(static_cast<GCode::File*>(filePtr.data()));
                 break;
             }
         }
         m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
-        LayoutFrames::update();
+        App::layoutFrames()->updateRect();
         return true;
     } catch (...) {
         qDebug() << file.errorString();
@@ -111,8 +126,8 @@ void Project::close()
     setWorckRect({});
     setStepsX(1);
     setStepsY(1);
-    setSpasingX(0.0);
-    setSpasingY(0.0);
+    setSpaceX(0.0);
+    setSpaceY(0.0);
 }
 
 AbstractFile* Project::file(int id)
@@ -137,7 +152,7 @@ bool Project::isEmpty()
 {
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Drill))
+        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Excellon))
             return true;
     }
     return false;
@@ -151,18 +166,18 @@ int Project::size()
 QRectF Project::getSelectedBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-        if (filePtr->itemGroup()->isVisible()) {
-            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
+        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
+            for (const GraphicsItem* const item : *itemGroup) {
                 if (item->isSelected()) {
                     for (const Path& path : item->paths()) {
                         for (const IntPoint& pt : path) {
-                            topleft.X = qMin(pt.X, topleft.X);
-                            topleft.Y = qMin(pt.Y, topleft.Y);
-                            bottomRight.X = qMax(pt.X, bottomRight.X);
-                            bottomRight.Y = qMax(pt.Y, bottomRight.Y);
+                            topLeft.X = qMin(pt.X, topLeft.X);
+                            topLeft.Y = qMin(pt.Y, topLeft.Y);
+                            botRight.X = qMax(pt.X, botRight.X);
+                            botRight.Y = qMax(pt.Y, botRight.Y);
                         }
                     }
                 }
@@ -170,7 +185,7 @@ QRectF Project::getSelectedBoundingRect()
         }
     }
 
-    const QRectF rect(toQPointF(topleft), toQPointF(bottomRight));
+    const QRectF rect(toQPointF(topLeft), toQPointF(botRight));
 
     if (!rect.isEmpty())
         setWorckRect(rect);
@@ -181,23 +196,23 @@ QRectF Project::getSelectedBoundingRect()
 QRectF Project::getBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-        if (filePtr->itemGroup()->isVisible()) {
-            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
+        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
+            for (const GraphicsItem* const item : *itemGroup) {
                 for (const Path& path : item->paths()) {
                     for (const IntPoint& pt : path) {
-                        topleft.X = qMin(pt.X, topleft.X);
-                        topleft.Y = qMin(pt.Y, topleft.Y);
-                        bottomRight.X = qMax(pt.X, bottomRight.X);
-                        bottomRight.Y = qMax(pt.Y, bottomRight.Y);
+                        topLeft.X = qMin(pt.X, topLeft.X);
+                        topLeft.Y = qMin(pt.Y, topLeft.Y);
+                        botRight.X = qMax(pt.X, botRight.X);
+                        botRight.Y = qMax(pt.Y, botRight.Y);
                     }
                 }
             }
         }
     }
-    return QRectF(toQPointF(topleft), toQPointF(bottomRight));
+    return QRectF(toQPointF(topLeft), toQPointF(botRight));
 }
 
 QString Project::fileNames()
@@ -206,7 +221,7 @@ QString Project::fileNames()
     QString fileNames;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
+        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon))
             fileNames.append(item->name()).append('|');
     }
     return fileNames;
@@ -217,7 +232,7 @@ int Project::contains(const QString& name)
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item->type() == FileType::Gerber || item->type() == FileType::Drill)
+        if (item->type() == FileType::Gerber || item->type() == FileType::Excellon)
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
@@ -229,21 +244,27 @@ bool Project::reload(int id, AbstractFile* file)
     file->m_id = id;
     if (m_files.contains(id)) {
         switch (file->type()) {
-        case FileType::Gerber:
+        case FileType::Gerber: {
+            Gerber::File* f = static_cast<Gerber::File*>(file);
             file->setColor(m_files[id]->color());
-            file->itemGroup()->setBrush(m_files[id]->itemGroup()->brush());
-            file->itemGroup()->addToScene();
-            file->itemGroup()->setZValue(-id);
-            static_cast<Gerber::File*>(file)->rawItemGroup()->setPen(static_cast<Gerber::File*>(m_files[id].data())->rawItemGroup()->pen());
-            static_cast<Gerber::File*>(file)->rawItemGroup()->addToScene();
-            static_cast<Gerber::File*>(file)->rawItemGroup()->setZValue(-id);
-            break;
-        case FileType::Drill:
+            // Normal
+            f->itemGroup(Gerber::File::Normal)->setBrush(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brush());
+            f->itemGroup(Gerber::File::Normal)->addToScene();
+            f->itemGroup(Gerber::File::Normal)->setZValue(-id);
+            // ApPaths
+            f->itemGroup(Gerber::File::ApPaths)->setPen(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::ApPaths)->pen());
+            f->itemGroup(Gerber::File::ApPaths)->addToScene();
+            f->itemGroup(Gerber::File::ApPaths)->setZValue(-id);
+            // Components
+            f->itemGroup(Gerber::File::Components)->addToScene();
+            f->itemGroup(Gerber::File::Components)->setZValue(-id);
+        } break;
+        case FileType::Excellon:
             static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
-        default:
+        case FileType::GCode:
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
@@ -263,7 +284,7 @@ int Project::addFile(AbstractFile* file)
     } else if (file->m_id == -1) {
         file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
-        FileModel::addFile(file);
+        App::fileModel()->addFile(file);
     }
     setChanged();
     return file->m_id;
@@ -293,28 +314,30 @@ void Project::saveSelectedToolpaths()
             files.remove(i--);
     }
 
-    QMap<QPair<Tool, Side>, QList<GCode::File*>> mm;
-    for (GCode::File* file : files)
-        mm[QPair { file->getTool(), file->side() }].append(file);
+    using Key = QPair<uint, Side>;
 
-    for (const QPair<Tool, Side>& key : mm.keys()) {
+    QMap<Key, QList<GCode::File*>> mm;
+    for (GCode::File* file : files)
+        mm[{ file->getTool().hash(), file->side() }].append(file);
+
+    for (const Key& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));
-        if (files.size() < 2 /*|| key.first == -1*/) {
+        if (files.size() < 2) {
             for (GCode::File* file : files) {
-                QString name(GCode::File::getLastDir().append(file->shortName()));
+                QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
-                    name += QStringList({ "(Top)", "(Bot)" })[file->side()];
-                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+                    name += QStringList({ "_TS", "_BS" })[file->side()];
+                name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
                 if (name.isEmpty())
                     return;
                 file->save(name);
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::File::getLastDir().append(files.first()->getTool().name()));
+            QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith("tap"))
-                name += QStringList({ "(Top)", "(Bot)" })[files.first()->side()];
-            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.tap)"));
+                name += QStringList({ "_TS", "_BS" })[files.first()->side()];
+            name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
             if (name.isEmpty())
                 return;
             QList<QString> sl;
@@ -325,10 +348,10 @@ void Project::saveSelectedToolpaths()
                 if (i == 0)
                     file->statFile();
                 file->addInfo(true);
-                file->genGcode();
-                if (i == files.size() - 1)
+                file->genGcodeAndTile();
+                if (i == (files.size() - 1))
                     file->endFile();
-                sl.append(file->getSl());
+                sl.append(file->gCodeText());
             }
             QFile file(name);
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -355,23 +378,23 @@ bool Project::isUntitled() { return m_isUntitled; }
 void Project::setUntitled(bool value)
 {
     m_isUntitled = value;
-    LayoutFrames::update();
+    App::layoutFrames()->updateRect();
 }
 
-double Project::spasingX() const { return m_spasingX; }
+double Project::spaceX() const { return m_spacingX; }
 
-void Project::setSpasingX(double value)
+void Project::setSpaceX(double value)
 {
-    m_spasingX = value;
-    LayoutFrames::update();
+    m_spacingX = value;
+    App::layoutFrames()->updateRect();
 }
 
-double Project::spasingY() const { return m_spasingY; }
+double Project::spaceY() const { return m_spacingY; }
 
-void Project::setSpasingY(double value)
+void Project::setSpaceY(double value)
 {
-    m_spasingY = value;
-    LayoutFrames::update();
+    m_spacingY = value;
+    App::layoutFrames()->updateRect();
 }
 
 int Project::stepsX() const { return m_stepsX; }
@@ -379,7 +402,7 @@ int Project::stepsX() const { return m_stepsX; }
 void Project::setStepsX(int value)
 {
     m_stepsX = value;
-    LayoutFrames::update();
+    App::layoutFrames()->updateRect();
 }
 
 int Project::stepsY() const { return m_stepsY; }
@@ -387,7 +410,7 @@ int Project::stepsY() const { return m_stepsY; }
 void Project::setStepsY(int value)
 {
     m_stepsY = value;
-    LayoutFrames::update();
+    App::layoutFrames()->updateRect();
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
@@ -395,7 +418,7 @@ QRectF Project::worckRect() const { return m_worckRect; }
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
-    LayoutFrames::update();
+    App::layoutFrames()->updateRect();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
@@ -413,7 +436,7 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     case static_cast<int>(FileType::Gerber):
         file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
         break;
-    case static_cast<int>(FileType::Drill):
+    case static_cast<int>(FileType::Excellon):
         file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
         break;
     case static_cast<int>(FileType::GCode):

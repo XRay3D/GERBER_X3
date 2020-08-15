@@ -1,10 +1,12 @@
-#ifndef DOUBLESPINBOX_H
-#define DOUBLESPINBOX_H
+#pragma once
+//#ifndef DOUBLESPINBOX_H
+//#define DOUBLESPINBOX_H
 
 #include <QDoubleSpinBox>
+#include <QStack>
 
 class DoubleSpinBox : public QDoubleSpinBox {
-//    Q_OBJECT
+    //    Q_OBJECT
 public:
     explicit DoubleSpinBox(QWidget* parent = nullptr);
     void setRange(double min, double max);
@@ -25,4 +27,4 @@ public:
     bool eventFilter(QObject* watched, QEvent* event) override;
 };
 
-#endif // DOUBLESPINBOX_H
+//#endif // DOUBLESPINBOX_H

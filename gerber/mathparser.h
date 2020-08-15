@@ -2,9 +2,10 @@
  * @link   https://habrahabr.ru/post/122397/
  * @author shurik
  */
+#pragma once
 
-#ifndef MATCHPARSER_H
-#define MATCHPARSER_H
+//#ifndef MATCHPARSER_H
+//#define MATCHPARSER_H
 
 #include <QMap>
 #include <QObject>
@@ -37,4 +38,4 @@ private:
     Result processFunction(QString func, Result r);
 };
 
-#endif // MATCHPARSER_H
+//#endif // MATCHPARSER_H

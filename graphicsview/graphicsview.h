@@ -1,5 +1,6 @@
-#ifndef VIEW_H
-#define VIEW_H
+#pragma once
+//#ifndef VIEW_H
+//#define VIEW_H
 
 #include <QGraphicsItem>
 #include <QGraphicsView>
@@ -12,24 +13,22 @@ class GraphicsView : public QGraphicsView {
     Q_OBJECT
 
     Q_PROPERTY(double scale READ getScale WRITE setScale)
-    friend class BridgeItem;
-    friend class SettingsDialog;
 
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
     ~GraphicsView() override;
     void setScene(QGraphicsScene* Scene);
-    static void zoom100();
-    static void zoomFit();
-    static void zoomToSelected();
-    static void zoomIn();
-    static void zoomOut();
+    void zoom100();
+    void zoomFit();
+    void zoomToSelected();
+    void zoomIn();
+    void zoomOut();
 
-    static double scaleFactor();
+    double scaleFactor();
     QPointF mappedPos(QMouseEvent* event) const;
 
     void setScale(double s);
-    static double getScale();
+    double getScale();
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
@@ -38,7 +37,6 @@ private:
     QDRuler* hRuler;
     QDRuler* vRuler;
     Scene* m_scene;
-    static GraphicsView* self;
 
     void updateRuler();
     template <class T>
@@ -58,4 +56,6 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
 };
 
-#endif // VIEW_H
+#include <app.h>
+
+//#endif // VIEW_H

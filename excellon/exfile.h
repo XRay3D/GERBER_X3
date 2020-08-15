@@ -1,5 +1,6 @@
-#ifndef EXFILE_H
-#define EXFILE_H
+#pragma once
+//#ifndef EXFILE_H
+//#define EXFILE_H
 
 #include "extypes.h"
 #include <abstractfile.h>
@@ -16,18 +17,15 @@ public:
     explicit File();
     ~File() override;
 
-    FileType type() const override { return FileType::Drill; }
+    FileType type() const override { return FileType::Excellon; }
 
     double tool(int t) const;
     QMap<int, double> tools() const;
 
     Format format() const;
     void setFormat(const Format& value);
-    void setFormatForFile(const Format& value);
 
-    void saveFormat();
-    void restoreFormat();
-    ItemGroup* itemGroup() const override { return m_itemGroup.data(); }
+    ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
 
 protected:
     Paths merge() const override;
@@ -40,4 +38,4 @@ public:
 };
 } // namespace Excellon
 
-#endif // EXFILE_H
+//#endif // EXFILE_H

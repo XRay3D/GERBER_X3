@@ -1,10 +1,11 @@
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#pragma once
+//#ifndef SETTINGSDIALOG_H
+//#define SETTINGSDIALOG_H
 
 #include "settings.h"
 #include "ui_settingsdialog.h"
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog, private Settings {
+class SettingsDialog : public QDialog, private Ui::SettingsDialog, private GlobalSettings {
     Q_OBJECT
 
 public:
@@ -19,4 +20,4 @@ public slots:
     void accept() override;
 };
 
-#endif // SETTINGSDIALOG_H
+//#endif // SETTINGSDIALOG_H

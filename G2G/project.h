@@ -1,5 +1,6 @@
-#ifndef PROJECT_H
-#define PROJECT_H
+#pragma once
+//#ifndef PROJECT_H
+//#define PROJECT_H
 
 #include <QMap>
 #include <QMutex>
@@ -16,6 +17,7 @@ enum FileVersion {
     G2G_Ver_1 = 1,
     G2G_Ver_2,
     G2G_Ver_3,
+    G2G_Ver_4,
 };
 
 class Project : public QObject {
@@ -50,6 +52,12 @@ public:
         return static_cast<T*>(m_files.value(id).data());
     }
 
+    AbstractFile* aFile(int id)
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_files.value(id).data();
+    }
+
     int addFile(AbstractFile* file);
 
     template <typename T>
@@ -76,11 +84,22 @@ public:
         return rfiles;
     }
 
+    void showFiles(const QList<QPair<int, int>>&& fileIds)
+    {
+        for (auto file : m_files)
+            file->itemGroup()->setVisible(false);
+        for (auto [fileId, giType] : fileIds) {
+            if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
+                file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
+            m_files[fileId]->itemGroup()->setVisible(true);
+        }
+    }
+
     template <typename T>
     QVector<T*> count()
     {
         QMutexLocker locker(&m_mutex);
-        int count;
+        int count = 0;
         for (const QSharedPointer<AbstractFile>& sp : m_files) {
             if (dynamic_cast<T*>(sp.data()))
                 ++count;
@@ -102,13 +121,11 @@ public:
     bool isUntitled();
     void setUntitled(bool value);
 
-    static Project* instance() { return m_instance; }
+    double spaceX() const;
+    void setSpaceX(double value);
 
-    double spasingX() const;
-    void setSpasingX(double value);
-
-    double spasingY() const;
-    void setSpasingY(double value);
+    double spaceY() const;
+    void setSpaceY(double value);
 
     int stepsX() const;
     void setStepsX(int value);
@@ -118,12 +135,13 @@ public:
 
     QRectF worckRect() const;
     void setWorckRect(const QRectF& worckRect);
+    int ver() const { return m_ver; }
 
 signals:
     void changed();
 
 private:
-    static Project* m_instance;
+    int m_ver;
     QMap<int, QSharedPointer<AbstractFile>> m_files;
     QMutex m_mutex;
     QSemaphore sem;
@@ -132,12 +150,13 @@ private:
     bool m_isModified = false;
     bool m_isUntitled = true;
 
-    double m_spasingX = 0.0;
-    double m_spasingY = 0.0;
+    double m_spacingX = 0.0;
+    double m_spacingY = 0.0;
     int m_stepsX = 1;
     int m_stepsY = 1;
 
     QRectF m_worckRect;
 };
+#include <app.h>
 
-#endif // PROJECT_H
+//#endif // PROJECT_H

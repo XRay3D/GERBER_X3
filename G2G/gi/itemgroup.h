@@ -1,17 +1,20 @@
-#ifndef ITEMGROUP_H
-#define ITEMGROUP_H
+#pragma once
+//#ifndef ITEMGROUP_H
+//#define ITEMGROUP_H
 
+#include "aperturepathitem.h"
+#include "componentitem.h"
 #include "drillitem.h"
 #include "gerberitem.h"
 #include "graphicsitem.h"
 #include "pathitem.h"
-#include "rawitem.h"
 
 class ItemGroup : public QList<GraphicsItem*> {
 public:
     ~ItemGroup();
     void append(GraphicsItem* value);
-    void setVisible( bool visible);
+    void setVisible(bool visible);
+    void setSelected(const QVector<int>& ids);
     bool isVisible() { return m_visible; }
     void addToScene();
     QBrush brush() const { return m_brush; }
@@ -26,4 +29,4 @@ private:
     QBrush m_brush;
 };
 
-#endif // ITEMGROUP_H
+//#endif // ITEMGROUP_H

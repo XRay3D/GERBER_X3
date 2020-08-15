@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
@@ -13,17 +17,25 @@
 #include <QSystemSemaphore>
 #include <QTranslator>
 
+#include "app.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "splashscreen.h"
 #include "version.h"
 
 void initIcon(const QString& path);
 void translation(QApplication* app);
 
+App* App::mInstance = nullptr;
+
 int main(int argc, char* argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
+
+    App stHolder;
 
     app.setApplicationName("G2G");
     app.setOrganizationName(VER_COMPANYNAME_STR);
@@ -42,7 +54,6 @@ int main(int argc, char* argv[])
 
     //    QSystemSemaphore semaphore("G2G_Semaphore", 1); // создаём семафор
     //    semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
-
     //#ifdef linux
     //    // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     //    // поэтому необходимо избавиться от данного мусора
@@ -53,7 +64,6 @@ int main(int argc, char* argv[])
     //#endif
     //    MainWindow* mainWin = nullptr;
     //    QSharedMemory sharedMemory("G2G_Memory"); // Создаём экземпляр разделяемой памяти
-
     //    auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
     //    bool is_running = false; // переменную для проверки ууже запущенного приложения
     //    if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
@@ -67,7 +77,6 @@ int main(int argc, char* argv[])
     //    parser.addPositionalArgument("url", "Url of file to open");
     //    parser.process(app);
     //    qDebug() << parser.positionalArguments().length() << parser.positionalArguments();
-
     //    if (is_running) {
     //        qDebug() << "instance()" << sharedMemory.data();
     //        system("pause");
@@ -80,7 +89,6 @@ int main(int argc, char* argv[])
     //        return 1;
     //    } else {
     //    }
-
     //    if (parser.positionalArguments().length()) {
     //        QSplashScreen* splash = nullptr;
     //        splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
@@ -114,8 +122,7 @@ int main(int argc, char* argv[])
     //        splash->finish(mainWin);
     //    }
 
-    QSplashScreen* splash = nullptr;
-    splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
+    SplashScreen* splash = new SplashScreen(QPixmap(QLatin1String(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
 
@@ -124,6 +131,7 @@ int main(int argc, char* argv[])
     }
 
     MainWindow mainWin;
+    mainWin.setObjectName("MainWindow");
     mainWin.setIconSize({ 24, 24 });
     mainWin.show();
     splash->finish(&mainWin);
@@ -156,17 +164,17 @@ void translation(QApplication* app)
     QString trFolder;
 
     if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
-        trFolder = "../G2G/translations/"; // for debug
+        trFolder = qApp->applicationDirPath() + "/../G2G/translations/"; // for debug
     else
         trFolder = (qApp->applicationDirPath() + "/translations/");
 
     auto translator = [app](const QString& path) {
         if (QFile::exists(path)) {
-            QTranslator* translator = new QTranslator();
-            if (translator->load(path))
-                app->installTranslator(translator);
+            QTranslator* pTranslator = new QTranslator();
+            if (pTranslator->load(path))
+                app->installTranslator(pTranslator);
             else
-                delete translator;
+                delete pTranslator;
         }
     };
 

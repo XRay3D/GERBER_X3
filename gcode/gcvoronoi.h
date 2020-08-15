@@ -1,5 +1,6 @@
-#ifndef VORONOI_H
-#define VORONOI_H
+#pragma once
+//#ifndef VORONOI_H
+//#define VORONOI_H
 
 #include "gccreator.h"
 
@@ -11,7 +12,7 @@ public:
     ~VoronoiCreator() override = default;
 
 protected:
-    void create(const GCodeParams& gcp) override; // Creator interface
+    void create() override; // Creator interface
 
 private:
     struct Pair {
@@ -54,12 +55,13 @@ private:
 
     void createVoronoi();
     void createOffset(const Tool& tool, double depth, const double width);
-    void mergePaths(Paths& paths, const double dist);
+    void mergePaths(Paths& paths, const double dist = 0.0);
     void clean(Path& path);
     void cgalVoronoi();
     void jcVoronoi();
+    void boostVoronoi();
     Paths toPath(const Pairs& pairs);
 };
 }
 
-#endif // VORONOI_H
+//#endif // VORONOI_H

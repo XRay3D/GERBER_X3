@@ -1,7 +1,8 @@
-#ifndef THERMALFORM_H
-#define THERMALFORM_H
+#pragma once
+//#ifndef THERMALFORM_H
+//#define THERMALFORM_H
 
-#include "../formsutil.h"
+#include "../formsutil/formsutil.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
 #include <QItemSelection>
@@ -10,27 +11,23 @@ namespace Ui {
 class ThermalForm;
 }
 
-class QCheckBox;
-class QGridLayout;
 namespace Gerber {
 class AbstractAperture;
 }
+
+class QCheckBox;
 
 class ThermalForm : public FormsUtil {
     Q_OBJECT
 
 public:
-    explicit ThermalForm(QWidget* parent = nullptr);
+    explicit ThermalForm(QWidget* parent);
     ~ThermalForm() override;
 
     void updateFiles();
     static bool canToShow();
 
 private slots:
-    void on_pbSelect_clicked();
-    void on_pbEdit_clicked();
-    void on_pbCreate_clicked();
-    void on_pbClose_clicked();
     void on_leName_textChanged(const QString& arg1);
 
     void on_cbxFileCurrentIndexChanged(int index);
@@ -44,13 +41,13 @@ private:
     void createTPI(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
-    ThermalModel* model;
+    ThermalModel* model = nullptr;
     void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-    QCheckBox* cbx;
-    QGridLayout* lay;
+    QCheckBox* chbx;
     double m_depth;
     inline void redraw();
+    Tool tool;
 
     // FormsUtil interface
 protected:
@@ -61,4 +58,4 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#endif // THERMALFORM_H
+//#endif // THERMALFORM_H

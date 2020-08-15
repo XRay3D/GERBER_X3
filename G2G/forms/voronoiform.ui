@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>230</width>
-    <height>293</height>
+    <width>246</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,64 +72,10 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Depth:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Tool:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
+   <item row="1" column="0" colspan="2">
     <widget class="DepthForm" name="dsbxDepth" native="true"/>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="lblToolName">
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pbSelect">
-       <property name="text">
-        <string>Select</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbEdit">
-       <property name="text">
-        <string>Edit</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <widget class="Line" name="line">
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
@@ -139,7 +85,34 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Solver:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="cbxSolver">
+     <item>
+      <property name="text">
+       <string>JC_VORONOI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CGAL</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="5" column="0">
     <widget class="QLabel" name="label_4">
      <property name="font">
       <font>
@@ -152,20 +125,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Width:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
+   <item row="5" column="1">
     <widget class="DoubleSpinBox" name="dsbxPrecision">
      <property name="suffix">
       <string> mm</string>
@@ -187,6 +147,45 @@
      </property>
     </widget>
    </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Frame Offset:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="DoubleSpinBox" name="dsbxOffset">
+     <property name="suffix">
+      <string> mm</string>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Width:</string>
+     </property>
+    </widget>
+   </item>
    <item row="7" column="1">
     <widget class="DoubleSpinBox" name="dsbxWidth">
      <property name="suffix">
@@ -197,6 +196,16 @@
      </property>
      <property name="singleStep">
       <double>0.100000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <widget class="Line" name="line_2">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -213,25 +222,8 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
-    <widget class="Line" name="line_2">
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
    <item row="9" column="1">
     <widget class="QLineEdit" name="leName"/>
-   </item>
-   <item row="11" column="0" colspan="2">
-    <widget class="QPushButton" name="pbClose">
-     <property name="text">
-      <string>Close</string>
-     </property>
-    </widget>
    </item>
    <item row="10" column="0" colspan="2">
     <widget class="QPushButton" name="pbCreate">
@@ -240,32 +232,15 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_7">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
+   <item row="11" column="0" colspan="2">
+    <widget class="QPushButton" name="pbClose">
      <property name="text">
-      <string>Solver:</string>
+      <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
-    <widget class="QComboBox" name="cbxSolver">
-     <item>
-      <property name="text">
-       <string>JC_VORONOI</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>CGAL</string>
-      </property>
-     </item>
-    </widget>
+   <item row="2" column="0" colspan="2">
+    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
    </item>
   </layout>
  </widget>
@@ -273,12 +248,18 @@
   <customwidget>
    <class>DoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>doublespinbox.h</header>
+   <header location="global">doublespinbox.h</header>
   </customwidget>
   <customwidget>
    <class>DepthForm</class>
    <extends>QWidget</extends>
-   <header>forms/depthform.h</header>
+   <header location="global">depthform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ToolSelectorForm</class>
+   <extends>QWidget</extends>
+   <header location="global">toolselectorform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

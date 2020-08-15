@@ -1,5 +1,6 @@
-#ifndef THERMALMODEL_H
-#define THERMALMODEL_H
+#pragma once
+//#ifndef THERMALMODEL_H
+//#define THERMALMODEL_H
 
 #include "thermalnode.h"
 
@@ -26,7 +27,6 @@ class ThermalModel : public QAbstractItemModel {
 
     ThermalNode* rootItem = nullptr;
     QList<ThermalNode*> m_data;
-    static ThermalModel* m_self;
 
 public:
     enum {
@@ -69,4 +69,4 @@ private:
     ThermalNode* getItem(const QModelIndex& index) const;
 };
 
-#endif // THERMALMODEL_H
+//#endif // THERMALMODEL_H
