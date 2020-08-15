@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "qdruler.h"
 
 #include <QDebug>
@@ -111,7 +115,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
     if (qFuzzyIsNull(rulerZoom))
         return;
 
-    gridStep = Settings::gridStep(rulerZoom);
+    gridStep = GlobalSettings::gridStep(rulerZoom);
 
     // drawing a scale of 0.1
     if ((gridStep * rulerZoom) > 35) {
@@ -141,9 +145,9 @@ void QDRuler::paintEvent(QPaintEvent* event)
     }
 
     // drawing no man's land between the ruler & view
-    if (/* DISABLES CODE */ (0)) {
-        QPointF starPt = Horizontal == rulerType ? rulerRect.bottomLeft() : rulerRect.topRight();
-        QPointF endPt = Horizontal == rulerType ? rulerRect.bottomRight() : rulerRect.bottomRight();
+    if (/* DISABLES CODE */ (1)) {
+        QPointF starPt((Horizontal == rulerType) ? rulerRect.bottomLeft() : rulerRect.topRight());
+        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight());//same branches!!!!!!
         painter.setPen(QPen(Qt::red, 2));
         painter.drawLine(starPt, endPt);
     }
@@ -186,10 +190,6 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
 {
     bool isHorzRuler = (Horizontal == rulerType);
     for (qreal current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
-        //        qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
-        //        qreal y1 = isHorzRuler ? rulerRect.top() + startPosition : current;
-        //        qreal x2 = isHorzRuler ? current : rulerRect.right();
-        //        qreal y2 = isHorzRuler ? rulerRect.bottom() : current;
         qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
         qreal y1 = isHorzRuler ? rulerRect.top() : current;
         qreal x2 = isHorzRuler ? current : rulerRect.right();
@@ -200,7 +200,7 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
             painter->save();
             painter->setPen(textPen); // zero width pen is cosmetic pen
             painter->setFont(font());
-            QString number = QString::number((startTickNo * gridStep * tickKoef * (Settings ::inch() ? 1.0 / 25.4 : 1.0)));
+            QString number = QString::number((startTickNo * gridStep * tickKoef * (GlobalSettings ::inch() ? 1.0 / 25.4 : 1.0)));
             if (1) {
                 if (startTickNo != 0) {
                     if (step > 0.0)

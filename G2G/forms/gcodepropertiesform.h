@@ -1,5 +1,6 @@
-#ifndef GCODEPROPERTIESFORM_H
-#define GCODEPROPERTIESFORM_H
+#pragma once
+//#ifndef GCODEPROPERTIESFORM_H
+//#define GCODEPROPERTIESFORM_H
 
 #include "point.h"
 #include <QWidget>
@@ -12,12 +13,11 @@ class GCodePropertiesForm : public QWidget {
     Q_OBJECT
 
 public:
-    explicit GCodePropertiesForm(QWidget* prnt = nullptr);
+    explicit GCodePropertiesForm(QWidget* parent);
     ~GCodePropertiesForm() override;
 
-    static void updatePosDsbxs();
-    static void updateAll();
-
+    void updatePosDsbxs();
+    void updateAll();
 
     static double safeZ;
     static double boardThickness;
@@ -26,10 +26,13 @@ public:
     static double plunge;
     static double glue;
 
-    static GCodePropertiesForm* self;
+private slots:
+    void on_pbResetHome_clicked();
+
+    void on_pbResetZero_clicked();
 
 private:
     Ui::GCodePropertiesForm* ui;
 };
 
-#endif // GCODEPROPERTIESFORM_H
+//#endif // GCODEPROPERTIESFORM_H

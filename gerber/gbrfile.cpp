@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "gbrfile.h"
 #include <QElapsedTimer>
 #include <QSemaphore>
@@ -9,7 +13,17 @@ using namespace Gerber;
 
 static Format* crutch;
 
-File::File(const QString& fileName) { m_name = fileName; }
+File::File(QDataStream& stream)
+{
+    m_itemGroup.append({ new ItemGroup, new ItemGroup });
+    read(stream);
+}
+
+File::File(const QString& fileName)
+{
+    m_itemGroup.append({ new ItemGroup, new ItemGroup });
+    m_name = fileName;
+}
 
 template <typename T>
 void addData(QByteArray& dataArray, const T& data)
@@ -17,7 +31,7 @@ void addData(QByteArray& dataArray, const T& data)
     dataArray.append(reinterpret_cast<const char*>(&data), sizeof(T));
 }
 
-File::~File() {}
+File::~File() { }
 
 const QMap<int, QSharedPointer<AbstractAperture>>* File::apertures() const { return &m_apertures; }
 
@@ -40,7 +54,7 @@ Paths File::merge() const
         else
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
     }
-    if (Settings::cleanPolygons())
+    if (GlobalSettings::gbrCleanPolygons())
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
     return m_mergedPaths;
 }
@@ -83,9 +97,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 File::ItemsType File::itemsType() const { return m_itemsType; }
 
-void File::setRawItemGroup(ItemGroup* itemGroup) { m_rawItemGroup = QSharedPointer<ItemGroup>(itemGroup); }
-
-ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
+ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroup[type]; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -119,41 +131,35 @@ bool File::flashedApertures() const
     return false;
 }
 
-ItemGroup* File::itemGroup() const
-{
-    if (m_itemsType == Normal)
-        return m_itemGroup.data();
-    else
-        return m_rawItemGroup.data();
-}
+ItemGroup* File::itemGroup() const { return m_itemGroup[m_itemsType]; }
 
 void File::addToScene() const
 {
-    m_itemGroup.data()->addToScene();
-    m_rawItemGroup.data()->addToScene();
-    m_itemGroup.data()->setZValue(-m_id);
-    m_rawItemGroup.data()->setZValue(-m_id);
+    for (const auto var : m_itemGroup) {
+        var->addToScene();
+        var->setZValue(-m_id);
+    }
 }
 
 void File::setColor(const QColor& color)
 {
     AbstractFile::setColor(color);
-    m_itemGroup->setBrush(color);
-    m_rawItemGroup->setPen(QPen(color, 0.0));
+    m_itemGroup[Normal]->setBrush(color);
+    m_itemGroup[ApPaths]->setPen(QPen(color, 0.0));
 }
 
 void File::setItemType(File::ItemsType type)
 {
     if (m_itemsType == type)
         return;
+
     m_itemsType = type;
-    if (m_itemsType == Normal) {
-        m_itemGroup.data()->setVisible(true);
-        m_rawItemGroup.data()->setVisible(false);
-    } else {
-        m_itemGroup.data()->setVisible(false);
-        m_rawItemGroup.data()->setVisible(true);
-    }
+
+    m_itemGroup[Normal]->setVisible(false);
+    m_itemGroup[ApPaths]->setVisible(false);
+    m_itemGroup[Components]->setVisible(false);
+
+    m_itemGroup[m_itemsType]->setVisible(true);
 }
 
 void Gerber::File::write(QDataStream& stream) const
@@ -165,12 +171,13 @@ void Gerber::File::write(QDataStream& stream) const
     //stream << miror;
     stream << rawIndex;
     stream << m_itemsType;
+    stream << m_components;
     _write(stream);
 }
 
 void Gerber::File::read(QDataStream& stream)
 {
-    crutch = &m_format;
+    crutch = &m_format; ///////////////////
     stream >> *this;
     stream >> m_apertures;
     stream >> m_format;
@@ -178,11 +185,84 @@ void Gerber::File::read(QDataStream& stream)
     //stream >> miror;
     stream >> rawIndex;
     stream >> m_itemsType;
+    stream >> m_components;
     for (GraphicObject& go : *this) {
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
     _read(stream);
+}
+
+void Gerber::File::createGi()
+{
+    // fill copper
+    for (Paths& paths : groupedPaths()) {
+        GraphicsItem* item = new GerberItem(paths, this);
+        m_itemGroup[Normal]->append(item);
+    }
+
+    // add components
+    for (const Component& c : m_components) {
+        if (!c.referencePoint.isNull())
+            m_itemGroup[Components]->append(new ComponentItem(c, this));
+    }
+
+    {
+        auto contains = [&](const Path& path) -> bool {
+            constexpr double k = 0.001 * uScale;
+            for (const Path& chPath : checkList) { // find copy
+                int counter = 0;
+                if (chPath.size() == path.size()) {
+                    for (const IntPoint& p1 : chPath) {
+                        for (const IntPoint& p2 : path) {
+                            if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                                ++counter;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (counter == path.size())
+                    return true;
+            }
+            return false;
+        };
+
+        for (const GraphicObject& go : *this) {
+            if (!go.path().isEmpty()) {
+                if (GlobalSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
+                    Paths paths;
+                    SimplifyPolygon(go.path(), paths);
+                    for (Path& path : paths) {
+                        path.append(path.first());
+                        if (!GlobalSettings::gbrSkipDuplicates()) {
+                            checkList.push_front(path);
+                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                        } else if (!contains(path)) {
+                            checkList.push_front(path);
+                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                        }
+                    }
+                } else {
+                    if (!GlobalSettings::gbrSkipDuplicates()) {
+                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                    } else if (!contains(go.path())) {
+                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        checkList.push_front(go.path());
+                    }
+                }
+            }
+        }
+    }
+
+    if (m_itemGroup[Components]->size())
+        m_itemsType = Components; ////////////////////////
+
+    m_itemGroup[Normal]->setVisible(false);
+    m_itemGroup[ApPaths]->setVisible(false);
+    m_itemGroup[Components]->setVisible(false);
+
+    m_itemGroup[m_itemsType]->setVisible(true);
 }
 
 QDebug operator<<(QDebug debug, const Gerber::State& state)
@@ -203,83 +283,6 @@ QDebug operator<<(QDebug debug, const Gerber::State& state)
                     << QStringLiteral("rotating") << state.rotating() << ", "
                     << ')';
     return debug;
-}
-
-void Gerber::File::createGi()
-{
-    for (Paths& paths : groupedPaths()) {
-        GraphicsItem* item = new GerberItem(paths, this);
-        item->m_id = m_itemGroup->size();
-        item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_itemGroup->append(item);
-    }
-
-    auto adder = [&](const Path& path) {
-        GraphicsItem* item = new RawItem(path, this);
-        item->m_id = rawItemGroup()->size();
-        item->setToolTip(QString("ID: %1").arg(item->m_id));
-        m_rawItemGroup->append(item);
-    };
-
-    auto contains = [&](const Path& path) -> bool {
-        for (const QSharedPointer<Path>& chPath : checkList) { // find copy
-            int counter = 0;
-            if (chPath->size() == path.size()) {
-                for (const IntPoint& p1 : *chPath) {
-                    for (const IntPoint& p2 : path) {
-                        const double k = 0.001 * uScale;
-                        if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-                            ++counter;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (counter == path.size())
-                return true;
-        }
-        return false;
-    };
-
-    setRawItemGroup(new ItemGroup);
-
-    for (const GraphicObject& go : *this) {
-        if (!go.path().isEmpty()) {
-            if (Settings::simplifyRegions() && go.path().first() == go.path().last()) {
-                Paths paths;
-                SimplifyPolygon(go.path(), paths);
-                for (Path& path : paths) {
-                    path.append(path.first());
-                    if (!Settings::skipDuplicates()) {
-                        checkList.append(QSharedPointer<Path>(new Path(path)));
-                        adder(*checkList.last());
-                    } else if (!contains(path)) {
-                        checkList.append(QSharedPointer<Path>(new Path(path)));
-                        adder(*checkList.last());
-                    }
-                }
-            } else {
-                if (!Settings::skipDuplicates()) {
-                    adder(go.path());
-                } else if (!contains(go.path())) {
-                    adder(go.path());
-                    checkList.append(QSharedPointer<Path>(new Path(go.path())));
-                }
-            }
-        }
-    }
-
-    if (m_itemsType == Normal)
-        m_rawItemGroup->setVisible(false);
-    else
-        m_itemGroup->setVisible(false);
-}
-
-QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& aperture)
-{
-    stream << aperture->type();
-    aperture->write(stream);
-    return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& aperture)

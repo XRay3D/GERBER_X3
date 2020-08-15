@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "gcthermal.h"
 
 #include <gbrfile.h>
@@ -8,14 +12,14 @@ ThermalCreator::ThermalCreator()
 {
 }
 
-void ThermalCreator::create(const GCodeParams& /*gcp*/)
+void ThermalCreator::create()
 {
-    createThermal(Project::instance()->file<Gerber::File>(static_cast<int>(m_gcp.dParam[FileId])), m_gcp.tool.first(), m_gcp.dParam[Depth]);
+    createThermal(App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()), m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
 {
-    self = this;
+    App::mInstance->m_creator = this;
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
@@ -25,9 +29,9 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     offset.Execute(m_returnPs, dOffset);
 
     // fix direction
-    if (m_gcp.side == Outer && !m_gcp.convent)
+    if (m_gcp.side() == Outer && !m_gcp.convent())
         ReversePaths(m_returnPs);
-    else if (m_gcp.side == Inner && m_gcp.convent)
+    else if (m_gcp.side() == Inner && m_gcp.convent())
         ReversePaths(m_returnPs);
 
     for (Path& path : m_returnPs)
@@ -62,7 +66,6 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
         clipper.Execute(ctIntersection, framePaths, pftPositive);
     }
     // create thermal
-    //self = nullptr;
     for (int index = 0; index < m_returnPs.size(); ++index) {
         const Path& path = m_returnPs.at(index);
         Paths paths;
@@ -89,8 +92,9 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new GCode::File(sortB(m_returnPss), tool, depth, Thermal);
-        m_file->setFileName(tool.name());
+        m_gcp.gcType = Thermal;
+        m_file = new GCode::File(sortB(m_returnPss), m_gcp);
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }

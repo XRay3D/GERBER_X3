@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "gcprofile.h"
 #include "gcfile.h"
 
@@ -10,26 +14,25 @@ ProfileCreator::ProfileCreator()
 {
 }
 
-void ProfileCreator::create(const GCodeParams& gcp)
+void ProfileCreator::create()
 {
-    m_gcp = gcp;
-    createProfile(gcp.tool.first(), gcp.dParam[Depth]);
+    createProfile(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    self = this;
+    App::mInstance->m_creator = this;
 
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset
-    if (m_gcp.side == On) {
+    if (m_gcp.side() == On) {
         m_returnPs = m_workingPs;
 
         for (Path& path : m_returnPs)
             path.append(path.first());
 
         // fix direction
-        if (m_gcp.convent)
+        if (m_gcp.convent())
             ReversePaths(m_returnPs);
 
         if (m_workingRawPs.size())
@@ -37,7 +40,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     } else {
         // calc offset
-        const double dOffset = (m_gcp.side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
         // execute offset
         if (!m_workingPs.isEmpty()) {
@@ -56,9 +59,9 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
             m_returnPs.append(m_workingRawPs);
 
         // fix direction
-        if (m_gcp.side == Outer && !m_gcp.convent)
+        if (m_gcp.side() == Outer && !m_gcp.convent())
             ReversePaths(m_returnPs);
-        else if (m_gcp.side == Inner && m_gcp.convent)
+        else if (m_gcp.side() == Inner && m_gcp.convent())
             ReversePaths(m_returnPs);
 
         for (Path& path : m_returnPs)
@@ -72,7 +75,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     // find Bridges
     QVector<BridgeItem*> bridgeItems;
-    for (QGraphicsItem* item : Scene::items()) {
+    for (QGraphicsItem* item : App::scene()->items()) {
         if (item->type() == GiBridge)
             bridgeItems.append(static_cast<BridgeItem*>(item));
     }
@@ -125,8 +128,9 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
-        m_file = new File(m_returnPss, tool, depth, Profile);
-        m_file->setFileName(tool.name());
+        m_gcp.gcType = Profile;
+        m_file = new File(m_returnPss, m_gcp);
+        m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
 }

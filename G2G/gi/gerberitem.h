@@ -1,5 +1,6 @@
-#ifndef WORKITEM_H
-#define WORKITEM_H
+#pragma once
+//#ifndef WORKITEM_H
+//#define WORKITEM_H
 
 #include "graphicsitem.h"
 
@@ -27,10 +28,11 @@ public:
     // GraphicsItem interface
     void redraw() override;
     Paths paths() const override;
-    Paths& rPaths() override;
+    Paths* rPaths() override;
     //const Gerber::File* file() const;
 
 private:
     Paths& m_paths;
+    QPolygonF fillPolygon;
 };
-#endif // WORKITEM_H
+//#endif // WORKITEM_H

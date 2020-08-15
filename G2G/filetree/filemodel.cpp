@@ -1,49 +1,51 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "filemodel.h"
-#include "drillnode.h"
+#include "exnode.h"
 #include "foldernode.h"
-#include "gcodenode.h"
-#include "gerbernode.h"
+#include "gbrnode.h"
+#include "gcnode.h"
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>
 #include <project.h>
-
-FileModel* FileModel::m_self = nullptr;
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem"))
     , mimeType(QStringLiteral("application/GCodeItem"))
 {
-    m_self = this;
     rootItem->append(new FolderNode(tr("Gerber Files")));
     rootItem->append(new FolderNode(tr("Excellon")));
     rootItem->append(new FolderNode(tr("Tool Paths")));
     rootItem->append(new FolderNode(tr("Special")));
+    App::mInstance->m_fileModel = this;
 }
 
 FileModel::~FileModel()
 {
     delete rootItem;
-    m_self = nullptr;
+    App::mInstance->m_fileModel = nullptr;
 }
 
 void FileModel::addFile(AbstractFile* file)
 {
-    if (!m_self || !file)
+    if (!file)
         return;
 
-    AbstractNode* item(m_self->rootItem->child(static_cast<int>(file->type())));
-    QModelIndex index = m_self->createIndex(0, 0, item);
+    AbstractNode* item(rootItem->child(static_cast<int>(file->type())));
+    QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    m_self->beginInsertRows(index, rowCount, rowCount);
+    beginInsertRows(index, rowCount, rowCount);
     switch (file->type()) {
     case FileType ::Gerber:
         item->append(new GerberNode(file->id()));
         break;
-    case FileType ::Drill:
-        item->append(new DrillNode(file->id()));
+    case FileType ::Excellon:
+        item->append(new ExcellonNode(file->id()));
         break;
     case FileType::GCode:
         item->append(new GcodeNode(file->id()));
@@ -51,26 +53,24 @@ void FileModel::addFile(AbstractFile* file)
     default:
         break;
     }
-    m_self->endInsertRows();
+    endInsertRows();
 
-    QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));
-    emit m_self->select(selectIndex);
+    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
+    emit select(selectIndex);
 }
 
 void FileModel::closeProject()
 {
-    if (m_self) {
-        AbstractNode* item;
-        for (int i = 0; i < m_self->rootItem->childCount(); ++i) {
-            item = m_self->rootItem->child(i);
-            QModelIndex index = m_self->createIndex(i, 0, item);
-            int rowCount = item->childCount();
-            if (rowCount) {
-                m_self->beginRemoveRows(index, 0, rowCount - 1);
-                for (int i = 0; i < rowCount; ++i)
-                    item->remove(0);
-                m_self->endRemoveRows();
-            }
+    AbstractNode* item;
+    for (int i = 0; i < rootItem->childCount(); ++i) {
+        item = rootItem->child(i);
+        QModelIndex index = createIndex(i, 0, item);
+        int rowCount = item->childCount();
+        if (rowCount) {
+            beginRemoveRows(index, 0, rowCount - 1);
+            for (int i = 0; i < rowCount; ++i)
+                item->remove(0);
+            endRemoveRows();
         }
     }
 }
@@ -158,8 +158,6 @@ int FileModel::rowCount(const QModelIndex& parent) const
         return 0;
     return getItem(parent)->childCount();
 }
-
-FileModel* FileModel::self() { return m_self; }
 
 //QStringList FileModel::mimeTypes() const
 //{

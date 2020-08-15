@@ -1,6 +1,8 @@
-#ifndef TOOL_H
-#define TOOL_H
+#pragma once
+//#ifndef TOOL_H
+//#define TOOL_H
 
+#include <QDebug>
 #include <QJsonObject>
 #include <QMap>
 #include <QMessageBox>
@@ -9,6 +11,7 @@
 class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
     friend QDataStream& operator>>(QDataStream& stream, Tool& tool);
+    friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
     Tool();
@@ -16,8 +19,9 @@ public:
     enum Type {
         Drill,
         EndMill,
-        Engraving,
-        Group
+        Engraver,
+        Laser,
+        Group = 100
     };
 
     enum {
@@ -30,11 +34,12 @@ public:
         SpindleSpeed,
         Stepover,
         OneTurnCutPercent,
-        StepoverPercent,
+        StepoverPercent
     };
 
     // name
     QString name() const;
+    QString nameEnc() const;
     void setName(const QString& name);
     // note
     QString note() const;
@@ -49,6 +54,7 @@ public:
     double diameter() const;
     void setDiameter(double diameter);
     // feedRate
+    double feedRateMmS() const;
     double feedRate() const;
     void setFeedRate(double feedRate);
     // oneTurnCut
@@ -77,10 +83,10 @@ public:
     double getDepth() const;
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;
-    bool isValid();
+    bool isValid() const;
     QIcon icon() const;
-    QString errorStr();
-    void errorMessageBox(QWidget* parent = nullptr);
+    QString errorStr() const;
+    void errorMessageBox(QWidget* parent = nullptr) const;
     uint hash() const;
 
 private:
@@ -124,4 +130,4 @@ public:
 
 Q_DECLARE_METATYPE(Tool)
 
-#endif // TOOL_H
+//#endif // TOOL_H

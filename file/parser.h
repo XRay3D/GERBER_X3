@@ -1,5 +1,6 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
+//#ifndef PARSER_H
+//#define PARSER_H
 
 #include "abstractfile.h"
 #include <QObject>
@@ -22,4 +23,4 @@ protected:
     AbstractFile* m_file = nullptr;
 };
 
-#endif // PARSER_H
+//#endif // PARSER_H

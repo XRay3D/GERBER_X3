@@ -1,5 +1,6 @@
-#ifndef SHAPES_H
-#define SHAPES_H
+#pragma once
+//#ifndef SHAPES_H
+//#define SHAPES_H
 
 #include <QPointF>
 class QGraphicsItem;
@@ -37,4 +38,4 @@ private:
 };
 
 } // namespace ShapePr
-#endif // SHAPES_H
+//#endif // SHAPES_H

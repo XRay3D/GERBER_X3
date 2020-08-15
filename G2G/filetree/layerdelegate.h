@@ -1,5 +1,6 @@
-#ifndef LAYERDELEGATE_H
-#define LAYERDELEGATE_H
+#pragma once
+//#ifndef LAYERDELEGATE_H
+//#define LAYERDELEGATE_H
 
 #include <QStyledItemDelegate>
 
@@ -36,4 +37,4 @@ public:
 private slots:
     void commitAndCloseEditor();
 };
-#endif // LAYERDELEGATE_H
+//#endif // LAYERDELEGATE_H

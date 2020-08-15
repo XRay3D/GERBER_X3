@@ -57,6 +57,7 @@
 #include <queue>
 #include <set>
 #include <stdexcept>
+#include <stdint.h>
 #include <vector>
 
 #include <QDataStream>
@@ -85,7 +86,7 @@ typedef int cInt;
 static cInt const loRange = 0x7FFF;
 static cInt const hiRange = 0x7FFF;
 #else
-typedef signed /*long*/ long cInt;
+typedef int32_t cInt;
 static cInt const loRange = 0x40000000;
 static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
@@ -138,7 +139,52 @@ struct IntPoint {
 typedef QVector /*std::vector*/<IntPoint> Path;
 typedef QVector /*std::vector*/<Path> Paths;
 
-inline Path& operator<<(Path& poly, const IntPoint& p)
+//struct Path : public QVector<IntPoint> {
+//    Path() = default;
+//    Path(int size)
+//        : QVector(size)
+//    {
+//    }
+//    Path(int size, const IntPoint& t)
+//        : QVector(size, t)
+//    {
+//    }
+//    Path(const QVector<IntPoint>& v)
+//        : QVector(v)
+//    {
+//    }
+//    Path(const std::initializer_list<IntPoint>& v)
+//        : QVector(v)
+//    {
+//    }
+//    Path(const Path& v) = default;
+//    int id {};
+//};
+
+//struct Paths : public QVector<Path> {
+//    Paths() = default;
+//    Paths(int size)
+//        : QVector(size)
+//    {
+//    }
+//    Paths(int size, const Path& t)
+//        : QVector(size, t)
+//    {
+//    }
+//    Paths(const QVector<Path>& v)
+//        : QVector(v)
+//    {
+//    }
+//    Paths(const std::initializer_list<Path>& v)
+//        : QVector(v)
+//    {
+//    }
+//    Paths(const Paths& v) = default;
+//    int id {};
+//};
+
+inline Path&
+operator<<(Path& poly, const IntPoint& p)
 {
     poly.push_back(p);
     return poly;

@@ -1,6 +1,8 @@
-#include "thermalmodel.h"
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 
-ThermalModel* ThermalModel::m_self = nullptr;
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+#include "thermalmodel.h"
 
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
@@ -16,8 +18,7 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 ThermalModel::ThermalModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
-    m_self = this;
-    rootItem = new ThermalNode(QIcon(), "");
+    rootItem = new ThermalNode(this);
 }
 
 ThermalModel::~ThermalModel()

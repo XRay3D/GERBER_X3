@@ -1,11 +1,21 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "abstractfile.h"
 
+#include <QApplication>
+#include <splashscreen.h>
+
 AbstractFile::AbstractFile()
-    : m_itemGroup(QSharedPointer<ItemGroup>(new ItemGroup))
+    : m_itemGroup(1, new ItemGroup)
 {
 }
 
-AbstractFile::~AbstractFile() {}
+AbstractFile::~AbstractFile()
+{
+    qDeleteAll(m_itemGroup);
+}
 
 QString AbstractFile::shortName() const { return QFileInfo(m_name).fileName(); }
 
@@ -13,7 +23,7 @@ QString AbstractFile::name() const { return m_name; }
 
 void AbstractFile::setFileName(const QString& fileName) { m_name = fileName; }
 
-ItemGroup* AbstractFile::itemGroup() const { return m_itemGroup.data(); }
+//ItemGroup* AbstractFile::itemGroup() const { return m_itemGroup.data(); }
 
 Paths AbstractFile::mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
 
@@ -57,6 +67,10 @@ void AbstractFile::_read(QDataStream& stream)
     stream >> m_side;
     stream >> m_color;
     stream >> m_date;
+
+    if (App::splashScreen())
+        App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+
     createGi();
     bool fl;
     stream >> fl;

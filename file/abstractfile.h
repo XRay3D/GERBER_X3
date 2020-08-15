@@ -1,17 +1,18 @@
-#ifndef GAbstractFile_H
-#define GAbstractFile_H
+#pragma once
+//#ifndef GAbstractFile_H
+//#define GAbstractFile_H
 
 #include <QDateTime>
 #include <QFileInfo>
-#include <myclipper.h>
 #include <datastream.h>
 #include <gi/itemgroup.h>
+#include <myclipper.h>
 
 using namespace ClipperLib;
 
 enum class FileType {
     Gerber,
-    Drill,
+    Excellon,
     GCode,
 };
 
@@ -50,6 +51,7 @@ public:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void createGi() = 0;
+    //    virtual void selected() = 0;
 
     Side side() const;
     void setSide(Side side);
@@ -63,9 +65,9 @@ protected:
     int m_id = -1;
     virtual Paths merge() const = 0;
 
-    QSharedPointer<ItemGroup> m_itemGroup;
-    QList<QString> m_lines;
+    QVector<ItemGroup*> m_itemGroup;
     QString m_name;
+    QList<QString> m_lines;
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
 
@@ -79,4 +81,4 @@ protected:
 
 //Q_DECLARE_METATYPE(AbstractFile)
 
-#endif // GAbstractFile_H
+//#endif // GAbstractFile_H

@@ -1,6 +1,8 @@
-#ifndef GERBERPARSER_H
-#define GERBERPARSER_H
+#pragma once
+//#ifndef GERBERPARSER_H
+//#define GERBERPARSER_H
 
+#include "gbrattributes.h"
 #include "gbrfile.h"
 #include "gbrtypes.h"
 #include <QObject>
@@ -40,13 +42,17 @@ private:
 
     QMap<QString, QString> m_apertureMacro;
 
-    enum WorkingType {
-        Normal,
-        StepRepeat,
-        ApertureBlock,
+    struct WorkingType {
+        enum eWT {
+            Normal,
+            StepRepeat,
+            ApertureBlock,
+        };
+        eWT workingType = Normal;
+        int apertureBlockId = 0;
     };
 
-    QStack<QPair<WorkingType, int>> m_abSrIdStack;
+    QStack<WorkingType> m_abSrIdStack;
 
     Path m_path;
     State m_state;
@@ -56,6 +62,12 @@ private:
     int m_goId = 0;
 
     StepRepeatStr m_stepRepeat;
+    QMap<QString, Component> components;
+    QString refDes;
+    int aperFunction = -1;
+    QMap<int, int> aperFunctionMap;
+    //Attributes att;
+
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -78,4 +90,4 @@ private:
     /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
 };
 }
-#endif // GERBERPARSER_H
+//#endif // GERBERPARSER_H

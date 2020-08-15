@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "thermaldelegate.h"
 #include "thermalmodel.h"
 
@@ -44,20 +48,13 @@ void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
     switch (index.column()) {
     case ThermalModel::ThName:
     case ThermalModel::ThPos:
-        break;
-    case ThermalModel::ThGapAngle: {
-        auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
-            return;
-        dsbx->setValue(index.data(Qt::EditRole).toDouble());
         return;
-    }
-    case ThermalModel::ThGapThickness: {
+    case ThermalModel::ThGapAngle:
+    case ThermalModel::ThGapThickness:{
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
         dsbx->setValue(index.data(Qt::EditRole).toDouble());
-
         return;
     }
     case ThermalModel::ThGapCount: {
@@ -75,15 +72,9 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
     switch (index.column()) {
     case ThermalModel::ThName:
     case ThermalModel::ThPos:
-        break;
-    case ThermalModel::ThGapAngle: {
-        auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
-            return;
-        model->setData(index, dsbx->value());
         return;
-    }
-    case ThermalModel::ThGapThickness: {
+    case ThermalModel::ThGapAngle:
+    case ThermalModel::ThGapThickness:  {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;

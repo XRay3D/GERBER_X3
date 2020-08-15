@@ -1,20 +1,22 @@
-#ifndef GFILE_H
-#define GFILE_H
+#pragma once
+//#ifndef GFILE_H
+//#define GFILE_H
 
 #include "gbraperture.h"
+#include "gbrcomponent.h"
 #include "gbrtypes.h"
 
 #include <QDebug>
 #include <abstractfile.h>
+#include <forward_list>
 #include <gi/itemgroup.h>
-
 namespace Gerber {
 
 class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    explicit File(QDataStream& stream) { read(stream); }
+    explicit File(QDataStream& stream);
     explicit File(const QString& name = "");
     ~File() override;
 
@@ -25,7 +27,8 @@ public:
 
     enum ItemsType {
         Normal,
-        Raw,
+        ApPaths,
+        Components,
     };
 
     Format* format() { return &m_format; }
@@ -33,8 +36,7 @@ public:
     bool flashedApertures() const;
     const QMap<int, QSharedPointer<AbstractAperture>>* apertures() const;
     void setItemType(ItemsType type);
-    void setRawItemGroup(ItemGroup* itemGroup);
-    ItemGroup* rawItemGroup() const;
+    ItemGroup* itemGroup(ItemsType type) const;
     ItemsType itemsType() const;
     FileType type() const override { return FileType::Gerber; }
     ItemGroup* itemGroup() const override;
@@ -45,15 +47,16 @@ protected:
     Paths merge() const override;
 
 private:
+    QList<Component> m_components;
+
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
     ItemsType m_itemsType = Normal;
-    QSharedPointer<ItemGroup> m_rawItemGroup;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
     //Layer layer = Copper;
     //Miror miror = Vertical;
     QVector<int> rawIndex;
-    QList<QSharedPointer<Path>> checkList;
+    std::forward_list<Path> checkList;
 
     // AbstractFile interface
 public:
@@ -68,4 +71,4 @@ public:
 
 Q_DECLARE_METATYPE(Gerber::File)
 
-#endif // GFILE_H
+//#endif // GFILE_H

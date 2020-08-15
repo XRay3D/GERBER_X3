@@ -1,5 +1,6 @@
-#ifndef TOOLPATHUTIL_H
-#define TOOLPATHUTIL_H
+#pragma once
+//#ifndef TOOLPATHUTIL_H
+//#define TOOLPATHUTIL_H
 
 #include "tooldatabase/tool.h"
 #include <QThread>
@@ -13,6 +14,7 @@ namespace GCode {
 class File;
 }
 
+class GraphicsItem;
 class QProgressDialog;
 
 class FormsUtil : public QWidget {
@@ -20,45 +22,48 @@ class FormsUtil : public QWidget {
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(const QString& name, GCode::Creator* tps, QWidget* parent = nullptr);
+    explicit FormsUtil(GCode::Creator* tps, QWidget* parent = nullptr);
     ~FormsUtil() override;
     virtual void editFile(GCode::File* file) = 0;
 
 signals:
-    void createToolpath(const GCode::GCodeParams&);
+    void createToolpath();
 
 protected:
-    void readTools(const QVector<Tool*>& tools) const;
-    void writeTools(const QVector<Tool>& tools) const;
     virtual void createFile() = 0;
     virtual void updateName() = 0;
 
     void setFile(GCode::File* file);
 
-    int fileCount;
-    Tool tool;
-    Tool tool2;
-    GCode::Direction direction = GCode::Climb;
-    GCode::SideOfMilling side = GCode::Outer;
-    Side boardSide = Top;
+    // QObject interface
+    virtual void timerEvent(QTimerEvent* event) override;
 
-    QString m_fileName;
-
-    QMap<int, QVector<int>> m_usedItems;
-    bool m_editMode = false;
     GCode::Creator* m_tpc = nullptr;
 
+    GCode::Direction direction = GCode::Climb;
+    GCode::SideOfMilling side = GCode::Outer;
+
+    void addUsedGi(GraphicsItem* gi);
+
+    UsedItems m_usedItems;
+
+    QString m_fileName;
+    Side boardSide = Top;
+
+    bool m_editMode = false;
+    int fileId = -1;
+
+    int fileCount;
+
 private:
-    const QString m_name;
+    void cancel();
+
     QThread thread;
     GCode::File* m_file;
-    void cancel();
     QProgressDialog* pd;
     int m_timerId = 0;
-
-    // QObject interface
-protected:
-    virtual void timerEvent(QTimerEvent* event) override;
 };
 
-#endif // TOOLPATHUTIL_H
+//Q_DECLARE_METATYPE(QMap<int, QVector<int>>)
+
+//#endif // TOOLPATHUTIL_H

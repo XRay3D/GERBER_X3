@@ -1,5 +1,6 @@
-#ifndef TOOLPATHCREATOR_H
-#define TOOLPATHCREATOR_H
+#pragma once
+//#ifndef TOOLPATHCREATOR_H
+//#define TOOLPATHCREATOR_H
 
 #include "gctypes.h"
 #include <QObject>
@@ -11,6 +12,8 @@
 
 using namespace ClipperLib;
 
+void dbgPaths(Paths ps, const Tool& tool, const QString& fileName);
+
 namespace GCode {
 
 class File;
@@ -19,7 +22,6 @@ class Creator : public QObject {
     Q_OBJECT
 
 public:
-    static Creator* self;
     Creator() {}
     void reset();
     //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
@@ -34,10 +36,14 @@ public:
     void addPaths(const Paths& paths);
 
     Pathss& groupedPaths(Grouping group, cInt k = uScale);
+
     static Paths& sortB(Paths& src);
     static Paths& sortBE(Paths& src);
+
     static Pathss& sortB(Pathss& src);
     static Pathss& sortBE(Pathss& src);
+
+    void createGc();
     void createGc(const GCodeParams& gcp);
 
     void cancel() { m_cancel = true; }
@@ -58,7 +64,7 @@ protected:
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
-    virtual void create(const GCodeParams& gcp) = 0;
+    virtual void create() = 0;
 
     static bool m_cancel;
     static int m_progressMax;
@@ -74,9 +80,11 @@ protected:
 
     double m_toolDiameter = 0.0;
     double m_dOffset = 0.0;
-    double m_stepOver = 0.0;
+    cInt m_stepOver = 0;
     GCodeParams m_gcp;
 };
-} // namespace GCode
 
-#endif // TOOLPATHCREATOR_H
+} // namespace GCode
+#include <app.h>
+
+//#endif // TOOLPATHCREATOR_H

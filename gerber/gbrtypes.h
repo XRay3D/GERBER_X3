@@ -1,5 +1,6 @@
-#ifndef GERBER_H
-#define GERBER_H
+#pragma once
+//#ifndef GBR_TYPES_H
+//#define GBR_TYPES_H
 
 #include <QDebug>
 #include <datastream.h>
@@ -99,13 +100,6 @@ enum GCode {
 #endif
 };
 
-enum AttributeType {
-    AttributeA, // TF
-    ApertureAttribute, // TA
-    ObjectAttribute, // TO
-    DeleteAttribute // TD
-};
-
 enum PrimitiveType {
     Aperture,
     Line,
@@ -124,10 +118,15 @@ struct Format {
     CoordinateValuesNotation coordValueNotation = AbsoluteNotation;
 
     // Warning: Using less than 4 decimal places is deprecated.
-    int xInteger = 3;
-    int xDecimal = 4;
-    int yInteger = 3;
-    int yDecimal = 4;
+    enum {
+        IntegerDefVal = 3,
+        DecimalDefVal = 4
+    };
+
+    int xInteger = IntegerDefVal;
+    int xDecimal = DecimalDefVal;
+    int yInteger = IntegerDefVal;
+    int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format)
     {
@@ -318,4 +317,4 @@ struct StepRepeatStr {
 
 } // namespace Gerber
 
-#endif //   GERBER_H
+//#endif //   GBR_TYPES_H

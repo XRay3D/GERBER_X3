@@ -1,5 +1,6 @@
-#ifndef TOOLEDIT_H
-#define TOOLEDIT_H
+#pragma once
+//#ifndef TOOLEDIT_H
+//#define TOOLEDIT_H
 
 #include "tool.h"
 #include <QDialog>
@@ -13,8 +14,11 @@ class ToolDatabase : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ToolDatabase(QWidget* parent = nullptr, QVector<Tool::Type> types = QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving });
-    ~ToolDatabase();
+    explicit ToolDatabase(
+        QWidget* parent = nullptr,
+        QVector<Tool::Type> types = QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser });
+
+    ~ToolDatabase() override;
 
 public:
     Tool tool() const;
@@ -29,4 +33,4 @@ protected:
     void keyPressEvent(QKeyEvent* evt) override;
 };
 
-#endif // TOOLEDIT_H
+//#endif // TOOLEDIT_H

@@ -1,30 +1,62 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "gccreator.h"
 #include "forms/gcodepropertiesform.h"
-#include "gccreator.h"
+#include "gcfile.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
+#include <errno.h>
 #include <filetree/filemodel.h>
 #include <gbraperture.h>
 #include <gcvoronoi.h>
 #include <gi/bridgeitem.h>
 #include <limits>
+#include <locale.h>
+#include <project.h>
 #include <scene.h>
 #include <settings.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <string.h>
+
+void dbgPaths(Paths ps, const Tool& tool, const QString& fileName)
+{
+    if (ps.isEmpty()) {
+        qDebug("dbgPaths - ps.isEmpty()");
+        return;
+    }
+    for (int i = 0; i < ps.size(); ++i)
+        if (ps[i].isEmpty())
+            ps.remove(i--);
+    for (Path& p : ps)
+        p.append(p.first());
+    //assert(ps.isEmpty());
+    GCode::GCodeParams gcp { tool, 0.0, GCode::Profile };
+    auto file = new GCode::File({ ps }, gcp);
+    file->setFileName(fileName + "_" + tool.name());
+    //file->itemGroup()->setPen({ Qt::green, 0.0 });
+    App::project()->addFile(file);
+};
 
 namespace GCode {
 
-Creator* Creator::self = nullptr;
 bool Creator::m_cancel = false;
 int Creator::m_progressMax = 0;
 int Creator::m_progressVal = 0;
 
+struct Cancel {
+    Cancel() { }
+};
+
 void Creator::reset()
 {
-    self = nullptr;
+    App::mInstance->m_creator = nullptr;
     m_cancel = false;
     m_progressMax = 0;
     m_progressVal = 0;
@@ -43,7 +75,7 @@ void Creator::reset()
     m_stepOver = 0.0;
 }
 
-Creator::~Creator() { self = nullptr; }
+Creator::~Creator() { App::mInstance->m_creator = nullptr; }
 
 Pathss& Creator::groupedPaths(Grouping group, cInt k)
 {
@@ -106,7 +138,7 @@ void Creator::addRawPaths(Paths rawPaths)
     if (rawPaths.isEmpty())
         return;
 
-    if (m_gcp.side == On) {
+    if (m_gcp.side() == On) {
         m_workingRawPs.append(rawPaths);
         return;
     }
@@ -153,20 +185,26 @@ void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(support
 
 void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
 
-void Creator::createGc(const GCodeParams& gcp)
+void Creator::createGc()
 {
     QElapsedTimer t;
     t.start();
     try {
         qDebug() << "Creator::createGc() started" << t.elapsed();
-        create(gcp);
+        create();
         qDebug() << "Creator::createGc() ended" << t.elapsed();
-    } catch (bool) {
-        m_cancel = false;
+    } catch (Cancel&) {
+        //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
-    } catch (...) {
-        qWarning() << "Creator::createGc() exeption:" << strerror(errno) << t.elapsed();
+    } catch (std::exception& e) {
+        qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
     }
+}
+
+void Creator::createGc(const GCodeParams& gcp)
+{
+    m_gcp = gcp;
+    createGc();
 }
 
 GCode::File* Creator::file() const { return m_file; }
@@ -175,13 +213,15 @@ QPair<int, int> Creator::getProgress()
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
     return { m_progressMax, m_progressVal };
 }
 
 void Creator::stacking(Paths& paths)
 {
+    if (paths.isEmpty())
+        return;
     QElapsedTimer t;
     t.start();
     PolyTree polyTree;
@@ -200,7 +240,7 @@ void Creator::stacking(Paths& paths)
     m_returnPss.clear();
     /***********************************************************************************************/
     t.start();
-    auto sss = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
+    auto mathBE = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
         QList<int> list;
         list.append(idx.first);
         for (int i = paths.count() - 1, index = idx.first; i; --i) {
@@ -225,13 +265,13 @@ void Creator::stacking(Paths& paths)
         return true;
     };
     using Worck = QPair<PolyNode*, bool>;
-    std::function<void(Worck)> stacker = [&stacker, &sss, this](Worck w) {
+    std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
         auto [node, newPaths] = w;
         if (!m_returnPss.isEmpty() || newPaths) {
             Path path(node->Contour);
-            if (!(m_gcp.convent ^ !node->IsHole()) ^ (m_gcp.side == Outer))
+            if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
                 ReversePath(path);
-            if (Settings::cleanPolygons())
+            if (GlobalSettings::gbrCleanPolygons())
                 CleanPolygon(path, uScale * 0.0005);
             if (m_returnPss.isEmpty() || newPaths) {
                 m_returnPss.append({ path });
@@ -251,7 +291,7 @@ void Creator::stacking(Paths& paths)
                         }
                     }
                 }
-                if (d <= m_toolDiameter && sss(m_returnPss.last(), path, idx))
+                if (d <= m_toolDiameter && mathBE(m_returnPss.last(), path, idx))
                     m_returnPss.last().append(path);
                 else
                     m_returnPss.append({ path });
@@ -274,6 +314,20 @@ void Creator::stacking(Paths& paths)
             path.append(path.first());
     }
     sortB(m_returnPss);
+    //    for (auto& paths : m_returnPss) {
+    //        bool ff, fl;
+    //        for (int f = 0, l = paths.size() - 1; f < l; ++f, --l) {
+    //            if (f) {
+    //                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
+    //                    ReversePath(paths[f]);
+    //                if (!(m_gcp.convent() ^ (fl ? Area(paths[l]) > 0 : Area(paths[l]) < 0)) ^ (m_gcp.side() == Outer))
+    //                    ReversePath(paths[l]);
+    //            } else {
+    //                ff = Area(paths[f]) > 0;
+    //                fl = Area(paths[l]) > 0;
+    //            }
+    //        }
+    //    }
 }
 
 void Creator::mergeSegments(Paths& paths, double glue)
@@ -285,7 +339,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
             for (int j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                if (i >= paths.size() || i >= paths.size()) {
+                if (i >= paths.size() || j >= paths.size()) {
                     i = -1;
                     j = 0;
                     break;
@@ -348,7 +402,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
 
 void Creator::progress(int progressMax)
 {
-    if (self != nullptr)
+    if (App::mInstance->m_creator != nullptr)
         m_progressMax += progressMax;
 }
 
@@ -356,7 +410,7 @@ void Creator::progress(int progressMax, int progressVal)
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
     m_progressVal = progressVal;
     m_progressMax = progressMax;
@@ -366,9 +420,9 @@ void Creator::progress()
 {
     if (m_cancel) {
         m_cancel = false;
-        throw true;
+        throw Cancel();
     }
-    if (self != nullptr)
+    if (App::mInstance->m_creator != nullptr)
         if (m_progressMax < ++m_progressVal) {
             if (m_progressMax == 0)
                 m_progressMax = 100;
@@ -408,8 +462,7 @@ Paths& Creator::sortB(Paths& src)
 
 Paths& Creator::sortBE(Paths& src)
 {
-    IntPoint startPt(
-        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
@@ -431,6 +484,8 @@ Paths& Creator::sortBE(Paths& src)
                     reverse = true;
                 }
             }
+            if (qFuzzyIsNull(destLen))
+                break;
         }
         if (reverse)
             ReversePath(src[swapIdx]);
@@ -505,26 +560,21 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
         return false;
     QPointF p;
     for (int i = 0; i < cnt; ++i) {
-        IntPoint pt1(path[(i + 1) % cnt]);
-        IntPoint pt2(/*i == cnt ? path[0] :*/ path[i]);
+        const IntPoint& pt1 = path[(i + 1) % cnt];
+        const IntPoint& pt2 = path[i];
         QLineF l1(toQPointF(pt1), toQPointF(pt2));
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
         if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
+#else
+        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
+#endif
             if (ret)
                 *ret = toIntPoint(p);
             return true;
         }
     }
-    //    IntPoint pt1 = path[0];
-    //    for (int i = 1; i <= cnt; ++i) {
-    //        IntPoint pt2(i == cnt ? path[0] : path[i]);
-    //        QLineF l1(toQPointF(pt1), toQPointF(pt2));
-    //        if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
-    //            if (ret)
-    //                *ret = toIntPoint(p);
-    //            return true;
-    //        }
-    //        pt1 = pt2;
-    //    }
+
     return false;
 }
 } // namespace GCode

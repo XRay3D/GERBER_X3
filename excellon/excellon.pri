@@ -18,6 +18,7 @@ HEADERS += \
     $$PWD/excellon.h \
     $$PWD/excellondialog.h \
     $$PWD/exfile.h \
+    $$PWD/exnode.h \
     $$PWD/exparser.h \
     $$PWD/extypes.h
 
@@ -25,4 +26,5 @@ SOURCES += \
     $$PWD/excellondialog.cpp \
     $$PWD/exfile.cpp \
     $$PWD/exformatstate.cpp \
+    $$PWD/exnode.cpp \
     $$PWD/exparser.cpp

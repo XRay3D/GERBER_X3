@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "voronoiform.h"
 #include "ui_voronoiform.h"
 
@@ -12,86 +16,61 @@
 #include <graphicsview.h>
 #include <myclipper.h>
 #include <scene.h>
+#include <settings.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
-    : FormsUtil("VoronoiForm", new GCode::VoronoiCreator, parent)
+    : FormsUtil(new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm)
 {
     ui->setupUi(this);
 
-    ui->lblToolName->setText(tool.name());
-
-    updateName();
-
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("view-form"));
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
 
     parent->setWindowTitle(ui->label->text());
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
-    }
-    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("VoronoiForm");
-    ui->dsbxPrecision->setValue(settings.value("dsbxPrecision", 0.1).toDouble());
-    ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
+    settings.getValue(ui->dsbxPrecision, 0.1);
+    settings.getValue(ui->dsbxWidth);
+    settings.getValue(ui->dsbxOffset, 1.0);
 #ifdef _USE_CGAL_
-    ui->cbxSolver->setCurrentIndex(settings.value("cbxSolver").toInt());
+    settings.getValue(ui->cbxSolver);
 #else
     ui->cbxSolver->setCurrentIndex(0);
     ui->cbxSolver->setEnabled(false);
 #endif
     settings.endGroup();
+
+    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
+    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
+
+    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+
+    updateName();
 }
 
 VoronoiForm::~VoronoiForm()
 {
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("VoronoiForm");
-    settings.setValue("dsbxPrecision", ui->dsbxPrecision->value());
-    settings.setValue("dsbxWidth", ui->dsbxWidth->value());
-    settings.setValue("cbxSolver", ui->cbxSolver->currentIndex());
+    settings.setValue(ui->dsbxPrecision);
+    settings.setValue(ui->dsbxWidth);
+    settings.setValue(ui->cbxSolver);
+    settings.setValue(ui->dsbxOffset);
     settings.endGroup();
     delete ui;
 }
 
-void VoronoiForm::on_pbSelect_clicked()
-{
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
-    if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->lblToolName->setText(tool.name());
-        updateName();
-    }
-}
-
-void VoronoiForm::on_pbEdit_clicked()
-{
-    ToolEditDialog d;
-    d.setTool(tool);
-    if (d.exec()) {
-        tool = d.tool();
-        tool.setId(-1);
-        ui->lblToolName->setText(tool.name());
-        updateName();
-    }
-}
-
-void VoronoiForm::on_pbClose_clicked()
-{
-    if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
-}
-
 void VoronoiForm::createFile()
 {
+    const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -100,31 +79,35 @@ void VoronoiForm::createFile()
     Paths wPaths;
     Paths wRawPaths;
     AbstractFile const* file = nullptr;
+    bool skip { true };
 
-    for (auto* item : Scene::selectedItems()) {
+    for (auto* item : App::scene()->selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiGerber:
-            //GerberItem* gi = static_cast<GerberItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-        case GiRaw:
+        case GiAperturePath:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
-                return;
+                if (skip) {
+                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                        return;
+                }
             }
             wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
@@ -137,6 +120,7 @@ void VoronoiForm::createFile()
         default:
             break;
         }
+        addUsedGi(gi);
     }
 
     if (wPaths.isEmpty() && wRawPaths.isEmpty()) {
@@ -145,17 +129,19 @@ void VoronoiForm::createFile()
     }
 
     GCode::GCodeParams gpc;
-    gpc.convent = true;
-    gpc.side = GCode::Outer;
-    gpc.tool.append(tool);
-    gpc.dParam[GCode::Depth] = ui->dsbxDepth->value();
-    gpc.dParam[GCode::Tolerance] = ui->dsbxPrecision->value();
-    gpc.dParam[GCode::Width] = ui->dsbxWidth->value() + 0.001;
-    gpc.dParam[GCode::VorT] = ui->cbxSolver->currentIndex();
+    gpc.setConvent(true);
+    gpc.setSide(GCode::Outer);
+    gpc.tools.append(tool);
+    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::GCodeParams::Tolerance] = ui->dsbxPrecision->value();
+    gpc.params[GCode::GCodeParams::Width] = ui->dsbxWidth->value() + 0.001;
+    gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
+    gpc.params[GCode::GCodeParams::FrameOffset] = ui->dsbxOffset->value();
+
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    createToolpath(gpc);
+    createToolpath();
 }
 
 void VoronoiForm::updateName()
@@ -169,8 +155,9 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1)
     m_fileName = arg1;
 }
 
-void VoronoiForm::setWidth(double /*w*/)
+void VoronoiForm::setWidth(double)
 {
+    const auto tool { ui->toolHolder->tool() };
     const double d = tool.getDiameter(ui->dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));

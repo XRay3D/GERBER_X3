@@ -1,5 +1,6 @@
-#ifndef PATHITEM_H
-#define PATHITEM_H
+#pragma once
+//#ifndef PATHITEM_H
+//#define PATHITEM_H
 
 #include "graphicsitem.h"
 
@@ -26,4 +27,4 @@ private:
 #endif
 };
 
-#endif // PATHITEM_H
+//#endif // PATHITEM_H

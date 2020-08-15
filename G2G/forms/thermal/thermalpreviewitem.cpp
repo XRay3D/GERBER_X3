@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
@@ -101,11 +105,12 @@ void ThermalPreviewItem::redraw()
         const double radius = (m_sourcePath.boundingRect().width() + m_sourcePath.boundingRect().height()) * uScale * 0.5;
         for (int i = 0; i < m_count; ++i) {
             ClipperOffset offset;
+            double angle = i * 2 * M_PI / m_count + qDegreesToRadians(m_angle);
             Path path{
                 center,
-                IntPoint(
-                    static_cast<cInt>((cos(i * 2 * M_PI / m_count + qDegreesToRadians(m_angle)) * radius) + center.X),
-                    static_cast<cInt>((sin(i * 2 * M_PI / m_count + qDegreesToRadians(m_angle)) * radius) + center.Y))
+                IntPoint(    
+                    static_cast<cInt>((cos(angle) * radius) + center.X),    
+                    static_cast<cInt>((sin(angle) * radius) + center.Y))
             };
             offset.AddPath(path, jtSquare, etOpenSquare);
             Paths paths;

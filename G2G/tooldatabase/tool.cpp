@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "tool.h"
 #include <QApplication>
 #include <QDebug>
@@ -46,12 +50,19 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool)
     return stream;
 }
 
+QDebug operator<<(QDebug debug, const Tool& t)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << t.diameter() << ')';
+    return debug;
+}
+
 Tool::Tool()
     : m_name(QObject::tr("Default"))
     , m_type(EndMill)
     , m_angle(0.0)
     , m_diameter(1.0)
-    , m_feedRate(1200.0)
+    , m_feedRate(100.0)
     , m_oneTurnCut(0.1)
     , m_passDepth(2.0)
     , m_plungeRate(600.0)
@@ -63,6 +74,22 @@ Tool::Tool()
 }
 
 QString Tool::name() const { return m_name; }
+
+QString Tool::nameEnc() const
+{
+    switch (m_type) {
+    case Tool::Drill:
+        return QString("D-D%1MM").arg(m_diameter);
+    case Tool::EndMill:
+        return QString("M-D%1MM").arg(m_diameter);
+    case Tool::Engraver:
+        return QString("V-D%1MMA%2DEG").arg(m_diameter).arg(m_angle);
+    case Tool::Laser:
+        return QString("L-D%1MM").arg(m_diameter);
+    default:
+        return {};
+    }
+}
 
 void Tool::setName(const QString& name)
 {
@@ -101,6 +128,8 @@ void Tool::setDiameter(double diameter)
     m_hash = 0;
     m_diameter = diameter;
 }
+
+double Tool::feedRateMmS() const { return m_feedRate / 60.0; }
 
 double Tool::feedRate() const { return m_feedRate; }
 
@@ -168,7 +197,7 @@ void Tool::setId(int id)
 
 double Tool::getDiameter(double depth) const
 {
-    if (type() == Engraving && depth > 0.0 && angle() > 0.0 && angle() < 90.0) {
+    if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
         return d * 2 + diameter();
@@ -182,7 +211,7 @@ double Tool::getDepth() const
     case Tool::Drill:
         return m_diameter * 0.5 * tan(qDegreesToRadians((180.0 - m_angle) * 0.5));
     case Tool::EndMill:
-    case Tool::Engraving:
+    case Tool::Engraver:
     default:
         return 0.0;
     }
@@ -220,18 +249,18 @@ void Tool::write(QJsonObject& json) const
     json["autoName"] = m_autoName;
 }
 
-bool Tool::isValid()
+bool Tool::isValid() const
 {
     do {
         if (qFuzzyIsNull(m_diameter))
             break;
-        if (qFuzzyIsNull(m_passDepth))
+        if (m_type != Laser && qFuzzyIsNull(m_passDepth))
             break;
-        if (type() != Drill && qFuzzyIsNull(m_feedRate))
+        if (m_type != Drill && qFuzzyIsNull(m_feedRate))
             break;
-        if (type() != Drill && qFuzzyIsNull(m_stepover))
+        if (m_type != Drill && qFuzzyIsNull(m_stepover))
             break;
-        if (qFuzzyIsNull(m_plungeRate))
+        if (m_type != Laser && qFuzzyIsNull(m_plungeRate))
             break;
         return true;
     } while (0);
@@ -245,14 +274,16 @@ QIcon Tool::icon() const
         return QIcon::fromTheme("drill");
     case Tool::EndMill:
         return QIcon::fromTheme("endmill");
-    case Tool::Engraving:
+    case Tool::Engraver:
         return QIcon::fromTheme("engraving");
+    case Tool::Laser:
+        return QIcon::fromTheme("laser");
     default:
         return QIcon();
     }
 }
 
-QString Tool::errorStr()
+QString Tool::errorStr() const
 {
     QString errorString;
     if (qFuzzyIsNull(m_diameter))
@@ -272,7 +303,10 @@ QString Tool::errorStr()
     return errorString;
 }
 
-void Tool::errorMessageBox(QWidget* parent) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
+void Tool::errorMessageBox(QWidget* parent) const
+{
+    QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr());
+}
 
 uint Tool::hash() const
 {
@@ -340,11 +374,18 @@ QMap<int, Tool> ToolHolder::tools;
 
 void ToolHolder::readTools()
 {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QFile loadFile(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
     if (!loadFile.open(QIODevice::ReadOnly))
         return;
-
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
+#else
+    QFile loadFile(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    if (!loadFile.open(QIODevice::ReadOnly))
+        return;
+    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+#endif
     QJsonArray toolArray = loadDoc.object()["tools"].toArray();
     for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;

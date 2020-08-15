@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>324</width>
+    <width>325</width>
     <height>512</height>
    </rect>
   </property>
@@ -53,7 +53,7 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="cbxToolType">
         <property name="currentIndex">
-         <number>-1</number>
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -67,7 +67,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Engraving</string>
+          <string>Engraver</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Laser</string>
          </property>
         </item>
        </widget>
@@ -315,7 +320,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="hlayStepover">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -370,7 +375,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="hlayOneTurnCut">
         <property name="leftMargin">
          <number>0</number>
         </property>

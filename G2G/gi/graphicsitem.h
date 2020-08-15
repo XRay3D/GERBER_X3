@@ -1,5 +1,6 @@
-#ifndef GERBERITEM_H
-#define GERBERITEM_H
+#pragma once
+//#ifndef GERBERITEM_H
+//#define GERBERITEM_H
 
 #include <QGraphicsItem>
 #include <QPen>
@@ -14,7 +15,7 @@ enum GraphicsItemType {
     GiPath,
     GiPointHome,
     GiPointZero,
-    GiRaw,
+    GiAperturePath,
     GiPin,
     GiLayoutFrames,
 
@@ -40,6 +41,7 @@ class File;
 class GraphicsItem : public QGraphicsItem {
     friend class Gerber::File;
     friend class Excellon::File;
+    friend class ItemGroup;
 
 public:
     explicit GraphicsItem(AbstractFile* file = nullptr);
@@ -50,11 +52,7 @@ public:
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
-    virtual Paths& rPaths()
-    {
-        static Paths p;
-        return p;
-    }
+    virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() {}
 
     //    void setItemGroup(ItemGroup* itemGroup);
@@ -84,4 +82,4 @@ protected:
     //    ItemGroup* m_ig = nullptr;
 };
 
-#endif // GERBERITEM_H
+//#endif // GERBERITEM_H

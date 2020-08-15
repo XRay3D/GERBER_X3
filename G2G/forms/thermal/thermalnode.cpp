@@ -1,5 +1,11 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "thermalnode.h"
 #include "thermalmodel.h"
+
+ThermalModel* ThermalNode::model = nullptr;
 
 ThermalNode::ThermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, ThermalPreviewItem* item)
     : container(false)
@@ -63,9 +69,9 @@ void ThermalNode::remove(int row) { childItems.removeAt(row); }
 
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    const QModelIndex i1(ThermalModel::m_self->createIndex(row(), ThermalModel::ThName, this));
-    const QModelIndex i2(ThermalModel::m_self->createIndex(row(), ThermalModel::ThGapCount, this));
-    ThermalModel::m_self->dataChanged(i1, i2, { role });
+    const QModelIndex i1(model->createIndex(row(), ThermalModel::ThName, this));
+    const QModelIndex i2(model->createIndex(row(), ThermalModel::ThGapCount, this));
+    model->dataChanged(i1, i2, { role });
 
     switch (role) {
     case Qt::EditRole:
@@ -207,8 +213,14 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
         }
         return QVariant();
     case Qt::DecorationRole:
-        if (!index.column())
+        if (index.column() == 0) {
+            if (icon.isNull()) {
+                QPixmap p(24, 24);
+                p.fill(Qt::transparent);
+                return QIcon(p);
+            }
             return icon;
+        }
         return QVariant();
     case Qt::CheckStateRole:
         if (index.column())

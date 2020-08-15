@@ -1,7 +1,7 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
+//#ifndef MAINWINDOW_H
+//#define MAINWINDOW_H
 
-#include "point.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
@@ -13,13 +13,18 @@ class Parser;
 namespace Excellon {
 class Parser;
 }
+namespace GCode {
+class File;
+}
 
 class DockWidget;
 class Project;
+class QProgressDialog;
 class Scene;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
+    friend void TreeView::on_doubleClicked(const QModelIndex&);
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -61,15 +66,16 @@ private:
     Project* m_project;
     bool openFlag;
 
-    QVector<QAction*> toolpathActionList;
+    QMap<int, QAction*> toolpathActionList;
 
-    static MainWindow* self;
+    QMap<QString, QProgressDialog*> m_progressDialogs;
 
     inline QString fileKey();
     inline QString recentFilesKey();
     void about();
     bool closeProject();
-    void createDockWidget(QWidget* dwContent, int type);
+    template <class T>
+    void createDockWidget(/*QWidget* dwContent,*/ int type);
     void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
@@ -90,10 +96,10 @@ private:
     // create actions
     void createActions();
     void createActionsFile();
+    void createActionsEdit();
     void createActionsService();
     void createActionsHelp();
     void createActionsZoom();
-    void createActionsSDS();
     void createActionsToolPath();
     void createActionsGraphics();
 
@@ -106,6 +112,8 @@ private:
     bool saveAs();
     void documentWasModified();
     bool maybeSave();
+
+    void editGcFile(GCode::File* file);
 
 public:
     void loadFile(const QString& fileName);
@@ -129,6 +137,7 @@ public:
         : QDockWidget(parent)
     {
         hide();
+        setVisible(false);
     }
     ~DockWidget() override = default;
 
@@ -136,10 +145,18 @@ public:
 protected:
     void closeEvent(QCloseEvent* event) override
     {
-        if (widget())
-            delete widget();
+        delete widget();
         event->accept();
+    }
+
+    void showEvent(QShowEvent* event) override
+    {
+        event->ignore();
+        //        close();
+        //        QDockWidget::showEvent(event);
+        if (widget() == nullptr)
+            QTimer::singleShot(1, this, &QDockWidget::close);
     }
 };
 
-#endif // MAINWINDOW_H
+//#endif // MAINWINDOW_H

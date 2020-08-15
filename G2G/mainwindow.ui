@@ -35,9 +35,6 @@
     </property>
     <item>
      <widget class="GraphicsView" name="graphicsView">
-      <property name="toolTip">
-       <string>фыв</string>
-      </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
       </property>
@@ -80,6 +77,9 @@
    </attribute>
    <widget class="QWidget" name="widget">
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>6</number>
+     </property>
      <property name="leftMargin">
       <number>3</number>
      </property>
