@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef FOLDER_H
-//#define FOLDER_H
+
+
 
 #include "abstractnode.h"
 
@@ -19,4 +19,4 @@ public:
     void menu(QMenu* menu , TreeView * tv) const override;
 };
 
-//#endif // FOLDER_H
+

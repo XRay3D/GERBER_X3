@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef DRILLMODEL_H
-//#define DRILLMODEL_H
+
+
 
 #include <QAbstractTableModel>
 #include <QIcon>
@@ -53,4 +53,4 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 };
-//#endif // DRILLMODEL_H
+

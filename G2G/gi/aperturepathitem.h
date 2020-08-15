@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef RAWITEM_H
-//#define RAWITEM_H
+
+
 
 #include "graphicsitem.h"
 
@@ -30,4 +30,4 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 };
 
-//#endif // RAWITEM_H
+

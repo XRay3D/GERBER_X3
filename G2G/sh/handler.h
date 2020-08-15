@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef HANDLER_H
-//#define HANDLER_H
+
+
 
 #include <QGraphicsItem>
 
@@ -22,4 +22,4 @@ protected:
 };
 }
 
-//#endif // HANDLER_H
+

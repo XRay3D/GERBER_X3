@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TOOLEDITDIALOG_H
-//#define TOOLEDITDIALOG_H
+
+
 
 #include "ui_tooleditdialog.h"
 #include <QDialog>
@@ -16,4 +16,4 @@ public:
     void setTool(const Tool& tool);
 };
 
-//#endif // TOOLEDITDIALOG_H
+

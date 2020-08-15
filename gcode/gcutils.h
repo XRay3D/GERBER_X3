@@ -1,7 +1,7 @@
 #pragma once
 
-//#ifndef GCUTILS_H
-//#define GCUTILS_H
+
+
 
 #include "gctypes.h"
 #include <QList>
@@ -125,4 +125,4 @@ protected:
 };
 }
 
-//#endif // GCUTILS_H
+

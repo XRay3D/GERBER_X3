@@ -4,8 +4,8 @@
  */
 #pragma once
 
-//#ifndef MATCHPARSER_H
-//#define MATCHPARSER_H
+
+
 
 #include <QMap>
 #include <QObject>
@@ -38,4 +38,4 @@ private:
     Result processFunction(QString func, Result r);
 };
 
-//#endif // MATCHPARSER_H
+

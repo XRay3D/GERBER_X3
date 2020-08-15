@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef THERMAL_H
-//#define THERMAL_H
+
+
 
 #include "gccreator.h"
 
@@ -21,4 +21,4 @@ protected:
     void create() override; // Creator interface
 };
 }
-//#endif // THERMAL_H
+

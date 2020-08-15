@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef SH_H
-//#define SH_H
+
+
 
 #include "rectangle.h"
 #include "shape.h"
@@ -28,4 +28,4 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }
-//#endif // SH_H
+

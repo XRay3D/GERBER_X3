@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef THERMALNODE_H
-//#define THERMALNODE_H
+
+
 
 #include "thermalpreviewitem.h"
 #include <QIcon>
@@ -65,4 +65,4 @@ private:
     static ThermalModel* model;
 };
 
-//#endif // THERMALNODE_H
+

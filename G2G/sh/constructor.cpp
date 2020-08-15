@@ -4,6 +4,7 @@
 
 #include "constructor.h"
 #include "circle.h"
+#include "pline.h"
 #include "rectangle.h"
 
 #include <QAction>
@@ -40,7 +41,22 @@ void Constructor::addShapePoint(const QPointF& value)
             action = nullptr;
         }
         break;
-    case Line:
+    case Pline:
+        switch (counter) {
+        case 0:
+        default:
+            if (item == nullptr) {
+                item = new class Pline(point, point + QPointF { 1, 1 });
+            } else {
+                static_cast<class Pline*>(item)->addPt(point);
+            }
+            //            break;
+            //            type = NullPT;
+            //            item->setSelected(true);
+            //            item = nullptr;
+            //            action->setChecked(false);
+            //            action = nullptr;
+        }
         break;
     case Elipse:
         switch (counter) {
@@ -73,11 +89,50 @@ void Constructor::updateShape(const QPointF& value)
         if (item != nullptr)
             static_cast<Rectangle*>(item)->setPt(point);
         break;
-    case Line:
+    case Pline:
+        if (item != nullptr)
+            static_cast<class Pline*>(item)->setPt(point);
         break;
     case Elipse:
         if (item != nullptr)
             static_cast<Circle*>(item)->setPt(point);
+        break;
+    case ArcPT:
+        break;
+    case Text:
+        break;
+    default:
+        break;
+    }
+}
+
+void Constructor::finalizeShape(const QPointF& value)
+{
+    point = value;
+    qDebug() << type << counter << item << point;
+    if (item == nullptr)
+        return;
+    switch (type) {
+    case Rect:
+        type = NullPT;
+        item->setSelected(true);
+        item = nullptr;
+        action->setChecked(false);
+        action = nullptr;
+        break;
+    case Pline:
+        type = NullPT;
+        item->setSelected(true);
+        item = nullptr;
+        action->setChecked(false);
+        action = nullptr;
+        break;
+    case Elipse:
+        type = NullPT;
+        item->setSelected(true);
+        item = nullptr;
+        action->setChecked(false);
+        action = nullptr;
         break;
     case ArcPT:
         break;

@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GERBERPARSER_H
-//#define GERBERPARSER_H
+
+
 
 #include "gbrattributes.h"
 #include "gbrfile.h"
@@ -90,4 +90,4 @@ private:
     /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
 };
 }
-//#endif // GERBERPARSER_H
+

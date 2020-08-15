@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef POCKETFORM_H
-//#define POCKETFORM_H
+
+
 
 #include "formsutil/formsutil.h"
 
@@ -41,4 +41,4 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-//#endif // POCKETFORM_H
+

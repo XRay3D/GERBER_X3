@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef POCKETRASTERFORM_H
-//#define POCKETRASTERFORM_H
+
+
 
 #include "formsutil/formsutil.h"
 
@@ -40,4 +40,4 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-//#endif // POCKETRASTERFORM_H
+

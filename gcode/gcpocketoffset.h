@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef POCKET_H
-//#define POCKET_H
+
+
 
 #include "gccreator.h"
 
@@ -19,4 +19,4 @@ protected:
 };
 }
 
-//#endif // POCKET_H
+

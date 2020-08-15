@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef PROJECT_H
-//#define PROJECT_H
+
+
 
 #include <QMap>
 #include <QMutex>
@@ -159,4 +159,4 @@ private:
 };
 #include <app.h>
 
-//#endif // PROJECT_H
+

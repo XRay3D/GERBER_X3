@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GCODEPROPERTIESFORM_H
-//#define GCODEPROPERTIESFORM_H
+
+
 
 #include "point.h"
 #include <QWidget>
@@ -35,4 +35,4 @@ private:
     Ui::GCodePropertiesForm* ui;
 };
 
-//#endif // GCODEPROPERTIESFORM_H
+

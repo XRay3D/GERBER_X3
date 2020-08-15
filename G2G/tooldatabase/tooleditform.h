@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TOOLEDITFORM_H
-//#define TOOLEDITFORM_H
+
+
 
 #include "tool.h"
 
@@ -75,4 +75,4 @@ private:
     QVector<DoubleSpinBox*> dsbx;
 };
 
-//#endif // TOOLEDITFORM_H
+

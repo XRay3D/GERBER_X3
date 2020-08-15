@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TOOLPATHUTIL_H
-//#define TOOLPATHUTIL_H
+
+
 
 #include "tooldatabase/tool.h"
 #include <QThread>
@@ -66,4 +66,4 @@ private:
 
 //Q_DECLARE_METATYPE(QMap<int, QVector<int>>)
 
-//#endif // TOOLPATHUTIL_H
+

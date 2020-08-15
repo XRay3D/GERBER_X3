@@ -1,6 +1,4 @@
 #pragma once
-//#ifndef GERBERITEM_H
-//#define GERBERITEM_H
 
 #include <QGraphicsItem>
 #include <QPen>
@@ -26,7 +24,7 @@ enum GraphicsItemType {
 
     GiShapeC,
     GiShapeR = GiShapeC,
-
+    GiShapeL = GiShapeC,
 };
 
 class AbstractFile;
@@ -53,7 +51,7 @@ public:
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
     virtual Paths* rPaths() { return nullptr; }
-    virtual void redraw() {}
+    virtual void redraw() { }
 
     //    void setItemGroup(ItemGroup* itemGroup);
     //    ItemGroup* parentItemGroup() const;
@@ -81,5 +79,3 @@ protected:
     //private:
     //    ItemGroup* m_ig = nullptr;
 };
-
-//#endif // GERBERITEM_H

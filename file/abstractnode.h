@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TREEITEM_H
-//#define TREEITEM_H
+
+
 
 #include <QAbstractItemModel>
 #include <QSharedPointer>
@@ -50,4 +50,4 @@ protected:
     //Qt::CheckState m_checkState = Qt::Checked;
 };
 
-//#endif // TREEITEM_H
+

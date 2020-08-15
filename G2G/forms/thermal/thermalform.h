@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef THERMALFORM_H
-//#define THERMALFORM_H
+
+
 
 #include "../formsutil/formsutil.h"
 #include "thermalmodel.h"
@@ -58,4 +58,4 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-//#endif // THERMALFORM_H
+

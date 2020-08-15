@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef BRIDGEITEM_H
-//#define BRIDGEITEM_H
+
+
 
 #include "graphicsitem.h"
 #include <QObject>
@@ -54,4 +54,4 @@ private:
     QPointF m_lastPos;
 };
 
-//#endif // BRIDGEITEM_H
+

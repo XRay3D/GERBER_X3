@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef EXPARSER_H
-//#define EXPARSER_H
+
+
 
 #include "extypes.h"
 #include <QObject>
@@ -38,4 +38,4 @@ private:
 };
 } // namespace Excellon
 
-//#endif // EXPARSER_H
+
