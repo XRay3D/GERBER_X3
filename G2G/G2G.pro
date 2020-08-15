@@ -111,6 +111,7 @@ HEADERS += \
     sh/circle.h \
     sh/constructor.h \
     sh/handler.h \
+    sh/pline.h \
     sh/rectangle.h \
     sh/sh.h \
     sh/shape.h \
@@ -165,6 +166,7 @@ SOURCES += \
     sh/circle.cpp \
     sh/constructor.cpp \
     sh/handler.cpp \
+    sh/pline.cpp \
     sh/rectangle.cpp \
     sh/sh.cpp \
     sh/shape.cpp \

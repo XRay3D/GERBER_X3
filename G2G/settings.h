@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef SETTINGS_H
-//#define SETTINGS_H
+
+
 
 #include <QColor>
 #include <QPointF>
@@ -208,4 +208,4 @@ protected:
     static bool m_inch;
 };
 
-//#endif // SETTINGS_H
+

@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef SPLASHSCREEN_H
-//#define SPLASHSCREEN_H
+
+
 
 #include <QSplashScreen>
 #include <app.h>
@@ -16,4 +16,4 @@ public:
     virtual ~SplashScreen() { App::mInstance->m_splashScreen = nullptr; }
 };
 
-//#endif // SPLASHSCREEN_H
+

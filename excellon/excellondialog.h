@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef EXCELLONDIALOG_H
-//#define EXCELLONDIALOG_H
+
+
 
 #include "extypes.h"
 #include <QDialog>
@@ -38,4 +38,4 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 };
 
-//#endif // EXCELLONDIALOG_H
+

@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef DRILL_H
-//#define DRILL_H
+
+
 
 #include "abstractnode.h"
 #include <QObject>
@@ -25,4 +25,4 @@ public:
     void menu(QMenu* menu, TreeView* tv) const override;
 };
 
-//#endif // DRILL_H
+

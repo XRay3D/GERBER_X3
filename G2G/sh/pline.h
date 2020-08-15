@@ -1,29 +1,22 @@
 #pragma once
 
-
-
 #include "shape.h"
 
 namespace ShapePr {
-class Rectangle : public Shape {
+class Pline : public Shape {
 public:
-    explicit Rectangle(QPointF pt1, QPointF pt2);
-    ~Rectangle() override = default;
+    Pline(QPointF pt1, QPointF pt2);
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return GiShapeR; }
+    int type() const override { return GiShapeL; }
 
     // GraphicsItem interface
     void redraw() override;
 
     void setPt(const QPointF& pt);
-    enum {
-        Center,
-        Point1,
-        Point2,
-    };
+    void addPt(const QPointF& pt);
+    //    double radius() const;
+    //    void setRadius(double radius);
 };
 }
-
-

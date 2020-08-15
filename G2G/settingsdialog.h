@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef SETTINGSDIALOG_H
-//#define SETTINGSDIALOG_H
+
+
 
 #include "settings.h"
 #include "ui_settingsdialog.h"
@@ -20,4 +20,4 @@ public slots:
     void accept() override;
 };
 
-//#endif // SETTINGSDIALOG_H
+

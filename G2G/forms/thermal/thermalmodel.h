@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef THERMALMODEL_H
-//#define THERMALMODEL_H
+
+
 
 #include "thermalnode.h"
 
@@ -69,4 +69,4 @@ private:
     ThermalNode* getItem(const QModelIndex& index) const;
 };
 
-//#endif // THERMALMODEL_H
+

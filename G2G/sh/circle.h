@@ -1,6 +1,4 @@
 #pragma once
-//#ifndef CIRCLE_H
-//#define CIRCLE_H
 
 #include "shape.h"
 
@@ -29,5 +27,3 @@ private:
     double m_radius;
 };
 }
-
-//#endif // CIRCLE_H

@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef EX_TYPES_H
-//#define EX_TYPES_H
+
+
 
 #include <QPolygonF>
 #include <datastream.h>
@@ -274,4 +274,4 @@ public:
 
 } // namespace Excellon
 
-//#endif // EX_TYPES_H
+

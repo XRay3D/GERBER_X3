@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GBRCOMPONENT_H
-//#define GBRCOMPONENT_H
+
+
 
 #include "gbrattributes.h"
 #include <QMap>
@@ -219,4 +219,4 @@ public:
     }
 };
 }
-//#endif // GBRCOMPONENT_H
+

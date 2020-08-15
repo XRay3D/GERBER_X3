@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TOOLSELECTORFORM_H
-//#define TOOLSELECTORFORM_H
+
+
 
 #include "tooldatabase/tool.h"
 #include <QWidget>
@@ -48,4 +48,4 @@ private:
     void retranslateUi(QWidget* ToolSelectorForm); // retranslateUi
 };
 
-//#endif // TOOLSELECTORFORM_H
+

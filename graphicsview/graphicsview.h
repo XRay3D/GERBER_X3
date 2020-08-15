@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef VIEW_H
-//#define VIEW_H
+
+
 
 #include <QGraphicsItem>
 #include <QGraphicsView>
@@ -58,4 +58,4 @@ protected:
 
 #include <app.h>
 
-//#endif // VIEW_H
+

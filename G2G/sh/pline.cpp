@@ -1,8 +1,4 @@
-﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
-#include "circle.h"
+#include "pline.h"
 #include "constructor.h"
 #include "sh.h"
 #include <QGraphicsScene>
@@ -15,13 +11,12 @@
 #include <settings.h>
 
 namespace ShapePr {
-Circle::Circle(QPointF center, QPointF pt)
-    : m_radius(QLineF(center, pt).length())
+Pline::Pline(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    sh = { new SH(this, true), new SH(this) };
-    sh[Center]->setPos(center);
-    sh[Point1]->setPos(pt);
+    sh = { new SH(this /*, true*/), new SH(this) };
+    sh.first()->setPos(pt1);
+    sh.last()->setPos(pt2);
 
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
@@ -29,11 +24,11 @@ Circle::Circle(QPointF center, QPointF pt)
     setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
-    App::scene()->addItem(sh[Center]);
-    App::scene()->addItem(sh[Point1]);
+    App::scene()->addItem(sh.first());
+    App::scene()->addItem(sh.last());
 }
 
-void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void Pline::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_penColor)
         m_pen.setColor(*m_penColor);
@@ -61,22 +56,13 @@ void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     painter->drawPath(m_shape);
 }
 
-void Circle::redraw()
+void Pline::redraw()
 {
-    m_radius = (QLineF(sh[Center]->pos(), sh[Point1]->pos()).length());
-    const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
-    const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center(toIntPoint(sh[Center]->pos()));
-    const double delta_angle = (2.0 * M_PI) / intSteps;
     Path& path = m_paths.first();
-    path.clear();
-    for (int i = 0; i < intSteps; i++) {
-        const double theta = delta_angle * i;
-        path.append(IntPoint(
-            static_cast<cInt>(radius * cos(theta)) + center.X,
-            static_cast<cInt>(radius * sin(theta)) + center.Y));
+    path.resize(sh.size());
+    for (int i = 0, e = sh.size(); i < e; ++i) {
+        path[i] = toIntPoint(sh[i]->pos());
     }
-    path.append(path.first());
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
@@ -84,24 +70,32 @@ void Circle::redraw()
     setPos({ 0, 0 });
 }
 
-void Circle::setPt(const QPointF& pt)
+void Pline::setPt(const QPointF& pt)
 {
-    if (sh[Point1]->pos() == pt)
+    if (sh.last()->pos() == pt)
         return;
-    sh[Point1]->setPos(pt);
+    sh.last()->setPos(pt);
     redraw();
 }
 
-double Circle::radius() const
+void Pline::addPt(const QPointF& pt)
 {
-    return m_radius;
-}
-
-void Circle::setRadius(double radius)
-{
-    if (!qFuzzyCompare(m_radius, radius))
-        return;
-    m_radius = radius;
+    sh.append(new SH(this));
+    sh.last()->setPos(pt);
+    App::scene()->addItem(sh.last());
     redraw();
 }
+
+//double Line::radius() const
+//{
+//    return m_radius;
+//}
+
+//void Line::setRadius(double radius)
+//{
+//    if (!qFuzzyCompare(m_radius, radius))
+//        return;
+//    m_radius = radius;
+//    redraw();
+//}
 }

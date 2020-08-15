@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef TOOL_H
-//#define TOOL_H
+
+
 
 #include <QDebug>
 #include <QJsonObject>
@@ -130,4 +130,4 @@ public:
 
 Q_DECLARE_METATYPE(Tool)
 
-//#endif // TOOL_H
+

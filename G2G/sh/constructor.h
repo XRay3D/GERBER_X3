@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef SHAPES_H
-//#define SHAPES_H
+
+
 
 #include <QPointF>
 class QGraphicsItem;
@@ -10,7 +10,7 @@ namespace ShapePr {
 enum PrType {
     NullPT,
     Rect,
-    Line,
+    Pline,
     Elipse,
     ArcPT,
     Text,
@@ -26,6 +26,7 @@ class Constructor {
 public:
     static void addShapePoint(const QPointF& value);
     static void updateShape(const QPointF& value);
+    static void finalizeShape(const QPointF& value);
 
     static PrType getType();
     static void setType(const PrType& value, QAction* act);
@@ -38,4 +39,4 @@ private:
 };
 
 } // namespace ShapePr
-//#endif // SHAPES_H
+

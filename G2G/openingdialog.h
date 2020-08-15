@@ -1,6 +1,6 @@
 //#pragma once
-////#ifndef OPENINGDIALOG_H
-////#define OPENINGDIALOG_H
+//
+//
 
 //#include <QtCore/QVariant>
 //#include <QtWidgets/QAction>
@@ -93,4 +93,4 @@
 //    } // retranslateUi
 //};
 
-////#endif // OPENINGDIALOG_H
+//

@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef LASERCREATOR_H
-//#define LASERCREATOR_H
+
+
 
 #include "gccreator.h"
 namespace GCode {
@@ -27,4 +27,4 @@ private:
     IntRect rect;
 };
 }
-//#endif // LASERCREATOR_H
+

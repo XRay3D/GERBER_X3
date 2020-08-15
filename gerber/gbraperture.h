@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GERBERAPERTURE_H
-//#define GERBERAPERTURE_H
+
+
 
 #include "gbrtypes.h"
 
@@ -229,4 +229,4 @@ protected:
     virtual void write(QDataStream& stream) const;
 };
 }
-//#endif // GERBERAPERTURE_H
+

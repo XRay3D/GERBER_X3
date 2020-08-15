@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef ITEMGROUP_H
-//#define ITEMGROUP_H
+
+
 
 #include "aperturepathitem.h"
 #include "componentitem.h"
@@ -29,4 +29,4 @@ private:
     QBrush m_brush;
 };
 
-//#endif // ITEMGROUP_H
+

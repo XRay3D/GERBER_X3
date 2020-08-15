@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GFILE_H
-//#define GFILE_H
+
+
 
 #include "gbraperture.h"
 #include "gbrcomponent.h"
@@ -71,4 +71,4 @@ public:
 
 Q_DECLARE_METATYPE(Gerber::File)
 
-//#endif // GFILE_H
+

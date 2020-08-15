@@ -1,6 +1,6 @@
 #pragma once
-//#ifndef GCODE_H
-//#define GCODE_H
+
+
 
 //#include "gctypes.h"
 #include "gcutils.h"
@@ -71,4 +71,4 @@ public:
     const GCodeParams& gcp() const;
 };
 }
-//#endif // GCODE_H
+

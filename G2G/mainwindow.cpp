@@ -470,17 +470,28 @@ void MainWindow::createActionsGraphics()
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     // tb->setEnabled(false);
-    QAction* action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
-    action->setCheckable(true);
-    connect(action, &QAction::triggered, [action](bool checked) {
-        ShapePr::Constructor::setType(checked ? ShapePr::Rect : ShapePr::NullPT, checked ? action : nullptr);
-    });
-    action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
-    action->setCheckable(true);
-    connect(action, &QAction::triggered, [action](bool checked) {
-        ShapePr::Constructor::setType(checked ? ShapePr::Elipse : ShapePr::NullPT, checked ? action : nullptr);
-    });
-
+    QAction* action = nullptr;
+    {
+        action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, [action](bool checked) {
+            ShapePr::Constructor::setType(checked ? ShapePr::Rect : ShapePr::NullPT, checked ? action : nullptr);
+        });
+    }
+    {
+        action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, [action](bool checked) {
+            ShapePr::Constructor::setType(checked ? ShapePr::Elipse : ShapePr::NullPT, checked ? action : nullptr);
+        });
+    }
+    {
+        action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, [action](bool checked) {
+            ShapePr::Constructor::setType(checked ? ShapePr::Pline : ShapePr::NullPT, checked ? action : nullptr);
+        });
+    }
     // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });
     // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] { graphicsView->setPt(ArcPT); });
     // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] { graphicsView->setPt(Text); });
@@ -601,7 +612,7 @@ void MainWindow::selectAll()
     }
 }
 
-void MainWindow::redo() {}
+void MainWindow::redo() { }
 
 void MainWindow::printDialog()
 {
