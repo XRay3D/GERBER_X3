@@ -10,9 +10,9 @@ public:
     PocketCreator();
 
 private:
-    void createPocket(const Tool& tool, const double depth, const int steps);
-    void createPocket3(const Tool& tool, const double depth);
-    void createPocket2(QVector<Tool>& tools, double depth);
+    void createFixedSteps(const Tool& tool, const double depth, const int steps);
+    void createStdFull(const Tool& tool, const double depth);
+    void createMultiTool(QVector<Tool>& tools, double depth);
 
 protected:
     void create() override; // Creator interface

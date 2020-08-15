@@ -15,15 +15,15 @@ PocketCreator::PocketCreator()
 void PocketCreator::create()
 {
     if (m_gcp.tools.count() > 1) {
-        createPocket2(m_gcp.tools, m_gcp.params[GCodeParams::Depth].toDouble());
+        createMultiTool(m_gcp.tools, m_gcp.params[GCodeParams::Depth].toDouble());
     } else if (m_gcp.params.contains(GCodeParams::Steps) && m_gcp.params[GCodeParams::Steps].toInt() > 0) {
-        createPocket(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::Steps].toInt());
+        createFixedSteps(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::Steps].toInt());
     } else {
-        createPocket3(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
+        createStdFull(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
     }
 }
 
-void PocketCreator::createPocket(const Tool& tool, const double depth, const int steps)
+void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const int steps)
 {
     App::mInstance->m_creator = this;
     if (m_gcp.side() == On)
@@ -100,7 +100,7 @@ void PocketCreator::createPocket(const Tool& tool, const double depth, const int
     emit fileReady(m_file);
 }
 
-void PocketCreator::createPocket3(const Tool& tool, const double depth)
+void PocketCreator::createStdFull(const Tool& tool, const double depth)
 {
     App::mInstance->m_creator = this;
     if (m_gcp.side() == On)
@@ -162,7 +162,7 @@ void PocketCreator::createPocket3(const Tool& tool, const double depth)
     emit fileReady(m_file);
 }
 
-void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
+void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
 {
     App::mInstance->m_creator = this;
 
@@ -237,9 +237,9 @@ void PocketCreator::createPocket2(QVector<Tool>& tools, double depth)
                 cliper.Execute(ctDifference, wp, pftEvenOdd);
             }
             if (tIdx + 1 != tools.size())
-                removeSmall(wp, m_dOffset * 2.0);
+                removeSmall(wp, m_dOffset * 2.0); // остальные
             else
-                removeSmall(wp, m_dOffset * 0.5);
+                removeSmall(wp, m_dOffset * 0.5); // последний
 
             fillPaths[tIdx].append(wp);
             Paths offsetPaths;
