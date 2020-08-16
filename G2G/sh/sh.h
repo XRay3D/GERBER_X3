@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "rectangle.h"
 #include "shape.h"
 #include <QGraphicsItem>
@@ -15,6 +13,7 @@ public:
 public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void setPos(const QPointF& pos);
 
 private:
     ShapePr::Shape* shape;
@@ -28,4 +27,3 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }
-

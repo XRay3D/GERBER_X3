@@ -390,7 +390,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         m_scene->setDrawRuller(false);
-        ShapePr::Constructor::finalizeShape(mappedPos(event));
+        ShapePr::Constructor::finalizeShape();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
         ShapePr::Constructor::addShapePoint(mappedPos(event));
