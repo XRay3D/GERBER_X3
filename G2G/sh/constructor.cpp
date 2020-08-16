@@ -48,7 +48,10 @@ void Constructor::addShapePoint(const QPointF& value)
             if (item == nullptr) {
                 item = new class Pline(point, point + QPointF { 1, 1 });
             } else {
-                static_cast<class Pline*>(item)->addPt(point);
+                if (static_cast<class Pline*>(item)->closed())
+                    finalizeShape();
+                else
+                    static_cast<class Pline*>(item)->addPt(point);
             }
             //            break;
             //            type = NullPT;
@@ -106,9 +109,9 @@ void Constructor::updateShape(const QPointF& value)
     }
 }
 
-void Constructor::finalizeShape(const QPointF& value)
+void Constructor::finalizeShape(/*const QPointF& value*/)
 {
-    point = value;
+    //    point = value;
     qDebug() << type << counter << item << point;
     if (item == nullptr)
         return;

@@ -86,6 +86,11 @@ void Pline::addPt(const QPointF& pt)
     redraw();
 }
 
+bool Pline::closed()
+{
+    return sh.first()->pos() == sh.last()->pos();
+}
+
 //double Line::radius() const
 //{
 //    return m_radius;

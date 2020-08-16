@@ -16,6 +16,7 @@ public:
 
     void setPt(const QPointF& pt);
     void addPt(const QPointF& pt);
+    bool closed();
     //    double radius() const;
     //    void setRadius(double radius);
 };

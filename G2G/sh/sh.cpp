@@ -6,10 +6,12 @@
 #include "constructor.h"
 
 #include <QGraphicsSceneMouseEvent>
+#include <QLineF>
+#include <app.h>
 #include <graphicsview.h>
+#include <math.h>
 #include <scene.h>
 #include <settings.h>
-#include <math.h>
 
 using namespace ShapePr;
 
@@ -29,6 +31,18 @@ void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QW
     painter->setPen(Qt::NoPen);
     painter->setBrush(Qt::red);
     painter->drawRect(rect());
+}
+
+void SH::setPos(const QPointF& pos)
+{
+    QGraphicsItem::setPos(pos);
+    for (SH* sh : shape->sh) { // прилипание
+        if (QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
+            QGraphicsItem::setPos(sh->pos());
+            return;
+        }
+    }
+    QGraphicsItem::setPos(pos);
 }
 
 QRectF SH::rect() const
@@ -54,6 +68,11 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             shape->sh[i]->setPos(pt[i] + pos() - pt.first());
         shape->redraw();
     } else {
+        for (SH* sh : shape->sh) { // прилипание
+            if (QLineF(sh->pos(), pos()).length() < App::graphicsView()->scaleFactor() * 20) {
+                QGraphicsItem::setPos(sh->pos());
+            }
+        }
         shape->redraw();
     }
 }

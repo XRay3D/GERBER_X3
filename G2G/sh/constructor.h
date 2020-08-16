@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QPointF>
 class QGraphicsItem;
 class QAction;
@@ -26,7 +24,7 @@ class Constructor {
 public:
     static void addShapePoint(const QPointF& value);
     static void updateShape(const QPointF& value);
-    static void finalizeShape(const QPointF& value);
+    static void finalizeShape();
 
     static PrType getType();
     static void setType(const PrType& value, QAction* act);
@@ -39,4 +37,3 @@ private:
 };
 
 } // namespace ShapePr
-
