@@ -24,8 +24,15 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     App::mInstance->m_creator = this;
 
     m_toolDiameter = tool.getDiameter(depth);
+
+    const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+
     // execute offset
     if (m_gcp.side() == On) {
+
+        if (m_gcp.params[GCodeParams::Strip].toBool())
+            strip();
+
         m_returnPs = m_workingPs;
 
         for (Path& path : m_returnPs)
@@ -40,7 +47,6 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     } else {
         // calc offset
-        const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
         // execute offset
         if (!m_workingPs.isEmpty()) {
@@ -134,4 +140,52 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         emit fileReady(m_file);
     }
 }
+
+void ProfileCreator::strip()
+{
+    const double dOffset = m_toolDiameter * uScale * 0.5;
+    for (int i = 0; i < m_workingRawPs.size(); ++i) {
+        auto& p = m_workingRawPs[i];
+        if (p.size() == 2) {
+            double l = Length(p.first(), p.last());
+            if (l <= m_toolDiameter * uScale) {
+                m_workingRawPs.remove(i--);
+                continue;
+            }
+            QLineF b(toQPointF(p.first()), toQPointF(p.last()));
+            QLineF e(toQPointF(p.last()), toQPointF(p.first()));
+            b.setLength(b.length() - m_toolDiameter * 0.5);
+            e.setLength(e.length() - m_toolDiameter * 0.5);
+            p = { toIntPoint(b.p2()), toIntPoint(e.p2()) };
+        } else if (double l = Perimeter(p); l <= m_toolDiameter * uScale) {
+            m_workingRawPs.remove(i--);
+            continue;
+        } else {
+            Paths ps;
+            {
+                ClipperOffset offset;
+                offset.AddPath(p, jtMiter, etOpenButt);
+                offset.Execute(ps, dOffset + 100);
+                //dbgPaths(ps, {}, "offset+");
+                offset.Clear();
+                offset.AddPath(ps.first(), jtMiter, etClosedPolygon);
+                offset.Execute(ps, -dOffset);
+                //dbgPaths(ps, {}, "offset-");
+                if (ps.isEmpty()) {
+                    m_workingRawPs.remove(i--);
+                    continue;
+                }
+            }
+            {
+                Clipper clipper;
+                clipper.AddPath(p, ptSubject, false);
+                clipper.AddPaths(ps, ptClip, true);
+                clipper.Execute(ctIntersection, ps, pftPositive);
+                //dbgPaths(ps, {}, "clip-");
+                p = ps.first();
+            }
+        }
+    }
+}
+
 }

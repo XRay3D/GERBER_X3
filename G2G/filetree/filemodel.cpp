@@ -7,6 +7,8 @@
 #include "foldernode.h"
 #include "gbrnode.h"
 #include "gcnode.h"
+#include "sh/shape.h"
+#include "sh/shnode.h"
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>
@@ -53,6 +55,36 @@ void FileModel::addFile(AbstractFile* file)
     default:
         break;
     }
+    endInsertRows();
+
+    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
+    emit select(selectIndex);
+}
+
+void FileModel::addFile(ShapePr::Shape* sh)
+{
+    if (sh == nullptr)
+        return;
+
+    AbstractNode* item(rootItem->child(static_cast<int>(FileType::Shapes)));
+    QModelIndex index = createIndex(0, 0, item);
+    int rowCount = item->childCount();
+
+    beginInsertRows(index, rowCount, rowCount);
+    item->append(new ShNode(sh->id()));
+    //    switch (sh->type()) {
+    //    case FileType ::Gerber:
+    //        item->append(new GerberNode(sh->id()));
+    //        break;
+    //    case FileType ::Excellon:
+    //        item->append(new ExcellonNode(sh->id()));
+    //        break;
+    //    case FileType::GCode:
+    //        item->append(new GcodeNode(sh->id()));
+    //        break;
+    //    default:
+    //        break;
+    //    }
     endInsertRows();
 
     QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));

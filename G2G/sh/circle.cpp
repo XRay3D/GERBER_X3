@@ -33,12 +33,19 @@ Circle::Circle(QPointF center, QPointF pt)
     App::scene()->addItem(sh[Point1]);
 }
 
+Circle::Circle(QDataStream& stream)
+    : Shape(stream)
+{
+}
+
+Circle::~Circle() { qDebug(Q_FUNC_INFO); }
+
 void Circle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (m_penColor)
-        m_pen.setColor(*m_penColor);
-    if (m_brushColor)
-        m_brush.setColor(*m_brushColor);
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
 
     QColor color(m_pen.color());
     QPen pen(m_pen);

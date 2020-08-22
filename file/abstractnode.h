@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>
@@ -10,10 +8,13 @@
 
 class AbstractFile;
 class TreeView;
+namespace ShapePr {
+class Shape;
+}
 
 class AbstractNode {
 public:
-    explicit AbstractNode(int id);
+    explicit AbstractNode(int id, int type = 0);
     virtual ~AbstractNode();
 
     AbstractNode* child(int row);
@@ -43,11 +44,12 @@ public:
 
 protected:
     const int m_id;
+    const int m_type;
+
     const QStringList tbStrList;
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
     inline AbstractFile* file() const { return App::project()->file(m_id); }
+    inline ShapePr::Shape* shape() const { return App::project()->aShape(m_id); }
     //Qt::CheckState m_checkState = Qt::Checked;
 };
-
-

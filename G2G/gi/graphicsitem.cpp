@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "graphicsitem.h"
@@ -11,8 +10,6 @@ GraphicsItem::GraphicsItem(AbstractFile* file)
     , m_brush(Qt::white)
 {
 }
-
-
 
 QBrush GraphicsItem::brush() const { return m_brush; }
 
@@ -28,13 +25,10 @@ void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
 
 //QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }
 
-void GraphicsItem::setPenColor(QColor& penColor) { m_penColor = &penColor; }
+void GraphicsItem::setPenColor(QColor& penColor) { m_pnColorPrt = &penColor; }
 
-void GraphicsItem::setBrushColor(QColor& brushColor) { m_brushColor = &brushColor; }
+void GraphicsItem::setBrushColor(QColor& brushColor) { m_brColorPtr = &brushColor; }
 
 const AbstractFile* GraphicsItem::file() const { return m_file; }
 
-int GraphicsItem::id() const
-{
-    return m_id;
-}
+int GraphicsItem::id() const { return m_id; }

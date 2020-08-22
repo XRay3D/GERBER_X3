@@ -5,6 +5,8 @@ class QGraphicsItem;
 class QAction;
 namespace ShapePr {
 
+class Shape;
+
 enum PrType {
     NullPT,
     Rect,
@@ -18,7 +20,7 @@ class Constructor {
     static PrType type;
     static int counter;
     static QPointF point;
-    static QGraphicsItem* item;
+    static Shape* item;
     static bool m_snap;
 
 public:

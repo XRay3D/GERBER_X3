@@ -506,7 +506,7 @@ void MainWindow::createActionsGraphics()
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
                 for (QGraphicsItem* clipItem : si)
-                    if (clipItem->type() == GiShapeC)
+                    if (clipItem->type() >= GiShapeC)
                         clipper.AddPaths(reinterpret_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
                 clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
                 if (gitem->rPaths()->isEmpty()) {

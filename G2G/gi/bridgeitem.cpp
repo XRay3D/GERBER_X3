@@ -96,7 +96,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        if (gi && (gi->type() == GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiAperturePath)) {
+        if (gi && (gi->type() >= GiShapeC || gi->type() == GiDrill || gi->type() == GiGerber || gi->type() == GiAperturePath)) {
             if (!gi->isSelected())
                 continue;
             for (const Path& path : gi->paths()) {

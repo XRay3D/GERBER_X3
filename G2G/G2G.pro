@@ -109,6 +109,7 @@ HEADERS += \
     sh/pline.h \
     sh/rectangle.h \
     sh/sh.h \
+    sh/shnode.h \
     sh/shape.h \
     splashscreen.h \
     tooldatabase/tool.h \
@@ -165,6 +166,7 @@ SOURCES += \
     sh/rectangle.cpp \
     sh/sh.cpp \
     sh/shape.cpp \
+    sh/shnode.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooleditdialog.cpp \

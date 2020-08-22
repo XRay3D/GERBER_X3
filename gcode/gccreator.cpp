@@ -34,8 +34,10 @@ void dbgPaths(Paths ps, const Tool& tool, const QString& fileName)
     for (int i = 0; i < ps.size(); ++i)
         if (ps[i].isEmpty())
             ps.remove(i--);
-    for (Path& p : ps)
-        p.append(p.first());
+
+    //    for (Path& p : ps)
+    //        p.append(p.first());
+
     //assert(ps.isEmpty());
     GCode::GCodeParams gcp { tool, 0.0, GCode::Profile };
     auto file = new GCode::File({ ps }, gcp);

@@ -136,6 +136,8 @@ void PocketOffsetForm::createFile()
                 wRawPaths.append(gi->paths());
             break;
         case GiShapeC:
+        case GiShapeR:
+        case GiShapeL:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:

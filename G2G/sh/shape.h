@@ -11,12 +11,15 @@ class Shape : public GraphicsItem {
 
 public:
     Shape();
-    ~Shape() override;
+    Shape(QDataStream& stream);
+    ~Shape();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     // GraphicsItem interface
     Paths paths() const override;
+    void write(QDataStream& stream);
+    QString name() const;
 
 protected:
     QVector<SH*> sh;

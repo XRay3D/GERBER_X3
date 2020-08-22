@@ -8,6 +8,7 @@
 #include "rectangle.h"
 
 #include <QAction>
+#include <project.h>
 #include <scene.h>
 
 namespace ShapePr {
@@ -15,7 +16,7 @@ namespace ShapePr {
 PrType Constructor::type = NullPT;
 int Constructor::counter = 0;
 QPointF Constructor::point;
-QGraphicsItem* Constructor::item = nullptr;
+Shape* Constructor::item = nullptr;
 bool Constructor::m_snap = false;
 QAction* Constructor::action = nullptr;
 
@@ -34,11 +35,7 @@ void Constructor::addShapePoint(const QPointF& value)
             item = new Rectangle(point, point + QPointF { 1, 1 });
             break;
         default:
-            type = NullPT;
-            item->setSelected(true);
-            item = nullptr;
-            action->setChecked(false);
-            action = nullptr;
+            finalizeShape();
         }
         break;
     case Pline:
@@ -67,11 +64,7 @@ void Constructor::addShapePoint(const QPointF& value)
             item = new Circle(point, point + QPointF { 1, 1 });
             break;
         default:
-            type = NullPT;
-            item->setSelected(true);
-            item = nullptr;
-            action->setChecked(false);
-            action = nullptr;
+            finalizeShape();
         }
         break;
     case ArcPT:
@@ -115,6 +108,9 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
     qDebug() << type << counter << item << point;
     if (item == nullptr)
         return;
+
+    App::project()->addShape(item);
+
     switch (type) {
     case Rect:
         type = NullPT;

@@ -39,10 +39,10 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         return;
     }
 
-    if (m_penColor)
-        m_pen.setColor(*m_penColor);
-    if (m_brushColor)
-        m_brush.setColor(*m_brushColor);
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
 
     if (App::scene()->drawPdf()) {
         painter->setBrush(m_brush.color());

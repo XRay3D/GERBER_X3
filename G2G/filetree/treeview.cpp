@@ -124,6 +124,10 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(id);
         }
+        if (row == NodeSpecial) {
+            const int id = index.data(Qt::UserRole).toInt();
+            App::project()->aShape(id)->setSelected(true);
+        }
     }
     if (!deselected.indexes().isEmpty()) {
         QModelIndex& index = deselected.indexes().first();
@@ -132,6 +136,10 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
             const int id = index.data(Qt::UserRole).toInt();
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(-id);
+        }
+        if (row == NodeSpecial) {
+            const int id = index.data(Qt::UserRole).toInt();
+            App::project()->aShape(id)->setSelected(false);
         }
     }
 #endif
@@ -171,7 +179,7 @@ void TreeView::saveGcodeFile()
     file->save(name);
 }
 
-void TreeView::showExcellonDialog() {}
+void TreeView::showExcellonDialog() { }
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {

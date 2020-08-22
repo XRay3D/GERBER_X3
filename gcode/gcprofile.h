@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "gccreator.h"
 
 namespace GCode {
@@ -12,9 +10,9 @@ public:
 
 private:
     void createProfile(const Tool& tool, const double depth);
+    void strip();
+
 protected:
     void create() override; // Creator interface
 };
 }
-
-

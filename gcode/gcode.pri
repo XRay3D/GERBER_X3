@@ -26,8 +26,6 @@ contains(QT_ARCH, i386) {
     }
 }
 
-
-
 HEADERS += \
     $$PWD/gccreator.h \
     $$PWD/gcfile.h \

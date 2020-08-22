@@ -28,12 +28,19 @@ Pline::Pline(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh.last());
 }
 
+Pline::Pline(QDataStream& stream)
+    : Shape(stream)
+{
+}
+
+Pline::~Pline() { qDebug(Q_FUNC_INFO); }
+
 void Pline::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (m_penColor)
-        m_pen.setColor(*m_penColor);
-    if (m_brushColor)
-        m_brush.setColor(*m_brushColor);
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
 
     QColor color(m_pen.color());
     QPen pen(m_pen);
@@ -90,17 +97,4 @@ bool Pline::closed()
 {
     return sh.first()->pos() == sh.last()->pos();
 }
-
-//double Line::radius() const
-//{
-//    return m_radius;
-//}
-
-//void Line::setRadius(double radius)
-//{
-//    if (!qFuzzyCompare(m_radius, radius))
-//        return;
-//    m_radius = radius;
-//    redraw();
-//}
 }

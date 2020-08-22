@@ -3,10 +3,11 @@
 #include "shape.h"
 
 namespace ShapePr {
-class Circle : public Shape {
+class Circle final : public Shape {
 public:
     explicit Circle(QPointF center, QPointF pt);
-    ~Circle() override = default;
+    Circle(QDataStream& stream);
+    ~Circle();
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
