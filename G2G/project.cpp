@@ -51,6 +51,7 @@ bool Project::save(QFile& file)
         case G2G_Ver_1:;
         }
         out << m_files;
+        out << m_shapes;
         m_isModified = false;
         return true;
     } catch (...) {
@@ -99,18 +100,24 @@ bool Project::open(QFile& file)
         }
         in >> m_files;
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-            switch (filePtr->type()) {
-            case FileType::Gerber:
-                App::fileModel()->addFile(static_cast<Gerber::File*>(filePtr.data()));
-                break;
-            case FileType::Excellon:
-                App::fileModel()->addFile(static_cast<Excellon::File*>(filePtr.data()));
-                break;
-            case FileType::GCode:
-                App::fileModel()->addFile(static_cast<GCode::File*>(filePtr.data()));
-                break;
-            }
+            App::fileModel()->addFile(filePtr.data());
+            //            switch (filePtr->type()) {
+            //            case FileType::Gerber:
+            //                App::fileModel()->addFile(static_cast<Gerber::File*>(filePtr.data()));
+            //                break;
+            //            case FileType::Excellon:
+            //                App::fileModel()->addFile(static_cast<Excellon::File*>(filePtr.data()));
+            //                break;
+            //            case FileType::GCode:
+            //                App::fileModel()->addFile(static_cast<GCode::File*>(filePtr.data()));
+            //                break;
+            //            }
         }
+        in >> m_shapes;
+        for (const QSharedPointer<ShapePr::Shape>& shPtr : m_shapes) {
+            App::fileModel()->addFile(shPtr.data());
+        }
+
         m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
         App::layoutFrames()->updateRect();
@@ -145,7 +152,17 @@ void Project::deleteFile(int id)
         m_files.take(id);
         setChanged();
     } else
-        qWarning() << "Error id" << id;
+        qWarning() << "Error id" << id << "File not found";
+}
+
+void Project::deleteShape(int id)
+{
+    QMutexLocker locker(&m_mutex);
+    if (m_shapes.contains(id)) {
+        m_shapes.take(id);
+        setChanged();
+    } else
+        qWarning() << "Error id" << id << "Shape not found";
 }
 
 bool Project::isEmpty()
@@ -275,6 +292,18 @@ bool Project::reload(int id, AbstractFile* file)
     return false;
 }
 
+AbstractFile* Project::aFile(int id)
+{
+    QMutexLocker locker(&m_mutex);
+    return m_files.value(id).data();
+}
+
+ShapePr::Shape* Project::aShape(int id)
+{
+    QMutexLocker locker(&m_mutex);
+    return m_shapes.value(id).data();
+}
+
 int Project::addFile(AbstractFile* file)
 {
     //QMutexLocker locker(&m_mutex);
@@ -288,6 +317,16 @@ int Project::addFile(AbstractFile* file)
     }
     setChanged();
     return file->m_id;
+}
+
+int Project::addShape(ShapePr::Shape* sh)
+{
+    //QMutexLocker locker(&m_mutex);
+    sh->m_id = m_shapes.size() ? m_shapes.lastKey() + 1 : 0;
+    m_shapes.insert(sh->m_id, QSharedPointer<ShapePr::Shape>(sh));
+    App::fileModel()->addFile(sh);
+    setChanged();
+    return sh->m_id;
 }
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
@@ -432,15 +471,47 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
 {
     int type;
     stream >> type;
-    switch (type) {
-    case static_cast<int>(FileType::Gerber):
+    switch (static_cast<FileType>(type)) {
+    case FileType::Gerber:
         file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
         break;
-    case static_cast<int>(FileType::Excellon):
+    case FileType::Excellon:
         file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
         break;
-    case static_cast<int>(FileType::GCode):
+    case FileType::GCode:
         file = QSharedPointer<AbstractFile>(new GCode::File(stream));
+        break;
+    }
+    return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const QSharedPointer<ShapePr::Shape>& sh)
+{
+    stream << static_cast<int>(sh->type());
+    sh->write(stream);
+    return stream;
+}
+
+#include "sh/circle.h"
+#include "sh/pline.h"
+#include "sh/rectangle.h"
+
+QDataStream& operator>>(QDataStream& stream, QSharedPointer<ShapePr::Shape>& sh)
+{
+    int type;
+    stream >> type;
+    switch (type) {
+    case GiShapeC:
+        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Circle(stream));
+        sh->redraw();
+        break;
+    case GiShapeR:
+        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Rectangle(stream));
+        sh->redraw();
+        break;
+    case GiShapeL:
+        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Pline(stream));
+        sh->redraw();
         break;
     }
     return stream;

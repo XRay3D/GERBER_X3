@@ -34,12 +34,19 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh[Point2]);
 }
 
+Rectangle::Rectangle(QDataStream& stream)
+    : Shape(stream)
+{
+}
+
+Rectangle::~Rectangle() { qDebug(Q_FUNC_INFO); }
+
 void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (m_penColor)
-        m_pen.setColor(*m_penColor);
-    if (m_brushColor)
-        m_brush.setColor(*m_brushColor);
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
 
     QColor color(m_pen.color());
     QPen pen(m_pen);
@@ -68,11 +75,11 @@ void Rectangle::redraw()
     IntPoint p1(toIntPoint(sh[Point1]->pos()));
     IntPoint p2(toIntPoint(sh[Point2]->pos()));
     m_paths.first() = {
-        IntPoint{ p1.X, p1.Y },
-        IntPoint{ p2.X, p1.Y },
-        IntPoint{ p2.X, p2.Y },
-        IntPoint{ p1.X, p2.Y },
-        IntPoint{ p1.X, p1.Y },
+        IntPoint { p1.X, p1.Y },
+        IntPoint { p2.X, p1.Y },
+        IntPoint { p2.X, p2.Y },
+        IntPoint { p1.X, p2.Y },
+        IntPoint { p1.X, p1.Y },
     };
     if (Area(m_paths.first()) < 0)
         ReversePath(m_paths.first());

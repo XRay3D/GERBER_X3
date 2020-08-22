@@ -6,8 +6,9 @@
 #include "mainwindow.h"
 #include "project.h"
 
-AbstractNode::AbstractNode(int id)
+AbstractNode::AbstractNode(int id, int type)
     : m_id(id)
+    , m_type(type)
     , tbStrList(QObject::tr("Top|Bottom").split('|'))
 {
     //    if (MainWindow::closeAllAct()) {
@@ -28,7 +29,10 @@ AbstractNode::~AbstractNode()
         //            scene->setSceneRect(scene->itemsBoundingRect());
         //            scene->update();
         //        }
-        App::project()->deleteFile(m_id);
+        if (m_type)
+            App::project()->deleteShape(m_id);
+        else
+            App::project()->deleteFile(m_id);
     }
     childItems.clear();
 }

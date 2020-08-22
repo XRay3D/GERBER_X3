@@ -22,9 +22,9 @@ enum GraphicsItemType {
     GiDrillPr, // DrillForm
     GiApetrurePr, // DrillForm
 
-    GiShapeC,
-    GiShapeR = GiShapeC,
-    GiShapeL = GiShapeC,
+    GiShapeC = QGraphicsItem::UserType + 100,
+    GiShapeR,
+    GiShapeL,
 };
 
 class AbstractFile;
@@ -40,6 +40,7 @@ class GraphicsItem : public QGraphicsItem {
     friend class Gerber::File;
     friend class Excellon::File;
     friend class ItemGroup;
+    friend class Project;
 
 public:
     explicit GraphicsItem(AbstractFile* file = nullptr);
@@ -70,8 +71,8 @@ protected:
     const AbstractFile* m_file;
     QPen m_pen;
     QBrush m_brush;
-    QColor* m_penColor = nullptr;
-    QColor* m_brushColor = nullptr;
+    QColor* m_pnColorPrt = nullptr;
+    QColor* m_brColorPtr = nullptr;
     QPainterPath m_shape;
     QRectF m_rect;
     int m_id = -1;

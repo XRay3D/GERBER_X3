@@ -52,6 +52,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     settings.getValue(ui->rbInside);
     settings.getValue(ui->rbOn);
     settings.getValue(ui->rbOutside);
+    settings.getValue(ui->cbxStrip);
     settings.endGroup();
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
@@ -83,6 +84,7 @@ ProfileForm::~ProfileForm()
     settings.setValue(ui->rbInside);
     settings.setValue(ui->rbOn);
     settings.setValue(ui->rbOutside);
+    settings.setValue(ui->cbxStrip);
     settings.endGroup();
 
     for (QGraphicsItem* item : App::scene()->items()) {
@@ -126,6 +128,8 @@ void ProfileForm::createFile()
                 wRawPaths.append(gi->paths());
             break;
         case GiShapeC:
+        case GiShapeR:
+        case GiShapeL:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:
@@ -147,6 +151,8 @@ void ProfileForm::createFile()
     gcp.setSide(side);
     gcp.tools.append(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    if (ui->cbxStrip->isEnabled())
+        gcp.params[GCode::GCodeParams::Strip] = ui->cbxStrip->isChecked();
     gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
 
     {
@@ -213,12 +219,16 @@ void ProfileForm::updatePixmap()
 
 void ProfileForm::rb_clicked()
 {
-    if (ui->rbOn->isChecked())
+    if (ui->rbOn->isChecked()) {
         side = GCode::On;
-    else if (ui->rbOutside->isChecked())
+        ui->cbxStrip->setEnabled(true);
+    } else if (ui->rbOutside->isChecked()) {
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+        ui->cbxStrip->setEnabled(false);
+    } else if (ui->rbInside->isChecked()) {
         side = GCode::Inner;
+        ui->cbxStrip->setEnabled(false);
+    }
 
     if (ui->rbClimb->isChecked())
         direction = GCode::Climb;

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "filemodel.h"
 
 #include <QItemSelection>
@@ -39,5 +37,3 @@ private:
 protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
 };
-
-

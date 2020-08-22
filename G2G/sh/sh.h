@@ -6,6 +6,8 @@
 
 namespace ShapePr {
 class SH : public QGraphicsItem {
+    friend class Shape;
+
 public:
     SH(ShapePr::Shape* shape, bool center = false);
 
@@ -13,7 +15,7 @@ public:
 public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    void setPos(const QPointF& pos);
+    void setPos(const QPointF& pos, bool fl = true);
 
 private:
     ShapePr::Shape* shape;

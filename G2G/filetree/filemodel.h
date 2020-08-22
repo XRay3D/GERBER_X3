@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QAbstractItemModel>
 
 enum RootNodes {
@@ -14,6 +12,10 @@ enum RootNodes {
 
 class AbstractFile;
 class AbstractNode;
+
+namespace ShapePr {
+class Shape;
+}
 
 class FileModel : public QAbstractItemModel {
     Q_OBJECT
@@ -54,9 +56,8 @@ private:
     const QString mimeType;
 
     void addFile(AbstractFile* file);
+    void addFile(ShapePr::Shape* sh);
     AbstractNode* getItem(const QModelIndex& index) const;
 };
 
 #include <app.h>
-
-

@@ -14,6 +14,7 @@ enum class FileType {
     Gerber,
     Excellon,
     GCode,
+    Shapes
 };
 
 enum Side {

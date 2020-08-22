@@ -67,7 +67,8 @@ struct GCodeParams {
         Node,
         Bridges,
         BridgeLen,
-        NotTile
+        NotTile,
+        Strip
     };
 
     GCodeParams() {}

@@ -33,15 +33,16 @@ void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QW
     painter->drawRect(rect());
 }
 
-void SH::setPos(const QPointF& pos)
+void SH::setPos(const QPointF& pos, bool fl)
 {
     QGraphicsItem::setPos(pos);
-    for (SH* sh : shape->sh) { // прилипание
-        if (QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
-            QGraphicsItem::setPos(sh->pos());
-            return;
+    if (fl)
+        for (SH* sh : shape->sh) { // прилипание
+            if (QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
+                QGraphicsItem::setPos(sh->pos());
+                return;
+            }
         }
-    }
     QGraphicsItem::setPos(pos);
 }
 
