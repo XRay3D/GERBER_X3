@@ -7,18 +7,12 @@
 
 namespace Excellon {
 
-File::File(QDataStream& stream)
-    : m_format(this)
-{
-    read(stream);
-}
-
 File::File()
     : m_format(this)
 {
 }
 
-File::~File() {}
+File::~File() { }
 
 Format File::format() const
 {
@@ -68,15 +62,16 @@ Paths Excellon::File::merge() const
 
 void File::write(QDataStream& stream) const
 {
-    stream << *this;
+    stream << *static_cast<const QList<Hole>*>(this);
     stream << m_tools;
     stream << m_format;
-    _write(stream);
+    //    stream << *static_cast<const AbstractFile*>(this);
+    //_write(stream);
 }
 
 void File::read(QDataStream& stream)
 {
-    stream >> *this;
+    stream >> *static_cast<QList<Hole>*>(this);
     stream >> m_tools;
     stream >> m_format;
     m_format.file = this;
@@ -84,7 +79,8 @@ void File::read(QDataStream& stream)
         hole.file = this;
         hole.state.format = &m_format;
     }
-    _read(stream);
+    //    stream >> *static_cast<AbstractFile*>(this);
+    //_read(stream);
 }
 
 void File::createGi()

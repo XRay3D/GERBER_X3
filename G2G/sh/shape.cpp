@@ -7,7 +7,7 @@
 #include <app.h>
 #include <scene.h>
 
-namespace ShapePr {
+namespace Shapes {
 Shape::Shape()
     : GraphicsItem(nullptr)
 {
@@ -54,8 +54,6 @@ void Shape::write(QDataStream& stream)
         stream << item->center;
     }
 }
-
-QString Shape::name() const { return QString("Circle|Rectangle|Line").split('|').value(type() - GiShapeC, "ERR"); }
 
 void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {

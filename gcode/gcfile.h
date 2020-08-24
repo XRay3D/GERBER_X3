@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 //#include "gctypes.h"
 #include "gcutils.h"
 #include <abstractfile.h>
@@ -15,7 +13,7 @@ class File : public AbstractFile, private GCUtils {
     friend class ::Project;
 
 public:
-    explicit File(QDataStream& stream); // for project load
+    explicit File();
     explicit File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
@@ -60,10 +58,10 @@ private:
     // AbstractFile interfaces
 protected:
     virtual Paths merge() const override { return {}; }
-
-public:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
+
+public:
     void createGi() override;
 
     QList<QString> gCodeText() const;
@@ -71,4 +69,3 @@ public:
     const GCodeParams& gcp() const;
 };
 }
-

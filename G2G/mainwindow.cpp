@@ -106,14 +106,14 @@ MainWindow::MainWindow(QWidget* parent)
         QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
         QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
-    App::mInstance->m_mainWindow = this;
+    App::m_mainWindow = this;
 }
 
 MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
-    App::mInstance->m_mainWindow = nullptr;
+    App::m_mainWindow = nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -345,7 +345,7 @@ void MainWindow::createActionsService()
 
     serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { ShapePr::Constructor::setSnap(checked); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { Shapes::Constructor::setSnap(checked); }));
     action->setCheckable(true);
 }
 
@@ -475,21 +475,21 @@ void MainWindow::createActionsGraphics()
         action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            ShapePr::Constructor::setType(checked ? ShapePr::Rect : ShapePr::NullPT, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? Shapes::Rect : Shapes::NullPT, checked ? action : nullptr);
         });
     }
     {
         action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            ShapePr::Constructor::setType(checked ? ShapePr::Elipse : ShapePr::NullPT, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? Shapes::Elipse : Shapes::NullPT, checked ? action : nullptr);
         });
     }
     {
         action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            ShapePr::Constructor::setType(checked ? ShapePr::Pline : ShapePr::NullPT, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? Shapes::PolyLine : Shapes::NullPT, checked ? action : nullptr);
         });
     }
     // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });
@@ -902,7 +902,7 @@ void MainWindow::addFileToPro(AbstractFile* file)
     m_project->addFile(file);
     prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
-        GerberNode::repaintTimer()->start();
+        Gerber::Node::repaintTimer()->start();
     graphicsView->zoomFit();
 }
 

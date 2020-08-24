@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "abstractfile.h"
@@ -12,10 +11,7 @@ AbstractFile::AbstractFile()
 {
 }
 
-AbstractFile::~AbstractFile()
-{
-    qDeleteAll(m_itemGroup);
-}
+AbstractFile::~AbstractFile() { qDeleteAll(m_itemGroup); }
 
 QString AbstractFile::shortName() const { return QFileInfo(m_name).fileName(); }
 
@@ -39,40 +35,39 @@ QColor AbstractFile::color() const { return m_color; }
 
 void AbstractFile::setColor(const QColor& color) { m_color = color; }
 
-int AbstractFile::id() const
-{
-    return m_id;
-}
+int AbstractFile::id() const { return m_id; }
 
-void AbstractFile::_write(QDataStream& stream) const
-{
-    stream << m_id;
-    stream << m_lines;
-    stream << m_name;
-    stream << m_mergedPaths;
-    stream << m_groupedPaths;
-    stream << m_side;
-    stream << m_color;
-    stream << m_date;
-    stream << itemGroup()->isVisible();
-}
+void AbstractFile::setId(int id) { m_id = id; }
 
-void AbstractFile::_read(QDataStream& stream)
-{
-    stream >> m_id;
-    stream >> m_lines;
-    stream >> m_name;
-    stream >> m_mergedPaths;
-    stream >> m_groupedPaths;
-    stream >> m_side;
-    stream >> m_color;
-    stream >> m_date;
+//void AbstractFile::_write(QDataStream& stream) const
+//{
+//    stream << m_id;
+//    stream << m_lines;
+//    stream << m_name;
+//    stream << m_mergedPaths;
+//    stream << m_groupedPaths;
+//    stream << m_side;
+//    stream << m_color;
+//    stream << m_date;
+//    stream << itemGroup()->isVisible();
+//}
 
-    if (App::splashScreen())
-        App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+//void AbstractFile::_read(QDataStream& stream)
+//{
+//    stream >> m_id;
+//    stream >> m_lines;
+//    stream >> m_name;
+//    stream >> m_mergedPaths;
+//    stream >> m_groupedPaths;
+//    stream >> m_side;
+//    stream >> m_color;
+//    stream >> m_date;
 
-    createGi();
-    bool fl;
-    stream >> fl;
-    itemGroup()->setVisible(fl);
-}
+//    if (App::splashScreen())
+//        App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+
+//    createGi();
+//    bool fl;
+//    stream >> fl;
+//    itemGroup()->setVisible(fl);
+//}

@@ -9,10 +9,12 @@
 #include "project.h"
 #include "settings.h"
 #include <QDebug>
+#include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QSettings>
 #include <clipper.hpp>
+#include <scene.h>
 
 using namespace ClipperLib;
 
@@ -21,6 +23,13 @@ Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
+    //    auto si { App::scene()->selectedItems() };
+    //    QRectF rect;
+    //    for (auto var : si) {
+    //        qDebug() << var->type() << var->boundingRect();
+    //        rect = rect.united(var->boundingRect());
+    //    }
+    //    qDebug() << rect;
     QRectF rect(App::project()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
@@ -396,18 +405,18 @@ void Pin::setPos(const QPointF& pos)
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
 {
-    if (App::mInstance->m_layoutFrames) {
+    if (App::m_layoutFrames) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class LayoutFrames more than 2 times!!!");
         exit(1);
     }
     setZValue(-std::numeric_limits<double>::max());
-    App::mInstance->m_layoutFrames = this;
+    App::m_layoutFrames = this;
     App::scene()->addItem(this);
 }
 
 LayoutFrames::~LayoutFrames()
 {
-    App::mInstance->m_layoutFrames = nullptr;
+    App::m_layoutFrames = nullptr;
 }
 
 int LayoutFrames::type() const

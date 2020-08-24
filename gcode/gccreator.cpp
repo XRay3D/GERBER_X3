@@ -58,7 +58,7 @@ struct Cancel {
 
 void Creator::reset()
 {
-    App::mInstance->m_creator = nullptr;
+    App::m_creator = nullptr;
     m_cancel = false;
     m_progressMax = 0;
     m_progressVal = 0;
@@ -77,7 +77,7 @@ void Creator::reset()
     m_stepOver = 0.0;
 }
 
-Creator::~Creator() { App::mInstance->m_creator = nullptr; }
+Creator::~Creator() { App::m_creator = nullptr; }
 
 Pathss& Creator::groupedPaths(Grouping group, cInt k)
 {
@@ -404,7 +404,7 @@ void Creator::mergeSegments(Paths& paths, double glue)
 
 void Creator::progress(int progressMax)
 {
-    if (App::mInstance->m_creator != nullptr)
+    if (App::m_creator != nullptr)
         m_progressMax += progressMax;
 }
 
@@ -424,7 +424,7 @@ void Creator::progress()
         m_cancel = false;
         throw Cancel();
     }
-    if (App::mInstance->m_creator != nullptr)
+    if (App::m_creator != nullptr)
         if (m_progressMax < ++m_progressVal) {
             if (m_progressMax == 0)
                 m_progressMax = 100;

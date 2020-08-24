@@ -13,11 +13,6 @@ using namespace Gerber;
 
 static Format* crutch;
 
-File::File(QDataStream& stream)
-{
-    m_itemGroup.append({ new ItemGroup, new ItemGroup });
-    read(stream);
-}
 
 File::File(const QString& fileName)
 {
@@ -164,7 +159,7 @@ void File::setItemType(File::ItemsType type)
 
 void Gerber::File::write(QDataStream& stream) const
 {
-    stream << *this;
+    stream << *static_cast<const QList<GraphicObject>*>(this); // write  QList<GraphicObject>
     stream << m_apertures;
     stream << m_format;
     //stream << layer;
@@ -172,13 +167,14 @@ void Gerber::File::write(QDataStream& stream) const
     stream << rawIndex;
     stream << m_itemsType;
     stream << m_components;
-    _write(stream);
+    //    stream << *static_cast<const AbstractFile*>(this);
+    //_write(stream);
 }
 
 void Gerber::File::read(QDataStream& stream)
 {
     crutch = &m_format; ///////////////////
-    stream >> *this;
+    stream >> *static_cast<QList<GraphicObject>*>(this); // read  QList<GraphicObject>
     stream >> m_apertures;
     stream >> m_format;
     //stream >> layer;
@@ -190,7 +186,8 @@ void Gerber::File::read(QDataStream& stream)
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
-    _read(stream);
+    //    stream >> *static_cast<AbstractFile*>(this);
+    //_read(stream);
 }
 
 void Gerber::File::createGi()

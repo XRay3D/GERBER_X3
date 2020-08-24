@@ -12,13 +12,14 @@
 #include <forms/drillform/drillform.h>
 #include <mainwindow.h>
 
-ExcellonNode::ExcellonNode(int id)
+namespace Excellon {
+Node::Node(int id)
     : AbstractNode(id)
 {
     file()->itemGroup()->addToScene();
 }
 
-bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int role)
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case Name:
@@ -42,7 +43,7 @@ bool ExcellonNode::setData(const QModelIndex& index, const QVariant& value, int 
     }
 }
 
-Qt::ItemFlags ExcellonNode::flags(const QModelIndex& index) const
+Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
@@ -55,7 +56,7 @@ Qt::ItemFlags ExcellonNode::flags(const QModelIndex& index) const
     }
 }
 
-QVariant ExcellonNode::data(const QModelIndex& index, int role) const
+QVariant Node::data(const QModelIndex& index, int role) const
 {
     if (file())
         switch (index.column()) {
@@ -93,7 +94,7 @@ QVariant ExcellonNode::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void ExcellonNode::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, TreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &TreeView::hideOther);
     if (!m_exFormatDialog) {
@@ -106,4 +107,5 @@ void ExcellonNode::menu(QMenu* menu, TreeView* tv) const
         });
     }
     menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &TreeView::closeFile);
+}
 }

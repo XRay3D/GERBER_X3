@@ -1,22 +1,20 @@
 #pragma once
 
-
-
 #include "abstractnode.h"
 #include <QObject>
 
-namespace Excellon {
-class File;
-}
 class ExcellonDialog;
 
-class ExcellonNode : public QObject, public AbstractNode {
+namespace Excellon {
+class File;
+
+class Node : public QObject, public AbstractNode {
     Q_OBJECT
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
 
 public:
-    explicit ExcellonNode(int id);
-    ~ExcellonNode() override = default;
+    explicit Node(int id);
+    ~Node() override = default;
 
     // AbstractNode interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
@@ -25,4 +23,4 @@ public:
     void menu(QMenu* menu, TreeView* tv) const override;
 };
 
-
+}

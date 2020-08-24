@@ -19,7 +19,7 @@ void ThermalCreator::create()
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
 {
-    App::mInstance->m_creator = this;
+    App::m_creator = this;
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 

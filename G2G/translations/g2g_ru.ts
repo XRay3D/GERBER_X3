@@ -1278,7 +1278,7 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
-    <name>GerberNode</name>
+    <name>Gerber::Node</name>
     <message>
         <source>Top|Bottom</source>
         <translation type="vanished">Верх|Низ</translation>

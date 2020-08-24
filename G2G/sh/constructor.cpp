@@ -11,7 +11,7 @@
 #include <project.h>
 #include <scene.h>
 
-namespace ShapePr {
+namespace Shapes {
 
 PrType Constructor::type = NullPT;
 int Constructor::counter = 0;
@@ -38,17 +38,17 @@ void Constructor::addShapePoint(const QPointF& value)
             finalizeShape();
         }
         break;
-    case Pline:
+    case PolyLine:
         switch (counter) {
         case 0:
         default:
             if (item == nullptr) {
-                item = new class Pline(point, point + QPointF { 1, 1 });
+                item = new class PolyLine(point, point + QPointF { 1, 1 });
             } else {
-                if (static_cast<class Pline*>(item)->closed())
+                if (static_cast<class PolyLine*>(item)->closed())
                     finalizeShape();
                 else
-                    static_cast<class Pline*>(item)->addPt(point);
+                    static_cast<class PolyLine*>(item)->addPt(point);
             }
             //            break;
             //            type = NullPT;
@@ -85,9 +85,9 @@ void Constructor::updateShape(const QPointF& value)
         if (item != nullptr)
             static_cast<Rectangle*>(item)->setPt(point);
         break;
-    case Pline:
+    case PolyLine:
         if (item != nullptr)
-            static_cast<class Pline*>(item)->setPt(point);
+            static_cast<class PolyLine*>(item)->setPt(point);
         break;
     case Elipse:
         if (item != nullptr)
@@ -119,7 +119,7 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
         action->setChecked(false);
         action = nullptr;
         break;
-    case Pline:
+    case PolyLine:
         type = NullPT;
         item->setSelected(true);
         item = nullptr;

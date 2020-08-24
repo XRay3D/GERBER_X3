@@ -14,13 +14,13 @@
 #include <qboxlayout.h>
 
 #include <filetree/treeview.h>
-
-ShNode::ShNode(int id)
+namespace Shapes {
+Node::Node(int id)
     : AbstractNode(id, 1)
 {
 }
 
-bool ShNode::setData(const QModelIndex& index, const QVariant& value, int role)
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case 0:
@@ -44,27 +44,26 @@ bool ShNode::setData(const QModelIndex& index, const QVariant& value, int role)
     }
 }
 
-Qt::ItemFlags ShNode::flags(const QModelIndex& index) const
+Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case 1: {
-        return itemFlag | Qt::ItemIsEditable;
-    }
+    case 1:
+        return itemFlag /*| Qt::ItemIsEditable*/;
     default:
         return itemFlag;
     }
 }
 
-QVariant ShNode::data(const QModelIndex& index, int role) const
+QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            return shape()->name();
+            return QString("%1 (%2)").arg(shape()->name()).arg(m_id);
             //        case Qt::ToolTipRole:
             //            return file()->shortName() + "\n" + file()->name();
         case Qt::CheckStateRole:
@@ -99,26 +98,8 @@ QVariant ShNode::data(const QModelIndex& index, int role) const
     }
 }
 
-void ShNode::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, TreeView* tv) const
 {
-    //    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
-    //    menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &TreeView::saveGcodeFile);
-    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &TreeView::closeFile);
-    //    menu->addAction(QIcon(), QObject::tr("&Show source"), [this] {
-    //        QDialog* dialog = new QDialog;
-    //        dialog->setObjectName(QString::fromUtf8("dialog"));
-    //        dialog->resize(600, 600);
-    //        //Dialog->resize(400, 300);
-    //        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-    //        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-    //        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-    //        textBrowser->setFont(QFont("Consolas"));
-    //        /*auto gch =*/new GCH(textBrowser->document());
-    //        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-    //        verticalLayout->addWidget(textBrowser);
-    //        for (const QString& str : App::project()->file(m_id)->lines())
-    //            textBrowser->append(str);
-    //        dialog->exec();
-    //        delete dialog;
-    //    });
+    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), tv, &TreeView::closeFile);
+}
 }

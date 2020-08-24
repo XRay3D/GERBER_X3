@@ -1,14 +1,12 @@
 #pragma once
 
 #include "abstractnode.h"
-#include <QGraphicsItemGroup>
-#include <gcfile.h>
-
-class ShNode : public AbstractNode {
+namespace Shapes {
+class Node : public AbstractNode {
 
 public:
-    explicit ShNode(int id);
-    ~ShNode() override = default;
+    explicit Node(int id);
+    ~Node() override = default;
 
     // AbstractNode interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
@@ -17,3 +15,4 @@ public:
     // AbstractNode interface
     void menu(QMenu* menu, TreeView* tv) const override;
 };
+}

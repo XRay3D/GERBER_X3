@@ -13,14 +13,14 @@
 
 Project::Project()
 {
-    if (App::mInstance->m_project) {
+    if (App::m_project) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");
         exit(1);
     }
-    App::mInstance->m_project = this;
+    App::m_project = this;
 }
 
-Project::~Project() { App::mInstance->m_project = nullptr; }
+Project::~Project() { App::m_project = nullptr; }
 
 bool Project::save(QFile& file)
 {
@@ -114,8 +114,8 @@ bool Project::open(QFile& file)
             //            }
         }
         in >> m_shapes;
-        for (const QSharedPointer<ShapePr::Shape>& shPtr : m_shapes) {
-            App::fileModel()->addFile(shPtr.data());
+        for (const QSharedPointer<Shapes::Shape>& shPtr : m_shapes) {
+            App::fileModel()->addShape(shPtr.data());
         }
 
         m_isModified = false;
@@ -183,26 +183,30 @@ int Project::size()
 QRectF Project::getSelectedBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
-    for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
-            for (const GraphicsItem* const item : *itemGroup) {
-                if (item->isSelected()) {
-                    for (const Path& path : item->paths()) {
-                        for (const IntPoint& pt : path) {
-                            topLeft.X = qMin(pt.X, topLeft.X);
-                            topLeft.Y = qMin(pt.Y, topLeft.Y);
-                            botRight.X = qMax(pt.X, botRight.X);
-                            botRight.Y = qMax(pt.Y, botRight.Y);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    auto si { App::scene()->selectedItems() };
+    QRectF rect;
+    for (auto var : App::scene()->selectedItems())
+        rect = rect.united(var->boundingRect());
 
-    const QRectF rect(toQPointF(topLeft), toQPointF(botRight));
+    //    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    //    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    //    for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+    //        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
+    //            for (const GraphicsItem* const item : *itemGroup) {
+    //                if (item->isSelected()) {
+    //                    for (const Path& path : item->paths()) {
+    //                        for (const IntPoint& pt : path) {
+    //                            topLeft.X = qMin(pt.X, topLeft.X);
+    //                            topLeft.Y = qMin(pt.Y, topLeft.Y);
+    //                            botRight.X = qMax(pt.X, botRight.X);
+    //                            botRight.Y = qMax(pt.Y, botRight.Y);
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //    const QRectF rect(toQPointF(topLeft), toQPointF(botRight));
 
     if (!rect.isEmpty())
         setWorckRect(rect);
@@ -258,7 +262,7 @@ int Project::contains(const QString& name)
 
 bool Project::reload(int id, AbstractFile* file)
 {
-    file->m_id = id;
+    file->setId(id);
     if (m_files.contains(id)) {
         switch (file->type()) {
         case FileType::Gerber: {
@@ -298,7 +302,7 @@ AbstractFile* Project::aFile(int id)
     return m_files.value(id).data();
 }
 
-ShapePr::Shape* Project::aShape(int id)
+Shapes::Shape* Project::aShape(int id)
 {
     QMutexLocker locker(&m_mutex);
     return m_shapes.value(id).data();
@@ -310,21 +314,21 @@ int Project::addFile(AbstractFile* file)
     const int id = contains(file->name());
     if (id != -1) {
         reload(id, file);
-    } else if (file->m_id == -1) {
-        file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
-        m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
+    } else if (file->id() == -1) {
+        file->setId(m_files.size() ? m_files.lastKey() + 1 : 0);
+        m_files.insert(file->id(), QSharedPointer<AbstractFile>(file));
         App::fileModel()->addFile(file);
     }
     setChanged();
-    return file->m_id;
+    return file->id();
 }
 
-int Project::addShape(ShapePr::Shape* sh)
+int Project::addShape(Shapes::Shape* sh)
 {
     //QMutexLocker locker(&m_mutex);
     sh->m_id = m_shapes.size() ? m_shapes.lastKey() + 1 : 0;
-    m_shapes.insert(sh->m_id, QSharedPointer<ShapePr::Shape>(sh));
-    App::fileModel()->addFile(sh);
+    m_shapes.insert(sh->m_id, QSharedPointer<Shapes::Shape>(sh));
+    App::fileModel()->addShape(sh);
     setChanged();
     return sh->m_id;
 }
@@ -463,7 +467,12 @@ void Project::setWorckRect(const QRectF& worckRect)
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
     stream << static_cast<int>(file->type());
-    file->write(stream);
+    stream << static_cast<int>(file->type());
+
+    //    if (file->type() == FileType::Excellon)
+    //        stream << *static_cast<const Excellon::File*>(file.data());
+    //    else
+    //        file->write(stream);
     return stream;
 }
 
@@ -473,19 +482,38 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     stream >> type;
     switch (static_cast<FileType>(type)) {
     case FileType::Gerber:
-        file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
+        file = QSharedPointer<AbstractFile>(new Gerber::File());
         break;
-    case FileType::Excellon:
-        file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
-        break;
-    case FileType::GCode:
-        file = QSharedPointer<AbstractFile>(new GCode::File(stream));
-        break;
+    case FileType::Excellon: {
+        file = QSharedPointer<AbstractFile>(new Excellon::File());
+    } break;
+    case FileType::GCode: {
+        file = QSharedPointer<AbstractFile>(new GCode::File());
+    } break;
     }
+    stream >> *file;
+
+    //    switch (static_cast<FileType>(type)) {
+    //    case FileType::Gerber:
+    //        file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
+    //        break;
+    //    case FileType::Excellon: {
+    //        //        file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
+    //        auto filePtr = new Excellon::File;
+    //        stream >> *filePtr;
+    //        file = QSharedPointer<AbstractFile>(filePtr);
+    //    } break;
+    //    case FileType::GCode: {
+    //        file = QSharedPointer<AbstractFile>(new GCode::File(stream));
+    //        //        auto filePtr = new GCode::File;
+    //        //        stream >> *filePtr;
+    //        //        file = QSharedPointer<AbstractFile>(filePtr);
+    //    } break;
+    //    }
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const QSharedPointer<ShapePr::Shape>& sh)
+QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>& sh)
 {
     stream << static_cast<int>(sh->type());
     sh->write(stream);
@@ -496,21 +524,21 @@ QDataStream& operator<<(QDataStream& stream, const QSharedPointer<ShapePr::Shape
 #include "sh/pline.h"
 #include "sh/rectangle.h"
 
-QDataStream& operator>>(QDataStream& stream, QSharedPointer<ShapePr::Shape>& sh)
+QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
 {
     int type;
     stream >> type;
     switch (type) {
     case GiShapeC:
-        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Circle(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Circle(stream));
         sh->redraw();
         break;
     case GiShapeR:
-        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Rectangle(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Rectangle(stream));
         sh->redraw();
         break;
     case GiShapeL:
-        sh = QSharedPointer<ShapePr::Shape>(new ShapePr::Pline(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::PolyLine(stream));
         sh->redraw();
         break;
     }
