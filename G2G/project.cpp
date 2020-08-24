@@ -467,12 +467,7 @@ void Project::setWorckRect(const QRectF& worckRect)
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
     stream << static_cast<int>(file->type());
-    stream << static_cast<int>(file->type());
-
-    //    if (file->type() == FileType::Excellon)
-    //        stream << *static_cast<const Excellon::File*>(file.data());
-    //    else
-    //        file->write(stream);
+    stream << *file;
     return stream;
 }
 
@@ -484,45 +479,27 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     case FileType::Gerber:
         file = QSharedPointer<AbstractFile>(new Gerber::File());
         break;
-    case FileType::Excellon: {
+    case FileType::Excellon:
         file = QSharedPointer<AbstractFile>(new Excellon::File());
-    } break;
-    case FileType::GCode: {
+        break;
+    case FileType::GCode:
         file = QSharedPointer<AbstractFile>(new GCode::File());
-    } break;
+        break;
     }
     stream >> *file;
-
-    //    switch (static_cast<FileType>(type)) {
-    //    case FileType::Gerber:
-    //        file = QSharedPointer<AbstractFile>(new Gerber::File(stream));
-    //        break;
-    //    case FileType::Excellon: {
-    //        //        file = QSharedPointer<AbstractFile>(new Excellon::File(stream));
-    //        auto filePtr = new Excellon::File;
-    //        stream >> *filePtr;
-    //        file = QSharedPointer<AbstractFile>(filePtr);
-    //    } break;
-    //    case FileType::GCode: {
-    //        file = QSharedPointer<AbstractFile>(new GCode::File(stream));
-    //        //        auto filePtr = new GCode::File;
-    //        //        stream >> *filePtr;
-    //        //        file = QSharedPointer<AbstractFile>(filePtr);
-    //    } break;
-    //    }
-    return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>& sh)
-{
-    stream << static_cast<int>(sh->type());
-    sh->write(stream);
     return stream;
 }
 
 #include "sh/circle.h"
 #include "sh/pline.h"
 #include "sh/rectangle.h"
+
+QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>& sh)
+{
+    stream << sh->type();
+    sh->write(stream);
+    return stream;
+}
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
 {
@@ -531,16 +508,14 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
     switch (type) {
     case GiShapeC:
         sh = QSharedPointer<Shapes::Shape>(new Shapes::Circle(stream));
-        sh->redraw();
         break;
     case GiShapeR:
         sh = QSharedPointer<Shapes::Shape>(new Shapes::Rectangle(stream));
-        sh->redraw();
         break;
     case GiShapeL:
         sh = QSharedPointer<Shapes::Shape>(new Shapes::PolyLine(stream));
-        sh->redraw();
         break;
     }
+    sh->redraw();
     return stream;
 }
