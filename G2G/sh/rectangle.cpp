@@ -15,7 +15,7 @@
 #include <scene.h>
 #include <settings.h>
 
-namespace ShapePr {
+namespace Shapes {
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);

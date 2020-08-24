@@ -10,8 +10,8 @@
 #include <scene.h>
 #include <settings.h>
 
-namespace ShapePr {
-Pline::Pline(QPointF pt1, QPointF pt2)
+namespace Shapes {
+PolyLine::PolyLine(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
     sh = { new SH(this /*, true*/), new SH(this) };
@@ -28,14 +28,14 @@ Pline::Pline(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh.last());
 }
 
-Pline::Pline(QDataStream& stream)
+PolyLine::PolyLine(QDataStream& stream)
     : Shape(stream)
 {
 }
 
-Pline::~Pline() { qDebug(Q_FUNC_INFO); }
+PolyLine::~PolyLine() { qDebug(Q_FUNC_INFO); }
 
-void Pline::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void PolyLine::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
@@ -63,7 +63,7 @@ void Pline::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     painter->drawPath(m_shape);
 }
 
-void Pline::redraw()
+void PolyLine::redraw()
 {
     Path& path = m_paths.first();
     path.resize(sh.size());
@@ -77,7 +77,7 @@ void Pline::redraw()
     setPos({ 0, 0 });
 }
 
-void Pline::setPt(const QPointF& pt)
+void PolyLine::setPt(const QPointF& pt)
 {
     if (sh.last()->pos() == pt)
         return;
@@ -85,7 +85,7 @@ void Pline::setPt(const QPointF& pt)
     redraw();
 }
 
-void Pline::addPt(const QPointF& pt)
+void PolyLine::addPt(const QPointF& pt)
 {
     sh.append(new SH(this));
     sh.last()->setPos(pt);
@@ -93,8 +93,5 @@ void Pline::addPt(const QPointF& pt)
     redraw();
 }
 
-bool Pline::closed()
-{
-    return sh.first()->pos() == sh.last()->pos();
-}
+bool PolyLine::closed() { return sh.first()->pos() == sh.last()->pos(); }
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-
-
 #include <QDateTime>
 #include <QFileInfo>
+#include <app.h>
 #include <datastream.h>
 #include <gi/itemgroup.h>
 #include <myclipper.h>
+#include <splashscreen.h>
 
 using namespace ClipperLib;
 
@@ -14,7 +14,6 @@ enum class FileType {
     Gerber,
     Excellon,
     GCode,
-    Shapes
 };
 
 enum Side {
@@ -24,9 +23,46 @@ enum Side {
 };
 
 class AbstractFile {
-    friend class Project;
+    //    friend class Project;
     friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file);
     friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file);
+
+    friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file)
+    {
+        file.write(stream);
+        stream << file.m_id;
+        stream << file.m_lines;
+        stream << file.m_name;
+        stream << file.m_mergedPaths;
+        stream << file.m_groupedPaths;
+        stream << file.m_side;
+        stream << file.m_color;
+        stream << file.m_date;
+        stream << file.itemGroup()->isVisible();
+        return stream;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, AbstractFile& file)
+    {
+        file.read(stream);
+        stream >> file.m_id;
+        stream >> file.m_lines;
+        stream >> file.m_name;
+        stream >> file.m_mergedPaths;
+        stream >> file.m_groupedPaths;
+        stream >> file.m_side;
+        stream >> file.m_color;
+        stream >> file.m_date;
+
+        if (App::splashScreen())
+            App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+
+        file.createGi();
+        bool fl;
+        stream >> fl;
+        file.itemGroup()->setVisible(fl);
+        return stream;
+    }
 
 public:
     AbstractFile();
@@ -49,8 +85,6 @@ public:
     };
 
     virtual FileType type() const = 0;
-    virtual void write(QDataStream& stream) const = 0;
-    virtual void read(QDataStream& stream) = 0;
     virtual void createGi() = 0;
     //    virtual void selected() = 0;
 
@@ -61,8 +95,12 @@ public:
     void setColor(const QColor& color);
 
     int id() const;
+    void setId(int id);
 
 protected:
+    virtual void write(QDataStream& stream) const = 0;
+    virtual void read(QDataStream& stream) = 0;
+
     int m_id = -1;
     virtual Paths merge() const = 0;
 
@@ -76,10 +114,8 @@ protected:
     QColor m_color;
     QDateTime m_date;
 
-    void _write(QDataStream& stream) const;
-    void _read(QDataStream& stream);
+    //    void _write(QDataStream& stream) const;
+    //    void _read(QDataStream& stream);
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)
-
-

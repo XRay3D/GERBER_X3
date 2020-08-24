@@ -2,18 +2,10 @@
 
 #include <QAbstractItemModel>
 
-enum RootNodes {
-    NodeGerberFiles,
-    NodeDrillFiles,
-    NodeToolPath,
-    NodeSpecial,
-    NodeCount,
-};
-
 class AbstractFile;
 class AbstractNode;
 
-namespace ShapePr {
+namespace Shapes {
 class Shape;
 }
 
@@ -27,6 +19,15 @@ signals:
     void select(const QModelIndex&);
 
 public:
+
+    enum RootNodes {
+        GerberFiles,
+        DrillFiles,
+        ToolPath,
+        Shapes,
+        NodeCount,
+    };
+
     explicit FileModel(QObject* parent = nullptr);
     ~FileModel() override;
 
@@ -56,7 +57,7 @@ private:
     const QString mimeType;
 
     void addFile(AbstractFile* file);
-    void addFile(ShapePr::Shape* sh);
+    void addShape(Shapes::Shape* sh);
     AbstractNode* getItem(const QModelIndex& index) const;
 };
 

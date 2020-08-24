@@ -18,10 +18,9 @@
 
 namespace GCode {
 
-File::File(QDataStream& stream)
+File::File()
     : GCUtils(m_gcp)
 {
-    read(stream);
 }
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
@@ -434,7 +433,7 @@ void File::addInfo(bool fl)
         m_lines.append(QString(";\tName:\t%1").arg(shortName()));
         m_lines.append(QString(";\tTool:\t%1").arg(m_gcp.getTool().name()));
         m_lines.append(QString(";\tDepth:\t%1").arg(m_gcp.getDepth()));
-        m_lines.append(QString(";\tSide:\t%1").arg(QStringList{ "Top", "Bottom" }[side()]));
+        m_lines.append(QString(";\tSide:\t%1").arg(QStringList { "Top", "Bottom" }[side()]));
     }
 }
 
@@ -679,7 +678,8 @@ void File::write(QDataStream& stream) const
     //        [[fallthrough]];
     //    case G2G_Ver_1:;
     //    }
-    _write(stream);
+    //    stream << *static_cast<const AbstractFile*>(this);
+    //_write(stream);
 }
 
 void File::read(QDataStream& stream)
@@ -706,7 +706,8 @@ void File::read(QDataStream& stream)
         [[fallthrough]];
     case G2G_Ver_1:;
     }
-    _read(stream);
+    //    stream >> *static_cast<AbstractFile*>(this);
+    // _read(stream);
 }
 
 void File::createGi()

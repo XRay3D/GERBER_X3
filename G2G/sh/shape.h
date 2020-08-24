@@ -2,7 +2,7 @@
 
 #include <gi/graphicsitem.h>
 
-namespace ShapePr {
+namespace Shapes {
 
 class SH;
 
@@ -19,7 +19,7 @@ public:
     // GraphicsItem interface
     Paths paths() const override;
     void write(QDataStream& stream);
-    QString name() const;
+    virtual QString name() const = 0;
 
 protected:
     QVector<SH*> sh;

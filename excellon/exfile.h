@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "extypes.h"
 #include <abstractfile.h>
 
@@ -13,7 +11,6 @@ class File : public AbstractFile, public QList<Hole> {
     Format m_format;
 
 public:
-    explicit File(QDataStream& stream);
     explicit File();
     ~File() override;
 
@@ -32,10 +29,10 @@ protected:
 
     // AbstractFile interface
 public:
+    void createGi() override;
+
+protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    void createGi() override;
 };
 } // namespace Excellon
-
-

@@ -88,7 +88,7 @@ void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, con
 void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyledItemDelegate::paint(painter, option, index);
-    if (dynamic_cast<GerberNode*>(reinterpret_cast<AbstractNode*>(index.internalPointer()))) {
+    if (dynamic_cast<Gerber::Node*>(reinterpret_cast<AbstractNode*>(index.internalPointer()))) {
 
         //        StarRating starRating = qvariant_cast<StarRating>(index.data());
 

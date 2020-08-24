@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QSplashScreen>
 #include <app.h>
 
@@ -11,9 +9,7 @@ public:
         : QSplashScreen(pixmap, f)
     {
         setObjectName("SplashScreen");
-        App::mInstance->m_splashScreen = this;
+        App::m_splashScreen = this;
     }
-    virtual ~SplashScreen() { App::mInstance->m_splashScreen = nullptr; }
+    virtual ~SplashScreen() { App::m_splashScreen = nullptr; }
 };
-
-

@@ -14,7 +14,7 @@
 #include <scene.h>
 #include <settings.h>
 
-namespace ShapePr {
+namespace Shapes {
 Circle::Circle(QPointF center, QPointF pt)
     : m_radius(QLineF(center, pt).length())
 {

@@ -4,7 +4,7 @@
 
 #include "handler.h"
 
-namespace ShapePr {
+namespace Shapes {
 Handler::Handler(QGraphicsItem* parent)
     : QGraphicsItem(parent)
 {
@@ -20,14 +20,14 @@ void Handler::paint(QPainter* /*painter*/, const QStyleOptionGraphicsItem* /*opt
 }
 }
 
-void ShapePr::Handler::mousePressEvent(QGraphicsSceneMouseEvent* /*event*/)
+void Shapes::Handler::mousePressEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }
 
-void ShapePr::Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* /*event*/)
+void Shapes::Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }
 
-void ShapePr::Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* /*event*/)
+void Shapes::Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
 }

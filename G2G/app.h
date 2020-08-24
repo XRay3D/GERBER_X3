@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QtGlobal>
 #include <exception>
 
@@ -24,9 +22,7 @@ class Scene;
 class SplashScreen;
 
 class App {
-    static App* mInstance;
     //    Q_DISABLE_COPY(App)
-
     friend class DrillForm;
     friend class FileModel;
     friend class GCode::Creator;
@@ -42,35 +38,26 @@ class App {
     friend class Scene;
     friend class SplashScreen;
 
-    DrillForm* m_drillForm = nullptr;
-    FileModel* m_fileModel = nullptr;
-    GCode::Creator* m_creator = nullptr;
-    GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
-    GraphicsView* m_graphicsView = nullptr;
-    LayoutFrames* m_layoutFrames = nullptr;
-    MainWindow* m_mainWindow = nullptr;
-    Project* m_project = nullptr;
-    Scene* m_scene = nullptr;
-    SplashScreen* m_splashScreen = nullptr;
+    inline static DrillForm* m_drillForm = nullptr;
+    inline static FileModel* m_fileModel = nullptr;
+    inline static GCode::Creator* m_creator = nullptr;
+    inline static GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
+    inline static GraphicsView* m_graphicsView = nullptr;
+    inline static LayoutFrames* m_layoutFrames = nullptr;
+    inline static MainWindow* m_mainWindow = nullptr;
+    inline static Project* m_project = nullptr;
+    inline static Scene* m_scene = nullptr;
+    inline static SplashScreen* m_splashScreen = nullptr;
 
 public:
-    App()
-    {
-        if (!mInstance)
-            mInstance = this;
-    }
-    ~App() = default;
-
-    static DrillForm* drillForm() { return mInstance->m_drillForm; }
-    static FileModel* fileModel() { return mInstance->m_fileModel; }
-    static GCode::Creator* creator() { return mInstance->m_creator; }
-    static GCodePropertiesForm* gCodePropertiesForm() { return mInstance->m_gCodePropertiesForm; }
-    static GraphicsView* graphicsView() { return mInstance->m_graphicsView; }
-    static LayoutFrames* layoutFrames() { return mInstance->m_layoutFrames; }
-    static MainWindow* mainWindow() { return mInstance->m_mainWindow; }
-    static Project* project() { return mInstance->m_project; }
-    static Scene* scene() { return mInstance->m_scene; }
-    static SplashScreen* splashScreen() { return mInstance->m_splashScreen; }
+    static DrillForm* drillForm() { return m_drillForm; }
+    static FileModel* fileModel() { return m_fileModel; }
+    static GCode::Creator* creator() { return m_creator; }
+    static GCodePropertiesForm* gCodePropertiesForm() { return m_gCodePropertiesForm; }
+    static GraphicsView* graphicsView() { return m_graphicsView; }
+    static LayoutFrames* layoutFrames() { return m_layoutFrames; }
+    static MainWindow* mainWindow() { return m_mainWindow; }
+    static Project* project() { return m_project; }
+    static Scene* scene() { return m_scene; }
+    static SplashScreen* splashScreen() { return m_splashScreen; }
 };
-
-

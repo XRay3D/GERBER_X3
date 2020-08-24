@@ -25,7 +25,7 @@ void PocketCreator::create()
 
 void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const int steps)
 {
-    App::mInstance->m_creator = this;
+    App::m_creator = this;
     if (m_gcp.side() == On)
         return;
     progress(0, 0);
@@ -102,7 +102,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
 
 void PocketCreator::createStdFull(const Tool& tool, const double depth)
 {
-    App::mInstance->m_creator = this;
+    App::m_creator = this;
     if (m_gcp.side() == On)
         return;
     progress(0, 0);
@@ -164,7 +164,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
 
 void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
 {
-    App::mInstance->m_creator = this;
+    App::m_creator = this;
 
     switch (m_gcp.side()) {
     case On:

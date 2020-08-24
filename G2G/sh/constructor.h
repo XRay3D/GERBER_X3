@@ -3,14 +3,14 @@
 #include <QPointF>
 class QGraphicsItem;
 class QAction;
-namespace ShapePr {
+namespace Shapes {
 
 class Shape;
 
 enum PrType {
     NullPT,
     Rect,
-    Pline,
+    PolyLine,
     Elipse,
     ArcPT,
     Text,

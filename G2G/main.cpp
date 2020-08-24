@@ -26,8 +26,6 @@
 void initIcon(const QString& path);
 void translation(QApplication* app);
 
-App* App::mInstance = nullptr;
-
 int main(int argc, char* argv[])
 {
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

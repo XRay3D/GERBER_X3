@@ -54,10 +54,10 @@ public:
     }
 
     AbstractFile* aFile(int id);
-    ShapePr::Shape *aShape(int id);
+    Shapes::Shape *aShape(int id);
 
     int addFile(AbstractFile* file);
-    int addShape(ShapePr::Shape* sh);
+    int addShape(Shapes::Shape* sh);
 
     template <typename T>
     bool replaceFile(int id, T* file)
@@ -142,7 +142,7 @@ signals:
 private:
     int m_ver;
     QMap<int, QSharedPointer<AbstractFile>> m_files;
-    QMap<int, QSharedPointer<ShapePr::Shape>> m_shapes;
+    QMap<int, QSharedPointer<Shapes::Shape>> m_shapes;
     QMutex m_mutex;
     QSemaphore sem;
     QString m_fileName;

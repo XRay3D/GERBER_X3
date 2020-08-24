@@ -2,7 +2,7 @@
 
 #include "shape.h"
 
-namespace ShapePr {
+namespace Shapes {
 class Circle final : public Shape {
 public:
     explicit Circle(QPointF center, QPointF pt);
@@ -15,6 +15,7 @@ public:
 
     // GraphicsItem interface
     void redraw() override;
+    QString name() const override { return QObject::tr("Circle"); }
 
     void setPt(const QPointF& pt);
     double radius() const;

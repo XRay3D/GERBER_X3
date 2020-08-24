@@ -1247,7 +1247,7 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
-    <name>GerberNode</name>
+    <name>Gerber::Node</name>
     <message>
         <location filename="../../gerber/gbrnode.cpp" line="165"/>
         <source>&amp;Hide other</source>

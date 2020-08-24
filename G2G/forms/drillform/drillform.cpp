@@ -99,7 +99,7 @@ DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
 {
-    if (App::mInstance->m_drillForm) {
+    if (App::m_drillForm) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class DrillForm more than 2 times!!!");
         exit(1);
     }
@@ -187,12 +187,12 @@ DrillForm::DrillForm(QWidget* parent)
 
     parent->setWindowTitle(ui->label->text());
 
-    App::mInstance->m_drillForm = this;
+    App::m_drillForm = this;
 }
 
 DrillForm::~DrillForm()
 {
-    App::mInstance->m_drillForm = nullptr;
+    App::m_drillForm = nullptr;
     QSettings settings;
     settings.beginGroup("DrillForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());

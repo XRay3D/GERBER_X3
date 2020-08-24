@@ -14,14 +14,14 @@
 #include <qboxlayout.h>
 
 #include <filetree/treeview.h>
-
-GcodeNode::GcodeNode(int id)
+namespace GCode {
+Node::Node(int id)
     : AbstractNode(id)
 {
     file()->itemGroup()->addToScene();
 }
 
-bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int role)
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case 0:
@@ -45,7 +45,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
     }
 }
 
-Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
+Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
@@ -61,7 +61,7 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     }
 }
 
-QVariant GcodeNode::data(const QModelIndex& index, int role) const
+QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
     case 0:
@@ -113,7 +113,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     }
 }
 
-void GcodeNode::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, TreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
     menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &TreeView::saveGcodeFile);
@@ -135,4 +135,5 @@ void GcodeNode::menu(QMenu* menu, TreeView* tv) const
         dialog->exec();
         delete dialog;
     });
+}
 }

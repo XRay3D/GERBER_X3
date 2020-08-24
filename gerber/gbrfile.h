@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "gbraperture.h"
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
@@ -16,7 +14,6 @@ class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    explicit File(QDataStream& stream);
     explicit File(const QString& name = "");
     ~File() override;
 
@@ -59,9 +56,9 @@ private:
     std::forward_list<Path> checkList;
 
     // AbstractFile interface
-public:
-    virtual void write(QDataStream& stream) const override;
-    virtual void read(QDataStream& stream) override;
+protected:
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
 
     // AbstractFile interface
 public:
@@ -70,5 +67,3 @@ public:
 }
 
 Q_DECLARE_METATYPE(Gerber::File)
-
-

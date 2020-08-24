@@ -2,12 +2,12 @@
 
 #include "shape.h"
 
-namespace ShapePr {
-class Pline final : public Shape {
+namespace Shapes {
+class PolyLine final : public Shape {
 public:
-    Pline(QPointF pt1, QPointF pt2);
-    Pline(QDataStream& stream);
-    ~Pline();
+    PolyLine(QPointF pt1, QPointF pt2);
+    PolyLine(QDataStream& stream);
+    ~PolyLine();
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -15,6 +15,7 @@ public:
 
     // GraphicsItem interface
     void redraw() override;
+    QString name() const override { return QObject::tr("Line"); }
 
     void setPt(const QPointF& pt);
     void addPt(const QPointF& pt);

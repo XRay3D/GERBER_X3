@@ -27,7 +27,7 @@ const double zoomFactor = 1.5;
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    if (App::mInstance->m_graphicsView) {
+    if (App::m_graphicsView) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class GraphicsView more than 2 times!!!");
         exit(1);
     }
@@ -97,12 +97,12 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + GlobalSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
-    App::mInstance->m_graphicsView = this;
+    App::m_graphicsView = this;
 }
 
 GraphicsView::~GraphicsView()
 {
-    App::mInstance->m_graphicsView = nullptr;
+    App::m_graphicsView = nullptr;
 }
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
@@ -223,7 +223,7 @@ double GraphicsView::scaleFactor()
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
-    if (event->modifiers() & Qt::AltModifier || ShapePr::Constructor::snap()) {
+    if (event->modifiers() & Qt::AltModifier || Shapes::Constructor::snap()) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         const double gs = GlobalSettings::gridStep(matrix().m11());
 #else
@@ -390,10 +390,10 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         m_scene->setDrawRuller(false);
-        ShapePr::Constructor::finalizeShape();
+        Shapes::Constructor::finalizeShape();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
-        ShapePr::Constructor::addShapePoint(mappedPos(event));
+        Shapes::Constructor::addShapePoint(mappedPos(event));
     }
 }
 
@@ -415,7 +415,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
     mouseMove(point);
-    ShapePr::Constructor::updateShape(point);
+    Shapes::Constructor::updateShape(point);
     QGraphicsView::mouseMoveEvent(event);
 }
 class PropertyAnimation : public QPropertyAnimation {

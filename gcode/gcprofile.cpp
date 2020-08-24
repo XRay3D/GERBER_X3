@@ -21,7 +21,7 @@ void ProfileCreator::create()
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    App::mInstance->m_creator = this;
+    App::m_creator = this;
 
     m_toolDiameter = tool.getDiameter(depth);
 

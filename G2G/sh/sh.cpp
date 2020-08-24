@@ -13,9 +13,9 @@
 #include <scene.h>
 #include <settings.h>
 
-using namespace ShapePr;
+using namespace Shapes;
 
-SH::SH(ShapePr::Shape* shape, bool center)
+SH::SH(Shapes::Shape* shape, bool center)
     : shape(shape)
     , center(center)
 {
@@ -29,8 +29,8 @@ QRectF SH::boundingRect() const { return rect(); }
 void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
     painter->setPen(Qt::NoPen);
-    painter->setBrush(Qt::red);
-    painter->drawRect(rect());
+    painter->setBrush(center ? Qt::red : Qt::green);
+    painter->drawEllipse(rect());
 }
 
 void SH::setPos(const QPointF& pos, bool fl)
@@ -78,7 +78,7 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void ShapePr::SH::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Shapes::SH::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mousePressEvent(event);
     if (center) {

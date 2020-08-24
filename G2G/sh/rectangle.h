@@ -2,7 +2,7 @@
 
 #include "shape.h"
 
-namespace ShapePr {
+namespace Shapes {
 class Rectangle final : public Shape {
 public:
     explicit Rectangle(QPointF pt1, QPointF pt2);
@@ -15,7 +15,7 @@ public:
 
     // GraphicsItem interface
     void redraw() override;
-
+    QString name() const override { return QObject::tr("Rectangle"); }
     void setPt(const QPointF& pt);
     enum {
         Center,

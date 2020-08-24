@@ -23,13 +23,13 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode(tr("Excellon")));
     rootItem->append(new FolderNode(tr("Tool Paths")));
     rootItem->append(new FolderNode(tr("Special")));
-    App::mInstance->m_fileModel = this;
+    App::m_fileModel = this;
 }
 
 FileModel::~FileModel()
 {
     delete rootItem;
-    App::mInstance->m_fileModel = nullptr;
+    App::m_fileModel = nullptr;
 }
 
 void FileModel::addFile(AbstractFile* file)
@@ -43,14 +43,14 @@ void FileModel::addFile(AbstractFile* file)
 
     beginInsertRows(index, rowCount, rowCount);
     switch (file->type()) {
-    case FileType ::Gerber:
-        item->append(new GerberNode(file->id()));
+    case FileType::Gerber:
+        item->append(new Gerber::Node(file->id()));
         break;
-    case FileType ::Excellon:
-        item->append(new ExcellonNode(file->id()));
+    case FileType::Excellon:
+        item->append(new Excellon::Node(file->id()));
         break;
     case FileType::GCode:
-        item->append(new GcodeNode(file->id()));
+        item->append(new GCode::Node(file->id()));
         break;
     default:
         break;
@@ -61,30 +61,17 @@ void FileModel::addFile(AbstractFile* file)
     emit select(selectIndex);
 }
 
-void FileModel::addFile(ShapePr::Shape* sh)
+void FileModel::addShape(Shapes::Shape* sh)
 {
     if (sh == nullptr)
         return;
 
-    AbstractNode* item(rootItem->child(static_cast<int>(FileType::Shapes)));
+    AbstractNode* item(rootItem->child(static_cast<int>(FileModel::Shapes)));
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
     beginInsertRows(index, rowCount, rowCount);
-    item->append(new ShNode(sh->id()));
-    //    switch (sh->type()) {
-    //    case FileType ::Gerber:
-    //        item->append(new GerberNode(sh->id()));
-    //        break;
-    //    case FileType ::Excellon:
-    //        item->append(new ExcellonNode(sh->id()));
-    //        break;
-    //    case FileType::GCode:
-    //        item->append(new GcodeNode(sh->id()));
-    //        break;
-    //    default:
-    //        break;
-    //    }
+    item->append(new Shapes::Node(sh->id()));
     endInsertRows();
 
     QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));

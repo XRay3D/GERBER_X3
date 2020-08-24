@@ -4,12 +4,12 @@
 #include "shape.h"
 #include <QGraphicsItem>
 
-namespace ShapePr {
+namespace Shapes {
 class SH : public QGraphicsItem {
     friend class Shape;
 
 public:
-    SH(ShapePr::Shape* shape, bool center = false);
+    SH(Shapes::Shape* shape, bool center = false);
 
     // QGraphicsItem interface
 public:
@@ -18,7 +18,7 @@ public:
     void setPos(const QPointF& pos, bool fl = true);
 
 private:
-    ShapePr::Shape* shape;
+    Shapes::Shape* shape;
     const bool center;
     QVector<QPointF> pt;
     inline QRectF rect() const;

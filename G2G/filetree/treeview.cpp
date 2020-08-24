@@ -30,7 +30,7 @@ TreeView::TreeView(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
-    connect(GerberNode::repaintTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
+    connect(Gerber::Node::repaintTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
     connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
@@ -94,11 +94,11 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 {
     if (!index.column()) {
         m_menuIndex = index;
-        if (index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex())) {
+        if (index.parent() == m_model->index(FileModel::GerberFiles, 0, QModelIndex())) {
             hideOther();
-        } else if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
+        } else if (index.parent() == m_model->index(FileModel::DrillFiles, 0, QModelIndex())) {
             hideOther();
-        } else if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex())) {
+        } else if (index.parent() == m_model->index(FileModel::ToolPath, 0, QModelIndex())) {
             qDebug(Q_FUNC_INFO);
             hideOther();
             //            {
@@ -119,12 +119,12 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
     if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
         const int row = index.parent().row();
-        if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
+        if (row == FileModel::GerberFiles || row == FileModel::DrillFiles || row == FileModel::ToolPath) {
             const int id = index.data(Qt::UserRole).toInt();
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(id);
         }
-        if (row == NodeSpecial) {
+        if (row == FileModel::Shapes) {
             const int id = index.data(Qt::UserRole).toInt();
             App::project()->aShape(id)->setSelected(true);
         }
@@ -132,12 +132,12 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
     if (!deselected.indexes().isEmpty()) {
         QModelIndex& index = deselected.indexes().first();
         const int row = index.parent().row();
-        if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
+        if (row == FileModel::GerberFiles || row == FileModel::DrillFiles || row == FileModel::ToolPath) {
             const int id = index.data(Qt::UserRole).toInt();
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(-id);
         }
-        if (row == NodeSpecial) {
+        if (row == FileModel::Shapes) {
             const int id = index.data(Qt::UserRole).toInt();
             App::project()->aShape(id)->setSelected(false);
         }
@@ -188,12 +188,17 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
     switch (m_menuIndex.parent().row()) {
     case -1:
-        if (m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
+        if (m_menuIndex.row() == FileModel::ToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
             menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [this] {
                 if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                     m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
             });
             menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
+        } else if (m_menuIndex.row() == FileModel::Shapes && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
+            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Objects"), [this] {
+                if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                    m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+            });
         }
         break;
     default:

@@ -20,14 +20,14 @@
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    if (App::mInstance->m_scene) {
+    if (App::m_scene) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
         exit(1);
     }
-    App::mInstance->m_scene = this;
+    App::m_scene = this;
 }
 
-Scene::~Scene() { App::mInstance->m_scene = nullptr; }
+Scene::~Scene() { App::m_scene = nullptr; }
 
 void Scene::RenderPdf()
 {

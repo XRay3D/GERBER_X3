@@ -14,23 +14,25 @@
 #include <qboxlayout.h>
 #include <scene.h>
 
-QTimer GerberNode::m_repaintTimer;
+namespace Gerber {
 
-GerberNode::GerberNode(int id)
+QTimer Node::m_repaintTimer;
+
+Node::Node(int id)
     : AbstractNode(id)
 {
     App::project()->file<Gerber::File>(m_id)->addToScene();
-    connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
+    connect(&m_repaintTimer, &QTimer::timeout, this, &Node::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
 }
 
-GerberNode::~GerberNode()
+Node::~Node()
 {
     m_repaintTimer.start(10);
 }
 
-bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int role)
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case Name:
@@ -62,7 +64,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     }
 }
 
-Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
+Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
@@ -77,7 +79,7 @@ Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
     }
 }
 
-QVariant GerberNode::data(const QModelIndex& index, int role) const
+QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
     case Name:
@@ -144,12 +146,12 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-QTimer* GerberNode::repaintTimer()
+QTimer* Node::repaintTimer()
 {
     return &m_repaintTimer;
 }
 
-void GerberNode::repaint()
+void Node::repaint()
 {
     const int count = m_parentItem->childCount();
     const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row() : 0);
@@ -160,7 +162,7 @@ void GerberNode::repaint()
     App::scene()->update();
 }
 
-void GerberNode::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, TreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &TreeView::hideOther);
     menu->setToolTipDuration(0);
@@ -211,4 +213,5 @@ void GerberNode::menu(QMenu* menu, TreeView* tv) const
         delete dialog;
     });
     menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &TreeView::closeFile);
+}
 }
