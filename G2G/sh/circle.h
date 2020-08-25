@@ -16,7 +16,7 @@ public:
     // Shape interface
     QString name() const override { return QObject::tr("Circle"); }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); };
-    QPointF calcPos(SH* sh) const override;
+    QPointF calcPos(Handler* sh) const override;
 
     void setPt(const QPointF& pt);
     double radius() const;

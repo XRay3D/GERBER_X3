@@ -48,10 +48,6 @@ void dbgPaths(Paths ps, const Tool& tool, const QString& fileName)
 
 namespace GCode {
 
-bool Creator::m_cancel = false;
-int Creator::m_progressMax = 0;
-int Creator::m_progressVal = 0;
-
 struct Cancel {
     Cancel() { }
 };

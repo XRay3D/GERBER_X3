@@ -106,10 +106,9 @@ HEADERS += \
     sh/arc.h \
     sh/circle.h \
     sh/constructor.h \
-    sh/handler.h \
     sh/pline.h \
     sh/rectangle.h \
-    sh/sh.h \
+    sh/shandler.h \
     sh/shnode.h \
     sh/shape.h \
     splashscreen.h \
@@ -163,10 +162,9 @@ SOURCES += \
     sh/arc.cpp \
     sh/circle.cpp \
     sh/constructor.cpp \
-    sh/handler.cpp \
     sh/pline.cpp \
     sh/rectangle.cpp \
-    sh/sh.cpp \
+    sh/shandler.cpp \
     sh/shape.cpp \
     sh/shnode.cpp \
     tooldatabase/tool.cpp \

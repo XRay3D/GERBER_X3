@@ -13,12 +13,7 @@
 
 namespace Shapes {
 
-PrType Constructor::type = NullPT;
-int Constructor::counter = 0;
-QPointF Constructor::point;
-Shape* Constructor::item = nullptr;
-bool Constructor::m_snap = false;
-QAction* Constructor::action = nullptr;
+
 
 bool Constructor::snap() { return m_snap; }
 
@@ -29,51 +24,33 @@ void Constructor::addShapePoint(const QPointF& value)
     point = value;
     switch (type) {
     case Rect:
-        switch (counter) {
-        case 0:
+        if (!counter) {
             item = new Rectangle(point, point + QPointF { 1, 1 });
-            break;
-        default:
+        } else {
             finalizeShape();
         }
         break;
     case PolyLine:
-        switch (counter) {
-        case 0:
-        default:
-            if (item == nullptr) {
-                item = new class PolyLine(point, point + QPointF { 1, 1 });
-            } else {
-                if (static_cast<class PolyLine*>(item)->closed())
-                    finalizeShape();
-                else
-                    static_cast<class PolyLine*>(item)->addPt(point);
-            }
-            //            break;
-            //            type = NullPT;
-            //            item->setSelected(true);
-            //            item = nullptr;
-            //            action->setChecked(false);
-            //            action = nullptr;
-        }
+        if (!counter) {
+            item = new class PolyLine(point, point + QPointF { 1, 1 });
+        } else {
+            if (static_cast<class PolyLine*>(item)->closed())
+                finalizeShape();
+            else
+                static_cast<class PolyLine*>(item)->addPt(point);
+        };
         break;
     case Elipse:
-        switch (counter) {
-        case 0:
+        if (!counter) {
             item = new Circle(point, point + QPointF { 1, 1 });
-            break;
-        default:
+        } else {
             finalizeShape();
         }
         break;
     case ArcPT:
-        switch (counter) {
-        case 0:
+        if (!counter) {
             item = new Arc(point, point + QPointF { 0, 1 }, point + QPointF { 0, 1 } + QPointF { 1, 0 });
-            break;
-        case 1:
-            break;
-        default:
+        } else if (counter > 1) {
             finalizeShape();
         }
         break;
@@ -88,26 +65,23 @@ void Constructor::addShapePoint(const QPointF& value)
 void Constructor::updateShape(const QPointF& value)
 {
     point = value;
+    if (item == nullptr)
+        return;
     switch (type) {
     case Rect:
-        if (item != nullptr)
-            static_cast<Rectangle*>(item)->setPt(point);
+        static_cast<Rectangle*>(item)->setPt(point);
         break;
     case PolyLine:
-        if (item != nullptr)
-            static_cast<class PolyLine*>(item)->setPt(point);
+        static_cast<class PolyLine*>(item)->setPt(point);
         break;
     case Elipse:
-        if (item != nullptr)
-            static_cast<Circle*>(item)->setPt(point);
+        static_cast<Circle*>(item)->setPt(point);
         break;
     case ArcPT:
-        if (item != nullptr) {
-            if (counter == 1)
-                static_cast<Arc*>(item)->setPt(point);
-            else
-                static_cast<Arc*>(item)->setPt2(point);
-        }
+        if (counter == 1)
+            static_cast<Arc*>(item)->setPt(point);
+        else
+            static_cast<Arc*>(item)->setPt2(point);
         break;
     case Text:
         break;
@@ -128,7 +102,7 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
     case PolyLine:
     case Elipse:
     case ArcPT:
-        type = NullPT;
+        type = NullShape;
         item->setSelected(true);
         item = nullptr;
         action->setChecked(false);
@@ -140,9 +114,7 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
     }
 }
 
-PrType Constructor::getType() { return type; }
-
-void Constructor::setType(const PrType& value, QAction* act)
+void Constructor::setType(const ShapeType& value, QAction* act)
 {
     type = value;
     counter = 0;

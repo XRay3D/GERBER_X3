@@ -1,21 +1,15 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "rectangle.h"
-#include "constructor.h"
-#include "sh.h"
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
-#include <math.h>
+#include "shandler.h"
 #include <scene.h>
-#include <settings.h>
 
 namespace Shapes {
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    sh = { new SH(this, true), new SH(this), new SH(this) };
+    sh = { new Handler(this, true), new Handler(this), new Handler(this) };
     sh[Point1]->setPos(pt1);
     sh[Point2]->setPos(pt2);
 
@@ -35,7 +29,7 @@ Rectangle::Rectangle(QDataStream& stream)
 {
 }
 
-Rectangle::~Rectangle() { qDebug(Q_FUNC_INFO); }
+Rectangle::~Rectangle() { }
 
 void Rectangle::redraw()
 {
@@ -57,7 +51,7 @@ void Rectangle::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Rectangle::calcPos(SH* sh) const { return sh->pos(); }
+QPointF Rectangle::calcPos(Handler* sh) const { return sh->pos(); }
 
 void Rectangle::setPt(const QPointF& pt)
 {

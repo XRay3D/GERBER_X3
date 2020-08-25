@@ -10,9 +10,6 @@
 
 namespace GCode {
 
-const QVector<QChar> GCUtils::cmdList{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
-QString GCUtils::lastDir;
-
 GCUtils::GCUtils(const GCodeParams& gcp)
     : m_gcp(gcp)
 {
@@ -47,7 +44,7 @@ void GCUtils::setLastDir(QString value)
 
 QVector<double> GCUtils::getDepths()
 {
-    const auto gDepth{ m_gcp.getDepth() };
+    const auto gDepth { m_gcp.getDepth() };
     if (gDepth < m_gcp.getTool().passDepth() || qFuzzyCompare(gDepth, m_gcp.getTool().passDepth()))
         return { -gDepth - m_gcp.getTool().getDepth() };
 

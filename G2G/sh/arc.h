@@ -16,7 +16,7 @@ public:
     // Shape interface
     QString name() const override { return QObject::tr("Arc"); }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse-arc"); };
-    QPointF calcPos(SH* sh) const override;
+    QPointF calcPos(Handler* sh) const override;
 
     void setPt(const QPointF& pt);
     void setPt2(const QPointF& pt);
