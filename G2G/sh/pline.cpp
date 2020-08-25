@@ -1,17 +1,12 @@
 #include "pline.h"
-#include "constructor.h"
-#include "sh.h"
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
-#include <math.h>
+#include "shandler.h"
 #include <scene.h>
-#include <settings.h>
 
 namespace Shapes {
 PolyLine::PolyLine(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    sh = { new SH(this /*, true*/), new SH(this) };
+    sh = { new Handler(this /*, true*/), new Handler(this) };
     sh.first()->setPos(pt1);
     sh.last()->setPos(pt2);
 
@@ -46,7 +41,7 @@ void PolyLine::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF PolyLine::calcPos(SH* sh) const { return sh->pos(); }
+QPointF PolyLine::calcPos(Handler* sh) const { return sh->pos(); }
 
 void PolyLine::setPt(const QPointF& pt)
 {
@@ -58,7 +53,7 @@ void PolyLine::setPt(const QPointF& pt)
 
 void PolyLine::addPt(const QPointF& pt)
 {
-    sh.append(new SH(this));
+    sh.append(new Handler(this));
     sh.last()->setPos(pt);
     App::scene()->addItem(sh.last());
     redraw();

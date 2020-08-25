@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "gctypes.h"
 #include <QObject>
 #include <QThread>
@@ -22,7 +20,7 @@ class Creator : public QObject {
     Q_OBJECT
 
 public:
-    Creator() {}
+    Creator() { }
     void reset();
     //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~Creator() override;
@@ -66,9 +64,9 @@ protected:
 
     virtual void create() = 0;
 
-    static bool m_cancel;
-    static int m_progressMax;
-    static int m_progressVal;
+    inline static bool m_cancel;
+    inline static int m_progressMax;
+    inline static int m_progressVal;
 
     File* m_file = nullptr;
     Paths m_workingPs;
@@ -86,5 +84,3 @@ protected:
 
 } // namespace GCode
 #include <app.h>
-
-

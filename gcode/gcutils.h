@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-
 #include "gctypes.h"
 #include <QList>
 #include <QString>
@@ -59,8 +56,8 @@ protected:
 
     Paths m_g0path;
 
-    static QString lastDir;
-    static const QVector<QChar> cmdList;
+    inline static QString lastDir;
+    inline static const QVector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 
     QVector<double> getDepths();
 
@@ -124,5 +121,3 @@ protected:
     }
 };
 }
-
-

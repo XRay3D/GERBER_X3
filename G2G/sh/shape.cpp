@@ -1,12 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shape.h"
-#include "sh.h"
+#include "shandler.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <app.h>
 #include <graphicsview.h>
 #include <scene.h>
 
@@ -30,11 +28,11 @@ Shape::Shape(QDataStream& stream)
         bool center;
         stream >> pos;
         stream >> center;
-        SH* item = new SH(this, center);
+        Handler* item = new Handler(this, center);
         item->QGraphicsItem::setPos(pos);
+        item->setVisible(false);
         sh.append(item);
         App::scene()->addItem(item);
-        item->update();
     }
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
@@ -88,7 +86,7 @@ void Shape::write(QDataStream& stream)
 {
     stream << m_id;
     stream << sh.size();
-    for (SH* item : sh) {
+    for (Handler* item : sh) {
         stream << item->pos();
         stream << item->center;
     }
@@ -103,7 +101,7 @@ void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
 {
     if (change == GraphicsItemChange::ItemSelectedChange) {
-        for (SH* item : sh)
+        for (Handler* item : sh)
             item->setVisible(value.toInt());
     }
     return QGraphicsItem::itemChange(change, value);

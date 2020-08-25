@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QColor>
 #include <QPointF>
 #include <QSettings>
@@ -35,7 +33,7 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto setValue(W* widget)
     {
-        const QString name{ widget->objectName() };
+        const QString name { widget->objectName() };
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -67,7 +65,7 @@ public:
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto getValue(W* widget, const QVariant& defaultValue = QVariant()) const
     {
-        const QString name{ widget->objectName() };
+        const QString name { widget->objectName() };
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -124,10 +122,7 @@ enum {
 
 class GlobalSettings {
 public:
-    GlobalSettings();
-
     /*G-Code*/
-
     static QString gcFileExtension();
     static QString gcFormat();
     static QString gcLaserConstOn();
@@ -168,44 +163,55 @@ public:
 
 protected:
     /*G-Code*/
-    static QString m_gcFileExtension;
-    static QString m_gcFormat;
-    static QString m_gcLaserConstOn;
-    static QString m_gcLaserDynamOn;
-    static QString m_gcSpindleLaserOff;
-    static QString m_gcSpindleOn;
+    inline static QString m_gcFileExtension = { "tap" };
+    inline static QString m_gcFormat { "G?X?Y?Z?F?S?" };
+    inline static QString m_gcLaserConstOn { "M3" };
+    inline static QString m_gcLaserDynamOn { "M4" };
+    inline static QString m_gcSpindleLaserOff { "M5" };
+    inline static QString m_gcSpindleOn { "M3" };
 
-    static QString m_gcStart;
-    static QString m_gcEnd;
+    inline static QString m_gcStart { "G21 G17 G90\nM3 S?" };
+    inline static QString m_gcEnd { "M5\nM30" };
 
-    static QString m_gcLaserStart;
-    static QString m_gcLaserEnd;
+    inline static QString m_gcLaserStart { "G21 G17 G90" };
+    inline static QString m_gcLaserEnd { "M30" };
 
-    static bool m_gcInfo;
-    static bool m_gcSameFolder;
+    inline static bool m_gcInfo { true };
+    inline static bool m_gcSameFolder { true };
 
     /*GUI*/
-    static QColor m_guiColor[static_cast<int>(Colors::Count)];
-    static bool m_guiSmoothScSh;
+    enum { gridColor = 100 };
+    inline static QColor m_guiColor[static_cast<int>(Colors::Count)] {
+        QColor(Qt::black), //Background
+        QColor(255, 255, 0, 120), //Pin
+        QColor(Qt::gray), //CutArea
+        QColor(gridColor, gridColor, gridColor, 50), //Grid1
+        QColor(gridColor, gridColor, gridColor, 100), //Grid5
+        QColor(gridColor, gridColor, gridColor, 200), //Grid10
+        QColor(), //Hole
+        QColor(0, 255, 0, 120), //Home
+        QColor(Qt::white), //ToolPath
+        QColor(255, 0, 0, 120), //Zero
+        QColor(Qt::red) //G0
+    };
+    inline static bool m_guiSmoothScSh;
 
     /*Gerber/G-Code*/
-    static double m_gbrGcMinCircleSegmentLength;
-    static int m_gbrGcMinCircleSegments;
+    inline static double m_gbrGcMinCircleSegmentLength { 0.5 };
+    inline static int m_gbrGcMinCircleSegments { 36 };
 
     /*Gerber*/
-    static bool m_gbrCleanPolygons;
-    static bool m_gbrSimplifyRegions;
-    static bool m_gbrSkipDuplicates;
+    inline static bool m_gbrCleanPolygons;
+    inline static bool m_gbrSimplifyRegions;
+    inline static bool m_gbrSkipDuplicates;
 
     /*Markers*/
-    static QPointF m_mrkHomeOffset;
-    static int m_mrkHomePos;
-    static QPointF m_mrkPinOffset;
-    static QPointF m_mrkZeroOffset;
-    static int m_mrkZeroPos;
+    inline static QPointF m_mrkHomeOffset;
+    inline static QPointF m_mrkPinOffset;
+    inline static QPointF m_mrkZeroOffset;
+    inline static int m_mrkHomePos { Qt::BottomLeftCorner };
+    inline static int m_mrkZeroPos { Qt::BottomLeftCorner };
 
     /*Other*/
-    static bool m_inch;
+    inline static bool m_inch;
 };
-
-

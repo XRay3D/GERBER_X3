@@ -4,10 +4,10 @@
 
 namespace Shapes {
 
-class SH;
+class Handler;
 
 class Shape : public GraphicsItem {
-    friend class SH;
+    friend class Handler;
 
 public:
     Shape();
@@ -23,14 +23,14 @@ public:
 
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
-    virtual QPointF calcPos(SH* sh) const = 0;
+    virtual QPointF calcPos(Handler* sh) const = 0;
 
 private:
     mutable double m_scale = std::numeric_limits<double>::max();
     mutable QPainterPath m_selectionShape;
 
 protected:
-    QVector<SH*> sh;
+    QVector<Handler*> sh;
     Paths m_paths;
 
     // QGraphicsItem interface

@@ -2,20 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "circle.h"
-#include "constructor.h"
-#include "sh.h"
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
-#include <math.h>
+#include "shandler.h"
 #include <scene.h>
-#include <settings.h>
 
 namespace Shapes {
 Circle::Circle(QPointF center, QPointF pt)
     : m_radius(QLineF(center, pt).length())
 {
     m_paths.resize(1);
-    sh = { new SH(this, true), new SH(this) };
+    sh = { new Handler(this, true), new Handler(this) };
     sh[Center]->setPos(center);
     sh[Point1]->setPos(pt);
 
@@ -34,7 +29,7 @@ Circle::Circle(QDataStream& stream)
 {
 }
 
-Circle::~Circle() { qDebug(Q_FUNC_INFO); }
+Circle::~Circle() { }
 
 void Circle::redraw()
 {
@@ -59,7 +54,7 @@ void Circle::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Circle::calcPos(SH* sh) const { return sh->pos(); }
+QPointF Circle::calcPos(Handler* sh) const { return sh->pos(); }
 
 void Circle::setPt(const QPointF& pt)
 {

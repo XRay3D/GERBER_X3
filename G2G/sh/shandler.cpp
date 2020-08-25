@@ -2,7 +2,7 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "sh.h"
+#include "shandler.h"
 #include "constructor.h"
 #include <QFont>
 #include <QFontMetricsF>
@@ -23,8 +23,8 @@ void drawRuller(QPainter* painter, const QPointF& pt1)
     font.setPixelSize(16);
     const QString text = QString(::GlobalSettings::inch() ? "  X = %1 in\n"
                                                             "  Y = %2 in\n"
-                                                          : "  ∆X = %1 mm\n"
-                                                            "  ∆Y = %2 mm\n")
+                                                          : "  X = %1 mm\n"
+                                                            "  Y = %2 mm\n")
                              .arg(pt1.x() / (::GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(pt1.y() / (::GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
 
@@ -59,7 +59,7 @@ void drawRuller(QPainter* painter, const QPointF& pt1)
     }
 }
 
-SH::SH(Shape* shape, bool center)
+Handler::Handler(Shape* shape, bool center)
     : shape(shape)
     , center(center)
 {
@@ -68,9 +68,9 @@ SH::SH(Shape* shape, bool center)
     setZValue(std::numeric_limits<double>::max() - 1);
 }
 
-QRectF SH::boundingRect() const { return rect(); }
+QRectF Handler::boundingRect() const { return rect(); }
 
-void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     painter->setPen(Qt::NoPen);
     QColor c(center ? Qt::red : Qt::green);
@@ -82,21 +82,20 @@ void SH::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidge
     }
 }
 
-void SH::setPos(QPointF pos, bool fl)
+void Handler::setPos(QPointF pos)
 {
     QGraphicsItem::setPos(pos);
-    if (fl) // прилипание
-        for (SH* sh : shape->sh) {
-            if (!sh->center && QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
-                QGraphicsItem::setPos(sh->pos());
-                return;
-            }
+    for (Handler* sh : shape->sh) { // прилипание
+        if (!sh->center && QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
+            QGraphicsItem::setPos(sh->pos());
+            return;
         }
+    }
     pos = shape->calcPos(this);
     QGraphicsItem::setPos(pos);
 }
 
-QRectF SH::rect() const
+QRectF Handler::rect() const
 {
     const double scale = App::graphicsView()->scaleFactor();
     const double k = 5 * scale;
@@ -104,7 +103,7 @@ QRectF SH::rect() const
     return { QPointF(-k, -k), QSizeF(s, s) };
 }
 
-void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mouseMoveEvent(event);
@@ -120,7 +119,7 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             shape->sh[i]->QGraphicsItem::setPos(pt[i] + pos() - pt.first());
         shape->redraw();
     } else {
-        for (SH* sh : shape->sh) {
+        for (Handler* sh : shape->sh) {
             if (!sh->center && QLineF(sh->pos(), pos()).length() < App::graphicsView()->scaleFactor() * 20) { // прилипание
                 QGraphicsItem::setPos(sh->pos());
             }
@@ -131,13 +130,13 @@ void SH::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void Shapes::SH::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Shapes::Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mousePressEvent(event);
     if (center) {
         pt.clear();
-        for (SH* item : shape->sh)
+        for (Handler* item : shape->sh)
             pt.append(item->pos());
     }
 }

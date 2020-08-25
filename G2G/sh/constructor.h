@@ -1,14 +1,16 @@
 #pragma once
 
 #include <QPointF>
+
 class QGraphicsItem;
 class QAction;
+
 namespace Shapes {
 
 class Shape;
 
-enum PrType {
-    NullPT,
+enum ShapeType {
+    NullShape,
     Rect,
     PolyLine,
     Elipse,
@@ -17,25 +19,23 @@ enum PrType {
 };
 
 class Constructor {
-    static PrType type;
-    static int counter;
-    static QPointF point;
-    static Shape* item;
-    static bool m_snap;
+    inline static ShapeType type;
+    inline static int counter;
+    inline static QPointF point;
+    inline static Shape* item;
+    inline static bool m_snap;
+    inline static QAction* action;
 
 public:
-    static void addShapePoint(const QPointF& value);
-    static void updateShape(const QPointF& value);
-    static void finalizeShape();
-
-    static PrType getType();
-    static void setType(const PrType& value, QAction* act);
-
     static bool snap();
     static void setSnap(bool snap);
 
+    static void addShapePoint(const QPointF& value);
+    static void updateShape(const QPointF& value);
+    static void finalizeShape();
+    static void setType(const ShapeType& value, QAction* act);
+
 private:
-    static QAction* action;
 };
 
 } // namespace ShapePr
