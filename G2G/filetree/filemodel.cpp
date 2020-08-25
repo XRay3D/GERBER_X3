@@ -22,7 +22,7 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode(tr("Gerber Files")));
     rootItem->append(new FolderNode(tr("Excellon")));
     rootItem->append(new FolderNode(tr("Tool Paths")));
-    rootItem->append(new FolderNode(tr("Special")));
+    rootItem->append(new FolderNode(tr("Shapes")));
     App::m_fileModel = this;
 }
 

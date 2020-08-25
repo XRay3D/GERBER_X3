@@ -14,12 +14,20 @@ public:
     Shape(QDataStream& stream);
     ~Shape();
     // QGraphicsItem interface
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
-    // GraphicsItem interface
     Paths paths() const override;
+
     void write(QDataStream& stream);
+
     virtual QString name() const = 0;
+    virtual QIcon icon() const = 0;
+    virtual QPointF calcPos(SH* sh) const = 0;
+
+private:
+    mutable double m_scale = std::numeric_limits<double>::max();
+    mutable QPainterPath m_selectionShape;
 
 protected:
     QVector<SH*> sh;

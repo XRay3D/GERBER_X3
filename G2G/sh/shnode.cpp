@@ -69,15 +69,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return shape()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            switch (shape()->type()) {
-            case GiShapeC:
-                return QIcon::fromTheme("draw-ellipse");
-            case GiShapeR:
-                return QIcon::fromTheme("draw-rectangle");
-            case GiShapeL:
-                return QIcon::fromTheme("draw-line");
-            }
-            return QIcon();
+            return shape()->icon();
         case Qt::UserRole:
             return m_id;
         default:

@@ -7,11 +7,11 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   viewBox="0 0 22 22"
-   version="1.1"
-   id="svg6"
+   inkscape:version="1.0beta1 (fe3e306, 2019-09-17)"
    sodipodi:docname="draw-ellipse.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+   id="svg6"
+   version="1.1"
+   viewBox="0 0 22 22">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -20,47 +20,60 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1835"
-     inkscape:window-height="1058"
-     id="namedview8"
-     showgrid="true"
-     inkscape:zoom="30.341309"
-     inkscape:cx="3.3430152"
-     inkscape:cy="10.237175"
-     inkscape:window-x="77"
-     inkscape:window-y="-8"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="svg6"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg6">
+     inkscape:window-y="-8"
+     inkscape:window-x="78"
+     inkscape:cy="10.237175"
+     inkscape:cx="3.3430152"
+     inkscape:zoom="30.341309"
+     showgrid="true"
+     id="namedview8"
+     inkscape:window-height="1058"
+     inkscape:window-width="1834"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff">
     <inkscape:grid
-       type="xygrid"
+       empspacing="4"
        id="grid4520"
-       empspacing="4" />
+       type="xygrid" />
   </sodipodi:namedview>
   <defs
      id="defs3051">
     <style
-       type="text/css"
-       id="current-color-scheme">
+       id="current-color-scheme"
+       type="text/css">
       .ColorScheme-Text {
         color:#4d4d4d;
       }
       </style>
   </defs>
   <path
-     style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348"
+     id="path4522"
      d="M 11 3 A 8 8 0 0 0 3 11 A 8 8 0 0 0 11 19 A 8 8 0 0 0 19 11 A 8 8 0 0 0 11 3 z M 11 4 A 7 7 0 0 1 18 11 A 7 7 0 0 1 11 18 A 7 7 0 0 1 4 11 A 7 7 0 0 1 11 4 z "
-     id="path4522" />
+     style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348" />
+  <circle
+     r="1"
+     cy="11"
+     cx="11"
+     id="path832"
+     style="fill:#da4453;fill-opacity:1;fill-rule:evenodd" />
+  <circle
+     style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd"
+     id="path832-9"
+     cx="16.340044"
+     cy="5.8150759"
+     r="1" />
 </svg>

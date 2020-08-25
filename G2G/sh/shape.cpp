@@ -4,7 +4,10 @@
 
 #include "shape.h"
 #include "sh.h"
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <app.h>
+#include <graphicsview.h>
 #include <scene.h>
 
 namespace Shapes {
@@ -18,6 +21,7 @@ Shape::Shape(QDataStream& stream)
     m_paths.resize(1);
     App::scene()->addItem(this);
     stream >> m_id;
+    setToolTip(QString::number(m_id));
     int size;
     stream >> size;
     sh.reserve(size);
@@ -27,7 +31,7 @@ Shape::Shape(QDataStream& stream)
         stream >> pos;
         stream >> center;
         SH* item = new SH(this, center);
-        item->setPos(pos, false);
+        item->QGraphicsItem::setPos(pos);
         sh.append(item);
         App::scene()->addItem(item);
         item->update();
@@ -39,9 +43,44 @@ Shape::Shape(QDataStream& stream)
 
 Shape::~Shape() { qDeleteAll(sh); }
 
-QRectF Shape::boundingRect() const { return m_shape.boundingRect() /* + QMarginsF(1, 1, 1, 1)*/; }
+void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
+{
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
 
-QPainterPath Shape::shape() const { return m_shape; }
+    //QColor color(m_pen.color());
+    QPen pen(m_pen);
+    pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
+
+    if (option->state & QStyle::State_Selected)
+        pen.setColor(Qt::green);
+    if (option->state & QStyle::State_MouseOver)
+        pen.setColor(Qt::red);
+
+    painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawPath(m_shape);
+}
+
+QRectF Shape::boundingRect() const { return m_shape.boundingRect(); }
+
+QPainterPath Shape::shape() const
+{
+    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
+        m_scale = App::graphicsView()->scaleFactor();
+        m_selectionShape = QPainterPath();
+        ClipperOffset offset;
+        Paths tmpPpath;
+        offset.AddPaths(m_paths, jtSquare, etOpenSquare);
+        offset.Execute(tmpPpath, 5 * uScale * m_scale);
+        for (const Path& path : tmpPpath)
+            m_selectionShape.addPolygon(toQPolygon(path));
+        //App::scene()->addPath(m_selectionShape, Qt::NoPen, QColor(0, 255, 255, 100));
+    }
+    return m_selectionShape;
+}
 
 Paths Shape::paths() const { return m_paths; }
 
@@ -55,7 +94,7 @@ void Shape::write(QDataStream& stream)
     }
 }
 
-void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)
 {
     //    GraphicsItem::mouseDoubleClickEvent(event);
     //    delete this;

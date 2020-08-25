@@ -5,12 +5,8 @@
 #include "rectangle.h"
 #include "constructor.h"
 #include "sh.h"
-
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
-#include <graphicsview.h>
 #include <math.h>
 #include <scene.h>
 #include <settings.h>
@@ -41,34 +37,6 @@ Rectangle::Rectangle(QDataStream& stream)
 
 Rectangle::~Rectangle() { qDebug(Q_FUNC_INFO); }
 
-void Rectangle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
-
-    QColor color(m_pen.color());
-    QPen pen(m_pen);
-
-    if (option->state & QStyle::State_Selected) {
-        color.setAlpha(255);
-        pen.setColor(color);
-        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
-    }
-    if (option->state & QStyle::State_MouseOver) {
-        pen.setColor(Qt::red);
-        //        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
-        //        pen.setStyle(Qt::CustomDashLine);
-        //        pen.setCapStyle(Qt::FlatCap);
-        //        pen.setDashPattern({ 3.0, 3.0 });
-    }
-
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawPath(m_shape);
-}
-
 void Rectangle::redraw()
 {
     sh[Center]->setPos(QLineF(sh[Point1]->pos(), sh[Point2]->pos()).center());
@@ -88,6 +56,8 @@ void Rectangle::redraw()
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
+
+QPointF Rectangle::calcPos(SH* sh) const { return sh->pos(); }
 
 void Rectangle::setPt(const QPointF& pt)
 {

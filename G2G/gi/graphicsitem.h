@@ -25,6 +25,7 @@ enum GraphicsItemType {
     GiShapeC = QGraphicsItem::UserType + 100,
     GiShapeR,
     GiShapeL,
+    GiShapeA,
 };
 
 class AbstractFile;

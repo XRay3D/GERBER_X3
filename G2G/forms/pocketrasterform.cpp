@@ -109,6 +109,7 @@ void PocketRasterForm::createFile()
         case GiShapeC:
         case GiShapeR:
         case GiShapeL:
+        case GiShapeA:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:

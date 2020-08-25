@@ -55,14 +55,14 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
             offset.Execute(m_returnPs, dOffset);
         }
+
         if (!m_workingRawPs.isEmpty()) {
             ClipperOffset offset;
             offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
             offset.Execute(m_workingRawPs, dOffset);
+            if (!m_workingRawPs.isEmpty())
+                m_returnPs.append(m_workingRawPs);
         }
-
-        if (!m_workingRawPs.isEmpty())
-            m_returnPs.append(m_workingRawPs);
 
         // fix direction
         if (m_gcp.side() == Outer && !m_gcp.convent())
@@ -187,5 +187,4 @@ void ProfileCreator::strip()
         }
     }
 }
-
 }

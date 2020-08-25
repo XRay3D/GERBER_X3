@@ -492,6 +492,13 @@ void MainWindow::createActionsGraphics()
             Shapes::Constructor::setType(checked ? Shapes::PolyLine : Shapes::NullPT, checked ? action : nullptr);
         });
     }
+    {
+        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, [action](bool checked) {
+            Shapes::Constructor::setType(checked ? Shapes::ArcPT : Shapes::NullPT, checked ? action : nullptr);
+        });
+    }
     // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });
     // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] { graphicsView->setPt(ArcPT); });
     // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] { graphicsView->setPt(Text); });
@@ -612,7 +619,7 @@ void MainWindow::selectAll()
     }
 }
 
-void MainWindow::redo() { }
+void MainWindow::redo() {}
 
 void MainWindow::printDialog()
 {

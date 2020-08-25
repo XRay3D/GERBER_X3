@@ -327,6 +327,7 @@ int Project::addShape(Shapes::Shape* sh)
 {
     //QMutexLocker locker(&m_mutex);
     sh->m_id = m_shapes.size() ? m_shapes.lastKey() + 1 : 0;
+    sh->setToolTip(QString::number(sh->m_id));
     m_shapes.insert(sh->m_id, QSharedPointer<Shapes::Shape>(sh));
     App::fileModel()->addShape(sh);
     setChanged();
@@ -490,6 +491,7 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     return stream;
 }
 
+#include "sh/arc.h"
 #include "sh/circle.h"
 #include "sh/pline.h"
 #include "sh/rectangle.h"
@@ -514,6 +516,9 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
         break;
     case GiShapeL:
         sh = QSharedPointer<Shapes::Shape>(new Shapes::PolyLine(stream));
+        break;
+    case GiShapeA:
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Arc(stream));
         break;
     }
     sh->redraw();
