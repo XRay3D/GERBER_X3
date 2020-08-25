@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rectangle.h"
+#include "settings.h"
 #include "shape.h"
 #include <QGraphicsItem>
 
@@ -15,13 +16,14 @@ public:
 public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    void setPos(const QPointF& pos, bool fl = true);
+    void setPos(QPointF pos, bool fl = true);
 
 private:
-    Shapes::Shape* shape;
+    Shape* shape;
     const bool center;
     QVector<QPointF> pt;
     inline QRectF rect() const;
+    QPointF lastPos;
 
     // QGraphicsItem interface
 protected:

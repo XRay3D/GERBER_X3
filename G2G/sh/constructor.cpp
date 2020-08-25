@@ -3,10 +3,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "constructor.h"
+#include "arc.h"
 #include "circle.h"
 #include "pline.h"
 #include "rectangle.h"
-
 #include <QAction>
 #include <project.h>
 #include <scene.h>
@@ -27,7 +27,6 @@ void Constructor::setSnap(bool snap) { m_snap = snap; }
 void Constructor::addShapePoint(const QPointF& value)
 {
     point = value;
-    qDebug() << type << counter << item << point;
     switch (type) {
     case Rect:
         switch (counter) {
@@ -68,6 +67,15 @@ void Constructor::addShapePoint(const QPointF& value)
         }
         break;
     case ArcPT:
+        switch (counter) {
+        case 0:
+            item = new Arc(point, point + QPointF { 0, 1 }, point + QPointF { 0, 1 } + QPointF { 1, 0 });
+            break;
+        case 1:
+            break;
+        default:
+            finalizeShape();
+        }
         break;
     case Text:
         break;
@@ -94,6 +102,12 @@ void Constructor::updateShape(const QPointF& value)
             static_cast<Circle*>(item)->setPt(point);
         break;
     case ArcPT:
+        if (item != nullptr) {
+            if (counter == 1)
+                static_cast<Arc*>(item)->setPt(point);
+            else
+                static_cast<Arc*>(item)->setPt2(point);
+        }
         break;
     case Text:
         break;
@@ -104,8 +118,6 @@ void Constructor::updateShape(const QPointF& value)
 
 void Constructor::finalizeShape(/*const QPointF& value*/)
 {
-    //    point = value;
-    qDebug() << type << counter << item << point;
     if (item == nullptr)
         return;
 
@@ -113,30 +125,16 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
 
     switch (type) {
     case Rect:
-        type = NullPT;
-        item->setSelected(true);
-        item = nullptr;
-        action->setChecked(false);
-        action = nullptr;
-        break;
     case PolyLine:
-        type = NullPT;
-        item->setSelected(true);
-        item = nullptr;
-        action->setChecked(false);
-        action = nullptr;
-        break;
     case Elipse:
+    case ArcPT:
         type = NullPT;
         item->setSelected(true);
         item = nullptr;
         action->setChecked(false);
         action = nullptr;
-        break;
-    case ArcPT:
         break;
     case Text:
-        break;
     default:
         break;
     }

@@ -103,6 +103,7 @@ HEADERS += \
     project.h \
     settings.h \
     settingsdialog.h \
+    sh/arc.h \
     sh/circle.h \
     sh/constructor.h \
     sh/handler.h \
@@ -159,6 +160,7 @@ SOURCES += \
     project.cpp \
     settings.cpp \
     settingsdialog.cpp \
+    sh/arc.cpp \
     sh/circle.cpp \
     sh/constructor.cpp \
     sh/handler.cpp \

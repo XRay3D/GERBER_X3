@@ -140,10 +140,10 @@ void Creator::addRawPaths(Paths rawPaths)
     if (rawPaths.isEmpty())
         return;
 
-    if (m_gcp.side() == On) {
-        m_workingRawPs.append(rawPaths);
-        return;
-    }
+    //    if (m_gcp.side() == On) {
+    //        m_workingRawPs.append(rawPaths);
+    //        return;
+    //    }
 
     for (int i = 0; i < rawPaths.size(); ++i)
         if (rawPaths[i].size() < 2)
