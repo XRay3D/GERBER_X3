@@ -29,6 +29,7 @@ class AbstractFile {
 
     friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file)
     {
+        stream << static_cast<int>(file.type());
         file.write(stream);
         stream << file.m_id;
         stream << file.m_lines;

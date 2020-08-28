@@ -7,7 +7,7 @@ namespace Shapes {
 class Arc final : public Shape {
 public:
     explicit Arc(QPointF center, QPointF pt, QPointF pt2);
-    Arc(QDataStream& stream);
+    explicit Arc() { }
     ~Arc();
 
     // QGraphicsItem interface
@@ -31,5 +31,10 @@ public:
 
 private:
     mutable double m_radius;
+
+protected:
+    // Shape interface
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
 };
 }

@@ -7,7 +7,7 @@ namespace Shapes {
 class Circle final : public Shape {
 public:
     explicit Circle(QPointF center, QPointF pt);
-    Circle(QDataStream& stream);
+    explicit Circle() { }
     ~Circle();
 
     // QGraphicsItem interface
@@ -28,5 +28,10 @@ public:
 
 private:
     double m_radius;
+
+protected:
+    // Shape interface
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
 };
 }

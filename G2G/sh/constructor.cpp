@@ -7,13 +7,12 @@
 #include "circle.h"
 #include "pline.h"
 #include "rectangle.h"
+#include "shtext.h"
 #include <QAction>
 #include <project.h>
 #include <scene.h>
 
 namespace Shapes {
-
-
 
 bool Constructor::snap() { return m_snap; }
 
@@ -23,14 +22,14 @@ void Constructor::addShapePoint(const QPointF& value)
 {
     point = value;
     switch (type) {
-    case Rect:
+    case GiShapeR:
         if (!counter) {
             item = new Rectangle(point, point + QPointF { 1, 1 });
         } else {
             finalizeShape();
         }
         break;
-    case PolyLine:
+    case GiShapeL:
         if (!counter) {
             item = new class PolyLine(point, point + QPointF { 1, 1 });
         } else {
@@ -40,21 +39,23 @@ void Constructor::addShapePoint(const QPointF& value)
                 static_cast<class PolyLine*>(item)->addPt(point);
         };
         break;
-    case Elipse:
+    case GiShapeC:
         if (!counter) {
             item = new Circle(point, point + QPointF { 1, 1 });
         } else {
             finalizeShape();
         }
         break;
-    case ArcPT:
+    case GiShapeA:
         if (!counter) {
             item = new Arc(point, point + QPointF { 0, 1 }, point + QPointF { 0, 1 } + QPointF { 1, 0 });
         } else if (counter > 1) {
             finalizeShape();
         }
         break;
-    case Text:
+    case GiShapeT:
+        item = new Text(point);
+        finalizeShape();
         break;
     default:
         break;
@@ -68,22 +69,22 @@ void Constructor::updateShape(const QPointF& value)
     if (item == nullptr)
         return;
     switch (type) {
-    case Rect:
+    case GiShapeR:
         static_cast<Rectangle*>(item)->setPt(point);
         break;
-    case PolyLine:
+    case GiShapeL:
         static_cast<class PolyLine*>(item)->setPt(point);
         break;
-    case Elipse:
+    case GiShapeC:
         static_cast<Circle*>(item)->setPt(point);
         break;
-    case ArcPT:
+    case GiShapeA:
         if (counter == 1)
             static_cast<Arc*>(item)->setPt(point);
         else
             static_cast<Arc*>(item)->setPt2(point);
         break;
-    case Text:
+    case GiShapeT:
         break;
     default:
         break;
@@ -98,23 +99,23 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
     App::project()->addShape(item);
 
     switch (type) {
-    case Rect:
-    case PolyLine:
-    case Elipse:
-    case ArcPT:
-        type = NullShape;
+    case GiShapeR:
+    case GiShapeL:
+    case GiShapeC:
+    case GiShapeA:
+    case GiShapeT:
+        type = 0;
         item->setSelected(true);
         item = nullptr;
         action->setChecked(false);
         action = nullptr;
         break;
-    case Text:
     default:
         break;
     }
 }
 
-void Constructor::setType(const ShapeType& value, QAction* act)
+void Constructor::setType(const int value, QAction* act)
 {
     type = value;
     counter = 0;

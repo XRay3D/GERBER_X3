@@ -3,6 +3,7 @@
 
 #include "shape.h"
 #include "shandler.h"
+#include "shtext.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <graphicsview.h>
@@ -12,31 +13,6 @@ namespace Shapes {
 Shape::Shape()
     : GraphicsItem(nullptr)
 {
-}
-
-Shape::Shape(QDataStream& stream)
-{
-    m_paths.resize(1);
-    App::scene()->addItem(this);
-    stream >> m_id;
-    setToolTip(QString::number(m_id));
-    int size;
-    stream >> size;
-    sh.reserve(size);
-    while (size--) {
-        QPointF pos;
-        bool center;
-        stream >> pos;
-        stream >> center;
-        Handler* item = new Handler(this, center);
-        item->QGraphicsItem::setPos(pos);
-        item->setVisible(false);
-        sh.append(item);
-        App::scene()->addItem(item);
-    }
-    setFlags(ItemIsSelectable | ItemIsFocusable);
-    setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
 }
 
 Shape::~Shape() { qDeleteAll(sh); }
@@ -82,22 +58,6 @@ QPainterPath Shape::shape() const
 
 Paths Shape::paths() const { return m_paths; }
 
-void Shape::write(QDataStream& stream)
-{
-    stream << m_id;
-    stream << sh.size();
-    for (Handler* item : sh) {
-        stream << item->pos();
-        stream << item->center;
-    }
-}
-
-void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)
-{
-    //    GraphicsItem::mouseDoubleClickEvent(event);
-    //    delete this;
-}
-
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
 {
     if (change == GraphicsItemChange::ItemSelectedChange) {
@@ -105,5 +65,45 @@ QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
             item->setVisible(value.toInt());
     }
     return QGraphicsItem::itemChange(change, value);
+}
+
+QDataStream& operator<<(QDataStream& stream, const Shape& sh)
+{
+    stream << sh.type();
+    stream << sh.m_id;
+    stream << sh.sh.size();
+    for (Handler* item : sh.sh) {
+        stream << item->pos();
+        stream << item->center;
+    }
+    sh.write(stream);
+    return stream;
+}
+QDataStream& operator>>(QDataStream& stream, Shape& sh)
+{
+    sh.m_paths.resize(1);
+    App::scene()->addItem(&sh);
+    stream >> sh.m_id;
+    sh.setToolTip(QString::number(sh.m_id));
+    int size;
+    stream >> size;
+    sh.sh.reserve(size);
+    while (size--) {
+        QPointF pos;
+        bool center;
+        stream >> pos;
+        stream >> center;
+        Handler* item = new Handler(&sh, center);
+        item->QGraphicsItem::setPos(pos);
+        item->setVisible(false);
+        sh.sh.append(item);
+        App::scene()->addItem(item);
+    }
+    sh.read(stream);
+
+    sh.setFlags(GraphicsItem::ItemIsSelectable | GraphicsItem::ItemIsFocusable);
+    sh.setAcceptHoverEvents(true);
+    sh.setZValue(std::numeric_limits<double>::max());
+    return stream;
 }
 }

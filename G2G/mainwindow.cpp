@@ -475,28 +475,35 @@ void MainWindow::createActionsGraphics()
         action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? Shapes::Rect : Shapes::NullShape, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? GiShapeR : 0, checked ? action : nullptr);
         });
     }
     {
         action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? Shapes::Elipse : Shapes::NullShape, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? GiShapeC : 0, checked ? action : nullptr);
         });
     }
     {
         action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? Shapes::PolyLine : Shapes::NullShape, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? GiShapeL : 0, checked ? action : nullptr);
         });
     }
     {
         action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? Shapes::ArcPT : Shapes::NullShape, checked ? action : nullptr);
+            Shapes::Constructor::setType(checked ? GiShapeA : 0, checked ? action : nullptr);
+        });
+    }
+    {
+        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Text"));
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, [action](bool checked) {
+            Shapes::Constructor::setType(checked ? GiShapeT : 0, checked ? action : nullptr);
         });
     }
     // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });

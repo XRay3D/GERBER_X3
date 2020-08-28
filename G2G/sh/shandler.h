@@ -8,6 +8,7 @@
 namespace Shapes {
 class Handler : public QGraphicsItem {
     friend class Shape;
+    friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
 
 public:
     Handler(Shapes::Shape* shape, bool center = false);

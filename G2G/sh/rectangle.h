@@ -7,7 +7,7 @@ namespace Shapes {
 class Rectangle final : public Shape {
 public:
     explicit Rectangle(QPointF pt1, QPointF pt2);
-    Rectangle(QDataStream& stream);
+    explicit Rectangle() { }
     ~Rectangle();
 
     // QGraphicsItem interface
@@ -24,5 +24,10 @@ public:
         Point1,
         Point2,
     };
+
+protected:
+    // Shape interface
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
 };
 }
