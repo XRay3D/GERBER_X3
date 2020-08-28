@@ -67,7 +67,7 @@ bool Project::open(QFile& file)
         t.start();
         QDataStream in(&file);
         in >> m_ver;
-        qDebug() << "Project ver:" << m_ver;
+        qDebug() << "Project ver:" << m_ver << file;
 
         QPointF tmpPt;
 
@@ -467,7 +467,7 @@ void Project::setWorckRect(const QRectF& worckRect)
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
-    stream << static_cast<int>(file->type());
+
     stream << *file;
     return stream;
 }
@@ -491,17 +491,17 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     return stream;
 }
 
+QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>& sh)
+{
+    stream << *sh;
+    return stream;
+}
+
 #include "sh/arc.h"
 #include "sh/circle.h"
 #include "sh/pline.h"
 #include "sh/rectangle.h"
-
-QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>& sh)
-{
-    stream << sh->type();
-    sh->write(stream);
-    return stream;
-}
+#include "sh/shtext.h"
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
 {
@@ -509,18 +509,22 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
     stream >> type;
     switch (type) {
     case GiShapeC:
-        sh = QSharedPointer<Shapes::Shape>(new Shapes::Circle(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Circle());
         break;
     case GiShapeR:
-        sh = QSharedPointer<Shapes::Shape>(new Shapes::Rectangle(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Rectangle());
         break;
     case GiShapeL:
-        sh = QSharedPointer<Shapes::Shape>(new Shapes::PolyLine(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::PolyLine());
         break;
     case GiShapeA:
-        sh = QSharedPointer<Shapes::Shape>(new Shapes::Arc(stream));
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Arc());
+        break;
+    case GiShapeT:
+        sh = QSharedPointer<Shapes::Shape>(new Shapes::Text());
         break;
     }
+    stream >> *sh;
     sh->redraw();
     return stream;
 }

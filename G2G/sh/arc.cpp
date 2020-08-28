@@ -27,10 +27,6 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     App::scene()->addItem(sh[Point2]);
 }
 
-Arc::Arc(QDataStream& stream)
-    : Shape(stream)
-{
-}
 
 Arc::~Arc() { }
 

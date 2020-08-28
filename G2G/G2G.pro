@@ -111,6 +111,8 @@ HEADERS += \
     sh/shandler.h \
     sh/shnode.h \
     sh/shape.h \
+    sh/shtext.h \
+    sh/shtextdialog.h \
     splashscreen.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
@@ -167,6 +169,8 @@ SOURCES += \
     sh/shandler.cpp \
     sh/shape.cpp \
     sh/shnode.cpp \
+    sh/shtext.cpp \
+    sh/shtextdialog.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooleditdialog.cpp \
@@ -187,6 +191,7 @@ FORMS += \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
+    sh/shtextdialog.ui \
     tooldatabase/tooldatabase.ui \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \

@@ -8,10 +8,21 @@ class Handler;
 
 class Shape : public GraphicsItem {
     friend class Handler;
+    friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
+    friend QDataStream& operator>>(QDataStream& stream, Shape& sh);
+    //    {
+    //        stream << sh.m_id;
+    //        stream << sh.sh.size();
+    //        for (Shapes::Handler* item : sh.sh) {
+    //            stream << item->pos();
+    //            stream << item->center;
+    //        }
+    //        write(stream);
+    //        return stream;
+    //    }
 
 public:
     Shape();
-    Shape(QDataStream& stream);
     ~Shape();
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
@@ -19,22 +30,23 @@ public:
     QPainterPath shape() const override;
     Paths paths() const override;
 
-    void write(QDataStream& stream);
-
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
     virtual QPointF calcPos(Handler* sh) const = 0;
 
 private:
-    mutable double m_scale = std::numeric_limits<double>::max();
     mutable QPainterPath m_selectionShape;
 
 protected:
+    mutable double m_scale = std::numeric_limits<double>::max();
+
     QVector<Handler*> sh;
     Paths m_paths;
 
     // QGraphicsItem interface
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+    virtual void write(QDataStream& stream) const = 0;
+    virtual void read(QDataStream& stream) = 0;
 };
 }

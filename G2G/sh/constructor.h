@@ -9,17 +9,9 @@ namespace Shapes {
 
 class Shape;
 
-enum ShapeType {
-    NullShape,
-    Rect,
-    PolyLine,
-    Elipse,
-    ArcPT,
-    Text,
-};
 
 class Constructor {
-    inline static ShapeType type;
+    inline static int type;
     inline static int counter;
     inline static QPointF point;
     inline static Shape* item;
@@ -33,7 +25,7 @@ public:
     static void addShapePoint(const QPointF& value);
     static void updateShape(const QPointF& value);
     static void finalizeShape();
-    static void setType(const ShapeType& value, QAction* act);
+    static void setType(const int value, QAction* act);
 
 private:
 };

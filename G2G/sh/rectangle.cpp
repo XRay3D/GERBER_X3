@@ -24,10 +24,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh[Point2]);
 }
 
-Rectangle::Rectangle(QDataStream& stream)
-    : Shape(stream)
-{
-}
+
 
 Rectangle::~Rectangle() { }
 

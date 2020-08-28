@@ -6,8 +6,8 @@
 namespace Shapes {
 class PolyLine final : public Shape {
 public:
-    PolyLine(QPointF pt1, QPointF pt2);
-    PolyLine(QDataStream& stream);
+    explicit PolyLine(QPointF pt1, QPointF pt2);
+    explicit PolyLine() { }
     ~PolyLine();
 
     // QGraphicsItem interface
@@ -21,5 +21,10 @@ public:
     void setPt(const QPointF& pt);
     void addPt(const QPointF& pt);
     bool closed();
+
+protected:
+    // Shape interface
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
 };
 }

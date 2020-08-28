@@ -20,11 +20,6 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh.last());
 }
 
-PolyLine::PolyLine(QDataStream& stream)
-    : Shape(stream)
-{
-}
-
 PolyLine::~PolyLine() { qDebug(Q_FUNC_INFO); }
 
 void PolyLine::redraw()

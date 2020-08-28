@@ -26,6 +26,7 @@ enum GraphicsItemType {
     GiShapeR,
     GiShapeL,
     GiShapeA,
+    GiShapeT,
 };
 
 class AbstractFile;

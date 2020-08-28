@@ -24,10 +24,7 @@ Circle::Circle(QPointF center, QPointF pt)
     App::scene()->addItem(sh[Point1]);
 }
 
-Circle::Circle(QDataStream& stream)
-    : Shape(stream)
-{
-}
+
 
 Circle::~Circle() { }
 
