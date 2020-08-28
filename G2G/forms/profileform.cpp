@@ -130,7 +130,7 @@ void ProfileForm::createFile()
         case GiShapeC:
         case GiShapeR:
         case GiShapeL:
-        case GiShapeA:
+        case GiShapeA:case GiShapeT:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:
