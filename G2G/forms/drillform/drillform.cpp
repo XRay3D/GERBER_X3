@@ -16,9 +16,10 @@
 #include <QPainter>
 #include <QSettings>
 #include <QTimer>
-#include <gcpocketoffset.h>
-#include <gcprofile.h>
-#include <gctypes.h>
+#include <excellon.h>
+#include <gbraperture.h>
+#include <gbrfile.h>
+#include <gcode.h>
 #include <graphicsview.h>
 
 enum { IconSize = 24 };
@@ -297,7 +298,7 @@ void DrillForm::updateFiles()
 {
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    disconnect(ui->cbxFile, qOverload<int/*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #else
@@ -694,7 +695,7 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
         }
     }
     for (toolIt = ToolHolder::tools.cbegin(); toolIt != ToolHolder::tools.cend(); ++toolIt) {
-        const auto& tool = toolIt.value(); 
+        const auto& tool = toolIt.value();
         if (tool.type() == Tool::EndMill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
             createHoles(apertureId, tool.id());
@@ -760,7 +761,7 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
     setHighlightSections(true);
 }
 
-Header::~Header() {}
+Header::~Header() { }
 
 void Header::setAll(bool ch)
 {

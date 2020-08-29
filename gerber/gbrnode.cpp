@@ -5,6 +5,7 @@
 #include "gbrnode.h"
 #include "project.h"
 #include <QAction>
+#include <QDialog>
 #include <QFileInfo>
 #include <QMenu>
 #include <QPainter>

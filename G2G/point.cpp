@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
+#include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
 #include <clipper.hpp>

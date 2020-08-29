@@ -4,8 +4,8 @@
 
 #include <QHeaderView>
 #include <QWidget>
-#include <gccreator.h>
-#include <gcfile.h>
+#include <gcode.h>
+#include <gcode.h>
 
 namespace Ui {
 class DrillForm;

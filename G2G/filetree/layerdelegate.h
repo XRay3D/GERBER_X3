@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QStyledItemDelegate>
 
 class LayerDelegate : public QStyledItemDelegate {
@@ -16,6 +14,20 @@ public:
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 
+    void emitCommitData();
+};
+
+class TextDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    TextDelegate(QObject* parent = nullptr);
+    ~TextDelegate() override = default;
+
+public:
+    // QAbstractItemDelegate interface
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
     void emitCommitData();
 };
 
@@ -37,4 +49,3 @@ public:
 private slots:
     void commitAndCloseEditor();
 };
-

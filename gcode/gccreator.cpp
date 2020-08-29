@@ -308,6 +308,10 @@ void Creator::stacking(Paths& paths)
     qDebug() << "stacker elapsed" << t.elapsed();
     for (Paths& paths : m_returnPss) {
         std::reverse(paths.begin(), paths.end());
+        for (int i = 0; i < paths.size(); ++i) {
+            if (paths[i].isEmpty())
+                paths.remove(i--);
+        }
         for (Path& path : paths)
             path.append(path.first());
     }
@@ -498,6 +502,11 @@ Pathss& Creator::sortB(Pathss& src)
 {
     IntPoint startPt(
         toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+
+    for (int i = 0; i < src.size(); ++i) {
+        if (src[i].isEmpty())
+            src.remove(i--);
+    }
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

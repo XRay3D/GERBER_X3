@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <gccreator.h>
+#include <gcode.h>
 #include <graphicsview.h>
 #include <limits>
 #include <math.h>

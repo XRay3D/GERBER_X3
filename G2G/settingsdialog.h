@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "settings.h"
 #include "ui_settingsdialog.h"
 
@@ -19,5 +17,3 @@ public slots:
     void reject() override;
     void accept() override;
 };
-
-

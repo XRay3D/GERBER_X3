@@ -4,8 +4,8 @@
 
 #include "gcodepropertiesform.h"
 #include "ui_gcodepropertiesform.h"
-
 #include <QDockWidget>
+#include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
 #include <mainwindow.h>
@@ -98,7 +98,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
             && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
-            
+
             parent->close();
             return;
         }
