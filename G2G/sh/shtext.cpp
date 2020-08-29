@@ -8,12 +8,28 @@
 #include <scene.h>
 
 namespace Shapes {
+
 Text::Text(QPointF pt1)
-    : text("text")
+    : m_text("Text")
+    , font(font_)
+    , m_side(side_)
+    , angle(angle_)
+    , height(height_)
+    , handleAlign(handleAlign_)
 {
     m_paths.resize(1);
     sh = { new Handler(this, true) };
     sh.first()->setPos(pt1);
+
+    if (font_.isEmpty()) {
+        QSettings s;
+        s.beginGroup("Shapes::Text");
+        font = font_ = s.value("font").toString();
+        m_side = side_ = static_cast<Side>(s.value("side").toInt());
+        angle = angle_ = s.value("angle").toDouble();
+        height = height_ = s.value("height").toDouble();
+        handleAlign = handleAlign_ = s.value("handleAlign").toInt();
+    }
 
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
@@ -24,103 +40,94 @@ Text::Text(QPointF pt1)
     App::scene()->addItem(sh.first());
 }
 
-Text::~Text() { }
+Text::~Text()
+{
+    QSettings s;
+    s.beginGroup("Shapes::Text");
+    s.setValue("font", font_);
+    s.setValue("side", static_cast<int>(side_));
+    s.setValue("angle", angle_);
+    s.setValue("height", height_);
+    s.setValue("handleAlign", handleAlign_);
+}
 
 void Text::redraw()
 {
-    QPainterPath p;
-    QFont f;
+    QPainterPath painterPath;
 
-    f.fromString(font);
-    f.setPointSizeF(100);
-    QFontMetrics fm(f);
-    p.addText(QPointF(), f, text);
+    QFont font;
+    font.fromString(this->font);
+    font.setPointSize(100);
 
-    if (Area(m_paths.first()) < 0)
-        ReversePath(m_paths.first());
+    painterPath.addText(QPointF(), font, m_text);
+    auto bRect = painterPath.boundingRect();
 
-    m_shape = QPainterPath();
-    QMatrix matrix;
+    QFontMetrics fm(font);
+    const auto capHeight = fm.capHeight();
+    const auto scale = height / capHeight;
 
-    auto r = p.boundingRect();
+    QPointF handlePt;
 
-    const auto k2 = fm.capHeight();
-    const auto k = height / fm.ascent(); // k2/*r.height()*/;
-    //r.setBottomRight(r.bottomRight() * k);
-
-    QPointF tr;
-    switch (centerAlign) {
-    case 1:
-        //ui->rb_bc->setChecked(true);
-        tr.rx() -= r.width() * 0.5;
-        tr.ry();
+    switch (handleAlign) {
+    case BotCenter:
+        handlePt -= QPointF(bRect.width() * 0.5, 0);
         break;
-    case 2:
-        //ui->rb_bl->setChecked(true);
-        tr.rx();
-        tr.ry();
+    case BotLeft:
+        handlePt -= QPointF();
         break;
-    case 3:
-        //ui->rb_br->setChecked(true);
-        tr.rx() -= r.width();
-        tr.ry();
+    case BotRight:
+        handlePt -= QPointF(bRect.width(), 0);
         break;
-    case 4:
-        //ui->rb_c->setChecked(true);
-        tr.rx() -= r.width() * 0.5;
-        tr.ry() -= k2 /*r.height()*/ * 0.5;
+    case Center:
+        handlePt -= QPointF(bRect.width() * 0.5, capHeight * 0.5);
         break;
-    case 5:
-        //ui->rb_lc->setChecked(true);
-        tr.rx();
-        tr.ry() -= k2 /*r.height()*/ * 0.5;
+    case CenterLeft:
+        handlePt -= QPointF(0, capHeight * 0.5);
         break;
-    case 6:
-        //ui->rb_rc->setChecked(true);
-        tr.rx() -= r.width();
-        tr.ry() -= k2 /*r.height()*/ * 0.5;
+    case CenterRight:
+        handlePt -= QPointF(bRect.width(), capHeight * 0.5);
         break;
-    case 7:
-        //ui->rb_tc->setChecked(true);
-        tr.rx() -= r.width() * 0.5;
-        tr.ry() -= k2 /*r.height()*/;
+    case TopCenter:
+        handlePt -= QPointF(bRect.width() * 0.5, capHeight);
         break;
-    case 8:
-        //ui->rb_tl->setChecked(true);
-        tr.rx();
-        tr.ry() -= k2 /*r.height()*/;
+    case TopLeft:
+        handlePt -= QPointF(0, capHeight);
         break;
-    case 9:
-        //ui->rb_tr->setChecked(true);
-        tr.rx() -= r.width();
-        tr.ry() -= k2 /*r.height()*/;
+    case TopRight:
+        handlePt -= QPointF(bRect.width(), capHeight);
         break;
     }
 
-    matrix.translate(-r.left() * k, 0 /*r.bottom() * k*/);
-    matrix.translate(tr.x() * k, tr.y() * k);
-    matrix.scale(k, -k);
+    QMatrix matrix;
+    matrix.translate(-bRect.left() * scale, 0);
+    matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
+    if (m_side == Bottom) {
+        matrix.translate((bRect.right() + bRect.left()) * scale, 0);
+        matrix.scale(-scale, -scale);
+    } else
+        matrix.scale(scale, -scale);
     {
-        QPainterPath p2;
-        for (auto& sp : p.toSubpathPolygons()) {
-            p2.addPolygon(sp);
+        QPainterPath tmpPainterPath;
+        for (auto& polygon : painterPath.toSubpathPolygons()) { // text to polygons
+            tmpPainterPath.addPolygon(polygon);
         }
-        p = p2;
-        p2 = QPainterPath();
-        for (auto& sp : p.toSubpathPolygons(matrix)) {
-            p2.addPolygon(sp);
+        painterPath = std::move(tmpPainterPath);
+        tmpPainterPath = QPainterPath();
+        for (auto& polygon : painterPath.toSubpathPolygons(matrix)) { // transform polygons with matrix
+            tmpPainterPath.addPolygon(polygon);
         }
-        p = p2;
+        painterPath = std::move(tmpPainterPath);
     }
     matrix.reset();
     matrix.translate(sh.first()->pos().x(), sh.first()->pos().y());
     matrix.rotate(angle - 360);
 
     m_paths.clear();
+    m_shape = QPainterPath();
 
-    for (auto& sp : p.toSubpathPolygons(matrix)) {
-        m_shape.addPolygon(sp);
+    for (auto& sp : painterPath.toSubpathPolygons(matrix)) {
         m_paths.append(toPath(sp));
+        m_shape.addPolygon(sp);
     }
     m_scale = std::numeric_limits<double>::max();
 
@@ -132,35 +139,31 @@ QPointF Text::calcPos(Handler* sh) const { return sh->pos(); }
 
 void Text::write(QDataStream& stream) const
 {
-    stream << text;
+    stream << m_text;
     stream << font;
     stream << angle;
     stream << height;
-    stream << centerAlign;
+    stream << handleAlign;
+    stream << m_side;
 }
 
 void Text::read(QDataStream& stream)
 {
-    stream >> text;
+    stream >> m_text;
     stream >> font;
     stream >> angle;
     stream >> height;
-    stream >> centerAlign;
+    stream >> handleAlign;
+    stream >> m_side;
 }
 
-void Shapes::Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseDoubleClickEvent(event);
-    ShTextDialog dlg(this, App::mainWindow());
-    if (!dlg.exec()) {
-        text = dlg.text_;
-        font = dlg.font_;
-        angle = dlg.angle_;
-        height = dlg.height_;
-        centerAlign = dlg.centerAlign_;
-    }
-    qDebug() << font;
+    ShTextDialog dlg({ this }, App::mainWindow());
+    dlg.exec();
     redraw();
 }
 
+QPainterPath Text::shape() const { return m_shape; }
 }

@@ -14,8 +14,7 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gcfile.h>
-#include <gcprofile.h>
+#include <gcode.h>
 #include <graphicsview.h>
 #include <myclipper.h>
 #include <scene.h>
@@ -130,7 +129,8 @@ void ProfileForm::createFile()
         case GiShapeC:
         case GiShapeR:
         case GiShapeL:
-        case GiShapeA:case GiShapeT:
+        case GiShapeA:
+        case GiShapeT:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:

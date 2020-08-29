@@ -3,6 +3,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "treeview.h"
+#include "../mainwindow.h"
 #include "abstractnode.h"
 #include "forms/drillform/drillform.h"
 #include "gbrnode.h"
@@ -16,10 +17,11 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-
-#include "../mainwindow.h"
-#include "gcode.h"
-#include <gcfile.h>
+#include <gcode.h>
+#include <sh/shnode.h>
+#include <sh/shtext.h>
+#include <sh/shtextdialog.h>
+#include <ui_shtextdialog.h>
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
@@ -73,8 +75,9 @@ TreeView::TreeView(QWidget* parent)
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
     header()->setStretchLastSection(false);
 
+    setItemDelegateForColumn(0, new TextDelegate(this));
     setItemDelegateForColumn(1, new LayerDelegate(this));
-    setItemDelegateForColumn(2, new RadioDelegate(this));
+    //    setItemDelegateForColumn(2, new RadioDelegate(this));
 }
 
 void TreeView::updateTree()
@@ -199,6 +202,21 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
                 if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                     m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
             });
+            { // edit Shapes::Text
+                QVector<Shapes::Text*> tx;
+                for (const auto& idx : selectedIndexes()) {
+                    if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == GiShapeT) {
+                        tx.append(static_cast<Shapes::Text*>(sh));
+                    }
+                }
+                if (tx.size() > 0)
+                    menu.addAction(QIcon::fromTheme("draw-text"), tr("&Edit Selected Texts"), [tx] {
+                        ShTextDialog dlg(tx, App::mainWindow());
+                        dlg.exec();
+                    });
+            }
+
+            // ShTextDialog dlg({ this }, App::mainWindow());
         }
         break;
     default:
@@ -208,4 +226,29 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
     if (!menu.isEmpty())
         menu.exec(mapToGlobal(event->pos()));
+}
+
+void TreeView::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton) {
+        QModelIndex index = indexAt(event->pos());
+        if (index.isValid()) {
+            if (index.column() == 0) {
+                qDebug() << event->pos() << visualRect(index);
+                if (event->pos().x() > visualRect(index).left() + 44)
+                    edit(index);
+            } else
+                edit(index);
+        }
+    }
+    QTreeView::mousePressEvent(event);
+}
+
+void TreeView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    m_menuIndex = indexAt(event->pos());
+    if (m_menuIndex.isValid() && m_menuIndex.parent().row() > -1)
+        hideOther();
+    else
+        QTreeView::mouseDoubleClickEvent(event);
 }

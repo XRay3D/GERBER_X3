@@ -7,8 +7,8 @@
 #include <QVector>
 #include <QWidget>
 #include <abstractfile.h>
-#include <gccreator.h>
-#include <gctypes.h>
+#include <gcode.h>
+#include <gcode.h>
 
 namespace GCode {
 class File;

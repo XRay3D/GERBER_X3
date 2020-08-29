@@ -1,15 +1,12 @@
 #pragma once
 
+#include "sh/shape.h"
 #include <QMap>
 #include <QMutex>
 #include <QObject>
 #include <QSemaphore>
-#include <exfile.h>
-#include <gbrfile.h>
-#include <gcfile.h>
+#include <abstractfile.h>
 #include <myclipper.h>
-
-#include "sh/shape.h"
 
 using namespace ClipperLib;
 
@@ -54,7 +51,7 @@ public:
     }
 
     AbstractFile* aFile(int id);
-    Shapes::Shape *aShape(int id);
+    Shapes::Shape* aShape(int id);
 
     int addFile(AbstractFile* file);
     int addShape(Shapes::Shape* sh);
@@ -83,17 +80,6 @@ public:
         return rfiles;
     }
 
-    void showFiles(const QList<QPair<int, int>>&& fileIds)
-    {
-        for (auto file : m_files)
-            file->itemGroup()->setVisible(false);
-        for (auto [fileId, giType] : fileIds) {
-            if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
-                file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
-            m_files[fileId]->itemGroup()->setVisible(true);
-        }
-    }
-
     template <typename T>
     QVector<T*> count()
     {
@@ -105,6 +91,8 @@ public:
         }
         return count;
     }
+
+    void showFiles(const QList<QPair<int, int>>&& fileIds);
 
     bool contains(AbstractFile* file);
     void setIsModified(bool isModified) { m_isModified = isModified; }

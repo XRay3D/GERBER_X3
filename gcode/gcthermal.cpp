@@ -3,7 +3,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcthermal.h"
-
+#include "gcfile.h"
 #include <gbrfile.h>
 #include <project.h>
 

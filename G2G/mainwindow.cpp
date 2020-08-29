@@ -27,7 +27,7 @@
 #include <exparser.h>
 #include <gbrnode.h>
 #include <gbrparser.h>
-#include <gcfile.h>
+#include <gcode.h>
 #include <sh/constructor.h>
 
 MainWindow::MainWindow(QWidget* parent)
@@ -500,7 +500,7 @@ void MainWindow::createActionsGraphics()
         });
     }
     {
-        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Text"));
+        action = tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
             Shapes::Constructor::setType(checked ? GiShapeT : 0, checked ? action : nullptr);

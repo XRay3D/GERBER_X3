@@ -8,7 +8,7 @@
 #include <tooldatabase/tooldatabase.h>
 #include <tooldatabase/tooleditdialog.h>
 
-#include <gcpocketraster.h>
+#include <gcode.h>
 #include <scene.h>
 #include <settings.h>
 
@@ -109,7 +109,8 @@ void PocketRasterForm::createFile()
         case GiShapeC:
         case GiShapeR:
         case GiShapeL:
-        case GiShapeA:case GiShapeT:
+        case GiShapeA:
+        case GiShapeT:
             wRawPaths.append(gi->paths());
             break;
         case GiDrill:

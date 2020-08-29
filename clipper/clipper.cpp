@@ -50,7 +50,7 @@
 #include <functional>
 #include <gbrtypes.h>
 #ifndef GTE
-#include <gccreator.h>
+#include <gcode.h>
 #include <settings.h>
 #endif
 #include <ostream>

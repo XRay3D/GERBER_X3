@@ -11,9 +11,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <gbrfile.h>
-#include <gccreator.h>
-#include <gcfile.h>
-#include <gcpocketoffset.h>
+#include <gcode.h>
 #include <myclipper.h>
 #include <scene.h>
 #include <settings.h>

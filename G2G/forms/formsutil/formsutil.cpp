@@ -11,9 +11,10 @@
 #include <QJsonDocument>
 #include <QPushButton>
 #include <QTimer>
-#include <gcvoronoi.h>
+#include <gcode.h>
 #include <qprogressdialog.h>
 #include <scene.h>
+#include <gbrfile.h>
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 

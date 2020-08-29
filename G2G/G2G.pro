@@ -47,7 +47,6 @@ gcc* {
 
 linux {
 # sudo apt install mesa-common-dev
-# sudo apt install mesa-common-dev
     DEFINES += linux
     greaterThan(QT_MINOR_VERSION, 12){
         LIBS += -ltbb # Why????? sudo apt-get install libtbb-dev

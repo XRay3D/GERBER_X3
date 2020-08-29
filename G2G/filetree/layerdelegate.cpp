@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QRadioButton>
 
 LayerDelegate::LayerDelegate(QObject* parent)
@@ -18,12 +19,9 @@ QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 {
     auto* comboBox = new QComboBox(parent);
     comboBox->addItems(tr("Top|Bottom").split('|'));
-    comboBox->setCurrentIndex(index.model()->data(index).toInt());
-    //        if (index.column() == 1)
-    //            comboBox->addItems(IconPreviewArea::iconModeNames());
-    //        else if (index.column() == 2)
-    //            comboBox->addItems(IconPreviewArea::iconStateNames());
-    //connect(comboBox, QOverload<int>::of(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
+    comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
+    comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
+    connect(comboBox, QOverload<int>::of(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
     return comboBox;
 }
 
@@ -44,11 +42,12 @@ void LayerDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, con
     model->setData(index, bool(comboBox->currentIndex()));
 }
 
-void LayerDelegate::emitCommitData()
-{
-    emit commitData(qobject_cast<QWidget*>(sender()));
-}
+void LayerDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
+////////////////////////////////////////////////////////////
+/// \brief RadioDelegate::RadioDelegate
+/// \param parent
+///
 RadioDelegate::RadioDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
@@ -121,3 +120,38 @@ void RadioDelegate::commitAndCloseEditor()
     // emit commitData(editor);
     // emit closeEditor(editor);
 }
+
+////////////////////////////////////////////////////////////
+/// \brief TextDelegate::TextDelegate
+/// \param parent
+///
+TextDelegate::TextDelegate(QObject* parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    auto* le = new QLineEdit(parent);
+    //    le->setText(index.data(Qt::EditRole).toString());
+    connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
+    return le;
+}
+
+void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+    auto* le = qobject_cast<QLineEdit*>(editor);
+    if (!le)
+        return;
+    le->setText(index.data(Qt::EditRole).toString());
+}
+
+void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    auto* le = qobject_cast<QLineEdit*>(editor);
+    if (!le)
+        return;
+    model->setData(index, le->text());
+}
+
+void TextDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }

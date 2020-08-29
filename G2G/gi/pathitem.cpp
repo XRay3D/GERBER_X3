@@ -8,7 +8,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <graphicsview.h>
 
-#include <gcfile.h>
+#include <gcode.h>
 
 PathItem::PathItem(const Paths& paths, GCode::File* file)
     : m_gcFile(file)

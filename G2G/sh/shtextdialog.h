@@ -14,21 +14,25 @@ class ShTextDialog : public QDialog {
     friend Shapes::Text;
 
 public:
-    explicit ShTextDialog(Shapes::Text* text, QWidget* parent = nullptr);
+    explicit ShTextDialog(QVector<Shapes::Text*> text, QWidget* parent = nullptr);
     ~ShTextDialog();
 
 private:
     Ui::ShTextDialog* ui;
-    Shapes::Text* pText;
+
+    QVector<Shapes::Text*> shapeText;
 
     void updateText();
+    void updateFont();
+    void updateAngle();
+    void updateHeight();
+    void updateCenterAlign();
+    void updateSide();
 
-    QString text_;
-    QString font_;
-    double angle_ = 0;
-    double height_ = 10;
-    int centerAlign_ = 0;
-
+    // QDialog interface
+public slots:
+    void accept() override;
+    void reject() override;
 };
 
 #endif // SHTEXTDIALOG_H

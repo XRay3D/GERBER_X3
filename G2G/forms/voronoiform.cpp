@@ -12,7 +12,7 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gcvoronoi.h>
+#include <gcode.h>
 #include <graphicsview.h>
 #include <myclipper.h>
 #include <scene.h>

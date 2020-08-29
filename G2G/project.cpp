@@ -5,11 +5,14 @@
 #include "project.h"
 #include "mainwindow.h"
 #include "settings.h"
-
 #include <QElapsedTimer>
 #include <QFileDialog>
+#include <QMessageBox>
+#include <excellon.h>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
+#include <gbrfile.h>
+#include <gcode.h>
 
 Project::Project()
 {
@@ -332,6 +335,17 @@ int Project::addShape(Shapes::Shape* sh)
     App::fileModel()->addShape(sh);
     setChanged();
     return sh->m_id;
+}
+
+void Project::showFiles(const QList<QPair<int, int>>&& fileIds)
+{
+    for (auto file : m_files)
+        file->itemGroup()->setVisible(false);
+    for (auto [fileId, giType] : fileIds) {
+        if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
+            file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
+        m_files[fileId]->itemGroup()->setVisible(true);
+    }
 }
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }

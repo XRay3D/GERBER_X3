@@ -7,7 +7,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <exfile.h>
 #include <extypes.h>
-#include <gcfile.h>
+#include <gcode.h>
 #include <graphicsview.h>
 
 using namespace ClipperLib;

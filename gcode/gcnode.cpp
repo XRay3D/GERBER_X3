@@ -3,9 +3,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcnode.h"
+#include "gcfile.h"
 #include "gch.h"
 #include "project.h"
-
 #include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
@@ -14,6 +14,8 @@
 #include <qboxlayout.h>
 
 #include <filetree/treeview.h>
+
+#include <settings.h>
 namespace GCode {
 Node::Node(int id)
     : AbstractNode(id)
@@ -29,6 +31,11 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         case Qt::CheckStateRole:
             file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
+        case Qt::EditRole:
+            file()->setFileName(value.toString());
+            return true;
+            //            if (auto text = dynamic_cast<Text*>(shape()); text)
+            //                text->setText(value.toString());
         default:
             return false;
         }
@@ -45,33 +52,18 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     }
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
-    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
-    switch (index.column()) {
-    case 0:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case 1: {
-        if (file()->shortName().contains(".tap"))
-            return itemFlag;
-        return itemFlag | Qt::ItemIsEditable;
-    }
-    default:
-        return itemFlag;
-    }
-}
-
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
     case 0:
         switch (role) {
-        case Qt::DisplayRole: {
-            if (file()->shortName().endsWith("tap"))
+        case Qt::DisplayRole:
+            if (file()->shortName().endsWith(GlobalSettings::gcFileExtension()))
                 return file()->shortName();
             else
                 return file()->shortName() + QStringList({ "_TS", "_BS" })[file()->side()];
-        }
+        case Qt::EditRole:
+            return file()->shortName();
         case Qt::ToolTipRole:
             return file()->shortName() + "\n" + file()->name();
         case Qt::CheckStateRole:
@@ -113,6 +105,23 @@ QVariant Node::data(const QModelIndex& index, int role) const
     }
 }
 
+Qt::ItemFlags Node::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
+    switch (index.column()) {
+    case 0:
+        if (file()->shortName().contains(GlobalSettings::gcFileExtension()))
+            return itemFlag | Qt::ItemIsUserCheckable;
+        return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
+    case 1: {
+        if (file()->shortName().contains(GlobalSettings::gcFileExtension()))
+            return itemFlag;
+        return itemFlag | Qt::ItemIsEditable;
+    }
+    default:
+        return itemFlag;
+    }
+}
 void Node::menu(QMenu* menu, TreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
