@@ -2,58 +2,40 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shtext.h"
-#include "shandler.h"
+#include "shhandler.h"
 #include "shtextdialog.h"
-#include <mainwindow.h>
+#include <QApplication>
+#include <QIcon>
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <scene.h>
 
 namespace Shapes {
 
 Text::Text(QPointF pt1)
-    : m_text("Text")
-    , font(font_)
-    , m_side(side_)
-    , angle(angle_)
-    , height(height_)
-    , handleAlign(handleAlign_)
+    : d(d_)
+    , fileName(qApp->applicationDirPath() + "/XrSoft/Text.dat")
 {
     m_paths.resize(1);
-    sh = { new Handler(this, Handler::Center) };
-    sh.first()->setPos(pt1);
+    handlers = { new Handler(this, Handler::Center) };
+    handlers.first()->setPos(pt1);
 
-    if (font_.isEmpty()) {
-        QSettings s;
-        s.beginGroup("Shapes::Text");
-        font_ = s.value("font").toString();
-        side_ = static_cast<Side>(s.value("side").toInt());
-        angle_ = s.value("angle").toDouble();
-        height_ = s.value("height").toDouble();
-        handleAlign_ = s.value("handleAlign").toInt();
+    QFile file(fileName);
+    if (file.open(QIODevice::ReadOnly)) {
+        QDataStream in(&file);
+        in >> d_;
+    } else {
+        qWarning("Couldn't open Text.dat file.");
     }
-    font = font_;
-    m_side = side_;
-    angle = angle_;
-    height = height_;
-    handleAlign = handleAlign_;
-
+    d = d_;
     redraw();
+
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
     setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
-    App::scene()->addItem(sh.first());
-}
-
-Text::~Text()
-{
-    QSettings s;
-    s.beginGroup("Shapes::Text");
-    s.setValue("font", font_);
-    s.setValue("side", static_cast<int>(side_));
-    s.setValue("angle", angle_);
-    s.setValue("height", height_);
-    s.setValue("handleAlign", handleAlign_);
+    App::scene()->addItem(handlers.first());
 }
 
 void Text::redraw()
@@ -61,19 +43,19 @@ void Text::redraw()
     QPainterPath painterPath;
 
     QFont font;
-    font.fromString(this->font);
-    font.setPointSize(100);
+    font.fromString(d.font);
+    font.setPixelSize(1000);
 
-    painterPath.addText(QPointF(), font, m_text);
+    painterPath.addText(QPointF(), font, d.text);
     auto bRect = painterPath.boundingRect();
 
     QFontMetrics fm(font);
     const auto capHeight = fm.capHeight();
-    const auto scale = height / capHeight;
+    const auto scale = d.height / capHeight;
 
     QPointF handlePt;
 
-    switch (handleAlign) {
+    switch (d.handleAlign) {
     case BotCenter:
         handlePt -= QPointF(bRect.width() * 0.5, 0);
         break;
@@ -106,7 +88,7 @@ void Text::redraw()
     QMatrix matrix;
     matrix.translate(-bRect.left() * scale, 0);
     matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
-    if (m_side == Bottom) {
+    if (d.side == Bottom) {
         matrix.translate((bRect.right() + bRect.left()) * scale, 0);
         matrix.scale(-scale, -scale);
     } else
@@ -124,8 +106,8 @@ void Text::redraw()
         painterPath = std::move(tmpPainterPath);
     }
     matrix.reset();
-    matrix.translate(sh.first()->pos().x(), sh.first()->pos().y());
-    matrix.rotate(angle - 360);
+    matrix.translate(handlers.first()->pos().x(), handlers.first()->pos().y());
+    matrix.rotate(d.angle - 360);
 
     m_paths.clear();
     m_shape = QPainterPath();
@@ -135,40 +117,105 @@ void Text::redraw()
         m_shape.addPolygon(sp);
     }
     m_scale = std::numeric_limits<double>::max();
-
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
 
 QPointF Text::calcPos(Handler* sh) { return sh->pos(); }
 
-void Text::write(QDataStream& stream) const
+QString Text::text() const { return d.text; }
+
+void Text::setText(const QString& value)
 {
-    stream << m_text;
-    stream << font;
-    stream << angle;
-    stream << height;
-    stream << handleAlign;
-    stream << m_side;
+    d.text = value;
+    redraw();
 }
 
-void Text::read(QDataStream& stream)
+Side Text::side() const { return d.side; }
+
+void Text::setSide(const Side& side)
 {
-    stream >> m_text;
-    stream >> font;
-    stream >> angle;
-    stream >> height;
-    stream >> handleAlign;
-    stream >> m_side;
+    d.side = side;
+    redraw();
+}
+
+void Text::write(QDataStream& stream) const { stream << d; }
+
+void Text::read(QDataStream& stream) { stream >> d; }
+
+void Text::save() { dCopy = d; }
+
+void Text::restore()
+{
+    d = std::move(dCopy);
+    redraw();
+}
+
+void Text::ok()
+{
+    d_ = d;
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly)) {
+        QDataStream out(&file);
+        d_.text = QObject::tr("Text");
+        out << d_;
+    } else {
+        qWarning("Couldn't open Text.dat file.");
+    }
 }
 
 void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseDoubleClickEvent(event);
-    ShTextDialog dlg({ this }, App::mainWindow());
+    ShTextDialog dlg({ this }, nullptr);
     dlg.exec();
     redraw();
 }
 
 QPainterPath Text::shape() const { return m_shape; }
+
+QString Text::name() const { return QObject::tr("Text"); }
+
+QIcon Text::icon() const { return QIcon::fromTheme("draw-text"); }
+
+void Text::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    if (m_pnColorPrt)
+        m_pen.setColor(*m_pnColorPrt);
+    if (m_brColorPtr)
+        m_brush.setColor(*m_brColorPtr);
+    QColor color(m_pen.color());
+    if (option->state & QStyle::State_Selected)
+        color = Qt::green;
+    if (option->state & QStyle::State_MouseOver)
+        color = Qt::red;
+    color.setAlpha(50);
+
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(color);
+    painter->drawPath(m_shape);
+    Shape::paint(painter, option, widget);
+}
+
+QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d)
+{
+    stream << d.text;
+    stream << d.font;
+    stream << d.angle;
+    stream << d.height;
+    stream << d.handleAlign;
+    stream << d.side;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Text::InternalData& d)
+{
+    stream >> d.text;
+    stream >> d.font;
+    stream >> d.angle;
+    stream >> d.height;
+    stream >> d.handleAlign;
+    stream >> d.side;
+    return stream;
+}
 }

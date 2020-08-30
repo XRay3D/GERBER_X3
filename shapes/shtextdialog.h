@@ -9,6 +9,7 @@ class ShTextDialog;
 namespace Shapes {
 class Text;
 }
+
 class ShTextDialog : public QDialog {
     Q_OBJECT
     friend Shapes::Text;

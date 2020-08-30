@@ -1,20 +1,21 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "arc.h"
-#include "shandler.h"
+#include "sharc.h"
+#include "scene.h"
+#include "shhandler.h"
+#include <QIcon>
 #include <QtMath>
-#include <scene.h>
 
 namespace Shapes {
 Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     : m_radius(QLineF(center, pt).length())
 {
     m_paths.resize(1);
-    sh = { new Handler(this, Handler::Center), new Handler(this), new Handler(this) };
-    sh[Center]->setPos(center);
-    sh[Point1]->setPos(pt);
-    sh[Point2]->setPos(pt2);
+    handlers = { new Handler(this, Handler::Center), new Handler(this), new Handler(this) };
+    handlers[Center]->setPos(center);
+    handlers[Point1]->setPos(pt);
+    handlers[Point2]->setPos(pt2);
 
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
@@ -22,23 +23,23 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
-    App::scene()->addItem(sh[Center]);
-    App::scene()->addItem(sh[Point1]);
-    App::scene()->addItem(sh[Point2]);
+    App::scene()->addItem(handlers[Center]);
+    App::scene()->addItem(handlers[Point1]);
+    App::scene()->addItem(handlers[Point2]);
 }
 
 Arc::~Arc() { }
 
 void Arc::redraw()
 {
-    const QLineF l1(sh[Center]->pos(), sh[Point1]->pos());
-    const QLineF l2(sh[Center]->pos(), sh[Point2]->pos());
+    const QLineF l1(handlers[Center]->pos(), handlers[Point1]->pos());
+    const QLineF l2(handlers[Center]->pos(), handlers[Point2]->pos());
 
     m_radius = l1.length();
 
     const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center(toIntPoint(sh[Center]->pos()));
+    const IntPoint center(toIntPoint(handlers[Center]->pos()));
     const double stepAngle = M_2PI / intSteps;
 
     double angle1 = M_2PI - qDegreesToRadians(l1.angle());
@@ -71,34 +72,39 @@ void Arc::redraw()
     m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
 
+    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
 
+QString Arc::name() const { return QObject::tr("Arc"); }
+
+QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
+
 QPointF Arc::calcPos(Handler* sh_)
 {
-    QLineF l(sh[Center]->pos(), sh_->pos());
+    QLineF l(handlers[Center]->pos(), sh_->pos());
     m_radius = l.length();
 
-    QLineF l1(sh[Center]->pos(),
-        sh[Center]->pos() == sh[Point1]->pos() //если залипло на центр
-            ? sh[Center]->pos() + QPointF(1.0, 0.0)
-            : sh[Point1]->pos());
-    QLineF l2(sh[Center]->pos(),
-        sh[Center]->pos() == sh[Point2]->pos() //если залипло на центр
-            ? sh[Center]->pos() + QPointF(1.0, 0.0)
-            : sh[Point2]->pos());
+    QLineF l1(handlers[Center]->pos(),
+        handlers[Center]->pos() == handlers[Point1]->pos() //если залипло на центр
+            ? handlers[Center]->pos() + QPointF(1.0, 0.0)
+            : handlers[Point1]->pos());
+    QLineF l2(handlers[Center]->pos(),
+        handlers[Center]->pos() == handlers[Point2]->pos() //если залипло на центр
+            ? handlers[Center]->pos() + QPointF(1.0, 0.0)
+            : handlers[Point2]->pos());
 
-    switch (sh.indexOf(sh_)) {
+    switch (handlers.indexOf(sh_)) {
     case Center:
         break;
     case Point1:
         l2.setLength(m_radius);
-        sh[Point2]->QGraphicsItem::setPos(l2.p2());
+        handlers[Point2]->QGraphicsItem::setPos(l2.p2());
         break;
     case Point2:
         l1.setLength(m_radius);
-        sh[Point1]->QGraphicsItem::setPos(l1.p2());
+        handlers[Point1]->QGraphicsItem::setPos(l1.p2());
         break;
     }
     return sh_->pos();
@@ -107,24 +113,24 @@ QPointF Arc::calcPos(Handler* sh_)
 void Arc::setPt(const QPointF& pt)
 {
     {
-        sh[Point1]->setPos(pt);
-        QLineF l(sh[Center]->pos(), sh[Point1]->pos());
+        handlers[Point1]->setPos(pt);
+        QLineF l(handlers[Center]->pos(), handlers[Point1]->pos());
         m_radius = l.length();
     }
     {
-        QLineF l(sh[Center]->pos(), sh[Point2]->pos());
+        QLineF l(handlers[Center]->pos(), handlers[Point2]->pos());
         l.setLength(m_radius);
-        sh[Point2]->QGraphicsItem::setPos(l.p2());
+        handlers[Point2]->QGraphicsItem::setPos(l.p2());
     }
     redraw();
 }
 
 void Arc::setPt2(const QPointF& pt)
 {
-    QLineF l(sh[Center]->pos(), pt);
+    QLineF l(handlers[Center]->pos(), pt);
     l.setLength(m_radius);
 
-    sh[Point2]->QGraphicsItem::setPos(l.p2());
+    handlers[Point2]->QGraphicsItem::setPos(l.p2());
     redraw();
 }
 

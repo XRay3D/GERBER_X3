@@ -1,8 +1,8 @@
 #pragma once
 
-#include "rectangle.h"
 #include "settings.h"
 #include "shape.h"
+#include "shrectangle.h"
 #include <QGraphicsItem>
 
 namespace Shapes {
@@ -11,24 +11,24 @@ class Handler : public QGraphicsItem {
     friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
 
 public:
-    enum Type {
+    enum HType {
         Adder,
         Center,
         Corner,
     };
-    explicit Handler(Shapes::Shape* shape, Type type = Corner);
+    explicit Handler(Shapes::Shape* shape, HType type = Corner);
     ~Handler();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     void setPos(const QPointF& pos);
 
-    Type getHType() const;
-    void setHType(const Type& value);
+    HType hType() const;
+    void setHType(const HType& value);
 
 private:
     Shape* shape;
-    Type hType;
+    HType m_hType;
     QVector<QPointF> pt;
     inline QRectF rect() const;
     QPointF lastPos;
@@ -38,6 +38,5 @@ private:
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }

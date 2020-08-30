@@ -1,23 +1,11 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "constructor.h"
-#include "arc.h"
-#include "circle.h"
-#include "pline.h"
-#include "rectangle.h"
-#include "shandler.h"
-#include "shtext.h"
+#include "shcreator.h"
+#include "shheaders.h"
 #include <QAction>
-#include <project.h>
-#include <scene.h>
 
 namespace Shapes {
-
-bool Constructor::snap() { return m_snap; }
-
-void Constructor::setSnap(bool snap) { m_snap = snap; }
 
 void Constructor::addShapePoint(const QPointF& value)
 {
@@ -101,11 +89,11 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
 
     switch (type) {
     case GiShapeL:
-        if (item->sh.size() > 4 && !static_cast<class PolyLine*>(item)->closed()) {
-            delete item->sh.last();
-            item->sh.removeLast();
-            delete item->sh.last();
-            item->sh.removeLast();
+        if (item->handlers.size() > 4 && !static_cast<class PolyLine*>(item)->closed()) {
+            delete item->handlers.last();
+            item->handlers.removeLast();
+            delete item->handlers.last();
+            item->handlers.removeLast();
             item->redraw();
         }
     case GiShapeR:
