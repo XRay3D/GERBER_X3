@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QSettings>
@@ -29,6 +27,7 @@ public:
 
     void setScale(double s);
     double getScale();
+
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
@@ -57,5 +56,3 @@ protected:
 };
 
 #include <app.h>
-
-

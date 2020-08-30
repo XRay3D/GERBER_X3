@@ -10,6 +10,7 @@
 #include "layerdelegate.h"
 #include "project.h"
 #include "settings.h"
+#include "shheaders.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
 #include <QGraphicsScene>
@@ -18,10 +19,6 @@
 #include <QPainter>
 #include <QtWidgets>
 #include <gcode.h>
-#include <sh/shnode.h>
-#include <sh/shtext.h>
-#include <sh/shtextdialog.h>
-#include <ui_shtextdialog.h>
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)

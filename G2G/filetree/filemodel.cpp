@@ -7,8 +7,8 @@
 #include "foldernode.h"
 #include "gbrnode.h"
 #include "gcnode.h"
-#include "sh/shape.h"
-#include "sh/shnode.h"
+#include "shheaders.h"
+#include "shheaders.h"
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>

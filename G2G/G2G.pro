@@ -1,21 +1,14 @@
 QT += core gui opengl widgets printsupport concurrent
 
+TARGET = Getber2Gcode
+
+
 contains(QT_ARCH, i386) {
-    CONFIG(debug, debug|release){
-        message("32-bit debug")
-        TARGET = Getber2Gcode_x32d
-    }else{
-        message("32-bit")
-        TARGET = Getber2Gcode_x32
-    }
+    message("32-bit")
+    TARGET = $$TARGET"_x32"
 } else {
-    CONFIG(debug, debug|release){
-        message("64-bit debug")
-        TARGET = Getber2Gcode_x64d
-    }else{
-        message("64-bit")
-        TARGET = Getber2Gcode_x64
-    }
+    message("64-bit")
+    TARGET = $$TARGET"_x64"
 }
 
 TEMPLATE = app
@@ -36,6 +29,8 @@ CONFIG += c++17
 msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
+    TARGET = $$TARGET"_msvc"
+    message($$TARGET)
 }
 
 gcc* {
@@ -43,6 +38,14 @@ gcc* {
     win32 {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
+    TARGET = $$TARGET"_gcc"
+    message($$TARGET)
+}
+
+CONFIG(debug, debug|release){
+    message("debug")
+    TARGET = $$TARGET"_d"
+    message($$TARGET)
 }
 
 linux {
@@ -102,16 +105,6 @@ HEADERS += \
     project.h \
     settings.h \
     settingsdialog.h \
-    sh/arc.h \
-    sh/circle.h \
-    sh/constructor.h \
-    sh/pline.h \
-    sh/rectangle.h \
-    sh/shandler.h \
-    sh/shnode.h \
-    sh/shape.h \
-    sh/shtext.h \
-    sh/shtextdialog.h \
     splashscreen.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
@@ -160,16 +153,6 @@ SOURCES += \
     project.cpp \
     settings.cpp \
     settingsdialog.cpp \
-    sh/arc.cpp \
-    sh/circle.cpp \
-    sh/constructor.cpp \
-    sh/pline.cpp \
-    sh/rectangle.cpp \
-    sh/shandler.cpp \
-    sh/shape.cpp \
-    sh/shnode.cpp \
-    sh/shtext.cpp \
-    sh/shtextdialog.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooleditdialog.cpp \
@@ -190,7 +173,6 @@ FORMS += \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
-    sh/shtextdialog.ui \
     tooldatabase/tooldatabase.ui \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
@@ -206,6 +188,7 @@ include(../file/file.pri)
 include(../gcode/gcode.pri)
 include(../gerber/gerber.pri)
 include(../graphicsview/graphicsview.pri)
+include(../shapes/shapes.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true

@@ -160,6 +160,9 @@ public:
     static double gridStep(double scale);
     static bool inch();
     static void setInch(bool val);
+    static QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = Qt::NoModifier);
+    static void setSnap(bool val) { m_snap = val; }
+    static bool snap() { return m_snap; }
 
 protected:
     /*G-Code*/
@@ -214,4 +217,5 @@ protected:
 
     /*Other*/
     inline static bool m_inch;
+    inline static bool m_snap;
 };

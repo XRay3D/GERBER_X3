@@ -3,6 +3,7 @@
 
 #include "settings.h"
 #include <cmath>
+#include <graphicsView.h>
 
 #ifndef M_PI
 #define M_PI (3.1415926535897932384626433832795)
@@ -57,3 +58,15 @@ int GlobalSettings::mkrZeroPos() { return m_mrkZeroPos; }
 double GlobalSettings::gridStep(double scale) { return m_inch ? pow(10.0, ceil(log10(30 / scale))) * .254 : pow(10.0, ceil(log10(8.0 / scale))); }
 bool GlobalSettings::inch() { return m_inch; }
 void GlobalSettings::setInch(bool val) { m_inch = val; }
+
+QPointF GlobalSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
+{
+    if (mod & Qt::ALT || m_snap) {
+        const double gs = GlobalSettings::gridStep(App::graphicsView()->getScale());
+        QPointF px(pt / gs);
+        px.setX(gs * round(px.x()));
+        px.setY(gs * round(px.y()));
+        return px;
+    }
+    return pt;
+}

@@ -3,8 +3,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "project.h"
+#include "abstractfile.h"
 #include "mainwindow.h"
 #include "settings.h"
+#include "shheaders.h"
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -510,12 +512,6 @@ QDataStream& operator<<(QDataStream& stream, const QSharedPointer<Shapes::Shape>
     stream << *sh;
     return stream;
 }
-
-#include "sh/arc.h"
-#include "sh/circle.h"
-#include "sh/pline.h"
-#include "sh/rectangle.h"
-#include "sh/shtext.h"
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<Shapes::Shape>& sh)
 {

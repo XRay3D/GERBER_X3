@@ -16,8 +16,8 @@
 #include <mainwindow.h>
 #include <settings.h>
 
-#include <sh/circle.h>
-#include <sh/constructor.h>
+#include "shheaders.h"
+#include "shheaders.h"
 
 #include <forms/thermal/thermalmodel.h>
 #include <forms/thermal/thermalpreviewitem.h>
@@ -223,7 +223,7 @@ double GraphicsView::scaleFactor()
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
-    if (event->modifiers() & Qt::AltModifier || Shapes::Constructor::snap()) {
+    if (event->modifiers() & Qt::AltModifier || GlobalSettings::snap()) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         const double gs = GlobalSettings::gridStep(matrix().m11());
 #else

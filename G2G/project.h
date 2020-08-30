@@ -1,11 +1,10 @@
 #pragma once
 
-#include "sh/shape.h"
+#include <QFile>
 #include <QMap>
 #include <QMutex>
 #include <QObject>
 #include <QSemaphore>
-#include <abstractfile.h>
 #include <myclipper.h>
 
 using namespace ClipperLib;
@@ -16,6 +15,11 @@ enum FileVersion {
     G2G_Ver_3,
     G2G_Ver_4,
 };
+
+class AbstractFile;
+namespace Shapes {
+class Shape;
+}
 
 class Project : public QObject {
     Q_OBJECT

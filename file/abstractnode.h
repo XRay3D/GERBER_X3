@@ -11,6 +11,7 @@ class TreeView;
 namespace Shapes {
 class Shape;
 }
+class QMenu;
 
 class AbstractNode {
 public:

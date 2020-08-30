@@ -14,6 +14,7 @@
 #include "gi/bridgeitem.h"
 #include "project.h"
 #include "settingsdialog.h"
+#include "shheaders.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
@@ -28,7 +29,6 @@
 #include <gbrnode.h>
 #include <gbrparser.h>
 #include <gcode.h>
-#include <sh/constructor.h>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -345,7 +345,7 @@ void MainWindow::createActionsService()
 
     serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { Shapes::Constructor::setSnap(checked); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { GlobalSettings::setSnap(checked); }));
     action->setCheckable(true);
 }
 
@@ -626,7 +626,7 @@ void MainWindow::selectAll()
     }
 }
 
-void MainWindow::redo() {}
+void MainWindow::redo() { }
 
 void MainWindow::printDialog()
 {

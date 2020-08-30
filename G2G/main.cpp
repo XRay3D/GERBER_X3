@@ -33,8 +33,6 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
 
-    App stHolder;
-
     app.setApplicationName("G2G");
     app.setOrganizationName(VER_COMPANYNAME_STR);
     app.setApplicationVersion(VER_PRODUCTVERSION_STR);
