@@ -874,32 +874,32 @@ Public License instead of this License.  But first, please read
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="226"/>
+        <location filename="../forms/drillform/drillform.cpp" line="227"/>
         <source>, drill Ø%1mm</source>
         <translation>, отверстие Ø%1мм</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="266"/>
+        <location filename="../forms/drillform/drillform.cpp" line="267"/>
         <source>Tool Ø%1mm</source>
         <translation>Ø%1мм</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="344"/>
+        <location filename="../forms/drillform/drillform.cpp" line="345"/>
         <source>No data to process.</source>
         <translation>Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="617"/>
+        <location filename="../forms/drillform/drillform.cpp" line="618"/>
         <source>&amp;Select Tool</source>
         <translation>&amp;Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="641"/>
+        <location filename="../forms/drillform/drillform.cpp" line="642"/>
         <source>&quot; not suitable for T</source>
         <translation>&quot; не подходит для Т</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="655"/>
+        <location filename="../forms/drillform/drillform.cpp" line="656"/>
         <source>&amp;Remove Tool</source>
         <translation>&amp;Убрать инструмент</translation>
     </message>
@@ -934,6 +934,24 @@ Public License instead of this License.  But first, please read
     <message>
         <source>Top|Bottom</source>
         <translation type="vanished">Верх|Низ</translation>
+    </message>
+</context>
+<context>
+    <name>Excellon::Node</name>
+    <message>
+        <location filename="../../excellon/exnode.cpp" line="99"/>
+        <source>&amp;Hide other</source>
+        <translation>&amp;Скрыть другие</translation>
+    </message>
+    <message>
+        <location filename="../../excellon/exnode.cpp" line="101"/>
+        <source>&amp;Edit Format</source>
+        <translation>&amp;Редактировать формат</translation>
+    </message>
+    <message>
+        <location filename="../../excellon/exnode.cpp" line="109"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Закрыть</translation>
     </message>
 </context>
 <context>
@@ -1012,19 +1030,16 @@ Public License instead of this License.  But first, please read
 <context>
     <name>ExcellonNode</name>
     <message>
-        <location filename="../../excellon/exnode.cpp" line="98"/>
         <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
+        <translation type="vanished">&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../excellon/exnode.cpp" line="100"/>
         <source>&amp;Edit Format</source>
-        <translation>&amp;Редактировать формат</translation>
+        <translation type="vanished">&amp;Редактировать формат</translation>
     </message>
     <message>
-        <location filename="../../excellon/exnode.cpp" line="108"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
+        <translation type="vanished">&amp;Закрыть</translation>
     </message>
 </context>
 <context>
@@ -1046,21 +1061,25 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../filetree/filemodel.cpp" line="25"/>
-        <source>Special</source>
-        <translation>Специальный</translation>
+        <source>Shapes</source>
+        <translation>Фигуры</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="148"/>
+        <source>Special</source>
+        <translation type="vanished">Специальный</translation>
+    </message>
+    <message>
+        <location filename="../filetree/filemodel.cpp" line="135"/>
         <source>Name</source>
         <translation>Название</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="150"/>
+        <location filename="../filetree/filemodel.cpp" line="137"/>
         <source>Side</source>
         <translation>Сторона</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="152"/>
+        <location filename="../filetree/filemodel.cpp" line="139"/>
         <source>C</source>
         <translation>ссс</translation>
     </message>
@@ -1068,12 +1087,12 @@ Public License instead of this License.  But first, please read
 <context>
     <name>FormsUtil</name>
     <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="70"/>
+        <location filename="../forms/formsutil/formsutil.cpp" line="71"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="70"/>
+        <location filename="../forms/formsutil/formsutil.cpp" line="71"/>
         <source>The tool doesn`t fit in the Working items!</source>
         <translation>Инструмент не вписывается в рабочие элементы!</translation>
     </message>
@@ -1258,6 +1277,43 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
+    <name>Gerber::Node</name>
+    <message>
+        <source>Top|Bottom</source>
+        <translation type="vanished">Верх|Низ</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="168"/>
+        <source>&amp;Hide other</source>
+        <translation>&amp;Скрыть другие</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="175"/>
+        <source>&amp;Aperture paths</source>
+        <translation>Пути &amp;апертур</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="184"/>
+        <source>&amp;Components</source>
+        <translation>Компоненты</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="193"/>
+        <source>&amp;Normal</source>
+        <translation>Нормальный вид</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="202"/>
+        <source>&amp;Show source</source>
+        <translation>&amp;Показать источник</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="216"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Закрыть</translation>
+    </message>
+</context>
+<context>
     <name>Gerber::Parser</name>
     <message>
         <location filename="../../gerber/gbrparser.cpp" line="428"/>
@@ -1278,43 +1334,6 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
-    <name>Gerber::Node</name>
-    <message>
-        <source>Top|Bottom</source>
-        <translation type="vanished">Верх|Низ</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="165"/>
-        <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="172"/>
-        <source>&amp;Aperture paths</source>
-        <translation>Пути &amp;апертур</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="181"/>
-        <source>&amp;Components</source>
-        <translation>Компоненты</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="190"/>
-        <source>&amp;Normal</source>
-        <translation>Нормальный вид</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="199"/>
-        <source>&amp;Show source</source>
-        <translation>&amp;Показать источник</translation>
-    </message>
-    <message>
-        <location filename="../../gerber/gbrnode.cpp" line="213"/>
-        <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
-    </message>
-</context>
-<context>
     <name>LayerDelegate</name>
     <message>
         <source>Top</source>
@@ -1325,9 +1344,8 @@ Public License instead of this License.  But first, please read
         <translation type="vanished">Низ</translation>
     </message>
     <message>
-        <location filename="../filetree/layerdelegate.cpp" line="20"/>
         <source>Top|Bottom</source>
-        <translation>Верх|Низ</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
 </context>
 <context>
@@ -1424,7 +1442,7 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="243"/>
-        <location filename="../mainwindow.cpp" line="892"/>
+        <location filename="../mainwindow.cpp" line="906"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation>&amp;Закрыть проект &quot;%1&quot;</translation>
     </message>
@@ -1544,7 +1562,17 @@ Public License instead of this License.  But first, please read
         <translation>Увеличить выбранное</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="567"/>
+        <location filename="../mainwindow.cpp" line="496"/>
+        <source>Arc</source>
+        <translation>Дуга</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="503"/>
+        <source>Text</source>
+        <translation>Текст</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="581"/>
         <source>Pin_</source>
         <translation>Булавка</translation>
     </message>
@@ -1633,22 +1661,22 @@ Public License instead of this License.  But first, please read
         <translation>Линия</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="524"/>
+        <location filename="../mainwindow.cpp" line="538"/>
         <source>Union</source>
         <translation>Объединение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="525"/>
+        <location filename="../mainwindow.cpp" line="539"/>
         <source>Difference</source>
         <translation>Разница</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="526"/>
+        <location filename="../mainwindow.cpp" line="540"/>
         <source>Exclusion</source>
         <translation>Исключение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="527"/>
+        <location filename="../mainwindow.cpp" line="541"/>
         <source>Intersection</source>
         <translation>Пересечение</translation>
     </message>
@@ -1668,8 +1696,8 @@ Public License instead of this License.  But first, please read
         <translation>Привязка к сетке</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="550"/>
-        <location filename="../mainwindow.cpp" line="553"/>
+        <location filename="../mainwindow.cpp" line="564"/>
+        <location filename="../mainwindow.cpp" line="567"/>
         <source>Set Depth</source>
         <translation>Установить глубину</translation>
     </message>
@@ -1678,13 +1706,13 @@ Public License instead of this License.  But first, please read
         <translation type="vanished">Булавки (</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="659"/>
+        <location filename="../mainwindow.cpp" line="673"/>
         <source>&amp;Create path for Pins</source>
         <translation>&amp;Создать УП для булавок</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="660"/>
-        <location filename="../mainwindow.cpp" line="667"/>
+        <location filename="../mainwindow.cpp" line="674"/>
+        <location filename="../mainwindow.cpp" line="681"/>
         <source>Fixed</source>
         <translation>Фиксация</translation>
     </message>
@@ -1697,61 +1725,61 @@ Public License instead of this License.  But first, please read
         <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="757"/>
-        <location filename="../mainwindow.cpp" line="786"/>
+        <location filename="../mainwindow.cpp" line="771"/>
+        <location filename="../mainwindow.cpp" line="800"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="759"/>
+        <location filename="../mainwindow.cpp" line="773"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation>Любой (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="786"/>
+        <location filename="../mainwindow.cpp" line="800"/>
         <source>Project (*.g2g)</source>
         <translation>Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="800"/>
+        <location filename="../mainwindow.cpp" line="814"/>
         <source>Do you want to close this project?</source>
         <translation>Закрыть этот проект?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="800"/>
-        <location filename="../mainwindow.cpp" line="806"/>
-        <location filename="../mainwindow.cpp" line="843"/>
-        <location filename="../mainwindow.cpp" line="864"/>
-        <location filename="../mainwindow.cpp" line="879"/>
+        <location filename="../mainwindow.cpp" line="814"/>
+        <location filename="../mainwindow.cpp" line="820"/>
+        <location filename="../mainwindow.cpp" line="857"/>
+        <location filename="../mainwindow.cpp" line="878"/>
+        <location filename="../mainwindow.cpp" line="893"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="806"/>
+        <location filename="../mainwindow.cpp" line="820"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>Документ был изменен.
 Вы хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="843"/>
+        <location filename="../mainwindow.cpp" line="857"/>
         <source>Do you want to reload file %1?</source>
         <translation>Перезагрузить файл %1?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="864"/>
+        <location filename="../mainwindow.cpp" line="878"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation>Не удается прочитать файл%1:
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="875"/>
+        <location filename="../mainwindow.cpp" line="889"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="880"/>
+        <location filename="../mainwindow.cpp" line="894"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Невозможно записать файл%1:
@@ -1762,22 +1790,22 @@ Do you want to save your changes?</source>
         <translation type="vanished">Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="931"/>
+        <location filename="../mainwindow.cpp" line="945"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="983"/>
+        <location filename="../mainwindow.cpp" line="997"/>
         <source>Icon size = 24</source>
         <translation>Размер иконки = 24</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="984"/>
+        <location filename="../mainwindow.cpp" line="998"/>
         <source>Icon size = 48</source>
         <translation>Размер иконки = 48</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="985"/>
+        <location filename="../mainwindow.cpp" line="999"/>
         <source>Icon size = 72</source>
         <translation>Размер иконки = 72</translation>
     </message>
@@ -2018,34 +2046,34 @@ tools:</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="30"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="28"/>
         <source>Pocket On</source>
         <translation>Карман поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="30"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="28"/>
         <source>Pocket Outside</source>
         <translation>Карман снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="30"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="28"/>
         <source>Pocket Inside</source>
         <translation>Карман внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="76"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="74"/>
         <location filename="../forms/pocketoffsetform.cpp" line="191"/>
         <source> - Infinity</source>
         <translation> - До заполнения</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="129"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="127"/>
         <location filename="../forms/pocketoffsetform.cpp" line="153"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="129"/>
+        <location filename="../forms/pocketoffsetform.cpp" line="127"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation>Задание из разных файлов!
@@ -2186,7 +2214,7 @@ Would you like to continue?</source>
     </message>
     <message>
         <location filename="../forms/pocketrasterform.cpp" line="100"/>
-        <location filename="../forms/pocketrasterform.cpp" line="124"/>
+        <location filename="../forms/pocketrasterform.cpp" line="126"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
@@ -2198,7 +2226,7 @@ Would you like to continue?</source>
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="124"/>
+        <location filename="../forms/pocketrasterform.cpp" line="126"/>
         <source>No selected items for working...</source>
         <translation>Нет выбранных элементов для работы...</translation>
     </message>
@@ -2311,35 +2339,35 @@ Would you like to continue?</source>
         <translation type="vanished">Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="121"/>
-        <location filename="../forms/profileform.cpp" line="145"/>
+        <location filename="../forms/profileform.cpp" line="120"/>
+        <location filename="../forms/profileform.cpp" line="146"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="121"/>
+        <location filename="../forms/profileform.cpp" line="120"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation>Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="145"/>
+        <location filename="../forms/profileform.cpp" line="146"/>
         <source>No selected items for working...</source>
         <translation>Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="27"/>
+        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile On</source>
         <translation>Профиль поверху</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="27"/>
+        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile Outside</source>
         <translation>Профиль снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="27"/>
+        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile Inside</source>
         <translation>Профиль внутри</translation>
     </message>
@@ -2347,19 +2375,19 @@ Would you like to continue?</source>
 <context>
     <name>Project</name>
     <message>
-        <location filename="../project.cpp" line="338"/>
+        <location filename="../project.cpp" line="359"/>
         <source>Untitled.g2g</source>
         <translation>Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="369"/>
-        <location filename="../project.cpp" line="379"/>
+        <location filename="../project.cpp" line="390"/>
+        <location filename="../project.cpp" line="400"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="369"/>
-        <location filename="../project.cpp" line="379"/>
+        <location filename="../project.cpp" line="390"/>
+        <location filename="../project.cpp" line="400"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
@@ -2368,7 +2396,7 @@ Would you like to continue?</source>
         <translation type="vanished">УП (*.tap)</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="412"/>
+        <location filename="../project.cpp" line="433"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>
@@ -2391,24 +2419,24 @@ Would you like to continue?</source>
         <translation>Инструмент%1, Ø%2 мм</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="27"/>
+        <location filename="../point.cpp" line="37"/>
         <source>There are no selected items to define the border.
 The old border will be used.</source>
         <translation>Нет выбранных элементов для определения границы.
 Будет использована предыдущая граница.</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="45"/>
+        <location filename="../point.cpp" line="55"/>
         <source>G-Code Home Point</source>
         <translation>Дом.УП</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="49"/>
+        <location filename="../point.cpp" line="59"/>
         <source>G-Code Zero Point</source>
         <translation>Ноль УП</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="387"/>
+        <location filename="../point.cpp" line="397"/>
         <source>Pin %1
 X %2:Y %3</source>
         <translation>Булавка %1
@@ -2435,7 +2463,9 @@ X %2:Y %3</translation>
         <translation>Плохой тепловой макрос!</translation>
     </message>
     <message>
+        <location filename="../filetree/layerdelegate.cpp" line="21"/>
         <location filename="../../file/abstractnode.cpp" line="12"/>
+        <location filename="../../shapes/shtextdialog.cpp" line="18"/>
         <source>Top|Bottom</source>
         <translation>Верх|Низ</translation>
     </message>
@@ -2495,30 +2525,65 @@ X %2:Y %3</translation>
         <translation>Путь G0</translation>
     </message>
     <message>
-        <location filename="../sh/shnode.cpp" line="106"/>
-        <location filename="../../gcode/gcnode.cpp" line="120"/>
+        <location filename="../../gcode/gcnode.cpp" line="129"/>
         <source>&amp;Delete Toolpath</source>
         <translation>&amp;Удалить УП</translation>
     </message>
     <message>
-        <location filename="../../file/abstractfile.cpp" line="72"/>
+        <location filename="../../file/abstractfile.h" line="59"/>
         <source>              Preparing: </source>
         <translation>           Подготовка: </translation>
     </message>
     <message>
-        <location filename="../../gcode/gcnode.cpp" line="118"/>
+        <location filename="../../gcode/gcnode.cpp" line="127"/>
         <source>&amp;Hide other</source>
         <translation>&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcnode.cpp" line="119"/>
+        <location filename="../../gcode/gcnode.cpp" line="128"/>
         <source>&amp;Save Toolpath</source>
         <translation>&amp;Сохранить УП</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcnode.cpp" line="121"/>
+        <location filename="../../gcode/gcnode.cpp" line="130"/>
         <source>&amp;Show source</source>
         <translation>&amp;Показать источник</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/sharc.cpp" line="79"/>
+        <source>Arc</source>
+        <translation>Дуга</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shcircle.cpp" line="54"/>
+        <source>Circle</source>
+        <translation>Круг</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shnode.cpp" line="114"/>
+        <source>&amp;Delete object &quot;%1&quot;</source>
+        <translation>&amp;Удалить фигуру &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shnode.cpp" line="116"/>
+        <source>&amp;Edit Text</source>
+        <translation>&amp;Редактировать текст</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shpolyline.cpp" line="44"/>
+        <source>Line</source>
+        <translation>Линия</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shrectangle.cpp" line="50"/>
+        <source>Rectangle</source>
+        <translation>Прямоугольник</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtext.cpp" line="161"/>
+        <location filename="../../shapes/shtext.cpp" line="178"/>
+        <source>Text</source>
+        <translation>Текст</translation>
     </message>
 </context>
 <context>
@@ -2810,6 +2875,54 @@ X %2:Y %3</translation>
         <location filename="../settingsdialog.ui" line="760"/>
         <source>Pins:</source>
         <translation>Булавки:</translation>
+    </message>
+</context>
+<context>
+    <name>ShTextDialog</name>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="20"/>
+        <source>Dialog</source>
+        <translation>Редактор </translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="36"/>
+        <source>Italic</source>
+        <translation>Курсив</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="49"/>
+        <source>Align</source>
+        <translation>Расположение</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="127"/>
+        <source>Height:</source>
+        <translation>Высота:</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="137"/>
+        <source>Font:</source>
+        <translation>Шрифт:</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="147"/>
+        <source>Angle:</source>
+        <translation>Угол:</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="157"/>
+        <source>Bold</source>
+        <translation>Жирный:</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="170"/>
+        <source> mm</source>
+        <translation> мм</translation>
+    </message>
+    <message>
+        <location filename="../../shapes/shtextdialog.ui" line="186"/>
+        <source> °</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -3280,6 +3393,7 @@ X %2:Y %3</translation>
     </message>
     <message>
         <location filename="../filetree/treeview.cpp" line="193"/>
+        <location filename="../filetree/treeview.cpp" line="199"/>
         <source>Really?</source>
         <translation>В самом деле?</translation>
     </message>
@@ -3287,6 +3401,16 @@ X %2:Y %3</translation>
         <location filename="../filetree/treeview.cpp" line="196"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation>Сохранить &amp;выбранные УП...</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="198"/>
+        <source>&amp;Delete All Objects</source>
+        <translation>Удалить &amp;все фигуры</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="210"/>
+        <source>&amp;Edit Selected Texts</source>
+        <translation>&amp;Редактировать выбранные &quot;тексты&quot;</translation>
     </message>
 </context>
 <context>
@@ -3352,12 +3476,12 @@ X %2:Y %3</translation>
     <message>
         <location filename="../forms/voronoiform.ui" line="159"/>
         <source>Frame Offset:</source>
-        <translation>Расширение</translation>
+        <translation>Отступ рамки:</translation>
     </message>
     <message>
         <location filename="../forms/voronoiform.ui" line="185"/>
         <source>Width:</source>
-        <translation>Ширина:</translation>
+        <translation>Расширение:</translation>
     </message>
     <message>
         <location filename="../forms/voronoiform.ui" line="231"/>

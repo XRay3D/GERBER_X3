@@ -3,10 +3,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcutils.h"
+#include "app.h"
+#include "project.h"
+#include "settings.h"
 #include <QFileInfo>
-#include <app.h>
-#include <project.h>
-#include <settings.h>
+#include <math.h>
 
 namespace GCode {
 

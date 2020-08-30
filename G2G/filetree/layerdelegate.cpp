@@ -15,10 +15,10 @@ LayerDelegate::LayerDelegate(QObject* parent)
 {
 }
 
-QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
+QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
 {
     auto* comboBox = new QComboBox(parent);
-    comboBox->addItems(tr("Top|Bottom").split('|'));
+    comboBox->addItems(QObject::tr("Top|Bottom").split('|'));
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
     connect(comboBox, QOverload<int>::of(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
@@ -130,7 +130,7 @@ TextDelegate::TextDelegate(QObject* parent)
 {
 }
 
-QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
 {
     auto* le = new QLineEdit(parent);
     //    le->setText(index.data(Qt::EditRole).toString());
