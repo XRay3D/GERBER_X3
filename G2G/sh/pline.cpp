@@ -6,18 +6,18 @@ namespace Shapes {
 PolyLine::PolyLine(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    sh = { new Handler(this /*, true*/), new Handler(this) };
-    sh.first()->setPos(pt1);
-    sh.last()->setPos(pt2);
+    sh = { new Handler(this, Handler::Center), new Handler(this), new Handler(this, Handler::Adder), new Handler(this) };
+    sh[1]->setPos(pt1);
+    sh[3]->setPos(pt2);
 
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
-
+    setZValue(-std::numeric_limits<double>::max());
     App::scene()->addItem(this);
-    App::scene()->addItem(sh.first());
-    App::scene()->addItem(sh.last());
+    for (auto var : sh) {
+        scene()->addItem(var);
+    }
 }
 
 PolyLine::~PolyLine() { qDebug(Q_FUNC_INFO); }
@@ -25,34 +25,76 @@ PolyLine::~PolyLine() { qDebug(Q_FUNC_INFO); }
 void PolyLine::redraw()
 {
     Path& path = m_paths.first();
-    path.resize(sh.size());
-    for (int i = 0, e = sh.size(); i < e; ++i) {
-        path[i] = toIntPoint(sh[i]->pos());
+    path.clear();
+    for (int i = 1, e = sh.size(); i < e; ++i) {
+        if (sh[i]->getHType() == Handler::Corner)
+            path.append(toIntPoint(sh[i]->pos()));
     }
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
+    sh[0]->QGraphicsItem::setPos(m_shape.boundingRect().center());
+    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
 
-QPointF PolyLine::calcPos(Handler* sh) const { return sh->pos(); }
+QPointF PolyLine::calcPos(Handler* handler)
+{
+    if (handler->getHType() == Handler::Adder) {
+        int idx = sh.indexOf(handler);
+        Handler* h;
+        {
+            Handler* h1 = sh[idx + 1];
+            sh.insert(idx + 1, h = new Handler(this, Handler::Adder));
+            h->QGraphicsItem::setPos(
+                QLineF(handler->pos(), h1->pos()).center());
+            scene()->addItem(h);
+        }
+        {
+            Handler* h1 = sh[idx];
+            sh.insert(idx, h = new Handler(this, Handler::Adder));
+            h->QGraphicsItem::setPos(
+                QLineF(handler->pos(), h1->pos()).center());
+            scene()->addItem(h);
+        }
+        handler->setHType(Handler::Corner);
+    } else {
+        int idx = sh.indexOf(handler);
+        if (handler != sh[1]) {
+            sh[idx - 1]->QGraphicsItem::setPos(
+                QLineF(handler->pos(), sh[idx - 2]->pos()).center());
+        }
+        if (handler != sh.last()) {
+            sh[idx + 1]->QGraphicsItem::setPos(
+                QLineF(handler->pos(), sh[idx + 2]->pos()).center());
+        }
+    }
+    return handler->pos();
+}
 
 void PolyLine::setPt(const QPointF& pt)
 {
-    if (sh.last()->pos() == pt)
-        return;
-    sh.last()->setPos(pt);
+    sh[sh.size() - 2]->QGraphicsItem::setPos(QLineF(sh[sh.size() - 3]->pos(), pt).center());
+    sh.last()->Handler::setPos(pt);
     redraw();
 }
 
 void PolyLine::addPt(const QPointF& pt)
 {
+    Handler* h1 = sh.last();
+    Handler* h2;
+    sh.append(h2 = new Handler(this, Handler::Adder));
+    sh.last()->QGraphicsItem::setPos(pt);
+
     sh.append(new Handler(this));
-    sh.last()->setPos(pt);
-    App::scene()->addItem(sh.last());
+    sh.last()->QGraphicsItem::setPos(pt);
+    h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
+    scene()->addItem(h2);
+    scene()->addItem(sh.last());
     redraw();
 }
 
-bool PolyLine::closed() { return sh.first()->pos() == sh.last()->pos(); }
+bool PolyLine::closed() { return sh[1]->pos() == sh.last()->pos(); }
+
 }

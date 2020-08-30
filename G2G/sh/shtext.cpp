@@ -18,18 +18,23 @@ Text::Text(QPointF pt1)
     , handleAlign(handleAlign_)
 {
     m_paths.resize(1);
-    sh = { new Handler(this, true) };
+    sh = { new Handler(this, Handler::Center) };
     sh.first()->setPos(pt1);
 
     if (font_.isEmpty()) {
         QSettings s;
         s.beginGroup("Shapes::Text");
-        font = font_ = s.value("font").toString();
-        m_side = side_ = static_cast<Side>(s.value("side").toInt());
-        angle = angle_ = s.value("angle").toDouble();
-        height = height_ = s.value("height").toDouble();
-        handleAlign = handleAlign_ = s.value("handleAlign").toInt();
+        font_ = s.value("font").toString();
+        side_ = static_cast<Side>(s.value("side").toInt());
+        angle_ = s.value("angle").toDouble();
+        height_ = s.value("height").toDouble();
+        handleAlign_ = s.value("handleAlign").toInt();
     }
+    font = font_;
+    m_side = side_;
+    angle = angle_;
+    height = height_;
+    handleAlign = handleAlign_;
 
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
@@ -135,7 +140,7 @@ void Text::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Text::calcPos(Handler* sh) const { return sh->pos(); }
+QPointF Text::calcPos(Handler* sh) { return sh->pos(); }
 
 void Text::write(QDataStream& stream) const
 {

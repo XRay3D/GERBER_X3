@@ -11,7 +11,7 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     : m_radius(QLineF(center, pt).length())
 {
     m_paths.resize(1);
-    sh = { new Handler(this, true), new Handler(this), new Handler(this) };
+    sh = { new Handler(this, Handler::Center), new Handler(this), new Handler(this) };
     sh[Center]->setPos(center);
     sh[Point1]->setPos(pt);
     sh[Point2]->setPos(pt2);
@@ -26,7 +26,6 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     App::scene()->addItem(sh[Point1]);
     App::scene()->addItem(sh[Point2]);
 }
-
 
 Arc::~Arc() { }
 
@@ -76,7 +75,7 @@ void Arc::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Arc::calcPos(Handler* sh_) const
+QPointF Arc::calcPos(Handler* sh_)
 {
     QLineF l(sh[Center]->pos(), sh_->pos());
     m_radius = l.length();
