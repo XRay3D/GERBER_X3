@@ -1,7 +1,6 @@
 #pragma once
 
 #include "shape.h"
-#include <QIcon>
 
 namespace Shapes {
 class Circle final : public Shape {
@@ -14,9 +13,8 @@ public:
     int type() const override { return GiShapeC; }
     void redraw() override;
     // Shape interface
-    QString name() const override { return QObject::tr("Circle"); }
-    QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); };
-    QPointF calcPos(Handler* sh) override;
+    QString name() const override;
+    QIcon icon() const override;
 
     void setPt(const QPointF& pt);
     double radius() const;
@@ -31,7 +29,8 @@ private:
 
 protected:
     // Shape interface
-    void write(QDataStream& stream) const override { }
-    void read(QDataStream& stream) override { }
+    void write(QDataStream& /*stream*/) const override { }
+    void read(QDataStream& /*stream*/) override { }
+    QPointF calcPos(Handler* sh) override;
 };
 }

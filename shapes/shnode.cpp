@@ -3,18 +3,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shnode.h"
-#include "project.h"
+#include "filetree/treeview.h"
 #include "shtext.h"
 #include "shtextdialog.h"
-
-#include <QDialog>
-#include <QFileInfo>
-#include <QIcon>
 #include <QMenu>
-#include <QTextBrowser>
-#include <qboxlayout.h>
 
-#include <filetree/treeview.h>
 namespace Shapes {
 Node::Node(int id)
     : AbstractNode(id, 1)
@@ -120,7 +113,7 @@ void Node::menu(QMenu* menu, TreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), tv, &TreeView::closeFile);
     if (shape()->type() == GiShapeT)
-        menu->addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Selected Texts"), [this, tv] {
+        menu->addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
             ShTextDialog dlg({ static_cast<Text*>(shape()) }, tv);
             dlg.exec();
         });
