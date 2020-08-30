@@ -43,6 +43,7 @@ void Rectangle::redraw()
         ReversePath(m_paths.first());
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(m_paths.first()));
+    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
