@@ -7,6 +7,7 @@
 #include "circle.h"
 #include "pline.h"
 #include "rectangle.h"
+#include "shandler.h"
 #include "shtext.h"
 #include <QAction>
 #include <project.h>
@@ -99,8 +100,15 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
     App::project()->addShape(item);
 
     switch (type) {
-    case GiShapeR:
     case GiShapeL:
+        if (item->sh.size() > 4 && !static_cast<class PolyLine*>(item)->closed()) {
+            delete item->sh.last();
+            item->sh.removeLast();
+            delete item->sh.last();
+            item->sh.removeLast();
+            item->redraw();
+        }
+    case GiShapeR:
     case GiShapeC:
     case GiShapeA:
     case GiShapeT:

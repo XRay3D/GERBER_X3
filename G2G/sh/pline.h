@@ -5,6 +5,8 @@
 
 namespace Shapes {
 class PolyLine final : public Shape {
+    int last = 1;
+
 public:
     explicit PolyLine(QPointF pt1, QPointF pt2);
     explicit PolyLine() { }
@@ -16,7 +18,7 @@ public:
     // Shape interface
     QString name() const override { return QObject::tr("Line"); }
     QIcon icon() const override { return QIcon::fromTheme("draw-line"); };
-    QPointF calcPos(Handler* sh) const override;
+    QPointF calcPos(Handler* handler) override;
 
     void setPt(const QPointF& pt);
     void addPt(const QPointF& pt);

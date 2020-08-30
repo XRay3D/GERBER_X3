@@ -24,7 +24,7 @@ public:
     QPainterPath shape() const override; // Shape interface
     QString name() const override { return QObject::tr("Text"); }
     QIcon icon() const override { return QIcon::fromTheme("draw-text"); };
-    QPointF calcPos(Handler* sh) const override;
+    QPointF calcPos(Handler* sh) override;
 
     enum {
         BotCenter = 1,

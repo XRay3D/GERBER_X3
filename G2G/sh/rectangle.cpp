@@ -9,7 +9,7 @@ namespace Shapes {
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    sh = { new Handler(this, true), new Handler(this), new Handler(this) };
+    sh = { new Handler(this, Handler::Center), new Handler(this), new Handler(this) };
     sh[Point1]->setPos(pt1);
     sh[Point2]->setPos(pt2);
 
@@ -23,8 +23,6 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
     App::scene()->addItem(sh[Point1]);
     App::scene()->addItem(sh[Point2]);
 }
-
-
 
 Rectangle::~Rectangle() { }
 
@@ -48,7 +46,7 @@ void Rectangle::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Rectangle::calcPos(Handler* sh) const { return sh->pos(); }
+QPointF Rectangle::calcPos(Handler* sh) { return sh->pos(); }
 
 void Rectangle::setPt(const QPointF& pt)
 {

@@ -38,7 +38,10 @@ void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     painter->drawPath(m_shape);
 }
 
-QRectF Shape::boundingRect() const { return m_shape.boundingRect(); }
+QRectF Shape::boundingRect() const
+{
+    return m_shape.boundingRect();
+}
 
 QPainterPath Shape::shape() const
 {
@@ -74,7 +77,7 @@ QDataStream& operator<<(QDataStream& stream, const Shape& sh)
     stream << sh.sh.size();
     for (Handler* item : sh.sh) {
         stream << item->pos();
-        stream << item->center;
+        stream << item->hType;
     }
     sh.write(stream);
     return stream;
@@ -90,10 +93,10 @@ QDataStream& operator>>(QDataStream& stream, Shape& sh)
     sh.sh.reserve(size);
     while (size--) {
         QPointF pos;
-        bool center;
+        Handler::Type hType;
         stream >> pos;
-        stream >> center;
-        Handler* item = new Handler(&sh, center);
+        stream >> hType;
+        Handler* item = new Handler(&sh, hType);
         item->QGraphicsItem::setPos(pos);
         item->setVisible(false);
         sh.sh.append(item);

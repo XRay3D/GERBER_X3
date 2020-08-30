@@ -5,9 +5,11 @@
 namespace Shapes {
 
 class Handler;
+class Constructor;
 
 class Shape : public GraphicsItem {
     friend class Handler;
+    friend class Constructor;
     friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
     friend QDataStream& operator>>(QDataStream& stream, Shape& sh);
     //    {
@@ -32,15 +34,14 @@ public:
 
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
-    virtual QPointF calcPos(Handler* sh) const = 0;
+    virtual QPointF calcPos(Handler* sh) = 0;
 
 private:
     mutable QPainterPath m_selectionShape;
 
 protected:
     mutable double m_scale = std::numeric_limits<double>::max();
-
-    QVector<Handler*> sh;
+    mutable QVector<Handler*> sh;
     Paths m_paths;
 
     // QGraphicsItem interface

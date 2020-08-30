@@ -10,7 +10,7 @@ Circle::Circle(QPointF center, QPointF pt)
     : m_radius(QLineF(center, pt).length())
 {
     m_paths.resize(1);
-    sh = { new Handler(this, true), new Handler(this) };
+    sh = { new Handler(this, Handler::Center), new Handler(this) };
     sh[Center]->setPos(center);
     sh[Point1]->setPos(pt);
 
@@ -23,8 +23,6 @@ Circle::Circle(QPointF center, QPointF pt)
     App::scene()->addItem(sh[Center]);
     App::scene()->addItem(sh[Point1]);
 }
-
-
 
 Circle::~Circle() { }
 
@@ -51,7 +49,7 @@ void Circle::redraw()
     setPos({ 0, 0 });
 }
 
-QPointF Circle::calcPos(Handler* sh) const { return sh->pos(); }
+QPointF Circle::calcPos(Handler* sh) { return sh->pos(); }
 
 void Circle::setPt(const QPointF& pt)
 {

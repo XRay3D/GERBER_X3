@@ -369,7 +369,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         //Ruler
         m_scene->setDrawRuller(true);
         m_scene->setCross2(mappedPos(event));
-        QGraphicsView::mousePressEvent(event);
+        Shapes::Constructor::finalizeShape();
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);

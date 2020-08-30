@@ -9,15 +9,16 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QLineF>
 #include <QStyleOptionGraphicsItem>
+#include <QTimer>
 #include <app.h>
 #include <graphicsview.h>
 #include <math.h>
 #include <scene.h>
 #include <settings.h>
 
-using namespace Shapes;
+namespace Shapes {
 
-void drawRuller(QPainter* painter, const QPointF& pt1)
+void drawPos(QPainter* painter, const QPointF& pt1)
 {
     QFont font;
     font.setPixelSize(16);
@@ -59,13 +60,30 @@ void drawRuller(QPainter* painter, const QPointF& pt1)
     }
 }
 
-Handler::Handler(Shape* shape, bool center)
+Handler::Handler(Shape* shape, Type type)
     : shape(shape)
-    , center(center)
+    , hType(type)
 {
     setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable);
-    setZValue(std::numeric_limits<double>::max() - 1);
+    switch (hType) {
+    case Adder:
+        setZValue(std::numeric_limits<double>::max());
+        break;
+    case Center:
+        setZValue(std::numeric_limits<double>::max());
+        break;
+    case Corner:
+        setZValue(std::numeric_limits<double>::max());
+        break;
+    }
+    hhh.append(this);
+}
+
+Handler::~Handler()
+{
+    hhh.removeOne(this);
+    qDebug("~Handler");
 }
 
 QRectF Handler::boundingRect() const { return rect(); }
@@ -73,27 +91,41 @@ QRectF Handler::boundingRect() const { return rect(); }
 void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     painter->setPen(Qt::NoPen);
-    QColor c(center ? Qt::red : Qt::green);
-    c.setAlpha(127);
+    QColor c;
+    switch (hType) {
+    case Adder:
+        c = QColor(Qt::yellow);
+        break;
+    case Center:
+        c = QColor(Qt::red);
+        break;
+    case Corner:
+        c = QColor(Qt::green);
+        break;
+    }
+    c.setAlpha(200);
     painter->setBrush(c);
     painter->drawEllipse(rect());
     if (option->state & QStyle::State_MouseOver) {
-        drawRuller(painter, pos());
+        drawPos(painter, pos());
     }
 }
 
-void Handler::setPos(QPointF pos)
+void Handler::setPos(const QPointF& pos)
 {
     QGraphicsItem::setPos(pos);
-    for (Handler* sh : shape->sh) { // прилипание
-        if (!sh->center && QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
+    for (Handler* sh : hhh) { // прилипание
+        if (sh->hType == Corner && sh->shape->isVisible() && QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
             QGraphicsItem::setPos(sh->pos());
             return;
         }
     }
-    pos = shape->calcPos(this);
-    QGraphicsItem::setPos(pos);
+    QGraphicsItem::setPos(shape->calcPos(this));
 }
+
+Handler::Type Handler::getHType() const { return hType; }
+
+void Handler::setHType(const Type& value) { hType = value; }
 
 QRectF Handler::rect() const
 {
@@ -105,6 +137,7 @@ QRectF Handler::rect() const
 
 void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
+    qDebug() << this;
     shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mouseMoveEvent(event);
     if (event->modifiers() & Qt::ALT || Constructor::snap()) {
@@ -114,29 +147,68 @@ void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         px.setY(gs * round(px.y()));
         setPos(px);
     }
-    if (center) {
+    if (hType == Center) {
         for (int i = 1, end = shape->sh.size(); i < end; ++i)
             shape->sh[i]->QGraphicsItem::setPos(pt[i] + pos() - pt.first());
         shape->redraw();
     } else {
-        for (Handler* sh : shape->sh) {
-            if (!sh->center && QLineF(sh->pos(), pos()).length() < App::graphicsView()->scaleFactor() * 20) { // прилипание
-                QGraphicsItem::setPos(sh->pos());
+        int idx = shape->sh.indexOf(this);
+        for (int i = 1; i < hhh.size(); ++i) {
+            Handler* h = hhh[i];
+            if (h != this
+                && h->hType == Corner
+                && h->shape->isVisible()
+                && QLineF(h->pos(), pos()).length() < App::graphicsView()->scaleFactor() * 20) { // прилипание
+                QGraphicsItem::setPos(h->pos());
+                if (shape->type() == GiShapeL) {
+                    /*  */ if (auto s = shape->sh.value(idx - 2); s
+                               && h->shape == s->shape
+                               && h == s
+                               && shape->sh.size() > 4) {
+                        delete shape->sh.takeAt(idx - 1);
+                        delete shape->sh.takeAt(idx - 2);
+                        break;
+                    } else if (auto s = shape->sh.value(idx + 2); s
+                               && h->shape == s->shape
+                               && h == s
+                               && shape->sh.size() > 4) {
+                        delete shape->sh.takeAt(idx + 1);
+                        delete shape->sh.takeAt(idx + 1);
+                        break;
+                    }
+                }
             }
         }
-        if (shape)
-            QGraphicsItem::setPos(shape->calcPos(this));
+        QGraphicsItem::setPos(shape->calcPos(this));
         shape->redraw();
     }
 }
 
-void Shapes::Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mousePressEvent(event);
-    if (center) {
+    if (hType == Center) {
         pt.clear();
         for (Handler* item : shape->sh)
             pt.append(item->pos());
     }
+}
+
+void Handler::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseDoubleClickEvent(event);
+    //    int idx = shape->sh.indexOf(this);
+    //    qDebug() << idx;
+    //    if (shape->type() == GiShapeL && hType == Corner) {
+    //        if (this != shape->sh.last() && this != shape->sh[1]) {
+    //            delete shape->sh.takeAt(idx + 1);
+    //            delete shape->sh.takeAt(idx - 1);
+    //            --idx;
+    //            hType = Adder;
+    //            QGraphicsItem::setPos(QLineF(shape->sh[idx - 1]->pos(), shape->sh[idx + 1]->pos()).center());
+    //            shape->redraw();
+    //        }
+    //    }
+}
 }
