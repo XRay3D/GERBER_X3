@@ -103,6 +103,7 @@ HEADERS += \
     openingdialog.h \
     point.h \
     project.h \
+    recent.h \
     settings.h \
     settingsdialog.h \
     splashscreen.h \
@@ -151,6 +152,7 @@ SOURCES += \
     mainwindow.cpp \
     point.cpp \
     project.cpp \
+    recent.cpp \
     settings.cpp \
     settingsdialog.cpp \
     tooldatabase/tool.cpp \

@@ -1,7 +1,6 @@
 #pragma once
 
-
-
+#include "recent.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
@@ -25,6 +24,7 @@ class Scene;
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
     friend void TreeView::on_doubleClicked(const QModelIndex&);
+    friend class Recent;
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -38,20 +38,17 @@ signals:
     void parseExcellonFile(const QString& filename);
 
 private:
-    enum { MaxRecentFiles = 20 };
     DockWidget* dockWidget = nullptr;
+    Recent recentFiles;
+    Recent recentProjects;
 
     Gerber::Parser* gerberParser;
     Excellon::Parser* excellonParser;
 
     QAction* m_closeAllAct = nullptr;
-    QAction* recentFileActs[MaxRecentFiles + 1];
-    QAction* recentFileSeparator = nullptr;
-    QAction* recentFileSubMenuAct = nullptr;
 
     QMenu* fileMenu = nullptr;
     QMenu* helpMenu = nullptr;
-    QMenu* recentMenu = nullptr;
     QMenu* serviceMenu = nullptr;
 
     QString lastPath;
@@ -70,8 +67,12 @@ private:
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
 
-    inline QString fileKey();
-    inline QString recentFilesKey();
+    //file
+
+    void open();
+    bool save();
+    bool saveAs();
+
     void about();
     bool closeProject();
     template <class T>
@@ -81,16 +82,13 @@ private:
     void fileProgress(const QString& fileName, int max, int value);
     void initWidgets();
     void onCustomContextMenuRequested(const QPoint& pos);
-    void openRecentFile();
-    void prependToRecentFiles(const QString& fileName);
+
     void printDialog();
     void readSettings();
     void redo();
     void resetToolPathsActions();
     void selectAll();
-    void setRecentFilesVisible(bool visible);
-    void updateRecentFileActions();
-    void writeRecentFiles(const QStringList& files, QSettings& settings);
+
     void writeSettings();
 
     // create actions
@@ -104,12 +102,8 @@ private:
     void createActionsGraphics();
 
     QString strippedName(const QString& fullFileName);
-    QStringList readRecentFiles(QSettings& settings);
-    bool hasRecentFiles();
+
     void newFile();
-    void open();
-    bool save();
-    bool saveAs();
     void documentWasModified();
     bool maybeSave();
 
@@ -158,5 +152,3 @@ protected:
             QTimer::singleShot(1, this, &QDockWidget::close);
     }
 };
-
-

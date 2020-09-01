@@ -32,9 +32,12 @@
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
+    , recentFiles(this, "recentFileList")
+    , recentProjects(this, "recentProjectsList")
     , gerberParser(new Gerber::Parser)
     , excellonParser(new Excellon::Parser)
     , m_project(new Project)
+
 {
     setupUi(this);
 
@@ -220,29 +223,10 @@ void MainWindow::createActionsFile()
     fileMenu->addSeparator();
     fileMenu->addSeparator();
 
-    recentMenu = fileMenu->addMenu(tr("Recent..."));
-    connect(recentMenu, &QMenu::aboutToShow, this, &MainWindow::updateRecentFileActions);
-    recentFileSubMenuAct = recentMenu->menuAction();
+    recentFiles.createMenu(fileMenu, tr("Recent Files..."));
+    recentProjects.createMenu(fileMenu, tr("Recent Projects..."));
 
-    for (int i = 0; i < MaxRecentFiles; ++i) {
-        recentFileActs[i] = recentMenu->addAction(QString(), this, &MainWindow::openRecentFile);
-        recentFileActs[i]->setVisible(false);
-    }
-    recentMenu->addSeparator();
-    recentFileActs[MaxRecentFiles] = recentMenu->addAction(tr("Clear Recent Files"), [this] {
-        QSettings settings;
-        writeRecentFiles({}, settings);
-        updateRecentFileActions();
-        setRecentFilesVisible(MainWindow::hasRecentFiles());
-    });
-
-    recentFileSeparator = fileMenu->addSeparator();
-    setRecentFilesVisible(MainWindow::hasRecentFiles());
-
-    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"),
-        tr("&Close project \"%1\""),
-        this,
-        &MainWindow::closeProject);
+    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
     m_closeAllAct->setShortcuts(QKeySequence::Close);
     m_closeAllAct->setStatusTip(tr("Close project"));
     // m_closeAllAct->setEnabled(false);
@@ -727,82 +711,6 @@ void MainWindow::resetToolPathsActions()
         action->setChecked(false);
 }
 
-void MainWindow::setRecentFilesVisible(bool visible)
-{
-    recentFileSubMenuAct->setVisible(visible);
-    recentFileSeparator->setVisible(visible);
-}
-
-QStringList MainWindow::readRecentFiles(QSettings& settings)
-{
-    QStringList result;
-    const int count = settings.beginReadArray(recentFilesKey());
-    for (int i = 0; i < count; ++i) {
-        settings.setArrayIndex(i);
-        result.append(settings.value(fileKey()).toString());
-    }
-    settings.endArray();
-    return result;
-}
-
-void MainWindow::writeRecentFiles(const QStringList& files, QSettings& settings)
-{
-    const int count = files.size();
-    settings.beginWriteArray(recentFilesKey());
-    for (int i = 0; i < count; ++i) {
-        settings.setArrayIndex(i);
-        settings.setValue(fileKey(), files.at(i));
-    }
-    settings.endArray();
-}
-
-bool MainWindow::hasRecentFiles()
-{
-    QSettings settings;
-    const int count = settings.beginReadArray(recentFilesKey());
-    settings.endArray();
-    return count > 0;
-}
-
-void MainWindow::open()
-{
-    QStringList files(QFileDialog::getOpenFileNames(
-        this,
-        tr("Open File"),
-        lastPath,
-        tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
-    if (files.isEmpty())
-        return;
-
-    if (files.filter(QRegExp(".+g2g$")).size()) {
-        loadFile(files.at(files.indexOf(QRegExp(".+g2g$"))));
-        return;
-    } else {
-        for (QString& fileName : files) {
-            loadFile(fileName);
-        }
-    }
-    //    QString name(QFileInfo(files.first()).path());
-    //    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
-}
-
-bool MainWindow::save()
-{
-    if (m_project->isUntitled())
-        return saveAs();
-    else
-        return saveFile(m_project->name());
-}
-
-bool MainWindow::saveAs()
-{
-    QString file(
-        QFileDialog::getSaveFileName(this, tr("Open File"), m_project->name(), tr("Project (*.g2g)")));
-    if (file.isEmpty())
-        return false;
-    return saveFile(file);
-}
-
 void MainWindow::documentWasModified()
 {
     setWindowModified(m_project->isModified());
@@ -902,7 +810,7 @@ void MainWindow::setCurrentFile(const QString& fileName)
     m_project->setModified(false);
     setWindowModified(false);
     if (!m_project->isUntitled())
-        prependToRecentFiles(m_project->name());
+        recentProjects.prependToRecentFiles(m_project->name());
     m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(m_project->name())));
     setWindowFilePath(m_project->name());
 }
@@ -914,48 +822,10 @@ void MainWindow::addFileToPro(AbstractFile* file)
         setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
     }
     m_project->addFile(file);
-    prependToRecentFiles(file->name());
+    recentFiles.prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
         Gerber::Node::repaintTimer()->start();
     graphicsView->zoomFit();
-}
-
-void MainWindow::prependToRecentFiles(const QString& fileName)
-{
-    QSettings settings;
-    const QStringList oldRecentFiles = readRecentFiles(settings);
-    QStringList recentFiles = oldRecentFiles;
-    recentFiles.removeAll(fileName);
-    recentFiles.prepend(fileName);
-    if (oldRecentFiles != recentFiles)
-        writeRecentFiles(recentFiles, settings);
-    setRecentFilesVisible(!recentFiles.isEmpty());
-    documentWasModified();
-}
-
-void MainWindow::updateRecentFileActions()
-{
-    QSettings settings;
-
-    const QStringList recentFiles = readRecentFiles(settings);
-    const int count = qMin(int(MaxRecentFiles), recentFiles.size());
-    int i = 0;
-    for (; i < count; ++i) {
-        const QString fileName = MainWindow::strippedName(recentFiles.at(i));
-        recentFileActs[i]->setText(tr("&%1 %2").arg(i + 1).arg(fileName));
-        recentFileActs[i]->setData(recentFiles.at(i));
-        recentFileActs[i]->setVisible(true);
-    }
-    for (; i < MaxRecentFiles; ++i)
-        recentFileActs[i]->setVisible(false);
-
-    recentFileActs[MaxRecentFiles]->setVisible(count);
-}
-
-void MainWindow::openRecentFile()
-{
-    if (const QAction* action = qobject_cast<const QAction*>(sender()))
-        loadFile(action->data().toString());
 }
 
 QString MainWindow::strippedName(const QString& fullFileName)
@@ -1000,14 +870,43 @@ QMenu* MainWindow::createPopupMenu()
     return menu;
 }
 
-QString MainWindow::fileKey()
+void MainWindow::open()
 {
-    return QStringLiteral("file");
+    QStringList files(QFileDialog::getOpenFileNames(
+        this,
+        tr("Open File"),
+        lastPath,
+        tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
+    if (files.isEmpty())
+        return;
+
+    if (files.filter(QRegExp(".+g2g$")).size()) {
+        loadFile(files.at(files.indexOf(QRegExp(".+g2g$"))));
+        return;
+    } else {
+        for (QString& fileName : files) {
+            loadFile(fileName);
+        }
+    }
+    //    QString name(QFileInfo(files.first()).path());
+    //    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
 }
 
-QString MainWindow::recentFilesKey()
+bool MainWindow::save()
 {
-    return QStringLiteral("recentFileList");
+    if (m_project->isUntitled())
+        return saveAs();
+    else
+        return saveFile(m_project->name());
+}
+
+bool MainWindow::saveAs()
+{
+    QString file(
+        QFileDialog::getSaveFileName(this, tr("Open File"), m_project->name(), tr("Project (*.g2g)")));
+    if (file.isEmpty())
+        return false;
+    return saveFile(file);
 }
 
 void MainWindow::showEvent(QShowEvent* event)
