@@ -237,7 +237,7 @@ typedef QVector<PolyNode*> PolyNodes;
 class PolyNode {
 public:
     PolyNode();
-    /*virtual*/ ~PolyNode() {}
+    /*virtual*/ ~PolyNode() { }
     Path Contour;
     PolyNodes Childs;
     PolyNode* Parent;
@@ -329,8 +329,8 @@ class ClipperBase {
 public:
     ClipperBase();
     virtual ~ClipperBase();
-    virtual bool AddPath(const Path& pg, PolyType PolyTyp, bool Closed);
-    bool AddPaths(const Paths& ppg, PolyType PolyTyp, bool Closed);
+    virtual bool AddPath(const Path& pg, PolyType PolyTyp, bool Closed = true);
+    bool AddPaths(const Paths& ppg, PolyType PolyTyp, bool Closed = true);
     virtual void Clear();
     IntRect GetBounds();
     bool PreserveCollinear() { return m_PreserveCollinear; }

@@ -60,6 +60,18 @@ void ItemGroup::setPen(const QPen& pen)
     }
 }
 
+void ItemGroup::setBrushColor(QColor* col)
+{
+    for (GraphicsItem* item : *this)
+        item->setBrushColor(*col);
+}
+
+void ItemGroup::setPenColor(QColor* col)
+{
+    for (GraphicsItem* item : *this)
+        item->setPenColor(*col);
+}
+
 void ItemGroup::setZValue(qreal z)
 {
     for (GraphicsItem* item : *this)

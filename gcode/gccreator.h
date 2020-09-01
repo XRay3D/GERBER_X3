@@ -10,7 +10,7 @@
 
 using namespace ClipperLib;
 
-void dbgPaths(Paths ps, const Tool& tool, const QString& fileName);
+void dbgPaths(Paths ps, const QString& fileName, const Tool& tool = { 1 });
 
 namespace GCode {
 

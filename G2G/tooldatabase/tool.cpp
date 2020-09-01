@@ -73,6 +73,22 @@ Tool::Tool()
 {
 }
 
+Tool::Tool(int)
+    : m_name(QObject::tr("Default"))
+    , m_type(EndMill)
+    , m_angle(0.0)
+    , m_diameter(0.0)
+    , m_feedRate(100.0)
+    , m_oneTurnCut(0.1)
+    , m_passDepth(2.0)
+    , m_plungeRate(600.0)
+    , m_spindleSpeed(12000.0)
+    , m_stepover(0.5)
+    , m_autoName(true)
+    , m_id(0)
+{
+}
+
 QString Tool::name() const { return m_name; }
 
 QString Tool::nameEnc() const
