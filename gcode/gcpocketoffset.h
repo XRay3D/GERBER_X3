@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "gccreator.h"
 
 namespace GCode {
@@ -18,5 +16,3 @@ protected:
     void create() override; // Creator interface
 };
 }
-
-

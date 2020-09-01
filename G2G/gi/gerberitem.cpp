@@ -16,7 +16,8 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     , m_paths(paths)
 {
     for (Path path : m_paths) {
-        path.append(path.first());
+        if (path.size())
+            path.append(path.first());
         m_shape.addPolygon(toQPolygon(path));
     }
     fillPolygon = m_shape.toFillPolygon();
@@ -24,7 +25,7 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     setFlag(ItemIsSelectable, true);
 }
 
-GerberItem::~GerberItem() {}
+GerberItem::~GerberItem() { }
 
 QRectF GerberItem::boundingRect() const { return m_shape.boundingRect(); }
 

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QDebug>
 #include <QJsonObject>
 #include <QMap>
@@ -15,6 +13,7 @@ class Tool {
 
 public:
     Tool();
+    Tool(int);
 
     enum Type {
         Drill,
@@ -129,5 +128,3 @@ public:
 };
 
 Q_DECLARE_METATYPE(Tool)
-
-
