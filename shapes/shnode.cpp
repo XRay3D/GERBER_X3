@@ -78,7 +78,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
-                return tbStrList[text->side()];
+                return sideStrList[text->side()];
             case Qt::EditRole:
                 return static_cast<bool>(text->side());
             default:

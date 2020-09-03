@@ -13,7 +13,6 @@ using namespace Gerber;
 
 static Format* crutch;
 
-
 File::File(const QString& fileName)
 {
     m_itemGroup.append({ new ItemGroup, new ItemGroup });
@@ -53,6 +52,8 @@ Paths File::merge() const
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
     return m_mergedPaths;
 }
+
+const QList<Component>& File::components() const { return m_components; }
 
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 {
