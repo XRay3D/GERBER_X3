@@ -69,7 +69,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         QElapsedTimer t;
         t.start();
 
-        static const QRegExp match(QStringLiteral("FS[L|T][A|I]X\\d{2}Y\\d{2}\\*"));
+        static const QRegExp match(QStringLiteral("FS[L|T|D]?[A|I]X\\d{2}Y\\d{2}\\*"));
         if (match.indexIn(gerberLines) == -1) {
             emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
             mutex.unlock();
