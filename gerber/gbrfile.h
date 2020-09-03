@@ -63,6 +63,7 @@ protected:
     // AbstractFile interface
 public:
     void createGi() override;
+    const QList<Component>& components() const;
 };
 }
 

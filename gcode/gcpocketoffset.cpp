@@ -226,29 +226,30 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
                 //App::scene()->addPolygon(toQPolygon(wp[i]), Qt::NoPen, Qt::red);
             }
             //            dbgPaths(wp, "wp2");
-            if (!wp.isEmpty()) {
-                GCode::GCodeParams gcp { {}, 0.0, GCode::Pocket };
-                //                m_returnPss.resize(wp.size());
-                //                for (int i = 0; i < wp.size(); ++i) {
-                //                    m_returnPss[i] = { std::move(wp[i]) };
-                //                }
-                auto file = new GCode::File({} /*m_returnPss*/, gcp, wp);
-                file->setFileName("Errors");
-                file->itemGroup()->setBrushColor(new QColor(Qt::red));
-                file->itemGroup()->setPen(QPen(QColor(Qt::red), 0.0));
-                //                file->itemGroup()->setBrush(QColor(Qt::red));
-                //                file->itemGroup()->setPenColor(new QColor(Qt::red));
-                //                QDialog d((QWidget*)parent());
-                //                d.setWindowFlag(Qt::WindowStaysOnTopHint);
-                //                d.setWindowModality(Qt::NonModal);
-                //                if (1 || !d.exec()) {
-                for (int i = 0; i < tools.size() - 1; ++i) {
-                    emit fileReady(nullptr);
-                }
-                emit fileReady(file);
-                return;
-                //                }
+            wpe.append(wp);
+        }
+        if (!wpe.isEmpty()) {
+            GCode::GCodeParams gcp { {}, 0.0, GCode::Pocket };
+            //                m_returnPss.resize(wp.size());
+            //                for (int i = 0; i < wp.size(); ++i) {
+            //                    m_returnPss[i] = { std::move(wp[i]) };
+            //                }
+            auto file = new GCode::File({} /*m_returnPss*/, gcp, wpe);
+            file->setFileName("Errors");
+            file->itemGroup()->setBrushColor(new QColor(Qt::red));
+            file->itemGroup()->setPen(QPen(QColor(Qt::red), 0.0));
+            //                file->itemGroup()->setBrush(QColor(Qt::red));
+            //                file->itemGroup()->setPenColor(new QColor(Qt::red));
+            //                QDialog d((QWidget*)parent());
+            //                d.setWindowFlag(Qt::WindowStaysOnTopHint);
+            //                d.setWindowModality(Qt::NonModal);
+            //                if (1 || !d.exec()) {
+            for (int i = 0; i < tools.size() - 1; ++i) {
+                emit fileReady(nullptr);
             }
+            emit fileReady(file);
+            return;
+            //                }
         }
     }
 

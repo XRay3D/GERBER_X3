@@ -9,7 +9,7 @@
 AbstractNode::AbstractNode(int id, int type)
     : m_id(id)
     , m_type(type)
-    , tbStrList(QObject::tr("Top|Bottom").split('|'))
+    , sideStrList(QObject::tr("Top|Bottom").split('|'))
 {
     //    if (MainWindow::closeAllAct()) {
     //        MainWindow::closeAllAct()->setEnabled(true);
