@@ -15,9 +15,11 @@
 #include "tooldatabase/tooleditdialog.h"
 #include <QCheckBox>
 #include <QDockWidget>
+#include <QFuture>
 #include <QMessageBox>
 #include <QPicture>
 #include <QTimer>
+#include <QtConcurrent>
 #include <gbrfile.h>
 #include <gcode.h>
 #include <graphicsview.h>
