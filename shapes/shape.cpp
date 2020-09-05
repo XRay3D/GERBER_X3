@@ -62,7 +62,7 @@ Paths Shape::paths() const { return m_paths; }
 
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
 {
-    if (change == GraphicsItemChange::ItemSelectedChange) {
+    if (change == ItemSelectedChange) {
         for (Handler* item : handlers)
             item->setVisible(value.toInt());
     }

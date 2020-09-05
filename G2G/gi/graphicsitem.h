@@ -22,6 +22,8 @@ enum GraphicsItemType {
     GiDrillPr, // DrillForm
     GiApetrurePr, // DrillForm
 
+    GiError,
+
     GiShapeC = QGraphicsItem::UserType + 100,
     GiShapeR,
     GiShapeL,

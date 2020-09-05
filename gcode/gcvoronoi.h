@@ -1,18 +1,17 @@
 #pragma once
 
-
-
 #include "gccreator.h"
 
 namespace GCode {
 class VoronoiCreator : public Creator {
 
 public:
-    VoronoiCreator() {}
+    VoronoiCreator() { }
     ~VoronoiCreator() override = default;
 
 protected:
     void create() override; // Creator interface
+    GCodeType type() override { return Voronoi; }
 
 private:
     struct Pair {
@@ -63,5 +62,3 @@ private:
     Paths toPath(const Pairs& pairs);
 };
 }
-
-

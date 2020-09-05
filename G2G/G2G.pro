@@ -79,6 +79,7 @@ HEADERS += \
     forms/drillform/drillmodel.h \
     forms/drillform/drillpreviewgi.h \
     forms/formsutil/depthform.h \
+    forms/formsutil/errordialog.h \
     forms/formsutil/formsutil.h \
     forms/formsutil/toolselectorform.h \
     forms/gcodepropertiesform.h \
@@ -95,6 +96,7 @@ HEADERS += \
     gi/bridgeitem.h \
     gi/componentitem.h \
     gi/drillitem.h \
+    gi/erroritem.h \
     gi/gerberitem.h \
     gi/graphicsitem.h \
     gi/itemgroup.h \
@@ -128,6 +130,7 @@ SOURCES += \
     forms/drillform/drillmodel.cpp \
     forms/drillform/drillpreviewgi.cpp \
     forms/formsutil/depthform.cpp \
+    forms/formsutil/errordialog.cpp \
     forms/formsutil/formsutil.cpp \
     forms/formsutil/toolselectorform.cpp \
     forms/gcodepropertiesform.cpp \
@@ -144,6 +147,7 @@ SOURCES += \
     gi/bridgeitem.cpp \
     gi/componentitem.cpp \
     gi/drillitem.cpp \
+    gi/erroritem.cpp \
     gi/gerberitem.cpp \
     gi/graphicsitem.cpp \
     gi/itemgroup.cpp \
@@ -167,6 +171,7 @@ FORMS += \
     aboutform.ui \
     colorselector.ui \
     forms/drillform/drillform.ui \
+    forms/formsutil/errordialog.ui \
     forms/gcodepropertiesform.ui \
     forms/pocketoffsetform.ui \
     forms/pocketrasterform.ui \

@@ -37,6 +37,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
     m_stepOver = tool.stepover() * uScale;
 
     groupedPaths(CopperPaths);
+
     if (m_gcp.side() == Inner) {
         m_dOffset *= -1;
         for (Paths paths : m_groupedPss) {
@@ -119,8 +120,6 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
         break;
     case Outer:
         groupedPaths(CutoffPaths, static_cast<cInt>(m_toolDiameter * 1.005));
-        if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
-            m_groupedPss.removeFirst();
         break;
     case Inner:
         groupedPaths(CopperPaths);
@@ -174,8 +173,6 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
         return;
     case Outer:
         groupedPaths(CutoffPaths, tools.first().getDiameter(depth) * 1.005 * uScale); // offset = 1mm
-        if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
-            m_groupedPss.removeFirst();
         break;
     case Inner:
         groupedPaths(CopperPaths);
@@ -193,67 +190,6 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
                 paths.remove(i--);
         }
     };
-
-    {
-        Paths wpe;
-        const double d = tools.last().getDiameter(depth) * uScale;
-        const double r = d * 0.5;
-        const double ta = d * d - M_PI * r * r;
-        for (int pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
-            const Paths& paths = m_groupedPss[pIdx];
-            Paths wp;
-            {
-                ClipperOffset offset(uScale);
-                offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(wp, -r);
-            }
-            if (GlobalSettings::gbrCleanPolygons())
-                CleanPolygons(wp, uScale * 0.0005);
-            {
-                ClipperOffset offset(uScale);
-                offset.AddPaths(wp, jtRound, etClosedPolygon);
-                offset.Execute(wp, r + 100);
-            }
-            {
-                Clipper clipper;
-                clipper.AddPaths(wp, ptClip);
-                clipper.AddPaths(paths, ptSubject);
-                clipper.Execute(ctDifference, wp, pftPositive);
-            }
-            for (int i = 0; i < wp.size(); ++i) {
-                if (ta > abs(Area(wp[i])))
-                    wp.remove(i--);
-                //App::scene()->addPolygon(toQPolygon(wp[i]), Qt::NoPen, Qt::red);
-            }
-            //            dbgPaths(wp, "wp2");
-            wpe.append(wp);
-        }
-        if (!wpe.isEmpty()) {
-            GCode::GCodeParams gcp { {}, 0.0, GCode::Pocket };
-            //                m_returnPss.resize(wp.size());
-            //                for (int i = 0; i < wp.size(); ++i) {
-            //                    m_returnPss[i] = { std::move(wp[i]) };
-            //                }
-            auto file = new GCode::File({} /*m_returnPss*/, gcp, wpe);
-            file->setFileName("Errors");
-            file->itemGroup()->setBrushColor(new QColor(Qt::red));
-            file->itemGroup()->setPen(QPen(QColor(Qt::red), 0.0));
-            //                file->itemGroup()->setBrush(QColor(Qt::red));
-            //                file->itemGroup()->setPenColor(new QColor(Qt::red));
-            //                QDialog d((QWidget*)parent());
-            //                d.setWindowFlag(Qt::WindowStaysOnTopHint);
-            //                d.setWindowModality(Qt::NonModal);
-            //                if (1 || !d.exec()) {
-            for (int i = 0; i < tools.size() - 1; ++i) {
-                emit fileReady(nullptr);
-            }
-            emit fileReady(file);
-            return;
-            //                }
-        }
-    }
-
-    qDebug() << tools;
 
     Pathss fillPaths;
     fillPaths.resize(tools.size());
