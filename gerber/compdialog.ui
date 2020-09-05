@@ -33,7 +33,7 @@
   <customwidget>
    <class>ComponentsView</class>
    <extends>QTreeView</extends>
-   <header>componentsview.h</header>
+   <header>compview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

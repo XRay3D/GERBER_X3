@@ -1,5 +1,5 @@
 #include "compdialog.h"
-#include "ui_componentsdialog.h"
+#include "ui_compdialog.h"
 
 namespace Gerber {
 
