@@ -1,9 +1,11 @@
 #include "errordialog.h"
+#include "ui_errordialog.h"
+
 #include "app.h"
 #include "gi/erroritem.h"
 #include "graphicsview.h"
+#include "mainwindow.h"
 #include "scene.h"
-#include "ui_errordialog.h"
 #include <QHeaderView>
 #include <QPushButton>
 #include <QTableView>
@@ -161,7 +163,7 @@ ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
-    setGeometry({ parent->mapToGlobal(parent->pos()), parent->size() });
+    setGeometry({ App::mainWindow()->dockWidget()->mapToGlobal({}), App::mainWindow()->dockWidget()->size() });
 }
 
 ErrorDialog::~ErrorDialog()
