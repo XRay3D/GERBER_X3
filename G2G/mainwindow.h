@@ -32,13 +32,14 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
+    const DockWidget* dockWidget() const { return m_dockWidget; }
 
 signals:
     void parseGerberFile(const QString& filename);
     void parseExcellonFile(const QString& filename);
 
 private:
-    DockWidget* dockWidget = nullptr;
+    DockWidget* m_dockWidget = nullptr;
     Recent recentFiles;
     Recent recentProjects;
 
