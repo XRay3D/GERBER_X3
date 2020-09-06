@@ -103,8 +103,8 @@ public:
         for (auto item : items)
             if (item->isSelected())
                 rect = rect.united(item->boundingRect());
-        App::graphicsView()->fitInView(rect, Qt::KeepAspectRatio);
-        App::graphicsView()->zoomOut();
+        App::graphicsView()->fitInView(rect);
+        //        App::graphicsView()->zoomOut();
     }
 };
 
@@ -135,18 +135,6 @@ protected slots:
         }
         static_cast<ErrorModel*>(model())->updateScene();
     }
-    void currentChanged(const QModelIndex& current, const QModelIndex& previous) override
-    {
-        QTableView::currentChanged(current, previous);
-        if (current.isValid()) {
-            auto item = current.data(Qt::UserRole).value<ErrorItem*>();
-            item->setSelected(true);
-        }
-        if (previous.isValid() && !selectionModel()->isSelected(previous)) {
-            previous.data(Qt::UserRole).value<ErrorItem*>()->setSelected(false);
-        }
-        static_cast<ErrorModel*>(model())->updateScene();
-    }
 
     // QWidget interface
 protected:
@@ -173,6 +161,7 @@ ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
+    setGeometry({ parent->mapToGlobal(parent->pos()), parent->size() });
 }
 
 ErrorDialog::~ErrorDialog()

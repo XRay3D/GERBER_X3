@@ -51,7 +51,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
 
     connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
     updateName();
 }

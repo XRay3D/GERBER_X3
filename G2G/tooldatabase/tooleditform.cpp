@@ -34,9 +34,9 @@ ToolEditForm::ToolEditForm(QWidget* parent)
         connect(pPsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
     }
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxFeedSpeeds, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(ui->cbxFeedSpeeds, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
 #else
-    connect(ui->cbxFeedSpeeds, QOverload<int/*, const QString&*/>::of(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(ui->cbxFeedSpeeds, qOverload<int/*, const QString&*/>(&QComboBox::currentIndexChanged), [this](int index) {
 #endif
         double tmpFeed = m_feed;
         switch (index) {

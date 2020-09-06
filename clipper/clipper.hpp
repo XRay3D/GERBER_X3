@@ -183,8 +183,7 @@ typedef QVector /*std::vector*/<Path> Paths;
 //    int id {};
 //};
 
-inline Path&
-operator<<(Path& poly, const IntPoint& p)
+inline Path& operator<<(Path& poly, const IntPoint& p)
 {
     poly.push_back(p);
     return poly;
