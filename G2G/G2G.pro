@@ -1,6 +1,6 @@
 QT += core gui opengl widgets printsupport concurrent
 
-TARGET = Getber2Gcode
+TARGET = GGEasy
 
 
 contains(QT_ARCH, i386) {

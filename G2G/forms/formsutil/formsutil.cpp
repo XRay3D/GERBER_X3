@@ -64,7 +64,7 @@ void FormsUtil::cancel()
 void FormsUtil::errorHandler(int)
 {
     stopProgress();
-    flikerTimerId = startTimer(16);
+    flikerTimerId = startTimer(60);
     if (ErrorDialog(m_tpc->items, this).exec()) {
         startProgress();
         m_tpc->proceed();

@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // (need for debug)
+    if constexpr (0) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
         QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
         QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
