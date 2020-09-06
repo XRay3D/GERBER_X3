@@ -485,32 +485,30 @@ bool Creator::createability(bool side)
     //    Paths wpe;
     const double d = m_gcp.tools.last().getDiameter(m_gcp.getDepth()) * uScale;
     const double r = d * 0.5;
-    const double ta = d * d - M_PI * r * r;
+    const double testArea = d * d - M_PI * r * r;
 
-    Paths paths;
+    Paths srcPaths;
     for (int pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
-        paths.append(m_groupedPss[pIdx]);
+        srcPaths.append(m_groupedPss[pIdx]);
     }
 
     Paths frPaths;
     {
         ClipperOffset offset(uScale);
-        offset.AddPaths(paths, jtRound, etClosedPolygon);
+        offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, -r);
-    }
-    if (GlobalSettings::gbrCleanPolygons())
-        CleanPolygons(frPaths, uScale * 0.0005);
-    {
-        ClipperOffset offset(uScale);
+        if (GlobalSettings::gbrCleanPolygons())
+            CleanPolygons(frPaths, uScale * 0.0005);
+        offset.Clear();
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, r + 100);
     }
-    if (!side)
-        ReversePaths(paths);
+    if (side == CopperPaths)
+        ReversePaths(srcPaths);
     {
         Clipper clipper;
         clipper.AddPaths(frPaths, ptClip);
-        clipper.AddPaths(paths, ptSubject);
+        clipper.AddPaths(srcPaths, ptSubject);
         clipper.Execute(ctDifference, frPaths, pftPositive);
     }
 
@@ -526,11 +524,37 @@ bool Creator::createability(bool side)
             clipper.AddPath(outer, ptSubject, true);
             clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         }
-        std::function<void(PolyNode*, double)> creator = [&creator /*recursive call*/, ta, this](PolyNode* node, double area) {
+
+        auto test = [&srcPaths, side](PolyNode* node) -> bool {
+            if (node->ChildCount() > 0) {
+                return true;
+            } else {
+                QSet<int> skip;
+                for (auto& point : node->Contour) {
+                    for (int i = 0; i < srcPaths.size(); ++i) {
+                        if (skip.contains(i))
+                            continue;
+                        const auto& path = srcPaths[i];
+                        if (int fl = PointInPolygon(point, path); side == CopperPaths || fl == -1) { ////////////////
+                            skip.insert(i);
+                            break;
+                        }
+                    }
+                }
+                if (skip.size() > 1) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const std::function<void(PolyNode*, double)> creator = [&creator, test, testArea, this](PolyNode* node, double area) {
             if (node && !node->IsHole()) { // init run
                 for (int i = 0; i < node->ChildCount(); ++i) {
-                    if (area = -Area(node->Childs[i]->Contour); ta < area) {
-                        creator(node->Childs[i], area);
+                    if (area = -Area(node->Childs[i]->Contour); testArea < area) {
+                        if (test(node->Childs[i])) {
+                            creator(node->Childs[i], area);
+                        }
                     }
                 }
             } else {
@@ -550,6 +574,7 @@ bool Creator::createability(bool side)
         };
         creator(polyTree.GetFirst(), 0);
     }
+
     if (!items.isEmpty())
         isContinueCalc();
 

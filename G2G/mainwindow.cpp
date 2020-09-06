@@ -104,10 +104,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (0) { // (need for debug)
-        QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
-        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+    if constexpr (1) { // (need for debug)
+        //        QTimer::singleShot(120, [this] { selectAll(); });
+        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Drill]->triggered(); });
+        //        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
 }

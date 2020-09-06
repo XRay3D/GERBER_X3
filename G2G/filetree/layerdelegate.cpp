@@ -21,7 +21,7 @@ QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     comboBox->addItems(QObject::tr("Top|Bottom").split('|'));
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
-    connect(comboBox, QOverload<int>::of(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
+    connect(comboBox, qOverload<int>(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
     return comboBox;
 }
 
@@ -61,7 +61,7 @@ QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     //            comboBox->addItems(IconPreviewArea::iconModeNames());
     //        else if (index.column() == 2)
     //            comboBox->addItems(IconPreviewArea::iconStateNames());
-    //connect(comboBox, QOverload<int>::of(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
+    //connect(comboBox, qOverload<int>(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
     connect(radioButton, &QRadioButton::clicked, this, &RadioDelegate::commitAndCloseEditor);
     return radioButton;
 }

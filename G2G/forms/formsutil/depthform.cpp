@@ -19,8 +19,8 @@ DepthForm::DepthForm(QWidget* parent)
     setupUi(this);
     retranslateUi(this);
 
-    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &DepthForm::valueChanged);
-    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DepthForm::valueChanged);
+    connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
         if (dsbx->isEnabled())
             m_value = value;
     });
