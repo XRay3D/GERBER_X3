@@ -13,15 +13,16 @@
 #include "tooldatabase/tooldatabase.h"
 #include <QCheckBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QSettings>
 #include <QTimer>
-#include <excellon.h>
-#include <gbraperture.h>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <graphicsview.h>
+#include "excellon.h"
+#include "gbraperture.h"
+#include "gbrfile.h"
+#include "gcode.h"
+#include "graphicsview.h"
 
 enum { IconSize = 24 };
 

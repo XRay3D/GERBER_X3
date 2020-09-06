@@ -12,19 +12,19 @@
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
-#include <errno.h>
+#include "errno.h"
 #include <filetree/filemodel.h>
-#include <gbraperture.h>
-#include <gcvoronoi.h>
+#include "gbraperture.h"
+#include "gcvoronoi.h"
 #include <gi/bridgeitem.h>
 #include <limits>
-#include <locale.h>
-#include <project.h>
-#include <scene.h>
-#include <settings.h>
+#include "locale.h"
+#include "project.h"
+#include "scene.h"
+#include "settings.h"
 #include <stdexcept>
-#include <stdio.h>
-#include <string.h>
+#include "stdio.h"
+#include "string.h"
 
 void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
 {

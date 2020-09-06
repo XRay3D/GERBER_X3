@@ -7,10 +7,10 @@
 #include "gbrnode.h"
 #include "project.h"
 #include <QFileInfo>
-#include <app.h>
-#include <exfile.h>
+#include "app.h"
+#include "exfile.h"
 #include <forms/drillform/drillform.h>
-#include <mainwindow.h>
+#include "mainwindow.h"
 
 namespace Excellon {
 Node::Node(int id)

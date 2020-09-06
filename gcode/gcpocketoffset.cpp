@@ -8,7 +8,7 @@
 #include "scene.h"
 #include <QDialog>
 #include <QElapsedTimer>
-#include <settings.h>
+#include "settings.h"
 
 namespace GCode {
 PocketCreator::PocketCreator()

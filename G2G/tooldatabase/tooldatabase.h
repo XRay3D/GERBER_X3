@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "tool.h"
 #include <QDialog>
 
@@ -16,7 +14,7 @@ class ToolDatabase : public QDialog {
 public:
     explicit ToolDatabase(
         QWidget* parent = nullptr,
-        QVector<Tool::Type> types = QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser });
+        QVector<Tool::Type> types = QVector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser });
 
     ~ToolDatabase() override;
 
@@ -32,5 +30,3 @@ private:
 protected:
     void keyPressEvent(QKeyEvent* evt) override;
 };
-
-

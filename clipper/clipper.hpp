@@ -57,7 +57,7 @@
 #include <queue>
 #include <set>
 #include <stdexcept>
-#include <stdint.h>
+#include "stdint.h"
 #include <vector>
 
 #include <QDataStream>

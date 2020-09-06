@@ -5,8 +5,9 @@
 #include "drillpreviewgi.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
-#include <exfile.h>
-#include <gbrfile.h>
+#include "exfile.h"
+#include "gbrfile.h"
+#include "gi/drillitem.h"
 
 extern Paths offset(const Path& /*path*/, double offset, bool fl = false);
 

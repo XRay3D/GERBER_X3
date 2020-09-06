@@ -1,10 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gch.h"
-
-#include <QDebug>
+#include <QRegularExpression>
 
 GCH::GCH(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
@@ -13,8 +11,6 @@ GCH::GCH(QTextDocument* parent)
 
 void GCH::highlightBlock(const QString& text)
 {
-    //qDebug() << text;
-
     QTextCharFormat myClassFormat;
     myClassFormat.setFontWeight(QFont::Bold);
     QRegularExpression expression("([GXYZFSM])([+-]?\\d+\\.?\\d*)");
@@ -24,7 +20,7 @@ void GCH::highlightBlock(const QString& text)
         QRegularExpressionMatch match = i.next();
         //qDebug() << match;
 
-        static const QVector<QChar> key{
+        static const QVector<QChar> key {
             'F',
             'G',
             'M',
@@ -33,7 +29,7 @@ void GCH::highlightBlock(const QString& text)
             'Y',
             'Z',
         };
-        static const QVector<Qt::GlobalColor> color{
+        static const QVector<Qt::GlobalColor> color {
             Qt::darkMagenta, // 'F',
             Qt::black, //       'G',
             Qt::darkYellow, //  'M',

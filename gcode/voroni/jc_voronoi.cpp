@@ -3,8 +3,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "jc_voronoi.h"
-#include <gccreator.h>
-#include <memory.h>
+#include "gccreator.h"
+#include "memory.h"
 
 // INTERNAL FUNCTIONS
 

@@ -1,13 +1,8 @@
 #pragma once
 
-#include <QFile>
 #include <QMap>
 #include <QMutex>
-#include <QObject>
-#include <QSemaphore>
-#include <myclipper.h>
-
-using namespace ClipperLib;
+#include <abstractfile.h>
 
 enum FileVersion {
     G2G_Ver_1 = 1,
@@ -16,10 +11,11 @@ enum FileVersion {
     G2G_Ver_4,
 };
 
-class AbstractFile;
 namespace Shapes {
 class Shape;
 }
+
+class QFile;
 
 class Project : public QObject {
     Q_OBJECT
@@ -136,7 +132,6 @@ private:
     QMap<int, QSharedPointer<AbstractFile>> m_files;
     QMap<int, QSharedPointer<Shapes::Shape>> m_shapes;
     QMutex m_mutex;
-    QSemaphore sem;
     QString m_fileName;
     QString m_name;
     bool m_isModified = false;
@@ -149,4 +144,4 @@ private:
 
     QRectF m_worckRect;
 };
-#include <app.h>
+#include "app.h"

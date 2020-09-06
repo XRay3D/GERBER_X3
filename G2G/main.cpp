@@ -2,26 +2,16 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QFile>
-#include <QGLWidget>
-#include <QLocale>
-#include <QOperatingSystemVersion>
-#include <QSettings>
-#include <QSharedMemory>
-#include <QSplashScreen>
-#include <QStandardPaths>
-#include <QSystemSemaphore>
-#include <QTranslator>
-
-#include "app.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "splashscreen.h"
 #include "version.h"
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QDebug>
+#include <QGLWidget>
+#include <QSettings>
+#include <QTranslator>
 
 void initIcon(const QString& path);
 void translation(QApplication* app);

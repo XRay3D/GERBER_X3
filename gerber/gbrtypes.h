@@ -3,8 +3,8 @@
 
 
 #include <QDebug>
-#include <datastream.h>
-#include <myclipper.h>
+#include "datastream.h"
+#include "myclipper.h"
 
 #define DEPRECATED
 

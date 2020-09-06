@@ -8,10 +8,10 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
-#include <mainwindow.h>
-#include <project.h>
-#include <scene.h>
-#include <settings.h>
+#include "mainwindow.h"
+#include "project.h"
+#include "scene.h"
+#include "settings.h"
 
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::boardThickness;

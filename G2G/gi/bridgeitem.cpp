@@ -9,11 +9,11 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <gcode.h>
-#include <graphicsview.h>
+#include "gcode.h"
+#include "graphicsview.h"
 #include <limits>
-#include <math.h>
-#include <scene.h>
+#include "math.h"
+#include "scene.h"
 
 BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
     : m_ptr(ptr)

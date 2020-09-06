@@ -4,7 +4,7 @@
 
 #include "graphicsitem.h"
 #include <QObject>
-#include <gcode.h>
+#include "gcode.h"
 
 class GraphicsView;
 

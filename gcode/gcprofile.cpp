@@ -7,7 +7,7 @@
 
 #include <gi/bridgeitem.h>
 
-#include <scene.h>
+#include "scene.h"
 
 namespace GCode {
 ProfileCreator::ProfileCreator()

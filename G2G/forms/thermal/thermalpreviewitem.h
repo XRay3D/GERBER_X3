@@ -4,8 +4,8 @@
 
 #include "gi/graphicsitem.h"
 #include "tooldatabase/tool.h"
-#include <gbrtypes.h>
-#include <myclipper.h>
+#include "gbrtypes.h"
+#include "myclipper.h"
 
 class ThermalNode;
 

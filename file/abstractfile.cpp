@@ -4,7 +4,7 @@
 #include "abstractfile.h"
 
 #include <QApplication>
-#include <splashscreen.h>
+#include "splashscreen.h"
 
 AbstractFile::AbstractFile()
     : m_itemGroup(1, new ItemGroup)

@@ -1,22 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "tooltreeview.h"
 #include "toolitem.h"
 
-#include <QAbstractItemView>
-#include <QApplication>
-#include <QDebug>
-#include <QDragEnterEvent>
-#include <QDragLeaveEvent>
-#include <QDragMoveEvent>
-#include <QDropEvent>
-#include <QFileDialog>
+#include <QFile>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QPainter>
-#include <QSettings>
+#include <QPushButton>
 
 ToolTreeView::ToolTreeView(QWidget* parent)
     : QTreeView(parent)
@@ -34,9 +25,9 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     setMinimumWidth(400);
     setIconSize({ 24, 24 });
 
-//    QFile brFile(":/QTreeView.qss");
-//    brFile.open(QFile::ReadOnly);
-//    setStyleSheet(brFile.readAll());
+    //    QFile brFile(":/QTreeView.qss");
+    //    brFile.open(QFile::ReadOnly);
+    //    setStyleSheet(brFile.readAll());
 
     int w = indentation();
     int h = rowHeight(m_model->index(0, 0, QModelIndex()));
@@ -62,7 +53,6 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     ssFile.open(QFile::ReadOnly);
     setStyleSheet(ssFile.readAll());
 }
-
 
 void ToolTreeView::newGroup()
 {

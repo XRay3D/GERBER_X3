@@ -1,11 +1,6 @@
 #pragma once
 
-#include "aperturepathitem.h"
-#include "componentitem.h"
-#include "drillitem.h"
-#include "gerberitem.h"
 #include "graphicsitem.h"
-#include "pathitem.h"
 
 class ItemGroup : public QList<GraphicsItem*> {
 public:
@@ -19,8 +14,8 @@ public:
     QPen pen() const { return m_pen; }
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
-    void setBrushColor(QColor *col);
-    void setPenColor(QColor *col);
+    void setBrushColor(QColor* col);
+    void setPenColor(QColor* col);
     void setZValue(qreal z);
 
 private:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "shape.h"
-#include <abstractfile.h>
+#include "abstractfile.h"
 
 class ShTextDialog;
 

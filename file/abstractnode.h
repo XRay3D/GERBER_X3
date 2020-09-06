@@ -3,8 +3,8 @@
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>
-#include <app.h>
-#include <project.h>
+#include "app.h"
+#include "project.h"
 
 class AbstractFile;
 class TreeView;

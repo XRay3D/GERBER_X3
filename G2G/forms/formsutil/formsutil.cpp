@@ -14,9 +14,10 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTimer>
-#include <qprogressdialog.h>
+#include "qprogressdialog.h"
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 

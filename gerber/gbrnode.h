@@ -2,7 +2,7 @@
 
 #include "abstractnode.h"
 #include <QObject>
-#include <gbrfile.h>
+#include "gbrfile.h"
 
 namespace Gerber {
 class Node : public QObject, public AbstractNode {

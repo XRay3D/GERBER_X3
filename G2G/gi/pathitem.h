@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "graphicsitem.h"
 
 namespace GCode {
@@ -26,5 +24,3 @@ private:
     void updateArrows();
 #endif
 };
-
-

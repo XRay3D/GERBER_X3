@@ -7,9 +7,9 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <gbrfile.h>
-#include <graphicsview.h>
-#include <myclipper.h>
+#include "gbrfile.h"
+#include "graphicsview.h"
+#include "myclipper.h"
 
 #include "forms/gcodepropertiesform.h"
 

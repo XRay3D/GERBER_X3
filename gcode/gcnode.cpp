@@ -11,11 +11,11 @@
 #include <QIcon>
 #include <QMenu>
 #include <QTextBrowser>
-#include <qboxlayout.h>
+#include "qboxlayout.h"
 
 #include <filetree/treeview.h>
 
-#include <settings.h>
+#include "settings.h"
 namespace GCode {
 Node::Node(int id)
     : AbstractNode(id)

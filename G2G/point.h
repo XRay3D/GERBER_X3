@@ -1,12 +1,7 @@
 #pragma once
 
-
-
 #include "scene.h"
-
-#include <QBrush>
 #include <QGraphicsItem>
-#include <QPen>
 
 bool updateRect();
 
@@ -87,5 +82,3 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     void updateRect(bool fl = false);
 };
-
-
