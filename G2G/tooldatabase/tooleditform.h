@@ -1,10 +1,7 @@
 #pragma once
 
-
-
+#include "doublespinbox.h"
 #include "tool.h"
-
-#include <QDoubleSpinBox>
 #include <QWidget>
 
 namespace Ui {
@@ -12,7 +9,6 @@ class ToolEditForm;
 }
 
 class ToolItem;
-class DoubleSpinBox;
 
 class ToolEditForm : public QWidget {
     Q_OBJECT
@@ -43,16 +39,16 @@ private:
     Ui::ToolEditForm* ui;
 
     struct State {
-        QMap<QDoubleSpinBox*, double> min;
-        QMap<QDoubleSpinBox*, double> max;
-        QMap<QDoubleSpinBox*, double> val;
-        void save(QDoubleSpinBox* dsbx)
+        QMap<DoubleSpinBox*, double> min;
+        QMap<DoubleSpinBox*, double> max;
+        QMap<DoubleSpinBox*, double> val;
+        void save(DoubleSpinBox* dsbx)
         {
             min[dsbx] = dsbx->minimum();
             max[dsbx] = dsbx->maximum();
             val[dsbx] = dsbx->value();
         }
-        void restore(QDoubleSpinBox* dsbx)
+        void restore(DoubleSpinBox* dsbx)
         {
             dsbx->setRange(min[dsbx], max[dsbx]);
             dsbx->setValue(val[dsbx]);
@@ -74,5 +70,3 @@ private:
     void setupToolWidgets(int type);
     QVector<DoubleSpinBox*> dsbx;
 };
-
-

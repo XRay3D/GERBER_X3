@@ -1,10 +1,6 @@
+#pragma once
 
-
-
-#include <QObject>
-#include <QRegularExpression>
 #include <QSyntaxHighlighter>
-#include <QTextCharFormat>
 
 class QTextDocument;
 
@@ -21,5 +17,3 @@ protected:
 
 private:
 };
-
-

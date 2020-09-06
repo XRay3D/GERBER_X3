@@ -4,8 +4,8 @@
 
 #include <QHeaderView>
 #include <QWidget>
-#include <gcode.h>
-#include <gcode.h>
+#include "gcode.h"
+#include "gcode.h"
 
 namespace Ui {
 class DrillForm;
@@ -102,6 +102,6 @@ private:
     bool checked(int index) const;
 };
 
-#include <app.h>
+#include "app.h"
 
 

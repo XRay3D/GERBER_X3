@@ -8,7 +8,7 @@
 #include <QIcon>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <scene.h>
+#include "scene.h"
 
 namespace Shapes {
 

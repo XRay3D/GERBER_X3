@@ -9,8 +9,8 @@
 #include <QSettings>
 #include <QtCore/QVariant>
 #include <QtWidgets>
-#include <doublespinbox.h>
-#include <settings.h>
+#include "doublespinbox.h"
+#include "settings.h"
 
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)

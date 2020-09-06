@@ -12,7 +12,7 @@
 #endif
 #include <QFuture>
 #include <QtConcurrent>
-#include <point.h>
+#include "point.h"
 
 namespace GCode {
 RasterCreator::RasterCreator()

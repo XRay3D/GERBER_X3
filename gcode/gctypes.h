@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QVariant>
-#include <datastream.h>
+#include <QVector>
+#include "datastream.h"
 #include <tooldatabase/tool.h>
 
 using UsedItems = QMap<QPair<int, int>, QVector<int>>;

@@ -1,17 +1,17 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "tool.h"
+#include "datastream.h"
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <qmath.h>
-//#include <QCryptographicHash>
-#include <QHash>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QtMath>
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 

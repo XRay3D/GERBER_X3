@@ -10,11 +10,11 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QSettings>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gbrfile.h"
+#include "gcode.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 #include <tooldatabase/tooleditdialog.h>
 
 enum {

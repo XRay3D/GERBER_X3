@@ -20,12 +20,12 @@
 #include <QPicture>
 #include <QTimer>
 #include <QtConcurrent>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <graphicsview.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gbrfile.h"
+#include "gcode.h"
+#include "graphicsview.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 
 enum { Size = 24 };
 

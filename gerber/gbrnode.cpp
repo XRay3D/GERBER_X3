@@ -13,8 +13,8 @@
 #include <QTextBrowser>
 #include <QTimer>
 #include <filetree/treeview.h>
-#include <qboxlayout.h>
-#include <scene.h>
+#include "qboxlayout.h"
+#include "scene.h"
 
 namespace Gerber {
 

@@ -4,8 +4,8 @@
 #include <QThread>
 #include <QVector>
 #include <QWidget>
-#include <abstractfile.h>
-#include <gcode.h>
+#include "abstractfile.h"
+#include "gcode.h"
 
 namespace GCode {
 class File;

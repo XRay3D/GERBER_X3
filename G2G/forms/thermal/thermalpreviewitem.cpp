@@ -5,7 +5,7 @@
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
-#include <gbrfile.h>
+#include "gbrfile.h"
 
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {

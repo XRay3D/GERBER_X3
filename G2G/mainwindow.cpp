@@ -4,6 +4,8 @@
 
 #include "mainwindow.h"
 #include "aboutform.h"
+#include "excellondialog.h"
+#include "exparser.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketoffsetform.h"
@@ -11,24 +13,24 @@
 #include "forms/profileform.h"
 #include "forms/thermal/thermalform.h"
 #include "forms/voronoiform.h"
+#include "gbrnode.h"
+#include "gbrparser.h"
+#include "gcode.h"
 #include "gi/bridgeitem.h"
+#include "gi/gerberitem.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QOperatingSystemVersion>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QProgressDialog>
 #include <QTableView>
 #include <QToolBar>
-#include <excellondialog.h>
-#include <exparser.h>
-#include <gbrnode.h>
-#include <gbrparser.h>
-#include <gcode.h>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -104,7 +106,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // (need for debug)
+    if constexpr (0) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
         QTimer::singleShot(150, [this] { toolpathActionList[GCode::Profile]->triggered(); });
         QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -913,4 +915,30 @@ void MainWindow::showEvent(QShowEvent* event)
 {
     //toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
+}
+
+//////////////////////////////////////////////////////
+/// \brief DockWidget::DockWidget
+/// \param parent
+///
+DockWidget::DockWidget(QWidget* parent)
+    : QDockWidget(parent)
+{
+    hide();
+    setVisible(false);
+}
+
+void DockWidget::closeEvent(QCloseEvent* event)
+{
+    delete widget();
+    event->accept();
+}
+
+void DockWidget::showEvent(QShowEvent* event)
+{
+    event->ignore();
+    //        close();
+    //        QDockWidget::showEvent(event);
+    if (widget() == nullptr)
+        QTimer::singleShot(1, this, &QDockWidget::close);
 }

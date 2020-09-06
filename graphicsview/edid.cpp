@@ -8,10 +8,10 @@
 #include <QScreen>
 
 #ifndef linux
-#include <windows.h>
+#include "windows.h"
 
 #include <Setupapi.h>
-#include <initguid.h>
+#include "initguid.h"
 #define NAME_SIZE 128
 #endif
 

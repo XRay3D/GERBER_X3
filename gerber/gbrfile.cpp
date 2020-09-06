@@ -3,12 +3,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gbrfile.h"
+#include "gi/aperturepathitem.h"
+#include "gi/componentitem.h"
+#include "gi/gerberitem.h"
+#include "gi/pathitem.h"
+#include "project.h"
+#include "settings.h"
 #include <QElapsedTimer>
 #include <QSemaphore>
 #include <QThread>
-#include <project.h>
-#include <settings.h>
-
 using namespace Gerber;
 
 static Format* crutch;

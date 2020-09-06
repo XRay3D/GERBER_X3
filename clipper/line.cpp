@@ -5,7 +5,7 @@
 //#include "line.h"
 //#include "qdatastream.h"
 //#include "qdebug.h"
-//#include "qmath.h"
+//#include "qmath"
 
 //#ifndef M_2PI
 //#define M_2PI 6.28318530717958647692528676655900576

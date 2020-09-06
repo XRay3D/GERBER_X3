@@ -12,11 +12,11 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gcode.h>
-#include <graphicsview.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gcode.h"
+#include "graphicsview.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)

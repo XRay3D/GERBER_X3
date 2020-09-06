@@ -1,21 +1,14 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "point.h"
 #include "forms/gcodepropertiesform.h"
-#include "gi/graphicsitem.h"
-#include "mainwindow.h"
+#include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
-#include <QDebug>
-#include <QGraphicsItem>
-#include <QGraphicsSceneMouseEvent>
 #include <QMessageBox>
 #include <QPainter>
-#include <QSettings>
-#include <clipper.hpp>
-#include <scene.h>
+#include <QStyleOptionGraphicsItem>
 
 using namespace ClipperLib;
 

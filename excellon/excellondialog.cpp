@@ -6,8 +6,8 @@
 #include "exfile.h"
 #include "ui_excellondialog.h"
 #include <cmath> // pow()
-#include <graphicsview.h>
-#include <scene.h>
+#include "graphicsview.h"
+#include "scene.h"
 
 using namespace Excellon;
 

@@ -4,7 +4,7 @@
 
 #include "extypes.h"
 #include <QObject>
-#include <parser.h>
+#include "parser.h"
 
 namespace Excellon {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <abstractnode.h>
+#include "abstractnode.h"
 #include <QGraphicsItemGroup>
-//#include <gcfile.h>
+//#include "gcfile.h"
 
 namespace GCode {
 class Node : public AbstractNode {

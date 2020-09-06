@@ -2,7 +2,7 @@
 
 #include <QGraphicsItem>
 #include <QPen>
-#include <myclipper.h>
+#include "myclipper.h"
 
 using namespace ClipperLib;
 

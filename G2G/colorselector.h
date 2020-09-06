@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QWidget>
 
 namespace Ui {
@@ -28,5 +26,3 @@ public:
     bool eventFilter(QObject* watched, QEvent* event) override;
     void setColor(QColor* color);
 };
-
-
