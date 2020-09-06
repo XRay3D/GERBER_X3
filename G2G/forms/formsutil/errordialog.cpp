@@ -101,8 +101,10 @@ public:
     {
         QRectF rect;
         for (auto item : items)
-            rect = rect.united(item->boundingRect());
+            if (item->isSelected())
+                rect = rect.united(item->boundingRect());
         App::graphicsView()->fitInView(rect, Qt::KeepAspectRatio);
+        App::graphicsView()->zoomOut();
     }
 };
 
