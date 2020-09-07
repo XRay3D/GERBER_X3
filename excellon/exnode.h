@@ -1,15 +1,13 @@
 #pragma once
 
 #include "abstractnode.h"
-#include <QObject>
 
 class ExcellonDialog;
 
 namespace Excellon {
 class File;
 
-class Node : public QObject, public AbstractNode {
-    Q_OBJECT
+class Node : public AbstractNode {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
 
 public:
@@ -22,5 +20,4 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu* menu, TreeView* tv) const override;
 };
-
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "graphicsitem.h"
 
 namespace Excellon {
@@ -42,5 +40,3 @@ private:
     Excellon::Hole* const m_hole = nullptr;
     double m_diameter = 0.0;
 };
-
-

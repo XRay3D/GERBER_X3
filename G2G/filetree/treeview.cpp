@@ -3,22 +3,18 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "treeview.h"
-#include "../mainwindow.h"
-#include "abstractnode.h"
 #include "forms/drillform/drillform.h"
 #include "gbrnode.h"
+#include "gcode.h"
 #include "layerdelegate.h"
+#include "mainwindow.h"
 #include "project.h"
-#include "settings.h"
 #include "shheaders.h"
-#include <QContextMenuEvent>
 #include <QFileDialog>
-#include <QGraphicsScene>
 #include <QHeaderView>
 #include <QMenu>
-#include <QPainter>
-#include <QtWidgets>
-#include "gcode.h"
+#include <QMessageBox>
+#include <QTimer>
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)

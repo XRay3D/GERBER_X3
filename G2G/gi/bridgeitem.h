@@ -1,10 +1,8 @@
 #pragma once
 
-
-
+#include "gcode.h"
 #include "graphicsitem.h"
 #include <QObject>
-#include "gcode.h"
 
 class GraphicsView;
 
@@ -44,14 +42,12 @@ protected:
 
 private:
     BridgeItem*& m_ptr;
+    GCode::SideOfMilling& m_side;
     QPainterPath m_path;
     QPointF calculate(const QPointF& pos);
+    QPointF m_lastPos;
     bool m_ok = false;
+    double m_angle = 0.0;
     double& m_lenght;
     double& m_size;
-    GCode::SideOfMilling& m_side;
-    double m_angle = 0.0;
-    QPointF m_lastPos;
 };
-
-

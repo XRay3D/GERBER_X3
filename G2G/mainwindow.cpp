@@ -1,10 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "mainwindow.h"
 #include "aboutform.h"
-#include "excellondialog.h"
 #include "exparser.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
@@ -16,8 +14,8 @@
 #include "gbrnode.h"
 #include "gbrparser.h"
 #include "gcode.h"
-#include "gi/bridgeitem.h"
 #include "gi/gerberitem.h"
+#include "point.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
@@ -29,7 +27,9 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QProgressDialog>
+#include <QPushButton>
 #include <QTableView>
+#include <QTimer>
 #include <QToolBar>
 
 MainWindow::MainWindow(QWidget* parent)

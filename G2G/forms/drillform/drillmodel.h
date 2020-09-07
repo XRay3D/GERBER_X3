@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QAbstractTableModel>
 #include <QIcon>
 
@@ -13,7 +11,7 @@ enum {
 class DrillModel : public QAbstractTableModel {
     Q_OBJECT
 
-    using Row = struct Row {
+    struct Row {
         Row(const QString& name, const QIcon& icon, int id)
             : name { name, "" }
             , icon { icon, QIcon() }
@@ -53,4 +51,3 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 };
-

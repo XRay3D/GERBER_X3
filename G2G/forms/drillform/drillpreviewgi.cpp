@@ -3,11 +3,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "drillpreviewgi.h"
-#include "tooldatabase/tool.h"
-#include <QPainter>
-#include "exfile.h"
 #include "gbrfile.h"
 #include "gi/drillitem.h"
+#include "tooldatabase/tool.h"
+#include <QPainter>
 
 extern Paths offset(const Path& /*path*/, double offset, bool fl = false);
 
@@ -128,22 +127,22 @@ void DrillPrGI::setToolId(int toolId)
                 }
             }
         } break;
-        case GiDrillPr:{
+        case GiDrillPr: {
             const auto offsetedPos = hole->state.offsetedPos();
             m_toolPath.addEllipse(offsetedPos, diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(offsetedPos - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(offsetedPos + QPointF(0.0, diameter * 0.7));
             m_toolPath.moveTo(offsetedPos - QPointF(diameter * 0.7, 0.0));
             m_toolPath.lineTo(offsetedPos + QPointF(diameter * 0.7, 0.0));
-        }break;
-        case GiApetrurePr:{
+        } break;
+        case GiApetrurePr: {
             const auto curPos = toQPointF(grob->state().curPos());
             m_toolPath.addEllipse(curPos, diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(curPos - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(curPos + QPointF(0.0, diameter * 0.7));
             m_toolPath.moveTo(curPos - QPointF(diameter * 0.7, 0.0));
             m_toolPath.lineTo(curPos + QPointF(diameter * 0.7, 0.0));
-        }break;
+        } break;
         }
     }
     update();

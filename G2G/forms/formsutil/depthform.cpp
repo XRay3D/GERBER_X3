@@ -1,16 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "depthform.h"
 
-#include "../gcodepropertiesform.h"
-#include <QDebug>
-#include <QSettings>
-#include <QtCore/QVariant>
-#include <QtWidgets>
 #include "doublespinbox.h"
+#include "forms/gcodepropertiesform.h"
 #include "settings.h"
+#include <QtWidgets>
 
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)
@@ -90,7 +86,7 @@ void DepthForm::setupUi(QWidget* Form)
         font.setWeight(75);
         label->setFont(font);
 
-        QFontMetrics fm(font); 
+        QFontMetrics fm(font);
         label->setMinimumWidth(std::max(
             fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
             fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));

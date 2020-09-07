@@ -1,11 +1,11 @@
 #pragma once
 
+#include "forms/formsutil/formsutil.h"
 
-
-#include "../formsutil/formsutil.h"
-#include "thermalmodel.h"
-#include "thermalpreviewitem.h"
-#include <QItemSelection>
+class ThermalModel;
+class ThermalPreviewItem;
+class QCheckBox;
+class QItemSelection;
 
 namespace Ui {
 class ThermalForm;
@@ -14,8 +14,6 @@ class ThermalForm;
 namespace Gerber {
 class AbstractAperture;
 }
-
-class QCheckBox;
 
 class ThermalForm : public FormsUtil {
     Q_OBJECT
@@ -57,5 +55,3 @@ protected:
 public:
     void editFile(GCode::File* file) override;
 };
-
-

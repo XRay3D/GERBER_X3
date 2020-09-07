@@ -1,8 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermalmodel.h"
+#include "thermalnode.h"
 
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
@@ -95,16 +95,6 @@ QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int 
     default:
         return QVariant();
     }
-    //    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-    //        switch (section) {
-    //        case 0:
-    //            return tr("Name");
-    //        case 1:
-    //            return tr("Side");
-    //        default:
-    //            return QString("");
-    //        }
-    //    return QVariant();
 }
 
 Qt::ItemFlags ThermalModel::flags(const QModelIndex& index) const

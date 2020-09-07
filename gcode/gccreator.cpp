@@ -3,28 +3,29 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gccreator.h"
+#include "errno.h"
 #include "forms/gcodepropertiesform.h"
+#include "gbraperture.h"
 #include "gcfile.h"
+#include "gcvoronoi.h"
 #include "gi/erroritem.h"
+#include "locale.h"
+#include "point.h"
+#include "project.h"
+#include "scene.h"
+#include "settings.h"
+#include "stdio.h"
+#include "string.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
-#include "errno.h"
 #include <filetree/filemodel.h>
-#include "gbraperture.h"
-#include "gcvoronoi.h"
 #include <gi/bridgeitem.h>
 #include <limits>
-#include "locale.h"
-#include "project.h"
-#include "scene.h"
-#include "settings.h"
 #include <stdexcept>
-#include "stdio.h"
-#include "string.h"
 
 void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
 {
@@ -591,8 +592,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 
 Paths& Creator::sortB(Paths& src)
 {
-    IntPoint startPt(
-        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

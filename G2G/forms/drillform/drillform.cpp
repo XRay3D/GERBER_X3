@@ -1,28 +1,23 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "drillform.h"
 #include "ui_drillform.h"
 
-#include "../gcodepropertiesform.h"
 #include "drillmodel.h"
 #include "drillpreviewgi.h"
-#include "project.h"
-#include "settings.h"
-#include "tooldatabase/tooldatabase.h"
-#include <QCheckBox>
-#include <QMenu>
-#include <QMessageBox>
-#include <QMouseEvent>
-#include <QPainter>
-#include <QSettings>
-#include <QTimer>
 #include "excellon.h"
 #include "gbraperture.h"
 #include "gbrfile.h"
-#include "gcode.h"
 #include "graphicsview.h"
+#include "point.h"
+#include "scene.h"
+#include "settings.h"
+#include "tooldatabase/tooldatabase.h"
+#include <QMenu>
+#include <QMessageBox>
+#include <QPainter>
+#include <QTimer>
 
 enum { IconSize = 24 };
 

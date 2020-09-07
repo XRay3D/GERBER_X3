@@ -1,12 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "project.h"
 #include "abstractfile.h"
 #include "excellon.h"
 #include "gbrfile.h"
 #include "gcode.h"
 #include "mainwindow.h"
+#include "point.h"
 #include "settings.h"
 #include "shheaders.h"
 #include <QElapsedTimer>

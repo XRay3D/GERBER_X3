@@ -1,24 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "profileform.h"
 #include "ui_profileform.h"
 
-#include "../project.h"
-#include "filetree/filemodel.h"
-#include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
-#include "tooldatabase/tooldatabase.h"
-#include "tooldatabase/tooleditdialog.h"
-#include <QDockWidget>
-#include <QMessageBox>
-#include <QPicture>
-#include "gcode.h"
-#include "graphicsview.h"
-#include "myclipper.h"
 #include "scene.h"
 #include "settings.h"
+#include <QMessageBox>
 
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)

@@ -1,15 +1,13 @@
 #pragma once
 
-
-
+#include "gcode.h"
 #include <QHeaderView>
 #include <QWidget>
-#include "gcode.h"
-#include "gcode.h"
 
 namespace Ui {
 class DrillForm;
 }
+
 namespace Gerber {
 class AbstractAperture;
 }
@@ -103,5 +101,3 @@ private:
 };
 
 #include "app.h"
-
-

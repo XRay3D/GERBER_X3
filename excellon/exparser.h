@@ -1,9 +1,6 @@
 #pragma once
 
-
-
 #include "extypes.h"
-#include <QObject>
 #include "parser.h"
 
 namespace Excellon {
@@ -37,5 +34,3 @@ private:
     State m_state;
 };
 } // namespace Excellon
-
-

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "extypes.h"
+#include "excellon.h"
 #include "gbrtypes.h"
 #include "gi/graphicsitem.h"
-#include "myclipper.h"
 
 class DrillPrGI : public QGraphicsItem {
     static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id);

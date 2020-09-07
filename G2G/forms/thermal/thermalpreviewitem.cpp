@@ -1,11 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
-#include "gbrfile.h"
+#include <QtMath>
 
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {
@@ -106,10 +105,10 @@ void ThermalPreviewItem::redraw()
         for (int i = 0; i < m_count; ++i) {
             ClipperOffset offset;
             double angle = i * 2 * M_PI / m_count + qDegreesToRadians(m_angle);
-            Path path{
+            Path path {
                 center,
-                IntPoint(    
-                    static_cast<cInt>((cos(angle) * radius) + center.X),    
+                IntPoint(
+                    static_cast<cInt>((cos(angle) * radius) + center.X),
                     static_cast<cInt>((sin(angle) * radius) + center.Y))
             };
             offset.AddPath(path, jtSquare, etOpenSquare);

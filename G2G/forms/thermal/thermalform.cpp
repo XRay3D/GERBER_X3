@@ -3,29 +3,30 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermalform.h"
-#include "thermaldelegate.h"
-#include "ui_thermalform.h"
-
 #include "../gcodepropertiesform.h"
+#include "gbrfile.h"
+#include "gcode.h"
 #include "gi/bridgeitem.h"
+#include "graphicsview.h"
+#include "myclipper.h"
 #include "project.h"
+#include "scene.h"
+#include "settings.h"
+#include "thermaldelegate.h"
 #include "thermalmodel.h"
+#include "thermalnode.h"
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
+#include "ui_thermalform.h"
 #include <QCheckBox>
 #include <QDockWidget>
 #include <QFuture>
+#include <QItemSelection>
 #include <QMessageBox>
 #include <QPicture>
 #include <QTimer>
 #include <QtConcurrent>
-#include "gbrfile.h"
-#include "gcode.h"
-#include "graphicsview.h"
-#include "myclipper.h"
-#include "scene.h"
-#include "settings.h"
 
 enum { Size = 24 };
 

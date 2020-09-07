@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "formsutil/formsutil.h"
 
 namespace Ui {
@@ -34,5 +32,3 @@ protected:
 public:
     void editFile(GCode::File* file) override;
 };
-
-

@@ -1,22 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "voronoiform.h"
 #include "ui_voronoiform.h"
 
-#include "gcodepropertiesform.h"
-#include "gi/bridgeitem.h"
-#include "tooldatabase/tooldatabase.h"
-#include "tooldatabase/tooleditdialog.h"
-#include <QDockWidget>
-#include <QMessageBox>
-#include <QPicture>
-#include "gcode.h"
-#include "graphicsview.h"
-#include "myclipper.h"
 #include "scene.h"
 #include "settings.h"
+#include <QMessageBox>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)

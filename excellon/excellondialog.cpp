@@ -1,13 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "excellondialog.h"
-#include "exfile.h"
 #include "ui_excellondialog.h"
-#include <cmath> // pow()
+
+#include "exfile.h"
 #include "graphicsview.h"
 #include "scene.h"
+#include <cmath>
 
 using namespace Excellon;
 

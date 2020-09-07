@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "filemodel.h"
@@ -7,12 +6,8 @@
 #include "foldernode.h"
 #include "gbrnode.h"
 #include "gcnode.h"
-#include "shheaders.h"
-#include "shheaders.h"
-#include <QDebug>
-#include <QFile>
-#include <QMimeData>
 #include "project.h"
+#include "shheaders.h"
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
