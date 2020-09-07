@@ -17,6 +17,7 @@ public:
     ~ErrorDialog();
 
 private:
+    QWidget* lastWidget = nullptr;
     Ui::ErrorDialog* ui;
     TableView* table;
 };

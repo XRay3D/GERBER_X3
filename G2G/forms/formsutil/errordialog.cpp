@@ -148,7 +148,7 @@ protected:
 };
 
 ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
-    : QDialog(parent)
+    : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::ErrorDialog)
 {
     ui->setupUi(this);
@@ -163,11 +163,16 @@ ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
+    lastWidget = App::mainWindow()->dockWidget()->widget();
+    //    App::mainWindow()->dockWidget()->push(this);
     setGeometry({ App::mainWindow()->dockWidget()->mapToGlobal({}), App::mainWindow()->dockWidget()->size() });
 }
 
 ErrorDialog::~ErrorDialog()
 {
+    qDebug(Q_FUNC_INFO);
+
+    //    App::mainWindow()->dockWidget()->pop();
     delete table->model();
     delete ui;
 }
