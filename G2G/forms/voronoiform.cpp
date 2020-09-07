@@ -12,11 +12,11 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gcode.h>
-#include <graphicsview.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gcode.h"
+#include "graphicsview.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)
@@ -51,7 +51,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
 
     connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
     updateName();
 }

@@ -12,7 +12,7 @@
 #include <QTextCodec>
 #include <QTextStream>
 #include <QThread>
-#include <settings.h>
+#include "settings.h"
 
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side

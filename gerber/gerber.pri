@@ -12,6 +12,10 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/compdialog.h \
+    $$PWD/compmodel.h \
+    $$PWD/compnode.h \
+    $$PWD/compview.h \
     $$PWD/gbrattributes.h \
     $$PWD/gbrcomponent.h \
     $$PWD/gbrnode.h \
@@ -22,6 +26,10 @@ HEADERS += \
     $$PWD/gbrparser.h
 
 SOURCES += \
+    $$PWD/compdialog.cpp \
+    $$PWD/compmodel.cpp \
+    $$PWD/compnode.cpp \
+    $$PWD/compview.cpp \
     $$PWD/gbrattributes.cpp \
     $$PWD/gbrcomponent.cpp \
     $$PWD/gbrnode.cpp \
@@ -29,3 +37,6 @@ SOURCES += \
     $$PWD/gbrparser.cpp \
     $$PWD/gbrfile.cpp \
     $$PWD/gbraperture.cpp
+
+FORMS += \
+    $$PWD/compdialog.ui

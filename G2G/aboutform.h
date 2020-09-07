@@ -1,9 +1,5 @@
 #pragma once
 
-
-
-#pragma once
-
 #include <QDialog>
 
 namespace Ui {
@@ -20,5 +16,3 @@ public:
 private:
     Ui::AboutForm* ui;
 };
-
-

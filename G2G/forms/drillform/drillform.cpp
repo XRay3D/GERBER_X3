@@ -9,18 +9,20 @@
 #include "drillmodel.h"
 #include "drillpreviewgi.h"
 #include "project.h"
+#include "settings.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QCheckBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QSettings>
 #include <QTimer>
-#include <excellon.h>
-#include <gbraperture.h>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <graphicsview.h>
+#include "excellon.h"
+#include "gbraperture.h"
+#include "gbrfile.h"
+#include "gcode.h"
+#include "graphicsview.h"
 
 enum { IconSize = 24 };
 
@@ -149,25 +151,28 @@ DrillForm::DrillForm(QWidget* parent)
         m_side = ui->rb_on->isChecked() ? GCode::On : (ui->rb_out->isChecked() ? GCode::Outer : GCode::Inner);
     };
 
-    QSettings settings;
-    settings.beginGroup("DrillForm");
-    if (settings.value("rbClimb").toBool())
-        ui->rbClimb->setChecked(true);
-    if (settings.value("rbConventional", true).toBool())
-        ui->rbConventional->setChecked(true);
-    if (settings.value("rb_drilling", true).toBool())
-        ui->rb_drilling->setChecked(true);
-    if (settings.value("rb_in", true).toBool())
-        ui->rb_in->setChecked(true);
-    if (settings.value("rb_on").toBool())
-        ui->rb_on->setChecked(true);
-    if (settings.value("rb_out").toBool())
-        ui->rb_out->setChecked(true);
-    if (settings.value("rb_pocket").toBool())
-        ui->rb_pocket->setChecked(true);
-    if (settings.value("rb_profile").toBool())
-        ui->rb_profile->setChecked(true);
-    settings.endGroup();
+    {
+        MySettings settings;
+        settings.beginGroup("DrillForm");
+        if (settings.value("rbClimb").toBool())
+            ui->rbClimb->setChecked(true);
+        if (settings.value("rbConventional", true).toBool())
+            ui->rbConventional->setChecked(true);
+        if (settings.value("rb_drilling", true).toBool())
+            ui->rb_drilling->setChecked(true);
+        if (settings.value("rb_in", true).toBool())
+            ui->rb_in->setChecked(true);
+        if (settings.value("rb_on").toBool())
+            ui->rb_on->setChecked(true);
+        if (settings.value("rb_out").toBool())
+            ui->rb_out->setChecked(true);
+        if (settings.value("rb_pocket").toBool())
+            ui->rb_pocket->setChecked(true);
+        if (settings.value("rb_profile").toBool())
+            ui->rb_profile->setChecked(true);
+        settings.getValue(ui->chbxZoomToSelected);
+        settings.endGroup();
+    }
 
     connect(ui->rb_drilling, &QRadioButton::clicked, updateState);
     connect(ui->rb_in, &QRadioButton::clicked, updateState);
@@ -194,16 +199,17 @@ DrillForm::DrillForm(QWidget* parent)
 DrillForm::~DrillForm()
 {
     App::m_drillForm = nullptr;
-    QSettings settings;
+    MySettings settings;
     settings.beginGroup("DrillForm");
-    settings.setValue("rbClimb", ui->rbClimb->isChecked());
-    settings.setValue("rbConventional", ui->rbConventional->isChecked());
-    settings.setValue("rb_drilling", ui->rb_drilling->isChecked());
-    settings.setValue("rb_in", ui->rb_in->isChecked());
-    settings.setValue("rb_on", ui->rb_on->isChecked());
-    settings.setValue("rb_out", ui->rb_out->isChecked());
-    settings.setValue("rb_pocket", ui->rb_pocket->isChecked());
-    settings.setValue("rb_profile", ui->rb_profile->isChecked());
+    settings.setValue(ui->rbClimb);
+    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rb_drilling);
+    settings.setValue(ui->rb_in);
+    settings.setValue(ui->rb_on);
+    settings.setValue(ui->rb_out);
+    settings.setValue(ui->rb_pocket);
+    settings.setValue(ui->rb_profile);
+    settings.setValue(ui->chbxZoomToSelected);
     settings.endGroup();
     clear();
     delete ui;
@@ -300,9 +306,9 @@ void DrillForm::updateFiles()
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #else
-    disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #endif
 
     ui->cbxFile->clear();
@@ -327,7 +333,7 @@ void DrillForm::updateFiles()
 
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #else
     connect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
 #endif

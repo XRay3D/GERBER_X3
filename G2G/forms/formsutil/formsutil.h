@@ -1,14 +1,11 @@
 #pragma once
 
-
-
 #include "tooldatabase/tool.h"
 #include <QThread>
 #include <QVector>
 #include <QWidget>
-#include <abstractfile.h>
-#include <gcode.h>
-#include <gcode.h>
+#include "abstractfile.h"
+#include "gcode.h"
 
 namespace GCode {
 class File;
@@ -33,7 +30,7 @@ protected:
     virtual void createFile() = 0;
     virtual void updateName() = 0;
 
-    void setFile(GCode::File* file);
+    void fileHandler(GCode::File* file);
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
@@ -57,13 +54,16 @@ protected:
 
 private:
     void cancel();
+    void errorHandler(int = 0);
+
+    void startProgress();
+    void stopProgress();
 
     QThread thread;
     GCode::File* m_file;
-    QProgressDialog* pd;
-    int m_timerId = 0;
+    QProgressDialog* progressDialog;
+    int progressTimerId = 0;
+    int flikerTimerId = 0;
 };
 
 //Q_DECLARE_METATYPE(QMap<int, QVector<int>>)
-
-

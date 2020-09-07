@@ -1,13 +1,6 @@
 #pragma once
 
-
-
 #include "tool.h"
-
-#include <QDebug>
-#include <QModelIndex>
-#include <QObject>
-#include <QVariant>
 
 class ToolItem {
 
@@ -62,4 +55,3 @@ private:
     QString m_name;
     QString m_note;
 };
-

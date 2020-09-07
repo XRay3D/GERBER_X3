@@ -1,16 +1,11 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "tooleditform.h"
-#include "toolitem.h"
-#include "toolmodel.h"
 #include "ui_tooleditform.h"
 
-#include <QDebug>
-#include <QPicture>
+#include "toolitem.h"
 #include <QSettings>
-#include <QTimer>
 
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)
@@ -34,9 +29,9 @@ ToolEditForm::ToolEditForm(QWidget* parent)
         connect(pPsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
     }
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxFeedSpeeds, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(ui->cbxFeedSpeeds, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
 #else
-    connect(ui->cbxFeedSpeeds, QOverload<int/*, const QString&*/>::of(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(ui->cbxFeedSpeeds, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), [this](int index) {
 #endif
         double tmpFeed = m_feed;
         switch (index) {
@@ -67,7 +62,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxToolType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
 #else
-    connect(ui->cbxToolType, qOverload<int/*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
+    connect(ui->cbxToolType, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
 #endif
 
     connect(ui->leName, &QLineEdit::textChanged, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); });

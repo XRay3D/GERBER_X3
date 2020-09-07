@@ -10,11 +10,11 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QSettings>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gbrfile.h"
+#include "gcode.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 #include <tooldatabase/tooleditdialog.h>
 
 enum {
@@ -25,7 +25,7 @@ enum {
 PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     : FormsUtil(new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
-    , names { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside") }
+    , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") }
     , pixmaps {
         QStringLiteral(":/toolpath/pock_offs_climb.svg"),
         QStringLiteral(":/toolpath/pock_offs_conv.svg"),

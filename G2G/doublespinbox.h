@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QDoubleSpinBox>
-#include <QStack>
 
 class DoubleSpinBox : public QDoubleSpinBox {
     Q_OBJECT
@@ -12,6 +11,9 @@ public:
     void setMinimum(double min);
     void flicker();
 
+    // QObject interface
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     void red();
     void normal();
@@ -19,8 +21,4 @@ private:
     // QWidget interface
 protected:
     void keyPressEvent(QKeyEvent* event) override;
-
-    // QObject interface
-public:
-    bool eventFilter(QObject* watched, QEvent* event) override;
 };

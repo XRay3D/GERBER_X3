@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QDebug>
-#include <QJsonObject>
-#include <QMap>
-#include <QMessageBox>
 #include <QObject>
+
+class QWidget;
+class QIcon;
 
 class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
@@ -103,20 +102,6 @@ private:
     double m_stepover;
     bool m_autoName;
     uint m_id;
-
-    friend QDataStream& operator>>(QDataStream& stream, Type& type)
-    {
-        int tmp;
-        stream >> tmp;
-        type = static_cast<Type>(tmp);
-        return stream;
-    }
-
-    friend QDataStream& operator<<(QDataStream& stream, Type& type)
-    {
-        stream << static_cast<int>(type);
-        return stream;
-    }
 };
 
 class ToolHolder {

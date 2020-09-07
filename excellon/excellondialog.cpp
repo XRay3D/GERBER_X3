@@ -6,8 +6,8 @@
 #include "exfile.h"
 #include "ui_excellondialog.h"
 #include <cmath> // pow()
-#include <graphicsview.h>
-#include <scene.h>
+#include "graphicsview.h"
+#include "scene.h"
 
 using namespace Excellon;
 
@@ -34,11 +34,11 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ExcellonDialog::rejectFormat);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ExcellonDialog::acceptFormat);
 
-    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setX(val); m_file->setFormat(m_tmpFormat); });
-    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setY(val); m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxX, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setX(val); m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxY, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setY(val); m_file->setFormat(m_tmpFormat); });
 
-    connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
-    connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
+    connect(ui->sbxInteger, qOverload<int>(&QSpinBox::valueChanged), [&] { updateFormat(); });
+    connect(ui->sbxDecimal, qOverload<int>(&QSpinBox::valueChanged), [&] { updateFormat(); });
 
     connect(ui->rbInches, &QRadioButton::toggled, [&] { updateFormat(); });
     connect(ui->rbLeading, &QRadioButton::toggled, [&] { updateFormat(); });
@@ -48,8 +48,8 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     //    connect(ui->rbLeading, &QRadioButton::toggled, [&](bool checked) { ui->sbxInteger->setEnabled(checked); });
     //    connect(ui->rbTrailing, &QRadioButton::toggled, [&](bool checked) { ui->sbxDecimal->setEnabled(checked); });
 
-    //    connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxDecimal->setValue(8 - val); });
-    //    connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&](int val) { ui->sbxInteger->setValue(8 - val); });
+    //    connect(ui->sbxInteger, qOverload<int>(&QSpinBox::valueChanged), [&](int val) { ui->sbxDecimal->setValue(8 - val); });
+    //    connect(ui->sbxDecimal, qOverload<int>(&QSpinBox::valueChanged), [&](int val) { ui->sbxInteger->setValue(8 - val); });
 
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);

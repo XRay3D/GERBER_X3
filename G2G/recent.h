@@ -1,15 +1,14 @@
 #pragma once
 
 #include <QObject>
-#include <QSettings>
 
 class QAction;
 class QMenu;
 class MainWindow;
+class QSettings;
 
 class Recent : public QObject {
     Q_OBJECT
-
     MainWindow* mainWindow;
 
 public:

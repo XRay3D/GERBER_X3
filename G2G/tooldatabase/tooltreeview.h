@@ -1,28 +1,21 @@
 #pragma once
 
-
-
 #include "toolmodel.h"
-
-#include <QItemSelection>
-#include <QItemSelectionModel>
-#include <QPushButton>
-#include <QStandardItemModel>
 #include <QTreeView>
+#include <QVector>
+
+class QPushButton;
 
 class ToolTreeView : public QTreeView {
     Q_OBJECT
 public:
-    explicit ToolTreeView(/*QVector<QPushButton*> buttons,*/ QWidget* parent = nullptr);
+    explicit ToolTreeView(QWidget* parent = nullptr);
     ~ToolTreeView() override = default;
     void updateItem();
-
     void setButtons(const QVector<QPushButton*>& buttons);
 
 signals:
     void itemSelected(ToolItem* item);
-
-public slots:
 
 private:
     void newGroup();
@@ -40,5 +33,3 @@ private:
     };
     QVector<QPushButton*> m_buttons;
 };
-
-

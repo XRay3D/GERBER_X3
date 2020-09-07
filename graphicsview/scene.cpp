@@ -15,7 +15,7 @@
 #include <QPdfWriter>
 #include <QtMath>
 #include <gi/graphicsitem.h>
-#include <settings.h>
+#include "settings.h"
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)

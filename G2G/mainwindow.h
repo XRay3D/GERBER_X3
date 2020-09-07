@@ -2,9 +2,7 @@
 
 #include "recent.h"
 #include "ui_mainwindow.h"
-#include <QSettings>
 #include <QThread>
-#include <qevent.h>
 
 namespace Gerber {
 class Parser;
@@ -32,13 +30,14 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
+    const DockWidget* dockWidget() const { return m_dockWidget; }
 
 signals:
     void parseGerberFile(const QString& filename);
     void parseExcellonFile(const QString& filename);
 
 private:
-    DockWidget* dockWidget = nullptr;
+    DockWidget* m_dockWidget = nullptr;
     Recent recentFiles;
     Recent recentProjects;
 
@@ -127,28 +126,11 @@ protected:
 class DockWidget : public QDockWidget {
     Q_OBJECT
 public:
-    explicit DockWidget(QWidget* parent = nullptr)
-        : QDockWidget(parent)
-    {
-        hide();
-        setVisible(false);
-    }
+    explicit DockWidget(QWidget* parent = nullptr);
     ~DockWidget() override = default;
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent* event) override
-    {
-        delete widget();
-        event->accept();
-    }
-
-    void showEvent(QShowEvent* event) override
-    {
-        event->ignore();
-        //        close();
-        //        QDockWidget::showEvent(event);
-        if (widget() == nullptr)
-            QTimer::singleShot(1, this, &QDockWidget::close);
-    }
+    void closeEvent(QCloseEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 };

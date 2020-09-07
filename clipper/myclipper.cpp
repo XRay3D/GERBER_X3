@@ -5,8 +5,8 @@
 #include "myclipper.h"
 #include <QElapsedTimer>
 #include <QLineF>
-#include <qmath.h>
-#include <settings.h>
+#include "qmath.h"
+#include "settings.h"
 
 Path toPath(const QPolygonF& p)
 {

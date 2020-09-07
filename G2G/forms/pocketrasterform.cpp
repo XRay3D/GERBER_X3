@@ -8,9 +8,11 @@
 #include <tooldatabase/tooldatabase.h>
 #include <tooldatabase/tooleditdialog.h>
 
-#include <gcode.h>
-#include <scene.h>
-#include <settings.h>
+#include "gcode.h"
+#include "scene.h"
+#include "settings.h"
+
+#include <QMessageBox>
 
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil(new GCode::RasterCreator, parent)

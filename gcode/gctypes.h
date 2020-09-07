@@ -1,9 +1,8 @@
 #pragma once
 
-
-
 #include <QVariant>
-#include <datastream.h>
+#include <QVector>
+#include "datastream.h"
 #include <tooldatabase/tool.h>
 
 using UsedItems = QMap<QPair<int, int>, QVector<int>>;
@@ -17,9 +16,9 @@ enum GCodeType {
     Voronoi,
     Thermal,
     Drill,
-    GCodeProperties,
     Raster,
-    LaserHLDI
+    LaserHLDI,
+    GCodeProperties = 100,
 };
 
 enum Code {
@@ -48,30 +47,30 @@ enum Grouping {
 
 struct GCodeParams {
     enum Param {
-        UseAngle,
+        UseAngle, // need for Raster and LaserHLDI
         Depth,
-        Pass,
+        Pass, // need for Raster and LaserHLDI profile
         UseRaster,
-        Steps,
-        Tolerance,
-        Width,
-        VorT,
+        Steps, // need for Pocket
+        Tolerance, // need for Voronoi
+        Width, // need for Voronoi
+        VorT, // need for Voronoi
         FileId,
-        FrameOffset,
-        AccDistance,
+        FrameOffset, // need for Voronoi
+        AccDistance, // need for LaserHLDI
         Side,
         Convent,
         Fast,
-        PocketIndex,
+        PocketIndex, // need for Pocket
         GrItems,
         Node,
-        Bridges,
-        BridgeLen,
+        Bridges, // need for Profile
+        BridgeLen, // need for Profile
         NotTile,
         Strip
     };
 
-    GCodeParams() {}
+    GCodeParams() { }
     GCodeParams(const Tool& tool, double depth, GCodeType type)
     {
         tools.append(tool);
@@ -115,5 +114,3 @@ struct GCodeParams {
     void setConvent(bool val) { params[Convent] = val; }
 };
 }
-
-

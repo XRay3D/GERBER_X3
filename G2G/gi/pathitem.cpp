@@ -1,14 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "pathitem.h"
 
+#include "gcode.h"
+#include "graphicsview.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <graphicsview.h>
-
-#include <gcode.h>
 
 PathItem::PathItem(const Paths& paths, GCode::File* file)
     : m_gcFile(file)

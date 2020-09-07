@@ -5,7 +5,7 @@
 #include "scene.h"
 #include "shhandler.h"
 #include <QIcon>
-#include <math.h>
+#include "math.h"
 
 namespace Shapes {
 Circle::Circle(QPointF center, QPointF pt)

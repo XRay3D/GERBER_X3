@@ -2,8 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "settings.h"
+#include "graphicsview.h"
 #include <cmath>
-#include <graphicsView.h>
 
 #ifndef M_PI
 #define M_PI (3.1415926535897932384626433832795)

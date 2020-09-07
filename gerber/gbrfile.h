@@ -5,7 +5,7 @@
 #include "gbrtypes.h"
 
 #include <QDebug>
-#include <abstractfile.h>
+#include "abstractfile.h"
 #include <forward_list>
 #include <gi/itemgroup.h>
 namespace Gerber {
@@ -63,6 +63,7 @@ protected:
     // AbstractFile interface
 public:
     void createGi() override;
+    const QList<Component>& components() const;
 };
 }
 

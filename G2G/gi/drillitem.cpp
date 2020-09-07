@@ -5,10 +5,10 @@
 #include "drillitem.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <exfile.h>
-#include <extypes.h>
-#include <gcode.h>
-#include <graphicsview.h>
+#include "exfile.h"
+#include "extypes.h"
+#include "gcode.h"
+#include "graphicsview.h"
 
 using namespace ClipperLib;
 

@@ -10,7 +10,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
-#include <datastream.h>
+#include "datastream.h"
 
 namespace Gerber {
 

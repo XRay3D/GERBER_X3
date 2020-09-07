@@ -14,11 +14,11 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gcode.h>
-#include <graphicsview.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include "gcode.h"
+#include "graphicsview.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)

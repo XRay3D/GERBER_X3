@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QSplashScreen>
-#include <app.h>
+#include "app.h"
 
 class SplashScreen : public QSplashScreen {
 public:

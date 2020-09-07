@@ -3,7 +3,7 @@
 #include "gctypes.h"
 #include <QList>
 #include <QString>
-#include <myclipper.h>
+#include "myclipper.h"
 
 class Project;
 

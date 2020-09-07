@@ -7,9 +7,9 @@
 #include <QElapsedTimer>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <gbrfile.h>
-#include <graphicsview.h>
-#include <scene.h>
+#include "gbrfile.h"
+#include "graphicsview.h"
+#include "scene.h"
 
 GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     : GraphicsItem(file)

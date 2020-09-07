@@ -4,8 +4,8 @@
 
 #include "gcthermal.h"
 #include "gcfile.h"
-#include <gbrfile.h>
-#include <project.h>
+#include "gbrfile.h"
+#include "project.h"
 
 namespace GCode {
 ThermalCreator::ThermalCreator()

@@ -4,15 +4,13 @@
 
 #include "settingsdialog.h"
 #include "colorselector.h"
-
-#include <QApplication>
+#include "graphicsview.h"
 #include <QGLWidget>
 #include <QtWidgets>
-#include <graphicsview.h>
 
 const int gridColor = 100;
 
-const QColor defaultColor[static_cast<size_t>(Colors::Count)]{
+const QColor defaultColor[static_cast<size_t>(Colors::Count)] {
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
@@ -26,7 +24,7 @@ const QColor defaultColor[static_cast<size_t>(Colors::Count)]{
     QColor(Qt::red) //G0
 };
 
-const QString colorName[static_cast<size_t>(Colors::Count)]{
+const QString colorName[static_cast<size_t>(Colors::Count)] {
     QObject::tr("Background"),
     QObject::tr("Pin"),
     QObject::tr("CutArea"),

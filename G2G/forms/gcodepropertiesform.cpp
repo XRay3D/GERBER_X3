@@ -8,10 +8,10 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
-#include <mainwindow.h>
-#include <project.h>
-#include <scene.h>
-#include <settings.h>
+#include "mainwindow.h"
+#include "project.h"
+#include "scene.h"
+#include "settings.h"
 
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::boardThickness;
@@ -30,38 +30,38 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     }
     ui->setupUi(this);
 
-    connect(ui->dsbxClearence, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxClearence, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
 
-    connect(ui->dsbxPlunge, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxPlunge, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value > ui->dsbxClearence->value())
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { glue = val; });
-    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosX(val); });
-    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosY(val); });
-    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosX(val); });
-    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
+    connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { glue = val; });
+    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosX(val); });
+    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosY(val); });
+    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosX(val); });
+    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
 
     if (App::project()) {
-        connect(ui->dsbxSpaceX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
-        connect(ui->dsbxSpaceY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceY);
-        connect(ui->sbxStepsX, QOverload<int>::of(&QSpinBox::valueChanged), App::project(), &Project::setStepsX);
-        connect(ui->sbxStepsY, QOverload<int>::of(&QSpinBox::valueChanged), App::project(), &Project::setStepsY);
+        connect(ui->dsbxSpaceX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
+        connect(ui->dsbxSpaceY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceY);
+        connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsX);
+        connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsY);
         ui->dsbxSpaceX->setValue(App::project()->spaceX());
         ui->dsbxSpaceY->setValue(App::project()->spaceY());
         ui->sbxStepsX->setValue(App::project()->stepsX());
         ui->sbxStepsY->setValue(App::project()->stepsY());
     }
 
-    connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxSafeZ, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
         ui->dsbxSafeZ->setValue(value);
         ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxClearence->value())

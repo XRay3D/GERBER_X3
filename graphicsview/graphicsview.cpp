@@ -3,26 +3,23 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "graphicsview.h"
-
 #include "edid.h"
+#include "forms/thermal/thermalmodel.h"
+#include "forms/thermal/thermalpreviewitem.h"
+#include "gi/bridgeitem.h"
+#include "mainwindow.h"
 #include "qdruler.h"
 #include "scene.h"
+#include "settings.h"
+#include "shheaders.h"
+
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
-#include <gi/bridgeitem.h>
-#include <mainwindow.h>
-#include <settings.h>
 
-#include "shheaders.h"
-#include "shheaders.h"
-
-#include <forms/thermal/thermalmodel.h>
-#include <forms/thermal/thermalpreviewitem.h>
-
-const double zoomFactor = 1.5;
+constexpr double zoomFactor = 1.5;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
@@ -114,62 +111,19 @@ void GraphicsView::setScene(QGraphicsScene* Scene)
 void GraphicsView::zoomFit()
 {
     scene()->setSceneRect(scene()->itemsBoundingRect());
-    fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
-    //scale(0.95, 0.95);
-    updateRuler();
+    fitInView(scene()->sceneRect(), false);
 }
 
 void GraphicsView::zoomToSelected()
 {
-
     QRectF rect;
     for (const QGraphicsItem* item : scene()->selectedItems()) {
         const QRectF tmpRect(item->pos().isNull() ? item->boundingRect() : item->boundingRect().translated(item->pos()));
-        rect = rect.isEmpty() ? tmpRect : rect.united(tmpRect);
+        rect = /*rect.isEmpty() ? tmpRect :*/ rect.united(tmpRect);
     }
     if (rect.isEmpty())
         return;
-
-    const double k = 5.0 / transform().m11();
-    rect += QMarginsF(k, k, k, k);
-    if (GlobalSettings::guiSmoothScSh() && /* DISABLES CODE */ (0)) {
-        //        // Reset the view scale to 1:1.
-        //        QRectF unity = d->matrix.mapRect(QRectF(0, 0, 1, 1));
-        //        if (unity.isEmpty())
-        //            return;
-        //        scale(1 / unity.width(), 1 / unity.height());
-        //        // Find the ideal x / y scaling ratio to fit \a rect in the view.
-        //        int margin = 2;
-        //        QRectF viewRect = viewport()->rect().adjusted(margin, margin, -margin, -margin);
-        //        if (viewRect.isEmpty())
-        //            return;
-        //        QRectF sceneRect = d->matrix.mapRect(rect);
-        //        if (sceneRect.isEmpty())
-        //            return;
-        //        qreal xratio = viewRect.width() / sceneRect.width();
-        //        qreal yratio = viewRect.height() / sceneRect.height();
-        //        // Respect the aspect ratio mode.
-        //        switch (aspectRatioMode) {
-        //        case Qt::KeepAspectRatio:
-        //            xratio = yratio = qMin(xratio, yratio);
-        //            break;
-        //        case Qt::KeepAspectRatioByExpanding:
-        //            xratio = yratio = qMax(xratio, yratio);
-        //            break;
-        //        case Qt::IgnoreAspectRatio:
-        //            break;
-        //        }
-        //        // Scale and center on the center of \a rect.
-        //        scale(xratio, yratio);
-        //        centerOn(rect.center());
-        //        123->anim(123, "sceneRect", 123->scene()->sceneRect(), rect);
-        fitInView(rect, Qt::KeepAspectRatio);
-        updateRuler();
-    } else {
-        const double k = 10 * scaleFactor();
-        fitInView(rect + QMarginsF(k, k, k, k), Qt::KeepAspectRatio);
-        updateRuler();
-    }
+    fitInView(rect);
 }
 
 void GraphicsView::zoom100()
@@ -191,7 +145,6 @@ void GraphicsView::zoom100()
 
 void GraphicsView::zoomIn()
 {
-
     if (getScale() > 10000.0)
         return;
 
@@ -207,11 +160,28 @@ void GraphicsView::zoomOut()
 {
     if (getScale() < 1.0)
         return;
-
     if (GlobalSettings::guiSmoothScSh()) {
         anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
+        updateRuler();
+    }
+}
+
+void GraphicsView::fitInView(QRectF dstRect, bool withBorders)
+{
+    if (dstRect.isNull())
+        return;
+    if (withBorders)
+        dstRect += QMarginsF(5, 5, 5, 5); // 5 mm
+    //    const auto r1(getViewRect().toRect());
+    //    const auto r2(dstRect.toRect());
+    //    if (r1 == r2)
+    //        return;
+    if (GlobalSettings::guiSmoothScSh()) {
+        anim(this, "viewRect", getViewRect(), dstRect);
+    } else {
+        QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
         updateRuler();
     }
 }
@@ -239,6 +209,7 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 
 void GraphicsView::setScale(double s)
 {
+    qDebug() << "set" << s;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     const auto trf = transform();
     setTransform({ +s /*11*/, trf.m12(), trf.m13(),
@@ -249,9 +220,19 @@ void GraphicsView::setScale(double s)
 #endif
 }
 
-double GraphicsView::getScale()
+double GraphicsView::getScale() { return transform().m11(); }
+
+void GraphicsView::setViewRect(QRectF r)
 {
-    return transform().m11();
+    QGraphicsView::fitInView(r, Qt::KeepAspectRatio);
+}
+
+QRectF GraphicsView::getViewRect()
+{
+    QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+    QRectF visible_scene_rect(matrix().inverted().mapRect({ topLeft, bottomRight }));
+    return visible_scene_rect;
 }
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
@@ -433,10 +414,22 @@ template <class T>
 void GraphicsView::anim(QObject* target, const QByteArray& propertyName, T begin, T end)
 {
     auto* animation = new PropertyAnimation(target, propertyName);
-    connect(animation, &QPropertyAnimation::finished, this, &GraphicsView::updateRuler);
-    animation->setDuration(100);
+    //    connect(animation, &QPropertyAnimation::finished, this, &GraphicsView::updateRuler);
+    connect(animation, &QPropertyAnimation::finished, [animation, propertyName, end, this] {
+        delete animation;
+        setProperty(propertyName, end);
+        updateRuler();
+    });
+    if constexpr (std::is_same_v<T, QRectF>) {
+        animation->setDuration(100);
+    } else {
+        animation->setDuration(100);
+    }
     animation->setStartValue(begin);
     animation->setEndValue(end);
     animation->start();
-    QTimer::singleShot(101, [animation] { delete animation; });
+    //    QTimer::singleShot(animation->duration() + 1, [animation, propertyName, end, this] {
+    //        delete animation;
+    //        setProperty(propertyName, end);
+    //    });
 }

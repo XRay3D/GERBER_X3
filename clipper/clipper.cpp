@@ -48,10 +48,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <gbrtypes.h>
+#include "gbrtypes.h"
 #ifndef GTE
-#include <gcode.h>
-#include <settings.h>
+#include "gcode.h"
+#include "settings.h"
 #endif
 #include <ostream>
 #include <stdexcept>

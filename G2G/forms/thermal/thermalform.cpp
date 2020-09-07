@@ -15,15 +15,17 @@
 #include "tooldatabase/tooleditdialog.h"
 #include <QCheckBox>
 #include <QDockWidget>
+#include <QFuture>
 #include <QMessageBox>
 #include <QPicture>
 #include <QTimer>
-#include <gbrfile.h>
-#include <gcode.h>
-#include <graphicsview.h>
-#include <myclipper.h>
-#include <scene.h>
-#include <settings.h>
+#include <QtConcurrent>
+#include "gbrfile.h"
+#include "gcode.h"
+#include "graphicsview.h"
+#include "myclipper.h"
+#include "scene.h"
+#include "settings.h"
 
 enum { Size = 24 };
 
@@ -147,7 +149,7 @@ ThermalForm::~ThermalForm()
 void ThermalForm::updateFiles()
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #else
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #endif
@@ -167,7 +169,7 @@ void ThermalForm::updateFiles()
 
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #else
     connect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #endif

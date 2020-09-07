@@ -11,6 +11,7 @@ class GraphicsView : public QGraphicsView {
     Q_OBJECT
 
     Q_PROPERTY(double scale READ getScale WRITE setScale)
+    Q_PROPERTY(QRectF viewRect READ getViewRect WRITE setViewRect)
 
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
@@ -21,12 +22,16 @@ public:
     void zoomToSelected();
     void zoomIn();
     void zoomOut();
+    void fitInView(QRectF destRect, bool withBorders = true);
 
     double scaleFactor();
     QPointF mappedPos(QMouseEvent* event) const;
 
     void setScale(double s);
     double getScale();
+
+    void setViewRect(QRectF r);
+    QRectF getViewRect();
 
 signals:
     void fileDroped(const QString&);
@@ -55,4 +60,4 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
 };
 
-#include <app.h>
+#include "app.h"

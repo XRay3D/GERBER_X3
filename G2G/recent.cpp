@@ -1,5 +1,6 @@
 #include "recent.h"
 #include "mainwindow.h"
+#include <QSettings>
 
 Recent::Recent(MainWindow* mainWindow, QString&& recentFilesKey)
     : QObject(mainWindow)
