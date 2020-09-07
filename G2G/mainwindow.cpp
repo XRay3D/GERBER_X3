@@ -9,7 +9,6 @@
 #include "forms/pocketoffsetform.h"
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
-#include "forms/thermal/thermalform.h"
 #include "forms/voronoiform.h"
 #include "gbrnode.h"
 #include "gbrparser.h"
@@ -19,18 +18,10 @@
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
+#include "thermal.h"
 #include "tooldatabase/tooldatabase.h"
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QOperatingSystemVersion>
-#include <QPrintPreviewDialog>
-#include <QPrinter>
-#include <QProgressDialog>
-#include <QPushButton>
-#include <QTableView>
-#include <QTimer>
-#include <QToolBar>
+#include <QtPrintSupport>
+#include <QtWidgets>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -106,9 +97,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (0) { // (need for debug)
+    if constexpr (1) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Profile]->triggered(); });
+        QTimer::singleShot(150, [this] { toolpathActions[GCode::Pocket]->triggered(); });
         QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
@@ -316,7 +307,7 @@ void MainWindow::createActionsService()
         });
         action->setShortcut(QKeySequence("Ctrl+Shift+G"));
         serviceMenu->addAction(action);
-        toolpathActionList[GCode::GCodeProperties] = action;
+        toolpathActions[GCode::GCodeProperties] = action;
     }
 
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] {
@@ -391,63 +382,63 @@ void MainWindow::createActionsToolPath()
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
     {
-        toolpathActionList[GCode::Profile] = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
+        toolpathActions[GCode::Profile] = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
             createDockWidget<ProfileForm>(GCode::Profile); //createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
-            toolpathActionList[GCode::Profile]->setChecked(true);
+            toolpathActions[GCode::Profile]->setChecked(true);
         });
-        toolpathActionList[GCode::Profile]->setShortcut(QKeySequence("Ctrl+Shift+F"));
-        menu->addAction(toolpathActionList[GCode::Profile]);
+        toolpathActions[GCode::Profile]->setShortcut(QKeySequence("Ctrl+Shift+F"));
+        menu->addAction(toolpathActions[GCode::Profile]);
     }
     {
-        toolpathActionList[GCode::Pocket] = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
+        toolpathActions[GCode::Pocket] = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
             createDockWidget<PocketOffsetForm>(GCode::Pocket); //createDockWidget(new PocketOffsetForm(dockWidget), GCode::Pocket);
-            toolpathActionList[GCode::Pocket]->setChecked(true);
+            toolpathActions[GCode::Pocket]->setChecked(true);
         });
-        toolpathActionList[GCode::Pocket]->setShortcut(QKeySequence("Ctrl+Shift+P"));
-        menu->addAction(toolpathActionList[GCode::Pocket]);
+        toolpathActions[GCode::Pocket]->setShortcut(QKeySequence("Ctrl+Shift+P"));
+        menu->addAction(toolpathActions[GCode::Pocket]);
     }
     {
-        toolpathActionList[GCode::Raster] = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
+        toolpathActions[GCode::Raster] = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
             createDockWidget<PocketRasterForm>(GCode::Raster); //createDockWidget(new PocketRasterForm(dockWidget), GCode::Raster);
-            toolpathActionList[GCode::Raster]->setChecked(true);
+            toolpathActions[GCode::Raster]->setChecked(true);
         });
-        toolpathActionList[GCode::Raster]->setShortcut(QKeySequence("Ctrl+Shift+R"));
-        menu->addAction(toolpathActionList[GCode::Raster]);
+        toolpathActions[GCode::Raster]->setShortcut(QKeySequence("Ctrl+Shift+R"));
+        menu->addAction(toolpathActions[GCode::Raster]);
     }
     {
-        toolpathActionList[GCode::Voronoi] = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
+        toolpathActions[GCode::Voronoi] = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
             createDockWidget<VoronoiForm>(GCode::Voronoi); //createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
-            toolpathActionList[GCode::Voronoi]->setChecked(true);
+            toolpathActions[GCode::Voronoi]->setChecked(true);
         });
-        toolpathActionList[GCode::Voronoi]->setShortcut(QKeySequence("Ctrl+Shift+V"));
-        menu->addAction(toolpathActionList[GCode::Voronoi]);
+        toolpathActions[GCode::Voronoi]->setShortcut(QKeySequence("Ctrl+Shift+V"));
+        menu->addAction(toolpathActions[GCode::Voronoi]);
     }
 
     {
-        toolpathActionList[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
+        toolpathActions[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
             if (ThermalForm::canToShow()) {
                 createDockWidget<ThermalForm>(GCode::Thermal); //createDockWidget(new ThermalForm(dockWidget), GCode::Thermal);
-                toolpathActionList[GCode::Thermal]->setChecked(true);
+                toolpathActions[GCode::Thermal]->setChecked(true);
             } else
-                toolpathActionList[GCode::Thermal]->setChecked(false);
+                toolpathActions[GCode::Thermal]->setChecked(false);
         });
-        toolpathActionList[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
-        menu->addAction(toolpathActionList[GCode::Thermal]);
+        toolpathActions[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
+        menu->addAction(toolpathActions[GCode::Thermal]);
     }
 
     {
-        toolpathActionList[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
+        toolpathActions[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
             if (DrillForm::canToShow()) {
                 createDockWidget<DrillForm>(GCode::Drill); //createDockWidget(new DrillForm(dockWidget), GCode::Drill);
-                toolpathActionList[GCode::Drill]->setChecked(true);
+                toolpathActions[GCode::Drill]->setChecked(true);
             } else
-                toolpathActionList[GCode::Drill]->setChecked(false);
+                toolpathActions[GCode::Drill]->setChecked(false);
         });
-        toolpathActionList[GCode::Drill]->setShortcut(QKeySequence("Ctrl+Shift+D"));
-        menu->addAction(toolpathActionList[GCode::Drill]);
+        toolpathActions[GCode::Drill]->setShortcut(QKeySequence("Ctrl+Shift+D"));
+        menu->addAction(toolpathActions[GCode::Drill]);
     }
 
-    for (QAction* action_ : toolpathActionList)
+    for (QAction* action_ : toolpathActions)
         action_->setCheckable(true);
 }
 
@@ -709,7 +700,7 @@ void MainWindow::fileError(const QString& fileName, const QString& error)
 
 void MainWindow::resetToolPathsActions()
 {
-    for (QAction* action : toolpathActionList)
+    for (QAction* action : toolpathActions)
         action->setChecked(false);
 }
 
@@ -746,7 +737,7 @@ void MainWindow::editGcFile(GCode::File* file)
     switch (file->gtype()) {
     case GCode::Null:
     case GCode::Profile:
-        toolpathActionList[GCode::Profile]->triggered();
+        toolpathActions[GCode::Profile]->triggered();
         reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
         break;
     case GCode::Pocket:
@@ -842,16 +833,26 @@ void MainWindow::createDockWidget(int type)
         return;
 
     auto dwContent = new T(m_dockWidget);
-    dwContent->setObjectName(QStringLiteral("dwContents"));
+    dwContent->setObjectName(typeid(T).name());
 
-    for (QAction* action : toolpathActionList)
+    for (QAction* action : toolpathActions)
         action->setChecked(false);
 
-    toolpathActionList[type]->setChecked(true);
+    toolpathActions[type]->setChecked(true);
 
-    if (m_dockWidget->widget())
-        delete m_dockWidget->widget();
-    m_dockWidget->setWidget(dwContent);
+    m_dockWidget->pop();
+    m_dockWidget->push(dwContent);
+
+    //    if (m_dockWidget->widget()) {
+    //        //if(dynamic_cast<>(m_dockWidget->widget()))
+    //        if (m_dockWidget->widget()->objectName() == "ErrorDialog") {
+    //            m_dockWidget->widget()->close();
+    //            QTimer::singleShot(10, [widget = m_dockWidget->widget()] { delete widget; });
+    //        } else
+    //            delete m_dockWidget->widget();
+    //    }
+    //    m_dockWidget->setWidget(dwContent);
+
     m_dockWidget->show();
 }
 
@@ -928,17 +929,44 @@ DockWidget::DockWidget(QWidget* parent)
     setVisible(false);
 }
 
+void DockWidget::push(QWidget* w)
+{
+    qDebug(Q_FUNC_INFO);
+
+    if (widget())
+        widgets.push(widget());
+    if (w)
+        QDockWidget::setWidget(w);
+}
+
+void DockWidget::pop()
+{
+    qDebug(Q_FUNC_INFO);
+
+    if (widget()) {
+        if (widget()->objectName() == "ErrorDialog") {
+            static_cast<QDialog*>(widget())->reject();
+            QTimer::singleShot(1, [this] { widgets.pop(); });
+        } else
+            delete widget();
+    }
+    if (!widgets.isEmpty())
+        QDockWidget::setWidget(widgets.pop());
+}
+
 void DockWidget::closeEvent(QCloseEvent* event)
 {
-    delete widget();
+    qDebug(Q_FUNC_INFO);
+
+    pop();
     event->accept();
 }
 
 void DockWidget::showEvent(QShowEvent* event)
 {
+    qDebug(Q_FUNC_INFO);
+
     event->ignore();
-    //        close();
-    //        QDockWidget::showEvent(event);
     if (widget() == nullptr)
         QTimer::singleShot(1, this, &QDockWidget::close);
 }

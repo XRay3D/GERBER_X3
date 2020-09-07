@@ -1,6 +1,7 @@
 #include "erroritem.h"
 #include <QPainter>
 #include <QTime>
+#include <QtMath>
 
 ErrorItem::ErrorItem(const Paths& paths, double area)
     : m_area(area)

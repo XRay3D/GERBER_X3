@@ -3,9 +3,7 @@
 
 #include "graphicsview.h"
 #include "edid.h"
-#include "forms/thermal/thermalmodel.h"
-#include "forms/thermal/thermalnode.h"
-#include "forms/thermal/thermalpreviewitem.h"
+#include "thermal.h"
 #include "gi/bridgeitem.h"
 #include "mainwindow.h"
 #include "qdruler.h"
@@ -19,6 +17,7 @@
 #include <QtWidgets>
 
 constexpr double zoomFactor = 1.5;
+constexpr double zoomFactor2 = 1.7;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
@@ -96,10 +95,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     App::m_graphicsView = this;
 }
 
-GraphicsView::~GraphicsView()
-{
-    App::m_graphicsView = nullptr;
-}
+GraphicsView::~GraphicsView() { App::m_graphicsView = nullptr; }
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
 {
@@ -148,7 +144,7 @@ void GraphicsView::zoomIn()
         return;
 
     if (GlobalSettings::guiSmoothScSh()) {
-        anim(this, "scale", getScale(), getScale() * zoomFactor);
+        anim(this, "scale", getScale(), getScale() * zoomFactor2);
     } else {
         scale(zoomFactor, zoomFactor);
         updateRuler();
@@ -160,7 +156,7 @@ void GraphicsView::zoomOut()
     if (getScale() < 1.0)
         return;
     if (GlobalSettings::guiSmoothScSh()) {
-        anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor));
+        anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor2));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
         updateRuler();
@@ -236,8 +232,7 @@ QRectF GraphicsView::getViewRect()
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
-    const int scbarScale = 3;
-
+    constexpr int scbarScale = 2;
     const auto delta = event->angleDelta().y();
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
@@ -398,37 +393,26 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     Shapes::Constructor::updateShape(point);
     QGraphicsView::mouseMoveEvent(event);
 }
-class PropertyAnimation : public QPropertyAnimation {
-public:
-    PropertyAnimation(QObject* target, const QByteArray& propertyName, QObject* parent = nullptr)
-        : QPropertyAnimation(target, propertyName, parent)
-    {
-    }
-    ~PropertyAnimation()
-    {
-        qDebug() << "~PropertyAnimation()";
-    }
-};
+
 template <class T>
 void GraphicsView::anim(QObject* target, const QByteArray& propertyName, T begin, T end)
 {
-    auto* animation = new PropertyAnimation(target, propertyName);
-    //    connect(animation, &QPropertyAnimation::finished, this, &GraphicsView::updateRuler);
-    connect(animation, &QPropertyAnimation::finished, [animation, propertyName, end, this] {
-        delete animation;
+    auto* animation = new QPropertyAnimation(target, propertyName);
+    connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName, end);
         updateRuler();
     });
     if constexpr (std::is_same_v<T, QRectF>) {
-        animation->setDuration(100);
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::InOutSine));
+        animation->setDuration(200);
+    } else if constexpr (std::is_same_v<decltype(target), QScrollBar>) {
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(50);
     } else {
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::InOutSine));
         animation->setDuration(100);
     }
     animation->setStartValue(begin);
     animation->setEndValue(end);
-    animation->start();
-    //    QTimer::singleShot(animation->duration() + 1, [animation, propertyName, end, this] {
-    //        delete animation;
-    //        setProperty(propertyName, end);
-    //    });
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }

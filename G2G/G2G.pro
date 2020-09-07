@@ -86,11 +86,6 @@ HEADERS += \
     forms/pocketoffsetform.h \
     forms/pocketrasterform.h \
     forms/profileform.h \
-    forms/thermal/thermaldelegate.h \
-    forms/thermal/thermalform.h \
-    forms/thermal/thermalmodel.h \
-    forms/thermal/thermalnode.h \
-    forms/thermal/thermalpreviewitem.h \
     forms/voronoiform.h \
     gi/aperturepathitem.h \
     gi/bridgeitem.h \
@@ -137,11 +132,6 @@ SOURCES += \
     forms/pocketoffsetform.cpp \
     forms/pocketrasterform.cpp \
     forms/profileform.cpp \
-    forms/thermal/thermaldelegate.cpp \
-    forms/thermal/thermalform.cpp \
-    forms/thermal/thermalmodel.cpp \
-    forms/thermal/thermalnode.cpp \
-    forms/thermal/thermalpreviewitem.cpp \
     forms/voronoiform.cpp \
     gi/aperturepathitem.cpp \
     gi/bridgeitem.cpp \
@@ -176,7 +166,6 @@ FORMS += \
     forms/pocketoffsetform.ui \
     forms/pocketrasterform.ui \
     forms/profileform.ui \
-    forms/thermal/thermalform.ui \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
@@ -196,6 +185,7 @@ include(../gcode/gcode.pri)
 include(../gerber/gerber.pri)
 include(../graphicsview/graphicsview.pri)
 include(../shapes/shapes.pri)
+include(../thermal/thermal.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true

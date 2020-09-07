@@ -54,6 +54,8 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
 
 PocketRasterForm::~PocketRasterForm()
 {
+    qDebug(Q_FUNC_INFO);
+
     MySettings settings;
     settings.beginGroup("PocketRasterForm");
     settings.setValue(ui->cbxPass);

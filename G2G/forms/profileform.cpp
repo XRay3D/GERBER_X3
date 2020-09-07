@@ -64,6 +64,8 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 ProfileForm::~ProfileForm()
 {
+    qDebug(Q_FUNC_INFO);
+
     MySettings settings;
     settings.beginGroup("ProfileForm");
     settings.setValue(ui->dsbxBridgeLenght);

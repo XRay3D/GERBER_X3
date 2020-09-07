@@ -2,6 +2,7 @@
 
 #include "recent.h"
 #include "ui_mainwindow.h"
+#include <QStack>
 #include <QThread>
 
 namespace Gerber {
@@ -31,6 +32,7 @@ public:
     // QMainWindow interface
     QMenu* createPopupMenu() override;
     const DockWidget* dockWidget() const { return m_dockWidget; }
+    DockWidget* dockWidget() { return m_dockWidget; }
 
 signals:
     void parseGerberFile(const QString& filename);
@@ -62,7 +64,7 @@ private:
     Project* m_project;
     bool openFlag;
 
-    QMap<int, QAction*> toolpathActionList;
+    QMap<int, QAction*> toolpathActions;
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
 
@@ -125,9 +127,15 @@ protected:
 
 class DockWidget : public QDockWidget {
     Q_OBJECT
+    QStack<QWidget*> widgets;
+    void setWidget(QWidget*) { }
+
 public:
     explicit DockWidget(QWidget* parent = nullptr);
     ~DockWidget() override = default;
+
+    void push(QWidget* w);
+    void pop();
 
     // QWidget interface
 protected:
