@@ -7,7 +7,7 @@
 
 #include <QFile>
 #include <cmath> // pow()
-#include <settings.h>
+#include "settings.h"
 
 using namespace Excellon;
 

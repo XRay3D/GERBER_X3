@@ -1,14 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "toolitem.h"
-#include "tooldatabase.h"
-#include "toolmodel.h"
-
 #include <QIcon>
-#include <QJsonArray>
-#include <QPixmap>
+#include <QModelIndex>
+#include <QVariant>
 
 bool ToolItem::m_deleteEnable = false;
 
@@ -146,7 +142,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
         }
     case Qt::DecorationRole:
         if (index.column() == 0) {
-            if(m_toolId)
+            if (m_toolId)
                 return ToolHolder::tools[m_toolId].icon();
             else
                 return QIcon::fromTheme("folder-sync");

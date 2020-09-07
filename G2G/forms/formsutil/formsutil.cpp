@@ -3,18 +3,21 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "formsutil.h"
+#include "errordialog.h"
 
+#include "gbrfile.h"
+#include "gcode.h"
+#include "gi/erroritem.h"
 #include "project.h"
+#include "scene.h"
 #include <QEvent>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTimer>
-#include <gcode.h>
-#include <qprogressdialog.h>
-#include <scene.h>
-#include <gbrfile.h>
+#include "qprogressdialog.h"
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
@@ -22,33 +25,33 @@ FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
     , fileCount(1)
-    , pd(new QProgressDialog(this))
+    , progressDialog(new QProgressDialog(this))
 {
     m_tpc->moveToThread(&thread);
-    connect(m_tpc, &GCode::Creator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
+
     connect(&thread, &QThread::finished, m_tpc, &QObject::deleteLater);
+
+    connect(m_tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress, Qt::QueuedConnection);
+    connect(m_tpc, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler, Qt::QueuedConnection);
+    connect(m_tpc, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler, Qt::QueuedConnection);
+
+    connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
+
     connect(this, &FormsUtil::createToolpath, m_tpc, qOverload<>(&GCode::Creator::createGc));
-    connect(this, &FormsUtil::createToolpath, [this] {
-        if (!fileCount)
-            fileCount = 1;
-        m_tpc->msg = m_fileName;
-        pd->setLabelText(m_tpc->msg);
-        m_timerId = startTimer(100);
-    });
+    connect(this, &FormsUtil::createToolpath, this, &FormsUtil::startProgress);
+
     thread.start(QThread::LowPriority /*HighestPriority*/);
 
-    pd->setMinimumDuration(100);
-    pd->setModal(true);
-    pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
-    pd->setAutoClose(false);
-    pd->setAutoReset(false);
-    pd->reset();
-    connect(pd, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
+    progressDialog->setMinimumDuration(100);
+    progressDialog->setModal(true);
+    progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+    progressDialog->setAutoClose(false);
+    progressDialog->setAutoReset(false);
+    progressDialog->reset();
 }
 
 FormsUtil::~FormsUtil()
 {
-    qDebug(Q_FUNC_INFO);
     thread.quit();
     thread.wait();
 }
@@ -56,13 +59,41 @@ FormsUtil::~FormsUtil()
 void FormsUtil::cancel()
 {
     m_tpc->cancel();
-    killTimer(m_timerId);
-    m_timerId = 0;
-    pd->reset();
-    pd->hide();
+    stopProgress();
 }
 
-void FormsUtil::setFile(GCode::File* file)
+void FormsUtil::errorHandler(int)
+{
+    stopProgress();
+    flikerTimerId = startTimer(60);
+    if (ErrorDialog(m_tpc->items, this).exec()) {
+        startProgress();
+        m_tpc->proceed();
+    } else {
+        m_tpc->cancel();
+    }
+    killTimer(flikerTimerId);
+    flikerTimerId = 0;
+}
+
+void FormsUtil::startProgress()
+{
+    if (!fileCount)
+        fileCount = 1;
+    m_tpc->msg = m_fileName;
+    progressDialog->setLabelText(m_tpc->msg);
+    progressTimerId = startTimer(100);
+}
+
+void FormsUtil::stopProgress()
+{
+    killTimer(progressTimerId);
+    progressTimerId = 0;
+    progressDialog->reset();
+    progressDialog->hide();
+}
+
+void FormsUtil::fileHandler(GCode::File* file)
 {
     if (--fileCount == 0)
         cancel();
@@ -85,12 +116,15 @@ void FormsUtil::setFile(GCode::File* file)
 
 void FormsUtil::timerEvent(QTimerEvent* event)
 {
-    if (event->timerId() == m_timerId && pd && m_tpc) {
+    if (event->timerId() == progressTimerId && progressDialog && m_tpc) {
         const auto [max, val] = m_tpc->getProgress();
-        pd->setMaximum(max);
-        pd->setValue(val);
+        progressDialog->setMaximum(max);
+        progressDialog->setValue(val);
         //qDebug() << "timerEvent" << max << val;
-        pd->setLabelText(m_tpc->msg);
+        progressDialog->setLabelText(m_tpc->msg);
+    }
+    if (event->timerId() == flikerTimerId) {
+        App::scene()->update();
     }
 }
 

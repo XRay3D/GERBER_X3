@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "gccreator.h"
 namespace GCode {
 class RasterCreator : public Creator {
@@ -12,6 +10,7 @@ public:
     // Creator interface
 protected:
     void create() override; // Creator interface
+    GCodeType type() override { return Raster; }
 
 private:
     enum {
@@ -27,4 +26,3 @@ private:
     IntRect rect;
 };
 }
-

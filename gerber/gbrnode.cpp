@@ -3,6 +3,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gbrnode.h"
+#include "compdialog.h"
 #include "project.h"
 #include <QAction>
 #include <QDialog>
@@ -12,8 +13,8 @@
 #include <QTextBrowser>
 #include <QTimer>
 #include <filetree/treeview.h>
-#include <qboxlayout.h>
-#include <scene.h>
+#include "qboxlayout.h"
+#include "scene.h"
 
 namespace Gerber {
 
@@ -126,7 +127,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return tbStrList[file()->side()];
+            return sideStrList[file()->side()];
         case Qt::EditRole:
             return static_cast<bool>(file()->side());
         case Qt::UserRole:
@@ -213,6 +214,15 @@ void Node::menu(QMenu* menu, TreeView* tv) const
         dialog->exec();
         delete dialog;
     });
+
+    if (!App::project()->file<Gerber::File>(m_id)->itemGroup(File::Components)->isEmpty()) {
+        menu->addAction(QIcon(), tr("Show &Components"), [this, tv] {
+            ComponentsDialog dialog(tv);
+            dialog.setFile(m_id);
+            dialog.exec();
+        });
+    }
+
     menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &TreeView::closeFile);
 }
 }

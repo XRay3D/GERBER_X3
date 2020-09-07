@@ -2,7 +2,7 @@
 
 #include <QGraphicsItem>
 #include <QPen>
-#include <myclipper.h>
+#include "myclipper.h"
 
 using namespace ClipperLib;
 
@@ -21,6 +21,8 @@ enum GraphicsItemType {
     GiSlotPr, // DrillForm
     GiDrillPr, // DrillForm
     GiApetrurePr, // DrillForm
+
+    GiError,
 
     GiShapeC = QGraphicsItem::UserType + 100,
     GiShapeR,

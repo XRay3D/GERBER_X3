@@ -4,6 +4,8 @@
 
 #include "mainwindow.h"
 #include "aboutform.h"
+#include "excellondialog.h"
+#include "exparser.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketoffsetform.h"
@@ -11,24 +13,24 @@
 #include "forms/profileform.h"
 #include "forms/thermal/thermalform.h"
 #include "forms/voronoiform.h"
+#include "gbrnode.h"
+#include "gbrparser.h"
+#include "gcode.h"
 #include "gi/bridgeitem.h"
+#include "gi/gerberitem.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QOperatingSystemVersion>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QProgressDialog>
 #include <QTableView>
 #include <QToolBar>
-#include <excellondialog.h>
-#include <exparser.h>
-#include <gbrnode.h>
-#include <gbrparser.h>
-#include <gcode.h>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -104,10 +106,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // (need for debug)
+    if constexpr (0) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Pocket]->triggered(); });
-        QTimer::singleShot(170, [this] { dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        QTimer::singleShot(150, [this] { toolpathActionList[GCode::Profile]->triggered(); });
+        QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
 }
@@ -123,7 +125,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (qApp->applicationDirPath().contains("GERBER_X2/bin") || maybeSave()) {
         writeSettings();
-        dockWidget->close();
+        m_dockWidget->close();
         qApp->closeAllWindows();
         App::fileModel()->closeProject();
         event->accept();
@@ -135,7 +137,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 bool MainWindow::closeProject()
 {
     if (maybeSave()) {
-        dockWidget->close();
+        m_dockWidget->close();
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         m_project->close();
@@ -159,6 +161,10 @@ void MainWindow::initWidgets()
 
 void MainWindow::createActions()
 {
+    m_dockWidget = new DockWidget(this);
+    m_dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
+
     // fileMenu
     createActionsFile();
     // zoomToolBar
@@ -381,12 +387,8 @@ void MainWindow::createActionsToolPath()
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
 
-    dockWidget = new DockWidget(this);
-    dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
-
-    connect(dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
-    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+    connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
+    addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
     {
         toolpathActionList[GCode::Profile] = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
@@ -745,7 +747,7 @@ void MainWindow::editGcFile(GCode::File* file)
     case GCode::Null:
     case GCode::Profile:
         toolpathActionList[GCode::Profile]->triggered();
-        reinterpret_cast<FormsUtil*>(dockWidget->widget())->editFile(file);
+        reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
         break;
     case GCode::Pocket:
     case GCode::Voronoi:
@@ -836,10 +838,10 @@ QString MainWindow::strippedName(const QString& fullFileName)
 template <class T>
 void MainWindow::createDockWidget(int type)
 {
-    if (dynamic_cast<T*>(dockWidget->widget()))
+    if (dynamic_cast<T*>(m_dockWidget->widget()))
         return;
 
-    auto dwContent = new T(dockWidget);
+    auto dwContent = new T(m_dockWidget);
     dwContent->setObjectName(QStringLiteral("dwContents"));
 
     for (QAction* action : toolpathActionList)
@@ -847,10 +849,10 @@ void MainWindow::createDockWidget(int type)
 
     toolpathActionList[type]->setChecked(true);
 
-    if (dockWidget->widget())
-        delete dockWidget->widget();
-    dockWidget->setWidget(dwContent);
-    dockWidget->show();
+    if (m_dockWidget->widget())
+        delete m_dockWidget->widget();
+    m_dockWidget->setWidget(dwContent);
+    m_dockWidget->show();
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent* event)
@@ -861,7 +863,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent* event)
 QMenu* MainWindow::createPopupMenu()
 {
     QMenu* menu = QMainWindow::createPopupMenu();
-    menu->removeAction(dockWidget->toggleViewAction());
+    menu->removeAction(m_dockWidget->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
     menu->removeAction(treeDockWidget->toggleViewAction());
     menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
@@ -913,4 +915,30 @@ void MainWindow::showEvent(QShowEvent* event)
 {
     //toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
+}
+
+//////////////////////////////////////////////////////
+/// \brief DockWidget::DockWidget
+/// \param parent
+///
+DockWidget::DockWidget(QWidget* parent)
+    : QDockWidget(parent)
+{
+    hide();
+    setVisible(false);
+}
+
+void DockWidget::closeEvent(QCloseEvent* event)
+{
+    delete widget();
+    event->accept();
+}
+
+void DockWidget::showEvent(QShowEvent* event)
+{
+    event->ignore();
+    //        close();
+    //        QDockWidget::showEvent(event);
+    if (widget() == nullptr)
+        QTimer::singleShot(1, this, &QDockWidget::close);
 }

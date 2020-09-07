@@ -7,10 +7,10 @@
 #include "gbrnode.h"
 #include "project.h"
 #include <QFileInfo>
-#include <app.h>
-#include <exfile.h>
+#include "app.h"
+#include "exfile.h"
 #include <forms/drillform/drillform.h>
-#include <mainwindow.h>
+#include "mainwindow.h"
 
 namespace Excellon {
 Node::Node(int id)
@@ -80,7 +80,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
-                return tbStrList[file()->side()];
+                return sideStrList[file()->side()];
             case Qt::EditRole:
                 return static_cast<bool>(file()->side());
             case Qt::UserRole:

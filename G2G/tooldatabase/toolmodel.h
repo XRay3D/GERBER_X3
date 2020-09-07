@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QAbstractItemModel>
 
 class ToolItem;
@@ -54,5 +52,3 @@ private:
         return rootItem;
     }
 };
-
-

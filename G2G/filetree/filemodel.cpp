@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMimeData>
-#include <project.h>
+#include "project.h"
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)

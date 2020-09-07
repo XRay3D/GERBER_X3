@@ -1,14 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "tooldatabase.h"
-#include "tooleditform.h"
 #include "toolitem.h"
-#include "tooltreeview.h"
 #include "ui_tooldatabase.h"
 #include <QKeyEvent>
 #include <QMessageBox>
+
 
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)

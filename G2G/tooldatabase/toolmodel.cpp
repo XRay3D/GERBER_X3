@@ -1,19 +1,14 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "toolmodel.h"
-#include "tooldatabase.h"
 #include "toolitem.h"
-
 #include <QApplication>
-#include <QDebug>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QMessageBox>
+#include <QJsonObject>
 #include <QMimeData>
-#include <QStandardItem>
 
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
@@ -235,7 +230,6 @@ void ToolModel::exportTools()
     do {
         if (file.open(QIODevice::WriteOnly))
             break;
-        qWarning() << file.errorString();
         return;
     } while (1);
 
@@ -299,7 +293,6 @@ void ToolModel::importTools()
     do {
         if (file.open(QIODevice::ReadOnly))
             break;
-        qWarning() << file.errorString();
         return;
     } while (0);
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));

@@ -14,5 +14,6 @@ private:
 
 protected:
     void create() override; // Creator interface
+    GCodeType type() override { return Pocket; }
 };
 }

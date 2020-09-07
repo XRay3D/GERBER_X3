@@ -1,16 +1,20 @@
 #pragma once
 
 #include "gctypes.h"
+#include "myclipper.h"
+#include <QMutex>
 #include <QObject>
-#include <QThread>
-#include <QThreadPool>
-#include <QtConcurrent>
-#include <myclipper.h>
-#include <tooldatabase/tool.h>
+#include <QWaitCondition>
+//#include <QThread>
+//#include <QThreadPool>
+//#include <QtConcurrent>
+//#include <tooldatabase/tool.h>
 
 using namespace ClipperLib;
 
 void dbgPaths(Paths ps, const QString& fileName, const Tool& tool = { 1 });
+
+class ErrorItem;
 
 namespace GCode {
 
@@ -44,7 +48,9 @@ public:
     void createGc();
     void createGc(const GCodeParams& gcp);
 
-    void cancel() { m_cancel = true; }
+    void cancel();
+
+    void proceed();
 
     GCodeParams getGcp() const;
     void setGcp(const GCodeParams& gcp);
@@ -54,15 +60,22 @@ public:
     static void progress();
     QString msg;
 
+    QVector<ErrorItem*> items;
+
 signals:
     void fileReady(GCode::File* file);
+    void canceled();
+    void errorOccurred(int = 0);
 
 protected:
+    bool createability(bool side);
+
     bool pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr);
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
     virtual void create() = 0;
+    virtual GCodeType type() = 0;
 
     inline static bool m_cancel;
     inline static int m_progressMax;
@@ -80,7 +93,14 @@ protected:
     double m_dOffset = 0.0;
     cInt m_stepOver = 0;
     GCodeParams m_gcp;
+
+    void isContinueCalc();
+
+private:
+    QMutex mutex;
+    QWaitCondition condition;
 };
 
 } // namespace GCode
-#include <app.h>
+
+#include "app.h"

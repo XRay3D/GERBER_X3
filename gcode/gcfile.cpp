@@ -6,15 +6,19 @@
 
 #include "forms/gcodepropertiesform.h"
 
+#include "gi/aperturepathitem.h"
+#include "gi/drillitem.h"
+#include "gi/gerberitem.h"
+#include "gi/pathitem.h"
+#include "graphicsview.h"
+#include "point.h"
+#include "project.h"
+#include "settings.h"
 #include <QDir>
 #include <QFile>
 #include <QPainter>
 #include <QTextStream>
 #include <gi/itemgroup.h>
-#include <graphicsview.h>
-#include <point.h>
-#include <project.h>
-#include <settings.h>
 
 namespace GCode {
 

@@ -3,8 +3,8 @@
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>
-#include <app.h>
-#include <project.h>
+#include "app.h"
+#include "project.h"
 
 class AbstractFile;
 class TreeView;
@@ -47,7 +47,7 @@ protected:
     const int m_id;
     const int m_type;
 
-    const QStringList tbStrList;
+    const QStringList sideStrList;
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
     inline AbstractFile* file() const { return App::project()->file(m_id); }

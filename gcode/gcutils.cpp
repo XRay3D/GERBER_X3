@@ -7,7 +7,7 @@
 #include "project.h"
 #include "settings.h"
 #include <QFileInfo>
-#include <math.h>
+#include "math.h"
 
 namespace GCode {
 

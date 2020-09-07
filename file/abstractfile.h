@@ -2,11 +2,11 @@
 
 #include <QDateTime>
 #include <QFileInfo>
-#include <app.h>
-#include <datastream.h>
+#include "app.h"
+#include "datastream.h"
 #include <gi/itemgroup.h>
-#include <myclipper.h>
-#include <splashscreen.h>
+#include "myclipper.h"
+#include "splashscreen.h"
 
 using namespace ClipperLib;
 

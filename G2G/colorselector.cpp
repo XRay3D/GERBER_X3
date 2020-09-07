@@ -6,8 +6,6 @@
 #include "ui_colorselector.h"
 
 #include <QColorDialog>
-#include <QDebug>
-#include <qevent.h>
 
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)

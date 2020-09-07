@@ -4,7 +4,7 @@
 
 #include "graphicsitem.h"
 #include <QObject>
-#include <gbrcomponent.h>
+#include "gbrcomponent.h"
 
 class ComponentItem final : public GraphicsItem {
     const Gerber::Component& m_component;

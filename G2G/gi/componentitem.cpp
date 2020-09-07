@@ -5,8 +5,8 @@
 #include "componentitem.h"
 
 #include <QPainter>
-#include <abstractfile.h>
-#include <graphicsview.h>
+#include "abstractfile.h"
+#include "graphicsview.h"
 
 ComponentItem::ComponentItem(const Gerber::Component& component, AbstractFile* file)
     : GraphicsItem(file)

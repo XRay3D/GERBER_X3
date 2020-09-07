@@ -7,7 +7,7 @@
 #include "gbrtypes.h"
 #include <QObject>
 #include <QStack>
-#include <parser.h>
+#include "parser.h"
 
 namespace Gerber {
 

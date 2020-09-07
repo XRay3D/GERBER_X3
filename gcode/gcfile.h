@@ -1,10 +1,11 @@
 #pragma once
 
 //#include "gctypes.h"
+#include "abstractfile.h"
 #include "gcutils.h"
-#include <abstractfile.h>
 
 class Project;
+class PathItem;
 
 namespace GCode {
 

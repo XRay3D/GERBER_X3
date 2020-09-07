@@ -10,7 +10,7 @@
 #include <QTextDocument>
 #include <QTextFormat>
 #include <QtMath>
-#include <settings.h>
+#include "settings.h"
 
 QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
     : QWidget(parent)

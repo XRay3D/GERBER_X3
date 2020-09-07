@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "ui_tooleditdialog.h"
 #include <QDialog>
 
@@ -15,5 +13,3 @@ public:
     Tool tool() const;
     void setTool(const Tool& tool);
 };
-
-

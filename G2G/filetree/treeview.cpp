@@ -18,7 +18,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QtWidgets>
-#include <gcode.h>
+#include "gcode.h"
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)

@@ -5,27 +5,28 @@
 #include "gccreator.h"
 #include "forms/gcodepropertiesform.h"
 #include "gcfile.h"
+#include "gi/erroritem.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
-#include <errno.h>
+#include "errno.h"
 #include <filetree/filemodel.h>
-#include <gbraperture.h>
-#include <gcvoronoi.h>
+#include "gbraperture.h"
+#include "gcvoronoi.h"
 #include <gi/bridgeitem.h>
 #include <limits>
-#include <locale.h>
-#include <project.h>
-#include <scene.h>
-#include <settings.h>
+#include "locale.h"
+#include "project.h"
+#include "scene.h"
+#include "settings.h"
 #include <stdexcept>
-#include <stdio.h>
-#include <string.h>
+#include "stdio.h"
+#include "string.h"
 
-void dbgPaths(Paths ps, const QString& fileName, const Tool& tool )
+void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
 {
     if (ps.isEmpty()) {
         qDebug("dbgPaths - ps.isEmpty()");
@@ -125,6 +126,12 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k)
     /*********************************/
     m_groupedPss.clear();
     grouping(polyTree.GetFirst(), group);
+
+    if (group == CutoffPaths) {
+        if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
+            m_groupedPss.removeFirst();
+    }
+
     return m_groupedPss;
 }
 ////////////////////////////////////////////////////////////////
@@ -188,7 +195,24 @@ void Creator::createGc()
     QElapsedTimer t;
     t.start();
     try {
-        qDebug() << "Creator::createGc() started" << t.elapsed();
+        if (type() == Profile || //
+            type() == Pocket || //
+            type() == Raster) {
+            switch (m_gcp.side()) {
+            case Outer:
+                groupedPaths(CutoffPaths, m_gcp.tools.first().getDiameter(m_gcp.getDepth()) * uScale + 100);
+                createability(CutoffPaths);
+                break;
+            case Inner:
+                groupedPaths(CopperPaths);
+                createability(CopperPaths);
+                break;
+            case On:
+                break;
+            }
+        }
+
+        //qDebug() << "Creator::createGc() started" << t.elapsed();
         create();
         qDebug() << "Creator::createGc() ended" << t.elapsed();
     } catch (Cancel&) {
@@ -203,6 +227,18 @@ void Creator::createGc(const GCodeParams& gcp)
 {
     m_gcp = gcp;
     createGc();
+}
+
+void Creator::cancel() // direct connection!!
+{
+    m_cancel = true;
+    condition.wakeAll();
+}
+
+void Creator::proceed() // direct connection!!
+{
+    m_cancel = false;
+    condition.wakeAll();
 }
 
 GCode::File* Creator::file() const { return m_file; }
@@ -402,6 +438,17 @@ void Creator::mergeSegments(Paths& paths, double glue)
     } while (size != paths.size());
 }
 
+void Creator::isContinueCalc()
+{
+    emit errorOccurred();
+    mutex.lock();
+    condition.wait(&mutex);
+    mutex.unlock();
+    items.clear();
+    if (m_cancel)
+        throw Cancel();
+}
+
 void Creator::progress(int progressMax)
 {
     if (App::m_creator != nullptr)
@@ -431,6 +478,107 @@ void Creator::progress()
             else
                 m_progressMax *= 2;
         }
+}
+
+bool Creator::createability(bool side)
+{
+    //    Paths wpe;
+    const double d = m_gcp.tools.last().getDiameter(m_gcp.getDepth()) * uScale;
+    const double r = d * 0.5;
+    const double testArea = d * d - M_PI * r * r;
+
+    Paths srcPaths;
+    for (int pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
+        srcPaths.append(m_groupedPss[pIdx]);
+    }
+
+    Paths frPaths;
+    {
+        ClipperOffset offset(uScale);
+        offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
+        offset.Execute(frPaths, -r);
+        if (GlobalSettings::gbrCleanPolygons())
+            CleanPolygons(frPaths, uScale * 0.0005);
+        offset.Clear();
+        offset.AddPaths(frPaths, jtRound, etClosedPolygon);
+        offset.Execute(frPaths, r + 100);
+    }
+    if (side == CopperPaths)
+        ReversePaths(srcPaths);
+    {
+        Clipper clipper;
+        clipper.AddPaths(frPaths, ptClip);
+        clipper.AddPaths(srcPaths, ptSubject);
+        clipper.Execute(ctDifference, frPaths, pftPositive);
+    }
+
+    if (!frPaths.isEmpty()) {
+        PolyTree polyTree;
+        {
+            Clipper clipper;
+            clipper.AddPaths(frPaths, ptSubject, true);
+            IntRect r(clipper.GetBounds());
+            int k = uScale;
+            Path outer = { IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
+                IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k) };
+            clipper.AddPath(outer, ptSubject, true);
+            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+        }
+
+        auto test = [&srcPaths, side](PolyNode* node) -> bool {
+            if (node->ChildCount() > 0) {
+                return true;
+            } else {
+                QSet<int> skip;
+                for (auto& point : node->Contour) {
+                    for (int i = 0; i < srcPaths.size(); ++i) {
+                        if (skip.contains(i))
+                            continue;
+                        const auto& path = srcPaths[i];
+                        if (int fl = PointInPolygon(point, path); side == CopperPaths || fl == -1) { ////////////////
+                            skip.insert(i);
+                            break;
+                        }
+                    }
+                }
+                if (skip.size() > 1) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const std::function<void(PolyNode*, double)> creator = [&creator, test, testArea, this](PolyNode* node, double area) {
+            if (node && !node->IsHole()) { // init run
+                for (int i = 0; i < node->ChildCount(); ++i) {
+                    if (area = -Area(node->Childs[i]->Contour); testArea < area) {
+                        if (test(node->Childs[i])) {
+                            creator(node->Childs[i], area);
+                        }
+                    }
+                }
+            } else {
+                static Paths paths;
+                paths.clear();
+                paths.reserve(node->ChildCount() + 1);
+                paths.append(std::move(node->Contour)); // init path
+                for (int i = 0; i < node->ChildCount(); ++i) {
+                    area += Area(node->Childs[i]->Contour);
+                    paths.append(std::move(node->Childs[i]->Contour));
+                }
+                items.append(new ErrorItem(paths, area * dScale * dScale));
+                for (int i = 0; i < node->ChildCount(); ++i) {
+                    creator(node->Childs[i], area);
+                }
+            }
+        };
+        creator(polyTree.GetFirst(), 0);
+    }
+
+    if (!items.isEmpty())
+        isContinueCalc();
+
+    return true;
 }
 
 GCodeParams Creator::getGcp() const { return m_gcp; }
