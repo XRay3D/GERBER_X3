@@ -1,25 +1,16 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "bridgeitem.h"
-#include "itemgroup.h"
 
-#include <QApplication>
-#include <QDebug>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include "gcode.h"
 #include "graphicsview.h"
-#include <limits>
-#include "math.h"
-#include "scene.h"
+#include <QPainter>
 
 BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
     : m_ptr(ptr)
+    , m_side(side)
     , m_lenght(lenght)
     , m_size(size)
-    , m_side(side)
 {
     connect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
@@ -106,8 +97,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                     const QLineF l1(pos, pt1);
                     const QLineF l2(pos, pt2);
                     const QLineF l3(pt2, pt1);
-                 //pvs   if (lastAngle == 0.0)
-                  //pvs        lastAngle = l3.normalVector().angle();
+                    //pvs   if (lastAngle == 0.0)
+                    //pvs        lastAngle = l3.normalVector().angle();
                     const double p = (l1.length() + l2.length() + l3.length()) / 2;
                     if (l1.length() < l3.length() && l2.length() < l3.length()) {
                         const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));

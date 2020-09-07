@@ -19,7 +19,6 @@ signals:
     void select(const QModelIndex&);
 
 public:
-
     enum RootNodes {
         GerberFiles,
         DrillFiles,

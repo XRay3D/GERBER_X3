@@ -1,8 +1,8 @@
 #pragma once
 
+#include "myclipper.h"
 #include <QGraphicsItem>
 #include <QPen>
-#include "myclipper.h"
 
 using namespace ClipperLib;
 
@@ -48,7 +48,7 @@ class GraphicsItem : public QGraphicsItem {
 
 public:
     explicit GraphicsItem(AbstractFile* file = nullptr);
-    ~GraphicsItem() override = default; // {            if (m_ig)                m_ig->takeAt(m_ig->indexOf(this));    }
+    ~GraphicsItem() override = default;
 
     QBrush brush() const;
     QPen pen() const;
@@ -57,10 +57,6 @@ public:
     virtual Paths paths() const = 0;
     virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() { }
-
-    //    void setItemGroup(ItemGroup* itemGroup);
-    //    ItemGroup* parentItemGroup() const;
-    //    QPointF center() const;
 
     void setPenColor(QColor& penColor);
     void setBrushColor(QColor& brushColor);
@@ -80,7 +76,4 @@ protected:
     QPainterPath m_shape;
     QRectF m_rect;
     int m_id = -1;
-
-    //private:
-    //    ItemGroup* m_ig = nullptr;
 };

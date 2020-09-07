@@ -1,12 +1,6 @@
 #pragma once
 
 #include "filemodel.h"
-
-#include <QItemSelection>
-#include <QItemSelectionModel>
-#include <QPushButton>
-#include <QStandardItemModel>
-#include <QTimer>
 #include <QTreeView>
 
 class TreeView : public QTreeView {
@@ -27,11 +21,8 @@ private:
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-    //void hideOther();
 
     QModelIndex m_menuIndex;
-    //void closeFile();
-    //void saveGcodeFile();
     void showExcellonDialog();
 
 protected:

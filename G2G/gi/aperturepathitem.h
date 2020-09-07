@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "graphicsitem.h"
 
 namespace Gerber {
@@ -24,10 +22,8 @@ protected:
     const Path& m_path;
     mutable QPainterPath m_selectionShape;
     mutable double m_scale = std::numeric_limits<double>::max();
+
     // QGraphicsItem interface
-protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
-
-

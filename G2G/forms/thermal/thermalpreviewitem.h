@@ -1,11 +1,9 @@
 #pragma once
 
-
-
-#include "gi/graphicsitem.h"
-#include "tooldatabase/tool.h"
 #include "gbrtypes.h"
-#include "myclipper.h"
+#include "gi/graphicsitem.h"
+
+class Tool;
 
 class ThermalNode;
 
@@ -62,5 +60,3 @@ private:
     int m_count = 4;
     ThermalNode* m_node = nullptr;
 };
-
-

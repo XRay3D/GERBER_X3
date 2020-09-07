@@ -1,24 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcodepropertiesform.h"
 #include "ui_gcodepropertiesform.h"
-#include <QDockWidget>
-#include <QMessageBox>
-#include <QSettings>
-#include <QTimer>
-#include "mainwindow.h"
-#include "project.h"
-#include "scene.h"
-#include "settings.h"
 
-double GCodePropertiesForm::safeZ;
-double GCodePropertiesForm::boardThickness;
-double GCodePropertiesForm::copperThickness;
-double GCodePropertiesForm::clearence;
-double GCodePropertiesForm::plunge;
-double GCodePropertiesForm::glue;
+#include "point.h"
+#include "project.h"
+#include "settings.h"
+#include <QMessageBox>
 
 GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)

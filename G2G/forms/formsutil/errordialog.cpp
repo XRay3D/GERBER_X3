@@ -1,18 +1,18 @@
 #include "errordialog.h"
 #include "ui_errordialog.h"
 
-#include "app.h"
 #include "gi/erroritem.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "scene.h"
+#include <QAbstractTableModel>
 #include <QHeaderView>
+#include <QIcon>
+#include <QPainter>
 #include <QPushButton>
 #include <QTableView>
 
 Q_DECLARE_METATYPE(ErrorItem*)
-
-//int id = qRegisterMetaType<ErrorItem*>();
 
 enum { IconSize = 32 };
 

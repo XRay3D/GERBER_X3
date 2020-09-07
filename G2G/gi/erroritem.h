@@ -3,7 +3,6 @@
 #include "graphicsitem.h"
 
 class ErrorItem : public QGraphicsItem {
-
     QPainterPath m_shape;
     const double m_area;
 

@@ -1,17 +1,11 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "pocketrasterform.h"
 #include "ui_pocketrasterform.h"
 
-#include <tooldatabase/tooldatabase.h>
-#include <tooldatabase/tooleditdialog.h>
-
-#include "gcode.h"
 #include "scene.h"
 #include "settings.h"
-
 #include <QMessageBox>
 
 PocketRasterForm::PocketRasterForm(QWidget* parent)

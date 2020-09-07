@@ -1,21 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "pocketoffsetform.h"
-#include "filetree/filemodel.h"
-#include "gcodepropertiesform.h"
-#include "tooldatabase/tooldatabase.h"
 #include "ui_pocketoffsetform.h"
-#include <QDockWidget>
-#include <QMessageBox>
-#include <QSettings>
-#include "gbrfile.h"
-#include "gcode.h"
-#include "myclipper.h"
+
 #include "scene.h"
 #include "settings.h"
-#include <tooldatabase/tooleditdialog.h>
+#include <QMessageBox>
 
 enum {
     Offset,

@@ -1,11 +1,8 @@
 #pragma once
 
-#include "tooldatabase/tool.h"
-#include <QThread>
-#include <QVector>
-#include <QWidget>
-#include "abstractfile.h"
 #include "gcode.h"
+#include <QThread>
+#include <QWidget>
 
 namespace GCode {
 class File;
@@ -65,5 +62,3 @@ private:
     int progressTimerId = 0;
     int flikerTimerId = 0;
 };
-
-//Q_DECLARE_METATYPE(QMap<int, QVector<int>>)

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "extypes.h"
 #include <QDialog>
 
@@ -37,5 +35,3 @@ private:
 protected:
     void closeEvent(QCloseEvent* event) override;
 };
-
-

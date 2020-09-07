@@ -1,17 +1,14 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "aperturepathitem.h"
 
+#include "forms/gcodepropertiesform.h"
+#include "gbrfile.h"
+#include "graphicsview.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include "gbrfile.h"
-#include "graphicsview.h"
-#include "myclipper.h"
-
-#include "forms/gcodepropertiesform.h"
 
 AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
     : GraphicsItem(file)

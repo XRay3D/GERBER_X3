@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "thermalpreviewitem.h"
 #include <QIcon>
 #include <QModelIndex>
@@ -62,7 +60,5 @@ private:
     QList<QSharedPointer<ThermalNode>> childItems;
     Qt::CheckState m_checkState = Qt::Checked;
 
-    static ThermalModel* model;
+    inline static ThermalModel* model;
 };
-
-

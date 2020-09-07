@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-#include "point.h"
 #include <QWidget>
 
 namespace Ui {
@@ -19,20 +16,17 @@ public:
     void updatePosDsbxs();
     void updateAll();
 
-    static double safeZ;
-    static double boardThickness;
-    static double copperThickness;
-    static double clearence;
-    static double plunge;
-    static double glue;
+    inline static double safeZ;
+    inline static double boardThickness;
+    inline static double copperThickness;
+    inline static double clearence;
+    inline static double plunge;
+    inline static double glue;
 
 private slots:
     void on_pbResetHome_clicked();
-
     void on_pbResetZero_clicked();
 
 private:
     Ui::GCodePropertiesForm* ui;
 };
-
-

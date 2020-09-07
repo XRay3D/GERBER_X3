@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QStyledItemDelegate>
 
 class ThermalDelegate : public QStyledItemDelegate {
@@ -18,5 +16,3 @@ public:
 
     void emitCommitData();
 };
-
-

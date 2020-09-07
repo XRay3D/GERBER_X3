@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "tooldatabase/tool.h"
 #include <QWidget>
 
@@ -47,5 +45,3 @@ private:
     void setupUi(QWidget* ToolSelectorForm); // setupUi
     void retranslateUi(QWidget* ToolSelectorForm); // retranslateUi
 };
-
-

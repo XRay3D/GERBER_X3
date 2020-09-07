@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <QWidget>
 
 class DoubleSpinBox;
@@ -33,5 +31,3 @@ private:
     void setupUi(QWidget* Form);
     void retranslateUi(QWidget* Form);
 };
-
-

@@ -1,10 +1,7 @@
 #pragma once
 
-
-
-#include "graphicsitem.h"
-#include <QObject>
 #include "gbrcomponent.h"
+#include "graphicsitem.h"
 
 class ComponentItem final : public GraphicsItem {
     const Gerber::Component& m_component;
@@ -28,5 +25,3 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
-
-

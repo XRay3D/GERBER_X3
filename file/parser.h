@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "abstractfile.h"
 #include <QObject>
 
@@ -22,5 +20,3 @@ signals:
 protected:
     AbstractFile* m_file = nullptr;
 };
-
-
