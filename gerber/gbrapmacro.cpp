@@ -1,0 +1,910 @@
+#include "gbrapmacro.h"
+
+#include "mathparser.h"
+#include "scene.h"
+#include <CGAL/Aff_transformation_2.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/General_polygon_set_2.h>
+#include <CGAL/Gps_circle_segment_traits_2.h>
+#include <CGAL/Lazy_exact_nt.h>
+#include <CGAL/Polygon_2.h>
+#include <QGraphicsPathItem>
+#include <QPainterPath>
+#include <QtMath>
+#include <boost/function_output_iterator.hpp>
+#include <cmath>
+#include <list>
+#include <math.h>
+
+using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
+using Point_2 = Kernel::Point_2;
+using Circle_2 = Kernel::Circle_2;
+using Traits_2 = CGAL::Gps_circle_segment_traits_2<Kernel>;
+using Polygon_set_2 = CGAL::General_polygon_set_2<Traits_2>;
+using Polygon_2 = Traits_2::General_polygon_2;
+using Polygon_with_holes_2 = Traits_2::General_polygon_with_holes_2;
+using Curve_2 = Traits_2::Curve_2;
+using X_monotone_curve_2 = Traits_2::X_monotone_curve_2;
+
+// Construct a polygon from a circle.
+Polygon_2 construct_polygon(const Circle_2& circle)
+{
+    // Subdivide the circle into two x-monotone arcs.
+    Traits_2 traits;
+    Curve_2 curve(circle);
+    std::list<CGAL::Object> objects;
+    traits.make_x_monotone_2_object()(curve, std::back_inserter(objects));
+    CGAL_assertion(objects.size() == 2);
+    // Construct the polygon.
+    Polygon_2 pgn;
+    X_monotone_curve_2 arc;
+    std::list<CGAL::Object>::iterator iter;
+    for (iter = objects.begin(); iter != objects.end(); ++iter) {
+        CGAL::assign(arc, *iter);
+        pgn.push_back(arc);
+    }
+    return pgn;
+}
+// Construct a polygon from a rectangle.
+Polygon_2 construct_polygon(const Point_2& p1, const Point_2& p2, const Point_2& p3, const Point_2& p4)
+{
+    Polygon_2 pgn;
+    X_monotone_curve_2 s1(p1, p2);
+    pgn.push_back(s1);
+    X_monotone_curve_2 s2(p2, p3);
+    pgn.push_back(s2);
+    X_monotone_curve_2 s3(p3, p4);
+    pgn.push_back(s3);
+    X_monotone_curve_2 s4(p4, p1);
+    pgn.push_back(s4);
+    return pgn;
+}
+
+//typedef typename Kernel::Point_2 CGAL_Point_2;
+//typedef typename Kernel::Segment_2 CGAL_Segment_2;
+//typedef typename Kernel::Ray_2 CGAL_Ray_2;
+//typedef typename Kernel::Line_2 CGAL_Line_2;
+//typedef typename Kernel::Triangle_2 CGAL_Triangle_2;
+//typedef typename Kernel::Iso_rectangle_2 CGAL_Iso_rectangle_2;
+//QPointF operator()(const CGAL_Point_2& p)
+//{
+//    return QPointF(to_double(p.x()), to_double(p.y()));
+//}
+//QPointF operator()(const CGAL_Circular_arc_point_2& p) const
+//{
+//    return QPointF(to_double(p.x()), to_double(p.y()));
+//}
+//CGAL_Segment_2 operator()(const QLineF& qs) const
+//{
+//    return CGAL_Segment_2(operator()(qs.p1()), operator()(qs.p2()));
+//}
+//QLineF operator()(const CGAL_Segment_2& s) const
+//{
+//    return QLineF(operator()(s.source()), operator()(s.target()));
+//}
+//CGAL_Iso_rectangle_2 operator()(const QRectF& qr) const
+//{
+//    return CGAL_Iso_rectangle_2(operator()(qr.bottomLeft()), operator()(qr.topRight()));
+//}
+//QRectF operator()(const CGAL_Iso_rectangle_2& r) const
+//{
+//    return QRectF(operator()(r[3]), operator()(r[1])).normalized(); // top left, bottom right
+//}
+//QRectF operator()(const CGAL::Bbox_2& bb) const
+//{
+//    return QRectF(bb.xmin(),
+//        bb.ymin(),
+//        bb.xmax() - bb.xmin(),
+//        bb.ymax() - bb.ymin());
+//}
+
+QPainterPath construct_path(const Polygon_2& pgn)
+{
+    QPainterPath result;
+    auto toQRectF = [](const CGAL::Bbox_2& bb) -> QRectF {
+        return QRectF(
+            bb.xmin(),
+            bb.ymin(),
+            bb.xmax() - bb.xmin(),
+            bb.ymax() - bb.ymin());
+    };
+    auto r = toQRectF(pgn.bbox());
+    if (r.width() * r.height() < 0.001)
+        return result;
+    if constexpr (0) {
+        auto current = pgn.curves_begin();
+        auto end = pgn.curves_end();
+        result.moveTo(QPointF(CGAL::to_double(current->source().x()), CGAL::to_double(current->source().y())));
+        do {
+            const auto& curve = *current;
+            const QPointF target = QPointF(CGAL::to_double(curve.target().x()), CGAL::to_double(curve.target().y()));
+            if (curve.is_linear()) {
+                result.lineTo(target);
+            } else if (curve.is_circular()) {
+                const bool isClockwise = (curve.supporting_circle().orientation() == CGAL::CLOCKWISE);
+                const QRectF rect = toQRectF(curve.supporting_circle().bbox());
+                const QPointF center = QPointF(CGAL::to_double(curve.supporting_circle().center().x()), CGAL::to_double(curve.supporting_circle().center().y()));
+                const QPointF source = QPointF(CGAL::to_double(curve.source().x()), CGAL::to_double(curve.source().y()));
+                const QPointF p1 = source - center;
+                const QPointF p2 = target - center;
+                const double asource = qAtan2(p1.y(), p1.x());
+                const double atarget = qAtan2(p2.y(), p2.x());
+                double aspan = atarget - asource;
+                if (aspan < -CGAL_PI || (qFuzzyCompare(aspan, -CGAL_PI) && !isClockwise))
+                    aspan += 2.0 * CGAL_PI;
+                else if (aspan > CGAL_PI || (qFuzzyCompare(aspan, CGAL_PI) && isClockwise))
+                    aspan -= 2.0 * CGAL_PI;
+                result.arcTo(rect.normalized(), qRadiansToDegrees(-asource), qRadiansToDegrees(-aspan));
+            }
+        } while (++current != end);
+    } else {
+        Q_ASSERT(pgn.orientation() == CGAL::CLOCKWISE || pgn.orientation() == CGAL::COUNTERCLOCKWISE);
+        // Degenerate polygon, ring.size() < 3
+        if (pgn.orientation() == CGAL::ZERO) {
+            qWarning() << "construct_path: Ignoring degenerated polygon";
+            return result;
+        }
+        const bool isClockwise = pgn.orientation() == CGAL::CLOCKWISE;
+        auto current = pgn.curves_begin();
+        auto end = pgn.curves_end();
+        result.moveTo(CGAL::to_double(current->source().x()), CGAL::to_double(current->source().y()));
+        do {
+            const auto& curve = *current;
+            const auto& source = curve.source();
+            const auto& target = curve.target();
+            if (curve.is_linear()) {
+                result.lineTo(QPointF(CGAL::to_double(target.x()), CGAL::to_double(target.y())));
+            } else if (curve.is_circular()) {
+                const QRectF rect(toQRectF(curve.supporting_circle().bbox()));
+                const auto center = curve.supporting_circle().center();
+                const double asource = qAtan2(CGAL::to_double(source.y() - center.y()), CGAL::to_double(source.x() - center.x()));
+                const double atarget = qAtan2(CGAL::to_double(target.y() - center.y()), CGAL::to_double(target.x() - center.x()));
+                double aspan = atarget - asource;
+                if (aspan < -CGAL_PI || (qFuzzyCompare(aspan, -CGAL_PI) && !isClockwise))
+                    aspan += 2.0 * CGAL_PI;
+                else if (aspan > CGAL_PI || (qFuzzyCompare(aspan, CGAL_PI) && isClockwise))
+                    aspan -= 2.0 * CGAL_PI;
+                result.arcTo(rect, qRadiansToDegrees(-asource), qRadiansToDegrees(-aspan));
+            } else { // ?!?
+                Q_UNREACHABLE();
+            }
+        } while (++current != end);
+        result.lineTo(CGAL::to_double(pgn.curves_begin()->source().x()), CGAL::to_double(pgn.curves_begin()->source().y()));
+    }
+    return result;
+}
+template <class T, class R, class S>
+Polygon_2 RectanglePath(const Point_2& wh /*double width, double height*/, T& t, R& r, S& s, const Point_2& center = {})
+{
+    auto halfWidth = wh.x() /*width*/ * 0.5;
+    auto halfHeight = wh.y() /*height*/ * 0.5;
+
+    QVector<Point_2> p {
+        Point_2(-halfWidth + center.x(), +halfHeight + center.y()),
+        Point_2(-halfWidth + center.x(), -halfHeight + center.y()),
+        Point_2(+halfWidth + center.x(), -halfHeight + center.y()),
+        Point_2(+halfWidth + center.x(), +halfHeight + center.y()),
+    };
+    for (auto& pt : p)
+        pt = s(pt);
+    for (auto& pt : p)
+        pt = r(pt);
+    for (auto& pt : p)
+        pt = t(pt);
+    Polygon_2 path;
+    path.push_back(X_monotone_curve_2(p[0], p[1]));
+    path.push_back(X_monotone_curve_2(p[1], p[2]));
+    path.push_back(X_monotone_curve_2(p[2], p[3]));
+    path.push_back(X_monotone_curve_2(p[3], p[0]));
+    return path;
+}
+
+using Transformation = CGAL::Aff_transformation_2<Kernel>;
+using Point = CGAL::Point_2<Kernel>;
+using Vector = CGAL::Vector_2<Kernel>;
+using Direction = CGAL::Direction_2<Kernel>;
+
+namespace Gerber {
+
+void drawCenterLine(const State& state, Polygon_2& path, const QList<double>& mod)
+{
+    enum {
+        Width = 2,
+        Height,
+        CenterX,
+        CenterY,
+        RotationAngle
+    };
+
+    Point_2 center(mod[CenterX], mod[CenterY]);
+
+    const double halfWidth = mod[Width] * 0.5;
+    const double halfHeight = mod[Height] * 0.5;
+
+    Transformation s(CGAL::SCALING, state.format()->unitMode == Inches ? 25.4 : 1.0);
+    Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+
+    QVector<Point_2> p {
+        s(Point_2(-halfWidth + center.x(), +halfHeight + center.y())),
+        s(Point_2(-halfWidth + center.x(), -halfHeight + center.y())),
+        s(Point_2(+halfWidth + center.x(), -halfHeight + center.y())),
+        s(Point_2(+halfWidth + center.x(), +halfHeight + center.y())),
+    };
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
+        Transformation r(CGAL::ROTATION, sin(qDegreesToRadians(mod[RotationAngle] - 360)), cos(qDegreesToRadians(mod[RotationAngle] - 360)));
+        for (auto& pt : p)
+            pt = r(pt);
+    }
+
+    for (auto& pt : p)
+        pt = t(pt);
+    path.clear();
+    path.push_back(X_monotone_curve_2(p[0], p[1]));
+    path.push_back(X_monotone_curve_2(p[1], p[2]));
+    path.push_back(X_monotone_curve_2(p[2], p[3]));
+    path.push_back(X_monotone_curve_2(p[3], p[0]));
+    //path.reverse_orientation();
+}
+
+Polygon_2 drawCircle(const State& state, const QList<double>& mod)
+{
+    enum {
+        Diameter = 2,
+        CenterX,
+        CenterY,
+        RotationAngle
+    };
+
+    bool rb = mod.size() > RotationAngle && mod.last() > 0;
+
+    Transformation r(CGAL::ROTATION,
+        sin(qDegreesToRadians(rb ? mod[RotationAngle] : 0.0)),
+        cos(qDegreesToRadians(rb ? mod[RotationAngle] : 0.0)));
+    Transformation s(CGAL::SCALING, state.format()->unitMode == Inches ? 25.4 : 1.0);
+    Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+    double rad = mod[Diameter] * (state.format()->unitMode == Inches ? 12.7 : 0.5);
+    Point_2 center(mod[CenterX], mod[CenterY]);
+    return construct_polygon(Circle_2(t(r(s(center))), rad * rad));
+}
+
+Polygon_2 drawOutlineCustomPolygon(const State& state, const QList<double>& mod)
+{
+    enum {
+        NumberOfVertices = 2,
+        X,
+        Y,
+    };
+
+    const int num = static_cast<int>(mod[NumberOfVertices]);
+    bool rb = mod.size() > (num * 2 + 3) && mod.last() > 0;
+
+    Transformation r(CGAL::ROTATION,
+        sin(qDegreesToRadians(rb ? mod.last() : 0.0)),
+        cos(qDegreesToRadians(rb ? mod.last() : 0.0)));
+    Transformation s(CGAL::SCALING, state.format()->unitMode == Inches ? 25.4 : 1.0);
+    Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+    Polygon_2 path;
+    QVector<Point_2> p;
+    p.reserve(num);
+    for (int j = 0; j < num; ++j) {
+        p.append(t(r(s(Point_2(mod[X + j * 2], mod[Y + j * 2])))));
+    }
+    for (int j = 0; j < num; ++j) {
+        path.push_back(X_monotone_curve_2(p[j], p[(j + 1) % num]));
+    }
+    if (path.orientation() == CGAL::NEGATIVE)
+        path.reverse_orientation();
+    return path;
+}
+void drawOutlineRegularPolygon(const State& state, Polygon_2& path, const QList<double>& mod) { }
+void drawVectorLine(const State& state, Polygon_2& path, const QList<double>& mod) { }
+void drawMoire(const State& state, QVector<QPair<bool, Polygon_2>>& items, const QList<double>& mod) { }
+void drawThermal(const State& state, QVector<QPair<bool, Polygon_2>>& items, const QList<double>& mod)
+{
+    enum {
+        CenterX = 1,
+        CenterY,
+        OuterDiameter,
+        InnerDiameter,
+        GapThickness,
+        RotationAngle
+    };
+    bool rb = mod.size() > RotationAngle && mod[RotationAngle] != 0.0;
+    Transformation r(CGAL::ROTATION,
+        sin(qDegreesToRadians(rb ? mod.last() - 180 : 0.0)),
+        cos(qDegreesToRadians(rb ? mod.last() - 180 : 0.0)));
+    Transformation s(CGAL::SCALING, state.format()->unitMode == Inches ? 25.4 : 1.0);
+    Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+
+    if (mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
+        throw QObject::tr("Bad thermal macro!");
+
+    const Point_2 center(mod[CenterX], mod[CenterY]);
+    double radOut = mod[OuterDiameter] * (state.format()->unitMode == Inches ? 12.7 : 0.5);
+    double radIn = mod[InnerDiameter] * (state.format()->unitMode == Inches ? 12.7 : 0.5);
+    {
+        items.append({ true, construct_polygon(Circle_2(t(r(s(center))), radOut * radOut)) });
+        items.append({ false, construct_polygon(Circle_2(t(r(s(center))), radIn * radIn)) });
+        items.append({ false, RectanglePath(Point_2 { mod[GapThickness], mod[OuterDiameter] + 1 }, t, r, s) });
+        items.append({ false, RectanglePath(Point_2 { mod[OuterDiameter] + 1, mod[GapThickness] }, t, r, s) });
+    }
+}
+
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
+    : AbstractAperture(format)
+    , m_macro(macro)
+    , m_modifiers(modifiers)
+    , m_coefficients(coefficients)
+{
+    while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
+        m_modifiers.removeLast();
+    }
+}
+
+QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } //MACRO
+
+ApertureType ApMacro::type() const { return Macro; }
+
+bool ApMacro::fit(double) const { return true; }
+
+void ApMacro::draw(const State& state, bool /*fl*/)
+{
+    qDebug() << Q_FUNC_INFO << name() << state.aperture();
+    enum {
+        Comment = 0,
+        Circle = 1,
+        OutlineCustomPolygon = 4, // MAXIMUM 5000 POINTS
+        OutlineRegularPolygon = 5, // 3-12 POINTS
+        Moire = 6,
+        Thermal = 7,
+        VectorLine = 20,
+        CenterLine = 21,
+    };
+
+    QMap<QString, double> macroCoefficients { m_coefficients };
+
+    QVector<QPair<bool, Polygon_2>> items;
+
+    try {
+        for (int i = 0; i < m_modifiers.size(); ++i) {
+            QString var(m_modifiers[i]);
+            if (var.at(0) == '0') { // Skip Comment
+                //qDebug() << "Macro comment:" << var;
+                continue;
+            }
+
+            QList<double> mod;
+
+            if (var.contains('=')) {
+                QList<QString> stringList = var.split('=');
+                macroCoefficients[stringList.first()] = MathParser(macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
+                continue;
+            } else {
+                for (QString& var2 : var.split(',')) {
+                    mod.push_back(var2.contains('$')
+                            ? (MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)))
+                            : var2.toDouble());
+                }
+            }
+
+            if (mod.size() < 2)
+                continue;
+
+            Polygon_2 path;
+
+            QMap<int, QString> name;
+            name[Comment] = "Comment";
+            name[Circle] = "Circle";
+            name[OutlineCustomPolygon] = "OutlineCustomPolygon";
+            name[OutlineRegularPolygon] = "OutlineRegularPolygon";
+            name[Moire] = "Moire";
+            name[Thermal] = "Thermal";
+            name[VectorLine] = "VectorLine";
+            name[CenterLine] = "CenterLine";
+
+            qDebug() << name[mod[0]];
+            qDebug() << mod;
+
+            switch (static_cast<int>(mod[0])) {
+            case Comment:
+                continue;
+            case Circle:
+                path = ::Gerber::drawCircle(state, mod);
+                break;
+            case OutlineCustomPolygon:
+                path = ::Gerber::drawOutlineCustomPolygon(state, mod);
+                break;
+            case OutlineRegularPolygon:
+                //path = drawOutlineRegularPolygon(mod);
+                break;
+            case Moire:
+                ::Gerber::drawMoire(state, items, mod);
+                return;
+            case Thermal:
+                ::Gerber::drawThermal(state, items, mod);
+                goto A;
+                return;
+            case VectorLine:
+                ::Gerber::drawVectorLine(state, path, mod);
+                break;
+            case CenterLine:
+                ::Gerber::drawCenterLine(state, path, mod);
+                break;
+            }
+            //            if (m_format->unitMode == Inches)
+            //                for (IntPoint& pt : path) {
+            //                    pt.X *= 25.4;
+            //                    pt.Y *= 25.4;
+            //                }
+            //            const double area = Area(path);
+            //            if (area < 0 && exposure)
+            //                ReversePath(path);
+            //            else if (area > 0 && !exposure)
+            //                ReversePath(path);
+
+            items.append({ !qFuzzyIsNull(mod[1]), path });
+        }
+    } catch (...) {
+        qWarning() << "Macro draw error";
+        throw;
+    }
+A:
+    Polygon_set_2 clipper;
+    if (items.size() > 1) {
+        for (int i = 0; i < items.size();) {
+            bool exp = items[i].first;
+            while (i < items.size() && exp == items[i].first)
+                if (exp)
+                    clipper.join(items[i++].second);
+                else
+                    clipper.difference(items[i++].second);
+        }
+    } else {
+        clipper.join(items.first().second);
+    }
+    QPainterPath pp;
+    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+        if (!pgn.is_unbounded()) {
+            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(pgn.outer_boundary()));
+        }
+
+        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+        while (current != end) {
+            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(*current));
+            current++;
+        }
+    }));
+    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
+
+    //    {
+    //        Clipper clipper;
+    //        clipper.AddPaths(m_paths, ptSubject, true);
+    //        IntRect r(clipper.GetBounds());
+    //        int k = uScale ;
+    //        Path outer {
+    //            IntPoint(r.left - k, r.bottom + k),
+    //            IntPoint(r.right + k, r.bottom + k),
+    //            IntPoint(r.right + k, r.top - k),
+    //            IntPoint(r.left - k, r.top - k)
+    //        };
+    //        clipper.AddPath(outer, ptClip, true);
+    //        clipper.Execute(ctXor, m_paths, pftEvenOdd);
+    //        m_paths.takeFirst();
+    //    }
+
+    //    ClipperBase clipperBase;
+    //    clipperBase.AddPaths(m_paths, ptSubject, true);
+    //    IntRect rect = clipperBase.GetBounds();
+    //    rect.right -= rect.left;
+    //    rect.top -= rect.bottom;
+    //    const double x = rect.right * dScale;
+    //    const double y = rect.top * dScale;
+    //    m_size = qSqrt(x * x + y * y);
+}
+
+void ApMacro::read(QDataStream& stream)
+{
+    stream >> m_modifiers;
+    stream >> m_coefficients;
+    stream >> m_macro;
+    stream >> m_isFlashed;
+    stream >> m_size;
+    draw();
+}
+
+void ApMacro::write(QDataStream& stream) const
+{
+    stream << m_modifiers;
+    stream << m_coefficients;
+    stream << m_macro;
+    stream << m_isFlashed;
+    stream << m_size;
+}
+
+void ApMacro::draw()
+{
+    qDebug() << Q_FUNC_INFO << name();
+    enum {
+        Comment = 0,
+        Circle = 1,
+        OutlineCustomPolygon = 4, // MAXIMUM 5000 POINTS
+        OutlineRegularPolygon = 5, // 3-12 POINTS
+        Moire = 6,
+        Thermal = 7,
+        VectorLine = 20,
+        CenterLine = 21,
+    };
+
+    QMap<QString, double> macroCoefficients { m_coefficients };
+    QVector<QPair<bool, Path>> items;
+
+    try {
+        for (int i = 0; i < m_modifiers.size(); ++i) {
+            QString var(m_modifiers[i]);
+            if (var.at(0) == '0') { // Skip Comment
+                //qDebug() << "Macro comment:" << var;
+                continue;
+            }
+
+            QList<double> mod;
+
+            if (var.contains('=')) {
+                QList<QString> stringList = var.split('=');
+                macroCoefficients[stringList.first()] = MathParser(macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
+                continue;
+            } else {
+                for (QString& var2 : var.split(',')) {
+                    mod.push_back(var2.contains('$')
+                            ? MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
+                            : var2.toDouble());
+                }
+            }
+
+            if (mod.size() < 2)
+                continue;
+
+            const bool exposure = !qFuzzyIsNull(mod[1]);
+            Path path;
+
+            QMap<int, QString> name;
+            name[Comment] = "Comment";
+            name[Circle] = "Circle";
+            name[OutlineCustomPolygon] = "OutlineCustomPolygon";
+            name[OutlineRegularPolygon] = "OutlineRegularPolygon";
+            name[Moire] = "Moire";
+            name[Thermal] = "Thermal";
+            name[VectorLine] = "VectorLine";
+            name[CenterLine] = "CenterLine";
+
+            qDebug() << name[mod[0]];
+            qDebug() << mod;
+
+            switch (static_cast<int>(mod[0])) {
+            case Comment:
+                continue;
+            case Circle:
+                path = drawCircle(mod);
+                break;
+            case OutlineCustomPolygon:
+                path = drawOutlineCustomPolygon(mod);
+                break;
+            case OutlineRegularPolygon:
+                path = drawOutlineRegularPolygon(mod);
+                break;
+            case Moire:
+                drawMoire(mod);
+                //                if (m_format->unitMode == Inches)
+                //                    for (Path& path : m_paths)
+                //                        for (IntPoint& pt : path) {
+                //                            pt.X *= 25.4;
+                //                            pt.Y *= 25.4;
+                //                        }
+                return;
+            case Thermal:
+                drawThermal(mod);
+                //                if (m_format->unitMode == Inches)
+                //                    for (Path& path : m_paths)
+                //                        for (IntPoint& pt : path) {
+                //                            pt.X *= 25.4;
+                //                            pt.Y *= 25.4;
+                //                        }
+                return;
+            case VectorLine:
+                path = drawVectorLine(mod);
+                break;
+            case CenterLine:
+                path = drawCenterLine(mod);
+                break;
+            }
+            //            if (m_format->unitMode == Inches)
+            //                for (IntPoint& pt : path) {
+            //                    pt.X *= 25.4;
+            //                    pt.Y *= 25.4;
+            //                }
+
+            const double area = Area(path);
+            if (area < 0 && exposure)
+                ReversePath(path);
+            else if (area > 0 && !exposure)
+                ReversePath(path);
+
+            items.append({ exposure, path });
+        }
+    } catch (...) {
+        qWarning() << "Macro draw error";
+        throw;
+    }
+
+    if (items.size() > 1) {
+        Clipper clipper;
+        for (int i = 0; i < items.size();) {
+            clipper.Clear();
+            clipper.AddPaths(m_paths, ptSubject, true);
+            bool exp = items[i].first;
+            while (i < items.size() && exp == items[i].first)
+                clipper.AddPath(items[i++].second, ptClip, true);
+            if (exp)
+                clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
+            else
+                clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
+        }
+    } else
+        m_paths.append(items.first().second);
+
+    //    {
+    //        Clipper clipper;
+    //        clipper.AddPaths(m_paths, ptSubject, true);
+    //        IntRect r(clipper.GetBounds());
+    //        int k = uScale ;
+    //        Path outer {
+    //            IntPoint(r.left - k, r.bottom + k),
+    //            IntPoint(r.right + k, r.bottom + k),
+    //            IntPoint(r.right + k, r.top - k),
+    //            IntPoint(r.left - k, r.top - k)
+    //        };
+    //        clipper.AddPath(outer, ptClip, true);
+    //        clipper.Execute(ctXor, m_paths, pftEvenOdd);
+    //        m_paths.takeFirst();
+    //    }
+
+    ClipperBase clipperBase;
+    clipperBase.AddPaths(m_paths, ptSubject, true);
+    IntRect rect = clipperBase.GetBounds();
+    rect.right -= rect.left;
+    rect.top -= rect.bottom;
+    const double x = rect.right * dScale;
+    const double y = rect.top * dScale;
+    m_size = qSqrt(x * x + y * y);
+}
+
+Path ApMacro::drawCenterLine(const QList<double>& mod)
+{
+    enum {
+        Width = 2,
+        Height,
+        CenterX,
+        CenterY,
+        RotationAngle
+    };
+
+    const IntPoint center(
+        static_cast<cInt>(mod[CenterX] * uScale),
+        static_cast<cInt>(mod[CenterY] * uScale));
+
+    Path polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        RotatePath(polygon, mod[RotationAngle]);
+
+    return polygon;
+}
+
+Path ApMacro::drawCircle(const QList<double>& mod)
+{
+    enum {
+        Diameter = 2,
+        CenterX,
+        CenterY,
+        RotationAngle
+    };
+
+    const IntPoint center(
+        static_cast<cInt>(mod[CenterX] * uScale),
+        static_cast<cInt>(mod[CenterY] * uScale));
+
+    Path polygon = CirclePath(mod[Diameter] * uScale, center);
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        RotatePath(polygon, mod[RotationAngle]);
+
+    return polygon;
+}
+
+void ApMacro::drawMoire(const QList<double>& mod)
+{
+    enum {
+        CenterX = 1,
+        CenterY,
+        Diameter,
+        Thickness,
+        Gap,
+        NumberOfRings,
+        CrossThickness,
+        CrossLength,
+        RotationAngle,
+    };
+
+    cInt diameter = static_cast<cInt>(mod[Diameter] * uScale);
+    const cInt thickness = static_cast<cInt>(mod[Thickness] * uScale);
+    const cInt gap = static_cast<cInt>(mod[Gap] * uScale);
+    const cInt ct = static_cast<cInt>(mod[CrossThickness] * uScale);
+    const cInt cl = static_cast<cInt>(mod[CrossLength] * uScale);
+
+    const IntPoint center(
+        static_cast<cInt>(mod[CenterX] * uScale),
+        static_cast<cInt>(mod[CenterY] * uScale));
+
+    {
+        Clipper clipper;
+        if (thickness && gap) {
+            for (int num = 0; num < mod[NumberOfRings]; ++num) {
+                clipper.AddPath(CirclePath(diameter), ptClip, true);
+                diameter -= thickness * 2;
+                Path polygon(CirclePath(diameter));
+                ReversePath(polygon);
+                clipper.AddPath(polygon, ptClip, true);
+                diameter -= gap * 2;
+            }
+        }
+        if (cl && ct) {
+            clipper.AddPath(RectanglePath(cl, ct), ptClip, true);
+            clipper.AddPath(RectanglePath(ct, cl), ptClip, true);
+        }
+        clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
+    }
+
+    for (Path& path : m_paths)
+        TranslatePath(path, center);
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
+        for (Path& path : m_paths)
+            RotatePath(path, mod[RotationAngle]);
+    }
+}
+
+Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
+{
+    enum {
+        NumberOfVertices = 2,
+        X,
+        Y,
+    };
+
+    const int num = static_cast<int>(mod[NumberOfVertices]);
+
+    Path polygon;
+    for (int j = 0; j < int(num); ++j)
+        polygon.push_back(IntPoint(
+            static_cast<cInt>(mod[X + j * 2] * uScale),
+            static_cast<cInt>(mod[Y + j * 2] * uScale)));
+
+    if (mod.size() > (num * 2 + 3) && mod.last() > 0)
+        RotatePath(polygon, mod.last());
+
+    return polygon;
+}
+
+Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
+{
+    enum {
+        NumberOfVertices = 2,
+        CenterX,
+        CenterY,
+        Diameter,
+        RotationAngle
+    };
+
+    const int num = static_cast<int>(mod[NumberOfVertices]);
+    if (3 > num || num > 12)
+        throw QObject::tr("Bad outline (regular polygon) macro!");
+
+    const cInt diameter = static_cast<cInt>(mod[Diameter] * uScale * 0.5);
+    const IntPoint center(
+        static_cast<cInt>(mod[CenterX] * uScale),
+        static_cast<cInt>(mod[CenterY] * uScale));
+
+    Path polygon;
+    for (int j = 0; j < num; ++j) {
+        auto angle = qDegreesToRadians(j * 360.0 / num);
+        polygon.push_back(IntPoint(
+            static_cast<cInt>(qCos(angle) * diameter),
+            static_cast<cInt>(qSin(angle) * diameter)));
+    }
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        RotatePath(polygon, mod[RotationAngle]);
+
+    TranslatePath(polygon, center);
+
+    return polygon;
+}
+
+void ApMacro::drawThermal(const QList<double>& mod)
+{
+    enum {
+        CenterX = 1,
+        CenterY,
+        OuterDiameter,
+        InnerDiameter,
+        GapThickness,
+        RotationAngle
+    };
+
+    if (mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
+        throw QObject::tr("Bad thermal macro!");
+
+    const cInt outer = static_cast<cInt>(mod[OuterDiameter] * uScale);
+    const cInt inner = static_cast<cInt>(mod[InnerDiameter] * uScale);
+    const cInt gap = static_cast<cInt>(mod[GapThickness] * uScale);
+
+    const IntPoint center(
+        static_cast<cInt>(mod[CenterX] * uScale),
+        static_cast<cInt>(mod[CenterY] * uScale));
+
+    {
+        Clipper clipper;
+        clipper.AddPath(CirclePath(outer), ptSubject, true);
+        clipper.AddPath(CirclePath(inner), ptClip, true);
+        clipper.AddPath(RectanglePath(gap, outer), ptClip, true);
+        clipper.AddPath(RectanglePath(outer, gap), ptClip, true);
+        clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
+    }
+
+    for (Path& path : m_paths)
+        TranslatePath(path, center);
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
+        for (Path& path : m_paths)
+            RotatePath(path, mod[RotationAngle]);
+    }
+}
+
+Path ApMacro::drawVectorLine(const QList<double>& mod)
+{
+    enum {
+        Width = 2,
+        StartX,
+        StartY,
+        EndX,
+        EndY,
+        RotationAngle,
+    };
+
+    const IntPoint start(
+        static_cast<cInt>(mod[StartX] * uScale),
+        static_cast<cInt>(mod[StartY] * uScale));
+    const IntPoint end(
+        static_cast<cInt>(mod[EndX] * uScale),
+        static_cast<cInt>(mod[EndY] * uScale));
+    const IntPoint center(
+        static_cast<cInt>(0.5 * start.X + 0.5 * end.X),
+        static_cast<cInt>(0.5 * start.Y + 0.5 * end.Y));
+
+    Path polygon = RectanglePath(Length(start, end), mod[Width] * uScale);
+    double angle = Angle(start, end);
+    RotatePath(polygon, angle);
+    TranslatePath(polygon, center);
+
+    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        RotatePath(polygon, mod[RotationAngle]);
+
+    return polygon;
+}
+
+}

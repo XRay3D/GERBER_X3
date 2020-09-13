@@ -278,10 +278,5 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
         emit fileReady(m_file);
 
     } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
-    //    {
-    //        ClipperOffset offset(uScale);
-    //        offset.AddPaths(testFrame, jtRound, etClosedPolygon);
-    //        offset.Execute(testFrame, tools.last().getDiameter(depth) * uScale * 0.6);
-    //    }
 }
 }

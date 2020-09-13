@@ -98,9 +98,10 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
 
     if constexpr (1) { // (need for debug)
-        QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActions[GCode::Pocket]->triggered(); });
-        QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        loadFile("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804/sample_macro_X1 — копия.gbr");
+        //        QTimer::singleShot(120, [this] { selectAll(); });
+        //        QTimer::singleShot(150, [this] { toolpathActions[GCode::Pocket]->triggered(); });
+        //        QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
 }

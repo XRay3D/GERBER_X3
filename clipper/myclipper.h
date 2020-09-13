@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "clipper.hpp"
 #include <QDebug>
 #include <QPolygonF>
@@ -50,5 +48,3 @@ Path CirclePath(double diametr, const IntPoint& center = IntPoint());
 Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
 void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
 void TranslatePath(Path& path, const IntPoint& pos);
-
-

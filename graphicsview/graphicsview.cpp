@@ -204,7 +204,6 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 
 void GraphicsView::setScale(double s)
 {
-    qDebug() << "set" << s;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     const auto trf = transform();
     setTransform({ +s /*11*/, trf.m12(), trf.m13(),
@@ -409,7 +408,7 @@ void GraphicsView::anim(QObject* target, const QByteArray& propertyName, T begin
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(50);
     } else {
-        animation->setEasingCurve(QEasingCurve(QEasingCurve::InOutSine));
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
     }
     animation->setStartValue(begin);
