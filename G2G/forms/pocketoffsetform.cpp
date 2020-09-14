@@ -215,8 +215,8 @@ void PocketOffsetForm::rb_clicked()
     {
         int fl = ui->sbxToolQty->value();
 
-        ui->labelSteps->setVisible(fl < 2);
-        ui->sbxSteps->setVisible(fl < 2);
+        //        ui->labelSteps->setVisible(fl < 2);
+        //        ui->sbxSteps->setVisible(fl < 2);
 
         ui->toolHolder2->setVisible(--fl > 0);
         ui->toolHolder3->setVisible(--fl > 0);
