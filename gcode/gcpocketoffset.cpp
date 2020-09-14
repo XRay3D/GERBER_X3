@@ -6,9 +6,9 @@
 #include "gcfile.h"
 #include "project.h"
 #include "scene.h"
+#include "settings.h"
 #include <QDialog>
 #include <QElapsedTimer>
-#include "settings.h"
 
 namespace GCode {
 PocketCreator::PocketCreator()
@@ -191,6 +191,8 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
         }
     };
 
+    int steps = 0;
+
     Pathss fillPaths;
     fillPaths.resize(tools.size());
 
@@ -221,6 +223,10 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
         }
 
         for (int pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
+
+            if (m_gcp.params[GCodeParams::Steps].toInt() > 0)
+                steps = m_gcp.params[GCodeParams::Steps].toInt();
+
             const Paths& paths = m_groupedPss[pIdx];
             Paths wp;
             ClipperOffset offset(uScale);
@@ -246,6 +252,11 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
             Paths offsetPaths;
             do {
                 offsetPaths.append(wp);
+                if (steps && !tIdx) {
+                    if (--steps == 0)
+                        break;
+                }
+
                 offset.Clear();
                 offset.AddPaths(wp, jtMiter, etClosedPolygon);
                 offset.Execute(wp, -m_stepOver);
@@ -266,22 +277,24 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
         m_gcp.gcType = Pocket;
         m_gcp.params[GCodeParams::PocketIndex] = tIdx;
 
-        {
+        { // make a fill box for the toolpath and create a file
+            ClipperOffset offset(uScale);
+            for (auto& paths : m_returnPss)
+                offset.AddPaths(paths, jtRound, etClosedLine);
+            Paths fillToolpath;
+            offset.Execute(fillToolpath, m_dOffset);
+            m_file = new GCode::File(m_returnPss, m_gcp, fillToolpath);
+            m_file->setFileName(tool.nameEnc());
+            //App::project()->addFile(m_file);
+            emit fileReady(m_file);
+        }
+
+        { // make a bounding box for the next tool
             ClipperOffset offset(uScale);
             offset.AddPaths(fillPaths[tIdx], jtRound, etClosedPolygon);
             offset.Execute(fillPaths[tIdx], m_dOffset);
         }
 
-        m_file = new GCode::File(m_returnPss, m_gcp, fillPaths[tIdx]);
-        m_file->setFileName(tool.nameEnc());
-        //App::project()->addFile(m_file);
-        emit fileReady(m_file);
-
     } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
-    //    {
-    //        ClipperOffset offset(uScale);
-    //        offset.AddPaths(testFrame, jtRound, etClosedPolygon);
-    //        offset.Execute(testFrame, tools.last().getDiameter(depth) * uScale * 0.6);
-    //    }
 }
 }
