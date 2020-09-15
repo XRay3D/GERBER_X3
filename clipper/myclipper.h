@@ -12,36 +12,73 @@
 #define M_PI (3.1415926535897932384626433832795)
 #endif
 
-//QDebug operator<<(QDebug debug, const IntPoint& p)
-//{
-//    //QDebugStateSaver saver(debug);
-//    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-//    return debug;
-//}
-
-#include <CGAL/Aff_transformation_2.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/General_polygon_set_2.h>
-#include <CGAL/Gps_circle_segment_traits_2.h>
-#include <CGAL/Lazy_exact_nt.h>
-#include <CGAL/Polygon_2.h>
 #include <QPainterPath>
 #include <boost/function_output_iterator.hpp>
 
-using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
-using Point_2 = Kernel::Point_2;
-using Circle_2 = Kernel::Circle_2;
-using Traits_2 = CGAL::Gps_circle_segment_traits_2<Kernel>;
-using Polygon_set_2 = CGAL::General_polygon_set_2<Traits_2>;
-using Polygon_2 = Traits_2::General_polygon_2;
-using Polygon_with_holes_2 = Traits_2::General_polygon_with_holes_2;
-using Curve_2 = Traits_2::Curve_2;
-using X_monotone_curve_2 = Traits_2::X_monotone_curve_2;
+//#include <CGAL/Arr_conic_traits_2.h>
+//#include <CGAL/Arrangement_2.h>
+//#include <CGAL/CORE_algebraic_number_traits.h>
+//#include <CGAL/Cartesian.h>
 
-using Transformation = CGAL::Aff_transformation_2<Kernel>;
-using Point = CGAL::Point_2<Kernel>;
-using Vector = CGAL::Vector_2<Kernel>;
-using Direction = CGAL::Direction_2<Kernel>;
+//#include <CGAL/Gps_traits_2.h>
+//#include <CGAL/offset_polygon_2.h>
+
+//typedef CGAL::CORE_algebraic_number_traits Nt_traits;
+//typedef Nt_traits::Rational Rational;
+//typedef CGAL::Cartesian<Rational> Rat_kernel;
+//typedef Rat_kernel::Point_2 Point_2 /*Rat_point*/;
+//typedef Rat_kernel::Segment_2 Segment_2 /*Rat_segment*/;
+//typedef Rat_kernel::Circle_2 Circle_2 /*Rat_circle*/;
+//typedef Nt_traits::Algebraic Algebraic;
+//typedef CGAL::Cartesian<Algebraic> Alg_kernel;
+
+//typedef CGAL::Arr_conic_traits_2<Rat_kernel, Alg_kernel, Nt_traits> Traits;
+//typedef CGAL::Arr_conic_traits_2<Rat_kernel, Alg_kernel, Nt_traits> Traits_2;
+//typedef Traits::Point_2 Point;
+//typedef Traits::Curve_2 Curve_2 /*Conic_arc*/;
+//typedef Traits::X_monotone_curve_2 X_monotone_curve_2 /*X_monotone_conic_arc*/;
+//typedef CGAL::Arrangement_2<Traits> Arrangement;
+
+////typedef CGAL::Polygon_2<Rat_kernel> Polygon_2;
+//typedef CGAL::Gps_traits_2<Traits> Gps_traits;
+//typedef Gps_traits::Polygon_with_holes_2 Offset_polygon_with_holes_2;
+//typedef Gps_traits::Polygon_2 Polygon_2;
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/General_polygon_set_2.h>
+#include <CGAL/Gps_circle_segment_traits_2.h>
+
+using Kernel
+    = CGAL::Exact_predicates_exact_constructions_kernel;
+
+using Point_2
+    = Kernel::Point_2;
+using Circle_2
+    = Kernel::Circle_2;
+
+using Traits_2
+    = CGAL::Gps_circle_segment_traits_2<Kernel>;
+
+using Polygon_set_2
+    = CGAL::General_polygon_set_2<Traits_2>;
+using Polygon_2
+    = Traits_2::Polygon_2;
+using Polygon_with_holes_2
+    = Traits_2::Polygon_with_holes_2;
+using Curve_2
+    = Traits_2::Curve_2;
+using X_monotone_curve_2
+    = Traits_2::X_monotone_curve_2;
+
+#include <CGAL/Aff_transformation_2.h>
+
+using Transformation
+    = CGAL::Aff_transformation_2<Kernel>;
+using Point
+    = CGAL::Point_2<Kernel>;
+using Vector
+    = CGAL::Vector_2<Kernel>;
+using Direction
+    = CGAL::Direction_2<Kernel>;
 
 Polygon_2 construct_polygon(const Circle_2& circle);
 QPainterPath construct_path(const Polygon_2& pgn);

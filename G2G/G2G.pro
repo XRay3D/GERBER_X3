@@ -1,6 +1,6 @@
 QT += core gui opengl widgets printsupport concurrent
 
-TARGET = GGEasy
+TARGET = GGEasyCGAL
 
 
 contains(QT_ARCH, i386) {

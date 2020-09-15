@@ -52,8 +52,6 @@ private:
 
     QStack<WorkingType> m_abSrIdStack;
 
-    QVector<X_monotone_curve_2> m_path2;
-
     Path m_path;
     State m_state;
     QString m_currentGerbLine;

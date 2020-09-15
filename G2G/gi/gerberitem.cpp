@@ -56,7 +56,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     QColor pnColor(brColor);
 
     if (option->state & QStyle::State_Selected) {
-        brColor.setAlpha(255);
+        brColor.setAlpha(150);
         pnColor.setAlpha(255);
     }
     if (option->state & QStyle::State_MouseOver) {
@@ -64,7 +64,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
             brColor = brColor.darker(120);
             pnColor = pnColor.darker(120);
         } else {
-            brColor.setAlpha(200);
+            brColor.setAlpha(150);
             pnColor.setAlpha(255);
         }
     }

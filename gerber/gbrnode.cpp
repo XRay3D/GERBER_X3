@@ -160,7 +160,7 @@ void Node::repaint()
     //    int k = -60 + static_cast<int>((count > 1) ? (240.0 / (count - 1)) * row() : 0);
     //    if (k < 0)
     //        k += 360;
-    App::project()->file<Gerber::File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
+    App::project()->file<Gerber::File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 70));
     App::scene()->update();
 }
 
