@@ -592,7 +592,7 @@ Paths Parser::createLine()
         //        for (int i = m_path2.size() - 2; i > 0; --i) {
         //            m_path2.push_back(m_path2[i]);
         //        }
-
+        size *= dScale;
         try {
 
             Polygon_set_2 clipper;
@@ -610,7 +610,18 @@ Paths Parser::createLine()
                     Linear_polygon p;
                     p.push_back(toPoint(var.p1));
                     p.push_back(toPoint(var.p2));
-                    clipper.join(CGAL::approximated_offset_2(p, size * dScale, 0.00001));
+                    Polygon_with_holes_2 pp = CGAL::approximated_offset_2(p, size, 0.00001);
+                    clipper.join(pp);
+                } else {
+                    qDebug() << "angle" << qFuzzyCompare(var.angle1, var.angle2) << qRadiansToDegrees(var.angle1) << qRadiansToDegrees(var.angle2);
+                    double r = QLineF(toQPointF(var.p2), toQPointF(var.c)).length();
+                    r *= 2;
+                    Polygon_set_2 c;
+                    c.join(CirclePath2(r + size * 2, toPoint(var.c)));
+                    c.difference(CirclePath2(r - size * 2, toPoint(var.c)));
+                    c.polygons_with_holes(boost::make_function_output_iterator([&clipper](const Polygon_with_holes_2& pgn) {
+                        clipper.join(pgn);
+                    }));
                 }
             }
 
