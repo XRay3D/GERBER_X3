@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QLineF>
 
+#include "scene.h"
+
 namespace Gerber {
 
 AbstractAperture::AbstractAperture(const Format* format)
@@ -43,10 +45,7 @@ Paths AbstractAperture::draw(const State& state, bool fl)
         TranslatePath(path, state.curPos());
     }
 
-    if (type() == Macro) {
-        auto macro = static_cast<ApMacro*>(this);
-        macro->draw(state, fl);
-    }
+    drawC(state, fl);
 
     return tmpPpaths;
 }
@@ -139,6 +138,42 @@ void ApCircle::draw()
     m_paths.push_back(CirclePath(m_diam * uScale));
     m_size = m_diam;
 }
+
+void ApCircle::drawC(const State& state, bool fl)
+{
+    Polygon_set_2 clipper;
+    clipper.join(CirclePath2(m_diam, { state.curPos().X * dScale, state.curPos().Y * dScale }));
+    //    if (items.size() > 1) {
+    //        for (int i = 0; i < items.size();) {
+    //            bool exp = items[i].first;
+    //            while (i < items.size() && exp == items[i].first)
+    //                if (exp)
+    //                    clipper.join(items[i++].second);
+    //                else
+    //                    clipper.difference(items[i++].second);
+    //        }
+    //    } else {
+    //        clipper.join(items.first().second);
+    //    }
+    QPainterPath pp;
+    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+        if (!pgn.is_unbounded()) {
+            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(pgn.outer_boundary()));
+        }
+
+        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+        while (current != end) {
+            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(*current));
+            current++;
+        }
+    }));
+    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
+}
 /////////////////////////////////////////////////////
 /// \brief ApRectangle::ApRectangle
 /// \param width
@@ -189,6 +224,42 @@ void ApRectangle::draw()
 {
     m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
     m_size = qSqrt(m_width * m_width + m_height * m_height);
+}
+
+void ApRectangle::drawC(const State& state, bool fl)
+{
+    Polygon_set_2 clipper;
+    clipper.join(RectanglePath2(m_width, m_height, { state.curPos().X * dScale, state.curPos().Y * dScale }));
+    //    if (items.size() > 1) {
+    //        for (int i = 0; i < items.size();) {
+    //            bool exp = items[i].first;
+    //            while (i < items.size() && exp == items[i].first)
+    //                if (exp)
+    //                    clipper.join(items[i++].second);
+    //                else
+    //                    clipper.difference(items[i++].second);
+    //        }
+    //    } else {
+    //        clipper.join(items.first().second);
+    //    }
+    QPainterPath pp;
+    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+        if (!pgn.is_unbounded()) {
+            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(pgn.outer_boundary()));
+        }
+
+        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+        while (current != end) {
+            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(*current));
+            current++;
+        }
+    }));
+    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
 }
 /////////////////////////////////////////////////////
 /// \brief ApObround::ApObround
@@ -251,6 +322,44 @@ void ApObround::draw()
         clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
     }
     m_size = qMax(w, h);
+}
+
+void ApObround::drawC(const State& state, bool fl)
+{
+    Polygon_set_2 clipper;
+    if (qFuzzyCompare(m_width + 1.0, m_height + 1.0)) {
+        clipper.join(CirclePath2(m_width, { state.curPos().X * dScale, state.curPos().Y * dScale }));
+    } else {
+        Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+        if (m_width > m_height) {
+            clipper.join(CirclePath2(m_height, t(Point_2(-(m_width - m_height) / 2, 0))));
+            clipper.join(CirclePath2(m_height, t(Point_2((m_width - m_height) / 2, 0))));
+            clipper.join(RectanglePath2(m_width - m_height, m_height, Point_2(state.curPos().X * dScale, state.curPos().Y * dScale)));
+        } else if //
+            (m_width < m_height) {
+            clipper.join(CirclePath2(m_width, t(Point_2(0, -(m_height - m_width) / 2))));
+            clipper.join(CirclePath2(m_width, t(Point_2(0, (m_height - m_width) / 2))));
+            clipper.join(RectanglePath2(m_width, m_height - m_width, Point_2(state.curPos().X * dScale, state.curPos().Y * dScale)));
+        }
+    }
+    QPainterPath pp;
+    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+        if (!pgn.is_unbounded()) {
+            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(pgn.outer_boundary()));
+        }
+
+        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+        while (current != end) {
+            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(*current));
+            current++;
+        }
+    }));
+    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
 }
 /////////////////////////////////////////////////////
 /// \brief ApPolygon::ApPolygon
@@ -316,6 +425,50 @@ void ApPolygon::draw()
     m_paths.push_back(poligon);
     m_size = diam;
 }
+
+void ApPolygon::drawC(const State& state, bool fl)
+{
+    Polygon_set_2 clipper;
+
+    Transformation r(CGAL::ROTATION, sin(qDegreesToRadians(m_rotation)), cos(qDegreesToRadians(m_rotation)));
+    Transformation t(CGAL::TRANSLATION, Vector(state.curPos().X * dScale, state.curPos().Y * dScale));
+    t = t * r;
+    const double step = 360.0 / m_verticesCount;
+    QVector<Point_2> p;
+    p.reserve(m_verticesCount);
+
+    for (int i = 0; i < m_verticesCount; ++i) {
+        p.push_back(
+            t(Point_2(
+                (qCos(qDegreesToRadians(step * i)) * m_diam * 0.5),
+                (qSin(qDegreesToRadians(step * i)) * m_diam * 0.5))));
+    }
+    Polygon_2 poligon;
+    for (int i = 0; i < m_verticesCount; ++i) {
+        poligon.push_back(X_monotone_curve_2(p[i], p[(i + 1) % m_verticesCount]));
+    }
+
+    clipper.join(poligon);
+
+    QPainterPath pp;
+    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+        if (!pgn.is_unbounded()) {
+            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(pgn.outer_boundary()));
+        }
+
+        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+        while (current != end) {
+            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+            //i->setZValue(std::numeric_limits<double>::max());
+            pp.addPath(construct_path(*current));
+            current++;
+        }
+    }));
+    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
+}
 /////////////////////////////////////////////////////
 /// \brief ApBlock::ApBlock
 /// \param macro
@@ -369,6 +522,40 @@ void ApBlock::draw()
     m_size = 1;
     qDebug() << m_paths.size();
     //CleanPolygons(m_paths, 0.0009 * uScale);
+}
+
+void ApBlock::drawC(const State& state, bool fl)
+{
+    //    Polygon_set_2 clipper;
+    //    if (items.size() > 1) {
+    //        for (int i = 0; i < items.size();) {
+    //            bool exp = items[i].first;
+    //            while (i < items.size() && exp == items[i].first)
+    //                if (exp)
+    //                    clipper.join(items[i++].second);
+    //                else
+    //                    clipper.difference(items[i++].second);
+    //        }
+    //    } else {
+    //        clipper.join(items.first().second);
+    //    }
+    //    QPainterPath pp;
+    //    clipper.polygons_with_holes(boost::make_function_output_iterator([&pp](const Polygon_with_holes_2& pgn) {
+    //        if (!pgn.is_unbounded()) {
+    //            //            auto i = App::scene()->addPath(construct_path(pgn.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
+    //            //i->setZValue(std::numeric_limits<double>::max());
+    //            pp.addPath(construct_path(pgn.outer_boundary()));
+    //        }
+    //        Polygon_with_holes_2::Hole_const_iterator current = pgn.holes_begin();
+    //        Polygon_with_holes_2::Hole_const_iterator end = pgn.holes_end();
+    //        while (current != end) {
+    //            //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
+    //            //i->setZValue(std::numeric_limits<double>::max());
+    //            pp.addPath(construct_path(*current));
+    //            current++;
+    //        }
+    //    }));
+    //    auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
 }
 
 } // namespace Gerber

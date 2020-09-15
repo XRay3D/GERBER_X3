@@ -1,13 +1,11 @@
 #pragma once
 
-
-
 #include "gbrattributes.h"
 #include "gbrfile.h"
 #include "gbrtypes.h"
+#include "parser.h"
 #include <QObject>
 #include <QStack>
-#include "parser.h"
 
 namespace Gerber {
 
@@ -54,6 +52,8 @@ private:
 
     QStack<WorkingType> m_abSrIdStack;
 
+    QVector<X_monotone_curve_2> m_path2;
+
     Path m_path;
     State m_state;
     QString m_currentGerbLine;
@@ -67,7 +67,6 @@ private:
     int aperFunction = -1;
     QMap<int, int> aperFunctionMap;
     //Attributes att;
-
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -90,4 +89,3 @@ private:
     /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
 };
 }
-

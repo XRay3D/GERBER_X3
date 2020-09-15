@@ -61,6 +61,7 @@ protected:
 
     Paths m_paths;
     virtual void draw() = 0;
+    virtual void drawC(const State& state, bool fl) = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
     const Format* m_format;
@@ -85,8 +86,9 @@ public:
 
 protected:
     void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void drawC(const State& state, bool fl) override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double m_diam = 0.0;
@@ -111,8 +113,9 @@ public:
 
 protected:
     void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void drawC(const State& state, bool fl) override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double m_height = 0.0;
@@ -136,8 +139,9 @@ public:
 
 protected:
     void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void drawC(const State& state, bool fl) override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double m_height = 0.0;
@@ -164,8 +168,9 @@ public:
 
 protected:
     void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void drawC(const State& state, bool fl) override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double m_diam = 0.0;
@@ -190,8 +195,9 @@ public:
 
 protected:
     void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void drawC(const State& state, bool fl) override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 };
 }
 
