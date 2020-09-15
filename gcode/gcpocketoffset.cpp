@@ -231,7 +231,7 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
             Paths wp;
             ClipperOffset offset(uScale);
             offset.AddPaths(paths, jtRound, etClosedPolygon);
-            offset.Execute(wp, -m_dOffset);
+            offset.Execute(wp, -m_dOffset + 1); // + 1 <- поправка при расчёте впритык.
             if (GlobalSettings::gbrCleanPolygons())
                 CleanPolygons(wp, uScale * 0.0005);
 
