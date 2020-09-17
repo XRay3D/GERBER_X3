@@ -44,8 +44,8 @@
 //typedef Gps_traits::Polygon_with_holes_2 Offset_polygon_with_holes_2;
 //typedef Gps_traits::Polygon_2 Polygon_2;
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/General_polygon_set_2.h>
 #include <CGAL/Gps_circle_segment_traits_2.h>
+#include <CGAL/Boolean_set_operations_2.h>
 
 using Kernel
     = CGAL::Exact_predicates_exact_constructions_kernel;
@@ -55,8 +55,12 @@ using Point_2
 using Circle_2
     = Kernel::Circle_2;
 
+
 using Traits_2
     = CGAL::Gps_circle_segment_traits_2<Kernel>;
+
+using Arc_point_2
+    = Traits_2::Point_2;
 
 using Polygon_set_2
     = CGAL::General_polygon_set_2<Traits_2>;

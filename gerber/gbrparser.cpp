@@ -16,6 +16,8 @@
 
 #include "scene.h"
 #include <CGAL/approximated_offset_2.h>
+#include <CGAL/cartesian_homogeneous_conversion.h>
+#include <CGAL/minkowski_sum_2.h>
 
 using Linear_polygon = CGAL::Polygon_2<Kernel>;
 
@@ -46,6 +48,7 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 struct PI {
     bool isArc = false;
     bool isCcw = false;
+    bool multi = false;
     IntPoint p1;
     IntPoint p2;
     IntPoint c;
@@ -56,7 +59,7 @@ struct PI {
 
 QVector<PI> PATH;
 
-Point_2 toPoint(const IntPoint& pt) { return { pt.X * dScale, pt.Y * dScale }; }
+Point_2 toPoint2(const IntPoint& pt) { return { pt.X * dScale, pt.Y * dScale }; }
 namespace Gerber {
 
 #ifndef M_PI
@@ -86,8 +89,8 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     static QMutex mutex;
     mutex.lock();
     try {
-        QElapsedTimer t;
-        t.start();
+        //QElapsedTimer t;
+        //t.start();
 
         static const QRegExp match(QStringLiteral("FS[L|T|D]?[A|I]X\\d{2}Y\\d{2}\\*"));
         if (match.indexIn(gerberLines) == -1) {
@@ -186,7 +189,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             m_file->createGi();
             emit fileReady(m_file);
             emit fileProgress(m_file->shortName(), 1, 1);
-            qDebug() << m_file->shortName() << "Parser" << t.elapsed();
+            //qDebug() << m_file->shortName() << "Parser" << t.elapsed();
         }
         m_currentGerbLine.clear();
         m_apertureMacro.clear();
@@ -608,20 +611,126 @@ Paths Parser::createLine()
             for (auto& var : PATH) {
                 if (!var.isArc) {
                     Linear_polygon p;
-                    p.push_back(toPoint(var.p1));
-                    p.push_back(toPoint(var.p2));
+                    p.push_back(toPoint2(var.p1));
+                    p.push_back(toPoint2(var.p2));
                     Polygon_with_holes_2 pp = CGAL::approximated_offset_2(p, size, 0.00001);
-                    clipper.join(pp);
+                    //                    clipper.join(pp);
                 } else {
-                    qDebug() << "angle" << qFuzzyCompare(var.angle1, var.angle2) << qRadiansToDegrees(var.angle1) << qRadiansToDegrees(var.angle2);
-                    double r = QLineF(toQPointF(var.p2), toQPointF(var.c)).length();
-                    r *= 2;
+
+                    QLineF l1(toQPointF(var.c), toQPointF(var.p1));
+                    QLineF l2(toQPointF(var.c), toQPointF(var.p2));
                     Polygon_set_2 c;
-                    c.join(CirclePath2(r + size * 2, toPoint(var.c)));
-                    c.difference(CirclePath2(r - size * 2, toPoint(var.c)));
-                    c.polygons_with_holes(boost::make_function_output_iterator([&clipper](const Polygon_with_holes_2& pgn) {
-                        clipper.join(pgn);
-                    }));
+
+                    if (!qFuzzyCompare(var.angle1, var.angle2)) {
+                        {
+                            if (var.multi) {
+                                App::scene()->addLine(l1, QPen(Qt::red, 0.0));
+                                App::scene()->addLine(l2, QPen(Qt::red, 0.0));
+                            } else {
+                                App::scene()->addLine(l1, QPen(Qt::green, 0.0));
+                                App::scene()->addLine(l2, QPen(Qt::green, 0.0));
+                            }
+                        }
+                        //continue;
+
+                        Point_2 p1(toPoint2(var.p1));
+                        Point_2 p2(toPoint2(var.p2));
+                        Point_2 c0(toPoint2(var.c));
+
+                        //l1.setLength(l1.length() * 2);
+                        l2.setLength(l1.length());
+                        auto sqr_rad = CGAL::squared_distance(p1, Point_2(p1.x() - c0.x() + p1.x(), p1.y() - c0.y() + p1.y()));
+                        //qDebug() << "squared_distance" << CGAL::to_double(sqr_rad) << (l1.length() * l1.length());
+                        if (!var.isCcw) {
+                            std::swap(p1, p2);
+                            std::swap(l1, l2);
+                        }
+                        Curve_2 circ_arc[2];
+                        Point_2 pt[4];
+                        Arc_point_2 pa[4];
+                        if (1) {
+                            double rr = l1.length() + size;
+                            auto supp_circ = Circle_2(c0, rr * rr, CGAL::COUNTERCLOCKWISE);
+                            circ_arc[0] = Curve_2(supp_circ, Arc_point_2(p1.x(), p1.y()), Arc_point_2(p2.x(), p2.y()));
+                            //circ_arc[0] = Curve_2(supp_circ, Arc_point_2(l1.p2().x(), l1.p2().y()), Arc_point_2(l2.p2().x(), l2.p2().y()));
+                            std::list<CGAL::Object> objects;
+                            Traits_2().make_x_monotone_2_object()(circ_arc[0], std::back_inserter(objects));
+                            //CGAL_assertion(objects.size() == 2);
+                            X_monotone_curve_2 arc;
+                            std::list<CGAL::Object>::iterator iter;
+                            Polygon_2 pgn;
+                            for (iter = objects.begin(); iter != objects.end(); ++iter) {
+                                CGAL::assign(arc, *iter);
+                                pgn.push_back(arc);
+                            }
+
+                            //Polygon_with_holes_2 pp = CGAL::minkowski_sum_by_full_convolution_2(pgn, CirclePath2(size * 2));
+
+                            pa[0] = circ_arc[0].source();
+                            pa[1] = circ_arc[0].target();
+                            Point_2 sp1(CGAL::to_double(circ_arc[0].source().x()), CGAL::to_double(circ_arc[0].source().y()));
+                            Point_2 tp1(CGAL::to_double(circ_arc[0].target().x()), CGAL::to_double(circ_arc[0].target().y()));
+                            pgn.push_back(X_monotone_curve_2(tp1, c0));
+                            pgn.push_back(X_monotone_curve_2(c0, sp1));
+                            c.join(pgn);
+                            pt[0] = sp1;
+                            pt[1] = tp1;
+                        }
+                        if (1) {
+                            double rr = l1.length() - size;
+                            auto supp_circ = Circle_2(c0, rr * rr, CGAL::COUNTERCLOCKWISE);
+                            circ_arc[1] = Curve_2(supp_circ, pa[0], pa[1]);
+                            //Curve_2 circ_arc(supp_circ, Arc_point_2(l1.p2().x(), l1.p2().y()), Arc_point_2(l2.p2().x(), l2.p2().y()));
+                            std::list<CGAL::Object> objects;
+                            Traits_2().make_x_monotone_2_object()(circ_arc[1], std::back_inserter(objects));
+                            //CGAL_assertion(objects.size() == 2);
+                            X_monotone_curve_2 arc;
+                            std::list<CGAL::Object>::iterator iter;
+                            Polygon_2 pgn;
+                            for (iter = objects.begin(); iter != objects.end(); ++iter) {
+                                CGAL::assign(arc, *iter);
+                                pgn.push_back(arc);
+                            }
+
+                            Point_2 sp2(CGAL::to_double(circ_arc[0].source().x()), CGAL::to_double(circ_arc[0].source().y()));
+                            Point_2 tp2(CGAL::to_double(circ_arc[0].target().x()), CGAL::to_double(circ_arc[0].target().y()));
+                            pgn.push_back(X_monotone_curve_2(tp2, c0));
+                            pgn.push_back(X_monotone_curve_2(c0, sp2));
+                            c.difference(pgn);
+                            pt[2] = sp2;
+                            pt[3] = tp2;
+                        }
+                        auto arc = [&c](Point_2 ps, Point_2 pt) {
+                            Traits_2 traits;
+                            const auto x_coord = ((ps.x() + pt.x()) / 2);
+                            const auto y_coord = ((ps.y() + pt.y()) / 2);
+                            const auto sqr_rad = CGAL::squared_distance(ps, pt) / 4;
+                            Circle_2 supp_circ(Point_2(x_coord, y_coord), sqr_rad, CGAL::COUNTERCLOCKWISE);
+                            Curve_2 circ_arc(supp_circ,
+                                Arc_point_2(ps.x(), ps.y()),
+                                Arc_point_2(pt.x(), pt.y()));
+                            std::list<CGAL::Object> objects;
+                            Traits_2().make_x_monotone_2_object()(circ_arc, std::back_inserter(objects));
+                            X_monotone_curve_2 arc;
+                            std::list<CGAL::Object>::iterator iter;
+                            Polygon_2 pgn;
+                            for (iter = objects.begin(); iter != objects.end(); ++iter) {
+                                CGAL::assign(arc, *iter);
+                                pgn.push_back(arc);
+                            }
+
+                            c.join(pgn);
+                        };
+                        //arc(pt[0], pt[1]);
+                        //arc(pt[2], pt[3]);
+                    } else {
+                        c.join(/* */ CirclePath2(l1.length() * 2 + size * 2, toPoint2(var.c)));
+                        c.difference(CirclePath2(l1.length() * 2 - size * 2, toPoint2(var.c)));
+                    }
+                    //                    c.polygons_with_holes(boost::make_function_output_iterator([&clipper](const Polygon_with_holes_2& pgn) {
+                    //                        clipper.join(pgn);
+                    //                    }));
+                    clipper.join(c);
                 }
             }
 
@@ -642,26 +751,11 @@ Paths Parser::createLine()
                     current++;
                 }
             }));
-            auto i = App::scene()->addPath(pp, QPen(Qt::green, 0.0), Qt::darkGreen);
-            //            if (m_path2.orientation() == CGAL::NEGATIVE)
-            //                m_path2.reverse_orientation();
-            //            Polygon_with_holes_2 offset = CGAL::approximated_offset_2(m_path2, size * dScale, 0.00001);
-            //            QPainterPath pp;
-            //            if (!offset.is_unbounded()) {
-            //                //            auto i = App::scene()->addPath(construct_path(offset.outer_boundary()), QPen(Qt::green, 0.0), Qt::darkGreen);
-            //                //i->setZValue(std::numeric_limits<double>::max());
-            //                pp.addPath(construct_path(offset.outer_boundary()));
-            //            }
-            //            Polygon_with_holes_2::Hole_const_iterator current = offset.holes_begin();
-            //            Polygon_with_holes_2::Hole_const_iterator end = offset.holes_end();
-            //            while (current != end) {
-            //                //            auto i = App::scene()->addPath(construct_path(*current), QPen(Qt::red, 0.0), Qt::darkRed);
-            //                //i->setZValue(std::numeric_limits<double>::max());
-            //                pp.addPath(construct_path(*current));
-            //                current++;
-            //            }
-            //            auto i = App::scene()->addPath(pp, QPen(Qt::yellow, 0.0), QColor(255, 255, 0, 150));
+            //auto i = App::scene()->addPath(pp, QPen(Qt::red, 0.0), Qt::darkRed);
+            auto i = App::scene()->addPath(pp, QPen(Qt::yellow, 0.0), QColor(255, 255, 0, 150));
             qDebug() << "ok" << m_path.size();
+        } catch (CGAL::Error_exception& e) {
+            qDebug() << "wtf" << QString::fromStdString(e.message());
         } catch (...) {
             qDebug() << "wtf" << m_path.size();
         }
@@ -970,6 +1064,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
     if (match.cap(1).isEmpty() && m_state.gCode() != G02 && m_state.gCode() != G03)
         return false;
 
+    auto ct = m_state.curPos();
+
     cInt x = 0, y = 0, i = 0, j = 0;
     if (match.cap(2).isEmpty())
         x = m_state.curPos().X;
@@ -1066,7 +1162,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         PATH.append(PI {
             true,
             m_state.interpolation() == CounterclockwiseCircular,
-            m_path.last(),
+            m_state.quadrant() == Multi,
+            ct,
             m_state.curPos(),
             centerPos[0],
             start,
@@ -1093,7 +1190,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 PATH.append(PI {
                     true,
                     m_state.interpolation() == CounterclockwiseCircular,
-                    m_path.last(),
+                    m_state.quadrant() == Multi,
+                    m_state.curPos(),
                     { x, y },
                     centerPos[c],
                     start,
@@ -1101,10 +1199,12 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                     radius1 });
                 // Replace with exact values
                 m_state.setCurPos({ x, y });
+
                 if (arcPolygon.size())
                     arcPolygon.last() = m_state.curPos();
                 else
                     arcPolygon.push_back(m_state.curPos());
+
                 valid = true;
             }
         }
@@ -1288,6 +1388,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
             m_state.setDCode(dcode);
             PATH.append(PI {
+                false,
                 false,
                 false,
                 m_path.last(),

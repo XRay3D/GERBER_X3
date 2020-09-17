@@ -51,14 +51,14 @@ MainWindow::MainWindow(QWidget* parent)
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    connect(gerberParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(gerberParser, &FileParser::fileError, this, &MainWindow::fileError);
+    connect(gerberParser, &FileParser::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+    connect(gerberParser, &FileParser::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
 
     excellonParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseExcellonFile, excellonParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(excellonParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
+    connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+    connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
 
     connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
