@@ -71,10 +71,12 @@ TreeView::TreeView(QWidget* parent)
     setItemDelegateForColumn(0, new TextDelegate(this));
     setItemDelegateForColumn(1, new LayerDelegate(this));
     //    setItemDelegateForColumn(2, new RadioDelegate(this));
+    App::m_treeView = this;
 }
 
 void TreeView::updateTree()
 {
+    App::m_treeView = nullptr;
     expandAll();
 }
 

@@ -3,13 +3,13 @@
 
 #include "graphicsview.h"
 #include "edid.h"
-#include "thermal.h"
 #include "gi/bridgeitem.h"
 #include "mainwindow.h"
 #include "qdruler.h"
 #include "scene.h"
 #include "settings.h"
 #include "shheaders.h"
+#include "thermal.h"
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
@@ -38,7 +38,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     setViewportUpdateMode(FullViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
-    setContextMenuPolicy(Qt::CustomContextMenu);
+    setContextMenuPolicy(Qt::DefaultContextMenu);
     ////////////////////////////////////
 
     // add two rulers on top and left.
@@ -204,9 +204,8 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 
 void GraphicsView::setScale(double s)
 {
-    qDebug() << "set" << s;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    const auto trf = transform();
+    const auto trf(transform());
     setTransform({ +s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
         /*      */ trf.m31(), trf.m32(), trf.m33() });

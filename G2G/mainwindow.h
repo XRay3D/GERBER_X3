@@ -78,11 +78,9 @@ private:
     bool closeProject();
     template <class T>
     void createDockWidget(/*QWidget* dwContent,*/ int type);
-    void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void initWidgets();
-    void onCustomContextMenuRequested(const QPoint& pos);
 
     void printDialog();
     void readSettings();

@@ -12,6 +12,7 @@ namespace Shapes {
 Node::Node(int id)
     : AbstractNode(id, 1)
 {
+    shape()->setNode(this);
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)

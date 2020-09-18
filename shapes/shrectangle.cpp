@@ -80,6 +80,7 @@ QPointF Rectangle::calcPos(Handler* sh)
 void Rectangle::setPt(const QPointF& pt)
 {
     handlers[Point3]->setPos(pt);
+    calcPos(handlers[Point3]);
     redraw();
 }
 }

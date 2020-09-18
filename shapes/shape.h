@@ -5,6 +5,7 @@
 namespace Shapes {
 
 class Handler;
+class Node;
 
 class Shape : public GraphicsItem {
     friend class Handler;
@@ -24,8 +25,11 @@ public:
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
 
+    void setNode(Node* node);
+
 private:
     mutable QPainterPath m_selectionShape;
+    Node* m_node = nullptr;
 
 protected:
     mutable double m_scale = std::numeric_limits<double>::max();
@@ -39,6 +43,7 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;

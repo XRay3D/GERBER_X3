@@ -5,7 +5,10 @@
 #include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
+#include "shnode.h"
+//#include "filetree/treeview.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QMenu>
 #include <QStyleOptionGraphicsItem>
 
 namespace Shapes {
@@ -15,6 +18,8 @@ Shape::Shape()
 }
 
 Shape::~Shape() { qDeleteAll(handlers); }
+
+void Shape::setNode(Node* node) { m_node = node; }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
@@ -96,6 +101,14 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
         }
     }
 }
+
+void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QMenu menu;
+    m_node->menu(&menu, App::treeView());
+    menu.exec(event->screenPos());
+};
+
 // write to project
 QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 {
