@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -9,38 +7,39 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="75"
-   height="75"
-   viewBox="0 0 19.84375 19.843751"
-   version="1.1"
+   sodipodi:docname="prof_on_climb.svg"
+   inkscape:version="1.0beta1 (fe3e306, 2019-09-17)"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="prof_on_climb.svg">
+   version="1.1"
+   viewBox="0 0 19.84375 19.843751"
+   height="75"
+   width="75">
   <defs
      id="defs2" />
   <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="16"
-     inkscape:cx="14.419825"
-     inkscape:cy="48.007752"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="true"
-     units="px"
+     inkscape:document-rotation="0"
+     inkscape:window-maximized="0"
+     inkscape:window-y="0"
+     inkscape:window-x="810"
+     inkscape:window-height="1042"
+     inkscape:window-width="1094"
      showguides="false"
-     inkscape:window-width="1857"
-     inkscape:window-height="1058"
-     inkscape:window-x="55"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1">
+     units="px"
+     showgrid="true"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="px"
+     inkscape:cy="48.063461"
+     inkscape:cx="29.926113"
+     inkscape:zoom="8"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base">
     <inkscape:grid
-       type="xygrid"
-       id="grid10" />
+       id="grid10"
+       type="xygrid" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -55,99 +54,31 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
+     transform="translate(0,-277.15623)"
      id="layer1"
-     transform="translate(0,-277.15623)">
-    <rect
-       id="rect14"
-       width="11.90625"
-       height="11.906258"
-       x="3.96875"
-       y="281.12497"
-       style="stroke-width:0.26169172" />
-    <rect
-       id="rect16"
-       width="11.377084"
-       height="11.377095"
-       x="4.2333331"
-       y="281.38956"
-       style="fill:#ffffff;stroke-width:0.26155958" />
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
     <circle
-       style="fill:#000000;stroke-width:0.26458335"
-       id="path18"
-       cx="4.1010418"
-       cy="287.07809"
-       r="1.984375" />
-    <circle
-       style="fill:#ffeeaa;stroke-width:0.26458335"
-       id="path20"
+       style="fill:#4d4d4d;stroke-width:0.264583;fill-opacity:0.5"
+       id="path24-4"
        cx="4.1010418"
        cy="287.07809"
        r="1.7197917" />
+    <path
+       transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
+       d="M 37.462891 8 A 7.4999998 7.4999998 0 0 0 30.017578 15 L 15 15 L 15 30.015625 A 7.4999998 7.4999998 0 0 0 8 37.5 A 7.4999998 7.4999998 0 0 0 15 44.984375 L 15 60 L 60 60 L 60 15 L 44.984375 15 A 7.4999998 7.4999998 0 0 0 37.5 8 A 7.4999998 7.4999998 0 0 0 37.462891 8 z M 16 16 L 30.015625 16 A 7.4999998 7.4999998 0 0 0 37.5 23 A 7.4999998 7.4999998 0 0 0 44.982422 16 L 59 16 L 59 59 L 16 59 L 16 44.982422 A 7.4999998 7.4999998 0 0 0 23 37.5 A 7.4999998 7.4999998 0 0 0 16 30.015625 L 16 16 z M 15.5 31 A 6.5 6.5 0 0 1 16 31.019531 A 6.5 6.5 0 0 1 22 37.5 A 6.5 6.5 0 0 1 16 43.980469 A 6.5 6.5 0 0 1 15.847656 43.990234 A 6.5 6.5 0 0 1 15.845703 43.990234 A 6.5 6.5 0 0 1 15.634766 43.998047 A 6.5 6.5 0 0 1 15.5 44 A 6.5 6.5 0 0 1 15 43.980469 A 6.5 6.5 0 0 1 9 37.5 A 6.5 6.5 0 0 1 15 31.019531 A 6.5 6.5 0 0 1 15.152344 31.009766 A 6.5 6.5 0 0 1 15.154297 31.009766 A 6.5 6.5 0 0 1 15.365234 31.001953 A 6.5 6.5 0 0 1 15.5 31 z "
+       style="stroke-width:0.989072;fill:#4d4d4d;fill-opacity:1"
+       id="rect14" />
     <circle
-       style="fill:#000000;stroke-width:0.26458335"
-       id="path22"
-       cx="9.921875"
+       r="1.7197917"
        cy="281.2572"
-       r="1.984375" />
-    <circle
-       style="fill:#ffcc00;stroke-width:0.26458335"
+       cx="9.921875"
        id="path24"
-       cx="9.921875"
-       cy="281.2572"
-       r="1.7197917" />
+       style="fill:#3daee9;stroke-width:0.26458335;fill-opacity:1" />
     <path
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.41702291"
-       d="M 15 34 L 15 36.087891 A 1.5000001 1.5000001 0 0 0 14 37.5 A 1.5000001 1.5000001 0 0 0 15.5 39 A 1.5000001 1.5000001 0 0 0 17 37.5 A 1.5000001 1.5000001 0 0 0 16 36.087891 L 16 34 L 15 34 z "
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
+       d="M 28 11 L 28 12 L 35.5 15 L 34 15 L 34 16 L 35.501953 16 L 28 19 L 28 20 L 36.488281 16.605469 A 1.5000001 1.5000001 0 0 0 37.5 17 A 1.5000001 1.5000001 0 0 0 39 15.5 A 1.5000001 1.5000001 0 0 0 37.5 14 A 1.5000001 1.5000001 0 0 0 36.488281 14.394531 L 28 11 z M 15 15 L 15 16 L 15 20 L 16 20 L 16 16 L 20 16 L 20 15 L 16 15 L 15 15 z M 22 15 L 22 16 L 26 16 L 26 15 L 22 15 z M 28 15 L 28 16 L 32 16 L 32 15 L 28 15 z M 15 22 L 15 26 L 16 26 L 16 22 L 15 22 z M 15 28 L 15 32 L 16 32 L 16 28 L 15 28 z M 15 34 L 15 36.087891 A 1.5000001 1.5000001 0 0 0 14 37.5 A 1.5000001 1.5000001 0 0 0 15.5 39 A 1.5000001 1.5000001 0 0 0 17 37.5 A 1.5000001 1.5000001 0 0 0 16 36.087891 L 16 34 L 15 34 z "
+       style="fill:#da4453;fill-opacity:1;stroke-width:0.41702291"
        id="rect26" />
-    <path
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.4170289"
-       d="M 28 11 L 28 12 L 35.5 15 L 34 15 L 34 16 L 35.501953 16 L 28 19 L 28 20 L 36.488281 16.605469 A 1.5000001 1.5000001 0 0 0 37.5 17 A 1.5000001 1.5000001 0 0 0 39 15.5 A 1.5000001 1.5000001 0 0 0 37.5 14 A 1.5000001 1.5000001 0 0 0 36.488281 14.394531 L 28 11 z "
-       transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
-       id="rect28" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.11033732"
-       id="rect26-4"
-       width="0.26458335"
-       height="1.0583036"
-       x="3.96875"
-       y="284.56461" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.11033732"
-       id="rect26-4-9"
-       width="0.26458335"
-       height="1.0583036"
-       x="3.9687498"
-       y="282.97711" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.12336376"
-       id="rect26-4-9-9"
-       width="0.26458335"
-       height="1.3229414"
-       x="3.9687502"
-       y="281.12497" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.1103389"
-       id="rect28-0"
-       width="1.0583338"
-       height="0.26458335"
-       x="7.4083333"
-       y="281.12497" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.1103389"
-       id="rect28-0-9"
-       width="1.0583338"
-       height="0.26458335"
-       x="5.8208327"
-       y="281.12497" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke-width:0.12336264"
-       id="rect28-0-9-6"
-       width="1.3229172"
-       height="0.26458335"
-       x="3.96875"
-       y="281.12497" />
   </g>
 </svg>
