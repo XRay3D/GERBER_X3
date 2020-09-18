@@ -3,9 +3,15 @@
 
 #include "point.h"
 #include "forms/gcodepropertiesform.h"
+#include "gcode.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
+#include "tooldatabase/tooldatabase.h"
+#include <QAction>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QInputDialog>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -191,6 +197,16 @@ void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     updateGCPForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
+void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QMenu menu;
+    auto action = menu.addAction(QObject::tr("Fixed"), [this](bool fl) {
+        setFlag(QGraphicsItem::ItemIsMovable, !fl);
+    });
+    action->setCheckable(true);
+    action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
+    menu.exec(event->screenPos());
+}
 
 ////////////////////////////////////////////////
 /// \brief Pin::Pin
@@ -337,6 +353,58 @@ void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->m_lastPos = m_pins[i]->pos();
     QGraphicsItem::mousePressEvent(event);
+}
+void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QMenu menu;
+
+    auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
+        ToolDatabase tdb(App::graphicsView(), { Tool::Drill, Tool::EndMill });
+        if (tdb.exec()) {
+            Tool tool(tdb.tool());
+
+            QPolygonF dst;
+
+            for (Pin* item : Pin::pins()) {
+                item->setFlag(QGraphicsItem::ItemIsMovable, false);
+                QPointF point(item->pos());
+                if (dst.contains(point))
+                    continue;
+                dst.append(point);
+            }
+
+            qDebug() << dst.size();
+
+            QSettings settings;
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+            double depth = QInputDialog::getDouble(App::graphicsView(), "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
+#else
+                bool ok;
+                double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
+                if (!ok)
+                    return;
+#endif
+
+            if (depth == 0.0)
+                return;
+            settings.setValue("Pin/depth", depth);
+
+            GCode::GCodeParams gcp(tool, depth, GCode::Drill);
+
+            gcp.params[GCode::GCodeParams::NotTile];
+
+            GCode::File* gcode = new GCode::File({ { toPath(dst) } }, gcp);
+            gcode->setFileName(tr("Pin_") + tool.nameEnc());
+            App::project()->addFile(gcode);
+        }
+    });
+    action = menu.addAction(tr("Fixed"), [](bool fl) {
+        for (Pin* pin : Pin::pins())
+            pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
+    });
+    action->setCheckable(true);
+    action->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
+    menu.exec(event->screenPos());
 }
 
 int Pin::type() const { return GiPin; }

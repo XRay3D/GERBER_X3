@@ -2,7 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermalpreviewitem.h"
+#include "thermalnode.h"
 #include "tooldatabase/tool.h"
+#include <QGraphicsSceneContextMenuEvent>
+#include <QIcon>
+#include <QMenu>
 #include <QPainter>
 #include <QtMath>
 
@@ -170,4 +174,14 @@ ThermalNode* ThermalPreviewItem::node() const
 bool ThermalPreviewItem::isValid() const
 {
     return flags() & QGraphicsItem::ItemIsSelectable && m_isValid;
+}
+
+void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QMenu menu;
+    if (flags() & QGraphicsItem::ItemIsSelectable)
+        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] { node()->disable(); });
+    else
+        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] { node()->enable(); });
+    menu.exec(event->screenPos());
 }

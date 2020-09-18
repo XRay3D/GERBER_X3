@@ -2,7 +2,6 @@ QT += core gui opengl widgets printsupport concurrent
 
 TARGET = GGEasy
 
-
 contains(QT_ARCH, i386) {
     message("32-bit")
     TARGET = $$TARGET"_x32"
@@ -173,10 +172,6 @@ FORMS += \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
 
-#DISTFILES += \
-#    translations/g2g_en.ts \
-#    translations/g2g_ru.ts\
-#    G2G_TR.pro
 
 include(../clipper/clipper.pri)
 include(../excellon/excellon.pri)

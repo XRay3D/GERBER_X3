@@ -12,7 +12,6 @@
 #include "forms/voronoiform.h"
 #include "gbrnode.h"
 #include "gbrparser.h"
-#include "gcode.h"
 #include "gi/gerberitem.h"
 #include "point.h"
 #include "project.h"
@@ -66,7 +65,6 @@ MainWindow::MainWindow(QWidget* parent)
     parserThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
-    connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
 
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
         setStyleSheet("QGroupBox, .QFrame {"
@@ -97,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if constexpr (1) { // (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         QTimer::singleShot(120, [this] { selectAll(); });
         QTimer::singleShot(150, [this] { toolpathActions[GCode::Pocket]->triggered(); });
         QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -518,48 +516,6 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
 }
 
-void MainWindow::createPinsPath()
-{
-    ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
-    if (tdb.exec()) {
-        Tool tool(tdb.tool());
-
-        QPolygonF dst;
-
-        for (Pin* item : Pin::pins()) {
-            item->setFlag(QGraphicsItem::ItemIsMovable, false);
-            QPointF point(item->pos());
-            if (dst.contains(point))
-                continue;
-            dst.append(point);
-        }
-
-        qDebug() << dst.size();
-
-        QSettings settings;
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
-#else
-        bool ok;
-        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
-        if (!ok)
-            return;
-#endif
-
-        if (depth == 0.0)
-            return;
-        settings.setValue("Pin/depth", depth);
-
-        GCode::GCodeParams gcp(tool, depth, GCode::Drill);
-
-        gcp.params[GCode::GCodeParams::NotTile];
-
-        GCode::File* gcode = new GCode::File({ { toPath(dst) } }, gcp);
-        gcode->setFileName(tr("Pin_") + tool.nameEnc());
-        m_project->addFile(gcode);
-    }
-}
-
 void MainWindow::newFile()
 {
     if (closeProject()) {
@@ -635,43 +591,6 @@ void MainWindow::printDialog()
         scene->m_drawPdf = false;
     });
     preview.exec();
-}
-
-void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
-{
-    QMenu menu;
-    QAction* action = nullptr;
-    QGraphicsItem* item = scene->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
-
-    if (!item)
-        return;
-
-    if (item->type() == GiPin) {
-        action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
-        action = menu.addAction(tr("Fixed"), [](bool fl) {
-            for (Pin* pin : Pin::pins())
-                pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
-        });
-        action->setCheckable(true);
-        action->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
-    } else if (dynamic_cast<Marker*>(item)) {
-        action = menu.addAction(tr("Fixed"),
-            [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
-        action->setCheckable(true);
-        action->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
-    }
-    //    else if (item->type() == GiThermalPr) {
-    //        if (item->flags() & QGraphicsItem::ItemIsSelectable)
-    //            a = menu.addAction(QIcon::fromTheme("list-remove"), tr("Exclude from the calculation"), [=] {
-    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
-    //            });
-    //        else
-    //            a = menu.addAction(QIcon::fromTheme("list-add"), tr("Include in the calculation"), [=] {
-    //                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
-    //            });
-    //    }
-    if (action)
-        menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)

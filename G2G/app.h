@@ -20,6 +20,7 @@ class MainWindow;
 class Project;
 class Scene;
 class SplashScreen;
+class TreeView;
 
 class App {
     //    Q_DISABLE_COPY(App)
@@ -37,6 +38,7 @@ class App {
     friend class Project;
     friend class Scene;
     friend class SplashScreen;
+    friend class TreeView;
 
     inline static DrillForm* m_drillForm = nullptr;
     inline static FileModel* m_fileModel = nullptr;
@@ -48,6 +50,7 @@ class App {
     inline static Project* m_project = nullptr;
     inline static Scene* m_scene = nullptr;
     inline static SplashScreen* m_splashScreen = nullptr;
+    inline static TreeView* m_treeView = nullptr;
 
 public:
     static DrillForm* drillForm() { return m_drillForm; }
@@ -60,4 +63,5 @@ public:
     static Project* project() { return m_project; }
     static Scene* scene() { return m_scene; }
     static SplashScreen* splashScreen() { return m_splashScreen; }
+    static TreeView* treeView() { return m_treeView; }
 };

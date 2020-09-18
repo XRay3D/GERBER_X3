@@ -59,4 +59,8 @@ private:
     double m_tickness = 0.5;
     int m_count = 4;
     ThermalNode* m_node = nullptr;
+
+    // QGraphicsItem interface
+protected:
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
