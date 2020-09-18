@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0beta1 (fe3e306, 2019-09-17)"
+   sodipodi:docname="draw-ellipse-arc.svg"
+   id="svg10"
+   version="1.1"
+   viewBox="0 0 16 16">
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="g8"
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="78"
+     inkscape:cy="8.7232862"
+     inkscape:cx="2.4260756"
+     inkscape:zoom="41.7193"
+     showgrid="true"
+     id="namedview12"
+     inkscape:window-height="1058"
+     inkscape:window-width="1834"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     inkscape:document-rotation="0"
+     bordercolor="#666666"
+     pagecolor="#ffffff">
+    <inkscape:grid
+       empspacing="4"
+       id="grid839"
+       type="xygrid" />
+  </sodipodi:namedview>
+  <defs
+     id="defs3051">
+    <style
+       id="current-color-scheme"
+       type="text/css">
+      .ColorScheme-Text {
+        color:#4d4d4d;
+      }
+      </style>
+  </defs>
+  <g
+     id="g8"
+     transform="translate(-421.71-531.79)">
+    <path
+       transform="translate(421.71,531.79)"
+       d="M 3.6484375 3.8828125 A 6 6 0 0 0 2 8 A 6 6 0 0 0 8 14 A 6 6 0 0 0 14 8 L 13 8 A 5 5 0 0 1 8 13 A 5 5 0 0 1 3 8 A 5 5 0 0 1 4.4179688 4.5195312 L 3.6484375 3.8828125 z "
+       style="fill:#4d4d4d;fill-opacity:1;stroke:none"
+       id="path4" />
+    <circle
+       r="1"
+       cy="539.78998"
+       cx="435.20999"
+       id="path841"
+       style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd;stroke-width:1" />
+    <circle
+       style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd;stroke-width:1"
+       id="path841-4"
+       cx="425.70999"
+       cy="535.78998"
+       r="1" />
+    <circle
+       style="fill:#da4453;fill-opacity:1;fill-rule:evenodd;stroke-width:1"
+       id="path841-7"
+       cx="429.70999"
+       cy="539.78998"
+       r="1" />
+  </g>
+</svg>
