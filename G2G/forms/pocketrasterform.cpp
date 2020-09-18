@@ -13,8 +13,8 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
     , ui(new Ui::PocketRasterForm)
     , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
     , pixmaps {
-        QStringLiteral(":/toolpath/pock_rast_climb.svg"),
-        QStringLiteral(":/toolpath/pock_rast_conv.svg"),
+        QStringLiteral("pock_rast_climb"),
+        QStringLiteral("pock_rast_conv"),
     }
 {
     ui->setupUi(this);
@@ -157,8 +157,7 @@ void PocketRasterForm::updateName()
 
 void PocketRasterForm::updatePixmap()
 {
-    int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-    ui->lblPixmap->setPixmap(QIcon(pixmaps[direction]).pixmap(QSize(size, size)));
+    ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
 void PocketRasterForm::rb_clicked()
