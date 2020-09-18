@@ -135,6 +135,20 @@ Size=32
 Context=Actions
 Type=Fixed
 
+##########
+
+Directories=toolpath
+
+########## Toolpath
+########## ordered by size
+
+#75x75 - Fixed size
+[toolpath]
+Size=75
+Context=Emblems
+Type=Fixed
+
+
 ########## Apps
 ########## ordered by size
 

@@ -18,8 +18,8 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     , ui(new Ui::PocketOffsetForm)
     , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") }
     , pixmaps {
-        QStringLiteral(":/toolpath/pock_offs_climb.svg"),
-        QStringLiteral(":/toolpath/pock_offs_conv.svg"),
+        QStringLiteral("pock_offs_climb"),
+        QStringLiteral("pock_offs_conv"),
     }
 {
     ui->setupUi(this);
@@ -191,8 +191,7 @@ void PocketOffsetForm::updateName()
 
 void PocketOffsetForm::updatePixmap()
 {
-    int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-    ui->lblPixmap->setPixmap(QIcon(pixmaps[direction]).pixmap(QSize(size, size)));
+    ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
 void PocketOffsetForm::rb_clicked()
