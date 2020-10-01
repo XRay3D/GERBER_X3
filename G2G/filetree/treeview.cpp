@@ -164,6 +164,17 @@ void TreeView::closeFile()
         App::drillForm()->on_pbClose_clicked();
 }
 
+void TreeView::closeFile2(const QModelIndex& index)
+{
+    qDebug() << m_model;
+    qDebug() << "index.row()" << index.row();
+    qDebug() << "index.parent()" << index.parent();
+    if (index.isValid())
+        m_model->removeRow(index.row(), index.parent());
+    if (App::drillForm())
+        App::drillForm()->on_pbClose_clicked();
+}
+
 void TreeView::saveGcodeFile()
 {
     auto* file = App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());

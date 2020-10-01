@@ -69,7 +69,7 @@ QPointF PolyLine::calcPos(Handler* handler)
             scene()->addItem(h);
         }
         handler->setHType(Handler::Corner);
-    } else {
+    } else if (handler->hType() == Handler::Corner) {
         int idx = handlers.indexOf(handler);
         if (handler != handlers[1]) {
             if (handlers.size() > 4

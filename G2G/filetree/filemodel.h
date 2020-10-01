@@ -13,6 +13,7 @@ class FileModel : public QAbstractItemModel {
     Q_OBJECT
     AbstractNode* rootItem;
     friend class Project;
+    friend class AbstractNode;
 
 signals:
     void updateActions();

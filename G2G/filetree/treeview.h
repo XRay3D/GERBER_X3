@@ -12,12 +12,13 @@ public:
     ~TreeView() override = default;
     void hideOther();
     void closeFile();
+    void closeFile2(const QModelIndex& index);
     void saveGcodeFile();
 
 private:
     void updateTree();
     void updateIcons();
-    FileModel* m_model;
+    FileModel* const m_model;
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

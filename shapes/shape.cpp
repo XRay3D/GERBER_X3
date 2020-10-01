@@ -28,17 +28,24 @@ void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if (m_brColorPtr)
         m_brush.setColor(*m_brColorPtr);
 
-    //QColor color(m_pen.color());
-    QPen pen(m_pen);
-    pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
+    QColor color(m_pen.color());
+    if (option->state & QStyle::State_Selected)
+        color = Qt::green;
+    if (option->state & QStyle::State_MouseOver)
+        color = Qt::red;
+    color.setAlpha(50);
 
+    QPen pen(m_pen);
+    pen.setWidthF(1.0 * App::graphicsView()->scaleFactor());
     if (option->state & QStyle::State_Selected)
         pen.setColor(Qt::green);
-    if (option->state & QStyle::State_MouseOver)
+    if (option->state & QStyle::State_MouseOver) {
+        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         pen.setColor(Qt::red);
+    }
 
     painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
+    painter->setBrush(color);
     painter->drawPath(m_shape);
 }
 

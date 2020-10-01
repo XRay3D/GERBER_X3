@@ -112,7 +112,9 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 void Node::menu(QMenu* menu, TreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), tv, &TreeView::closeFile);
+    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
+        App::fileModel()->removeRow(row(), index().parent());
+    });
     if (shape()->type() == GiShapeT)
         menu->addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
             ShTextDialog dlg({ static_cast<Text*>(shape()) }, tv);

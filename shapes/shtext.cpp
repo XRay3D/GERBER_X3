@@ -2,13 +2,13 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shtext.h"
+#include "scene.h"
 #include "shhandler.h"
 #include "shtextdialog.h"
 #include <QApplication>
 #include <QIcon>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include "scene.h"
 
 namespace Shapes {
 
@@ -177,25 +177,6 @@ QPainterPath Text::shape() const { return m_shape; }
 QString Text::name() const { return QObject::tr("Text"); }
 
 QIcon Text::icon() const { return QIcon::fromTheme("draw-text"); }
-
-void Text::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-{
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
-    QColor color(m_pen.color());
-    if (option->state & QStyle::State_Selected)
-        color = Qt::green;
-    if (option->state & QStyle::State_MouseOver)
-        color = Qt::red;
-    color.setAlpha(50);
-
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(color);
-    painter->drawPath(m_shape);
-    Shape::paint(painter, option, widget);
-}
 
 QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d)
 {

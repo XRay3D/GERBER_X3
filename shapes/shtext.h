@@ -50,7 +50,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return GiShapeT; }
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override; // Shape interface
 
     // Shape interface

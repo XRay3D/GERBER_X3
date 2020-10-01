@@ -2,11 +2,13 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shhandler.h"
+#include "doublespinbox.h"
 #include "graphicsview.h"
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QtWidgets>
 
 namespace Shapes {
 
@@ -163,4 +165,50 @@ void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
+void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    //    QMenu menu;
+    //    menu.addAction("EditPos", [event, this] {
+    class Dialog : public QDialog {
+    public:
+        Dialog(Handler* h)
+        {
+            setWindowFlags(Qt::Popup);
+            setModal(false);
+            // clang-format off
+            enum PType{ X, Y };
+            // clang-format on
+            auto dsbx = [h, this](PType type) {
+                auto ds = new DoubleSpinBox(this);
+                ds->setDecimals(3);
+                ds->setRange(-1000, +1000);
+                ds->setSuffix(QObject::tr(" mm"));
+                ds->setValue(type == X ? h->pos().x() : h->pos().y());
+                ds->connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                    [h, type](auto val) {
+                        if (type == X)
+                            h->setPos({ val, h->pos().y() });
+                        else
+                            h->setPos({ h->pos().x(), val });
+                        h->shape->calcPos(h);
+                        h->shape->redraw();
+                    });
+                return ds;
+            };
+
+            auto gl = new QGridLayout(this);
+            gl->addWidget(new QLabel("X:", this), 0, 0);
+            gl->addWidget(new QLabel("Y:", this), 1, 0);
+            gl->addWidget(dsbx(X), 0, 1);
+            gl->addWidget(dsbx(Y), 1, 1);
+            gl->setMargin(6);
+        }
+        virtual ~Dialog() { }
+        void leaveEvent(QEvent*) override { reject(); };
+    } d(this);
+    d.move(event->screenPos());
+    d.exec();
+    //    });
+    //    menu.exec(event->screenPos());
+}
 }
