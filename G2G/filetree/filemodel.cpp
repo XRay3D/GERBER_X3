@@ -66,11 +66,11 @@ void FileModel::addShape(Shapes::Shape* sh)
     int rowCount = item->childCount();
 
     beginInsertRows(index, rowCount, rowCount);
-    item->append(new Shapes::Node(sh->id()));
+    auto node = new Shapes::Node(sh->id());
+    item->append(node);
     endInsertRows();
 
-    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
-    emit select(selectIndex);
+    emit select(createIndex(rowCount, 0, node));
 }
 
 void FileModel::closeProject()

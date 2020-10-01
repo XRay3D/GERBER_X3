@@ -1,10 +1,10 @@
 #pragma once
 
+#include "app.h"
+#include "project.h"
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>
-#include "app.h"
-#include "project.h"
 
 class AbstractFile;
 class TreeView;
@@ -42,6 +42,7 @@ public:
 
     AbstractNode(const AbstractNode&) = delete;
     AbstractNode& operator=(const AbstractNode&) = delete;
+    QModelIndex index() const;
 
 protected:
     const int m_id;

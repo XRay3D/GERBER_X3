@@ -3,6 +3,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "abstractnode.h"
+#include "app.h"
+#include "filetree/filemodel.h"
 #include "mainwindow.h"
 #include "project.h"
 
@@ -41,7 +43,7 @@ int AbstractNode::row() const
 {
     if (m_parentItem)
         for (int i = 0, size = m_parentItem->childItems.size(); i < size; ++i)
-            if (m_parentItem->childItems[i].data() == this)
+            if (m_parentItem->childItems[i] == this)
                 return i;
     return 0;
 }
@@ -66,5 +68,7 @@ void AbstractNode::append(AbstractNode* item)
 }
 
 void AbstractNode::remove(int row) { childItems.removeAt(row); }
+
+QModelIndex AbstractNode::index() const { return App::fileModel()->createIndex(row(), 0, reinterpret_cast<quintptr>(this)); }
 
 int AbstractNode::childCount() const { return childItems.count(); }
