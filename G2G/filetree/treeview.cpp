@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "treeview.h"
@@ -32,7 +31,9 @@ TreeView::TreeView(QWidget* parent)
     connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
         selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
     });
+#ifndef QT_DEBUG
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::onSelectionChanged);
+#endif
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
 
@@ -113,7 +114,6 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 
 void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-#ifndef QT_DEBUG
     if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
         const int row = index.parent().row();
@@ -140,7 +140,6 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
             App::project()->aShape(id)->setSelected(false);
         }
     }
-#endif
 }
 
 void TreeView::hideOther()
