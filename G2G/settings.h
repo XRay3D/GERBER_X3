@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QPointF>
 #include <QSettings>
+#include <type_traits>
 
 class DoubleSpinBox;
 class QAbstractButton;

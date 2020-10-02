@@ -85,7 +85,11 @@ void Text::redraw()
         break;
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QMatrix matrix;
+#else
+    QTransform matrix;
+#endif
     matrix.translate(-bRect.left() * scale, 0);
     matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
     if (d.side == Bottom) {
