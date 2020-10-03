@@ -377,12 +377,12 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
             QSettings settings;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-            double depth = QInputDialog::getDouble(App::graphicsView(), "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
+            bool ok;
+            double depth = QInputDialog::getDouble(nullptr, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
+            if (!ok)
+                return;
 #else
-                bool ok;
-                double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 20, 1, &ok, Qt::WindowFlags(), 1);
-                if (!ok)
-                    return;
+            double depth = QInputDialog::getDouble(App::graphicsView(), "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
 #endif
 
             if (depth == 0.0)
