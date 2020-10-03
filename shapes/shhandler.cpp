@@ -201,7 +201,11 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             gl->addWidget(new QLabel("Y:", this), 1, 0);
             gl->addWidget(dsbx(X), 0, 1);
             gl->addWidget(dsbx(Y), 1, 1);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
             gl->setMargin(6);
+#else
+            gl->setContentsMargins(6, 6, 6, 6);
+#endif
         }
         virtual ~Dialog() { }
         void leaveEvent(QEvent*) override { reject(); };

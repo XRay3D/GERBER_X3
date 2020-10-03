@@ -224,7 +224,13 @@ QRectF GraphicsView::getViewRect()
 {
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QRectF visible_scene_rect(matrix().inverted().mapRect({ topLeft, bottomRight }));
+#else
+    QRectF visible_scene_rect(transform().inverted().mapRect({ topLeft, bottomRight }));
+#endif
+
     return visible_scene_rect;
 }
 

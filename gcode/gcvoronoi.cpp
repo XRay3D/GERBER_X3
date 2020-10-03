@@ -664,11 +664,12 @@ Paths VoronoiCreator::toPath(const Pairs& pairs)
     Paths paths;
     Pairs tmp = pairs;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    QList<Pair> tmp2(tmp.values());
-#else
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QList<Pair> tmp2(tmp.toList());
+#else
+    QList<Pair> tmp2(tmp.values());
 #endif
+
     std::sort(tmp2.begin(), tmp2.end(), [](const Pair& a, const Pair& b) { return a.id > b.id; });
     {
         QList<OrdPath*> merge;
