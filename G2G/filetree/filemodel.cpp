@@ -9,6 +9,8 @@
 #include "project.h"
 #include "shheaders.h"
 
+#include "leakdetector.h"
+
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem"))

@@ -58,8 +58,8 @@ public:
     virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() { }
 
-    void setPenColor(QColor& penColor);
-    void setBrushColor(QColor& brushColor);
+    void setPenColor(const QColor& penColor);
+    void setBrushColor(const QColor& brushColor);
 
     const AbstractFile* file() const;
     template <typename T>
@@ -71,8 +71,8 @@ protected:
     const AbstractFile* m_file;
     QPen m_pen;
     QBrush m_brush;
-    QColor* m_pnColorPrt = nullptr;
-    QColor* m_brColorPtr = nullptr;
+    const QColor* m_pnColorPrt = nullptr;
+    const QColor* m_brColorPtr = nullptr;
     QPainterPath m_shape;
     QRectF m_rect;
     int m_id = -1;

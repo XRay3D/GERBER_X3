@@ -6,7 +6,10 @@
 #include "shhandler.h"
 #include <QIcon>
 
+#include "leakdetector.h"
+
 namespace Shapes {
+
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);

@@ -1,21 +1,23 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcnode.h"
 #include "gcfile.h"
 #include "gch.h"
 #include "project.h"
+#include "qboxlayout.h"
 #include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
 #include <QMenu>
 #include <QTextBrowser>
-#include "qboxlayout.h"
 
 #include <filetree/treeview.h>
 
 #include "settings.h"
+
+#include "leakdetector.h"
+
 namespace GCode {
 Node::Node(int id)
     : AbstractNode(id)

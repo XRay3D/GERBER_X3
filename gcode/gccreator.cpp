@@ -27,6 +27,8 @@
 #include <limits>
 #include <stdexcept>
 
+#include "leakdetector.h"
+
 void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
 {
     if (ps.isEmpty()) {

@@ -6,6 +6,8 @@
 #include <QModelIndex>
 #include <QVariant>
 
+#include "leakdetector.h"
+
 bool ToolItem::m_deleteEnable = false;
 
 ToolItem::ToolItem(const ToolItem& item)

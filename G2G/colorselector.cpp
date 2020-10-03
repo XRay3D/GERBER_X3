@@ -7,6 +7,8 @@
 
 #include <QColorDialog>
 
+#include "leakdetector.h"
+
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::ColorSelector)

@@ -6,6 +6,8 @@
 #include "graphicsview.h"
 #include <QPainter>
 
+#include "leakdetector.h"
+
 BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
     : m_ptr(ptr)
     , m_side(side)

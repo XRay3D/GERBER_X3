@@ -1,9 +1,9 @@
 #pragma once
 
-
-
 #include <QApplication>
 #include <QSharedMemory>
+
+#include "leakdetector.h"
 
 class Application : public QApplication {
     Q_OBJECT
@@ -37,4 +37,3 @@ public:
 private:
     QSharedMemory* _singular; // shared memory !! SINGLE ACCESS
 };
-

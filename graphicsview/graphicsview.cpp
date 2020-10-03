@@ -15,6 +15,8 @@
 #include <QTransform>
 #include <QtWidgets>
 
+#include "leakdetector.h"
+
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactor2 = 1.7;
 

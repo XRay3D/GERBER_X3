@@ -10,6 +10,8 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtWidgets>
 
+#include "leakdetector.h"
+
 namespace Shapes {
 
 void drawPos(QPainter* painter, const QPointF& pt1)

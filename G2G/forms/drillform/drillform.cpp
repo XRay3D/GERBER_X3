@@ -19,6 +19,8 @@
 #include <QPainter>
 #include <QTimer>
 
+#include "leakdetector.h"
+
 enum { IconSize = 24 };
 
 Paths offset(const Path& path, double offset, bool fl = false)

@@ -2,12 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "shcircle.h"
+#include "math.h"
 #include "scene.h"
 #include "shhandler.h"
 #include <QIcon>
-#include "math.h"
+
+#include "leakdetector.h"
 
 namespace Shapes {
+
 Circle::Circle(QPointF center, QPointF pt)
     : m_radius(QLineF(center, pt).length())
 {

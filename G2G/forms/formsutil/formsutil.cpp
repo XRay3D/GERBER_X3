@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "formsutil.h"
@@ -9,6 +8,7 @@
 #include "gcode.h"
 #include "gi/erroritem.h"
 #include "project.h"
+#include "qprogressdialog.h"
 #include "scene.h"
 #include <QEvent>
 #include <QFile>
@@ -17,9 +17,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTimer>
-#include "qprogressdialog.h"
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+
+#include "leakdetector.h"
 
 FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)

@@ -10,6 +10,8 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
+#include "leakdetector.h"
+
 namespace Shapes {
 
 Text::Text(QPointF pt1)

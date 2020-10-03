@@ -3,8 +3,10 @@
 
 #include "abstractfile.h"
 
-#include <QApplication>
 #include "splashscreen.h"
+#include <QApplication>
+
+#include "leakdetector.h"
 
 AbstractFile::AbstractFile()
     : m_itemGroup(1, new ItemGroup)

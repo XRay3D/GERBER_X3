@@ -7,6 +7,8 @@
 #include "toolitem.h"
 #include <QSettings>
 
+#include "leakdetector.h"
+
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::ToolEditForm)

@@ -8,6 +8,8 @@
 #include "settings.h"
 #include <QtWidgets>
 
+#include "leakdetector.h"
+
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)
     , m_parentName(parent->objectName())

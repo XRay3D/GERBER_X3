@@ -42,6 +42,7 @@
 *                                                                              *
 *******************************************************************************/
 
+
 #include "clipper.hpp"
 #include <algorithm>
 #include <cmath>
@@ -56,6 +57,8 @@
 #include <ostream>
 #include <stdexcept>
 #include <vector>
+
+#include "leakdetector.h"
 
 namespace ClipperLib {
 

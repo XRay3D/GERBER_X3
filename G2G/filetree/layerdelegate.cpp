@@ -9,6 +9,8 @@
 #include <QLineEdit>
 #include <QRadioButton>
 
+#include "leakdetector.h"
+
 LayerDelegate::LayerDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {

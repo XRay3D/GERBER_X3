@@ -11,7 +11,10 @@
 #include <QMenu>
 #include <QStyleOptionGraphicsItem>
 
+#include "leakdetector.h"
+
 namespace Shapes {
+
 Shape::Shape()
     : GraphicsItem(nullptr)
 {

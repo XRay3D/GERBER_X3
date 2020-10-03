@@ -8,6 +8,8 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 
+#include "leakdetector.h"
+
 ThermalDelegate::ThermalDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
@@ -50,7 +52,7 @@ void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
     case ThermalModel::Position:
         return;
     case ThermalModel::GapAngle:
-    case ThermalModel::apThickness:{
+    case ThermalModel::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
@@ -74,7 +76,7 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
     case ThermalModel::Position:
         return;
     case ThermalModel::GapAngle:
-    case ThermalModel::apThickness:  {
+    case ThermalModel::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;

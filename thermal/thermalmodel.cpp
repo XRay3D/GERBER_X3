@@ -4,6 +4,8 @@
 #include "thermalmodel.h"
 #include "thermalnode.h"
 
+#include "leakdetector.h"
+
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {
     QImage image(icon.pixmap(24, 24).toImage());

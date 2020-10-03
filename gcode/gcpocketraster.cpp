@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcpocketraster.h"
@@ -10,9 +9,11 @@
 #ifndef __GNUC__
 #include <execution>
 #endif
+#include "point.h"
 #include <QFuture>
 #include <QtConcurrent>
-#include "point.h"
+
+#include "leakdetector.h"
 
 namespace GCode {
 RasterCreator::RasterCreator()

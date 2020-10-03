@@ -55,9 +55,10 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event)
     //        lineEdit()->setSelection(start, 100);
     //        return;
     //    }
-    if (event->text() == '.' || event->text() == ',')
-        QDoubleSpinBox::keyPressEvent(new QKeyEvent(event->type(), Qt::Key_Comma, event->modifiers(), QLocale().decimalPoint()));
-    else
+    if (event->text() == '.' || event->text() == ',') {
+        QKeyEvent ke(event->type(), Qt::Key_Comma, event->modifiers(), QLocale().decimalPoint());
+        QDoubleSpinBox::keyPressEvent(&ke);
+    } else
         QDoubleSpinBox::keyPressEvent(event);
     //    lineEdit()->setSelection(lineEdit()->cursorPosition(), 100);
 }

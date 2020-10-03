@@ -7,6 +7,8 @@
 #include <QFile>
 #include <cmath>
 
+#include "leakdetector.h"
+
 using namespace Excellon;
 
 Parser::Parser(QObject* parent)
