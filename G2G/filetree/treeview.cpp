@@ -15,6 +15,8 @@
 #include <QMessageBox>
 #include <QTimer>
 
+#include "leakdetector.h"
+
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
     , m_model(new FileModel(this))

@@ -1,8 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gbrparser.h"
+#include "settings.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QElapsedTimer>
@@ -12,7 +12,6 @@
 #include <QTextCodec>
 #include <QTextStream>
 #include <QThread>
-#include "settings.h"
 
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
@@ -37,6 +36,9 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 
 *The GTP file isn’t necessary for the PCB fabrication, because it is used to create a stencil(if your design had SMD parts).
 */
+
+#include "leakdetector.h"
+
 namespace Gerber {
 
 #ifndef M_PI

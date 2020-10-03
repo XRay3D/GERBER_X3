@@ -9,6 +9,8 @@
 #include "scene.h"
 #include <cmath>
 
+#include "leakdetector.h"
+
 using namespace Excellon;
 
 ExcellonDialog::ExcellonDialog(Excellon::File* file)

@@ -22,13 +22,15 @@
 #include <QtPrintSupport>
 #include <QtWidgets>
 
+#include "leakdetector.h"
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , recentFiles(this, "recentFileList")
     , recentProjects(this, "recentProjectsList")
     , gerberParser(new Gerber::Parser)
     , excellonParser(new Excellon::Parser)
-    , m_project(new Project)
+    , m_project(new Project(this))
 
 {
     setupUi(this);

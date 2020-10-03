@@ -25,9 +25,9 @@ void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
 
 //QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }
 
-void GraphicsItem::setPenColor(QColor& penColor) { m_pnColorPrt = &penColor; }
+void GraphicsItem::setPenColor(const QColor& penColor) { m_pnColorPrt = &penColor; }
 
-void GraphicsItem::setBrushColor(QColor& brushColor) { m_brColorPtr = &brushColor; }
+void GraphicsItem::setBrushColor(const QColor& brushColor) { m_brColorPtr = &brushColor; }
 
 const AbstractFile* GraphicsItem::file() const { return m_file; }
 

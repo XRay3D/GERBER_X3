@@ -12,6 +12,8 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
 
+#include "leakdetector.h"
+
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {
     QPainterPath painterPath;

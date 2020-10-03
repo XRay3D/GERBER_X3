@@ -55,6 +55,7 @@ private:
     void saveMillingRaster(const QPointF& offset);
 
     void saveLaserHLDI(const QPointF& offset);
+    QVector<QSharedPointer<QColor>> debugColor;
 
     // AbstractFile interfaces
 protected:

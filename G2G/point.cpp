@@ -16,6 +16,8 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
+#include "leakdetector.h"
+
 using namespace ClipperLib;
 
 QVector<Pin*> Pin::m_pins;

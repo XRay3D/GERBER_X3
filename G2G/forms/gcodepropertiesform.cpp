@@ -9,6 +9,8 @@
 #include "settings.h"
 #include <QMessageBox>
 
+#include "leakdetector.h"
+
 GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm)

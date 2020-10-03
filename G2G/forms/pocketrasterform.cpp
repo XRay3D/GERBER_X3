@@ -8,6 +8,8 @@
 #include "settings.h"
 #include <QMessageBox>
 
+#include "leakdetector.h"
+
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil(new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)

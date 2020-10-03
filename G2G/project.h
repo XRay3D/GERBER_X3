@@ -21,7 +21,7 @@ class Project : public QObject {
     Q_OBJECT
 
 public:
-    explicit Project();
+    explicit Project(QObject *parent=nullptr);
     ~Project() override;
 
     bool save(QFile& file);

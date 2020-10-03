@@ -5,6 +5,8 @@
 #include "shheaders.h"
 #include <QAction>
 
+#include "leakdetector.h"
+
 namespace Shapes {
 
 void Constructor::addShapePoint(const QPointF& value)

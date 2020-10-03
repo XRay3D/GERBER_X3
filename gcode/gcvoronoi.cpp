@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "gcvoronoi.h"
@@ -14,6 +13,8 @@
 #include <CGAL/Segment_Delaunay_graph_filtered_traits_2.h>
 #include <CGAL/Segment_Delaunay_graph_storage_traits_with_info_2.h>
 #include <CGAL/Segment_Delaunay_graph_traits_2.h>
+
+#include "leakdetector.h"
 
 struct convert_info {
     using Info = int;

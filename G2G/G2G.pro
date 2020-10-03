@@ -95,6 +95,7 @@ HEADERS += \
     gi/graphicsitem.h \
     gi/itemgroup.h \
     gi/pathitem.h \
+    leakdetector.h \
     mainwindow.h \
     openingdialog.h \
     point.h \

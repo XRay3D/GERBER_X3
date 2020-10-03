@@ -7,7 +7,10 @@
 #include <QIcon>
 #include <QtMath>
 
+#include "leakdetector.h"
+
 namespace Shapes {
+
 Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     : m_radius(QLineF(center, pt).length())
 {

@@ -1,6 +1,8 @@
 #include "compdialog.h"
 #include "ui_compdialog.h"
 
+#include "leakdetector.h"
+
 namespace Gerber {
 
 ComponentsDialog::ComponentsDialog(QWidget* parent)

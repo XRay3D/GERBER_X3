@@ -17,7 +17,10 @@
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
 
-Project::Project()
+#include "leakdetector.h"
+
+Project::Project(QObject* parent)
+    : QObject(parent)
 {
     if (App::m_project) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");

@@ -20,6 +20,8 @@
 #include <QTextStream>
 #include <gi/itemgroup.h>
 
+#include "leakdetector.h"
+
 namespace GCode {
 
 File::File()
@@ -534,13 +536,12 @@ void File::createGiPocket()
     int i = 0;
     for (const Paths& paths : m_toolPathss) {
         int k = static_cast<int>((m_toolPathss.size() > 1) ? (300.0 / (m_toolPathss.size() - 1)) * i : 0);
-        QColor* c = new QColor;
-        *c = QColor::fromHsv(k, 255, 255, 255);
+        debugColor.append(QSharedPointer<QColor>(new QColor(QColor::fromHsv(k, 255, 255, 255))));
 
         for (const Path& path : paths) {
             item = new PathItem(path, this);
 #ifdef QT_DEBUG
-            item->setPenColor(*c);
+            item->setPenColor(*debugColor.last());
 #else
             item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
 #endif
@@ -553,7 +554,8 @@ void File::createGiPocket()
                 g1path.append({ paths[i].last(), paths[i + 1].first() });
             item = new PathItem(g1path);
 #ifdef QT_DEBUG
-            item->setPenColor(*new QColor(0, 0, 255));
+            debugColor.append(QSharedPointer<QColor>(new QColor(0, 0, 255)));
+            item->setPenColor(*debugColor.last());
 #else
             item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
 #endif

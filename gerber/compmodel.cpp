@@ -4,6 +4,8 @@
 #include "gbrfile.h"
 #include "project.h"
 
+#include "leakdetector.h"
+
 namespace Gerber {
 
 ComponentsModel::ComponentsModel(int fileId, QObject* parent)

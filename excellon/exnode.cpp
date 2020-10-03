@@ -10,6 +10,8 @@
 #include <filetree/treeview.h>
 #include <forms/drillform/drillform.h>
 
+#include "leakdetector.h"
+
 namespace Excellon {
 Node::Node(int id)
     : AbstractNode(id)

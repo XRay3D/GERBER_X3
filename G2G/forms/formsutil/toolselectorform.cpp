@@ -13,6 +13,8 @@
 #include <tooldatabase/tooldatabase.h>
 #include <tooldatabase/tooleditdialog.h>
 
+#include "leakdetector.h"
+
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
     , counter { parent->findChildren<ToolSelectorForm*>().count() }
