@@ -11,16 +11,16 @@ class ThermalModel : public QAbstractItemModel {
 
     QIcon repaint(QColor color, const QIcon& icon) const;
 
-    ThermalNode* rootItem = nullptr;
+    ThermalNode* const rootItem = nullptr;
     QList<ThermalNode*> m_data;
 
 public:
     enum {
-        ThName,
-        ThPos,
-        ThGapAngle,
-        ThGapThickness,
-        ThGapCount,
+        Name,
+        Position,
+        GapAngle,
+        apThickness,
+        GapCount,
     };
 
     explicit ThermalModel(QObject* parent = nullptr);

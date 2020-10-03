@@ -18,6 +18,9 @@ void translation(QApplication* app);
 
 int main(int argc, char* argv[])
 {
+#ifdef _MSC_VER
+    _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+#endif
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     Q_INIT_RESOURCE(resources);

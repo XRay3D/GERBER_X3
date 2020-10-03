@@ -17,14 +17,11 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 
 ThermalModel::ThermalModel(QObject* parent)
     : QAbstractItemModel(parent)
+    , rootItem(new ThermalNode(this))
 {
-    rootItem = new ThermalNode(this);
 }
 
-ThermalModel::~ThermalModel()
-{
-    delete rootItem;
-}
+ThermalModel::~ThermalModel() { delete rootItem; }
 
 ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name)
 {
@@ -40,10 +37,7 @@ int ThermalModel::rowCount(const QModelIndex& parent) const
     return getItem(parent)->childCount();
 }
 
-int ThermalModel::columnCount(const QModelIndex& /*parent*/) const
-{
-    return 5;
-}
+int ThermalModel::columnCount(const QModelIndex& /*parent*/) const { return 5; }
 
 QModelIndex ThermalModel::index(int row, int column, const QModelIndex& parent) const
 {
