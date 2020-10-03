@@ -8,6 +8,8 @@
 #include <QIcon>
 #include <QMenu>
 #include <QPainter>
+#include <QPropertyAnimation>
+#include <QStyleOptionGraphicsItem>
 #include <QtMath>
 
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
@@ -28,42 +30,38 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_depth(depth)
     , grob(&go)
     , m_sourcePath(drawPoly(go))
-    , m_pen(Qt::darkGray, 0.0)
-    , m_brush(QColor(255, 255, 255, 100))
+    , mbColor(QColor(255, 255, 255, 0))
+    , mpColor(QColor(255, 0, 0, 0))
 {
     setZValue(std::numeric_limits<double>::max() - 10);
+    setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     redraw();
+    connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
+    hhh.append(this);
+}
+
+ThermalPreviewItem::~ThermalPreviewItem()
+{
+    hhh.clear();
 }
 
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    // draw source
-    if (isSelected()) {
-        m_pen.setColor(Qt::green);
-        m_brush.setColor(QColor(0, 255, 0, 100));
-    } else {
-        m_pen.setColor(Qt::darkGray);
-        m_brush.setColor(QColor(255, 255, 255, 100));
-    }
-    if (!(flags() & ItemIsSelectable))
-        m_brush.setColor(QColor(0, 0, 0, 0));
-    painter->setPen(m_pen);
-    painter->setBrush(m_brush);
+
+    painter->setBrush(mbColor);
+    QColor p(mbColor);
+    p.setAlpha(255);
+    painter->setPen(QPen(p, 0.0));
     painter->drawPath(m_sourcePath);
     // draw hole
-    if (tool.isValid() && (flags() & ItemIsSelectable)) {
+    if (tool.isValid() && m_node->isChecked()) { //(flags() & ItemIsSelectable)) {
         //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
         //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
-
-        QPen pen(Qt::red, 0.0);
-        QBrush br(QColor(255, 0, 0, 100));
-
-        if (isSelected())
-            painter->setPen(m_pen);
-        else
-            painter->setPen(pen);
-        painter->setBrush(br);
+        painter->setBrush(mpColor);
+        QColor p(mpColor);
+        p.setAlpha(255);
+        painter->setPen(QPen(p, 0.0));
         painter->drawPath(m_toolPath);
     }
 }
@@ -166,22 +164,102 @@ void ThermalPreviewItem::setCount(int count)
     redraw();
 }
 
-ThermalNode* ThermalPreviewItem::node() const
-{
-    return m_node;
-}
-
-bool ThermalPreviewItem::isValid() const
-{
-    return flags() & QGraphicsItem::ItemIsSelectable && m_isValid;
-}
+bool ThermalPreviewItem::isValid() const { return m_isValid && m_node->isChecked(); }
 
 void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QMenu menu;
-    if (flags() & QGraphicsItem::ItemIsSelectable)
-        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] { node()->disable(); });
+    if (m_node->isChecked())
+        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
+            for (auto item : hhh)
+                if ((item == this || item->isSelected()) && item->m_node->isChecked()) {
+                    item->m_node->disable();
+                    item->update();
+                    item->mouseDoubleClickEvent(nullptr);
+                }
+        });
     else
-        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] { node()->enable(); });
+        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
+            for (auto item : hhh)
+                if ((item == this || item->isSelected()) && !item->m_node->isChecked()) {
+                    item->m_node->enable();
+                    item->update();
+                    item->mouseDoubleClickEvent(nullptr);
+                }
+        });
     menu.exec(event->screenPos());
+}
+
+void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event) {
+        QGraphicsItem::mouseDoubleClickEvent(event);
+        if (m_node->isChecked())
+            m_node->disable();
+        else
+            m_node->enable();
+    }
+    auto* animation = new QPropertyAnimation(this, "pColor");
+    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    animation->setDuration(100);
+    animation->setStartValue(mpColor);
+    animation->setEndValue(m_node->isChecked() ? QColor(255, 0, 0, 100) : QColor(255, 0, 0, 0));
+    connect(animation, &QPropertyAnimation::finished, [animation, this] {
+        setProperty("pColor", animation->endValue());
+        update();
+    });
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    update();
+}
+
+void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    auto* animation = new QPropertyAnimation(this, "bColor");
+    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    animation->setDuration(100);
+    animation->setStartValue(mbColor);
+    if (isSelected()) {
+        animation->setEndValue(QColor(0, 255, 0, 200));
+    } else {
+        animation->setEndValue(QColor(255, 255, 255, 100));
+    }
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    hover = true;
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void ThermalPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    auto* animation = new QPropertyAnimation(this, "bColor");
+    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    animation->setDuration(100);
+    animation->setStartValue(mbColor);
+    if (isSelected()) {
+        animation->setEndValue(QColor(0, 255, 0, 100));
+    } else {
+        animation->setEndValue(QColor(255, 255, 255, 0));
+    }
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    hover = false;
+    QGraphicsItem::hoverLeaveEvent(event);
+}
+
+QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemSelectedChange) {
+        auto* animation = new QPropertyAnimation(this, "bColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(mbColor);
+        if (value.toInt()) {
+            animation->setEndValue(hover ? QColor(0, 255, 0, 200) : QColor(0, 255, 0, 100));
+            emit selectionChanged(m_node->index(), {});
+
+        } else {
+            animation->setEndValue(hover ? QColor(255, 255, 255, 100) : QColor(255, 255, 255, 0));
+            emit selectionChanged({}, m_node->index());
+        }
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    return QGraphicsItem::itemChange(change, value);
 }

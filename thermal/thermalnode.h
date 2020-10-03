@@ -7,7 +7,6 @@
 class ThermalModel;
 
 class ThermalNode {
-
 public:
     explicit ThermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, ThermalPreviewItem* item);
     explicit ThermalNode(const QIcon& icon, const QString& name);
@@ -44,8 +43,11 @@ public:
     ThermalNode(const ThermalNode&) = delete;
     ThermalNode& operator=(const ThermalNode&) = delete;
 
+    bool isChecked() const;
+    QModelIndex index() const;
+
 private:
-    bool container = false;
+    const bool container = false;
     const QIcon icon;
     const QString name;
     double m_angle;
@@ -53,12 +55,17 @@ private:
     int m_count;
     const IntPoint m_pos;
 
-    ThermalPreviewItem* m_item = nullptr;
-    bool selected = false;
+    ThermalPreviewItem* const m_item = nullptr;
 
     ThermalNode* m_parentItem = nullptr;
     QList<QSharedPointer<ThermalNode>> childItems;
-    Qt::CheckState m_checkState = Qt::Checked;
+    bool m_checked = false;
 
     inline static ThermalModel* model;
+    inline static const Qt::CheckState chState[] {
+        Qt::Unchecked, // index 0
+        Qt::Unchecked, // index 1
+        Qt::Checked, // index 2
+        Qt::PartiallyChecked // index 3
+    };
 };

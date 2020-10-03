@@ -9,7 +9,6 @@
 #include "scene.h"
 #include "settings.h"
 #include "shheaders.h"
-#include "thermal.h"
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
@@ -369,18 +368,6 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         QGraphicsView::mouseReleaseEvent(event);
         Shapes::Constructor::addShapePoint(mappedPos(event));
     }
-}
-
-void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
-{
-    auto item = scene()->itemAt(mapToScene(event->pos()), transform()); //itemAt(event->pos());
-    if (item && item->type() == GiThermalPr) {
-        if (item->flags() & QGraphicsItem::ItemIsSelectable)
-            reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
-        else
-            reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
-    }
-    QGraphicsView::mouseDoubleClickEvent(event);
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event)

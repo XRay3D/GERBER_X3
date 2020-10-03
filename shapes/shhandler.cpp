@@ -184,7 +184,7 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                 ds->setRange(-1000, +1000);
                 ds->setSuffix(QObject::tr(" mm"));
                 ds->setValue(type == X ? h->pos().x() : h->pos().y());
-                ds->connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged),
                     [h, type](auto val) {
                         if (type == X)
                             h->setPos({ val, h->pos().y() });

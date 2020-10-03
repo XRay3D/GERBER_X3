@@ -14,7 +14,7 @@ ThermalNode::ThermalNode(const QIcon& icon, const QString& name, double angle, d
     , m_pos(pos)
     , m_item(item)
 {
-    item->m_node = this;
+    m_item->m_node = this;
 }
 
 ThermalNode::ThermalNode(const QIcon& icon, const QString& name)
@@ -27,95 +27,72 @@ ThermalNode::ThermalNode(const QIcon& icon, const QString& name)
 {
 }
 
-ThermalNode::~ThermalNode()
-{
-    childItems.clear();
-}
+ThermalNode::~ThermalNode() { childItems.clear(); }
 
-ThermalNode* ThermalNode::child(int row) const
-{
-    return childItems.value(row).data();
-}
+ThermalNode* ThermalNode::child(int row) const { return childItems.value(row).data(); }
 
-ThermalNode* ThermalNode::parentItem()
-{
-    return m_parentItem;
-}
+ThermalNode* ThermalNode::parentItem() { return m_parentItem; }
 
-int ThermalNode::childCount() const
-{
-    return childItems.count();
-}
+int ThermalNode::childCount() const { return childItems.count(); }
 
 int ThermalNode::row() const
 {
     if (m_parentItem)
         for (int i = 0, size = m_parentItem->childItems.size(); i < size; ++i)
-            if (m_parentItem->childItems[i].data() == this)
+            if (m_parentItem->childItems[i] == this)
                 return i;
     return 0;
 }
 
-void ThermalNode::append(ThermalNode* item)
+void ThermalNode::append(ThermalNode* node)
 {
-    item->m_parentItem = this;
-    childItems.append(QSharedPointer<ThermalNode>(item));
+    node->m_parentItem = this;
+    childItems.append(QSharedPointer<ThermalNode>(node));
 }
 
 void ThermalNode::remove(int row) { childItems.removeAt(row); }
 
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    const QModelIndex i1(model->createIndex(row(), ThermalModel::ThName, this));
-    const QModelIndex i2(model->createIndex(row(), ThermalModel::ThGapCount, this));
-    model->dataChanged(i1, i2, { role });
+    {
+        const QModelIndex i1(model->createIndex(row(), ThermalModel::Name, this));
+        const QModelIndex i2(model->createIndex(row(), ThermalModel::GapCount, this));
+        model->dataChanged(i1, i2, { role });
+    }
 
-    switch (role) {
-    case Qt::EditRole:
-        if (container && childItems.isEmpty()) {
-            auto childItems(m_parentItem->childItems);
-            childItems.takeFirst();
+    if (role == Qt::CheckStateRole && !index.column()) {
+        m_checked = (value.value<Qt::CheckState>() == Qt::Checked);
+        if (container) {
+            for (auto node : childItems)
+                node->setData(index, value, role);
+        } else {
+            m_item->mouseDoubleClickEvent(nullptr);
+        }
+        return true;
+    } else if (role == Qt::EditRole) {
+        if (container) {
+            auto childItems(this->childItems);
+            if (container && childItems.isEmpty())
+                childItems = m_parentItem->childItems.mid(1);
             switch (index.column()) {
-            case 0:
-            case 1:
+            case ThermalModel::Name:
+            case ThermalModel::Position:
                 return false;
-            case 2:
-                for (QSharedPointer<ThermalNode> item : childItems)
-                    item->setData(index, value, role);
-                m_angle = value.toDouble();
-                return true;
-            case 3:
-                for (QSharedPointer<ThermalNode> item : childItems)
-                    item->setData(index, value, role);
-                m_tickness = value.toDouble();
-                return true;
-            case 4:
-                for (QSharedPointer<ThermalNode> item : childItems)
-                    item->setData(index, value, role);
-                m_count = value.toInt();
-                return true;
-            }
-            return false;
-        } else if (container) {
-            switch (index.column()) {
-            case 0:
-            case 1:
-                return false;
-            case 2:
-                for (QSharedPointer<ThermalNode> item : childItems) {
-                    item->setData(index, value, role);
+            case ThermalModel::GapAngle:
+                for (auto node : childItems) {
+                    node->setData(index, value, role);
                 }
                 m_angle = value.toDouble();
                 return true;
-            case 3:
-                for (QSharedPointer<ThermalNode> item : childItems) {
-                    item->setData(index, value, role);
+            case ThermalModel::apThickness:
+                for (auto node : childItems) {
+                    node->setData(index, value, role);
                 }
                 m_tickness = value.toDouble();
                 return true;
-            case 4:
-                for (QSharedPointer<ThermalNode> item : childItems) {
-                    item->setData(index, value, role);
+            case ThermalModel::GapCount:
+                for (auto node : childItems) {
+                    node->setData(index, value, role);
                 }
                 m_count = value.toInt();
                 return true;
@@ -123,41 +100,20 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
             return false;
         } else {
             switch (index.column()) {
-            case 0:
-            case 1:
+            case ThermalModel::Name:
+            case ThermalModel::Position:
                 return false;
-            case 2:
+            case ThermalModel::GapAngle:
                 m_item->setAngle(value.toDouble());
                 return true;
-            case 3:
+            case ThermalModel::apThickness:
                 m_item->setTickness(value.toDouble());
                 return true;
-            case 4:
+            case ThermalModel::GapCount:
                 m_item->setCount(value.toInt());
                 return true;
             }
         }
-        return false;
-    case Qt::CheckStateRole:
-        if (!index.column()) {
-            m_checkState = value.toBool() ? Qt::Checked : Qt::Unchecked;
-            if (m_item) {
-                if (value.toBool()) {
-                    m_item->setFlag(QGraphicsItem::ItemIsSelectable, value.toBool());
-                    m_item->setSelected(selected);
-                } else {
-                    selected = m_item->isSelected();
-                    m_item->setFlag(QGraphicsItem::ItemIsSelectable, value.toBool());
-                }
-            }
-            for (QSharedPointer<ThermalNode> item : childItems) {
-                item->setData(index, value, role);
-            }
-            return true;
-        }
-        return false;
-    default:
-        break;
     }
     return false;
 }
@@ -167,12 +123,11 @@ Qt::ItemFlags ThermalNode::flags(const QModelIndex& index) const
     Qt::ItemFlags flags = Qt::ItemIsEnabled;
     if (!index.column())
         flags |= Qt::ItemIsUserCheckable;
-    if (index.column() > 1 /*&& !container*/)
+    if (index.column() > ThermalModel::Position)
         flags |= Qt::ItemIsEditable;
     if (!container)
         flags |= Qt::ItemNeverHasChildren;
-    if (m_checkState == Qt::Checked)
-        flags |= Qt::ItemIsSelectable;
+    flags |= Qt::ItemIsSelectable;
     return flags;
 }
 
@@ -183,34 +138,34 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole:
         if (container) {
             switch (index.column()) {
-            case 0:
+            case ThermalModel::Name:
                 return name;
-            case 1:
+            case ThermalModel::Position:
                 return QString("%1 : %2").arg(m_pos.X * dScale).arg(m_pos.Y * dScale).replace('.', ',');
-            case 2:
+            case ThermalModel::GapAngle:
                 return m_angle;
-            case 3:
+            case ThermalModel::apThickness:
                 return m_tickness;
-            case 4:
+            case ThermalModel::GapCount:
                 return m_count;
             }
         } else {
             switch (index.column()) {
-            case 0:
+            case ThermalModel::Name:
                 return name;
-            case 1:
+            case ThermalModel::Position:
                 return QString("%1 : %2").arg(m_pos.X * dScale).arg(m_pos.Y * dScale).replace('.', ',');
-            case 2:
+            case ThermalModel::GapAngle:
                 return m_item->angle();
-            case 3:
+            case ThermalModel::apThickness:
                 return m_item->tickness();
-            case 4:
+            case ThermalModel::GapCount:
                 return m_item->count();
             }
         }
-        return QVariant();
+        return {};
     case Qt::DecorationRole:
-        if (index.column() == 0) {
+        if (!index.column()) {
             if (icon.isNull()) {
                 QPixmap p(24, 24);
                 p.fill(Qt::transparent);
@@ -218,35 +173,26 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
             }
             return icon;
         }
-        return QVariant();
+        return {};
     case Qt::CheckStateRole:
         if (index.column())
-            return QVariant();
+            return {};
         if (container) {
             int val = 0;
-            for (QSharedPointer<ThermalNode> item : childItems) {
-                if (item->m_checkState == Qt::Unchecked)
-                    val |= 1;
-                else if (item->m_checkState == Qt::Checked)
-                    val |= 2;
+            for (auto node : childItems) {
+                val |= node->m_checked ? 2 : 1;
             }
-            static const Qt::CheckState chState[] {
-                Qt::Unchecked, // index 0
-                Qt::Unchecked, // index 1
-                Qt::Checked, // index 2
-                Qt::PartiallyChecked // index 3
-            };
             return chState[val];
         } else
-            return m_checkState;
+            return m_checked ? Qt::Checked : Qt::Unchecked;
     case Qt::TextAlignmentRole:
         if (index.column())
             return Qt::AlignCenter;
-        return QVariant();
+        return {};
     default:
         break;
     }
-    return QVariant();
+    return {};
 }
 
 double ThermalNode::angle() const { return m_angle; }
@@ -259,19 +205,22 @@ IntPoint ThermalNode::pos() const { return m_pos; }
 
 ThermalPreviewItem* ThermalNode::item() const { return m_item; }
 
-bool ThermalNode::createFile() const { return m_checkState == Qt::Checked && !container; }
+bool ThermalNode::createFile() const { return m_checked && m_item; }
 
 void ThermalNode::disable()
 {
-    m_checkState = Qt::Unchecked;
-    selected = false;
-    m_item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    m_checked = false;
+    model->dataChanged(index(), index(), {});
+    model->dataChanged(parentItem()->index(), parentItem()->index(), {});
 }
 
 void ThermalNode::enable()
 {
-    m_checkState = Qt::Checked;
-    selected = true;
-    m_item->setFlag(QGraphicsItem::ItemIsSelectable, true);
-    m_item->setSelected(true);
+    m_checked = true;
+    model->dataChanged(index(), index(), {});
+    model->dataChanged(parentItem()->index(), parentItem()->index(), {});
 }
+
+QModelIndex ThermalNode::index() const { return model->createIndex(row(), 0, reinterpret_cast<quintptr>(this)); }
+
+bool ThermalNode::isChecked() const { return m_checked; }

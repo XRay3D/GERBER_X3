@@ -31,8 +31,6 @@ private slots:
     void on_cbxFileCurrentIndexChanged(int index);
     void on_dsbxDepth_valueChanged(double arg1);
 
-    void on_pbExclude_clicked();
-
 private:
     Ui::ThermalForm* ui;
 
@@ -40,7 +38,8 @@ private:
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
     ThermalModel* model = nullptr;
-    void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void setSelection(const QModelIndex& selected, const QModelIndex& deselected);
 
     QCheckBox* chbx;
     double m_depth;

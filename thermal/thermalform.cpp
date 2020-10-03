@@ -248,41 +248,47 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
         static QMutex m;
         auto [go, thermalNode, name] = w;
         auto item = new ThermalPreviewItem(*go, tool, m_depth);
+        connect(item, &ThermalPreviewItem::selectionChanged, this, &ThermalForm::setSelection);
         item->setToolTip(name);
         QMutexLocker lock(&m);
         m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
         thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
     };
 
-    ThermalNode* thermalNode = nullptr;
-    for (const Gerber::GraphicObject& go : *file) {
-        if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
-            if (thermalNode == nullptr)
-                thermalNode = model->appendRow(QIcon(), tr("Regions"));
-            map.append({ &go, thermalNode, tr("Region") });
+    enum {
+        Region = 0xFFFF,
+        Line
+    };
+
+    QMap<int, ThermalNode*> thermalNodes;
+    for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
+        if (apIt.value()->isFlashed())
+            thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name());
+    if (0) {
+        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"));
+        thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"));
+
+        for (const Gerber::GraphicObject& go : *file) {
+            if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
+                map.append({ &go, thermalNodes[Region], tr("Region") });
+            }
+        }
+
+        for (const Gerber::GraphicObject& go : *file) {
+            if (go.state().type() == Gerber::Line
+                && go.state().imgPolarity() == Gerber::Positive
+                && go.path().size() == 2
+                && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
+                map.append({ &go, thermalNodes[Line], tr("Line") });
+            }
         }
     }
 
-    thermalNode = nullptr;
-    for (const Gerber::GraphicObject& go : *file) {
-        if (go.state().type() == Gerber::Line
-            && go.state().imgPolarity() == Gerber::Positive
-            && go.path().size() == 2
-            && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
-            if (thermalNode == nullptr)
-                thermalNode = model->appendRow(QIcon(), tr("Lines"));
-            map.append({ &go, thermalNode, tr("Line") });
-        }
-    }
-
-    QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apIt;
-    for (apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
+    for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
         if (apIt.value()->isFlashed()) {
-            QString name(apIt.value()->name());
-            ThermalNode* thermalNode = model->appendRow(drawApertureIcon(apIt.value().data()), name);
             for (const Gerber::GraphicObject& go : *file) {
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apIt.key())
-                    map.append({ &go, thermalNode, name });
+                    map.append({ &go, thermalNodes[apIt.key()], apIt.value()->name() });
             }
         }
     }
@@ -299,10 +305,12 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     //    updateCreateButton();
 
     ui->treeView->setModel(model);
-    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::on_selectionChanged);
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::onSelectionChanged);
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
+        ui->treeView->expandAll();
 }
 
-void ThermalForm::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     for (auto index : selected.indexes()) {
         auto* node = static_cast<ThermalNode*>(index.internalPointer());
@@ -328,6 +336,14 @@ void ThermalForm::on_selectionChanged(const QItemSelection& selected, const QIte
     }
 }
 
+void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& deselected)
+{
+    if (selected.isValid())
+        ui->treeView->selectionModel()->select(selected, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    if (deselected.isValid())
+        ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Clear | QItemSelectionModel::Rows);
+}
+
 void ThermalForm::redraw()
 {
     for (auto item : m_sourcePreview) {
@@ -339,15 +355,6 @@ void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
 {
     m_depth = arg1;
     redraw();
-}
-
-void ThermalForm::on_pbExclude_clicked()
-{
-    for (const QSharedPointer<ThermalPreviewItem>& item : m_sourcePreview) {
-        if (item->node() && !item->isSelected())
-            item->node()->disable();
-    }
-    ui->treeView->update();
 }
 
 void ThermalForm::editFile(GCode::File* /*file*/)
