@@ -154,11 +154,11 @@ void ProfileCreator::strip()
                 m_workingRawPs.remove(i--);
                 continue;
             }
-            QLineF b(toQPointF(p.first()), toQPointF(p.last()));
-            QLineF e(toQPointF(p.last()), toQPointF(p.first()));
+            QLineF b(p.first()(), p.last()());
+            QLineF e(p.last()(), p.first()());
             b.setLength(b.length() - m_toolDiameter * 0.5);
             e.setLength(e.length() - m_toolDiameter * 0.5);
-            p = { toIntPoint(b.p2()), toIntPoint(e.p2()) };
+            p = { (b.p2()), (e.p2()) };
         } else if (double l = Perimeter(p); l <= m_toolDiameter * uScale) {
             m_workingRawPs.remove(i--);
             continue;

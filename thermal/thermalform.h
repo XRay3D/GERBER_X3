@@ -2,6 +2,8 @@
 
 #include "forms/formsutil/formsutil.h"
 
+#include "thvars.h"
+
 class ThermalModel;
 class ThermalPreviewItem;
 class QCheckBox;
@@ -31,6 +33,8 @@ private slots:
     void on_cbxFileCurrentIndexChanged(int index);
     void on_dsbxDepth_valueChanged(double arg1);
 
+    void on_pbReset_clicked();
+
 private:
     Ui::ThermalForm* ui;
 
@@ -40,6 +44,8 @@ private:
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void setSelection(const QModelIndex& selected, const QModelIndex& deselected);
+
+    ThParam par;
 
     QCheckBox* chbx;
     double m_depth;

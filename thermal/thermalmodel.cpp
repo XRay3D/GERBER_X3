@@ -25,9 +25,9 @@ ThermalModel::ThermalModel(QObject* parent)
 
 ThermalModel::~ThermalModel() { delete rootItem; }
 
-ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name)
+ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name, const ThParam &par)
 {
-    m_data.append(new ThermalNode(icon, name));
+    m_data.append(new ThermalNode(icon, name, par));
     rootItem->append(m_data.last());
     return m_data.last();
 }

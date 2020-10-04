@@ -94,8 +94,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                 continue;
             for (const Path& path : gi->paths()) {
                 for (int i = 0, s = path.size(); i < s; ++i) {
-                    const QPointF pt1(toQPointF(path[i]));
-                    const QPointF pt2(toQPointF(path[(i + 1) % s]));
+                    const QPointF pt1(path[i]());
+                    const QPointF pt2(path[(i + 1) % s]());
                     const QLineF l1(pos, pt1);
                     const QLineF l2(pos, pt2);
                     const QLineF l3(pt2, pt1);
@@ -145,13 +145,13 @@ IntPoint BridgeItem::getPoint(const int side) const
     l2.translate(pos());
     switch (side) {
     case GCode::On:
-        return toIntPoint(pos());
+        return (pos());
     case GCode::Outer:
         l2.setAngle(m_angle + 180);
-        return toIntPoint(l2.p2());
+        return (l2.p2());
     case GCode::Inner:
         l2.setAngle(m_angle);
-        return toIntPoint(l2.p2());
+        return (l2.p2());
     }
     return IntPoint();
 }

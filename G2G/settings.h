@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QColor>
+#include <QDebug>
 #include <QPointF>
 #include <QSettings>
+#include <stdexcept>
 #include <type_traits>
 
 class DoubleSpinBox;
@@ -14,6 +16,8 @@ class QPlainTextEdit;
 class QRadioButton;
 class QSpinBox;
 class QTabWidget;
+
+#define varName(val) val, #val
 
 class MySettings : public QSettings {
 public:
@@ -93,6 +97,27 @@ public:
         } else {
             throw std::logic_error(typeid(W).name());
         }
+    }
+
+    template <typename V, typename = std::enable_if_t<std::is_fundamental_v<V>>>
+    auto getValue(V& val, const char* name, V def) const
+    {
+        if constexpr (std::is_floating_point_v<V>) {
+            val = QSettings::value(name, def).toDouble();
+            return val;
+        } else if constexpr (std::is_integral_v<V>) {
+            val = QSettings::value(name, def).toInt();
+            return val;
+        } else {
+            throw std::logic_error(typeid(V).name());
+        }
+    }
+
+    template <typename V, typename = std::enable_if_t<std::is_fundamental_v<V>>>
+    auto setValue(V val, const char* name)
+    {
+        QSettings::setValue(name, val);
+        return val;
     }
 };
 

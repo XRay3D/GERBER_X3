@@ -345,13 +345,13 @@ void Creator::stacking(Paths& paths)
     progress(polyTree.Total());
     stacker({ polyTree.GetFirst(), false });
     qDebug() << "stacker elapsed" << t.elapsed();
-    for (Paths& paths : m_returnPss) {
-        std::reverse(paths.begin(), paths.end());
-        for (int i = 0; i < paths.size(); ++i) {
-            if (paths[i].isEmpty())
-                paths.remove(i--);
+    for (Paths& retPaths : m_returnPss) {
+        std::reverse(retPaths.begin(), retPaths.end());
+        for (int i = 0; i < retPaths.size(); ++i) {
+            if (retPaths[i].isEmpty())
+                retPaths.remove(i--);
         }
-        for (Path& path : paths)
+        for (Path& path : retPaths)
             path.append(path.first());
     }
     sortB(m_returnPss);
@@ -520,10 +520,10 @@ bool Creator::createability(bool side)
         {
             Clipper clipper;
             clipper.AddPaths(frPaths, ptSubject, true);
-            IntRect r(clipper.GetBounds());
+            IntRect rect(clipper.GetBounds());
             int k = uScale;
-            Path outer = { IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
-                IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k) };
+            Path outer = { IntPoint(rect.left - k, rect.bottom + k), IntPoint(rect.right + k, rect.bottom + k),
+                IntPoint(rect.right + k, rect.top - k), IntPoint(rect.left - k, rect.top - k) };
             clipper.AddPath(outer, ptSubject, true);
             clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         }
@@ -594,7 +594,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 
 Paths& Creator::sortB(Paths& src)
 {
-    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -614,7 +614,7 @@ Paths& Creator::sortB(Paths& src)
 
 Paths& Creator::sortBE(Paths& src)
 {
-    IntPoint startPt(toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
@@ -651,7 +651,7 @@ Paths& Creator::sortBE(Paths& src)
 Pathss& Creator::sortB(Pathss& src)
 {
     IntPoint startPt(
-        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+        (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
 
     for (int i = 0; i < src.size(); ++i) {
         if (src[i].isEmpty())
@@ -677,7 +677,7 @@ Pathss& Creator::sortB(Pathss& src)
 Pathss& Creator::sortBE(Pathss& src)
 {
     IntPoint startPt(
-        toIntPoint(Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+        (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -719,7 +719,7 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
     for (int i = 0; i < cnt; ++i) {
         const IntPoint& pt1 = path[(i + 1) % cnt];
         const IntPoint& pt2 = path[i];
-        QLineF l1(toQPointF(pt1), toQPointF(pt2));
+        QLineF l1(pt1(), pt2());
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
         if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
@@ -727,7 +727,7 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
         if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
 #endif
             if (ret)
-                *ret = toIntPoint(p);
+                *ret = (p);
             return true;
         }
     }

@@ -163,8 +163,8 @@ void File::saveMillingProfile(const QPointF& offset)
                 QPolygonF& path = paths[j];
                 if (path.first() == path.last()) { // make complete depth and remove from worck
                     startPath(path.first());
-                    for (int i = 0; i < depths.count(); ++i) {
-                        m_lines.append(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
+                    for (int k = 0; k < depths.count(); ++k) {
+                        m_lines.append(formated({ g1(), z(depths[k]), feed(plungeRate()) }));
                         m_lines.append(savePath(path, spindleSpeed()));
                         //                    bool skip = true;
                         //                    for (QPointF& point : path) {
@@ -506,7 +506,7 @@ void File::createGiDrill()
     GraphicsItem* item;
     for (const IntPoint& point : m_toolPathss.first().first()) {
         item = new DrillItem(m_gcp.getTool().diameter(), this);
-        item->setPos(toQPointF(point));
+        item->setPos(point());
         item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
         item->setBrushColor(GlobalSettings::guiColor(Colors::CutArea));
         itemGroup()->append(item);
@@ -550,8 +550,8 @@ void File::createGiPocket()
 
         {
             Paths g1path;
-            for (int i = 0; i < paths.count() - 1; ++i)
-                g1path.append({ paths[i].last(), paths[i + 1].first() });
+            for (int j = 0; j < paths.count() - 1; ++j)
+                g1path.append({ paths[j].last(), paths[j + 1].first() });
             item = new PathItem(g1path);
 #ifdef QT_DEBUG
             debugColor.append(QSharedPointer<QColor>(new QColor(0, 0, 255)));
@@ -585,8 +585,8 @@ void File::createGiProfile()
         item = new PathItem(m_toolPathss[i], this);
         item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
         itemGroup()->append(item);
-        for (int i = 0; i < paths.count() - 1; ++i)
-            m_g0path.append({ paths[i].last(), paths[i + 1].first() });
+        for (int j = 0; j < paths.count() - 1; ++j)
+            m_g0path.append({ paths[j].last(), paths[j + 1].first() });
         if (i < m_toolPathss.size() - 1) {
             m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
         }
@@ -627,8 +627,8 @@ void File::createGiRaster()
         item = new PathItem(paths, this);
         item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
         itemGroup()->append(item);
-        for (int i = 0; i < paths.count() - 1; ++i)
-            m_g0path.append({ paths[i].last(), paths[i + 1].first() });
+        for (int j = 0; j < paths.count() - 1; ++j)
+            m_g0path.append({ paths[j].last(), paths[j + 1].first() });
         if (i < m_toolPathss.size() - 1) {
             m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
         }

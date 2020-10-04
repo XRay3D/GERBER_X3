@@ -25,9 +25,11 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
     // execute offset
-    ClipperOffset offset;
-    offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
-    offset.Execute(m_returnPs, dOffset);
+    {
+        ClipperOffset offset;
+        offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
+        offset.Execute(m_returnPs, dOffset);
+    }
 
     // fix direction
     if (m_gcp.side() == Outer && !m_gcp.convent())

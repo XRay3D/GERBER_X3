@@ -1,5 +1,7 @@
 #pragma once
 
+#include "thvars.h"
+
 #include <QAbstractItemModel>
 
 class ThermalNode;
@@ -26,7 +28,7 @@ public:
     explicit ThermalModel(QObject* parent = nullptr);
     ~ThermalModel() override;
 
-    ThermalNode* appendRow(const QIcon& icon, const QString& name);
+    ThermalNode* appendRow(const QIcon& icon, const QString& name, const ThParam& par);
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent) const override;

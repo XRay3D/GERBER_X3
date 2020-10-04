@@ -30,7 +30,7 @@ void PolyLine::redraw()
     path.clear();
     for (int i = 1, e = handlers.size(); i < e; ++i) {
         if (handlers[i]->hType() == Handler::Corner)
-            path.append(toIntPoint(handlers[i]->pos()));
+            path.append((handlers[i]->pos()));
     }
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(path));

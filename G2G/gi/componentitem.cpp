@@ -71,18 +71,18 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             m_component.referencePoint - QPointF { k, k } });
 
     if (m_scale < 0.05) {
-        const double k = m_scale * 20; //m_scale > 0.05 ? 1./10 / m_scale : 10;
+        const double size = m_scale * 20; //m_scale > 0.05 ? 1./10 / m_scale : 10;
         for (auto [number, description, pos] : m_component.pins) {
             Q_UNUSED(number)
             Q_UNUSED(description)
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(c, 2 * m_scale, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             painter->drawLine(
-                pos + QPointF { k, k },
-                pos - QPointF { k, k });
+                pos + QPointF { size, size },
+                pos - QPointF { size, size });
             painter->drawLine(
-                pos + QPointF { -k, k },
-                pos - QPointF { -k, k });
+                pos + QPointF { -size, size },
+                pos - QPointF { -size, size });
         }
         for (auto [path, pos] : pathPins) {
             painter->save();

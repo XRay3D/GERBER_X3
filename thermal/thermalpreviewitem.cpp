@@ -2,6 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermalpreviewitem.h"
+//#include "graphicsview.h"
+//#include "settings.h"
 #include "thermalnode.h"
 #include "tooldatabase/tool.h"
 #include <QGraphicsSceneContextMenuEvent>
@@ -23,7 +25,7 @@ QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
     }
     //    const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
     //    if (hole)
-    //        painterPath.addEllipse(toQPointF(go.state().curPos()), hole, hole);
+    //        painterPath.addEllipse(go.state().curPos()), hole, hole);
     return painterPath;
 }
 
@@ -32,38 +34,35 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_depth(depth)
     , grob(&go)
     , m_sourcePath(drawPoly(go))
-    , mbColor(QColor(255, 255, 255, 0))
-    , mpColor(QColor(255, 0, 0, 0))
+    , m_bodyColor(colors[(int)Colors::Default])
+    , m_pathColor(colors[(int)Colors::UnUsed])
 {
     setZValue(std::numeric_limits<double>::max() - 10);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
-    redraw();
     connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
     hhh.append(this);
 }
 
-ThermalPreviewItem::~ThermalPreviewItem()
-{
-    hhh.clear();
-}
+ThermalPreviewItem::~ThermalPreviewItem() { hhh.clear(); }
 
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
 
-    painter->setBrush(mbColor);
-    QColor p(mbColor);
+    painter->setBrush(m_bodyColor);
+    QColor p(m_bodyColor);
     p.setAlpha(255);
     painter->setPen(QPen(p, 0.0));
     painter->drawPath(m_sourcePath);
     // draw hole
-    if (tool.isValid() && m_node->isChecked()) { //(flags() & ItemIsSelectable)) {
-        //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
-        //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
-        painter->setBrush(mpColor);
-        QColor p(mpColor);
-        p.setAlpha(255);
-        painter->setPen(QPen(p, 0.0));
+    if (tool.isValid() && m_pathColor.alpha()) {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->drawPath(m_toolPath);
+
+        QColor pc(m_pathColor);
+        pc.setAlpha(pc.alpha() * 255 / 100.0);
+        painter->setPen(QPen(pc, 0.0));
         painter->drawPath(m_toolPath);
     }
 }
@@ -82,7 +81,7 @@ Paths ThermalPreviewItem::bridge() const { return m_bridge; }
 
 void ThermalPreviewItem::redraw()
 {
-    const double diameter = tool.getDiameter(m_depth);
+    diameter = tool.getDiameter(m_depth);
     Paths paths;
     {
         ClipperOffset offset;
@@ -94,21 +93,23 @@ void ThermalPreviewItem::redraw()
         path.append(path.first());
     clipper.AddPaths(paths, ptSubject, false);
     // create frame
-    if (qFuzzyIsNull(m_tickness) && m_count) {
+    if (qFuzzyIsNull(m_node->tickness()) && m_node->count()) {
         m_bridge.clear();
     } else {
-        ClipperOffset offset;
-        offset.AddPaths(paths, jtMiter, etClosedLine);
-        offset.Execute(m_bridge, diameter * uScale * 0.1);
-
-        Clipper clipper;
-        clipper.AddPaths(m_bridge, ptSubject, true);
-
-        const IntPoint center(toIntPoint(m_sourcePath.boundingRect().center()));
-        const double radius = (m_sourcePath.boundingRect().width() + m_sourcePath.boundingRect().height()) * uScale * 0.5;
-        for (int i = 0; i < m_count; ++i) {
+        {
             ClipperOffset offset;
-            double angle = i * 2 * M_PI / m_count + qDegreesToRadians(m_angle);
+            offset.AddPaths(paths, jtMiter, etClosedLine);
+            offset.Execute(m_bridge, diameter * uScale * 0.1);
+        }
+
+        Clipper clipperBr;
+        clipperBr.AddPaths(m_bridge, ptSubject, true);
+
+        const IntPoint& center((m_sourcePath.boundingRect().center()));
+        const double radius = (m_sourcePath.boundingRect().width() + m_sourcePath.boundingRect().height()) * uScale * 0.5;
+        for (int i = 0; i < m_node->count(); ++i) {
+            ClipperOffset offset;
+            double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
             Path path {
                 center,
                 IntPoint(
@@ -116,11 +117,11 @@ void ThermalPreviewItem::redraw()
                     static_cast<cInt>((sin(angle) * radius) + center.Y))
             };
             offset.AddPath(path, jtSquare, etOpenSquare);
-            Paths paths;
-            offset.Execute(paths, (m_tickness + diameter) * uScale * 0.5);
-            clipper.AddPath(paths.first(), ptClip, true);
+            Paths pathsBr;
+            offset.Execute(pathsBr, (m_node->tickness() + diameter) * uScale * 0.5);
+            clipperBr.AddPath(pathsBr.first(), ptClip, true);
         }
-        clipper.Execute(ctIntersection, m_bridge, pftPositive);
+        clipperBr.Execute(ctIntersection, m_bridge, pftPositive);
     }
     clipper.AddPaths(m_bridge, ptClip, true);
     {
@@ -128,45 +129,44 @@ void ThermalPreviewItem::redraw()
         clipper.Execute(ctDifference, polytree, pftPositive);
         PolyTreeToPaths(polytree, paths);
     }
-    {
-        ClipperOffset offset;
-        offset.AddPaths(paths, jtRound, etOpenRound);
-        offset.Execute(paths, diameter * uScale * 0.5);
-    }
     m_isValid = !paths.isEmpty();
     m_toolPath = QPainterPath();
     for (QPolygonF& polygon : toQPolygons(paths)) {
-        polygon.append(polygon.first());
-        m_toolPath.addPolygon(polygon);
+        m_toolPath.moveTo(polygon.takeFirst());
+        for (QPointF& pt : polygon)
+            m_toolPath.lineTo(pt);
     }
     update();
 }
 
-double ThermalPreviewItem::angle() const { return m_angle; }
-
-void ThermalPreviewItem::setAngle(double angle)
-{
-    m_angle = angle;
-    redraw();
-}
-
-double ThermalPreviewItem::tickness() const { return m_tickness; }
-
-void ThermalPreviewItem::setTickness(double tickness)
-{
-    m_tickness = tickness;
-    redraw();
-}
-
-int ThermalPreviewItem::count() const { return m_count; }
-
-void ThermalPreviewItem::setCount(int count)
-{
-    m_count = count;
-    redraw();
-}
-
 bool ThermalPreviewItem::isValid() const { return m_isValid && m_node->isChecked(); }
+
+void ThermalPreviewItem::changeColor()
+{
+    {
+        auto animation = new QPropertyAnimation(this, "bodyColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_bodyColor);
+        if (colorState & Selected) {
+            animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
+        } else {
+            if (colorState & Used)
+                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
+            else
+                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
+        }
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    {
+        auto animation = new QPropertyAnimation(this, "pathColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_pathColor);
+        animation->setEndValue((colorState & Used) ? colors[(int)Colors::Used] : colors[(int)Colors::UnUsed]);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+}
 
 void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
@@ -201,67 +201,43 @@ void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
         else
             m_node->enable();
     }
-    auto* animation = new QPropertyAnimation(this, "pColor");
-    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    animation->setDuration(100);
-    animation->setStartValue(mpColor);
-    animation->setEndValue(m_node->isChecked() ? QColor(255, 0, 0, 100) : QColor(255, 0, 0, 0));
-    connect(animation, &QPropertyAnimation::finished, [animation, this] {
-        setProperty("pColor", animation->endValue());
-        update();
-    });
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
+
+    if (m_node->isChecked())
+        colorState |= Used;
+    else
+        colorState &= ~Used;
+
+    changeColor();
     update();
 }
 
 void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-    auto* animation = new QPropertyAnimation(this, "bColor");
-    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    animation->setDuration(100);
-    animation->setStartValue(mbColor);
-    if (isSelected()) {
-        animation->setEndValue(QColor(0, 255, 0, 200));
-    } else {
-        animation->setEndValue(QColor(255, 255, 255, 100));
-    }
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-    hover = true;
+
+    colorState |= Hovered;
+    changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
 void ThermalPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-    auto* animation = new QPropertyAnimation(this, "bColor");
-    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    animation->setDuration(100);
-    animation->setStartValue(mbColor);
-    if (isSelected()) {
-        animation->setEndValue(QColor(0, 255, 0, 100));
-    } else {
-        animation->setEndValue(QColor(255, 255, 255, 0));
-    }
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-    hover = false;
+
+    colorState &= ~Hovered;
+    changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
 QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedChange) {
-        auto* animation = new QPropertyAnimation(this, "bColor");
-        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-        animation->setDuration(100);
-        animation->setStartValue(mbColor);
         if (value.toInt()) {
-            animation->setEndValue(hover ? QColor(0, 255, 0, 200) : QColor(0, 255, 0, 100));
+            colorState |= Selected;
             emit selectionChanged(m_node->index(), {});
-
         } else {
-            animation->setEndValue(hover ? QColor(255, 255, 255, 100) : QColor(255, 255, 255, 0));
+            colorState &= ~Selected;
             emit selectionChanged({}, m_node->index());
         }
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
+        changeColor();
     }
     return QGraphicsItem::itemChange(change, value);
 }

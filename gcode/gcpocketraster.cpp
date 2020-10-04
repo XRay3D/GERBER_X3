@@ -99,8 +99,8 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                 {
                     Clipper clipper;
                     clipper.AddPaths(src, ptClip, true);
-                    for (auto& [left_, right_, var, flag] : w) {
-                        Q_UNUSED(flag)
+                    for (auto& [left_, right_, var, _f] : w) {
+                        Q_UNUSED(_f)
                         Path frame { { left_, var }, { right_, var } };
                         RotatePath(frame, angle, center);
                         clipper.AddPath(frame, ptSubject, false);
@@ -133,8 +133,8 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     Paths toNext;
                     Clipper clipper;
                     clipper.AddPaths(src, ptSubject, false);
-                    for (auto [left_, right_, var, flag] : w) {
-                        Q_UNUSED(flag)
+                    for (auto [left_, right_, var, _f] : w) {
+                        Q_UNUSED(_f)
                         Path frame {
                             { left_, var },
                             { right_, var },
@@ -152,17 +152,17 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                     } else {
                         for (Path& dst : scanLine) {
                             for (int i = 0; i < toNext.size(); ++i) {
-                                Path& src = toNext[i];
-                                if (dst.last() == src.first()) {
-                                    dst.append(src.mid(1));
+                                Path& next = toNext[i];
+                                if (dst.last() == next.first()) {
+                                    dst.append(next.mid(1));
                                     toNext.remove(i--);
-                                } else if (dst.last() == src.last()) {
-                                    ReversePath(src);
-                                    dst.append(src.mid(1));
+                                } else if (dst.last() == next.last()) {
+                                    ReversePath(next);
+                                    dst.append(next.mid(1));
                                     toNext.remove(i--);
-                                } else if (dst.first() == src.first()) {
+                                } else if (dst.first() == next.first()) {
                                     toNext.remove(i--);
-                                } else if (dst.first() == src.last()) {
+                                } else if (dst.first() == next.last()) {
                                     toNext.remove(i--);
                                 }
                             }

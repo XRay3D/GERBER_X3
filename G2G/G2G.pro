@@ -29,6 +29,7 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
     TARGET = $$TARGET"_msvc"
+    QMAKE_CXXFLAGS_WARN_ON = /W4
     message($$TARGET)
 }
 

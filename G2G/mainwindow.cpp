@@ -297,7 +297,7 @@ void MainWindow::createActionsService()
     });
     action->setStatusTip(tr("Show the application's settings box"));
 
-    QToolBar* toolpathToolBar = addToolBar(tr("Service"));
+    toolpathToolBar = addToolBar(tr("Service"));
     toolpathToolBar->setObjectName("tbService");
     //toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "thermalpreviewitem.h"
+#include "thvars.h"
 #include <QIcon>
 #include <QModelIndex>
 
@@ -8,9 +9,9 @@ class ThermalModel;
 
 class ThermalNode {
 public:
-    explicit ThermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, ThermalPreviewItem* item);
-    explicit ThermalNode(const QIcon& icon, const QString& name);
-    explicit ThermalNode(ThermalModel* _model) { model = _model; }
+    ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, ThermalPreviewItem* item);
+    ThermalNode(const QIcon& icon, const QString& name, const ThParam& par);
+    explicit ThermalNode(ThermalModel* _model);
 
     ~ThermalNode();
 
@@ -26,14 +27,15 @@ public:
     void remove(int row);
 
     bool setData(const QModelIndex& index, const QVariant& value, int role);
+    QVariant data(const QModelIndex& index, int role) const;
 
     Qt::ItemFlags flags(const QModelIndex& index) const;
-
-    QVariant data(const QModelIndex& index, int role) const;
 
     double angle() const;
     double tickness() const;
     int count() const;
+    ThParam getParam() const { return par; };
+
     IntPoint pos() const;
     ThermalPreviewItem* item() const;
     bool createFile() const;
@@ -44,21 +46,20 @@ public:
     ThermalNode& operator=(const ThermalNode&) = delete;
 
     bool isChecked() const;
-    QModelIndex index() const;
+    QModelIndex index(int column = 0) const;
 
 private:
     const bool container = false;
     const QIcon icon;
     const QString name;
-    double m_angle;
-    double m_tickness;
-    int m_count;
     const IntPoint m_pos;
+
+    ThParam par;
 
     ThermalPreviewItem* const m_item = nullptr;
 
-    ThermalNode* m_parentItem = nullptr;
-    QList<QSharedPointer<ThermalNode>> childItems;
+    ThermalNode* m_parent = nullptr;
+    QList<QSharedPointer<ThermalNode>> childs;
     bool m_checked = false;
 
     inline static ThermalModel* model;
