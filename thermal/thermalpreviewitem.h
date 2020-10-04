@@ -12,22 +12,15 @@ class ThermalNode;
 class ThermalPreviewItem : public QObject, public QGraphicsItem {
     Q_OBJECT
 
-    Q_PROPERTY(QColor bColor READ bColor WRITE setBColor NOTIFY colorChanged)
-    Q_PROPERTY(QColor pColor READ pColor WRITE setPColor NOTIFY colorChanged)
+    Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)
+    Q_PROPERTY(QColor pathColor READ pathColor WRITE setPathColor)
 
-    QColor bColor() { return mbColor; }
-    void setBColor(const QColor& c)
-    {
-        mbColor = c;
-        colorChanged();
-    }
-    QColor pColor() { return mpColor; }
-    void setPColor(const QColor& c)
-    {
-        mpColor = c;
-        colorChanged();
-    }
-
+    // clang-format off
+    QColor bodyColor() { return m_bodyColor; }
+    void setBodyColor(const QColor& c) { m_bodyColor = c; colorChanged();  }
+    QColor pathColor() { return m_pathColor; }
+    void setPathColor(const QColor& c) { m_pathColor = c; colorChanged(); }
+    // clang-format on
     static QPainterPath drawPoly(const Gerber::GraphicObject& go);
     friend class ThermalNode;
 
@@ -51,18 +44,6 @@ public:
     Paths paths() const;
     Paths bridge() const;
     void redraw();
-
-    double angle() const;
-    void setAngle(double angle);
-
-    double tickness() const;
-    void setTickness(double tickness);
-
-    int count() const;
-    void setCount(int count);
-
-    //    ThermalNode* node() const;
-
     bool isValid() const;
 
 private:
@@ -76,18 +57,42 @@ private:
 
     QPainterPath m_toolPath;
 
-    QColor mbColor;
-    QColor mpColor;
-    bool hover = false;
+    QColor m_bodyColor;
+    QColor m_pathColor;
 
+    enum class Colors : int {
+        Default,
+        DefaultHovered,
+        Selected,
+        SelectedHovered,
+        Used,
+        UsedHovered,
+        UnUsed,
+    };
+
+    inline static const QColor colors[] {
+        QColor(255, 255, 255, 100), //  dark gray
+        QColor(255, 255, 255, 200), //  light gray
+        QColor(0, 255, 0, 100), //      dark green
+        QColor(0, 255, 0, 200), //      light green
+        QColor(255, 0, 0, 100), //      dark red
+        QColor(255, 0, 0, 200), //      light red
+        QColor(255, 0, 0, 0), //        transparent
+    };
+
+    enum ColorState {
+        Default,
+        Hovered = 1,
+        Selected = 2,
+        Used = 4,
+    };
+
+    int colorState = Default;
+    double diameter;
     Paths m_bridge;
-
-    double m_angle = 0.0;
-    double m_tickness = 0.5;
-    int m_count = 4;
     ThermalNode* m_node = nullptr;
-
     inline static QVector<ThermalPreviewItem*> hhh;
+    void changeColor();
 
     // QGraphicsItem interface
 protected:

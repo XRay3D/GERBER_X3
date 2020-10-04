@@ -16,12 +16,12 @@ AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
 {
     m_polygon = toQPolygon(path);
 
-    Paths tmpPpath;
+    Paths tmpPaths;
     ClipperOffset offset;
     offset.AddPath(path, jtSquare, etOpenButt);
-    offset.Execute(tmpPpath, 0.01 * uScale);
-    for (const Path& path : tmpPpath)
-        m_selectionShape.addPolygon(toQPolygon(path));
+    offset.Execute(tmpPaths, 0.01 * uScale);
+    for (const Path& tmpPath : tmpPaths)
+        m_selectionShape.addPolygon(toQPolygon(tmpPath));
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }

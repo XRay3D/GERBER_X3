@@ -215,7 +215,7 @@ QRectF Project::getSelectedBoundingRect()
     //            }
     //        }
     //    }
-    //    const QRectF rect(toQPointF(topLeft), toQPointF(botRight));
+    //    const QRectF rect(topLeft), botRight));
 
     if (!rect.isEmpty())
         setWorckRect(rect);
@@ -242,7 +242,7 @@ QRectF Project::getBoundingRect()
             }
         }
     }
-    return QRectF(toQPointF(topLeft), toQPointF(botRight));
+    return QRectF(topLeft(), botRight());
 }
 
 QString Project::fileNames()
@@ -372,16 +372,16 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 
 void Project::saveSelectedToolpaths()
 {
-    QVector<GCode::File*> files(this->files<GCode::File>());
-    for (int i = 0; i < files.size(); ++i) {
-        if (!files[i]->itemGroup()->isVisible())
-            files.remove(i--);
+    QVector<GCode::File*> gcFiles(this->files<GCode::File>());
+    for (int i = 0; i < gcFiles.size(); ++i) {
+        if (!gcFiles[i]->itemGroup()->isVisible())
+            gcFiles.remove(i--);
     }
 
     using Key = QPair<uint, Side>;
 
     QMap<Key, QList<GCode::File*>> mm;
-    for (GCode::File* file : files)
+    for (GCode::File* file : gcFiles)
         mm[{ file->getTool().hash(), file->side() }].append(file);
 
     for (const Key& key : mm.keys()) {

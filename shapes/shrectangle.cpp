@@ -33,8 +33,8 @@ Rectangle::~Rectangle() { }
 void Rectangle::redraw()
 {
     handlers[Center]->setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
-    IntPoint p1(toIntPoint(handlers[Point1]->pos()));
-    IntPoint p2(toIntPoint(handlers[Point3]->pos()));
+    IntPoint p1((handlers[Point1]->pos()));
+    IntPoint p2((handlers[Point3]->pos()));
     m_paths.first() = {
         IntPoint { p1.X, p1.Y },
         IntPoint { p2.X, p1.Y },

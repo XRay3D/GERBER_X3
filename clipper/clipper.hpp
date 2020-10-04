@@ -49,6 +49,7 @@
 //use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated
 
+#include "stdint.h"
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -57,29 +58,37 @@
 #include <queue>
 #include <set>
 #include <stdexcept>
-#include "stdint.h"
 #include <vector>
 
 #include <QDataStream>
 #include <QDebug>
+#include <QPointF>
 #include <QVector>
 
 namespace ClipperLib {
 
-enum ClipType { ctIntersection,
+enum ClipType {
+    ctIntersection,
     ctUnion,
     ctDifference,
-    ctXor };
-enum PolyType { ptSubject,
-    ptClip };
+    ctXor
+};
+
+enum PolyType {
+    ptSubject,
+    ptClip
+};
+
 //By far the most widely used winding rules for polygon filling are
 //EvenOdd & NonZero (GDI, GDI+, XLib, OpenGL, Cairo, AGG, Quartz, SVG, Gr32)
 //Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
 //see http://glprogramming.com/red/chapter11.html
-enum PolyFillType { pftEvenOdd,
+enum PolyFillType {
+    pftEvenOdd,
     pftNonZero,
     pftPositive,
-    pftNegative };
+    pftNegative
+};
 
 #ifdef use_int32
 typedef int cInt;
@@ -92,6 +101,8 @@ static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
 typedef unsigned long long ulong64;
 
+constexpr cInt uScale = 100000;
+constexpr double dScale = 1.0 / uScale;
 #endif
 
 struct IntPoint {
@@ -109,7 +120,17 @@ struct IntPoint {
         , Y(y)
     {
     }
+    IntPoint(const QPointF& p)
+        : X(p.x() * uScale)
+        , Y(p.y() * uScale)
+    {
+    }
 #endif
+    QPointF operator()() const
+    {
+        return { X * dScale, Y * dScale };
+    }
+
     friend inline bool operator==(const IntPoint& a, const IntPoint& b)
     {
         return a.X == b.X && a.Y == b.Y;

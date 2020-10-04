@@ -84,7 +84,7 @@ void FileModel::closeProject()
         int rowCount = item->childCount();
         if (rowCount) {
             beginRemoveRows(index, 0, rowCount - 1);
-            for (int i = 0; i < rowCount; ++i)
+            for (int j = 0; j < rowCount; ++j)
                 item->remove(0);
             endRemoveRows();
         }

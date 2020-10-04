@@ -449,10 +449,10 @@ void Parser::addFlash()
     if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
         switch (aperFunctionMap[m_state.aperture()]) {
         case Att::AperFunction::ComponentPin:
-            components[refDes].pins.last().pos = toQPointF(m_state.curPos());
+            components[refDes].pins.last().pos = m_state.curPos()();
             break;
         case Att::AperFunction::ComponentMain:
-            components[refDes].referencePoint = toQPointF(m_state.curPos());
+            components[refDes].referencePoint = m_state.curPos()();
             break;
         }
     }

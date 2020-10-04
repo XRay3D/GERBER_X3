@@ -27,7 +27,7 @@ private:
     const QStringList names;
     const QStringList pixmaps;
     void rb_clicked();
-    BridgeItem* item = nullptr;
+    BridgeItem* brItem = nullptr;
 
 protected:
     // QWidget interface

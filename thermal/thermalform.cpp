@@ -82,24 +82,30 @@ ThermalForm::ThermalForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
 
-    MySettings settings;
-    settings.beginGroup("ThermalForm");
-    settings.endGroup();
-
     connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
     connect(ui->pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ThermalForm::updateName);
 
     ui->treeView->setIconSize(QSize(Size, Size));
+    connect(ui->treeView, &QTreeView::clicked, ui->treeView, qOverload<const QModelIndex&>(&QTreeView::edit));
 
     updateName();
 
-    chbx = new QCheckBox("", ui->treeView);
-    chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
-    chbx->setEnabled(false);
-    auto lay = new QGridLayout(ui->treeView->header());
-    lay->addWidget(chbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
-    lay->setContentsMargins(3, 0, 0, 0);
+    if (0) {
+        chbx = new QCheckBox("", ui->treeView);
+        chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
+        chbx->setEnabled(false);
+        auto lay = new QGridLayout(ui->treeView->header());
+        lay->addWidget(chbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
+        lay->setContentsMargins(3, 0, 0, 0);
+    }
+
+    MySettings settings;
+    settings.beginGroup("ThermalForm");
+    settings.getValue(varName(par.angle), 0.0);
+    settings.getValue(varName(par.count), 4);
+    settings.getValue(varName(par.tickness), 0.5);
+    settings.endGroup();
 
     updateFiles();
 
@@ -142,8 +148,14 @@ ThermalForm::ThermalForm(QWidget* parent)
 ThermalForm::~ThermalForm()
 {
     m_sourcePreview.clear();
-    QSettings settings;
+
+    par = model->rootItem->child(0)->getParam();
+
+    MySettings settings;
     settings.beginGroup("ThermalForm");
+    settings.setValue(varName(par.angle));
+    settings.setValue(varName(par.count));
+    settings.setValue(varName(par.tickness));
     settings.endGroup();
     delete ui;
 }
@@ -241,7 +253,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     model = new ThermalModel(ui->treeView);
     auto const file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
     boardSide = file->side();
-    model->appendRow(QIcon(), tr("All"));
+    model->appendRow(QIcon(), tr("All"), par);
 
     using Worker = std::tuple<const Gerber::GraphicObject*, ThermalNode*, QString>;
     QVector<Worker> map;
@@ -253,7 +265,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
         item->setToolTip(name);
         QMutexLocker lock(&m);
         m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-        thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, 0.0, 0.5, 4, go->state().curPos(), item));
+        thermalNode->append(new ThermalNode(drawRegionIcon(*go), name, par, go->state().curPos(), item));
     };
 
     enum {
@@ -264,10 +276,10 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     QMap<int, ThermalNode*> thermalNodes;
     for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
         if (apIt.value()->isFlashed())
-            thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name());
+            thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name(), par);
     if (0) {
-        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"));
-        thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"));
+        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"), par);
+        thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"), par);
 
         for (const Gerber::GraphicObject& go : *file) {
             if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
@@ -342,7 +354,7 @@ void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& d
     if (selected.isValid())
         ui->treeView->selectionModel()->select(selected, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     if (deselected.isValid())
-        ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Clear | QItemSelectionModel::Rows);
+        ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
 void ThermalForm::redraw()
@@ -360,4 +372,9 @@ void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
 
 void ThermalForm::editFile(GCode::File* /*file*/)
 {
+}
+
+void ThermalForm::on_pbReset_clicked()
+{
+    qDebug(Q_FUNC_INFO);
 }

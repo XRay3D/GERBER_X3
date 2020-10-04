@@ -56,22 +56,22 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
-{
-    return false;
-    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-    ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
-    ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
-    if (!srcItem)
-        srcItem = rootItem;
-    if (!dstItem)
-        dstItem = rootItem;
-    for (int r = 0; r < count; ++r) {
-        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-    }
-    endMoveRows();
-    return true;
-}
+//bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+//{
+//    return false;
+//    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+//    ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
+//    ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
+//    if (!srcItem)
+//        srcItem = rootItem;
+//    if (!dstItem)
+//        dstItem = rootItem;
+//    for (int r = 0; r < count; ++r) {
+//        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+//    }
+//    endMoveRows();
+//    return true;
+//}
 
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const
 {

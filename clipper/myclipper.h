@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "clipper.hpp"
 #include <QDebug>
 #include <QPolygonF>
@@ -25,17 +23,11 @@ using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
-constexpr cInt uScale = 100000;
-constexpr double dScale = 1.0 / uScale;
-
 Path toPath(const QPolygonF& p);
 Paths toPaths(const QVector<QPolygonF>& p);
 
 QPolygonF toQPolygon(const Path& p);
 QVector<QPolygonF> toQPolygons(const Paths& p);
-
-inline QPointF toQPointF(const IntPoint& p) { return QPointF(p.X * dScale, p.Y * dScale); }
-inline IntPoint toIntPoint(const QPointF& p) { return IntPoint(static_cast<cInt>(p.x() * uScale), static_cast<cInt>(p.y() * uScale)); }
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);
@@ -50,5 +42,3 @@ Path CirclePath(double diametr, const IntPoint& center = IntPoint());
 Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
 void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
 void TranslatePath(Path& path, const IntPoint& pos);
-
-

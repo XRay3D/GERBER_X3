@@ -34,8 +34,8 @@ Paths offset(const Path& path, double offset, bool fl = false)
 
     cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
 
-    for (Path& path : tmpPpaths)
-        path.append(path.first());
+    for (Path& tmpPath : tmpPpaths)
+        tmpPath.append(tmpPath.first());
 
     return tmpPpaths;
 }
@@ -232,8 +232,8 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
                 drillDiameter = aperture->apertureSize();
             }
             model->appendRow(name, drawApertureIcon(aperture.data()), apertureIt.key());
-            const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
-            for (const Gerber::GraphicObject& go : *file) {
+            const Gerber::File* gbrFile = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+            for (const Gerber::GraphicObject& go : *gbrFile) {
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     DrillPrGI* item = new DrillPrGI(go, apertureIt.key());
                     m_sourcePreview[apertureIt.key()].append(QSharedPointer<DrillPrGI>(item));
@@ -269,9 +269,9 @@ void DrillForm::setHoles(const QMap<int, double>& value)
     for (toolIt = m_tools.cbegin(); toolIt != m_tools.cend(); ++toolIt) {
         QString name(tr("Tool Ø%1mm").arg(toolIt.value()));
         model->appendRow(name, drawDrillIcon(), toolIt.key());
-        const Excellon::File* file = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
+        const Excellon::File* exFile = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
         bool isSlot = false;
-        for (const Excellon::Hole& hole : *file) {
+        for (const Excellon::Hole& hole : *exFile) {
             if (hole.state.tCode == toolIt.key()) {
                 auto* item = new DrillPrGI(hole);
                 if (!hole.state.path.isEmpty())
@@ -308,17 +308,17 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (Excellon::File* file : App::project()->files<Excellon::File>()) {
-        ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+    for (Excellon::File* exFile : App::project()->files<Excellon::File>()) {
+        ui->cbxFile->addItem(exFile->shortName(), QVariant::fromValue(static_cast<void*>(exFile)));
         ui->cbxFile->setItemIcon(ui->cbxFile->count() - 1, QIcon::fromTheme("drill-path"));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
     }
 
-    for (Gerber::File* file : App::project()->files<Gerber::File>()) {
-        if (file->flashedApertures()) {
-            ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+    for (Gerber::File* gbrFile : App::project()->files<Gerber::File>()) {
+        if (gbrFile->flashedApertures()) {
+            ui->cbxFile->addItem(gbrFile->shortName(), QVariant::fromValue(static_cast<void*>(gbrFile)));
             QPixmap pixmap(IconSize, IconSize);
-            QColor color(file->color());
+            QColor color(gbrFile->color());
             color.setAlpha(255);
             pixmap.fill(color);
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon(pixmap), Qt::DecorationRole);
@@ -470,7 +470,7 @@ void DrillForm::on_pbCreate_clicked()
 
             if (!pathsMap[toolId].drillPath.isEmpty()) {
                 Path& path = pathsMap[toolId].drillPath;
-                IntPoint point1(toIntPoint(Marker::get(Marker::Home)->pos()));
+                IntPoint point1((Marker::get(Marker::Home)->pos()));
                 { // sort by distance
                     int counter = 0;
                     while (counter < path.size()) {

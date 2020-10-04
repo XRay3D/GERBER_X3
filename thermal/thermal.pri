@@ -21,6 +21,7 @@ HEADERS += \
     $$PWD/thermalmodel.h \
     $$PWD/thermalnode.h \
     $$PWD/thermalpreviewitem.h \
+    $$PWD/thvars.h
 
 SOURCES += \
     $$PWD/thermaldelegate.cpp \

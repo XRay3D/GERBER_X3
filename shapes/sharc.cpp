@@ -42,7 +42,7 @@ void Arc::redraw()
 
     const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center(toIntPoint(handlers[Center]->pos()));
+    const IntPoint center((handlers[Center]->pos()));
     const double stepAngle = M_2PI / intSteps;
 
     double angle1 = M_2PI - qDegreesToRadians(l1.angle());

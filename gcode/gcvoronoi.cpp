@@ -341,9 +341,9 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
 void VoronoiCreator::clean(Path& path)
 {
     for (int i = 1; i < path.size() - 2; ++i) {
-        QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
+        QLineF line(path[i](), path[i + 1]());
         if (line.length() < m_gcp.params[GCodeParams::Tolerance].toDouble()) {
-            path[i] = toIntPoint(line.center());
+            path[i] = (line.center());
             path.remove(i + 1);
             --i;
         }
@@ -403,14 +403,14 @@ void VoronoiCreator::cgalVoronoi()
             CGAL_precondition(!sdg.is_infinite(e));
             if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
                 continue;
-            const int id = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
+            const int idIdx = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
             CGAL::Object o = sdg.primal(e);
             /*  */ if (SDG2::Geom_traits::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
-                pathPairs[id].append(Path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
+                pathPairs[idIdx].append(Path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
             } else if (SDG2::Geom_traits::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
-                pathPairs[id].append(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
+                pathPairs[idIdx].append(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
             } else if (SDG2::Geom_traits::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                pathPairs[id].append(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
+                pathPairs[idIdx].append(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
             } else if (CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 std::vector<SDG2::Point_2> points;
                 cgalParabola.generate_points(points, 5);
@@ -418,7 +418,7 @@ void VoronoiCreator::cgalVoronoi()
                 path.reserve(static_cast<int>(points.size()));
                 for (const SDG2::Point_2& pt : points)
                     path.append(toIntPoint(pt));
-                pathPairs[id].append(path);
+                pathPairs[idIdx].append(path);
             }
         }
         for (Paths& edge : pathPairs) {
@@ -457,12 +457,12 @@ void VoronoiCreator::jcVoronoi()
     groupedPaths(CopperPaths);
     int id = 0;
     auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
-        QLineF line(toQPointF(tmp), toQPointF(point));
+        QLineF line(tmp(), point());
         if (line.length() > tolerance) {
             for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
-                IntPoint point(toIntPoint(line.p2()));
-                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                IntPoint pt((line.p2()));
+                points.append({ static_cast<jcv_real>(pt.X), static_cast<jcv_real>(pt.Y), id });
             }
         }
     };

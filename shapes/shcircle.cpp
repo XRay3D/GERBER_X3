@@ -36,7 +36,7 @@ void Circle::redraw()
     m_radius = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center(toIntPoint(handlers[Center]->pos()));
+    const IntPoint center((handlers[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
     Path& path = m_paths.first();
     path.clear();

@@ -13,7 +13,7 @@ Path toPath(const QPolygonF& p)
     Path path;
     path.reserve(p.size());
     for (const QPointF& pt : p)
-        path.push_back(toIntPoint(pt));
+        path.push_back((pt));
     return path;
 }
 
@@ -31,7 +31,7 @@ QPolygonF toQPolygon(const Path& p)
     QPolygonF polygon;
     polygon.reserve(p.size());
     for (const IntPoint& pt : p)
-        polygon.push_back(toQPointF(pt));
+        polygon.push_back(pt());
     return polygon;
 }
 

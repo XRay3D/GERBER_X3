@@ -79,9 +79,9 @@ ProfileForm::~ProfileForm()
     settings.setValue(ui->cbxStrip);
     settings.endGroup();
 
-    for (QGraphicsItem* item : App::scene()->items()) {
-        if (item->type() == GiBridge)
-            delete item;
+    for (QGraphicsItem* giItem : App::scene()->items()) {
+        if (giItem->type() == GiBridge)
+            delete giItem;
     }
     delete ui;
 }
@@ -100,9 +100,9 @@ void ProfileForm::createFile()
     AbstractFile const* file = nullptr;
     bool skip { true };
 
-    for (auto* item : App::scene()->selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
+    for (auto* sItem : App::scene()->selectedItems()) {
+        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
+        switch (sItem->type()) {
         case GiGerber:
         case GiAperturePath:
             if (!file) {
@@ -114,7 +114,7 @@ void ProfileForm::createFile()
                         return;
                 }
             }
-            if (item->type() == GiGerber)
+            if (sItem->type() == GiGerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
@@ -187,12 +187,12 @@ void ProfileForm::showEvent(QShowEvent* event)
 
 void ProfileForm::on_pbAddBridge_clicked()
 {
-    if (item) {
-        if (!item->ok())
-            delete item;
+    if (brItem) {
+        if (!brItem->ok())
+            delete brItem;
     }
-    item = new BridgeItem(m_lenght, m_size, side, item);
-    App::scene()->addItem(item);
+    brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+    App::scene()->addItem(brItem);
 }
 
 void ProfileForm::updateBridge()
@@ -278,9 +278,9 @@ void ProfileForm::editFile(GCode::File* file)
         auto i = items.constBegin();
         while (i != items.constEnd()) {
             qDebug() << i.key() << i.value();
-            auto [fileId, _] = i.key();
+            auto [_fileId, _] = i.key();
             Q_UNUSED(_)
-            App::project()->aFile(fileId)->itemGroup()->setSelected(i.value());
+            App::project()->aFile(_fileId)->itemGroup()->setSelected(i.value());
             ++i;
         }
     }
@@ -289,13 +289,13 @@ void ProfileForm::editFile(GCode::File* file)
         if (gcp.params.contains(GCode::GCodeParams::Bridges)) {
             ui->dsbxBridgeLenght->setValue(gcp.params[GCode::GCodeParams::BridgeLen].toDouble());
             for (auto& pos : gcp.params[GCode::GCodeParams::Bridges].value<QVector<QPointF>>()) {
-                item = new BridgeItem(m_lenght, m_size, side, item);
-                App::scene()->addItem(item);
-                item->setPos(pos);
-                item->m_lastPos = pos;
+                brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+                App::scene()->addItem(brItem);
+                brItem->setPos(pos);
+                brItem->m_lastPos = pos;
             }
             updateBridge();
-            item = new BridgeItem(m_lenght, m_size, side, item);
+            brItem = new BridgeItem(m_lenght, m_size, side, brItem);
             //        delete item;
         }
     }

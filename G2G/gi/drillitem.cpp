@@ -96,11 +96,11 @@ Paths DrillItem::paths() const
     Path path;
     if (m_hole) {
         if (m_hole->state.path.isEmpty())
-            path = CirclePath(m_diameter * uScale, toIntPoint(m_hole->state.offsetedPos()));
+            path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
         else
             return { toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)) };
     } else
-        path = CirclePath(m_diameter * uScale, toIntPoint(pos()));
+        path = CirclePath(m_diameter * uScale, (pos()));
     ReversePath(path);
     return { path };
 }
@@ -127,7 +127,7 @@ void DrillItem::create()
     } else if (m_hole->state.path.isEmpty()) {
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
-        auto p = toQPolygon(CirclePath(m_diameter * uScale, toIntPoint(m_hole->state.offsetedPos())));
+        auto p = toQPolygon(CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos())));
         p.append(p.first());
         m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();

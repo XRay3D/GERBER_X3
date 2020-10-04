@@ -84,7 +84,7 @@ public:
                 return Qt::AlignVCenter;
             return Qt::AlignCenter;
         default:
-            return {};
+            break;
         }
         return {};
     }
