@@ -74,6 +74,19 @@ ThermalForm::ThermalForm(QWidget* parent)
 {
     ui->setupUi(this);
 
+    MySettings settings;
+    settings.beginGroup("ThermalForm");
+    settings.getValue(varName(par.angle), 0.0);
+    settings.getValue(varName(par.count), 4);
+    settings.getValue(varName(par.tickness), 0.5);
+    lastMax = settings.getValue(ui->dsbxAreaMax, 10.0);
+    lastMin = settings.getValue(ui->dsbxAreaMin);
+    settings.getValue(ui->chbxIgnoreCopper);
+    settings.getValue(ui->chbxAperture, true);
+    settings.getValue(ui->chbxPath);
+    settings.getValue(ui->chbxPour);
+    settings.endGroup();
+
     parent->setWindowTitle(ui->label->text());
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
@@ -89,6 +102,10 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->treeView->setIconSize(QSize(Size, Size));
     connect(ui->treeView, &QTreeView::clicked, ui->treeView, qOverload<const QModelIndex&>(&QTreeView::edit));
 
+    connect(ui->chbxAperture, &QCheckBox::toggled, [this] { createTPI(nullptr); });
+    connect(ui->chbxPath, &QCheckBox::toggled, [this] { createTPI(nullptr); });
+    connect(ui->chbxPour, &QCheckBox::toggled, [this] { createTPI(nullptr); });
+
     updateName();
 
     if (0) {
@@ -99,13 +116,6 @@ ThermalForm::ThermalForm(QWidget* parent)
         lay->addWidget(chbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
         lay->setContentsMargins(3, 0, 0, 0);
     }
-
-    MySettings settings;
-    settings.beginGroup("ThermalForm");
-    settings.getValue(varName(par.angle), 0.0);
-    settings.getValue(varName(par.count), 4);
-    settings.getValue(varName(par.tickness), 0.5);
-    settings.endGroup();
 
     updateFiles();
 
@@ -154,6 +164,12 @@ ThermalForm::~ThermalForm()
     settings.setValue(varName(par.angle));
     settings.setValue(varName(par.count));
     settings.setValue(varName(par.tickness));
+    settings.setValue(ui->dsbxAreaMax);
+    settings.setValue(ui->dsbxAreaMin);
+    settings.setValue(ui->chbxIgnoreCopper);
+    settings.setValue(ui->chbxAperture);
+    settings.setValue(ui->chbxPath);
+    settings.setValue(ui->chbxPour);
     settings.endGroup();
     delete ui;
 }
@@ -243,7 +259,8 @@ void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
 {
     m_sourcePreview.clear();
-    m_apertures = *value;
+    if (value)
+        m_apertures = *value;
 
     if (model)
         delete ui->treeView->model();
@@ -271,36 +288,62 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
         Line
     };
 
-    QMap<int, ThermalNode*> thermalNodes;
-    for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
-        if (apIt.value()->isFlashed())
-            thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name(), par);
-    if (1) {
-        thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"), par);
-        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"), par);
+    auto testArea = [this](const Paths& paths) {
+        const double areaMax = ui->dsbxAreaMax->value() * uScale * uScale;
+        const double areaMin = ui->dsbxAreaMin->value() * uScale * uScale;
+        const double area = Area(paths);
+        return areaMin <= area && area <= areaMax;
+    };
 
-        for (const Gerber::GraphicObject& go : *file) {
-            if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
-                map.append({ &go, thermalNodes[Region], tr("Region") });
+    QMap<int, ThermalNode*> thermalNodes;
+
+    if (ui->chbxAperture->isChecked()) {
+        for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
+            if (apIt.value()->isFlashed() && testArea(apIt.value().data()->draw({})))
+                thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name(), par);
+
+        for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
+            if (apIt.value()->isFlashed()) {
+                for (const Gerber::GraphicObject& go : *file) {
+                    if (thermalNodes.contains(apIt.key())
+                        && go.state().dCode() == Gerber::D03
+                        && go.state().aperture() == apIt.key())
+                        map.append({ &go, thermalNodes[apIt.key()], "" /*apIt.value()->name()*/ });
+                }
             }
         }
+    }
 
+    if (ui->chbxPath->isChecked()) {
+        thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"), par);
         for (const Gerber::GraphicObject& go : *file) {
             if (go.state().type() == Gerber::Line
                 && go.state().imgPolarity() == Gerber::Positive
                 && (go.path().size() == 2 || (go.path().size() == 5 && go.path().first() == go.path().last()))
-                && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
+                && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()
+                && testArea(go.paths())) {
                 map.append({ &go, thermalNodes[Line], tr("Line") });
             }
         }
     }
 
-    for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
-        if (apIt.value()->isFlashed()) {
-            for (const Gerber::GraphicObject& go : *file) {
-                if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apIt.key())
-                    map.append({ &go, thermalNodes[apIt.key()], apIt.value()->name() });
+    if (ui->chbxPour->isChecked()) {
+        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"), par);
+        QVector<const Gerber::GraphicObject*> gos;
+        for (const Gerber::GraphicObject& go : *file) {
+            if (go.state().type() == Gerber::Region
+                && go.state().imgPolarity() == Gerber::Positive
+                && testArea(go.paths())) {
+                gos.append(&go);
+                //map.append({ &go, thermalNodes[Region], tr("Region") });
             }
+        }
+        std::sort(gos.begin(), gos.end(), [](const Gerber::GraphicObject* go1, const Gerber::GraphicObject* go2) {
+            //            return go1->paths() < go2->paths();
+            return go1->state().curPos() < go2->state().curPos();
+        });
+        for (auto go : gos) {
+            map.append({ go, thermalNodes[Region], tr("Region") });
         }
     }
 
@@ -317,7 +360,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
 
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::onSelectionChanged);
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
+    if (0 && qApp->applicationDirPath().contains("GERBER_X2/bin"))
         ui->treeView->expandAll();
 }
 
@@ -368,11 +411,22 @@ void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
     redraw();
 }
 
-void ThermalForm::editFile(GCode::File* /*file*/)
-{
-}
+void ThermalForm::editFile(GCode::File* /*file*/) { }
 
-void ThermalForm::on_pbReset_clicked()
+void ThermalForm::on_dsbxAreaMin_editingFinished()
 {
     qDebug(Q_FUNC_INFO);
+    if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
+        lastMin = ui->dsbxAreaMin->value();
+        createTPI(nullptr);
+    }
+}
+
+void ThermalForm::on_dsbxAreaMax_editingFinished()
+{
+    qDebug(Q_FUNC_INFO);
+    if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
+        lastMax = ui->dsbxAreaMax->value();
+        createTPI(nullptr);
+    }
 }
