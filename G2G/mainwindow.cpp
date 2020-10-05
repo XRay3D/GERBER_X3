@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         //QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(150, [this] { toolpathActions[GCode::Thermal]->triggered(); });
+        QTimer::singleShot(200, [this] { toolpathActions[GCode::Thermal]->triggered(); });
         //QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
@@ -116,7 +116,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (qApp->applicationDirPath().contains("GERBER_X2/bin") || maybeSave()) {
         writeSettings();
-        m_dockWidget->close();
+        delete m_dockWidget; //->close();
         qApp->closeAllWindows();
         App::fileModel()->closeProject();
         event->accept();
@@ -554,6 +554,9 @@ void MainWindow::selectAll()
     if (focusWidget() && focusWidget()->objectName() == "toolTable") {
         static_cast<QTableView*>(focusWidget())->selectAll();
         return;
+    } else if (focusWidget() && focusWidget()->objectName() == "treeView") {
+        static_cast<QTableView*>(focusWidget())->selectAll();
+        return;
     } else {
         for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible())
@@ -863,13 +866,13 @@ void DockWidget::push(QWidget* w)
 void DockWidget::pop()
 {
     qDebug(Q_FUNC_INFO);
-
     if (widget()) {
         if (widget()->objectName() == "ErrorDialog") {
             static_cast<QDialog*>(widget())->reject();
             QTimer::singleShot(1, [this] { widgets.pop(); });
-        } else
+        } else {
             delete widget();
+        }
     }
     if (!widgets.isEmpty())
         QDockWidget::setWidget(widgets.pop());
@@ -878,7 +881,6 @@ void DockWidget::pop()
 void DockWidget::closeEvent(QCloseEvent* event)
 {
     qDebug(Q_FUNC_INFO);
-
     pop();
     event->accept();
 }
@@ -886,7 +888,6 @@ void DockWidget::closeEvent(QCloseEvent* event)
 void DockWidget::showEvent(QShowEvent* event)
 {
     qDebug(Q_FUNC_INFO);
-
     event->ignore();
     if (widget() == nullptr)
         QTimer::singleShot(1, this, &QDockWidget::close);

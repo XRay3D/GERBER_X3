@@ -4,11 +4,14 @@
 #include "thermalpreviewitem.h"
 //#include "graphicsview.h"
 //#include "settings.h"
+#include "gccreator.h"
 #include "thermalnode.h"
 #include "tooldatabase/tool.h"
+#include <QElapsedTimer>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QIcon>
 #include <QMenu>
+#include <QMutex>
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
@@ -33,18 +36,21 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     : tool(tool)
     , m_depth(depth)
     , grob(&go)
-    , m_sourcePath(drawPoly(go))
+    , sourcePath(drawPoly(go))
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed])
 {
+    static QMutex m;
     setZValue(std::numeric_limits<double>::max() - 10);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
-    hhh.append(this);
+    m.lock();
+    thpi.append(this);
+    m.unlock();
 }
 
-ThermalPreviewItem::~ThermalPreviewItem() { hhh.clear(); }
+ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
 
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
@@ -53,89 +59,91 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
     QColor p(m_bodyColor);
     p.setAlpha(255);
     painter->setPen(QPen(p, 0.0));
-    painter->drawPath(m_sourcePath);
+    painter->drawPath(sourcePath);
     // draw hole
     if (tool.isValid() && m_pathColor.alpha()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->drawPath(m_toolPath);
+        painter->drawPath(painterPath);
 
         QColor pc(m_pathColor);
-        pc.setAlpha(pc.alpha() * 255 / 100.0);
+        pc.setAlpha(pc.alpha() * 255.0 / light);
         painter->setPen(QPen(pc, 0.0));
-        painter->drawPath(m_toolPath);
+        painter->drawPath(painterPath);
     }
 }
 
-QRectF ThermalPreviewItem::boundingRect() const { return m_sourcePath.boundingRect().united(m_toolPath.boundingRect()); }
+QRectF ThermalPreviewItem::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
 
-QPainterPath ThermalPreviewItem::shape() const { return m_sourcePath; }
+QPainterPath ThermalPreviewItem::shape() const { return sourcePath; }
 
 int ThermalPreviewItem::type() const { return GiThermalPr; }
 
 IntPoint ThermalPreviewItem::pos() const { return grob->state().curPos(); }
 
+Paths ThermalPreviewItem::bridge() const { return m_bridge; }
+
 Paths ThermalPreviewItem::paths() const { return grob->paths(); }
 
-Paths ThermalPreviewItem::bridge() const { return m_bridge; }
+Paths ThermalPreviewItem::toolPath() const { return m_toolPath; }
 
 void ThermalPreviewItem::redraw()
 {
+    QElapsedTimer t;
+    t.start();
+
     diameter = tool.getDiameter(m_depth);
-    Paths paths;
     {
         ClipperOffset offset;
         offset.AddPaths(grob->paths(), jtRound, etClosedPolygon);
-        offset.Execute(paths, diameter * uScale * 0.5);
+        offset.Execute(m_toolPath, diameter * uScale * 0.5); // toolpath
+        offset.Clear();
+        offset.AddPaths(m_toolPath, jtMiter, etClosedLine);
+        offset.Execute(m_bridge, diameter * uScale * 0.1); // frame
     }
-    Clipper clipper;
-    for (Path& path : paths)
-        path.append(path.first());
-    clipper.AddPaths(paths, ptSubject, false);
-    // create frame
+
     if (qFuzzyIsNull(m_node->tickness()) && m_node->count()) {
         m_bridge.clear();
     } else {
-        {
-            ClipperOffset offset;
-            offset.AddPaths(paths, jtMiter, etClosedLine);
-            offset.Execute(m_bridge, diameter * uScale * 0.1);
-        }
-
-        Clipper clipperBr;
-        clipperBr.AddPaths(m_bridge, ptSubject, true);
-
-        const IntPoint& center((m_sourcePath.boundingRect().center()));
-        const double radius = (m_sourcePath.boundingRect().width() + m_sourcePath.boundingRect().height()) * uScale * 0.5;
+        Clipper clipper;
+        clipper.AddPaths(m_bridge, ptSubject, true);
+        const auto rect(sourcePath.boundingRect());
+        const IntPoint& center(rect.center());
+        const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
+        const auto fp(sourcePath.toFillPolygons());
         for (int i = 0; i < m_node->count(); ++i) {
             ClipperOffset offset;
             double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
-            Path path {
-                center,
-                IntPoint(
-                    static_cast<cInt>((cos(angle) * radius) + center.X),
-                    static_cast<cInt>((sin(angle) * radius) + center.Y))
-            };
-            offset.AddPath(path, jtSquare, etOpenSquare);
-            Paths pathsBr;
-            offset.Execute(pathsBr, (m_node->tickness() + diameter) * uScale * 0.5);
-            clipperBr.AddPath(pathsBr.first(), ptClip, true);
+            offset.AddPath({ center,
+                               IntPoint(
+                                   static_cast<cInt>((cos(angle) * radius) + center.X),
+                                   static_cast<cInt>((sin(angle) * radius) + center.Y)) },
+                jtSquare, etOpenButt);
+            Paths paths;
+            offset.Execute(paths, (m_node->tickness() + diameter) * uScale * 0.5);
+            clipper.AddPath(paths.first(), ptClip, true);
         }
-        clipperBr.Execute(ctIntersection, m_bridge, pftPositive);
+        clipper.Execute(ctIntersection, m_bridge, pftPositive);
     }
-    clipper.AddPaths(m_bridge, ptClip, true);
     {
+        Clipper clipper;
+        for (Path& path : m_toolPath)
+            path.append(path.first());
+        clipper.AddPaths(m_toolPath, ptSubject, false);
+        clipper.AddPaths(m_bridge, ptClip, true);
         PolyTree polytree;
         clipper.Execute(ctDifference, polytree, pftPositive);
-        PolyTreeToPaths(polytree, paths);
+        PolyTreeToPaths(polytree, m_toolPath);
     }
-    m_isValid = !paths.isEmpty();
-    m_toolPath = QPainterPath();
-    for (QPolygonF& polygon : toQPolygons(paths)) {
-        m_toolPath.moveTo(polygon.takeFirst());
+    qDebug() << "redraw" << (t.nsecsElapsed() / 1000) << "us";
+    m_isValid = !m_toolPath.isEmpty();
+    painterPath = QPainterPath();
+    for (QPolygonF& polygon : toQPolygons(m_toolPath)) {
+        painterPath.moveTo(polygon.takeFirst());
         for (QPointF& pt : polygon)
-            m_toolPath.lineTo(pt);
+            painterPath.lineTo(pt);
     }
+
     update();
 }
 
@@ -173,7 +181,7 @@ void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QMenu menu;
     if (m_node->isChecked())
         menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
-            for (auto item : hhh)
+            for (auto item : thpi)
                 if ((item == this || item->isSelected()) && item->m_node->isChecked()) {
                     item->m_node->disable();
                     item->update();
@@ -182,7 +190,7 @@ void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
         });
     else
         menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
-            for (auto item : hhh)
+            for (auto item : thpi)
                 if ((item == this || item->isSelected()) && !item->m_node->isChecked()) {
                     item->m_node->enable();
                     item->update();

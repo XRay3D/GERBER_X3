@@ -36,12 +36,14 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , m_gcp(gcp)
 {
     createGi();
-
-    initSave();
-    addInfo();
-    statFile();
-    genGcodeAndTile();
-    endFile();
+    if (gcp.tools.first().diameter()) {
+        qDebug(Q_FUNC_INFO);
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
 }
 
 bool File::save(const QString& name)

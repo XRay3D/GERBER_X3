@@ -1,31 +1,97 @@
-IDI_ICON1 ICON DISCARDABLE "myapp.ico"
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+// Русский (Россия) resources
 
-#include <windows.h>
-#include "version.h"
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "myapp.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     VER_FILEVERSION
-PRODUCTVERSION  VER_PRODUCTVERSION
+ FILEVERSION 0,7,8,10
+ PRODUCTVERSION 0,7,8,10
+ FILEFLAGSMASK 0x0L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40000L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904E4"
+        BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName",        VER_COMPANYNAME_STR
-            VALUE "FileDescription",    VER_FILEDESCRIPTION_STR
-            VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       VER_INTERNALNAME_STR
-            VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
-            VALUE "LegalTrademarks1",   VER_LEGALTRADEMARKS1_STR
-            VALUE "LegalTrademarks2",   VER_LEGALTRADEMARKS2_STR
-            VALUE "OriginalFilename",   VER_ORIGINALFILENAME_STR
-            VALUE "ProductName",        VER_PRODUCTNAME_STR
-            VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+            VALUE "CompanyName", "XrSoft"
+            VALUE "FileDescription", "Getber2Gcode"
+            VALUE "FileVersion", "0.7.8.10b"
+            VALUE "InternalName", "Getber2Gcode"
+            VALUE "OriginalFilename", "Getber2Gcode.exe"
+            VALUE "ProductName", "Getber2Gcode"
+            VALUE "ProductVersion", "0.7.8.10b"
         END
     END
-
     BLOCK "VarFileInfo"
     BEGIN
         VALUE "Translation", 0x409, 1252
     END
 END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Русский (Россия) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

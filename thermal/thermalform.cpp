@@ -147,10 +147,8 @@ ThermalForm::ThermalForm(QWidget* parent)
 
 ThermalForm::~ThermalForm()
 {
-    m_sourcePreview.clear();
-
+    qDebug(Q_FUNC_INFO);
     par = model->rootItem->child(0)->getParam();
-
     MySettings settings;
     settings.beginGroup("ThermalForm");
     settings.setValue(varName(par.angle));
@@ -269,7 +267,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     };
 
     enum {
-        Region = 0xFFFF,
+        Region = -2,
         Line
     };
 
@@ -277,9 +275,9 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
         if (apIt.value()->isFlashed())
             thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name(), par);
-    if (0) {
-        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"), par);
+    if (1) {
         thermalNodes[Line] = model->appendRow(QIcon(), tr("Lines"), par);
+        thermalNodes[Region] = model->appendRow(QIcon(), tr("Regions"), par);
 
         for (const Gerber::GraphicObject& go : *file) {
             if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
@@ -290,7 +288,7 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
         for (const Gerber::GraphicObject& go : *file) {
             if (go.state().type() == Gerber::Line
                 && go.state().imgPolarity() == Gerber::Positive
-                && go.path().size() == 2
+                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().first() == go.path().last()))
                 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
                 map.append({ &go, thermalNodes[Line], tr("Line") });
             }
@@ -343,7 +341,7 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
             item->setSelected(false);
         else {
             for (int i = 0; i < node->childCount(); ++i) {
-                ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Clear | QItemSelectionModel::Rows);
+                ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
             }
         }
     }
