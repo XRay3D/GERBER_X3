@@ -3,9 +3,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "thermaldelegate.h"
+#include "doublespinbox.h"
 #include "thermalmodel.h"
-
-#include <QDoubleSpinBox>
 #include <QSpinBox>
 
 #include "leakdetector.h"
@@ -22,23 +21,26 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
     case ThermalModel::Position:
         break;
     case ThermalModel::GapAngle: {
-        auto* dsbx = new QDoubleSpinBox(parent);
+        auto* dsbx = new DoubleSpinBox(parent);
         dsbx->setRange(0, 360);
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
+        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
     case ThermalModel::apThickness: {
-        auto* dsbx = new QDoubleSpinBox(parent);
+        auto* dsbx = new DoubleSpinBox(parent);
         dsbx->setRange(0, 10);
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
+        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
     case ThermalModel::GapCount: {
         auto* sbx = new QSpinBox(parent);
         sbx->setRange(0, 16);
         sbx->setSingleStep(1);
+        connect(sbx, qOverload<int>(&QSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return sbx;
     }
     }
@@ -93,7 +95,4 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
     }
 }
 
-void ThermalDelegate::emitCommitData()
-{
-    emit commitData(qobject_cast<QWidget*>(sender()));
-}
+void ThermalDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }

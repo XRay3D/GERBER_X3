@@ -14,6 +14,7 @@
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
+#include "shpolyline.h"
 #include "stdio.h"
 #include "string.h"
 #include <QDebug>
@@ -48,6 +49,28 @@ void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
     file->setFileName(fileName + "_" + tool.name());
     //file->itemGroup()->setPen({ Qt::green, 0.0 });
     App::project()->addFile(file);
+
+    //    static QMutex m;
+    //    m.lock();
+
+    //    if (ps.isEmpty()) {
+    //        qDebug("dbgPaths - ps.isEmpty()");
+    //        return;
+    //    }
+    //    const auto polygons = toQPolygons(ps);
+    //    for (auto& path : polygons) {
+    //        if (path.size() < 2)
+    //            continue;
+    //        auto pl = new Shapes::PolyLine(path[0], path[1]);
+    //        for (int i = 2; i < path.size(); ++i)
+    //            pl->addPt(path[i]);
+    //        //        for (auto& p : path.mid(3))
+    //        //            pl->addPt(p);
+    //        pl->setSelected(true);
+    //        pl->setSelected(false);
+    //        App::project()->addShape(pl);
+    //    }
+    //    m.unlock();
 };
 
 namespace GCode {

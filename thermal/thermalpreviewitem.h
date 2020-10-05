@@ -40,11 +40,15 @@ public:
 
     //////////////////////////////////////////
     int type() const override;
+
     IntPoint pos() const;
-    Paths paths() const;
+
     Paths bridge() const;
-    void redraw();
+    Paths paths() const;
+    Paths toolPath() const;
+
     bool isValid() const;
+    void redraw();
 
 private:
     Tool& tool;
@@ -53,9 +57,8 @@ private:
 
     const Gerber::GraphicObject* const grob = nullptr;
 
-    const QPainterPath m_sourcePath;
-
-    QPainterPath m_toolPath;
+    const QPainterPath sourcePath;
+    QPainterPath painterPath;
 
     QColor m_bodyColor;
     QColor m_pathColor;
@@ -69,15 +72,16 @@ private:
         UsedHovered,
         UnUsed,
     };
-
+    static constexpr int dark = 100;
+    static constexpr int light = 200;
     inline static const QColor colors[] {
-        QColor(255, 255, 255, 100), //  dark gray
-        QColor(255, 255, 255, 200), //  light gray
-        QColor(0, 255, 0, 100), //      dark green
-        QColor(0, 255, 0, 200), //      light green
-        QColor(255, 0, 0, 100), //      dark red
-        QColor(255, 0, 0, 200), //      light red
-        QColor(255, 0, 0, 0), //        transparent
+        QColor(255, 255, 255, dark), //  dark gray
+        QColor(255, 255, 255, light), //  light gray
+        QColor(0, 255, 0, dark), //      dark green
+        QColor(0, 255, 0, light), //      light green
+        QColor(255, 0, 255, dark), //      dark red
+        QColor(255, 0, 255, light), //      light red
+        QColor(255, 0, 255, 0), //        transparent
     };
 
     enum ColorState {
@@ -89,9 +93,12 @@ private:
 
     int colorState = Default;
     double diameter;
+
     Paths m_bridge;
+    Paths m_toolPath;
+
     ThermalNode* m_node = nullptr;
-    inline static QVector<ThermalPreviewItem*> hhh;
+    inline static QVector<ThermalPreviewItem*> thpi;
     void changeColor();
 
     // QGraphicsItem interface
