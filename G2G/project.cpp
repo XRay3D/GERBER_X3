@@ -242,7 +242,7 @@ QRectF Project::getBoundingRect()
             }
         }
     }
-    return QRectF(topLeft(), botRight());
+    return QRectF(topLeft, botRight);
 }
 
 QString Project::fileNames()

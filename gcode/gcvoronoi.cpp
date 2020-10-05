@@ -341,7 +341,7 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
 void VoronoiCreator::clean(Path& path)
 {
     for (int i = 1; i < path.size() - 2; ++i) {
-        QLineF line(path[i](), path[i + 1]());
+        QLineF line(path[i], path[i + 1]);
         if (line.length() < m_gcp.params[GCodeParams::Tolerance].toDouble()) {
             path[i] = (line.center());
             path.remove(i + 1);
@@ -457,7 +457,7 @@ void VoronoiCreator::jcVoronoi()
     groupedPaths(CopperPaths);
     int id = 0;
     auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
-        QLineF line(tmp(), point());
+        QLineF line(tmp, point);
         if (line.length() > tolerance) {
             for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);

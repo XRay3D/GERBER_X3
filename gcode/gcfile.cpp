@@ -508,7 +508,7 @@ void File::createGiDrill()
     GraphicsItem* item;
     for (const IntPoint& point : m_toolPathss.first().first()) {
         item = new DrillItem(m_gcp.getTool().diameter(), this);
-        item->setPos(point());
+        item->setPos(point);
         item->setPenColor(GlobalSettings::guiColor(Colors::ToolPath));
         item->setBrushColor(GlobalSettings::guiColor(Colors::CutArea));
         itemGroup()->append(item);

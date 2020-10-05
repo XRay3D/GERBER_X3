@@ -42,14 +42,13 @@
 *                                                                              *
 *******************************************************************************/
 
-
 #include "clipper.hpp"
+#include "gbrtypes.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include "gbrtypes.h"
 #ifndef GTE
 #include "gcode.h"
 #include "settings.h"
@@ -430,7 +429,14 @@ bool Orientation(const Path& poly)
     return Area(poly) >= 0;
 }
 //------------------------------------------------------------------------------
-
+double Area(const Paths& polygons)
+{
+    double area = 0.0;
+    for (auto& poly : polygons) {
+        area += Area(poly);
+    }
+    return area;
+}
 double Area(const Path& poly)
 {
     int size = (int)poly.size();
@@ -614,7 +620,7 @@ inline bool IsHorizontal(TEdge& e)
 }
 //------------------------------------------------------------------------------
 
-inline double GetDx(const IntPoint &pt1, const IntPoint& pt2)
+inline double GetDx(const IntPoint& pt1, const IntPoint& pt2)
 {
     return (pt1.Y == pt2.Y) ? HORIZONTAL : (double)(pt2.X - pt1.X) / (pt2.Y - pt1.Y);
 }
@@ -891,7 +897,7 @@ OutPt* GetBottomPt(OutPt* pp)
 }
 //------------------------------------------------------------------------------
 
-bool Pt2IsBetweenPt1AndPt3(const IntPoint& pt1,    const IntPoint &pt2, const IntPoint& pt3)
+bool Pt2IsBetweenPt1AndPt3(const IntPoint& pt1, const IntPoint& pt2, const IntPoint& pt3)
 {
     if ((pt1 == pt3) || (pt1 == pt2) || (pt3 == pt2))
         return false;
@@ -4529,6 +4535,7 @@ std::ostream& operator<<(std::ostream& s, const Paths& p)
     s << "\n";
     return s;
 }
+
 //------------------------------------------------------------------------------
 
 } //ClipperLib namespace

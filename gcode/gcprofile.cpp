@@ -154,8 +154,8 @@ void ProfileCreator::strip()
                 m_workingRawPs.remove(i--);
                 continue;
             }
-            QLineF b(p.first()(), p.last()());
-            QLineF e(p.last()(), p.first()());
+            QLineF b(p.first(), p.last());
+            QLineF e(p.last(), p.first());
             b.setLength(b.length() - m_toolDiameter * 0.5);
             e.setLength(e.length() - m_toolDiameter * 0.5);
             p = { (b.p2()), (e.p2()) };

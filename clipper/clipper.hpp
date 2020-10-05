@@ -126,11 +126,15 @@ struct IntPoint {
     {
     }
 #endif
-    QPointF operator()() const
+
+    operator QPointF() const
     {
         return { X * dScale, Y * dScale };
     }
-
+    friend inline bool operator<(const IntPoint& a, const IntPoint& b)
+    {
+        return std::tuple(a.X, a.Y) < std::tuple(b.X, b.Y);
+    }
     friend inline bool operator==(const IntPoint& a, const IntPoint& b)
     {
         return a.X == b.X && a.Y == b.Y;
@@ -292,6 +296,7 @@ private:
 };
 
 bool Orientation(const Path& poly);
+double Area(const Paths& polygons);
 double Area(const Path& poly);
 int PointInPolygon(const IntPoint& pt, const Path& path);
 
