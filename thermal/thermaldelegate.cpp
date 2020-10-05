@@ -25,6 +25,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
         dsbx->setRange(0, 360);
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
+        dsbx->setAlignment(Qt::AlignCenter);
         connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
@@ -33,6 +34,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
         dsbx->setRange(0, 10);
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
+        dsbx->setAlignment(Qt::AlignCenter);
         connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
@@ -40,6 +42,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
         auto* sbx = new QSpinBox(parent);
         sbx->setRange(0, 16);
         sbx->setSingleStep(1);
+        sbx->setAlignment(Qt::AlignCenter);
         connect(sbx, qOverload<int>(&QSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
         return sbx;
     }

@@ -54,13 +54,6 @@ ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
 
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-
-    painter->setBrush(m_bodyColor);
-    QColor p(m_bodyColor);
-    p.setAlpha(255);
-    painter->setPen(QPen(p, 0.0));
-    painter->drawPath(sourcePath);
-    // draw hole
     if (tool.isValid() && m_pathColor.alpha()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -71,6 +64,11 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
         painter->setPen(QPen(pc, 0.0));
         painter->drawPath(painterPath);
     }
+    painter->setBrush(m_bodyColor);
+    QColor p(m_bodyColor);
+    p.setAlpha(255);
+    painter->setPen(QPen(p, 0.0));
+    painter->drawPath(sourcePath);
 }
 
 QRectF ThermalPreviewItem::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
