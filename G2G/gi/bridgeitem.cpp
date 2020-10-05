@@ -94,8 +94,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                 continue;
             for (const Path& path : gi->paths()) {
                 for (int i = 0, s = path.size(); i < s; ++i) {
-                    const QPointF pt1(path[i]());
-                    const QPointF pt2(path[(i + 1) % s]());
+                    const QPointF pt1(path[i]);
+                    const QPointF pt2(path[(i + 1) % s]);
                     const QLineF l1(pos, pt1);
                     const QLineF l2(pos, pt2);
                     const QLineF l3(pt2, pt1);

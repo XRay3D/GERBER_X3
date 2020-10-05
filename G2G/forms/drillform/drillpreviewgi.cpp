@@ -19,7 +19,7 @@ QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject& go, int id)
     }
     const double hole = go.gFile()->apertures()->value(id)->drillDiameter() * 0.5;
     if (hole != 0.0)
-        painterPath.addEllipse(go.state().curPos()(), hole, hole);
+        painterPath.addEllipse(go.state().curPos(), hole, hole);
     return painterPath;
 }
 
@@ -116,14 +116,14 @@ void DrillPrGI::setToolId(int toolId)
             Path path(hole->item->paths().first());
             if (path.size()) {
                 for (IntPoint& pt : path) {
-                    m_toolPath.moveTo(pt() - QPointF(0.0, diameter * 0.7));
-                    m_toolPath.lineTo(pt() + QPointF(0.0, diameter * 0.7));
-                    m_toolPath.moveTo(pt() - QPointF(diameter * 0.7, 0.0));
-                    m_toolPath.lineTo(pt() + QPointF(diameter * 0.7, 0.0));
+                    m_toolPath.moveTo(pt - QPointF(0.0, diameter * 0.7));
+                    m_toolPath.lineTo(pt + QPointF(0.0, diameter * 0.7));
+                    m_toolPath.moveTo(pt - QPointF(diameter * 0.7, 0.0));
+                    m_toolPath.lineTo(pt + QPointF(diameter * 0.7, 0.0));
                 }
-                m_toolPath.moveTo(path.first()());
+                m_toolPath.moveTo(path.first());
                 for (IntPoint& pt : path) {
-                    m_toolPath.lineTo(pt());
+                    m_toolPath.lineTo(pt);
                 }
             }
         } break;
@@ -136,7 +136,7 @@ void DrillPrGI::setToolId(int toolId)
             m_toolPath.lineTo(offsetedPos + QPointF(diameter * 0.7, 0.0));
         } break;
         case GiApetrurePr: {
-            const auto curPos = grob->state().curPos()();
+            const auto curPos = grob->state().curPos();
             m_toolPath.addEllipse(curPos, diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(curPos - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(curPos + QPointF(0.0, diameter * 0.7));

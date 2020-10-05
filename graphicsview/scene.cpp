@@ -4,6 +4,7 @@
 
 #include "scene.h"
 #include "graphicsview.h"
+#include "settings.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -15,7 +16,6 @@
 #include <QPdfWriter>
 #include <QtMath>
 #include <gi/graphicsitem.h>
-#include "settings.h"
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
@@ -106,17 +106,22 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString(GlobalSettings::inch() ? "  ∆X = %1 in\n"
-                                                          "  ∆Y = %2 in\n"
-                                                          "  ∆ / = %3 in\n"
-                                                          "  %4°"
-                                                        : "  ∆X = %1 mm\n"
-                                                          "  ∆Y = %2 mm\n"
-                                                          "  ∆ / = %3 mm\n"
-                                                          "  %4°")
+    const QString text = QString(GlobalSettings::inch() ? "  ∆X: %1 in\n"
+                                                          "  ∆Y: %2 in\n"
+                                                          "  ∆/: %3 in\n"
+                                                          "  Area: %4 in²\n"
+                                                          "  Angle: %5°"
+                                                        : "  ∆X: %1 mm\n"
+                                                          "  ∆Y: %2 mm\n"
+                                                          "  ∆/: %3 mm\n"
+                                                          "  Area: %4 mm²\n"
+                                                          "  Angle: %5°")
                              .arg(rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(length / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg((rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0))
+                                     * (rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0)),
+                                 4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
@@ -124,44 +129,46 @@ void Scene::drawRuller(QPainter* painter)
     if (qFuzzyIsNull(line.length()))
         return;
 
-    const double k = App::graphicsView()->scaleFactor();
+    const double scaleFactor = App::graphicsView()->scaleFactor();
 
     painter->setBrush(QColor(127, 127, 127, 100));
-    painter->setPen(QPen(Qt::green, 0.0)); //1.5 * k));
-    // draw rect
-    painter->drawRect(rect);
-    // draw cross
-    const double crossLength = 20.0 * k;
-    painter->drawLine(QLineF::fromPolar(crossLength, 0.000).translated(pt1));
-    painter->drawLine(QLineF::fromPolar(crossLength, 90.00).translated(pt1));
-    painter->drawLine(QLineF::fromPolar(crossLength, 180.0).translated(pt1));
-    painter->drawLine(QLineF::fromPolar(crossLength, 270.0).translated(pt1));
+    painter->setPen(QPen(Qt::green, 0.0));
+    {
+        // draw rect
+        painter->drawRect(rect);
+        const double crossLength = 20.0 * scaleFactor;
+        // draw cross pt1
+        painter->drawLine(pt1, pt1 + QPointF(0, crossLength));
+        painter->drawLine(pt1, pt1 + QPointF(crossLength, 0));
+        painter->drawLine(pt1, pt1 - QPointF(0, crossLength));
+        painter->drawLine(pt1, pt1 - QPointF(crossLength, 0));
+        // draw cross pt1
+        painter->drawLine(pt2, pt2 + QPointF(0, crossLength));
+        painter->drawLine(pt2, pt2 + QPointF(crossLength, 0));
+        painter->drawLine(pt2, pt2 - QPointF(0, crossLength));
+        painter->drawLine(pt2, pt2 - QPointF(crossLength, 0));
+    }
 
-    painter->drawLine(QLineF::fromPolar(crossLength, 0.000).translated(pt2));
-    painter->drawLine(QLineF::fromPolar(crossLength, 90.00).translated(pt2));
-    painter->drawLine(QLineF::fromPolar(crossLength, 180.0).translated(pt2));
-    painter->drawLine(QLineF::fromPolar(crossLength, 270.0).translated(pt2));
-
-    // draw arrow
-    painter->setRenderHint(QPainter::Antialiasing, true);
-
-    painter->setPen(QPen(Qt::white, 0.0));
-    painter->drawLine(line);
-    line.setLength(20.0 * k);
-    line.setAngle(angle + 10);
-    painter->drawLine(line);
-    line.setAngle(angle - 10);
-    painter->drawLine(line);
+    { // draw arrow
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(QPen(Qt::white, 0.0));
+        painter->drawLine(line);
+        line.setLength(20.0 * scaleFactor);
+        line.setAngle(angle + 10);
+        painter->drawLine(line);
+        line.setAngle(angle - 10);
+        painter->drawLine(line);
+    }
     // draw text
     //painter->setFont(font);
     //painter->drawText(textRect, Qt::AlignLeft, text);
     QPointF pt(pt2);
-    if ((pt.x() + textRect.width() * k) > m_rect.right())
-        pt.rx() -= textRect.width() * k;
-    if ((pt.y() - textRect.height() * k) < m_rect.top())
-        pt.ry() += textRect.height() * k;
+    if ((pt.x() + textRect.width() * scaleFactor) > m_rect.right())
+        pt.rx() -= textRect.width() * scaleFactor;
+    if ((pt.y() - textRect.height() * scaleFactor) < m_rect.top())
+        pt.ry() += textRect.height() * scaleFactor;
     painter->translate(pt);
-    painter->scale(k, -k);
+    painter->scale(scaleFactor, -scaleFactor);
     int i = 0;
     for (QString txt : text.split('\n')) {
         QPainterPath path;
