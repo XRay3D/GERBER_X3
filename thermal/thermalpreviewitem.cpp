@@ -59,9 +59,9 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
         painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter->drawPath(painterPath);
 
-        QColor pc(m_pathColor);
-        pc.setAlpha(pc.alpha() * 255.0 / light);
-        painter->setPen(QPen(pc, 0.0));
+        QColor pc(m_bodyColor);
+        pc.setAlpha(255);
+        painter->setPen(QPen(Qt::red, 0.0));
         painter->drawPath(painterPath);
     }
     painter->setBrush(m_bodyColor);
@@ -90,26 +90,28 @@ void ThermalPreviewItem::redraw()
     QElapsedTimer t;
     t.start();
 
-    diameter = tool.getDiameter(m_depth);
-    {
+    if (double d = tool.getDiameter(m_depth); !qFuzzyCompare(diameter, d)) {
+        diameter = d;
         ClipperOffset offset;
         offset.AddPaths(grob->paths(), jtRound, etClosedPolygon);
-        offset.Execute(m_toolPath, diameter * uScale * 0.5); // toolpath
+        offset.Execute(cashedPath, diameter * uScale * 0.5); // toolpath
         offset.Clear();
-        offset.AddPaths(m_toolPath, jtMiter, etClosedLine);
-        offset.Execute(m_bridge, diameter * uScale * 0.1); // frame
+        offset.AddPaths(cashedPath, jtMiter, etClosedLine);
+        offset.Execute(cashedFrame, diameter * uScale * 0.1); // frame
+        for (Path& path : cashedPath)
+            path.append(path.first());
     }
 
     if (qFuzzyIsNull(m_node->tickness()) && m_node->count()) {
         m_bridge.clear();
     } else {
         Clipper clipper;
-        clipper.AddPaths(m_bridge, ptSubject, true);
+        clipper.AddPaths(cashedFrame, ptSubject, true);
         const auto rect(sourcePath.boundingRect());
         const IntPoint& center(rect.center());
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons());
-        for (int i = 0; i < m_node->count(); ++i) {
+        for (int i = 0; i < m_node->count(); ++i) { // Gaps
             ClipperOffset offset;
             double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
             offset.AddPath({ center,
@@ -125,9 +127,7 @@ void ThermalPreviewItem::redraw()
     }
     {
         Clipper clipper;
-        for (Path& path : m_toolPath)
-            path.append(path.first());
-        clipper.AddPaths(m_toolPath, ptSubject, false);
+        clipper.AddPaths(cashedPath, ptSubject, false);
         clipper.AddPaths(m_bridge, ptClip, true);
         PolyTree polytree;
         clipper.Execute(ctDifference, polytree, pftPositive);
@@ -152,7 +152,7 @@ void ThermalPreviewItem::changeColor()
     {
         auto animation = new QPropertyAnimation(this, "bodyColor");
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-        animation->setDuration(100);
+        animation->setDuration(200);
         animation->setStartValue(m_bodyColor);
         if (colorState & Selected) {
             animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
@@ -169,7 +169,7 @@ void ThermalPreviewItem::changeColor()
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(m_pathColor);
-        animation->setEndValue((colorState & Used) ? colors[(int)Colors::Used] : colors[(int)Colors::UnUsed]);
+        animation->setEndValue((colorState & Used) ? colors[(int)Colors::Default] : colors[(int)Colors::UnUsed]);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

@@ -9,7 +9,7 @@ class Tool;
 
 class ThermalNode;
 
-class ThermalPreviewItem : public QObject, public QGraphicsItem {
+class ThermalPreviewItem final : public QObject, public QGraphicsItem {
     Q_OBJECT
 
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)
@@ -72,16 +72,17 @@ private:
         UsedHovered,
         UnUsed,
     };
-    static constexpr int dark = 100;
-    static constexpr int light = 200;
+
+    static constexpr int dark = 200;
+    static constexpr int light = 255;
     inline static const QColor colors[] {
-        QColor(255, 255, 255, dark), //  dark gray
-        QColor(255, 255, 255, light), //  light gray
+        QColor(128, 128, 128, dark), //  dark gray
+        QColor(255, 255, 255, light), // light gray
         QColor(0, 255, 0, dark), //      dark green
-        QColor(0, 255, 0, light), //      light green
-        QColor(255, 0, 255, dark), //      dark red
-        QColor(255, 0, 255, light), //      light red
-        QColor(255, 0, 255, 0), //        transparent
+        QColor(0, 255, 0, light), //     light green
+        QColor(255, 0, 0, dark), //      dark red
+        QColor(255, 0, 0, light), //     light red
+        QColor(255, 255, 255, 0), //         transparent
     };
 
     enum ColorState {
@@ -96,6 +97,9 @@ private:
 
     Paths m_bridge;
     Paths m_toolPath;
+
+    Paths cashedPath;
+    Paths cashedFrame;
 
     ThermalNode* m_node = nullptr;
     inline static QVector<ThermalPreviewItem*> thpi;
