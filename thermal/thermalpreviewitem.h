@@ -9,7 +9,7 @@ class Tool;
 
 class ThermalNode;
 
-class ThermalPreviewItem final : public QObject, public QGraphicsItem {
+class ThermalPreviewItem final : public QGraphicsObject {
     Q_OBJECT
 
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)

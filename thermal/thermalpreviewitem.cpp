@@ -44,6 +44,8 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     setZValue(std::numeric_limits<double>::max() - 10);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
+    setOpacity(0);
+
     connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
     m.lock();
     thpi.append(this);
@@ -244,6 +246,13 @@ QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change
             emit selectionChanged({}, m_node->index());
         }
         changeColor();
+    } else if (change == ItemVisibleChange) {
+        auto animation = new QPropertyAnimation(this, "opacity");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(200);
+        animation->setStartValue(0.0);
+        animation->setEndValue(1.0);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
     return QGraphicsItem::itemChange(change, value);
 }
