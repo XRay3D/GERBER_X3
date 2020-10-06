@@ -389,6 +389,7 @@ void MainWindow::createActionsToolPath()
         toolpathActions[GCode::Profile]->setShortcut(QKeySequence("Ctrl+Shift+F"));
         menu->addAction(toolpathActions[GCode::Profile]);
     }
+
     {
         toolpathActions[GCode::Pocket] = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
             createDockWidget<PocketOffsetForm>(GCode::Pocket); //createDockWidget(new PocketOffsetForm(dockWidget), GCode::Pocket);
@@ -397,6 +398,7 @@ void MainWindow::createActionsToolPath()
         toolpathActions[GCode::Pocket]->setShortcut(QKeySequence("Ctrl+Shift+P"));
         menu->addAction(toolpathActions[GCode::Pocket]);
     }
+
     {
         toolpathActions[GCode::Raster] = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
             createDockWidget<PocketRasterForm>(GCode::Raster); //createDockWidget(new PocketRasterForm(dockWidget), GCode::Raster);
@@ -405,6 +407,7 @@ void MainWindow::createActionsToolPath()
         toolpathActions[GCode::Raster]->setShortcut(QKeySequence("Ctrl+Shift+R"));
         menu->addAction(toolpathActions[GCode::Raster]);
     }
+
     {
         toolpathActions[GCode::Voronoi] = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
             createDockWidget<VoronoiForm>(GCode::Voronoi); //createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
@@ -551,12 +554,14 @@ void MainWindow::writeSettings()
 
 void MainWindow::selectAll()
 {
-    if (focusWidget() && focusWidget()->objectName() == "toolTable") {
-        static_cast<QTableView*>(focusWidget())->selectAll();
-        return;
-    } else if (focusWidget() && focusWidget()->objectName() == "treeView") {
-        static_cast<QTableView*>(focusWidget())->selectAll();
-        return;
+    if (/*  */ toolpathActions[GCode::Thermal]->isChecked()) {
+        for (QGraphicsItem* item : App::scene()->items())
+            item->setSelected(item->type() == GiThermalPr);
+    } else if (toolpathActions[GCode::Drill]->isChecked()) {
+        for (QGraphicsItem* item : App::scene()->items()) {
+            const int type(item->type());
+            item->setSelected(type == GiApetrurePr || type == GiDrillPr || type == GiSlotPr);
+        }
     } else {
         for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible())
