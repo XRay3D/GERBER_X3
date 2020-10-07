@@ -20,7 +20,7 @@ void DrillModel::appendRow(const QString& name, const QIcon& icon, int id) { m_d
 void DrillModel::setToolId(int row, int id)
 {
     if (m_data[row].toolId != id)
-        m_data[row].create = id > -1;
+        m_data[row].useForCalc = id > -1;
     m_data[row].toolId = id;
     set(row, id != -1);
     dataChanged(createIndex(row, 0), createIndex(row, 1));
@@ -32,22 +32,22 @@ void DrillModel::setSlot(int row, bool slot) { m_data[row].isSlot = slot; }
 
 bool DrillModel::isSlot(int row) { return m_data[row].isSlot; }
 
-int DrillModel::apertureId(int row) { return m_data[row].apToolId; }
+int DrillModel::apertureId(int row) { return m_data[row].apertureId; }
 
-bool DrillModel::create(int row) const { return m_data[row].create; }
+bool DrillModel::useForCalc(int row) const { return m_data[row].useForCalc; }
 
 void DrillModel::setCreate(int row, bool create)
 {
     if (m_data[row].toolId == -1)
         return;
-    m_data[row].create = create;
+    m_data[row].useForCalc = create;
     dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
 void DrillModel::setCreate(bool create)
 {
     for (int row = 0; row < rowCount(); ++row) {
-        m_data[row].create = create && m_data[row].toolId != -1;
+        m_data[row].useForCalc = create && m_data[row].toolId != -1;
     }
     dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
@@ -90,7 +90,7 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
             }
         }
         case Qt::UserRole:
-            return m_data[row].apToolId;
+            return m_data[row].apertureId;
         default:
             break;
         }
@@ -123,7 +123,6 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
 
 QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal) {
@@ -142,9 +141,9 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
         } else {
             switch (m_type) {
             case tAperture:
-                return QString("D%1").arg(m_data[section].apToolId);
+                return QString("D%1").arg(m_data[section].apertureId);
             case tTool:
-                return QString("T%1").arg(m_data[section].apToolId);
+                return QString("T%1").arg(m_data[section].apertureId);
             }
         }
         return QVariant();
@@ -164,6 +163,6 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
 Qt::ItemFlags DrillModel::flags(const QModelIndex& index) const
 {
     if (!index.column())
-        return /*(m_data[index.row()].toolId > -1 ? Qt::ItemIsEnabled : Qt::NoItemFlags)*/ Qt::ItemIsEnabled;
+        return /*(m_data[index.row()].toolId > -1 ? Qt::ItemIsEnabled : Qt::NoItemFlags)*/ Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }

@@ -1,5 +1,4 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "drillpreviewgi.h"
@@ -7,13 +6,14 @@
 #include "gi/drillitem.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
+#include <QPropertyAnimation>
 
-extern Paths offset(const Path& /*path*/, double offset, bool fl = false);
+extern Paths offset(const Path& path, double offset, bool fl = false);
 
 QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject& go, int id)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
+    for (QPolygonF& polygon : toQPolygons(go.paths())) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
@@ -44,11 +44,14 @@ DrillPrGI::DrillPrGI(const Gerber::GraphicObject& go, int id)
     , m_sourcePath(drawApetrure(go, id))
     , m_sourceDiameter(qFuzzyIsNull(go.gFile()->apertures()->value(id)->drillDiameter()) ? go.gFile()->apertures()->value(id)->minSize() : go.gFile()->apertures()->value(id)->drillDiameter())
     , m_type(GiApetrurePr)
-    , m_pen(Qt::darkGray, 0.0)
-    , m_brush(Qt::darkGray)
+    , m_bodyColor(colors[(int)Colors::Default])
+    , m_pathColor(colors[(int)Colors::UnUsed])
 {
-    setZValue(std::numeric_limits<double>::max() - 10);
+    connect(this, &DrillPrGI::colorChanged, [this] { update(); });
+    setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
+    setOpacity(0);
+    setZValue(std::numeric_limits<double>::max() - 10);
 }
 
 DrillPrGI::DrillPrGI(const Excellon::Hole& hole)
@@ -56,35 +59,27 @@ DrillPrGI::DrillPrGI(const Excellon::Hole& hole)
     , m_sourcePath(hole.state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
     , m_sourceDiameter(hole.state.currentToolDiameter())
     , m_type(hole.state.path.isEmpty() ? GiDrillPr : GiSlotPr)
-    , m_pen(Qt::darkGray, 0.0)
-    , m_brush(Qt::darkGray)
+    , m_bodyColor(colors[(int)Colors::Default])
+    , m_pathColor(colors[(int)Colors::UnUsed])
 {
-    setZValue(std::numeric_limits<double>::max() - 10);
+    connect(this, &DrillPrGI::colorChanged, [this] { update(); });
+    setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
+    setOpacity(0);
+    setZValue(std::numeric_limits<double>::max() - 10);
 }
 
 void DrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    // draw source
-    if (isSelected()) {
-        m_pen.setColor(Qt::green);
-        m_brush.setColor(Qt::green);
-    } else {
-        m_pen.setColor(Qt::darkGray);
-        m_brush.setColor(Qt::darkGray);
-    }
-    painter->setPen(m_pen);
-    painter->setBrush(m_brush);
+    painter->setPen({ m_bodyColor, 0.0 });
+    painter->setBrush(m_bodyColor);
     painter->drawPath(m_sourcePath);
-    // draw hole
+    // draw tool
     if (m_toolId > -1) {
-        //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
-        //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
-        if (isSelected())
-            painter->setPen(m_pen);
-        else
-            painter->setPen(QPen(Qt::red, 0.0));
-        painter->setBrush(QBrush(QColor(255, 0, 0, 100)));
+        QColor p(m_pathColor);
+        p.setAlpha(255);
+        painter->setPen(QPen(p, 0.0));
+        painter->setBrush(Qt::NoBrush /*m_pathColor*/);
         painter->drawPath(m_toolPath);
     }
 }
@@ -100,6 +95,12 @@ int DrillPrGI::toolId() const { return m_toolId; }
 void DrillPrGI::setToolId(int toolId)
 {
     m_toolId = toolId;
+
+    if (m_toolId > -1)
+        colorState |= Tool;
+    else
+        colorState &= ~Tool;
+
     if (m_toolId > -1) {
         m_toolPath = QPainterPath(); //.clear();
         const double diameter = ToolHolder::tools[m_toolId].diameter();
@@ -145,7 +146,16 @@ void DrillPrGI::setToolId(int toolId)
         } break;
         }
     }
-    update();
+    changeColor();
+}
+
+void DrillPrGI::setUsed(bool fl)
+{
+    if (fl)
+        colorState |= Used;
+    else
+        colorState &= ~Used;
+    changeColor();
 }
 
 IntPoint DrillPrGI::pos() const
@@ -186,4 +196,65 @@ bool DrillPrGI::fit(double depth)
         return grob->gFile()->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
     }
     return false;
+}
+
+void DrillPrGI::changeColor()
+{
+    {
+        auto animation = new QPropertyAnimation(this, "bodyColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(200);
+        animation->setStartValue(m_bodyColor);
+        if (colorState & Selected) {
+            animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
+        } else {
+            if (colorState & Used)
+                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
+            else
+                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
+        }
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    {
+        auto animation = new QPropertyAnimation(this, "pathColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_pathColor);
+        animation->setEndValue((colorState & Tool) ? colors[(int)Colors::Tool] : colors[(int)Colors::UnUsed]);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+}
+
+void DrillPrGI::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    colorState |= Hovered;
+    changeColor();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void DrillPrGI::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    colorState &= ~Hovered;
+    changeColor();
+    QGraphicsItem::hoverLeaveEvent(event);
+}
+
+QVariant DrillPrGI::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemSelectedChange) {
+        if (value.toInt()) {
+            colorState |= Selected;
+        } else {
+            colorState &= ~Selected;
+        }
+        changeColor();
+    } else if (change == ItemVisibleChange) {
+        auto animation = new QPropertyAnimation(this, "opacity");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(200);
+        animation->setStartValue(0.0);
+        animation->setEndValue(1.0);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    return QGraphicsItem::itemChange(change, value);
 }
