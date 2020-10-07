@@ -105,11 +105,15 @@ private:
 };
 
 class ToolHolder {
+    static QMap<int, Tool> m_tools;
+    friend class ToolItem;
+
 public:
+    static const Tool& tool(int id);
+    static const QMap<int, Tool> &tools();
     static void readTools();
     static void readTools(const QJsonObject& json);
     static void writeTools(QJsonObject& json);
-    static QMap<int, Tool> tools;
 };
 
 Q_DECLARE_METATYPE(Tool)

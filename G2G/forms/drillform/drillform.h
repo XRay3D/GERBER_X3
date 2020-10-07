@@ -1,5 +1,7 @@
 #pragma once
 
+#include "extypes.h"
+#include "gbrtypes.h"
 #include "gcode.h"
 #include <QHeaderView>
 #include <QWidget>
@@ -24,8 +26,8 @@ public:
     explicit DrillForm(QWidget* parent = nullptr);
     ~DrillForm() override;
 
-    void setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
-    void setHoles(const QMap<int, double>& value);
+    void setApertures(const Gerber::ApertureMap* value);
+    void setExcellonTools(const Excellon::Tools& value);
     void updateFiles();
     static bool canToShow();
 
@@ -45,7 +47,7 @@ private:
     void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
     void on_customContextMenuRequested(const QPoint& pos);
 
-    void createHoles(int toolId, int toolIdSelected);
+    void updateToolsOnGi(int toolId);
     void pickUpTool(int apertureId, double diameter, bool isSlot = false);
 
     //    inline void updateCreateButton();
@@ -56,8 +58,8 @@ private:
     Ui::DrillForm* ui;
 
     int m_type;
-    QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
-    QMap<int, double> m_tools;
+    Gerber::ApertureMap m_apertures;
+    Excellon::Tools m_tools;
     QMap<int, QVector<QSharedPointer<DrillPrGI>>> m_giPeview;
     AbstractFile* file = nullptr;
     QCheckBox* checkBox;
@@ -83,7 +85,7 @@ public:
     static QRect getRect(const QRect& rect);
 
 signals:
-    void onChecked(int);
+    void onChecked(int = -1);
 
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;

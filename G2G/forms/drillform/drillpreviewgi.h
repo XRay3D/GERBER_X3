@@ -4,6 +4,8 @@
 #include "gbrtypes.h"
 #include "gi/graphicsitem.h"
 
+class Row;
+
 class DrillPrGI : public QGraphicsObject {
     Q_OBJECT
 
@@ -23,8 +25,8 @@ signals:
     void colorChanged();
 
 public:
-    explicit DrillPrGI(const Gerber::GraphicObject& go, int id);
-    explicit DrillPrGI(const Excellon::Hole& hole);
+    explicit DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row);
+    explicit DrillPrGI(const Excellon::Hole* hole, Row& row);
 
     ~DrillPrGI() override = default;
 
@@ -36,26 +38,28 @@ public:
     int type() const override;
     double sourceDiameter() const;
     int toolId() const;
-    void setToolId(int toolId);
-    void setUsed(bool fl);
+    void updateTool();
     IntPoint pos() const;
     Paths paths() const;
     bool fit(double depth);
 
+    void changeColor();
+
 private:
-    static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id);
-    static QPainterPath drawDrill(const Excellon::Hole& hole);
-    static QPainterPath drawSlot(const Excellon::Hole& hole);
+    static QPainterPath drawApetrure(const Gerber::GraphicObject* go, int id);
+    static QPainterPath drawDrill(const Excellon::Hole* hole);
+    static QPainterPath drawSlot(const Excellon::Hole* hole);
+
+    const Row& row;
 
     const int id = 0;
-    const Gerber::GraphicObject* const grob = nullptr;
+    const Gerber::GraphicObject* const gbrObj = nullptr;
     const Excellon::Hole* const hole = nullptr;
 
     const QPainterPath m_sourcePath;
     QPainterPath m_toolPath;
 
     const double m_sourceDiameter;
-    int m_toolId = -1;
     const int m_type;
 
     QColor m_bodyColor;
@@ -93,8 +97,6 @@ private:
         Tool = 8,
     };
     int colorState = Default;
-
-    void changeColor();
 
     // QGraphicsItem interface
 protected:

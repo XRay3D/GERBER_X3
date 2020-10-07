@@ -36,7 +36,7 @@ ToolItem::ToolItem()
 ToolItem::~ToolItem()
 {
     if (m_toolId && m_deleteEnable)
-        ToolHolder::tools.remove(m_toolId);
+        ToolHolder::m_tools.remove(m_toolId);
     qDeleteAll(childItems);
 }
 
@@ -145,7 +145,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
     case Qt::DecorationRole:
         if (index.column() == 0) {
             if (m_toolId)
-                return ToolHolder::tools[m_toolId].icon();
+                return ToolHolder::tool(m_toolId).icon();
             else
                 return QIcon::fromTheme("folder-sync");
         }
@@ -180,8 +180,8 @@ int ToolItem::toolId() const
 
 Tool& ToolItem::tool()
 {
-    if (ToolHolder::tools.contains(m_toolId))
-        return ToolHolder::tools[m_toolId];
+    if (ToolHolder::tools().contains(m_toolId))
+        return ToolHolder::m_tools[m_toolId];
     static Tool tmp;
     return tmp;
 }
@@ -193,22 +193,22 @@ bool ToolItem::isTool() const
 
 void ToolItem::setIsTool()
 {
-    if (ToolHolder::tools.size())
-        m_toolId = ToolHolder::tools.lastKey() + 1;
+    if (ToolHolder::m_tools.size())
+        m_toolId = ToolHolder::m_tools.lastKey() + 1;
     else
         m_toolId = 1;
-    ToolHolder::tools[m_toolId].setId(m_toolId);
+    ToolHolder::m_tools[m_toolId].setId(m_toolId);
 }
 
 QString ToolItem::note() const
 {
-    return m_toolId ? ToolHolder::tools[m_toolId].note() : m_note;
+    return m_toolId ? ToolHolder::m_tools[m_toolId].note() : m_note;
 }
 
 void ToolItem::setNote(const QString& value)
 {
     if (m_toolId)
-        ToolHolder::tools[m_toolId].setNote(value);
+        ToolHolder::m_tools[m_toolId].setNote(value);
     else
         m_note = value;
 }
@@ -220,13 +220,13 @@ void ToolItem::setDeleteEnable(bool deleteEnable)
 
 QString ToolItem::name() const
 {
-    return m_toolId ? ToolHolder::tools[m_toolId].name() : m_name;
+    return m_toolId ? ToolHolder::tool(m_toolId).name() : m_name;
 }
 
 void ToolItem::setName(const QString& value)
 {
     if (m_toolId)
-        ToolHolder::tools[m_toolId].setName(value);
+        ToolHolder::m_tools[m_toolId].setName(value);
     else
         m_name = value;
 }

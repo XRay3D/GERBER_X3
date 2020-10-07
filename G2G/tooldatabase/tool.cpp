@@ -386,7 +386,11 @@ uint Tool::hash() const
 ///////////////////////////////////////////////////////
 /// \brief ToolHolder::tools
 ///
-QMap<int, Tool> ToolHolder::tools;
+QMap<int, Tool> ToolHolder::m_tools;
+
+const Tool& ToolHolder::tool(int id) { return m_tools[id]; }
+
+const QMap<int, Tool>& ToolHolder::tools() { return m_tools; }
 
 void ToolHolder::readTools()
 {
@@ -408,7 +412,7 @@ void ToolHolder::readTools()
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
         tool.setId(toolObject["id"].toInt());
-        tools[tool.id()] = tool;
+        m_tools[tool.id()] = tool;
     }
 }
 
@@ -420,15 +424,15 @@ void ToolHolder::readTools(const QJsonObject& json)
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
         tool.setId(toolObject["id"].toInt());
-        tools[tool.id()] = tool;
+        m_tools[tool.id()] = tool;
     }
 }
 
 void ToolHolder::writeTools(QJsonObject& json)
 {
     QJsonArray toolArray;
-    QMap<int, Tool>::iterator i = tools.begin();
-    while (i != tools.constEnd()) {
+    QMap<int, Tool>::iterator i = m_tools.begin();
+    while (i != m_tools.constEnd()) {
         QJsonObject toolObject;
         i.value().write(toolObject);
         toolObject["id"] = i.key();

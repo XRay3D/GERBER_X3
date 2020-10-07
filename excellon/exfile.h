@@ -6,7 +6,7 @@
 namespace Excellon {
 
 class File : public AbstractFile, public QList<Hole> {
-    QMap<int, double> m_tools;
+    Tools m_tools;
     friend class Parser;
     Format m_format;
 
@@ -17,7 +17,7 @@ public:
     FileType type() const override { return FileType::Excellon; }
 
     double tool(int t) const;
-    QMap<int, double> tools() const;
+    Tools tools() const;
 
     Format format() const;
     void setFormat(const Format& value);

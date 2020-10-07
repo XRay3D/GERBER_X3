@@ -14,9 +14,84 @@
 
 #include "leakdetector.h"
 
-using namespace Gerber;
+namespace Gerber {
 
 static Format* crutch;
+
+QDebug operator<<(QDebug debug, const State& state)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "State("
+                    << "D0" << state.dCode() << ", "
+                    << "G0" << state.gCode() << ", "
+                    << QStringLiteral("Positive|Negative").split('|').at(state.imgPolarity()) << ", "
+                    << QStringLiteral("Linear|ClockwiseCircular|CounterclockwiseCircular").split('|').at(state.interpolation() - 1) << ", "
+                    << QStringLiteral("Aperture|Line|Region").split('|').at(state.type()) << ", "
+                    << QStringLiteral("Undef|Single|Multi").split('|').at(state.quadrant()) << ", "
+                    << QStringLiteral("Off|On").split('|').at(state.region()) << ", "
+                    << QStringLiteral("NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring").split('|').at(state.mirroring()) << ", "
+                    << QStringLiteral("aperture") << state.aperture() << ", "
+                    << state.curPos() << ", "
+                    << QStringLiteral("scaling") << state.scaling() << ", "
+                    << QStringLiteral("rotating") << state.rotating() << ", "
+                    << ')';
+    return debug;
+}
+
+QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& aperture)
+{
+    int type;
+    stream >> type;
+    switch (type) {
+    case Circle:
+        aperture = QSharedPointer<AbstractAperture>(new ApCircle(stream, crutch));
+        break;
+    case Rectangle:
+        aperture = QSharedPointer<AbstractAperture>(new ApRectangle(stream, crutch));
+        break;
+    case Obround:
+        aperture = QSharedPointer<AbstractAperture>(new ApObround(stream, crutch));
+        break;
+    case Polygon:
+        aperture = QSharedPointer<AbstractAperture>(new ApPolygon(stream, crutch));
+        break;
+    case Macro:
+        aperture = QSharedPointer<AbstractAperture>(new ApMacro(stream, crutch));
+        break;
+    case Block:
+        aperture = QSharedPointer<AbstractAperture>(new ApBlock(stream, crutch));
+        break;
+    }
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& s, ApertureMap& c)
+{
+    c.clear();
+    quint32 n;
+    s >> n;
+    for (quint32 i = 0; i < n; ++i) {
+        ApertureMap::key_type key;
+        ApertureMap::mapped_type val;
+        s >> key;
+        s >> val;
+        if (s.status() != QDataStream::Ok) {
+            c.clear();
+            break;
+        }
+        c.emplace(key, val);
+    }
+    return s;
+}
+
+QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
+{
+    s << quint32(c.size());
+    for (auto& [key, val] : c) {
+        s << key << val;
+    }
+    return s;
+}
 
 File::File(const QString& fileName)
 {
@@ -24,15 +99,9 @@ File::File(const QString& fileName)
     m_name = fileName;
 }
 
-template <typename T>
-void addData(QByteArray& dataArray, const T& data)
-{
-    dataArray.append(reinterpret_cast<const char*>(&data), sizeof(T));
-}
-
 File::~File() { }
 
-const QMap<int, QSharedPointer<AbstractAperture>>* File::apertures() const { return &m_apertures; }
+const ApertureMap* File::apertures() const { return &m_apertures; }
 
 Paths File::merge() const
 {
@@ -125,8 +194,8 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
 
 bool File::flashedApertures() const
 {
-    for (QSharedPointer<AbstractAperture> a : m_apertures) {
-        if (a.data()->isFlashed())
+    for (auto [_, aperture] : m_apertures) {
+        if (aperture->isFlashed())
             return true;
     }
     return false;
@@ -163,7 +232,7 @@ void File::setItemType(File::ItemsType type)
     m_itemGroup[m_itemsType]->setVisible(true);
 }
 
-void Gerber::File::write(QDataStream& stream) const
+void File::write(QDataStream& stream) const
 {
     stream << *static_cast<const QList<GraphicObject>*>(this); // write  QList<GraphicObject>
     stream << m_apertures;
@@ -177,7 +246,7 @@ void Gerber::File::write(QDataStream& stream) const
     //_write(stream);
 }
 
-void Gerber::File::read(QDataStream& stream)
+void File::read(QDataStream& stream)
 {
     crutch = &m_format; ///////////////////
     stream >> *static_cast<QList<GraphicObject>*>(this); // read  QList<GraphicObject>
@@ -196,7 +265,7 @@ void Gerber::File::read(QDataStream& stream)
     //_read(stream);
 }
 
-void Gerber::File::createGi()
+void File::createGi()
 {
     // fill copper
     for (Paths& paths : groupedPaths()) {
@@ -268,49 +337,4 @@ void Gerber::File::createGi()
     m_itemGroup[m_itemsType]->setVisible(true);
 }
 
-QDebug operator<<(QDebug debug, const Gerber::State& state)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace() << "State("
-                    << "D0" << state.dCode() << ", "
-                    << "G0" << state.gCode() << ", "
-                    << QStringLiteral("Positive|Negative").split('|').at(state.imgPolarity()) << ", "
-                    << QStringLiteral("Linear|ClockwiseCircular|CounterclockwiseCircular").split('|').at(state.interpolation() - 1) << ", "
-                    << QStringLiteral("Aperture|Line|Region").split('|').at(state.type()) << ", "
-                    << QStringLiteral("Undef|Single|Multi").split('|').at(state.quadrant()) << ", "
-                    << QStringLiteral("Off|On").split('|').at(state.region()) << ", "
-                    << QStringLiteral("NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring").split('|').at(state.mirroring()) << ", "
-                    << QStringLiteral("aperture") << state.aperture() << ", "
-                    << state.curPos() << ", "
-                    << QStringLiteral("scaling") << state.scaling() << ", "
-                    << QStringLiteral("rotating") << state.rotating() << ", "
-                    << ')';
-    return debug;
-}
-
-QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& aperture)
-{
-    int type;
-    stream >> type;
-    switch (type) {
-    case Circle:
-        aperture = QSharedPointer<AbstractAperture>(new ApCircle(stream, crutch));
-        break;
-    case Rectangle:
-        aperture = QSharedPointer<AbstractAperture>(new ApRectangle(stream, crutch));
-        break;
-    case Obround:
-        aperture = QSharedPointer<AbstractAperture>(new ApObround(stream, crutch));
-        break;
-    case Polygon:
-        aperture = QSharedPointer<AbstractAperture>(new ApPolygon(stream, crutch));
-        break;
-    case Macro:
-        aperture = QSharedPointer<AbstractAperture>(new ApMacro(stream, crutch));
-        break;
-    case Block:
-        aperture = QSharedPointer<AbstractAperture>(new ApBlock(stream, crutch));
-        break;
-    }
-    return stream;
 }

@@ -2,6 +2,7 @@
 
 #include "forms/formsutil/formsutil.h"
 
+#include "gbrtypes.h"
 #include "thvars.h"
 
 class ThermalModel;
@@ -39,9 +40,9 @@ private slots:
 private:
     Ui::ThermalForm* ui;
 
-    void createTPI(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
+    void createTPI(const Gerber::ApertureMap* value);
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
-    QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
+    Gerber::ApertureMap m_apertures;
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void setSelection(const QModelIndex& selected, const QModelIndex& deselected);

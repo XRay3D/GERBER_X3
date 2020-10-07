@@ -9,13 +9,18 @@
 #include <QBitmap>
 #include <QDebug>
 
-DrillModel::DrillModel(int type, QObject* parent)
+DrillModel::DrillModel(int type, int rowCount, QObject* parent)
     : QAbstractTableModel(parent)
     , m_type(type)
 {
+    m_data.reserve(rowCount);
 }
 
-void DrillModel::appendRow(const QString& name, const QIcon& icon, int id) { m_data.append(Row(name, icon, id)); }
+Row& DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
+{
+    m_data.append(Row(name, icon, id));
+    return m_data.last();
+}
 
 void DrillModel::setToolId(int row, int id)
 {
@@ -42,6 +47,7 @@ void DrillModel::setCreate(int row, bool create)
         return;
     m_data[row].useForCalc = create;
     dataChanged(createIndex(row, 0), createIndex(row, 1));
+    headerDataChanged(Qt::Vertical, row, row);
 }
 
 void DrillModel::setCreate(bool create)
@@ -63,26 +69,26 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
             if (m_data[row].isSlot)
-                return QString(m_data[row].name[0]).replace(tr("Tool"), tr("Slot"));
+                return QString(m_data[row].name).replace(tr("Tool"), tr("Slot"));
             else
-                return m_data[row].name[0];
+                return m_data[row].name;
         case Qt::DecorationRole: {
             if (m_data[index.row()].toolId > -1 && m_data[row].isSlot) {
-                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else if (m_data[index.row()].toolId > -1) {
-                return m_data[row].icon[0];
+                return m_data[row].icon;
             } else if (m_data[row].isSlot) {
-                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else {
-                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
@@ -109,9 +115,9 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         else
             switch (role) {
             case Qt::DisplayRole:
-                return ToolHolder::tools[m_data[row].toolId].name();
+                return ToolHolder::tool(m_data[row].toolId).name();
             case Qt::DecorationRole:
-                return ToolHolder::tools[m_data[row].toolId].icon();
+                return ToolHolder::tool(m_data[row].toolId).icon();
             case Qt::UserRole:
                 return m_data[row].toolId;
             default:

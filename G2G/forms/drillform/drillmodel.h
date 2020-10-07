@@ -8,33 +8,35 @@ enum {
     tTool,
 };
 
+struct Row {
+    Row(const QString& name = {}, const QIcon& icon = {}, int id = {})
+        : name(name)
+        , icon(icon)
+        , apertureId(id)
+        , toolId(-1)
+    {
+    }
+    const QString name;
+    const QIcon icon;
+    const int apertureId;
+    int toolId;
+    bool isSlot = false;
+    bool useForCalc = false;
+    inline static double depth;
+};
+
 class DrillModel : public QAbstractTableModel {
     Q_OBJECT
 
-    struct Row {
-        Row(const QString& name, const QIcon& icon, int id)
-            : name { name, "" }
-            , icon { icon, QIcon() }
-            , apertureId(id)
-            , toolId(-1)
-        {
-        }
-        const QString name[2];
-        /*const*/ QIcon icon[2];
-        const int apertureId;
-        int toolId;
-        bool isSlot = false;
-        bool useForCalc = false;
-    };
-    QList<Row> m_data;
+    QVector<Row> m_data;
     int m_type;
 
 signals:
     void set(int, bool);
 
 public:
-    DrillModel(int type, QObject* parent = nullptr);
-    void appendRow(const QString& name, const QIcon& icon, int id);
+    DrillModel(int type, int rowCount, QObject* parent = nullptr);
+    Row& appendRow(const QString& name, const QIcon& icon, int id);
     void setToolId(int row, int id);
     int toolId(int row);
     void setSlot(int row, bool slot);
@@ -43,6 +45,8 @@ public:
     bool useForCalc(int row) const;
     void setCreate(int row, bool create);
     void setCreate(bool create);
+
+    const QVector<Row>& data() const { return m_data; }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;

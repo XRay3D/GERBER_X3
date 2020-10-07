@@ -116,7 +116,6 @@ DrillForm::DrillForm(QWidget* parent)
     }
 
     {
-
         auto cornerButton = ui->toolTable->findChild<QAbstractButton*>();
         header = new Header(Qt::Vertical, ui->toolTable);
         ui->toolTable->setVerticalHeader(header);
@@ -125,18 +124,20 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setFocusPolicy(Qt::NoFocus);
             checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
-            connect(header, &Header::onChecked, [this](int) {
+            connect(header, &Header::onChecked, [this](int idx) {
+                qDebug() << Q_FUNC_INFO << idx;
                 int fl = 0;
                 for (int i = 0; i < model->rowCount(); ++i) {
-                    if (model->useForCalc(i)) {
+                    if (model->useForCalc(i))
                         ++fl;
-                    }
-                    for (auto item : m_giPeview[model->apertureId(i)]) {
-                        item->setUsed(model->useForCalc(i));
-                    }
+
+                    if (idx < 0 || idx == i)
+                        for (auto item : m_giPeview[model->apertureId(i)])
+                            item->changeColor();
                 }
+
                 checkBox->setCheckState(!fl ? Qt::Unchecked : (fl == model->rowCount() ? Qt::Checked : Qt::PartiallyChecked));
-                ui->pbCreate->setEnabled(checkBox->checkState() != Qt::Unchecked);
+                ui->pbCreate->setEnabled(fl);
             });
         }
     }
@@ -180,6 +181,8 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
+    connect(ui->dsbxDepth, &DepthForm::valueChanged, [](double val) { Row::depth = val; }); //////////////////////////////////////////////////////////////////////////////////////////
+
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     for (QPushButton* button : findChildren<QPushButton*>()) {
@@ -214,39 +217,50 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
-void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
+void DrillForm::setApertures(const Gerber::ApertureMap* value)
 {
     m_type = tAperture;
     clear();
     m_apertures = *value;
-    model = new DrillModel(m_type, this);
 
-    QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
-    for (apertureIt = m_apertures.cbegin(); apertureIt != m_apertures.cend(); ++apertureIt) {
-        const auto aperture = apertureIt.value();
+    uint count = 0;
+    for (auto [_, aperture] : m_apertures)
+        if (aperture->isFlashed())
+            ++count;
+
+    const Gerber::File* gbrFile = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+
+    std::map<int, QVector<const Gerber::GraphicObject*>> cacheApertures;
+    for (const Gerber::GraphicObject& go : *gbrFile)
+        if (go.state().dCode() == Gerber::D03)
+            cacheApertures[go.state().aperture()].append(&go);
+
+    assert(count == cacheApertures.size()); // assert on != - false
+
+    model = new DrillModel(m_type, count, this);
+
+    for (auto [dCode, aperture] : m_apertures) {
         if (aperture && aperture->isFlashed()) {
-            double drillDiameter = 0.0;
+            double drillDiameter;
             QString name(aperture->name());
-            if (aperture->isDrilled()) {
+            if (aperture->withHole()) {
                 drillDiameter = aperture->drillDiameter();
                 name += tr(", drill Ø%1mm").arg(drillDiameter);
             } else if (aperture->type() == Gerber::Circle) {
                 drillDiameter = aperture->apertureSize();
             }
-            model->appendRow(name, drawApertureIcon(aperture.data()), apertureIt.key());
-            const Gerber::File* gbrFile = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
-            for (const Gerber::GraphicObject& go : *gbrFile) {
-                if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
-                    DrillPrGI* item = new DrillPrGI(go, apertureIt.key());
-                    m_giPeview[apertureIt.key()].append(QSharedPointer<DrillPrGI>(item));
-                    App::scene()->addItem(item);
-                }
+
+            Row& row = model->appendRow(name, drawApertureIcon(aperture.data()), dCode);
+            for (const Gerber::GraphicObject* go : cacheApertures[dCode]) {
+                DrillPrGI* item = new DrillPrGI(go, dCode, row);
+                m_giPeview[dCode].append(QSharedPointer<DrillPrGI>(item));
+                App::scene()->addItem(item);
             }
+
             if (drillDiameter != 0.0)
-                pickUpTool(apertureIt.key(), drillDiameter);
+                pickUpTool(dCode, drillDiameter);
         }
     }
-    // updateCreateButton();
 
     delete ui->toolTable->model();
     ui->toolTable->setModel(model);
@@ -259,35 +273,38 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
     connect(ui->toolTable->selectionModel(), &QItemSelectionModel::currentChanged, this, &DrillForm::on_currentChanged);
 }
 
-void DrillForm::setHoles(const QMap<int, double>& value)
+void DrillForm::setExcellonTools(const Excellon::Tools& value)
 {
     m_type = tTool;
     clear();
 
     m_tools = value;
-    model = new DrillModel(m_type, this);
+    model = new DrillModel(m_type, static_cast<int>(m_tools.size()), this);
 
-    QMap<int, double>::const_iterator toolIt;
-    for (toolIt = m_tools.cbegin(); toolIt != m_tools.cend(); ++toolIt) {
-        QString name(tr("Tool Ø%1mm").arg(toolIt.value()));
-        model->appendRow(name, drawDrillIcon(), toolIt.key());
-        const Excellon::File* exFile = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
+    const Excellon::File* exFile = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
+
+    std::map<int, QVector<const Excellon::Hole*>> cacheHoles;
+    for (const Excellon::Hole& hole : *exFile)
+        cacheHoles[hole.state.tCode] << &hole;
+
+    for (auto [toolNum, diameter] : m_tools) {
+        //for (toolIt = m_tools.cbegin(); toolIt != m_tools.cend(); ++toolIt) {
+        QString name(tr("Tool Ø%1mm").arg(diameter));
+        Row& row = model->appendRow(name, drawDrillIcon(), toolNum); ///->
         bool isSlot = false;
-        for (const Excellon::Hole& hole : *exFile) {
-            if (hole.state.tCode == toolIt.key()) {
-                auto* item = new DrillPrGI(hole);
-                if (!hole.state.path.isEmpty())
-                    isSlot = true;
-                m_giPeview[toolIt.key()].append(QSharedPointer<DrillPrGI>(item));
-                App::scene()->addItem(item);
-            }
+        for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
+            if (!hole->state.path.isEmpty())
+                isSlot = true;
+
+            auto* item = new DrillPrGI(hole, row);
+            m_giPeview[toolNum].append(QSharedPointer<DrillPrGI>(item));
+            App::scene()->addItem(item);
         }
-        model->setSlot(model->rowCount() - 1, isSlot);
-        if (toolIt.value() != 0.0)
-            pickUpTool(toolIt.key(), toolIt.value(), isSlot);
+        model->setSlot(model->rowCount() - 1, isSlot); ///<-
+        if (diameter > 0.0)
+            pickUpTool(toolNum, diameter, isSlot);
     }
 
-    // updateCreateButton();
     delete ui->toolTable->model();
     ui->toolTable->setModel(model);
     connect(model, &DrillModel::set, header, &Header::set);
@@ -352,34 +369,33 @@ bool DrillForm::canToShow()
 void DrillForm::on_pbClose_clicked()
 {
     if (parent())
-        if (auto* w = dynamic_cast<QWidget*>(parent()); w)
-            w->close();
+        dynamic_cast<QWidget*>(parent())->close();
 }
 
 void DrillForm::on_pbCreate_clicked()
 {
     { //   slots only
-
         struct data {
             Paths paths;
             QVector<int> toolsApertures;
         };
 
-        QMap<int, data> pathsMap;
+        std::map<int, data> pathsMap;
+
         for (int row = 0; row < model->rowCount(); ++row) {
-            int selectedToolId = model->toolId(row);
-            if (selectedToolId != -1 && model->useForCalc(row)) {
+            int usedToolId = model->toolId(row);
+            if (usedToolId != -1 && model->useForCalc(row)) {
                 int apertureId = model->apertureId(row);
-                pathsMap[selectedToolId].toolsApertures.append(apertureId);
+                pathsMap[usedToolId].toolsApertures.append(apertureId);
                 for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                     if (item->type() == GiSlotPr) {
                         if (item->fit(ui->dsbxDepth->value())) {
-                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter())) {
-                                pathsMap[selectedToolId].paths.append(path);
+                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tool(item->toolId()).diameter())) {
+                                pathsMap[usedToolId].paths.append(path);
                             }
                             model->setCreate(row, false);
                         } else {
-                            pathsMap[selectedToolId].paths.append(item->paths().first());
+                            pathsMap[usedToolId].paths.append(item->paths().first());
                             model->setCreate(row, false);
                         }
                     }
@@ -390,18 +406,16 @@ void DrillForm::on_pbCreate_clicked()
                 }
             }
         }
-        QMap<int, data>::iterator iterator;
-        for (iterator = pathsMap.begin(); iterator != pathsMap.end(); ++iterator) {
-            int selectedToolId = iterator.key();
+        for (auto [usedToolId, _] : pathsMap) {
             QString indexes;
-            for (int id : pathsMap[selectedToolId].toolsApertures) {
+            for (int id : pathsMap[usedToolId].toolsApertures) {
                 if (indexes.size())
                     indexes += ",";
                 indexes += QString::number(id);
             }
-            if (!pathsMap[selectedToolId].paths.isEmpty()) {
-                GCode::File* gcode = new GCode::File({ pathsMap[selectedToolId].paths }, { ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), GCode::Profile });
-                gcode->setFileName(ToolHolder::tools[selectedToolId].nameEnc() + "_T" + indexes);
+            if (!pathsMap[usedToolId].paths.isEmpty()) {
+                GCode::File* gcode = new GCode::File({ pathsMap[usedToolId].paths }, { ToolHolder::tool(usedToolId), ui->dsbxDepth->value(), GCode::Profile });
+                gcode->setFileName(ToolHolder::tool(usedToolId).nameEnc() + "_T" + indexes);
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
             }
@@ -425,7 +439,7 @@ void DrillForm::on_pbCreate_clicked()
                         continue;
                     switch (m_worckType) {
                     case GCode::Profile:
-                        if (ToolHolder::tools[toolId].type() != Tool::Drill) {
+                        if (ToolHolder::tool(toolId).type() != Tool::Drill) {
                             switch (m_side) {
                             case GCode::On:
                             case GCode::Outer:
@@ -442,13 +456,13 @@ void DrillForm::on_pbCreate_clicked()
                         }
                         break;
                     case GCode::Pocket:
-                        if (ToolHolder::tools[toolId].type() != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
+                        if (ToolHolder::tool(toolId).type() != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
                             pathsMap[toolId].paths.append(item->paths());
                             model->setCreate(row, false);
                         }
                         break;
                     case GCode::Drill:
-                        if (ToolHolder::tools[toolId].type() != Tool::Engraver || ToolHolder::tools[toolId].type() != Tool::Laser) {
+                        if (ToolHolder::tool(toolId).type() != Tool::Engraver || ToolHolder::tool(toolId).type() != Tool::Laser) {
                             pathsMap[toolId].drillPath.append(item->pos());
                             model->setCreate(row, false);
                         }
@@ -489,8 +503,8 @@ void DrillForm::on_pbCreate_clicked()
                         point1 = path[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({ { path } }, { ToolHolder::tools[toolId], ui->dsbxDepth->value(), GCode::Drill });
-                gcode->setFileName(ToolHolder::tools[toolId].nameEnc() + (m_type ? "_T" : "_D") + indexes);
+                GCode::File* gcode = new GCode::File({ { path } }, { ToolHolder::tool(toolId), ui->dsbxDepth->value(), GCode::Drill });
+                gcode->setFileName(ToolHolder::tool(toolId).nameEnc() + (m_type ? "_T" : "_D") + indexes);
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
             }
@@ -505,7 +519,7 @@ void DrillForm::on_pbCreate_clicked()
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(m_side);
-                    gcp.tools.append(ToolHolder::tools[toolId]);
+                    gcp.tools.append(ToolHolder::tool(toolId));
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
                     GCode::ProfileCreator tpc;
                     tpc.addPaths(pathsMap[toolId].paths);
@@ -516,7 +530,7 @@ void DrillForm::on_pbCreate_clicked()
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
-                    gcp.tools.append(ToolHolder::tools[toolId]);
+                    gcp.tools.append(ToolHolder::tool(toolId));
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
                     gcp.params[GCode::GCodeParams::Pass] = 0;
                     gcp.params[GCode::GCodeParams::UseRaster] = 0;
@@ -532,15 +546,13 @@ void DrillForm::on_pbCreate_clicked()
                 }
                 if (!gcode)
                     continue;
-                gcode->setFileName(ToolHolder::tools[toolId].nameEnc() + "_T" + indexes);
+                gcode->setFileName(ToolHolder::tool(toolId).nameEnc() + "_T" + indexes);
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
             }
         }
     }
-    //    header->onCheckedV(header->checked());
-    // updateCreateButton();
-    QTimer::singleShot(500, Qt::CoarseTimer, [this] { ui->pbCreate->update(); });
+    QTimer::singleShot(1, Qt::CoarseTimer, [this] { header->onChecked(); });
 }
 
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
@@ -549,7 +561,8 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     if (file && file->type() == FileType::Gerber)
         setApertures(static_cast<Gerber::File*>(file)->apertures());
     else
-        setHoles(static_cast<Excellon::File*>(file)->tools());
+        setExcellonTools(static_cast<Excellon::File*>(file)->tools());
+    header->onChecked();
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)
@@ -558,7 +571,6 @@ void DrillForm::on_clicked(const QModelIndex& index)
     deselectAll();
     setSelected(apertureId, true);
     zoonToSelected();
-    // updateCreateButton();
 }
 
 void DrillForm::on_doubleClicked(const QModelIndex& current)
@@ -575,8 +587,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
             int apertureId = model->apertureId(current.row());
             const Tool tool(tdb.tool());
             model->setToolId(current.row(), tool.id());
-            createHoles(apertureId, tool.id());
-            // updateCreateButton();
+            updateToolsOnGi(apertureId);
         }
     }
 }
@@ -611,7 +622,6 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
         setSelected(apertureId, true);
     }
     zoonToSelected();
-    // updateCreateButton();
 }
 
 void DrillForm::on_customContextMenuRequested(const QPoint& pos)
@@ -641,17 +651,16 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
             for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
                 if (model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id());
-                    createHoles(model->apertureId(current.row()), tool.id());
+                    updateToolsOnGi(model->apertureId(current.row()));
                 } else if (model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
                 } else if (!model->isSlot(current.row())) {
                     if (model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
-                    createHoles(model->apertureId(current.row()), tool.id());
+                    updateToolsOnGi(model->apertureId(current.row()));
                 }
             }
-            // updateCreateButton();
         }
     });
 
@@ -660,13 +669,12 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
             menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [this] {
                 for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
                     model->setToolId(current.row(), -1);
-                    createHoles(model->apertureId(current.row()), -1);
+                    updateToolsOnGi(model->apertureId(current.row()));
                 }
                 for (int i = 0; i < model->rowCount(); ++i) {
                     if (model->toolId(i) != -1)
                         return;
                 }
-                // updateCreateButton();
             });
             break;
         }
@@ -675,10 +683,10 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
     menu.exec(ui->toolTable->mapToGlobal(pos /*+ QPoint(24, 24)*/));
 }
 
-void DrillForm::createHoles(int toolId, int toolIdSelected)
+void DrillForm::updateToolsOnGi(int toolId)
 {
     for (const QSharedPointer<DrillPrGI>& item : m_giPeview[toolId])
-        item->setToolId(toolIdSelected);
+        item->updateTool();
 }
 
 void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
@@ -687,42 +695,27 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
     const double drillDiameterMin = diameter * (1.0 - k);
     const double drillDiameterMax = diameter * (1.0 + k);
     QMap<int, Tool>::const_iterator toolIt;
-    for (toolIt = ToolHolder::tools.cbegin(); !isSlot && toolIt != ToolHolder::tools.cend(); ++toolIt) {
+    for (toolIt = ToolHolder::tools().cbegin(); !isSlot && toolIt != ToolHolder::tools().cend(); ++toolIt) {
         const auto& tool = toolIt.value();
         if (tool.type() == Tool::Drill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
-            createHoles(apertureId, tool.id());
-            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
-                item->setToolId(tool.id());
-            }
+            updateToolsOnGi(apertureId);
+            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId])
+                item->updateTool();
             return;
         }
     }
-    for (toolIt = ToolHolder::tools.cbegin(); toolIt != ToolHolder::tools.cend(); ++toolIt) {
+    for (toolIt = ToolHolder::tools().cbegin(); toolIt != ToolHolder::tools().cend(); ++toolIt) {
         const auto& tool = toolIt.value();
         if (tool.type() == Tool::EndMill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
-            createHoles(apertureId, tool.id());
-            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
-                item->setToolId(tool.id());
-            }
+            updateToolsOnGi(apertureId);
+            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId])
+                item->updateTool();
             return;
         }
     }
 }
-
-//void DrillForm::updateCreateButton()
-//{
-//    for (int row = 0; row < model->rowCount(); ++row) {
-//        if (model->create(row)) {
-//            ui->pbCreate->setEnabled(true);
-//            return;
-//        }
-//    }
-//    checkBox->setChecked(false);
-//    header->setAll(false);
-//    ui->pbCreate->setEnabled(false);
-//}
 
 void DrillForm::setSelected(int id, bool fl)
 {
@@ -770,11 +763,10 @@ void Header::setAll(bool ch)
     for (int i = 0; i < count(); ++i) {
         if (checked(i) != ch) {
             setChecked(i, ch);
-
             updateSection(i);
         }
     }
-    emit onChecked({});
+    emit onChecked();
 }
 
 void Header::togle(int index)
