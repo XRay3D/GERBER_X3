@@ -1,10 +1,7 @@
 #pragma once
 
-
-
 #include "gbrtypes.h"
 
-#include <QMap>
 #include <QtMath>
 
 namespace Gerber {
@@ -40,7 +37,7 @@ public:
     AbstractAperture(const Format* m_format);
     virtual ~AbstractAperture();
 
-    bool isDrilled() const { return m_drillDiam != 0.0; }
+    bool withHole() const { return m_drillDiam != 0.0; }
     bool isFlashed() const { return m_isFlashed; }
 
     double drillDiameter() const;
@@ -229,4 +226,3 @@ protected:
     virtual void write(QDataStream& stream) const;
 };
 }
-

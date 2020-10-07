@@ -1,14 +1,15 @@
 #pragma once
 
-
-
-#include <QDebug>
 #include "datastream.h"
 #include "myclipper.h"
+#include <QDebug>
 
 #define DEPRECATED
 
 namespace Gerber {
+
+class AbstractAperture;
+using ApertureMap = std::map<int, QSharedPointer<AbstractAperture>>;
 
 enum ZeroOmissionMode {
     OmitLeadingZeros,
@@ -316,5 +317,3 @@ struct StepRepeatStr {
 };
 
 } // namespace Gerber
-
-

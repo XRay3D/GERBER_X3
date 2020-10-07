@@ -118,7 +118,7 @@ bool Parser::parseComment(const QString& line)
         if (matchTool.exactMatch(match.cap(1))) {
             const int tCode = static_cast<int>(matchTool.cap(1).toDouble());
             file()->m_tools[tCode] = matchTool.cap(2).toDouble() * 0.0254 * (1.0 / 25.4);
-            m_state.tCode = file()->m_tools.firstKey();
+            m_state.tCode = tCode; //m_state.tCode = file()->m_tools.firstKey();
             qDebug() << m_state.tCode << matchTool.capturedTexts() << file()->m_tools;
         }
         return true;
@@ -169,9 +169,14 @@ bool Parser::parseMCode(const QString& line)
     if (match.exactMatch(line)) {
         switch (match.cap(1).toInt()) {
         case M00: {
-            QList<int> keys(file()->m_tools.keys());
+            auto tools = file()->m_tools;
+            QList<int> keys;
+            std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
             if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
                 m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+            //            QList<int> keys(file()->m_tools.keys());
+            //            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
+            //                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
         } break;
         case M15:
             m_state.mCode = M15;

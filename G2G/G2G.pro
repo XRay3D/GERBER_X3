@@ -21,7 +21,7 @@ DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
 
 ICON = 256.png
 
-CONFIG += c++17
+#CONFIG += c++17
 
 #macx: ICON = resources/icon.icns
 
@@ -29,7 +29,8 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
     TARGET = $$TARGET"_msvc"
-    QMAKE_CXXFLAGS_WARN_ON = /W4
+    QMAKE_CXXFLAGS -= /std:c++17
+    QMAKE_CXXFLAGS += /std:c++latest
     message($$TARGET)
 }
 

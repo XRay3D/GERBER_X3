@@ -8,6 +8,34 @@
 
 namespace Excellon {
 
+QDataStream& operator>>(QDataStream& s, Tools& c)
+{
+    c.clear();
+    quint32 n;
+    s >> n;
+    for (quint32 i = 0; i < n; ++i) {
+        Tools::key_type key;
+        Tools::mapped_type val;
+        s >> key;
+        s >> val;
+        if (s.status() != QDataStream::Ok) {
+            c.clear();
+            break;
+        }
+        c.emplace(key, val);
+    }
+    return s;
+}
+
+QDataStream& operator<<(QDataStream& s, const Tools& c)
+{
+    s << quint32(c.size());
+    for (auto& [key, val] : c) {
+        s << key << val;
+    }
+    return s;
+}
+
 File::File()
     : m_format(this)
 {
@@ -37,20 +65,20 @@ double File::tool(int t) const
 {
     double tool = 0.0;
     if (m_tools.contains(t)) {
-        tool = m_tools[t];
+        tool = m_tools.at(t);
         if (m_format.unitMode == Inches)
             tool *= 25.4;
     }
     return tool;
 }
 
-QMap<int, double> File::tools() const
+Tools File::tools() const
 {
-    QMap<int, double> tools(m_tools);
+    Tools tools(m_tools);
     QMap<int, double>::iterator toolIt;
     if (m_format.unitMode == Inches)
-        for (toolIt = tools.begin(); toolIt != tools.end(); ++toolIt)
-            toolIt.value() *= 25.4;
+        for (auto& [_, tool] : tools)
+            tool *= 25.4;
     return tools;
 }
 

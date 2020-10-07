@@ -340,7 +340,7 @@ void ApPolygon::draw()
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
     : AbstractAperture(format)
     , m_macro(macro)
-    , m_modifiers(modifiers) 
+    , m_modifiers(modifiers)
     , m_coefficients(coefficients)
 {
     while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
@@ -638,8 +638,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
         auto angle = qDegreesToRadians(j * 360.0 / num);
         polygon.push_back(IntPoint(
             static_cast<cInt>(qCos(angle) * diameter),
-            static_cast<cInt>(qSin(angle) * diameter))
-        );
+            static_cast<cInt>(qSin(angle) * diameter)));
     }
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)

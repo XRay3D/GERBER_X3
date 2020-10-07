@@ -1,14 +1,14 @@
 #pragma once
 
-
-
-#include <QPolygonF>
 #include "datastream.h"
+#include <QPolygonF>
 #include <type_traits>
 
 class DrillItem;
 
 namespace Excellon {
+
+using Tools = std::map<int, double>;
 
 enum UnitMode {
     Inches,
@@ -273,5 +273,3 @@ public:
 };
 
 } // namespace Excellon
-
-

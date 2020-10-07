@@ -2,47 +2,52 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "drillpreviewgi.h"
+#include "drillmodel.h"
 #include "gbrfile.h"
 #include "gi/drillitem.h"
+#include "graphicsview.h"
 #include "tooldatabase/tool.h"
 #include <QPainter>
 #include <QPropertyAnimation>
 
 extern Paths offset(const Path& path, double offset, bool fl = false);
 
-QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject& go, int id)
+QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject* go, int id)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go.paths())) {
+    for (QPolygonF& polygon : toQPolygons(go->paths())) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
-    const double hole = go.gFile()->apertures()->value(id)->drillDiameter() * 0.5;
+    const double hole = go->gFile()->apertures()->at(id)->drillDiameter() * 0.5;
     if (hole != 0.0)
-        painterPath.addEllipse(go.state().curPos(), hole, hole);
+        painterPath.addEllipse(go->state().curPos(), hole, hole);
     return painterPath;
 }
 
-QPainterPath DrillPrGI::drawDrill(const Excellon::Hole& hole)
+QPainterPath DrillPrGI::drawDrill(const Excellon::Hole* hole)
 {
     QPainterPath painterPath;
-    painterPath.addEllipse(hole.state.offsetedPos(), hole.state.currentToolDiameter() * 0.5, hole.state.currentToolDiameter() * 0.5);
+    painterPath.addEllipse(hole->state.offsetedPos(), hole->state.currentToolDiameter() * 0.5, hole->state.currentToolDiameter() * 0.5);
     return painterPath;
 }
 
-QPainterPath DrillPrGI::drawSlot(const Excellon::Hole& hole)
+QPainterPath DrillPrGI::drawSlot(const Excellon::Hole* hole)
 {
     QPainterPath painterPath;
-    for (Path& path : offset(hole.item->paths().first(), hole.state.currentToolDiameter()))
+    for (Path& path : offset(hole->item->paths().first(), hole->state.currentToolDiameter()))
         painterPath.addPolygon(toQPolygon(path));
     return painterPath;
 }
 
-DrillPrGI::DrillPrGI(const Gerber::GraphicObject& go, int id)
-    : id(id)
-    , grob(&go)
+DrillPrGI::DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row)
+    : row(row)
+    , id(id)
+    , gbrObj(go)
     , m_sourcePath(drawApetrure(go, id))
-    , m_sourceDiameter(qFuzzyIsNull(go.gFile()->apertures()->value(id)->drillDiameter()) ? go.gFile()->apertures()->value(id)->minSize() : go.gFile()->apertures()->value(id)->drillDiameter())
+    , m_sourceDiameter(qFuzzyIsNull(go->gFile()->apertures()->at(id)->drillDiameter())
+              ? go->gFile()->apertures()->at(id)->minSize()
+              : go->gFile()->apertures()->at(id)->drillDiameter())
     , m_type(GiApetrurePr)
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed])
@@ -54,11 +59,12 @@ DrillPrGI::DrillPrGI(const Gerber::GraphicObject& go, int id)
     setZValue(std::numeric_limits<double>::max() - 10);
 }
 
-DrillPrGI::DrillPrGI(const Excellon::Hole& hole)
-    : hole(&hole)
-    , m_sourcePath(hole.state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
-    , m_sourceDiameter(hole.state.currentToolDiameter())
-    , m_type(hole.state.path.isEmpty() ? GiDrillPr : GiSlotPr)
+DrillPrGI::DrillPrGI(const Excellon::Hole* hole, Row& row)
+    : row(row)
+    , hole(hole)
+    , m_sourcePath(hole->state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
+    , m_sourceDiameter(hole->state.currentToolDiameter())
+    , m_type(hole->state.path.isEmpty() ? GiDrillPr : GiSlotPr)
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed])
 {
@@ -75,11 +81,9 @@ void DrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidge
     painter->setBrush(m_bodyColor);
     painter->drawPath(m_sourcePath);
     // draw tool
-    if (m_toolId > -1) {
-        QColor p(m_pathColor);
-        p.setAlpha(255);
-        painter->setPen(QPen(p, 0.0));
-        painter->setBrush(Qt::NoBrush /*m_pathColor*/);
+    if (row.toolId > -1) {
+        painter->setPen(QPen(m_pathColor, 2 * App::graphicsView()->scaleFactor()));
+        painter->setBrush(Qt::NoBrush);
         painter->drawPath(m_toolPath);
     }
 }
@@ -90,20 +94,19 @@ int DrillPrGI::type() const { return m_type; }
 
 double DrillPrGI::sourceDiameter() const { return m_sourceDiameter; }
 
-int DrillPrGI::toolId() const { return m_toolId; }
+int DrillPrGI::toolId() const { return row.toolId; }
 
-void DrillPrGI::setToolId(int toolId)
+void DrillPrGI::updateTool()
 {
-    m_toolId = toolId;
-
-    if (m_toolId > -1)
+    if (row.toolId > -1)
         colorState |= Tool;
     else
         colorState &= ~Tool;
 
-    if (m_toolId > -1) {
+    if (row.toolId > -1) {
         m_toolPath = QPainterPath(); //.clear();
-        const double diameter = ToolHolder::tools[m_toolId].diameter();
+        const double diameter = ToolHolder::tool(row.toolId).diameter();
+        const double lineKoeff = diameter * 0.7;
         switch (m_type) {
         case GiSlotPr: {
             Paths tmpPpath;
@@ -117,10 +120,10 @@ void DrillPrGI::setToolId(int toolId)
             Path path(hole->item->paths().first());
             if (path.size()) {
                 for (IntPoint& pt : path) {
-                    m_toolPath.moveTo(pt - QPointF(0.0, diameter * 0.7));
-                    m_toolPath.lineTo(pt + QPointF(0.0, diameter * 0.7));
-                    m_toolPath.moveTo(pt - QPointF(diameter * 0.7, 0.0));
-                    m_toolPath.lineTo(pt + QPointF(diameter * 0.7, 0.0));
+                    m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
+                    m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
+                    m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
+                    m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
                 }
                 m_toolPath.moveTo(path.first());
                 for (IntPoint& pt : path) {
@@ -129,32 +132,23 @@ void DrillPrGI::setToolId(int toolId)
             }
         } break;
         case GiDrillPr: {
-            const auto offsetedPos = hole->state.offsetedPos();
+            const QPointF offsetedPos(hole->state.offsetedPos());
             m_toolPath.addEllipse(offsetedPos, diameter * 0.5, diameter * 0.5);
-            m_toolPath.moveTo(offsetedPos - QPointF(0.0, diameter * 0.7));
-            m_toolPath.lineTo(offsetedPos + QPointF(0.0, diameter * 0.7));
-            m_toolPath.moveTo(offsetedPos - QPointF(diameter * 0.7, 0.0));
-            m_toolPath.lineTo(offsetedPos + QPointF(diameter * 0.7, 0.0));
+            m_toolPath.moveTo(offsetedPos - QPointF(0.0, lineKoeff));
+            m_toolPath.lineTo(offsetedPos + QPointF(0.0, lineKoeff));
+            m_toolPath.moveTo(offsetedPos - QPointF(lineKoeff, 0.0));
+            m_toolPath.lineTo(offsetedPos + QPointF(lineKoeff, 0.0));
         } break;
         case GiApetrurePr: {
-            const auto curPos = grob->state().curPos();
+            const QPointF curPos(gbrObj->state().curPos());
             m_toolPath.addEllipse(curPos, diameter * 0.5, diameter * 0.5);
-            m_toolPath.moveTo(curPos - QPointF(0.0, diameter * 0.7));
-            m_toolPath.lineTo(curPos + QPointF(0.0, diameter * 0.7));
-            m_toolPath.moveTo(curPos - QPointF(diameter * 0.7, 0.0));
-            m_toolPath.lineTo(curPos + QPointF(diameter * 0.7, 0.0));
+            m_toolPath.moveTo(curPos - QPointF(0.0, lineKoeff));
+            m_toolPath.lineTo(curPos + QPointF(0.0, lineKoeff));
+            m_toolPath.moveTo(curPos - QPointF(lineKoeff, 0.0));
+            m_toolPath.lineTo(curPos + QPointF(lineKoeff, 0.0));
         } break;
         }
     }
-    changeColor();
-}
-
-void DrillPrGI::setUsed(bool fl)
-{
-    if (fl)
-        colorState |= Used;
-    else
-        colorState &= ~Used;
     changeColor();
 }
 
@@ -166,7 +160,7 @@ IntPoint DrillPrGI::pos() const
     case GiDrillPr:
         return hole->state.offsetedPos();
     case GiApetrurePr:
-        return grob->state().curPos();
+        return gbrObj->state().curPos();
     }
     return IntPoint();
 }
@@ -181,7 +175,7 @@ Paths DrillPrGI::paths() const
         return ReversePaths(paths);
     }
     case GiApetrurePr:
-        return grob->paths();
+        return gbrObj->paths();
     }
     return Paths();
 }
@@ -191,15 +185,19 @@ bool DrillPrGI::fit(double depth)
     switch (m_type) {
     case GiSlotPr:
     case GiDrillPr:
-        return m_sourceDiameter > ToolHolder::tools[m_toolId].getDiameter(depth);
+        return m_sourceDiameter > ToolHolder::tool(row.toolId).getDiameter(depth);
     case GiApetrurePr:
-        return grob->gFile()->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
+        return gbrObj->gFile()->apertures()->at(id)->fit(ToolHolder::tool(row.toolId).getDiameter(depth));
     }
     return false;
 }
 
 void DrillPrGI::changeColor()
 {
+    if (row.useForCalc)
+        colorState |= Used;
+    else
+        colorState &= ~Used;
     {
         auto animation = new QPropertyAnimation(this, "bodyColor");
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
@@ -220,7 +218,9 @@ void DrillPrGI::changeColor()
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(m_pathColor);
-        animation->setEndValue((colorState & Tool) ? colors[(int)Colors::Tool] : colors[(int)Colors::UnUsed]);
+        animation->setEndValue((colorState & Tool)
+                ? ((colorState & Used) ? colors[(int)Colors::Tool] : colors[(int)Colors::Default])
+                : colors[(int)Colors::UnUsed]);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

@@ -256,7 +256,7 @@ void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     createTPI(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
 }
 
-void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
+void ThermalForm::createTPI(const Gerber::ApertureMap* value)
 {
     m_sourcePreview.clear();
     if (value)
@@ -298,17 +298,17 @@ void ThermalForm::createTPI(const QMap<int, QSharedPointer<Gerber::AbstractApert
     QMap<int, ThermalNode*> thermalNodes;
 
     if (ui->chbxAperture->isChecked()) {
-        for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt)
-            if (apIt.value()->isFlashed() && testArea(apIt.value().data()->draw({})))
-                thermalNodes[apIt.key()] = model->appendRow(drawApertureIcon(apIt.value().data()), apIt.value()->name(), par);
+        for (auto [dCode, aperture] : m_apertures)
+            if (aperture->isFlashed() && testArea(aperture->draw({})))
+                thermalNodes[dCode] = model->appendRow(drawApertureIcon(aperture.data()), aperture->name(), par);
 
-        for (auto apIt = m_apertures.cbegin(); apIt != m_apertures.cend(); ++apIt) {
-            if (apIt.value()->isFlashed()) {
+        for (auto [dCode, aperture] : m_apertures) {
+            if (aperture->isFlashed()) {
                 for (const Gerber::GraphicObject& go : *file) {
-                    if (thermalNodes.contains(apIt.key())
+                    if (thermalNodes.contains(dCode)
                         && go.state().dCode() == Gerber::D03
-                        && go.state().aperture() == apIt.key())
-                        map.append({ &go, thermalNodes[apIt.key()], "" /*apIt.value()->name()*/ });
+                        && go.state().aperture() == dCode)
+                        map.append({ &go, thermalNodes[dCode], "" /*aperture->name()*/ });
                 }
             }
         }

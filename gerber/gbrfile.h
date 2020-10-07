@@ -4,8 +4,8 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-#include <QDebug>
 #include "abstractfile.h"
+#include <QDebug>
 #include <forward_list>
 #include <gi/itemgroup.h>
 namespace Gerber {
@@ -31,7 +31,7 @@ public:
     Format* format() { return &m_format; }
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
-    const QMap<int, QSharedPointer<AbstractAperture>>* apertures() const;
+    const ApertureMap* apertures() const;
     void setItemType(ItemsType type);
     ItemGroup* itemGroup(ItemsType type) const;
     ItemsType itemsType() const;
@@ -46,7 +46,7 @@ protected:
 private:
     QList<Component> m_components;
 
-    QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
+    ApertureMap m_apertures;
     ItemsType m_itemsType = Normal;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
