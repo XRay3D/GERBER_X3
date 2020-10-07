@@ -125,16 +125,18 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setFocusPolicy(Qt::NoFocus);
             checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
-            connect(header, &Header::onCheckedV, [this](const QVector<bool>& v) {
-                static const Qt::CheckState chState[] {
-                    Qt::Unchecked,
-                    Qt::Unchecked,
-                    Qt::Checked,
-                    Qt::PartiallyChecked
-                };
-                checkBox->setCheckState(chState[v.contains(true) * 2 | v.contains(false) * 1]);
+            connect(header, &Header::onChecked, [this](int) {
+                int fl = 0;
+                for (int i = 0; i < model->rowCount(); ++i) {
+                    if (model->useForCalc(i)) {
+                        ++fl;
+                    }
+                    for (auto item : m_giPeview[model->apertureId(i)]) {
+                        item->setUsed(model->useForCalc(i));
+                    }
+                }
+                checkBox->setCheckState(!fl ? Qt::Unchecked : (fl == model->rowCount() ? Qt::Checked : Qt::PartiallyChecked));
                 ui->pbCreate->setEnabled(checkBox->checkState() != Qt::Unchecked);
-                // updateCreateButton();
             });
         }
     }
@@ -236,7 +238,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
             for (const Gerber::GraphicObject& go : *gbrFile) {
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     DrillPrGI* item = new DrillPrGI(go, apertureIt.key());
-                    m_sourcePreview[apertureIt.key()].append(QSharedPointer<DrillPrGI>(item));
+                    m_giPeview[apertureIt.key()].append(QSharedPointer<DrillPrGI>(item));
                     App::scene()->addItem(item);
                 }
             }
@@ -249,7 +251,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
     delete ui->toolTable->model();
     ui->toolTable->setModel(model);
     connect(model, &DrillModel::set, header, &Header::set);
-    header->onCheckedV(header->checked());
+    //    header->onCheckedV(header->checked());
     ui->toolTable->resizeColumnsToContents();
     ui->toolTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->toolTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -276,7 +278,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
                 auto* item = new DrillPrGI(hole);
                 if (!hole.state.path.isEmpty())
                     isSlot = true;
-                m_sourcePreview[toolIt.key()].append(QSharedPointer<DrillPrGI>(item));
+                m_giPeview[toolIt.key()].append(QSharedPointer<DrillPrGI>(item));
                 App::scene()->addItem(item);
             }
         }
@@ -289,7 +291,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
     delete ui->toolTable->model();
     ui->toolTable->setModel(model);
     connect(model, &DrillModel::set, header, &Header::set);
-    header->onCheckedV(header->checked());
+    //    header->onCheckedV(header->checked());
     ui->toolTable->resizeColumnsToContents();
     ui->toolTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->toolTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -366,10 +368,10 @@ void DrillForm::on_pbCreate_clicked()
         QMap<int, data> pathsMap;
         for (int row = 0; row < model->rowCount(); ++row) {
             int selectedToolId = model->toolId(row);
-            if (selectedToolId != -1 && model->create(row)) {
+            if (selectedToolId != -1 && model->useForCalc(row)) {
                 int apertureId = model->apertureId(row);
                 pathsMap[selectedToolId].toolsApertures.append(apertureId);
-                for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
+                for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                     if (item->type() == GiSlotPr) {
                         if (item->fit(ui->dsbxDepth->value())) {
                             for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter())) {
@@ -382,7 +384,7 @@ void DrillForm::on_pbCreate_clicked()
                         }
                     }
                 }
-                for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
+                for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                     if (item->type() != GiSlotPr)
                         model->setCreate(row, true);
                 }
@@ -415,10 +417,10 @@ void DrillForm::on_pbCreate_clicked()
         QMap<int, data> pathsMap;
         for (int row = 0; row < model->rowCount(); ++row) {
             int toolId = model->toolId(row);
-            if (toolId != -1 && model->create(row)) {
+            if (toolId != -1 && model->useForCalc(row)) {
                 const int apertureId = model->apertureId(row);
                 pathsMap[toolId].toolsApertures.append(apertureId);
-                for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
+                for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                     if (item->type() == GiSlotPr)
                         continue;
                     switch (m_worckType) {
@@ -536,7 +538,7 @@ void DrillForm::on_pbCreate_clicked()
             }
         }
     }
-    header->onCheckedV(header->checked());
+    //    header->onCheckedV(header->checked());
     // updateCreateButton();
     QTimer::singleShot(500, Qt::CoarseTimer, [this] { ui->pbCreate->update(); });
 }
@@ -581,6 +583,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
 
 void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+    qDebug(Q_FUNC_INFO);
     deselectAll();
     if (previous.isValid() && previous.row() != current.row()) {
         int apertureId = model->apertureId(previous.row());
@@ -642,7 +645,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
                 } else if (model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
                 } else if (!model->isSlot(current.row())) {
-                    if (model->toolId(current.row()) > -1 && !model->create(current.row()))
+                    if (model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
                     createHoles(model->apertureId(current.row()), tool.id());
@@ -674,7 +677,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
 void DrillForm::createHoles(int toolId, int toolIdSelected)
 {
-    for (const QSharedPointer<DrillPrGI>& item : m_sourcePreview[toolId])
+    for (const QSharedPointer<DrillPrGI>& item : m_giPeview[toolId])
         item->setToolId(toolIdSelected);
 }
 
@@ -689,7 +692,7 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
         if (tool.type() == Tool::Drill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
             createHoles(apertureId, tool.id());
-            for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
+            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                 item->setToolId(tool.id());
             }
             return;
@@ -700,7 +703,7 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
         if (tool.type() == Tool::EndMill && drillDiameterMin <= tool.diameter() && drillDiameterMax >= tool.diameter()) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
             createHoles(apertureId, tool.id());
-            for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[apertureId]) {
+            for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
                 item->setToolId(tool.id());
             }
             return;
@@ -723,7 +726,7 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
 
 void DrillForm::setSelected(int id, bool fl)
 {
-    for (QSharedPointer<DrillPrGI>& item : m_sourcePreview[id])
+    for (QSharedPointer<DrillPrGI>& item : m_giPeview[id])
         item->setSelected(fl);
 }
 
@@ -741,7 +744,7 @@ void DrillForm::deselectAll()
 
 void DrillForm::clear()
 {
-    m_sourcePreview.clear();
+    m_giPeview.clear();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -754,9 +757,7 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
 
 {
     connect(this, &QHeaderView::sectionCountChanged, [this](int /*oldCount*/, int newCount) {
-        m_checked.resize(newCount);
         m_checkRect.resize(newCount);
-        emit onCheckedV(m_checked);
     });
     setSectionsClickable(true);
     setHighlightSections(true);
@@ -769,18 +770,17 @@ void Header::setAll(bool ch)
     for (int i = 0; i < count(); ++i) {
         if (checked(i) != ch) {
             setChecked(i, ch);
-            emit onChecked(i);
+
             updateSection(i);
         }
     }
-    emit onCheckedV(m_checked);
+    emit onChecked({});
 }
 
 void Header::togle(int index)
 {
     setChecked(index, !checked(index));
     updateSection(index);
-    emit onCheckedV(m_checked);
     emit onChecked(index);
 }
 
@@ -788,17 +788,7 @@ void Header::set(int index, bool ch)
 {
     setChecked(index, ch);
     updateSection(index);
-    emit onCheckedV(m_checked);
     emit onChecked(index);
-}
-
-QVector<bool> Header::checked()
-{
-    for (int index = 0; index < m_checked.size(); ++index) {
-        m_checked[index] = static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model())->create(index);
-        updateSection(index);
-    }
-    return m_checked;
 }
 
 QRect Header::getRect(const QRect& rect)
@@ -860,7 +850,7 @@ void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex
         ? QStyle::State_On
         : QStyle::State_Off;
 
-    option.state |= static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model())->toolId(logicalIndex) != -1 && isEnabled()
+    option.state |= model()->toolId(logicalIndex) != -1 && isEnabled()
         ? QStyle::State_Enabled
         : QStyle::State_None;
 
@@ -870,13 +860,8 @@ void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex
         style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter);
 }
 
-void Header::setChecked(int index, bool ch)
-{
-    static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model())->setCreate(index, ch);
-    m_checked[index] = static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model())->create(index);
-}
+void Header::setChecked(int index, bool ch) { model()->setCreate(index, ch); }
 
-bool Header::checked(int index) const
-{
-    return m_checked[index] = static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model())->create(index);
-}
+bool Header::checked(int index) const { return model()->useForCalc(index); }
+
+DrillModel* Header::model() const { return static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model()); }

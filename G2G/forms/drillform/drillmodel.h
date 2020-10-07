@@ -15,16 +15,16 @@ class DrillModel : public QAbstractTableModel {
         Row(const QString& name, const QIcon& icon, int id)
             : name { name, "" }
             , icon { icon, QIcon() }
-            , apToolId(id)
+            , apertureId(id)
             , toolId(-1)
         {
         }
-        QString name[2];
-        QIcon icon[2];
-        int apToolId;
+        const QString name[2];
+        /*const*/ QIcon icon[2];
+        const int apertureId;
         int toolId;
         bool isSlot = false;
-        bool create = false;
+        bool useForCalc = false;
     };
     QList<Row> m_data;
     int m_type;
@@ -40,7 +40,7 @@ public:
     void setSlot(int row, bool slot);
     bool isSlot(int row);
     int apertureId(int row);
-    bool create(int row) const;
+    bool useForCalc(int row) const;
     void setCreate(int row, bool create);
     void setCreate(bool create);
 

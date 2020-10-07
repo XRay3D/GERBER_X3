@@ -40,13 +40,13 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed])
 {
-    static QMutex m;
-    setZValue(std::numeric_limits<double>::max() - 10);
+    connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
+    setZValue(std::numeric_limits<double>::max() - 10);
 
-    connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
+    static QMutex m;
     m.lock();
     thpi.append(this);
     m.unlock();

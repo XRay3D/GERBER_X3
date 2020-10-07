@@ -58,7 +58,7 @@ private:
     int m_type;
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
     QMap<int, double> m_tools;
-    QMap<int, QVector<QSharedPointer<DrillPrGI>>> m_sourcePreview;
+    QMap<int, QVector<QSharedPointer<DrillPrGI>>> m_giPeview;
     AbstractFile* file = nullptr;
     QCheckBox* checkBox;
     Header* header;
@@ -80,12 +80,9 @@ public:
     void setAll(bool ch);
     void togle(int index);
     void set(int index, bool ch);
-
-    QVector<bool> checked();
     static QRect getRect(const QRect& rect);
 
 signals:
-    void onCheckedV(const QVector<bool>&);
     void onChecked(int);
 
 protected:
@@ -94,10 +91,11 @@ protected:
     void paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const override;
 
 private:
-    mutable QVector<bool> m_checked;
+    int flag = Qt::Unchecked;
     mutable QVector<QRect> m_checkRect;
     void setChecked(int index, bool ch);
     bool checked(int index) const;
+    DrillModel* model() const;
 };
 
 #include "app.h"

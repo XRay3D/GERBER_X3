@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         //QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(200, [this] { toolpathActions[GCode::Thermal]->triggered(); });
+        QTimer::singleShot(200, [this] { toolpathActions[GCode::Drill]->triggered(); });
         //QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
