@@ -214,7 +214,7 @@ void File::addToScene() const
 void File::setColor(const QColor& color)
 {
     AbstractFile::setColor(color);
-    m_itemGroup[Normal]->setBrush(color);
+    m_itemGroup[Normal]->setBrushColor(color);
     m_itemGroup[ApPaths]->setPen(QPen(color, 0.0));
 }
 

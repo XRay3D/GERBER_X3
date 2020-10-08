@@ -278,7 +278,7 @@ bool Project::reload(int id, AbstractFile* file)
             Gerber::File* f = static_cast<Gerber::File*>(file);
             file->setColor(m_files[id]->color());
             // Normal
-            f->itemGroup(Gerber::File::Normal)->setBrush(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brush());
+            f->itemGroup(Gerber::File::Normal)->setBrushColor(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brushColor());
             f->itemGroup(Gerber::File::Normal)->addToScene();
             f->itemGroup(Gerber::File::Normal)->setZValue(-id);
             // ApPaths

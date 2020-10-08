@@ -125,7 +125,6 @@ DrillForm::DrillForm(QWidget* parent)
             checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
             connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
             connect(header, &Header::onChecked, [this](int idx) {
-                qDebug() << Q_FUNC_INFO << idx;
                 int fl = 0;
                 for (int i = 0; i < model->rowCount(); ++i) {
                     if (model->useForCalc(i))

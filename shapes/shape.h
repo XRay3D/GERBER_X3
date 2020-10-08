@@ -28,7 +28,6 @@ public:
     void setNode(Node* node);
 
 private:
-    mutable QPainterPath m_selectionShape;
     Node* m_node = nullptr;
 
 protected:
@@ -48,5 +47,7 @@ protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual QPointF calcPos(Handler* sh) = 0;
+
+    void changeColor() override;
 };
 }

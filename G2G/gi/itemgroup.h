@@ -10,16 +10,16 @@ public:
     void setSelected(const QVector<int>& ids);
     bool isVisible() { return m_visible; }
     void addToScene();
-    QBrush brush() const { return m_brush; }
+    QColor brushColor() const { return m_brushColor; }
     QPen pen() const { return m_pen; }
-    void setBrush(const QBrush& brush);
+    void setBrushColor(const QColor& color);
     void setPen(const QPen& pen);
-    void setBrushColor(QColor* col);
+    void setBrushColorP(QColor* col);
     void setPenColor(QColor* col);
     void setZValue(qreal z);
 
 private:
     bool m_visible = true;
     QPen m_pen;
-    QBrush m_brush;
+    QColor m_brushColor;
 };

@@ -33,7 +33,7 @@ Side AbstractFile::side() const { return m_side; }
 
 void AbstractFile::setSide(Side side) { m_side = side; }
 
-QColor AbstractFile::color() const { return m_color; }
+const QColor& AbstractFile::color() const { return m_color; }
 
 void AbstractFile::setColor(const QColor& color) { m_color = color; }
 

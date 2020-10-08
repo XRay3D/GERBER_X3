@@ -6,7 +6,7 @@ namespace Gerber {
 class File;
 }
 
-class GerberItem : public GraphicsItem {
+class GerberItem final : public GraphicsItem {
 public:
     explicit GerberItem(Paths& m_paths, Gerber::File* file);
     ~GerberItem() override;
@@ -23,4 +23,8 @@ public:
 private:
     Paths& m_paths;
     QPolygonF fillPolygon;
+
+    // GraphicsItem interface
+protected:
+    void changeColor() override;
 };

@@ -34,10 +34,8 @@ Text::Text(QPointF pt1)
 
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
-
+    //    setZValue(std::numeric_limits<double>::max());
     App::scene()->addItem(this);
-    App::scene()->addItem(handlers.first());
 }
 
 void Text::redraw()

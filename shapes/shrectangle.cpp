@@ -20,12 +20,8 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
-
+    //    setZValue(std::numeric_limits<double>::max());
     App::scene()->addItem(this);
-
-    for (auto h : handlers)
-        App::scene()->addItem(h);
 }
 
 Rectangle::~Rectangle() { }
