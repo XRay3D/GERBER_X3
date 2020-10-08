@@ -6,7 +6,7 @@
 
 class GraphicsView;
 
-class BridgeItem : public QObject, public GraphicsItem {
+class BridgeItem final : public GraphicsItem {
     Q_OBJECT
     friend class ProfileForm;
 

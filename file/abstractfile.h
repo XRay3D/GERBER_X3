@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QDateTime>
-#include <QFileInfo>
 #include "app.h"
 #include "datastream.h"
-#include <gi/itemgroup.h>
 #include "myclipper.h"
 #include "splashscreen.h"
+#include <QDateTime>
+#include <QFileInfo>
+#include <gi/itemgroup.h>
 
 using namespace ClipperLib;
 
@@ -92,7 +92,7 @@ public:
     Side side() const;
     void setSide(Side side);
 
-    QColor color() const;
+    const QColor& color() const;
     void setColor(const QColor& color);
 
     int id() const;

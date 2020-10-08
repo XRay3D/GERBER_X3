@@ -23,7 +23,7 @@ void ItemGroup::setVisible(bool visible)
 {
     if (m_visible != visible) {
         m_visible = visible;
-        for (QGraphicsItem* item : *this)
+        for (GraphicsItem* item : *this)
             item->setVisible(m_visible);
     }
 }
@@ -40,12 +40,12 @@ void ItemGroup::addToScene()
         App::scene()->addItem(item);
 }
 
-void ItemGroup::setBrush(const QBrush& brush)
+void ItemGroup::setBrushColor(const QColor& color)
 {
-    if (m_brush != brush) {
-        m_brush = brush;
+    if (m_brushColor != color) {
+        m_brushColor = color;
         for (GraphicsItem* item : *this)
-            item->setBrush(m_brush);
+            item->setColorP(&m_brushColor);
     }
 }
 
@@ -58,16 +58,16 @@ void ItemGroup::setPen(const QPen& pen)
     }
 }
 
-void ItemGroup::setBrushColor(QColor* col)
+void ItemGroup::setBrushColorP(QColor* col)
 {
     for (GraphicsItem* item : *this)
-        item->setBrushColor(*col);
+        item->setColorP(col);
 }
 
 void ItemGroup::setPenColor(QColor* col)
 {
     for (GraphicsItem* item : *this)
-        item->setPenColor(*col);
+        item->setPenColor(col);
 }
 
 void ItemGroup::setZValue(qreal z)

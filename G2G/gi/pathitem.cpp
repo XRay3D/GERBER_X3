@@ -47,8 +47,8 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
+    if (m_colorPtr)
+        m_color = *m_colorPtr;
 
     if (m_pen.widthF() == 0) {
         QPen pen(m_pen);

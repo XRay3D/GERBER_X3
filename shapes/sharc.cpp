@@ -23,12 +23,9 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
+    //    setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
-    App::scene()->addItem(handlers[Center]);
-    App::scene()->addItem(handlers[Point1]);
-    App::scene()->addItem(handlers[Point2]);
 }
 
 Arc::~Arc() { }

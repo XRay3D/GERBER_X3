@@ -4,6 +4,7 @@
 #include "shhandler.h"
 #include "doublespinbox.h"
 #include "graphicsview.h"
+#include "scene.h"
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -64,6 +65,7 @@ Handler::Handler(Shape* shape, HType type)
 {
     setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable);
+    App::scene()->addItem(this);
     switch (m_hType) {
     case Adder:
         setZValue(std::numeric_limits<double>::max());
@@ -218,3 +220,7 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     //    menu.exec(event->screenPos());
 }
 }
+
+void Shapes::Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
+
+void Shapes::Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }

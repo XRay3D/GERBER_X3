@@ -32,8 +32,8 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
 {
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
+    if (m_colorPtr)
+        m_color = *m_colorPtr;
 
     QColor color(m_pen.color());
     QPen pen(m_pen);

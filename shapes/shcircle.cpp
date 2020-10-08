@@ -22,11 +22,9 @@ Circle::Circle(QPointF center, QPointF pt)
     redraw();
     setFlags(ItemIsSelectable | ItemIsFocusable);
     setAcceptHoverEvents(true);
-    setZValue(std::numeric_limits<double>::max());
+    //    setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
-    App::scene()->addItem(handlers[Center]);
-    App::scene()->addItem(handlers[Point1]);
 }
 
 Circle::~Circle() { }

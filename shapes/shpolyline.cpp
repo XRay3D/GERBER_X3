@@ -19,9 +19,9 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2)
     setAcceptHoverEvents(true);
     setZValue(-std::numeric_limits<double>::max());
     App::scene()->addItem(this);
-    for (auto var : handlers) {
-        scene()->addItem(var);
-    }
+    //    for (auto var : handlers) {
+
+    //    }
 }
 
 void PolyLine::redraw()
@@ -62,14 +62,12 @@ QPointF PolyLine::calcPos(Handler* handler)
             handlers.insert(idx + 1, h = new Handler(this, Handler::Adder));
             h->QGraphicsItem::setPos(
                 QLineF(handler->pos(), h1->pos()).center());
-            scene()->addItem(h);
         }
         {
             Handler* h1 = handlers[idx];
             handlers.insert(idx, h = new Handler(this, Handler::Adder));
             h->QGraphicsItem::setPos(
                 QLineF(handler->pos(), h1->pos()).center());
-            scene()->addItem(h);
         }
         handler->setHType(Handler::Corner);
     } else if (handler->hType() == Handler::Corner) {
@@ -114,8 +112,7 @@ void PolyLine::addPt(const QPointF& pt)
     handlers.append(new Handler(this));
     handlers.last()->QGraphicsItem::setPos(pt);
     h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
-    scene()->addItem(h2);
-    scene()->addItem(handlers.last());
+
     redraw();
 }
 

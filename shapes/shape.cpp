@@ -9,6 +9,7 @@
 //#include "filetree/treeview.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
+#include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
 #include "leakdetector.h"
@@ -18,37 +19,21 @@ namespace Shapes {
 Shape::Shape()
     : GraphicsItem(nullptr)
 {
+    changeColor();
 }
 
 Shape::~Shape() { qDeleteAll(handlers); }
 
 void Shape::setNode(Node* node) { m_node = node; }
 
-void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
+void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
 {
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
+    m_pen.setColor(m_pathColor);
+    painter->setPen(m_pen);
 
-    QColor color(m_pen.color());
-    if (option->state & QStyle::State_Selected)
-        color = Qt::green;
-    if (option->state & QStyle::State_MouseOver)
-        color = Qt::red;
-    color.setAlpha(50);
-
-    QPen pen(m_pen);
-    pen.setWidthF(1.0 * App::graphicsView()->scaleFactor());
-    if (option->state & QStyle::State_Selected)
-        pen.setColor(Qt::green);
-    if (option->state & QStyle::State_MouseOver) {
-        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
-        pen.setColor(Qt::red);
-    }
-
-    painter->setPen(pen);
-    painter->setBrush(color);
+    m_bodyColor = m_pathColor;
+    m_bodyColor.setAlpha(50);
+    painter->setBrush(m_bodyColor);
     painter->drawPath(m_shape);
 }
 
@@ -59,18 +44,7 @@ QRectF Shape::boundingRect() const
 
 QPainterPath Shape::shape() const
 {
-    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
-        m_scale = App::graphicsView()->scaleFactor();
-        m_selectionShape = QPainterPath();
-        ClipperOffset offset;
-        Paths tmpPpath;
-        offset.AddPaths(m_paths, jtSquare, etOpenSquare);
-        offset.Execute(tmpPpath, 5 * uScale * m_scale);
-        for (const Path& path : tmpPpath)
-            m_selectionShape.addPolygon(toQPolygon(path));
-        //App::scene()->addPath(m_selectionShape, Qt::NoPen, QColor(0, 255, 255, 100));
-    }
-    return m_selectionShape;
+    return m_shape;
 }
 
 Paths Shape::paths() const { return m_paths; }
@@ -78,10 +52,11 @@ Paths Shape::paths() const { return m_paths; }
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedChange) {
+        bool fl = value.toBool();
         for (Handler* item : handlers)
-            item->setVisible(value.toInt());
+            item->setVisible(fl);
     }
-    return QGraphicsItem::itemChange(change, value);
+    return GraphicsItem::itemChange(change, value);
 }
 
 void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
@@ -151,7 +126,6 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
         item->QGraphicsItem::setPos(pos);
         item->setVisible(false);
         shape.handlers.append(item);
-        App::scene()->addItem(item);
     }
     shape.read(stream);
 
@@ -160,4 +134,31 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
     shape.setZValue(std::numeric_limits<double>::max());
     return stream;
 }
+}
+
+void Shapes::Shape::changeColor()
+{
+    {
+        auto animation = new QPropertyAnimation(dynamic_cast<GraphicsItem*>(this), "pathColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_pathColor);
+        m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
+        switch (colorState) {
+        case Default:
+            m_pathColor = Qt::gray;
+            break;
+        case Hovered:
+            m_pathColor = Qt::white;
+            break;
+        case Selected:
+            m_pathColor = Qt::darkGreen;
+            break;
+        case Hovered | Selected:
+            m_pathColor = Qt::green;
+            break;
+        }
+        animation->setEndValue(m_pathColor);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
 }

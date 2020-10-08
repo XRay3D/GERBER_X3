@@ -4,12 +4,13 @@
 
 #include "gerberitem.h"
 
-#include <QElapsedTimer>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
 #include "gbrfile.h"
 #include "graphicsview.h"
 #include "scene.h"
+#include <QElapsedTimer>
+#include <QPainter>
+#include <QPropertyAnimation>
+#include <QStyleOptionGraphicsItem>
 
 GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     : GraphicsItem(file)
@@ -23,6 +24,9 @@ GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     fillPolygon = m_shape.toFillPolygon();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
+
+    connect(this, &GerberItem::colorChanged, [this] { update(); });
+    setAcceptHoverEvents(true);
 }
 
 GerberItem::~GerberItem() { }
@@ -31,56 +35,23 @@ QRectF GerberItem::boundingRect() const { return m_shape.boundingRect(); }
 
 QPainterPath GerberItem::shape() const { return m_shape; }
 
-void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen); //QPen(Qt::black, 0.0));
-        painter->drawPath(m_shape);
-        return;
-    }
-
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_brColorPtr)
-        m_brush.setColor(*m_brColorPtr);
-
-    if (App::scene()->drawPdf()) {
-        painter->setBrush(m_brush.color());
         painter->setPen(Qt::NoPen);
         painter->drawPath(m_shape);
         return;
     }
 
-    QColor brColor(m_brush.color());
-    QColor pnColor(brColor);
-
-    if (option->state & QStyle::State_Selected) {
-        brColor.setAlpha(255);
-        pnColor.setAlpha(255);
-    }
-    if (option->state & QStyle::State_MouseOver) {
-        if (option->state & QStyle::State_Selected) {
-            brColor = brColor.darker(120);
-            pnColor = pnColor.darker(120);
-        } else {
-            brColor.setAlpha(200);
-            pnColor.setAlpha(255);
-        }
-    }
-
-    QBrush brush(brColor);
-    QPen pen(pnColor, 0.0);
-
-    if constexpr (false) {
-        painter->setBrush(brush);
-        painter->setPen(m_file ? pen : m_pen);
-        painter->drawPath(m_shape);
-    } else {
-        painter->setBrush(brush);
+    if (m_bodyColor.alpha()) {
+        painter->setBrush(m_bodyColor);
         painter->setPen(Qt::NoPen);
-        painter->drawPolygon(fillPolygon /*m_shape.toFillPolygon()*/);
-        painter->strokePath(m_shape, m_file ? pen : m_pen);
+        painter->drawPolygon(fillPolygon);
+    }
+    if (m_pathColor.alpha()) {
+        m_pen.setColor(m_pathColor);
+        painter->strokePath(m_shape, m_pen);
     }
 }
 
@@ -102,3 +73,48 @@ void GerberItem::redraw()
 Paths GerberItem::paths() const { return m_paths; }
 
 Paths* GerberItem::rPaths() { return &m_paths; }
+
+void GerberItem::changeColor()
+{
+    {
+        auto animation = new QPropertyAnimation(this, "bodyColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_bodyColor);
+        m_bodyColor = m_colorPtr ? *m_colorPtr : m_color;
+        if (colorState & Selected) {
+            m_bodyColor.setAlpha(255);
+            m_bodyColor = (colorState & Hovered) ? m_bodyColor.lighter(150)
+                                                 : m_bodyColor;
+        } else {
+            m_bodyColor = (colorState & Hovered) ? (m_bodyColor.setAlpha(255), m_bodyColor.darker(125))
+                                                 : m_bodyColor;
+        }
+        animation->setEndValue(m_bodyColor);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    {
+        auto animation = new QPropertyAnimation(this, "pathColor");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(100);
+        animation->setStartValue(m_pathColor);
+        m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
+        switch (colorState) {
+        case Default:
+            m_pathColor.setAlpha(0);
+            break;
+        case Hovered:
+            m_pathColor.setAlpha(255);
+            m_pathColor = m_pathColor.darker(125);
+            break;
+        case Selected:
+            break;
+        case Hovered | Selected:
+            m_pathColor.setAlpha(255);
+            m_pathColor = m_pathColor.lighter(150);
+            break;
+        }
+        animation->setEndValue(m_pathColor);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+}
