@@ -6,7 +6,6 @@
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
-//#include "filetree/treeview.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -19,7 +18,12 @@ namespace Shapes {
 Shape::Shape()
     : GraphicsItem(nullptr)
 {
+    m_paths.resize(1);
     changeColor();
+    setFlags(ItemIsSelectable);
+    setAcceptHoverEvents(true);
+    setVisible(true);
+    //    setZValue(std::numeric_limits<double>::max());
 }
 
 Shape::~Shape() { qDeleteAll(handlers); }
@@ -28,36 +32,20 @@ void Shape::setNode(Node* node) { m_node = node; }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
 {
+    m_pathColor = m_bodyColor;
+    m_pathColor.setAlpha(255);
     m_pen.setColor(m_pathColor);
-    painter->setPen(m_pen);
 
-    m_bodyColor = m_pathColor;
-    m_bodyColor.setAlpha(50);
+    painter->setPen(m_pen);
     painter->setBrush(m_bodyColor);
     painter->drawPath(m_shape);
 }
 
-QRectF Shape::boundingRect() const
-{
-    return m_shape.boundingRect();
-}
+QRectF Shape::boundingRect() const { return m_shape.boundingRect(); }
 
-QPainterPath Shape::shape() const
-{
-    return m_shape;
-}
+QPainterPath Shape::shape() const { return m_shape; }
 
 Paths Shape::paths() const { return m_paths; }
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value)
-{
-    if (change == ItemSelectedChange) {
-        bool fl = value.toBool();
-        for (Handler* item : handlers)
-            item->setVisible(fl);
-    }
-    return GraphicsItem::itemChange(change, value);
-}
 
 void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
 {
@@ -77,7 +65,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
     const auto p(GlobalSettings::getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for (auto item : scene()->selectedItems()) {
-        if (item->type() >= GiShapeC) {
+        if (item->type() >= static_cast<int>(GiType::ShapeC)) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto h : shape->handlers) {
@@ -92,17 +80,36 @@ void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QMenu menu;
     m_node->menu(&menu, App::treeView());
     menu.exec(event->screenPos());
-};
+}
+
+QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemSelectedChange) {
+        const bool selected = value.toInt();
+        for (Handler* item : handlers)
+            item->setVisible(selected);
+    }
+    return GraphicsItem::itemChange(change, value);
+}
+
+void Shape::write(QDataStream& /*stream*/) const { }
+
+void Shape::read(QDataStream& /*stream*/) { }
+
+void Shape::updateOtherHandlers(Handler*) { }
 
 // write to project
 QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 {
     stream << shape.type();
     stream << shape.m_id;
-    stream << shape.handlers.size();
-    for (Handler* item : shape.handlers) {
-        stream << item->pos();
-        stream << item->m_hType;
+    stream << shape.isVisible();
+    {
+        stream << shape.handlers.size();
+        for (Handler* item : shape.handlers) {
+            stream << item->QGraphicsItem::pos();
+            stream << item->m_hType;
+        }
     }
     shape.write(stream);
     return stream;
@@ -110,55 +117,51 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 // read from project
 QDataStream& operator>>(QDataStream& stream, Shape& shape)
 {
-    shape.m_paths.resize(1);
     App::scene()->addItem(&shape);
+    bool visible;
     stream >> shape.m_id;
+    stream >> visible;
+    shape.QGraphicsItem::setVisible(visible);
     shape.setToolTip(QString::number(shape.m_id));
-    int size;
-    stream >> size;
-    shape.handlers.reserve(size);
-    while (size--) {
-        QPointF pos;
-        int type;
-        stream >> pos;
-        stream >> type;
-        Handler* item = new Handler(&shape, static_cast<Handler::HType>(type));
-        item->QGraphicsItem::setPos(pos);
-        item->setVisible(false);
-        shape.handlers.append(item);
+    {
+        int size;
+        stream >> size;
+        shape.handlers.reserve(size);
+        while (size--) {
+            QPointF pos;
+            int type;
+            stream >> pos;
+            stream >> type;
+            Handler* item = new Handler(&shape, static_cast<Handler::HType>(type));
+            item->QGraphicsItem::setPos(pos);
+            item->setVisible(false);
+            shape.handlers.append(item);
+        }
     }
     shape.read(stream);
-
-    shape.setFlags(GraphicsItem::ItemIsSelectable | GraphicsItem::ItemIsFocusable);
-    shape.setAcceptHoverEvents(true);
-    shape.setZValue(std::numeric_limits<double>::max());
+    shape.redraw();
     return stream;
 }
+
+void Shape::changeColor()
+{
+    animation.setStartValue(m_bodyColor);
+    switch (colorState) {
+    case Default:
+        m_bodyColor = QColor(255, 255, 255, 50);
+        break;
+    case Hovered:
+        m_bodyColor = QColor(255, 255, 255, 100);
+        break;
+    case Selected:
+        m_bodyColor = QColor(255, 0x0, 0x0, 150);
+        break;
+    case Hovered | Selected:
+        m_bodyColor = QColor(255, 0x0, 0x0, 200);
+        break;
+    }
+    animation.setEndValue(m_bodyColor);
+    animation.start();
 }
 
-void Shapes::Shape::changeColor()
-{
-    {
-        auto animation = new QPropertyAnimation(dynamic_cast<GraphicsItem*>(this), "pathColor");
-        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-        animation->setDuration(100);
-        animation->setStartValue(m_pathColor);
-        m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
-        switch (colorState) {
-        case Default:
-            m_pathColor = Qt::gray;
-            break;
-        case Hovered:
-            m_pathColor = Qt::white;
-            break;
-        case Selected:
-            m_pathColor = Qt::darkGreen;
-            break;
-        case Hovered | Selected:
-            m_pathColor = Qt::green;
-            break;
-        }
-        animation->setEndValue(m_pathColor);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-    }
 }

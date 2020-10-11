@@ -1,7 +1,7 @@
 #pragma once
 
-#include "shape.h"
 #include "abstractfile.h"
+#include "shape.h"
 
 class ShTextDialog;
 
@@ -48,7 +48,7 @@ public:
     };
 
     // QGraphicsItem interface
-    int type() const override { return GiShapeT; }
+    int type() const override { return static_cast<int>(GiType::ShapeT); }
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // Shape interface
 
@@ -67,7 +67,6 @@ protected:
     // Shape interface
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    QPointF calcPos(Handler* sh) override;
 
 private:
     InternalData d;

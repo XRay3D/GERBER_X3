@@ -23,6 +23,7 @@ Node::Node(int id)
     : AbstractNode(id)
 {
     file()->itemGroup()->addToScene();
+    file()->itemGroup()->setVisible(true);
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)

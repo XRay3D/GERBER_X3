@@ -10,7 +10,7 @@ public:
     ~Arc();
 
     // QGraphicsItem interface
-    int type() const override { return GiShapeA; }
+    int type() const override { return static_cast<int>(GiType::ShapeA); }
     void redraw() override;
     // Shape interface
     QString name() const override;
@@ -32,8 +32,6 @@ private:
 
 protected:
     // Shape interface
-    void write(QDataStream& /*stream*/) const override { }
-    void read(QDataStream& /*stream*/) override { }
-    QPointF calcPos(Handler* sh) override;
+    void updateOtherHandlers(Handler* handler) override;
 };
 }

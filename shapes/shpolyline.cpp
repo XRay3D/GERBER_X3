@@ -15,13 +15,8 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2)
     handlers[3]->setPos(pt2);
 
     redraw();
-    setFlags(ItemIsSelectable | ItemIsFocusable);
-    setAcceptHoverEvents(true);
-    setZValue(-std::numeric_limits<double>::max());
-    App::scene()->addItem(this);
-    //    for (auto var : handlers) {
 
-    //    }
+    App::scene()->addItem(this);
 }
 
 void PolyLine::redraw()
@@ -43,7 +38,6 @@ void PolyLine::redraw()
         handlers[0]->setVisible(true);
     } else
         handlers[0]->setVisible(false);
-    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
@@ -52,7 +46,7 @@ QString PolyLine::name() const { return QObject::tr("Line"); }
 
 QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
 
-QPointF PolyLine::calcPos(Handler* handler)
+void PolyLine::updateOtherHandlers(Handler* handler)
 {
     if (handler->hType() == Handler::Adder) {
         int idx = handlers.indexOf(handler);
@@ -92,7 +86,6 @@ QPointF PolyLine::calcPos(Handler* handler)
                     QLineF(handler->pos(), handlers[idx + 2]->pos()).center());
         }
     }
-    return handler->pos();
 }
 
 void PolyLine::setPt(const QPointF& pt)

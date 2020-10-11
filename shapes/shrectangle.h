@@ -11,7 +11,8 @@ public:
     ~Rectangle();
 
     // QGraphicsItem interface
-    int type() const override { return GiShapeR; }
+    int type() const override { return static_cast<int>(GiType::ShapeR); }
+    // GraphicsItem interface
     void redraw() override;
     // Shape interface
     QString name() const override;
@@ -24,12 +25,14 @@ public:
         Point2,
         Point3,
         Point4,
+        Center1,
+        Center2,
+        Center3,
+        Center4,
     };
 
 protected:
     // Shape interface
-    void write(QDataStream& /*stream*/) const override { }
-    void read(QDataStream& /*stream*/) override { }
-    QPointF calcPos(Handler* sh) override;
+    void updateOtherHandlers(Handler* sh) override;
 };
 }

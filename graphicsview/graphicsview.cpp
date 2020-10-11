@@ -341,7 +341,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
     } else if (event->button() == Qt::RightButton) {
         { // удаление мостика
             QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-            if (item && item->type() == GiBridge && !static_cast<BridgeItem*>(item)->ok())
+            if (item && item->type() == static_cast<int>(GiType::Bridge) && !static_cast<BridgeItem*>(item)->ok())
                 delete item;
         }
         // это что бы при вызове контекстного меню ничего постороннего не было

@@ -20,8 +20,9 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
+    // GraphicsItem interface
     Paths paths() const override;
-
+    // Shape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
 
@@ -31,7 +32,6 @@ private:
     Node* m_node = nullptr;
 
 protected:
-    mutable double m_scale = std::numeric_limits<double>::max();
     mutable QVector<Handler*> handlers;
     Paths m_paths;
 
@@ -39,14 +39,16 @@ protected:
     QPointF initPos; // групповое перемещение
 
     // QGraphicsItem interface
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
-    virtual void write(QDataStream& stream) const = 0;
-    virtual void read(QDataStream& stream) = 0;
-    virtual QPointF calcPos(Handler* sh) = 0;
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
+
+    // Shape interface
+    virtual void write(QDataStream& stream) const;
+    virtual void read(QDataStream& stream);
+    virtual void updateOtherHandlers(Handler* handler);
 
     void changeColor() override;
 };
