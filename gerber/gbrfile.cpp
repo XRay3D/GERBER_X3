@@ -269,7 +269,7 @@ void File::createGi()
 {
     // fill copper
     for (Paths& paths : groupedPaths()) {
-        GraphicsItem* item = new GerberItem(paths, this);
+        GraphicsItem* item = new GiGerber(paths, this);
         m_itemGroup[Normal]->append(item);
     }
 

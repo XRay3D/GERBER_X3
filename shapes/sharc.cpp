@@ -21,9 +21,6 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
     handlers[Point2]->setPos(pt2);
 
     redraw();
-    setFlags(ItemIsSelectable | ItemIsFocusable);
-    setAcceptHoverEvents(true);
-    //    setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
 }
@@ -72,7 +69,6 @@ void Arc::redraw()
     m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
 
-    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
@@ -81,9 +77,9 @@ QString Arc::name() const { return QObject::tr("Arc"); }
 
 QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-QPointF Arc::calcPos(Handler* sh_)
+void Arc::updateOtherHandlers(Handler* handler)
 {
-    QLineF l(handlers[Center]->pos(), sh_->pos());
+    QLineF l(handlers[Center]->pos(), handler->pos());
     m_radius = l.length();
 
     QLineF l1(handlers[Center]->pos(),
@@ -95,7 +91,7 @@ QPointF Arc::calcPos(Handler* sh_)
             ? handlers[Center]->pos() + QPointF(1.0, 0.0)
             : handlers[Point2]->pos());
 
-    switch (handlers.indexOf(sh_)) {
+    switch (handlers.indexOf(handler)) {
     case Center:
         break;
     case Point1:
@@ -107,7 +103,6 @@ QPointF Arc::calcPos(Handler* sh_)
         handlers[Point1]->QGraphicsItem::setPos(l1.p2());
         break;
     }
-    return sh_->pos();
 }
 
 void Arc::setPt(const QPointF& pt)

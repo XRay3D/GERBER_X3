@@ -12,15 +12,15 @@ namespace Shapes {
 void Constructor::addShapePoint(const QPointF& value)
 {
     point = value;
-    switch (type) {
-    case GiShapeR:
+    switch (static_cast<GiType>(type)) {
+    case GiType::ShapeR:
         if (!counter) {
             item = new Rectangle(point, point + QPointF { 1, 1 });
         } else {
             finalizeShape();
         }
         break;
-    case GiShapeL:
+    case GiType::ShapeL:
         if (!counter) {
             item = new class PolyLine(point, point + QPointF { 1, 1 });
         } else {
@@ -30,21 +30,21 @@ void Constructor::addShapePoint(const QPointF& value)
                 static_cast<class PolyLine*>(item)->addPt(point);
         };
         break;
-    case GiShapeC:
+    case GiType::ShapeC:
         if (!counter) {
             item = new Circle(point, point + QPointF { 1, 1 });
         } else {
             finalizeShape();
         }
         break;
-    case GiShapeA:
+    case GiType::ShapeA:
         if (!counter) {
             item = new Arc(point, point + QPointF { 0, 1 }, point + QPointF { 0, 1 } + QPointF { 1, 0 });
         } else if (counter > 1) {
             finalizeShape();
         }
         break;
-    case GiShapeT:
+    case GiType::ShapeT:
         item = new Text(point);
         finalizeShape();
         break;
@@ -59,23 +59,23 @@ void Constructor::updateShape(const QPointF& value)
     point = value;
     if (item == nullptr)
         return;
-    switch (type) {
-    case GiShapeR:
+    switch (static_cast<GiType>(type)) {
+    case GiType::ShapeR:
         static_cast<Rectangle*>(item)->setPt(point);
         break;
-    case GiShapeL:
+    case GiType::ShapeL:
         static_cast<class PolyLine*>(item)->setPt(point);
         break;
-    case GiShapeC:
+    case GiType::ShapeC:
         static_cast<Circle*>(item)->setPt(point);
         break;
-    case GiShapeA:
+    case GiType::ShapeA:
         if (counter == 1)
             static_cast<Arc*>(item)->setPt(point);
         else
             static_cast<Arc*>(item)->setPt2(point);
         break;
-    case GiShapeT:
+    case GiType::ShapeT:
         break;
     default:
         break;
@@ -89,8 +89,8 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
 
     App::project()->addShape(item);
 
-    switch (type) {
-    case GiShapeL:
+    switch (static_cast<GiType>(type)) {
+    case GiType::ShapeL:
         if (item->handlers.size() > 4 && !static_cast<class PolyLine*>(item)->closed()) {
             delete item->handlers.last();
             item->handlers.removeLast();
@@ -98,10 +98,10 @@ void Constructor::finalizeShape(/*const QPointF& value*/)
             item->handlers.removeLast();
             item->redraw();
         }
-    case GiShapeR:
-    case GiShapeC:
-    case GiShapeA:
-    case GiShapeT:
+    case GiType::ShapeR:
+    case GiType::ShapeC:
+    case GiType::ShapeA:
+    case GiType::ShapeT:
         type = 0;
         item->setSelected(true);
         item = nullptr;

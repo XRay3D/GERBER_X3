@@ -10,7 +10,7 @@ public:
     ~PolyLine() = default;
 
     // QGraphicsItem interface
-    int type() const override { return GiShapeL; }
+    int type() const override { return static_cast<int>(GiType::ShapeL); }
     void redraw() override;
     // Shape interface
     QString name() const override;
@@ -22,9 +22,7 @@ public:
 
 protected:
     // Shape interface
-    void write(QDataStream& /*stream*/) const override { }
-    void read(QDataStream& /*stream*/) override { }
-    QPointF calcPos(Handler* handler) override;
+    void updateOtherHandlers(Handler* handler) override;
 
 private:
     QPointF centroid();

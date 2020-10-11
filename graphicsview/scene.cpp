@@ -14,8 +14,14 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPdfWriter>
+#include <QTime>
 #include <QtMath>
 #include <gi/graphicsitem.h>
+
+QTime m_time;
+int m_time2;
+int m_frameCount = 0;
+int m_frameCount2;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
@@ -296,7 +302,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
         bool fl = false;
         for (QGraphicsItem* item : items) {
-            if (item && item->type() != GiBridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
+            if (item && item->type() != static_cast<int>(GiType::Bridge) && item->flags() & QGraphicsItem::ItemIsSelectable) {
                 fl = true;
                 break;
             }
@@ -312,6 +318,38 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
     if (m_drawRuller)
         drawRuller(painter);
+
+    if (0) {
+        if (m_frameCount == 0) {
+            m_time.start();
+            m_time2 = m_time.elapsed() + 1000;
+            qDebug() << m_time.elapsed() << m_time2;
+        } else {
+            if (m_time.elapsed() > m_time2) {
+                qDebug() << m_time.elapsed() << m_time2;
+                m_time2 = m_time.elapsed() + 1000;
+                m_frameCount2 = m_frameCount;
+                m_frameCount = 0;
+            }
+
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            QString str(QString("FPS %1").arg(m_frameCount2));
+            painter->translate(m_rect.center());
+            const double scaleFactor = App::graphicsView()->scaleFactor();
+            painter->scale(scaleFactor, -scaleFactor);
+            QFont f;
+            f.setPixelSize(100);
+            QPainterPath path;
+            path.addText(QPointF(), f, str);
+            painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawPath(path);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(Qt::white);
+            painter->drawPath(path);
+        }
+        m_frameCount++;
+    }
 
     painter->restore();
 }

@@ -20,9 +20,6 @@ Circle::Circle(QPointF center, QPointF pt)
     handlers[Point1]->setPos(pt);
 
     redraw();
-    setFlags(ItemIsSelectable | ItemIsFocusable);
-    setAcceptHoverEvents(true);
-    //    setZValue(std::numeric_limits<double>::max());
 
     App::scene()->addItem(this);
 }
@@ -48,7 +45,6 @@ void Circle::redraw()
     m_shape = QPainterPath();
     m_shape.addPolygon(toQPolygon(path));
     m_rect = m_shape.boundingRect();
-    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
@@ -56,8 +52,6 @@ void Circle::redraw()
 QString Circle::name() const { return QObject::tr("Circle"); }
 
 QIcon Circle::icon() const { return QIcon::fromTheme("draw-ellipse"); }
-
-QPointF Circle::calcPos(Handler* sh) { return sh->pos(); }
 
 void Circle::setPt(const QPointF& pt)
 {

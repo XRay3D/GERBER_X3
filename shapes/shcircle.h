@@ -10,7 +10,7 @@ public:
     ~Circle();
 
     // QGraphicsItem interface
-    int type() const override { return GiShapeC; }
+    int type() const override { return static_cast<int>(GiType::ShapeC); }
     void redraw() override;
     // Shape interface
     QString name() const override;
@@ -26,11 +26,5 @@ public:
 
 private:
     double m_radius;
-
-protected:
-    // Shape interface
-    void write(QDataStream& /*stream*/) const override { }
-    void read(QDataStream& /*stream*/) override { }
-    QPointF calcPos(Handler* sh) override;
 };
 }

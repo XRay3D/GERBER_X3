@@ -15,6 +15,8 @@
 
 namespace Shapes {
 
+constexpr double StickingDistance = 10;
+
 void drawPos(QPainter* painter, const QPointF& pt1)
 {
     QFont font;
@@ -64,19 +66,19 @@ Handler::Handler(Shape* shape, HType type)
     , m_hType(type)
 {
     setAcceptHoverEvents(true);
-    setFlags(QGraphicsItem::ItemIsMovable);
-    App::scene()->addItem(this);
+    setFlags(ItemIsMovable);
     switch (m_hType) {
     case Adder:
-        setZValue(std::numeric_limits<double>::max());
+        setZValue(std::numeric_limits<double>::max() - 2);
         break;
     case Center:
-        setZValue(std::numeric_limits<double>::max());
+        setZValue(std::numeric_limits<double>::max() - 0);
         break;
     case Corner:
-        setZValue(std::numeric_limits<double>::max());
+        setZValue(std::numeric_limits<double>::max() - 1);
         break;
     }
+    App::scene()->addItem(this);
     hhh.append(this);
 }
 
@@ -104,23 +106,51 @@ void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     } else
         c.setAlpha(100);
     painter->setBrush(c);
+    painter->setPen(QPen(Qt::black, 0.0));
     painter->drawEllipse(rect());
 }
 
 void Handler::setPos(const QPointF& pos)
 {
     QGraphicsItem::setPos(pos);
-    for (Handler* sh : hhh) { // прилипание
-        if (sh->m_hType == Corner
-            && sh->shape->isVisible()
-            && QLineF(sh->pos(), pos).length() < App::graphicsView()->scaleFactor() * 20) {
-            QGraphicsItem::setPos(sh->pos());
-            return;
+    if (m_hType == Center) {
+        for (int i = 1, end = shape->handlers.size(); i < end; ++i)
+            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos /*()*/ - pt.first());
+    } /*else*/
+    {
+        double k = App::graphicsView()->scaleFactor() * StickingDistance;
+
+        switch (static_cast<GiType>(shape->type())) {
+        case GiType::ShapeL:
+            for (Handler* h : hhh) { // прилипание
+                if (h != this
+                    && h->shape->isVisible()
+                    && QLineF(h->pos(), pos).length() < k) { // прилипание
+                    QGraphicsItem::setPos(h->pos());
+                    shape->updateOtherHandlers(this);
+                    shape->redraw();
+                    return;
+                }
+            }
+        default:
+            for (Handler* h : hhh) { // прилипание
+                if (h != this
+                    && h->shape != shape
+                    && h->shape->isVisible()
+                    && QLineF(h->pos(), pos).length() < k) { // прилипание
+                    QGraphicsItem::setPos(h->pos());
+                    shape->updateOtherHandlers(this);
+                    shape->redraw();
+                    return;
+                }
+            }
         }
+
+        //        if (m_hType != Center)
+        //            QGraphicsItem::setPos(shape->updateOtherHandlers(this));
+        shape->updateOtherHandlers(this);
     }
-    if (m_hType == Center)
-        return;
-    QGraphicsItem::setPos(shape->calcPos(this));
+    shape->redraw();
 }
 
 Handler::HType Handler::hType() const { return m_hType; }
@@ -135,44 +165,30 @@ QRectF Handler::rect() const
     return { QPointF(-k, -k), QSizeF(s, s) };
 }
 
+void Handler::savePos()
+{
+    if (m_hType != Center)
+        [[likely]] return;
+    pt.clear();
+    for (Handler* item : shape->handlers)
+        pt.append(item->pos());
+}
+
 void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mouseMoveEvent(event);
     setPos(GlobalSettings::getSnappedPos(pos(), event->modifiers()));
-    if (m_hType == Center) {
-        for (int i = 1, end = shape->handlers.size(); i < end; ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos() - pt.first());
-        shape->redraw();
-    } else {
-        for (Handler* h : hhh) { // прилипание
-            if (h != this
-                && h->m_hType == Corner
-                && h->shape->isVisible()
-                && QLineF(h->pos(), pos()).length() < App::graphicsView()->scaleFactor() * 20) { // прилипание
-                QGraphicsItem::setPos(h->pos());
-            }
-        }
-        QGraphicsItem::setPos(shape->calcPos(this));
-        shape->redraw();
-    }
 }
 
 void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    shape->m_scale = std::numeric_limits<double>::max();
     QGraphicsItem::mousePressEvent(event);
-    if (m_hType == Center) {
-        pt.clear();
-        for (Handler* item : shape->handlers)
-            pt.append(item->pos());
-    }
+    savePos();
 }
 
 void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
-    //    QMenu menu;
-    //    menu.addAction("EditPos", [event, this] {
+    savePos();
     class Dialog : public QDialog {
     public:
         Dialog(Handler* h)
@@ -194,7 +210,7 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                             h->setPos({ val, h->pos().y() });
                         else
                             h->setPos({ h->pos().x(), val });
-                        h->shape->calcPos(h);
+                        h->shape->updateOtherHandlers(h);
                         h->shape->redraw();
                     });
                 return ds;

@@ -32,9 +32,6 @@ Text::Text(QPointF pt1)
     d = d_;
     redraw();
 
-    setFlags(ItemIsSelectable | ItemIsFocusable);
-    setAcceptHoverEvents(true);
-    //    setZValue(std::numeric_limits<double>::max());
     App::scene()->addItem(this);
 }
 
@@ -120,12 +117,9 @@ void Text::redraw()
         m_paths.append(toPath(sp));
         m_shape.addPolygon(sp);
     }
-    m_scale = std::numeric_limits<double>::max();
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
-
-QPointF Text::calcPos(Handler* sh) { return sh->pos(); }
 
 QString Text::text() const { return d.text; }
 

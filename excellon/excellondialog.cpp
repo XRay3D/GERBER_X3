@@ -118,11 +118,11 @@ void ExcellonDialog::on_pushButton_clicked()
     QPair<QPointF, QPointF> pair;
     int c = 0;
     for (QGraphicsItem* item : App::scene()->selectedItems()) {
-        if (item->type() == GiDrill) {
+        if (item->type() == static_cast<int>(GiType::Drill)) {
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (item->type() != GiDrill) {
+        if (item->type() != static_cast<int>(GiType::Drill)) {
             pair.second = item->boundingRect().center();
             ++c;
         }

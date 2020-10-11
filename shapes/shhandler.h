@@ -6,7 +6,7 @@
 #include <QGraphicsItem>
 
 namespace Shapes {
-class Handler : public QGraphicsItem {
+class Handler final : public QGraphicsItem {
     friend class Shape;
     friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
 
@@ -33,6 +33,7 @@ private:
     inline QRectF rect() const;
     QPointF lastPos;
     inline static QVector<Handler*> hhh;
+    void savePos();
 
     // QGraphicsItem interface
 protected:

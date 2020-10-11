@@ -527,7 +527,7 @@ void File::createGiPocket()
         //            offset.AddPaths(m_pocketPaths, jtRound, etClosedPolygon);
         //            offset.Execute(m_pocketPaths, uScale * m_gcp.getToolDiameter() * 0.5);
         //        }
-        item = new GerberItem(m_pocketPaths, nullptr);
+        item = new GiGerber(m_pocketPaths, nullptr);
         item->setPen(Qt::NoPen);
         item->setColorP(&GlobalSettings::guiColor(Colors::CutArea));
         item->setAcceptHoverEvents(false);
@@ -609,7 +609,7 @@ void File::createGiRaster()
     m_g0path.reserve(m_toolPathss.size());
 
     if (m_pocketPaths.size()) {
-        item = new GerberItem(m_pocketPaths, nullptr);
+        item = new GiGerber(m_pocketPaths, nullptr);
         item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
         item->setColorP(&GlobalSettings::guiColor(Colors::CutArea));
@@ -684,7 +684,7 @@ void File::write(QDataStream& stream) const
     //        [[fallthrough]];
     //    case G2G_Ver_2:
     //        [[fallthrough]];
-    //    case G2G_Ver_1:;
+    //    case  GiType::G2G_Ver_1::
     //    }
     //    stream << *static_cast<const AbstractFile*>(this);
     //_write(stream);
@@ -694,12 +694,12 @@ void File::read(QDataStream& stream)
 {
     auto& gcp = *const_cast<GCodeParams*>(&m_gcp);
     switch (App::project()->ver()) {
-    case G2G_Ver_4:
+    case ProVer_4:
         stream >> gcp;
         stream >> m_pocketPaths;
         stream >> m_toolPathss;
         break;
-    case G2G_Ver_3: {
+    case ProVer_3: {
         stream >> m_pocketPaths;
         stream >> gcp.gcType;
         stream >> m_toolPathss;
@@ -710,9 +710,9 @@ void File::read(QDataStream& stream)
         gcp.params[GCodeParams::Depth] = depth;
     }
         [[fallthrough]];
-    case G2G_Ver_2:
+    case ProVer_2:
         [[fallthrough]];
-    case G2G_Ver_1:;
+    case ProVer_1:;
     }
     //    stream >> *static_cast<AbstractFile*>(this);
     // _read(stream);

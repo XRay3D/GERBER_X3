@@ -77,7 +77,7 @@ QRectF ThermalPreviewItem::boundingRect() const { return sourcePath.boundingRect
 
 QPainterPath ThermalPreviewItem::shape() const { return sourcePath; }
 
-int ThermalPreviewItem::type() const { return GiThermalPr; }
+int ThermalPreviewItem::type() const { return static_cast<int>(GiType::ThermalPr); }
 
 IntPoint ThermalPreviewItem::pos() const { return grob->state().curPos(); }
 
