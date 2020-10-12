@@ -333,7 +333,7 @@ QVector<QVector<QPolygonF>> File::normalizedPathss(const QPointF& offset)
 
 QVector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_)
 {
-    QVector<QPolygonF> paths(paths_.isEmpty() ? toQPolygons(m_toolPathss.first()) : toQPolygons(paths_));
+    QVector<QPolygonF> paths(paths_.isEmpty() ? m_toolPathss.first() : paths_);
 
     for (QPolygonF& path : paths)
         path.translate(offset);

@@ -154,10 +154,10 @@ void Shape::changeColor()
         m_bodyColor = QColor(255, 255, 255, 100);
         break;
     case Selected:
-        m_bodyColor = QColor(255, 0x0, 0x0, 150);
+        m_bodyColor = QColor(255, 0x0, 0x0, 100);
         break;
     case Hovered | Selected:
-        m_bodyColor = QColor(255, 0x0, 0x0, 200);
+        m_bodyColor = QColor(255, 0x0, 0x0, 150);
         break;
     }
     animation.setEndValue(m_bodyColor);

@@ -418,7 +418,7 @@ void Parser::addPath()
     }
     if (aperFunctionMap.contains(m_state.aperture())
         && aperFunctionMap[m_state.aperture()] == Att::AperFunction::ComponentOutline) {
-        components[refDes].footprint = toQPolygon(m_path);
+        components[refDes].footprint = m_path;
     }
     resetStep();
 }

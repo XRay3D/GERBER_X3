@@ -22,7 +22,7 @@
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
+    for (QPolygonF polygon : go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
@@ -138,7 +138,7 @@ void ThermalPreviewItem::redraw()
     qDebug() << "redraw" << (t.nsecsElapsed() / 1000) << "us";
     m_isValid = !m_toolPath.isEmpty();
     painterPath = QPainterPath();
-    for (QPolygonF& polygon : toQPolygons(m_toolPath)) {
+    for (QPolygonF polygon : m_toolPath) {
         painterPath.moveTo(polygon.takeFirst());
         for (QPointF& pt : polygon)
             painterPath.lineTo(pt);

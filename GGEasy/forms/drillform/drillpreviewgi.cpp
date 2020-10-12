@@ -15,7 +15,7 @@ extern Paths offset(const Path& path, double offset, bool fl = false);
 QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject* go, int id)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go->paths())) {
+    for (QPolygonF polygon : go->paths()) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
@@ -36,7 +36,7 @@ QPainterPath DrillPrGI::drawSlot(const Excellon::Hole* hole)
 {
     QPainterPath painterPath;
     for (Path& path : offset(hole->item->paths().first(), hole->state.currentToolDiameter()))
-        painterPath.addPolygon(toQPolygon(path));
+        painterPath.addPolygon(path);
     return painterPath;
 }
 
@@ -115,7 +115,7 @@ void DrillPrGI::updateTool()
             offset.Execute(tmpPpath, diameter * 0.5 * uScale);
             for (Path& path : tmpPpath) {
                 path.append(path.first());
-                m_toolPath.addPolygon(toQPolygon(path));
+                m_toolPath.addPolygon(path);
             }
             Path path(hole->item->paths().first());
             if (path.size()) {

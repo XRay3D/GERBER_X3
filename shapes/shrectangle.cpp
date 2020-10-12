@@ -51,7 +51,7 @@ void Rectangle::redraw()
     if (Area(m_paths.first()) < 0)
         ReversePath(m_paths.first());
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(m_paths.first()));
+    m_shape.addPolygon(m_paths.first());
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }

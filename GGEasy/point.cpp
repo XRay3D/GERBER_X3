@@ -395,7 +395,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
             gcp.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File({ { toPath(dst) } }, gcp);
+            GCode::File* gcode = new GCode::File({ { dst } }, gcp);
             gcode->setFileName(tr("Pin_") + tool.nameEnc());
             App::project()->addFile(gcode);
         }

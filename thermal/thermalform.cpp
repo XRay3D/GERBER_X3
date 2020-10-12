@@ -40,7 +40,7 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 
     QPainterPath painterPath;
 
-    for (QPolygonF& polygon : toQPolygons(go.paths()))
+    for (QPolygonF polygon : go.paths())
         painterPath.addPolygon(polygon);
 
     const QRectF rect = painterPath.boundingRect();

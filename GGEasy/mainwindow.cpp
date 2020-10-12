@@ -35,17 +35,15 @@ MainWindow::MainWindow(QWidget* parent)
 {
     setupUi(this);
 
-    scene = reinterpret_cast<Scene*>(graphicsView->scene());
-
     initWidgets();
 
     {
         new Marker(Marker::Home);
         new Marker(Marker::Zero);
-        new Pin(scene);
-        new Pin(scene);
-        new Pin(scene);
-        new Pin(scene);
+        new Pin(App::scene());
+        new Pin(App::scene());
+        new Pin(App::scene());
+        new Pin(App::scene());
         new LayoutFrames();
     }
 
@@ -212,8 +210,7 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."),
-        scene, &Scene::RenderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
     action->setStatusTip(tr("Export to PDF file"));
     fileToolBar->addAction(action);
 
@@ -573,14 +570,12 @@ void MainWindow::selectAll()
     }
 }
 
-void MainWindow::redo() { }
-
 void MainWindow::printDialog()
 {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
     connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* pPrinter) {
-        scene->m_drawPdf = true;
+        App::scene()->m_drawPdf = true;
         QRectF rect;
         for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
@@ -598,11 +593,11 @@ void MainWindow::printDialog()
 #endif
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        scene->render(&painter,
+        App::scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
-        scene->m_drawPdf = false;
+        App::scene()->m_drawPdf = false;
     });
     preview.exec();
 }

@@ -59,8 +59,6 @@ private:
     QToolBar* toolpathToolBar = nullptr;
     QToolBar* zoomToolBar = nullptr;
 
-    Scene* scene;
-
     Project* m_project;
     bool openFlag;
 
@@ -84,7 +82,6 @@ private:
 
     void printDialog();
     void readSettings();
-    void redo();
     void resetToolPathsActions();
     void selectAll();
 

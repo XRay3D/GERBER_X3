@@ -3,46 +3,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "myclipper.h"
-#include <QElapsedTimer>
-#include <QLineF>
 #include "qmath.h"
 #include "settings.h"
-
-Path toPath(const QPolygonF& p)
-{
-    Path path;
-    path.reserve(p.size());
-    for (const QPointF& pt : p)
-        path.push_back((pt));
-    return path;
-}
-
-Paths toPaths(const QVector<QPolygonF>& p)
-{
-    Paths paths;
-    paths.reserve(p.size());
-    for (const QPolygonF& pl : p)
-        paths.push_back(toPath(pl));
-    return paths;
-}
-
-QPolygonF toQPolygon(const Path& p)
-{
-    QPolygonF polygon;
-    polygon.reserve(p.size());
-    for (const IntPoint& pt : p)
-        polygon.push_back(pt);
-    return polygon;
-}
-
-QVector<QPolygonF> toQPolygons(const Paths& p)
-{
-    QVector<QPolygonF> polygons;
-    polygons.reserve(p.size());
-    for (const Path& pl : p)
-        polygons.push_back(toQPolygon(pl));
-    return polygons;
-}
+#include <QElapsedTimer>
+#include <QLineF>
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2)
 {

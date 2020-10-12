@@ -5,6 +5,7 @@
 #include "doublespinbox.h"
 #include "graphicsview.h"
 #include "scene.h"
+#include "shcreator.h"
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -16,6 +17,7 @@
 namespace Shapes {
 
 constexpr double StickingDistance = 10;
+constexpr double Size = StickingDistance / 2;
 
 void drawPos(QPainter* painter, const QPointF& pt1)
 {
@@ -116,38 +118,17 @@ void Handler::setPos(const QPointF& pos)
     if (m_hType == Center) {
         for (int i = 1, end = shape->handlers.size(); i < end; ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos /*()*/ - pt.first());
-    } /*else*/
-    {
+    } else {
         double k = App::graphicsView()->scaleFactor() * StickingDistance;
-
-        switch (static_cast<GiType>(shape->type())) {
-        case GiType::ShapeL:
-            for (Handler* h : hhh) { // прилипание
-                if (h != this
-                    && h->shape->isVisible()
-                    && QLineF(h->pos(), pos).length() < k) { // прилипание
-                    QGraphicsItem::setPos(h->pos());
-                    shape->updateOtherHandlers(this);
-                    shape->redraw();
-                    return;
-                }
-            }
-        default:
-            for (Handler* h : hhh) { // прилипание
-                if (h != this
-                    && h->shape != shape
-                    && h->shape->isVisible()
-                    && QLineF(h->pos(), pos).length() < k) { // прилипание
-                    QGraphicsItem::setPos(h->pos());
-                    shape->updateOtherHandlers(this);
-                    shape->redraw();
-                    return;
-                }
+        for (Handler* h : hhh) { // прилипание
+            if (h != this
+                && (!Constructor::item && h->shape != shape)
+                && h->shape->isVisible()
+                && QLineF(h->pos(), pos).length() < k) { // прилипание
+                QGraphicsItem::setPos(h->pos());
+                break;
             }
         }
-
-        //        if (m_hType != Center)
-        //            QGraphicsItem::setPos(shape->updateOtherHandlers(this));
         shape->updateOtherHandlers(this);
     }
     shape->redraw();
@@ -160,7 +141,7 @@ void Handler::setHType(const HType& value) { m_hType = value; }
 QRectF Handler::rect() const
 {
     const double scale = App::graphicsView()->scaleFactor();
-    const double k = (m_hType == Center ? 5 : 5) * scale;
+    const double k = Size * scale;
     const double s = k * 2;
     return { QPointF(-k, -k), QSizeF(s, s) };
 }
@@ -168,7 +149,7 @@ QRectF Handler::rect() const
 void Handler::savePos()
 {
     if (m_hType != Center)
-        [[likely]] return;
+        return;
     pt.clear();
     for (Handler* item : shape->handlers)
         pt.append(item->pos());
@@ -178,6 +159,7 @@ void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(GlobalSettings::getSnappedPos(pos(), event->modifiers()));
+    event->accept();
 }
 
 void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -232,11 +214,10 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     } d(this);
     d.move(event->screenPos());
     d.exec();
-    //    });
-    //    menu.exec(event->screenPos());
-}
 }
 
-void Shapes::Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
+void Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
 
-void Shapes::Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
+void Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
+
+}

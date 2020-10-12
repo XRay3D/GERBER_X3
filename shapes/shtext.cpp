@@ -114,7 +114,7 @@ void Text::redraw()
     m_shape = QPainterPath();
 
     for (auto& sp : painterPath.toSubpathPolygons(matrix)) {
-        m_paths.append(toPath(sp));
+        m_paths.append(sp);
         m_shape.addPolygon(sp);
     }
     setPos({ 1, 1 }); //костыли    //update();
