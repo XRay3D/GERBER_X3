@@ -14,14 +14,14 @@ AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
     : GraphicsItem(file)
     , m_path(path)
 {
-    m_polygon = toQPolygon(path);
+    m_polygon = path;
 
     Paths tmpPaths;
     ClipperOffset offset;
     offset.AddPath(path, jtSquare, etOpenButt);
     offset.Execute(tmpPaths, 0.01 * uScale);
     for (const Path& tmpPath : tmpPaths)
-        m_selectionShape.addPolygon(toQPolygon(tmpPath));
+        m_selectionShape.addPolygon(tmpPath);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
@@ -52,7 +52,7 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(toQPolygon(m_path));
+    painter->drawPolyline(m_path);
 }
 
 int AperturePathItem::type() const { return static_cast<int>(GiType::AperturePath); }
@@ -69,7 +69,7 @@ QPainterPath AperturePathItem::shape() const
         offset.AddPath(m_path, jtSquare, etOpenButt);
         offset.Execute(tmpPpath, 5 * uScale * m_scale);
         for (const Path& path : tmpPpath)
-            m_selectionShape.addPolygon(toQPolygon(path));
+            m_selectionShape.addPolygon(path);
     }
     return m_selectionShape;
 }

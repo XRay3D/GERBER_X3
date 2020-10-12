@@ -49,7 +49,7 @@ QIcon drawApertureIcon(Gerber::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
 
-    for (QPolygonF& polygon : toQPolygons(aperture->draw(Gerber::State())))
+    for (QPolygonF polygon : aperture->draw(Gerber::State()))
         painterPath.addPolygon(polygon);
 
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);

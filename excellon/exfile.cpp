@@ -94,8 +94,6 @@ void File::write(QDataStream& stream) const
     stream << *static_cast<const QList<Hole>*>(this);
     stream << m_tools;
     stream << m_format;
-    //    stream << *static_cast<const AbstractFile*>(this);
-    //_write(stream);
 }
 
 void File::read(QDataStream& stream)
@@ -108,8 +106,6 @@ void File::read(QDataStream& stream)
         hole.file = this;
         hole.state.format = &m_format;
     }
-    //    stream >> *static_cast<AbstractFile*>(this);
-    //_read(stream);
 }
 
 void File::createGi()
@@ -120,6 +116,7 @@ void File::createGi()
         item->m_id = itemGroup()->size();
         itemGroup()->append(item);
     }
+    itemGroup()->setVisible(true);
 }
 
 } //  namespace Excellon

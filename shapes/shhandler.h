@@ -39,7 +39,9 @@ private:
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 };

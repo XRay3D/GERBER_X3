@@ -62,7 +62,7 @@
 
 #include <QDataStream>
 #include <QDebug>
-#include <QPointF>
+#include <QPolygonF>
 #include <QVector>
 
 namespace ClipperLib {
@@ -161,52 +161,81 @@ struct IntPoint {
 };
 //------------------------------------------------------------------------------
 
-typedef QVector /*std::vector*/<IntPoint> Path;
-typedef QVector /*std::vector*/<Path> Paths;
+//typedef QVector /*std::vector*/<IntPoint> Path;
+//typedef QVector /*std::vector*/<Path> Paths;
 
-//struct Path : public QVector<IntPoint> {
-//    Path() = default;
-//    Path(int size)
-//        : QVector(size)
-//    {
-//    }
-//    Path(int size, const IntPoint& t)
-//        : QVector(size, t)
-//    {
-//    }
-//    Path(const QVector<IntPoint>& v)
-//        : QVector(v)
-//    {
-//    }
-//    Path(const std::initializer_list<IntPoint>& v)
-//        : QVector(v)
-//    {
-//    }
-//    Path(const Path& v) = default;
-//    int id {};
-//};
+struct Path : public QVector<IntPoint> {
+    Path() = default;
+    Path(int size)
+        : QVector(size)
+    {
+    }
+    Path(int size, const IntPoint& t)
+        : QVector(size, t)
+    {
+    }
+    Path(const QVector<IntPoint>& v)
+        : QVector(v)
+    {
+    }
 
-//struct Paths : public QVector<Path> {
-//    Paths() = default;
-//    Paths(int size)
-//        : QVector(size)
-//    {
-//    }
-//    Paths(int size, const Path& t)
-//        : QVector(size, t)
-//    {
-//    }
-//    Paths(const QVector<Path>& v)
-//        : QVector(v)
-//    {
-//    }
-//    Paths(const std::initializer_list<Path>& v)
-//        : QVector(v)
-//    {
-//    }
-//    Paths(const Paths& v) = default;
-//    int id {};
-//};
+    Path(const std::initializer_list<IntPoint>& v)
+        : QVector(v)
+    {
+    }
+
+    Path(const Path& v) = default;
+
+    Path(const QPolygonF& v)
+    {
+        reserve(v.size());
+        for (auto& pt : v) {
+            append(pt);
+        }
+    }
+
+    operator QPolygonF() const
+    {
+        QPolygonF poly;
+        poly.reserve(size());
+        for (const auto pt : *this)
+            poly << pt;
+        return poly;
+    }
+    //    int id {};
+};
+
+struct Paths : public QVector<Path> {
+    Paths() = default;
+    Paths(int size)
+        : QVector(size)
+    {
+    }
+    Paths(int size, const Path& t)
+        : QVector(size, t)
+    {
+    }
+    Paths(const QVector<Path>& v)
+        : QVector(v)
+    {
+    }
+    Paths(const std::initializer_list<Path>& v)
+        : QVector(v)
+    {
+    }
+    Paths(const Paths& v) = default;
+
+    operator QVector<QPolygonF>()
+    {
+        QVector<QPolygonF> poly;
+        poly.reserve(size());
+        for (const auto& pt : *this)
+            poly << pt;
+        return poly;
+    }
+
+    //    int id {};
+};
 
 inline Path& operator<<(Path& poly, const IntPoint& p)
 {

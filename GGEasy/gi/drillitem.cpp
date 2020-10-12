@@ -5,6 +5,7 @@
 #include "excellon.h"
 #include "gcode.h"
 #include "graphicsview.h"
+#include "scene.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
@@ -12,12 +13,13 @@ using namespace ClipperLib;
 
 DrillItem::DrillItem(Excellon::Hole* hole, Excellon::File* file)
     : GraphicsItem(file)
-    , m_hole(hole)
     , m_diameter(hole->state.currentToolDiameter())
+    , m_hole(hole)
 {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     create();
+    changeColor();
 }
 
 DrillItem::DrillItem(double diameter, GCode::File* file)
@@ -27,47 +29,31 @@ DrillItem::DrillItem(double diameter, GCode::File* file)
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     create();
+    changeColor();
 }
+
+DrillItem::~DrillItem() { }
 
 QRectF DrillItem::boundingRect() const { return m_rect; }
 
 QPainterPath DrillItem::shape() const { return m_shape; }
 
-void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
-    //    if (m_paths.first().isEmpty()) {
-    //    if (m_penColor)
-    //        m_pen.setColor(*m_penColor);
-    //    if (m_brushColor)
-    //        m_brush.setColor(*m_brushColor);
-    painter->save();
-    QBrush brush(m_color);
-    if (brush.style() != Qt::SolidPattern) {
-        const double scale = App::graphicsView()->scaleFactor();
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        brush.setMatrix(QMatrix().scale(scale, scale));
-#else
-        brush.setTransform(QTransform().scale(scale, scale));
-#endif
-    }
 
-    if (option->state & QStyle::State_Selected)
-        brush.setColor(Qt::magenta);
-
-    if (option->state & QStyle::State_MouseOver)
-        brush.setColor(brush.color().darker(150));
-
-    if constexpr (false) {
-        painter->setBrush(brush);
-        painter->setPen(m_pen);
-        painter->drawPath(m_shape);
-    } else {
-        painter->setBrush(brush);
+    if (App::scene()->drawPdf()) {
+        painter->setBrush(Qt::black);
         painter->setPen(Qt::NoPen);
-        painter->drawPolygon(m_shape.toFillPolygon());
-        painter->strokePath(m_shape, m_pen);
+        painter->drawPath(m_shape);
+        return;
     }
-    painter->restore();
+
+    painter->setBrush(m_bodyColor);
+    painter->setPen(Qt::NoPen);
+    painter->drawPolygon(m_shape.toFillPolygon());
+
+    m_pen.setColor(m_pathColor);
+    painter->strokePath(m_shape, m_pen);
 }
 
 int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
@@ -88,7 +74,7 @@ void DrillItem::setDiameter(double diameter)
     m_diameter = diameter;
 
     create();
-    update(/*m_rect*/);
+    update();
 }
 
 Paths DrillItem::paths() const
@@ -98,11 +84,48 @@ Paths DrillItem::paths() const
         if (m_hole->state.path.isEmpty())
             path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
         else
-            return { toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)) };
+            return { m_hole->state.path.translated(m_hole->state.format->offsetPos) };
     } else
         path = CirclePath(m_diameter * uScale, (pos()));
     ReversePath(path);
     return { path };
+}
+
+void DrillItem::changeColor()
+{
+    animation.setStartValue(m_bodyColor);
+
+    switch (colorState) {
+    case Default:
+        m_bodyColor = QColor(100, 100, 100);
+        break;
+    case Hovered:
+        m_bodyColor = QColor(150, 0x0, 150);
+        break;
+    case Selected:
+        m_bodyColor = QColor(255, 0x0, 255);
+        break;
+    case Hovered | Selected:
+        m_bodyColor = QColor(127, 0x0, 255);
+        break;
+    }
+
+    m_pathColor = m_bodyColor;
+    switch (colorState) {
+    case Default:
+        break;
+    case Hovered:
+        break;
+    case Selected:
+        m_pathColor = Qt::white;
+        break;
+    case Hovered | Selected:
+        m_pathColor = Qt::white;
+        break;
+    }
+
+    animation.setEndValue(m_bodyColor);
+    animation.start();
 }
 
 void DrillItem::updateHole()
@@ -112,7 +135,7 @@ void DrillItem::updateHole()
     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
     m_diameter = m_hole->state.currentToolDiameter();
     create();
-    update(/*m_rect*/);
+    update();
 }
 
 void DrillItem::create()
@@ -120,14 +143,14 @@ void DrillItem::create()
     m_shape = QPainterPath();
     if (!m_hole) {
         //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
-        auto p = toQPolygon(CirclePath(m_diameter * uScale));
+        auto p = CirclePath(m_diameter * uScale);
         p.append(p.first());
         m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
     } else if (m_hole->state.path.isEmpty()) {
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
-        auto p = toQPolygon(CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos())));
+        auto p = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
         p.append(p.first());
         m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
@@ -135,12 +158,13 @@ void DrillItem::create()
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         Paths tmpPpath;
         ClipperOffset offset;
-        offset.AddPath(toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)), jtRound, etOpenRound);
+        offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
         offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
         for (Path& path : tmpPpath) {
             path.append(path.first());
-            m_shape.addPolygon(toQPolygon(path));
+            m_shape.addPolygon(path);
         }
         m_rect = m_shape.boundingRect();
+        fillPolygon = m_shape.toFillPolygon();
     }
 }

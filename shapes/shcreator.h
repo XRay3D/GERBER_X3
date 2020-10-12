@@ -7,6 +7,7 @@ class QAction;
 namespace Shapes {
 
 class Constructor {
+    friend class Handler;
     inline static int type;
     inline static int counter;
     inline static QPointF point;

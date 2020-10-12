@@ -12,7 +12,7 @@ PathItem::PathItem(const Paths& paths, GCode::File* file)
     : m_gcFile(file)
 {
     for (const Path& path : paths)
-        m_shape.addPolygon(toQPolygon(path));
+        m_shape.addPolygon(path);
     double k;
     if (m_gcFile)
         k = m_gcFile->m_gcp.getToolDiameter() * 0.5;
@@ -27,7 +27,7 @@ PathItem::PathItem(const Paths& paths, GCode::File* file)
 PathItem::PathItem(const Path& path, GCode::File* file)
     : m_gcFile(file)
 {
-    m_shape.addPolygon(toQPolygon(path));
+    m_shape.addPolygon(path);
     double k;
     if (m_gcFile)
         k = m_gcFile->m_gcp.getToolDiameter() * 0.5;

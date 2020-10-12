@@ -238,7 +238,7 @@ QRectF GraphicsView::getViewRect()
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
-    constexpr int scbarScale = 2;
+    constexpr int scbarScale = 3;
     const auto delta = event->angleDelta().y();
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))

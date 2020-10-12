@@ -28,7 +28,7 @@ void PolyLine::redraw()
             path.append((handlers[i]->pos()));
     }
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(path));
+    m_shape.addPolygon(path);
     m_rect = m_shape.boundingRect();
     if (handlers.size() > 4) {
         QPointF c(centroidFast());

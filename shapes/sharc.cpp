@@ -66,7 +66,7 @@ void Arc::redraw()
     }
 
     m_shape = QPainterPath();
-    m_shape.addPolygon(toQPolygon(path));
+    m_shape.addPolygon(path);
     m_rect = m_shape.boundingRect();
 
     setPos({ 1, 1 }); //костыли    //update();

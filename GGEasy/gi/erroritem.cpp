@@ -7,7 +7,7 @@ ErrorItem::ErrorItem(const Paths& paths, double area)
     : m_area(area)
 {
     for (auto& path : paths)
-        m_shape.addPolygon(toQPolygon(path));
+        m_shape.addPolygon(path);
     setFlag(ItemIsSelectable);
 }
 

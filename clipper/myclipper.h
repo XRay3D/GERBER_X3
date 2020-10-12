@@ -23,11 +23,11 @@ using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
-Path toPath(const QPolygonF& p);
-Paths toPaths(const QVector<QPolygonF>& p);
+//Path toPath(const QPolygonF& p);
+//Paths toPaths(const QVector<QPolygonF>& p);
 
-QPolygonF toQPolygon(const Path& p);
-QVector<QPolygonF> toQPolygons(const Paths& p);
+//QPolygonF toQPolygon(const Path& p);
+//QVector<QPolygonF> toQPolygons(const Paths& p);
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);
