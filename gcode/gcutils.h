@@ -63,7 +63,7 @@ protected:
 
     bool formatFlags[Size];
     QString lastValues[6];
-    Code m_gCode = G_null;
+    Code m_gCode = GNull;
 
     inline QString g0()
     {

@@ -9,13 +9,15 @@
 #include "leakdetector.h"
 
 namespace GCode {
-ThermalCreator::ThermalCreator()
-{
-}
+
+ThermalCreator::ThermalCreator() { }
 
 void ThermalCreator::create()
 {
-    createThermal(App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()), m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
+    createThermal(
+        App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()),
+        m_gcp.tools.first(),
+        m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
@@ -24,35 +26,34 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
-    // execute offset
-    {
-        ClipperOffset offset;
-        offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
-        offset.Execute(m_returnPs, dOffset);
-    }
+    { // create tool path
+        // execute offset
+        {
+            ClipperOffset offset;
+            offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
+            offset.Execute(m_returnPs, dOffset);
+        }
 
-    // fix direction
-    if (m_gcp.side() == Outer && !m_gcp.convent())
-        ReversePaths(m_returnPs);
-    else if (m_gcp.side() == Inner && m_gcp.convent())
-        ReversePaths(m_returnPs);
+        // fix direction
+        if (m_gcp.side() == Outer && !m_gcp.convent())
+            ReversePaths(m_returnPs);
+        else if (m_gcp.side() == Inner && m_gcp.convent())
+            ReversePaths(m_returnPs);
 
-    for (Path& path : m_returnPs)
-        path.append(path.first());
+        for (Path& path : m_returnPs)
+            path.append(path.first());
 
-    if (m_returnPs.isEmpty()) {
-        emit fileReady(nullptr);
-        return;
+        if (m_returnPs.isEmpty()) {
+            emit fileReady(nullptr);
+            return;
+        }
+        //dbgPaths(m_returnPs, "tool path");
     }
 
     // create frame
     Paths framePaths;
     {
-        ClipperOffset offset;
-        offset.AddPaths(m_returnPs, jtMiter, etClosedLine);
-        offset.Execute(framePaths, +m_toolDiameter * uScale * 0.1);
         Clipper clipper;
-        clipper.AddPaths(framePaths, ptSubject, true);
         {
             ClipperOffset offset;
             for (const Gerber::GraphicObject& go : *file) {
@@ -61,35 +62,44 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
                 }
             }
             offset.Execute(framePaths, dOffset - 0.005 * uScale);
+            //dbgPaths(framePaths, "Gerber::Line", true);
+            clipper.AddPaths(framePaths, ptSubject, true);
+        }
+        if (!m_gcp.params[GCodeParams::IgnoreCopper].toInt()) {
+            ClipperOffset offset;
+            for (const Gerber::GraphicObject& go : *file) {
+                if (go.state().type() == Gerber::Region) {
+                    if (go.state().imgPolarity() == Gerber::Positive)
+                        offset.AddPaths(go.paths(), jtMiter, etClosedPolygon);
+                    else {
+                        Paths paths(go.paths());
+                        ReversePaths(paths);
+                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    }
+                }
+            }
+            offset.Execute(framePaths, dOffset - 0.005 * uScale);
+            //dbgPaths(framePaths, "Gerber::Region", true);
+            clipper.AddPaths(framePaths, ptClip, true);
         }
         for (const Paths& paths : m_supportPss) {
             clipper.AddPaths(paths, ptClip, true);
         }
-        clipper.AddPaths(framePaths, ptClip, true);
-        clipper.Execute(ctIntersection, framePaths, pftPositive);
+        clipper.Execute(ctUnion, framePaths, pftEvenOdd);
+        //dbgPaths(framePaths, "framePaths", true);
     }
-    // create thermal
-    for (int index = 0; index < m_returnPs.size(); ++index) {
-        const Path& path = m_returnPs.at(index);
-        Paths paths;
-        // cut toolPath
 
+    {
         Clipper clipper;
-        clipper.AddPath(path, ptSubject, false);
+        clipper.AddPaths(m_returnPs, ptSubject, false);
         clipper.AddPaths(framePaths, ptClip, true);
-        PolyTree polytree;
-        clipper.Execute(ctDifference, polytree /*paths*/, pftPositive);
-        PolyTreeToPaths(polytree, paths);
-        if (paths.isEmpty())
-            continue;
-        // merge result toolPaths
-        mergeSegments(paths);
-        m_returnPs.remove(index--);
-        m_returnPss.append(sortBE(paths));
+        clipper.Execute(ctDifference, m_returnPs, pftPositive);
+        sortBE(m_returnPs);
     }
+
     if (m_returnPs.size()) {
-        for (Path& path : m_returnPs)
-            path.append(path.first());
+        //        for (Path& path : m_returnPs)
+        //            path.append(path.first());
         m_returnPss.append(sortB(m_returnPs));
     }
     if (m_returnPss.isEmpty()) {

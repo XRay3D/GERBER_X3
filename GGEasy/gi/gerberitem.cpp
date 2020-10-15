@@ -81,7 +81,6 @@ void GiGerber::changeColor()
         break;
     case Hovered:
         m_bodyColor.setAlpha(255);
-        m_bodyColor = m_bodyColor.darker(125);
         break;
     case Selected:
         m_bodyColor.setAlpha(255);
