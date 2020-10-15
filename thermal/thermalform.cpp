@@ -185,7 +185,7 @@ void ThermalForm::updateFiles()
 
     for (Gerber::File* file : App::project()->files<Gerber::File>()) {
         if (file->flashedApertures()) {
-            ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+            ui->cbxFile->addItem(file->shortName(), file->id());
             QPixmap pixmap(Size, Size);
             QColor color(file->color());
             color.setAlpha(255);
@@ -237,7 +237,8 @@ void ThermalForm::createFile()
     gpc.setSide(GCode::Outer);
     gpc.tools.append(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::FileId] = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.params[GCode::GCodeParams::FileId] = ui->cbxFile->currentData().toInt();
+    gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addSupportPaths(wBridgePaths);
@@ -253,7 +254,8 @@ void ThermalForm::updateName()
 
 void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
-    createTPI(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
+    auto file = App::project()->file<Gerber::File>(ui->cbxFile->currentData().toInt());
+    createTPI(file->apertures());
 }
 
 void ThermalForm::createTPI(const Gerber::ApertureMap* value)
@@ -266,7 +268,7 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
         delete ui->treeView->model();
 
     model = new ThermalModel(ui->treeView);
-    auto const file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+    auto file = App::project()->file<Gerber::File>(ui->cbxFile->currentData().toInt());
     boardSide = file->side();
     model->appendRow(QIcon(), tr("All"), par);
 

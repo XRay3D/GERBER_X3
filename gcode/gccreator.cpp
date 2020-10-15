@@ -30,7 +30,7 @@
 
 #include "leakdetector.h"
 
-void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
+void dbgPaths(Paths ps, const QString& fileName, bool closed, const Tool& tool)
 {
     if (ps.isEmpty()) {
         qDebug("dbgPaths - ps.isEmpty()");
@@ -40,8 +40,9 @@ void dbgPaths(Paths ps, const QString& fileName, const Tool& tool)
         if (ps[i].isEmpty())
             ps.remove(i--);
 
-    //    for (Path& p : ps)
-    //        p.append(p.first());
+    if (closed)
+        for (Path& p : ps)
+            p.append(p.first());
 
     //assert(ps.isEmpty());
     GCode::GCodeParams gcp { tool, 0.0, GCode::Profile };

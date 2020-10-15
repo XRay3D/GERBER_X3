@@ -5,9 +5,9 @@
 
 #include <QVector>
 
-class Tool;
-
+class QParallelAnimationGroup;
 class ThermalNode;
+class Tool;
 
 class ThermalPreviewItem final : public QGraphicsObject {
     Q_OBJECT
@@ -17,15 +17,14 @@ class ThermalPreviewItem final : public QGraphicsObject {
 
     // clang-format off
     QColor bodyColor() { return m_bodyColor; }
-    void setBodyColor(const QColor& c) { m_bodyColor = c; colorChanged();  }
+    void setBodyColor(const QColor& c) { m_bodyColor = c; update();  }
     QColor pathColor() { return m_pathColor; }
-    void setPathColor(const QColor& c) { m_pathColor = c; colorChanged(); }
+    void setPathColor(const QColor& c) { m_pathColor = c; update(); }
     // clang-format on
     static QPainterPath drawPoly(const Gerber::GraphicObject& go);
     friend class ThermalNode;
 
 signals:
-    void colorChanged();
     void selectionChanged(const QModelIndex& s, const QModelIndex& d);
 
 public:
@@ -45,18 +44,16 @@ public:
 
     Paths bridge() const;
     Paths paths() const;
-    Paths toolPath() const;
 
     bool isValid() const;
     void redraw();
 
 private:
+    QParallelAnimationGroup* ag;
     Tool& tool;
     double& m_depth;
-    bool m_isValid = false;
 
     const Gerber::GraphicObject* const grob = nullptr;
-
     const QPainterPath sourcePath;
     QPainterPath painterPath;
 
@@ -82,7 +79,7 @@ private:
         QColor(0, 255, 0, light), //     light green
         QColor(255, 0, 0, dark), //      dark red
         QColor(255, 0, 0, light), //     light red
-        QColor(255, 255, 255, 0), //         transparent
+        QColor(255, 255, 255, 0), //     transparent
     };
 
     enum ColorState {
@@ -96,7 +93,7 @@ private:
     double diameter;
 
     Paths m_bridge;
-    Paths m_toolPath;
+    Paths previewPath;
 
     Paths cashedPath;
     Paths cashedFrame;

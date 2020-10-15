@@ -1,8 +1,8 @@
 #pragma once
 
+#include "datastream.h"
 #include <QVariant>
 #include <QVector>
-#include "datastream.h"
 #include <tooldatabase/tool.h>
 
 using UsedItems = QMap<QPair<int, int>, QVector<int>>;
@@ -22,7 +22,7 @@ enum GCodeType {
 };
 
 enum Code {
-    G_null = -1,
+    GNull = -1,
     G00 = 0,
     G01 = 1,
     G02 = 2,
@@ -67,7 +67,8 @@ struct GCodeParams {
         Bridges, // need for Profile
         BridgeLen, // need for Profile
         NotTile,
-        Strip
+        Strip,
+        IgnoreCopper // need for Thermal
     };
 
     GCodeParams() { }

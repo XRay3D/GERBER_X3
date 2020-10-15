@@ -7,12 +7,14 @@
 #include "gccreator.h"
 #include "thermalnode.h"
 #include "tooldatabase/tool.h"
+#include <QAnimationGroup>
 #include <QElapsedTimer>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QIcon>
 #include <QMenu>
 #include <QMutex>
 #include <QPainter>
+#include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
@@ -33,14 +35,25 @@ QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 }
 
 ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& tool, double& depth)
-    : tool(tool)
+    : ag(new QParallelAnimationGroup(this))
+    , tool(tool)
     , m_depth(depth)
     , grob(&go)
     , sourcePath(drawPoly(go))
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed])
+
 {
-    connect(this, &ThermalPreviewItem::colorChanged, [this] { update(); });
+    ag->addAnimation(new QPropertyAnimation(this, "bodyColor"));
+    ag->addAnimation(new QPropertyAnimation(this, "pathColor"));
+
+    QPropertyAnimation* a = static_cast<QPropertyAnimation*>(ag->animationAt(0));
+    a->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    a->setDuration(100);
+    a = static_cast<QPropertyAnimation*>(ag->animationAt(1));
+    a->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    a->setDuration(100);
+
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
@@ -85,14 +98,12 @@ Paths ThermalPreviewItem::bridge() const { return m_bridge; }
 
 Paths ThermalPreviewItem::paths() const { return grob->paths(); }
 
-Paths ThermalPreviewItem::toolPath() const { return m_toolPath; }
-
 void ThermalPreviewItem::redraw()
 {
-    QElapsedTimer t;
-    t.start();
+    //    QElapsedTimer t;
+    //    t.start();
 
-    if (double d = tool.getDiameter(m_depth); !qFuzzyCompare(diameter, d)) {
+    if (double d = tool.getDiameter(m_depth); cashedPath.isEmpty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
         ClipperOffset offset;
         offset.AddPaths(grob->paths(), jtRound, etClosedPolygon);
@@ -127,18 +138,18 @@ void ThermalPreviewItem::redraw()
         }
         clipper.Execute(ctIntersection, m_bridge, pftPositive);
     }
-    {
+
+    { // cut
         Clipper clipper;
         clipper.AddPaths(cashedPath, ptSubject, false);
         clipper.AddPaths(m_bridge, ptClip, true);
-        PolyTree polytree;
-        clipper.Execute(ctDifference, polytree, pftPositive);
-        PolyTreeToPaths(polytree, m_toolPath);
+        clipper.Execute(ctDifference, previewPath, pftPositive);
     }
-    qDebug() << "redraw" << (t.nsecsElapsed() / 1000) << "us";
-    m_isValid = !m_toolPath.isEmpty();
+
+    //    qDebug() << "redraw" << (t.nsecsElapsed() / 1000) << "us";
     painterPath = QPainterPath();
-    for (QPolygonF polygon : m_toolPath) {
+
+    for (QPolygonF polygon : previewPath) {
         painterPath.moveTo(polygon.takeFirst());
         for (QPointF& pt : polygon)
             painterPath.lineTo(pt);
@@ -147,33 +158,26 @@ void ThermalPreviewItem::redraw()
     update();
 }
 
-bool ThermalPreviewItem::isValid() const { return m_isValid && m_node->isChecked(); }
+bool ThermalPreviewItem::isValid() const { return !previewPath.isEmpty() && m_node->isChecked(); }
 
 void ThermalPreviewItem::changeColor()
 {
-    {
-        auto animation = new QPropertyAnimation(this, "bodyColor");
-        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-        animation->setDuration(200);
-        animation->setStartValue(m_bodyColor);
-        if (colorState & Selected) {
-            animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
-        } else {
-            if (colorState & Used)
-                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
-            else
-                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
-        }
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    QPropertyAnimation* a = static_cast<QPropertyAnimation*>(ag->animationAt(0));
+    a->setStartValue(m_bodyColor);
+    if (colorState & Selected) {
+        a->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
+    } else {
+        if (colorState & Used)
+            a->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
+        else
+            a->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
     }
-    {
-        auto animation = new QPropertyAnimation(this, "pathColor");
-        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-        animation->setDuration(100);
-        animation->setStartValue(m_pathColor);
-        animation->setEndValue((colorState & Used) ? colors[(int)Colors::Default] : colors[(int)Colors::UnUsed]);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
-    }
+    a = static_cast<QPropertyAnimation*>(ag->animationAt(1));
+
+    a->setStartValue(m_pathColor);
+    a->setEndValue((colorState & Used) ? colors[(int)Colors::Default] : colors[(int)Colors::UnUsed]);
+
+    ag->start();
 }
 
 void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
