@@ -1,3 +1,23 @@
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Bakiev Damir                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Bakiev Damir 2016-2020                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#* Attributions:                                                                *
+#* The code in this library is an extension of Bala Vatti's clipping algorithm: *
+#* "A generic solution to polygon clipping"                                     *
+#* Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
+#* http://portal.acm.org/citation.cfm?id=129906                                 *
+#*                                                                              *
+#*******************************************************************************/
+
 QT += core gui opengl widgets printsupport concurrent
 
 TARGET = GGEasy

@@ -1,7 +1,9 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
+/**
+ * @link   https://habrahabr.ru/post/122397/
+ * @author shurik
+ */
 #include "mathparser.h"
 #include <QDebug>
 #include <QtMath>

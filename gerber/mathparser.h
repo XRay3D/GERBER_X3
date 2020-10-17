@@ -4,9 +4,6 @@
  */
 #pragma once
 
-
-
-
 #include <QMap>
 #include <QObject>
 
@@ -37,5 +34,3 @@ private:
     // Тут определяем все нашие функции, которыми мы можем пользоватся в формулах
     Result processFunction(QString func, Result r);
 };
-
-
