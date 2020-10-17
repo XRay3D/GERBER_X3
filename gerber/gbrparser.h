@@ -1,13 +1,23 @@
+/*******************************************************************************
+*                                                                              *
+* Author    :  Bakiev Damir                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Bakiev Damir 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #pragma once
-
-
-
 #include "gbrattributes.h"
 #include "gbrfile.h"
 #include "gbrtypes.h"
+#include "parser.h"
 #include <QObject>
 #include <QStack>
-#include "parser.h"
 
 namespace Gerber {
 
@@ -68,7 +78,6 @@ private:
     QMap<int, int> aperFunctionMap;
     //Attributes att;
 
-
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
     bool parseApertureMacros(const QString& gLine);
@@ -90,4 +99,3 @@ private:
     /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
 };
 }
-

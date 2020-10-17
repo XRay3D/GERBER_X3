@@ -1,5 +1,17 @@
+/*******************************************************************************
+*                                                                              *
+* Author    :  Bakiev Damir                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Bakiev Damir 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #pragma once
-
 #define VER_FILEVERSION             0,7,8,10b
 #define VER_FILEVERSION_STR         "0.7.8.10b\0"
 

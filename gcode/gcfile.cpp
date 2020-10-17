@@ -1,7 +1,18 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
+/*******************************************************************************
+*                                                                              *
+* Author    :  Bakiev Damir                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Bakiev Damir 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "gcfile.h"
 
 #include "forms/gcodepropertiesform.h"
@@ -543,7 +554,7 @@ void File::createGiPocket()
         for (const Path& path : paths) {
             item = new PathItem(path, this);
 #ifdef QT_DEBUG
-            item->setPenColor(*debugColor.last());
+            item->setPenColor(debugColor.last().data());
 #else
             item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
 #endif
@@ -557,7 +568,7 @@ void File::createGiPocket()
             item = new PathItem(g1path);
 #ifdef QT_DEBUG
             debugColor.append(QSharedPointer<QColor>(new QColor(0, 0, 255)));
-            item->setPenColor(*debugColor.last());
+            item->setPenColor(debugColor.last().data());
 #else
             item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
 #endif

@@ -1,5 +1,17 @@
+/*******************************************************************************
+*                                                                              *
+* Author    :  Bakiev Damir                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Bakiev Damir 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #pragma once
-
 #include "myclipper.h"
 #include <QAnimationGroup>
 #include <QGraphicsItem>
@@ -69,11 +81,11 @@ public:
     // clang-format off
     QColor color() const { return m_color; }
     void setColor(const QColor& brush) { m_bodyColor = m_color = brush; colorChanged(); }
-    void setColorP(const QColor* brushColor) { m_bodyColor = *(m_colorPtr = brushColor); colorChanged(); }
+    void setColorP(QColor* brushColor) { m_bodyColor = *(m_colorPtr = brushColor); colorChanged(); }
 
     QPen pen() const { return m_pen; }
     void setPen(const QPen& pen) { m_pen = pen; colorChanged(); }
-    void setPenColor(const QColor* penColor) { m_pnColorPrt = penColor; colorChanged(); }
+    void setPenColor(QColor* penColor) { m_pnColorPrt = penColor; colorChanged(); }
     // clang-format on
 
     virtual Paths paths() const = 0;
