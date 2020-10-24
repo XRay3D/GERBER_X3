@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -151,7 +151,7 @@ void BridgeItem::update()
     QGraphicsItem::update();
 }
 
-IntPoint BridgeItem::getPoint(const int side) const
+Point64 BridgeItem::getPoint(const int side) const
 {
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
@@ -165,7 +165,7 @@ IntPoint BridgeItem::getPoint(const int side) const
         l2.setAngle(m_angle);
         return (l2.p2());
     }
-    return IntPoint();
+    return Point64();
 }
 
 QLineF BridgeItem::getPath() const

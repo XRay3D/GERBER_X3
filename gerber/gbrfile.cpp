@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -190,10 +190,10 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
         IntRect r(clipper.GetBounds());
         int k = /*uScale*/ 1;
         Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
+            Point64(r.left - k, r.bottom + k),
+            Point64(r.right + k, r.bottom + k),
+            Point64(r.right + k, r.top - k),
+            Point64(r.left - k, r.top - k)
         };
         if (fl)
             ReversePath(outer);
@@ -297,8 +297,8 @@ void File::createGi()
             for (const Path& chPath : checkList) { // find copy
                 int counter = 0;
                 if (chPath.size() == path.size()) {
-                    for (const IntPoint& p1 : chPath) {
-                        for (const IntPoint& p2 : path) {
+                    for (const Point64& p1 : chPath) {
+                        for (const Point64& p2 : path) {
                             if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
                                 ++counter;
                                 break;

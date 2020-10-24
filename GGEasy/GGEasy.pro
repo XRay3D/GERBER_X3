@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #*                                                                              *
-#* Author    :  Bakiev Damir                                                    *
+#* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
 #* Date      :  01 February 2020                                                *
 #* Website   :  na                                                              *
-#* Copyright :  Bakiev Damir 2016-2020                                          *
+#* Copyright :  Damir Bakiev 2016-2020                                          *
 #*                                                                              *
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -206,8 +206,8 @@ include(../graphicsview/graphicsview.pri)
 include(../shapes/shapes.pri)
 include(../thermal/thermal.pri)
 
-pvs_studio.target = pvs
-pvs_studio.output = true
-pvs_studio.cxxflags = -std=c++17
-pvs_studio.sources = $${SOURCES}
-include(../PVS-Studio.pri)
+#pvs_studio.target = pvs
+#pvs_studio.output = true
+#pvs_studio.cxxflags = -std=c++17
+#pvs_studio.sources = $${SOURCES}
+#include(../PVS-Studio.pri)

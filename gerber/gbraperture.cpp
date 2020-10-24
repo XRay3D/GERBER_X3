@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -27,11 +27,6 @@ AbstractAperture::AbstractAperture(const Format* format)
 
 AbstractAperture::~AbstractAperture() { }
 
-double AbstractAperture::drillDiameter() const
-{
-    return m_drillDiam;
-}
-
 Paths AbstractAperture::draw(const State& state, bool fl)
 {
     if (state.dCode() == D03 && state.imgPolarity() == Positive && fl)
@@ -44,41 +39,19 @@ Paths AbstractAperture::draw(const State& state, bool fl)
     for (Path& path : tmpPpaths) {
         if (state.imgPolarity() == Negative)
             ReversePath(path);
-        if (m_format->unitMode == Inches && type() == Macro)
-            for (IntPoint& pt : path) {
-                pt.X *= 25.4;
-                pt.Y *= 25.4;
-            }
+
+        if (m_format->unitMode == Inches && type() == Macro) {
+            for (Point64& pt : path)
+                pt *= 25.4;
+        }
 
         transform(path, state);
 
-        //if (state.curPos().X != 0 || state.curPos().Y != 0)
-        TranslatePath(path, state.curPos());
+        if (!state.curPos().isNull()) //??????????
+            TranslatePath(path, state.curPos());
     }
-    //    Paths tmpPpaths;
-    //    tmpPpaths.reserve(m_paths.size());
 
-    //    for (Path path : m_paths) {
-    //        if (state.imgPolarity() == Negative)
-    //            ReversePath(path);
-    //        if (m_format->unitMode == Inches && type() == Macro)
-    //            for (IntPoint& pt : path) {
-    //                pt.X *= 25.4;
-    //                pt.Y *= 25.4;
-    //            }
-
-    //        transform(path, state);
-
-    //        if (state.curPos().X != 0 || state.curPos().Y != 0)
-    //            translate(path, state.curPos());
-    //        tmpPpaths.push_back(path);
-    //    }
     return tmpPpaths;
-}
-
-double AbstractAperture::minSize() const
-{
-    return m_size;
 }
 
 double AbstractAperture::apertureSize()
@@ -105,16 +78,16 @@ Path AbstractAperture::drawDrill(const State& state)
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
     bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
+    for (Point64& pt : poligon) {
 
         if (state.mirroring() & X_Mirroring)
             pt.X = -pt.X;
         if (state.mirroring() & Y_Mirroring)
             pt.Y = -pt.Y;
         if (state.rotating() != 0.0 || state.scaling() != 1.0) {
-            const double tmpAangle = qDegreesToRadians(state.rotating() - Angle(IntPoint(), pt));
-            const double length = Length(IntPoint(), pt) * state.scaling();
-            pt = IntPoint(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
+            const double tmpAangle = qDegreesToRadians(state.rotating() - Angle(Point64(), pt));
+            const double length = Length(Point64(), pt) * state.scaling();
+            pt = Point64(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
         }
     }
 
@@ -265,12 +238,12 @@ void ApObround::draw()
         m_paths.push_back(CirclePath(w));
     } else {
         if (w > h) {
-            clipper.AddPath(CirclePath(h, IntPoint(-(w - h) / 2, 0)), ptClip, true);
-            clipper.AddPath(CirclePath(h, IntPoint((w - h) / 2, 0)), ptClip, true);
+            clipper.AddPath(CirclePath(h, Point64(-(w - h) / 2, 0)), ptClip, true);
+            clipper.AddPath(CirclePath(h, Point64((w - h) / 2, 0)), ptClip, true);
             clipper.AddPath(RectanglePath(w - h, h), ptClip, true);
         } else if (w < h) {
-            clipper.AddPath(CirclePath(w, IntPoint(0, -(h - w) / 2)), ptClip, true);
-            clipper.AddPath(CirclePath(w, IntPoint(0, (h - w) / 2)), ptClip, true);
+            clipper.AddPath(CirclePath(w, Point64(0, -(h - w) / 2)), ptClip, true);
+            clipper.AddPath(CirclePath(w, Point64(0, (h - w) / 2)), ptClip, true);
             clipper.AddPath(RectanglePath(w, h - w), ptClip, true);
         }
         clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
@@ -331,7 +304,7 @@ void ApPolygon::draw()
     const double step = 360.0 / m_verticesCount;
     const double diam = this->m_diam * uScale;
     for (int i = 0; i < m_verticesCount; ++i) {
-        poligon.push_back(IntPoint(
+        poligon.push_back(Point64(
             static_cast<cInt>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<cInt>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     }
@@ -518,7 +491,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
         RotationAngle
     };
 
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -539,7 +512,7 @@ Path ApMacro::drawCircle(const QList<double>& mod)
         RotationAngle
     };
 
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -571,7 +544,7 @@ void ApMacro::drawMoire(const QList<double>& mod)
     const cInt ct = static_cast<cInt>(mod[CrossThickness] * uScale);
     const cInt cl = static_cast<cInt>(mod[CrossLength] * uScale);
 
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -615,7 +588,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
 
     Path polygon;
     for (int j = 0; j < int(num); ++j)
-        polygon.push_back(IntPoint(
+        polygon.push_back(Point64(
             static_cast<cInt>(mod[X + j * 2] * uScale),
             static_cast<cInt>(mod[Y + j * 2] * uScale)));
 
@@ -640,14 +613,14 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
         throw QObject::tr("Bad outline (regular polygon) macro!");
 
     const cInt diameter = static_cast<cInt>(mod[Diameter] * uScale * 0.5);
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
     Path polygon;
     for (int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
-        polygon.push_back(IntPoint(
+        polygon.push_back(Point64(
             static_cast<cInt>(qCos(angle) * diameter),
             static_cast<cInt>(qSin(angle) * diameter)));
     }
@@ -678,7 +651,7 @@ void ApMacro::drawThermal(const QList<double>& mod)
     const cInt inner = static_cast<cInt>(mod[InnerDiameter] * uScale);
     const cInt gap = static_cast<cInt>(mod[GapThickness] * uScale);
 
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -711,13 +684,13 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         RotationAngle,
     };
 
-    const IntPoint start(
+    const Point64 start(
         static_cast<cInt>(mod[StartX] * uScale),
         static_cast<cInt>(mod[StartY] * uScale));
-    const IntPoint end(
+    const Point64 end(
         static_cast<cInt>(mod[EndX] * uScale),
         static_cast<cInt>(mod[EndY] * uScale));
-    const IntPoint center(
+    const Point64 center(
         static_cast<cInt>(0.5 * start.X + 0.5 * end.X),
         static_cast<cInt>(0.5 * start.Y + 0.5 * end.Y));
 

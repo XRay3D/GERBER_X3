@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -284,11 +284,17 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
     boardSide = file->side();
     model->appendRow(QIcon(), tr("All"), par);
 
-    using Worker = std::tuple<const Gerber::GraphicObject*, ThermalNode*, QString>;
+    struct Worker {
+        const Gerber::GraphicObject* go;
+        ThermalNode* thermalNode;
+        QString name;
+        int strageIdx = -1;
+    };
+
     QVector<Worker> map;
     auto creator = [this](Worker w) {
         static QMutex m;
-        auto [go, thermalNode, name] = w;
+        auto [go, thermalNode, name, strageIdx] = w;
         auto item = new ThermalPreviewItem(*go, tool, m_depth);
         connect(item, &ThermalPreviewItem::selectionChanged, this, &ThermalForm::setSelection);
         item->setToolTip(name);
@@ -302,6 +308,8 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
         Line
     };
 
+    int ctr = 0;
+
     auto testArea = [this](const Paths& paths) {
         const double areaMax = ui->dsbxAreaMax->value() * uScale * uScale;
         const double areaMin = ui->dsbxAreaMin->value() * uScale * uScale;
@@ -310,19 +318,20 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
     };
 
     QMap<int, ThermalNode*> thermalNodes;
-
     if (ui->chbxAperture->isChecked()) {
-        for (auto [dCode, aperture] : m_apertures)
-            if (aperture->isFlashed() && testArea(aperture->draw({})))
+        for (auto [dCode, aperture] : m_apertures) {
+            if (aperture->isFlashed() && testArea(aperture->draw({}))) {
                 thermalNodes[dCode] = model->appendRow(drawApertureIcon(aperture.data()), aperture->name(), par);
-
+            }
+        }
         for (auto [dCode, aperture] : m_apertures) {
             if (aperture->isFlashed()) {
                 for (const Gerber::GraphicObject& go : *file) {
                     if (thermalNodes.contains(dCode)
                         && go.state().dCode() == Gerber::D03
-                        && go.state().aperture() == dCode)
-                        map.append({ &go, thermalNodes[dCode], "" /*aperture->name()*/ });
+                        && go.state().aperture() == dCode) {
+                        map.append({ &go, thermalNodes[dCode], "", ctr++ });
+                    }
                 }
             }
         }
@@ -336,7 +345,7 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
                 && (go.path().size() == 2 || (go.path().size() == 5 && go.path().first() == go.path().last()))
                 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()
                 && testArea(go.paths())) {
-                map.append({ &go, thermalNodes[Line], tr("Line") });
+                map.append({ &go, thermalNodes[Line], tr("Line"), ctr++ });
             }
         }
     }
@@ -349,7 +358,6 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
                 && go.state().imgPolarity() == Gerber::Positive
                 && testArea(go.paths())) {
                 gos.append(&go);
-                //map.append({ &go, thermalNodes[Region], tr("Region") });
             }
         }
         std::sort(gos.begin(), gos.end(), [](const Gerber::GraphicObject* go1, const Gerber::GraphicObject* go2) {
@@ -357,9 +365,12 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
             return go1->state().curPos() < go2->state().curPos();
         });
         for (auto go : gos) {
-            map.append({ go, thermalNodes[Region], tr("Region") });
+            map.append({ go, thermalNodes[Region], tr("Region"), ctr++ });
         }
     }
+
+    storage.resize(ctr * sizeof(ThermalPreviewItem));
+    qDebug() << storage.size() << ctr;
 
     for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
         auto m(map.mid(i, c));

@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -43,13 +43,13 @@ void Circle::redraw()
     m_radius = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center((handlers[Center]->pos()));
+    const Point64 center((handlers[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
     Path& path = m_paths.first();
     path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        path.append(IntPoint(
+        path.append(Point64(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }

@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -21,7 +21,7 @@ class ThermalModel;
 
 class ThermalNode {
 public:
-    ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, ThermalPreviewItem* item);
+    ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, ThermalPreviewItem* item);
     ThermalNode(const QIcon& icon, const QString& name, const ThParam& par);
     explicit ThermalNode(ThermalModel* _model);
 
@@ -48,7 +48,7 @@ public:
     int count() const;
     ThParam getParam() const { return par; };
 
-    IntPoint pos() const;
+    Point64 pos() const;
     ThermalPreviewItem* item() const;
     bool createFile() const;
     void disable();
@@ -64,7 +64,7 @@ private:
     const bool container = false;
     const QIcon icon;
     const QString name;
-    const IntPoint m_pos;
+    const Point64 m_pos;
 
     ThParam par;
 

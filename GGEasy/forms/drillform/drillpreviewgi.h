@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -51,7 +51,7 @@ public:
     double sourceDiameter() const;
     int toolId() const;
     void updateTool();
-    IntPoint pos() const;
+    Point64 pos() const;
     Paths paths() const;
     bool fit(double depth);
 
@@ -88,17 +88,17 @@ private:
         Tool,
     };
 
-    static constexpr int dark = 200;
+    static constexpr int dark = 180;
     static constexpr int light = 255;
-    inline static const QColor colors[] {
-        QColor(128, 128, 128, dark), //  Default         gray dark
-        QColor(255, 255, 255, light), // DefaultHovered  gray light
-        QColor(0, 255, 0, dark), //      Selected        green dark
-        QColor(0, 255, 0, light), //     SelectedHovered green light
-        QColor(255, 0, 0, dark), //      Used            red dark
-        QColor(255, 0, 0, light), //     UsedHovered     red light
-        QColor(255, 255, 255, 0), //     UnUsed          transparent
-        QColor(255, 255, 255, dark), //  Tool            white
+    inline static constexpr QRgb colors[] {
+        qRgba(128, 128, 128, dark), //  Default         gray dark
+        qRgba(255, 255, 255, light), // DefaultHovered  gray light
+        qRgba(0, 255, 0, dark), //      Selected        green dark
+        qRgba(0, 255, 0, light), //     SelectedHovered green light
+        qRgba(255, 0, 0, dark), //      Used            red dark
+        qRgba(255, 0, 0, light), //     UsedHovered     red light
+        qRgba(255, 255, 255, 0), //     UnUsed          transparent
+        qRgba(255, 255, 255, dark), //  Tool            white
     };
 
     enum ColorState {

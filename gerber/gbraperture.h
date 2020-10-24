@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -52,7 +52,7 @@ public:
     bool withHole() const { return m_drillDiam != 0.0; }
     bool isFlashed() const { return m_isFlashed; }
 
-    double drillDiameter() const;
+    double drillDiameter() const { return m_drillDiam; }
     double apertureSize();
 
     Path drawDrill(const State& state);
@@ -61,7 +61,7 @@ public:
     virtual QString name() const = 0;
     virtual ApertureType type() const = 0;
 
-    double minSize() const;
+    double minSize() const { return m_size; }
 
     virtual bool fit(double toolDiam) const = 0;
 

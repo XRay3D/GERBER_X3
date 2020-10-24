@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -102,9 +102,9 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     if (bridgeItems.size()) {
         for (int index = 0; index < m_returnPs.size(); ++index) {
             const Path& path = m_returnPs.at(index);
-            QList<QPair<BridgeItem*, IntPoint>> biStack;
+            QList<QPair<BridgeItem*, Point64>> biStack;
             for (BridgeItem* bi : bridgeItems) {
-                IntPoint pt;
+                Point64 pt;
                 if (pointOnPolygon(bi->getPath(), path, &pt))
                     biStack.append({ bi, pt });
             }
@@ -118,7 +118,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
                     Clipper clipper;
                     clipper.AddPaths(paths, ptSubject, true);
-                    for (const QPair<BridgeItem*, IntPoint>& bip : biStack) {
+                    for (const QPair<BridgeItem*, Point64>& bip : biStack) {
                         clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
                     }
                     clipper.Execute(ctIntersection, paths, pftPositive);

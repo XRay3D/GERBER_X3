@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -497,7 +497,7 @@ void Parser::resetStep()
     m_path.push_back(m_state.curPos());
 }
 
-IntPoint Parser::parsePosition(const QString& xyStr)
+Point64 Parser::parsePosition(const QString& xyStr)
 {
     static const QRegExp match(QStringLiteral("(?:G[01]{1,2})?(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?"));
     if (match.indexIn(xyStr) > -1) {
@@ -519,7 +519,7 @@ IntPoint Parser::parsePosition(const QString& xyStr)
     return m_state.curPos();
 }
 
-Path Parser::arc(const IntPoint& center, double radius, double start, double stop)
+Path Parser::arc(const Point64& center, double radius, double start, double stop)
 {
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
@@ -536,7 +536,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     double delta_angle = da_sign[m_state.interpolation()] * angle * 1.0 / steps;
     for (int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
-        points.push_back(IntPoint(
+        points.push_back(Point64(
             static_cast<cInt>(center.X + radius * cos(theta)),
             static_cast<cInt>(center.Y + radius * sin(theta))));
     }
@@ -544,7 +544,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     return points;
 }
 
-Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center)
+Path Parser::arc(Point64 p1, Point64 p2, Point64 center)
 {
     double radius = sqrt(pow((center.X - p1.X), 2) + pow((center.Y - p1.Y), 2));
     double start = atan2(p1.Y - center.Y, p1.X - center.X);
@@ -754,7 +754,7 @@ void Parser::closeStepRepeat()
     addPath();
     for (int y = 0; y < m_stepRepeat.y; ++y) {
         for (int x = 0; x < m_stepRepeat.x; ++x) {
-            const IntPoint pt(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y));
+            const Point64 pt(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y));
             for (GraphicObject& go : m_stepRepeat.storage) {
                 Paths paths(go.paths());
                 for (Path& path : paths)
@@ -945,9 +945,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             return true;
         }
 
-        const IntPoint& curPos = m_state.curPos();
+        const Point64& curPos = m_state.curPos();
 
-        const IntPoint centerPos[4] = {
+        const Point64 centerPos[4] = {
             { curPos.X + i, curPos.Y + j },
             { curPos.X - i, curPos.Y + j },
             { curPos.X + i, curPos.Y - j },
@@ -965,11 +965,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (m_state.curPos() == IntPoint(x, y))
+            const double stop = (m_state.curPos() == Point64(x, y))
                 ? start
                 : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
-            arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
+            arcPolygon = arc(Point64(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
             //arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
             // Последняя точка в вычисленной дуге может иметь числовые ошибки.
             // Точной конечной точкой является указанная (x, y). Заменить.
@@ -994,7 +994,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 const double stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
                 const double angle = arcAngle(start, stop);
                 if (angle < (M_PI + 1e-5) * 0.5) {
-                    arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
+                    arcPolygon = arc(Point64(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
                     // Replace with exact values
                     m_state.setCurPos({ x, y });
                     if (arcPolygon.size())

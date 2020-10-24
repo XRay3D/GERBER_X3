@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -53,6 +53,7 @@ private:
     Ui::ThermalForm* ui;
 
     void createTPI(const Gerber::ApertureMap* value);
+    QByteArray storage;
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
     Gerber::ApertureMap m_apertures;
     ThermalModel* model = nullptr;

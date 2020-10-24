@@ -126,7 +126,16 @@ struct IntPoint {
     {
     }
 #endif
-
+    bool isNull() const
+    {
+        return X == 0 && Y == 0;
+    }
+    friend inline IntPoint& operator*=(IntPoint& pt, double s)
+    {
+        pt.X *= s;
+        pt.Y *= s;
+        return pt;
+    }
     operator QPointF() const
     {
         return { X * dScale, Y * dScale };
@@ -197,7 +206,7 @@ struct Path : public QVector<IntPoint> {
     operator QPolygonF() const
     {
         QPolygonF poly;
-        poly.reserve(size());
+        poly.reserve(size() + 1); // +1 if need closed polygons
         for (const auto pt : *this)
             poly << pt;
         return poly;
