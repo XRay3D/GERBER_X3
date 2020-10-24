@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -19,7 +19,7 @@
 #include <QElapsedTimer>
 #include <QLineF>
 
-double Angle(const IntPoint& pt1, const IntPoint& pt2)
+double Angle(const Point64& pt1, const Point64& pt2)
 {
     const double dx = pt2.X - pt1.X;
     const double dy = pt2.Y - pt1.Y;
@@ -31,7 +31,7 @@ double Angle(const IntPoint& pt1, const IntPoint& pt2)
         return theta_normalized;
 }
 
-double Length(const IntPoint& pt1, const IntPoint& pt2)
+double Length(const Point64& pt1, const Point64& pt2)
 {
     double x = pt2.X - pt1.X;
     double y = pt2.Y - pt1.Y;
@@ -52,7 +52,7 @@ double Length(const IntPoint& pt1, const IntPoint& pt2)
 //#endif
 //}
 
-Path CirclePath(double diametr, const IntPoint& center)
+Path CirclePath(double diametr, const Point64& center)
 {
     if (diametr == 0.0)
         return Path();
@@ -61,23 +61,23 @@ Path CirclePath(double diametr, const IntPoint& center)
     const int intSteps = GlobalSettings::gbrGcCircleSegments(radius * dScale);
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = IntPoint(
+        poligon[i] = Point64(
             static_cast<cInt>(cos(i * 2 * M_PI / intSteps) * radius) + center.X,
             static_cast<cInt>(sin(i * 2 * M_PI / intSteps) * radius) + center.Y);
     }
     return poligon;
 }
 
-Path RectanglePath(double width, double height, const IntPoint& center)
+Path RectanglePath(double width, double height, const Point64& center)
 {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
     Path poligon {
-        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
+        Point64(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
+        Point64(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
+        Point64(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
+        Point64(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
     };
     if (Area(poligon) < 0.0)
         ReversePath(poligon);
@@ -85,13 +85,13 @@ Path RectanglePath(double width, double height, const IntPoint& center)
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const IntPoint& center)
+void RotatePath(Path& poligon, double angle, const Point64& center)
 {
     const bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
+    for (Point64& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - Angle(center, pt));
         const double length = Length(center, pt);
-        pt = IntPoint(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
+        pt = Point64(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;
     }
@@ -99,7 +99,7 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center)
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const IntPoint& pos)
+void TranslatePath(Path& path, const Point64& pos)
 {
     if (pos.X == 0 && pos.Y == 0)
         return;

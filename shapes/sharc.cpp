@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -48,7 +48,7 @@ void Arc::redraw()
 
     const int intSteps = GlobalSettings::gbrGcCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const IntPoint center((handlers[Center]->pos()));
+    const Point64 center((handlers[Center]->pos()));
     const double stepAngle = M_2PI / intSteps;
 
     double angle1 = M_2PI - qDegreesToRadians(l1.angle());
@@ -67,12 +67,12 @@ void Arc::redraw()
     for (int i = 0; i < intSteps; i++) {
         const double theta = stepAngle * i;
         if (theta > angle) {
-            path.append(IntPoint(
+            path.append(Point64(
                 static_cast<cInt>(radius * cos(angle2)) + center.X,
                 static_cast<cInt>(radius * sin(angle2)) + center.Y));
             break;
         }
-        path.append(IntPoint(
+        path.append(Point64(
             static_cast<cInt>(radius * cos(angle1 + theta)) + center.X,
             static_cast<cInt>(radius * sin(angle1 + theta)) + center.Y));
     }

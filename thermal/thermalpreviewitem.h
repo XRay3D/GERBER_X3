@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -15,9 +15,11 @@
 #include "gbrtypes.h"
 #include "gi/graphicsitem.h"
 
+#include <QParallelAnimationGroup>
+#include <QPropertyAnimation>
 #include <QVector>
 
-class QParallelAnimationGroup;
+//class QParallelAnimationGroup;
 class ThermalNode;
 class Tool;
 
@@ -52,7 +54,7 @@ public:
     //////////////////////////////////////////
     int type() const override;
 
-    IntPoint pos() const;
+    Point64 pos() const;
 
     Paths bridge() const;
     Paths paths() const;
@@ -61,7 +63,9 @@ public:
     void redraw();
 
 private:
-    QParallelAnimationGroup* ag;
+    QParallelAnimationGroup agr;
+    QPropertyAnimation pa1;
+    QPropertyAnimation pa2;
     Tool& tool;
     double& m_depth;
 
@@ -82,20 +86,20 @@ private:
         UnUsed,
     };
 
-    static constexpr int dark = 200;
+    static constexpr int dark = 180;
     static constexpr int light = 255;
     inline static const QColor colors[] {
         QColor(128, 128, 128, dark), //  dark gray
         QColor(255, 255, 255, light), // light gray
-        QColor(0, 255, 0, dark), //      dark green
-        QColor(0, 255, 0, light), //     light green
-        QColor(255, 0, 0, dark), //      dark red
-        QColor(255, 0, 0, light), //     light red
-        QColor(255, 255, 255, 0), //     transparent
+        QColor(0x0, 255, 0x0, dark), //      dark green
+        QColor(0x0, 255, 0x0, light), //     light green
+        QColor(255, 0x0, 0x0, dark), //      dark red
+        QColor(255, 0x0, 0x0, light), //     light red
+        QColor(255, 255, 255, 0x0), //     transparent
     };
 
     enum ColorState {
-        Default,
+        Default = 0,
         Hovered = 1,
         Selected = 2,
         Used = 4,
@@ -105,10 +109,11 @@ private:
     double diameter;
 
     Paths m_bridge;
-    Paths previewPath;
+    Paths previewPaths;
 
     Paths cashedPath;
     Paths cashedFrame;
+    int isEmpty = -1;
 
     ThermalNode* m_node = nullptr;
     inline static QVector<ThermalPreviewItem*> thpi;

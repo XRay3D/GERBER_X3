@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -27,8 +27,8 @@ protected:
 
 private:
     struct Pair {
-        IntPoint first;
-        IntPoint second;
+        Point64 first;
+        Point64 second;
         int id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
@@ -39,7 +39,7 @@ private:
     using Pairss = QVector<Pairs>;
     struct OrdPath {
         int count = 1;
-        IntPoint Pt;
+        Point64 Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;

@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -14,8 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "thermalpreviewitem.h"
-//#include "graphicsview.h"
-//#include "settings.h"
+
 #include "gccreator.h"
 #include "thermalnode.h"
 #include "tooldatabase/tool.h"
@@ -36,18 +35,17 @@
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {
     QPainterPath painterPath;
-    for (QPolygonF polygon : go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/) {
+    for (QPolygonF polygon : go.paths()) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
-    //    const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
-    //    if (hole)
-    //        painterPath.addEllipse(go.state().curPos()), hole, hole);
     return painterPath;
 }
 
 ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& tool, double& depth)
-    : ag(new QParallelAnimationGroup(this))
+    : agr(this)
+    , pa1(this, "bodyColor")
+    , pa2(this, "pathColor")
     , tool(tool)
     , m_depth(depth)
     , grob(&go)
@@ -56,15 +54,13 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_pathColor(colors[(int)Colors::UnUsed])
 
 {
-    ag->addAnimation(new QPropertyAnimation(this, "bodyColor"));
-    ag->addAnimation(new QPropertyAnimation(this, "pathColor"));
+    agr.addAnimation(&pa1);
+    agr.addAnimation(&pa2);
 
-    QPropertyAnimation* a = static_cast<QPropertyAnimation*>(ag->animationAt(0));
-    a->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    a->setDuration(100);
-    a = static_cast<QPropertyAnimation*>(ag->animationAt(1));
-    a->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    a->setDuration(100);
+    pa1.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    pa1.setDuration(150);
+    pa2.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    pa2.setDuration(150);
 
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -82,14 +78,23 @@ ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     if (tool.isValid() && m_pathColor.alpha()) {
-        painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->drawPath(painterPath);
-
-        QColor pc(m_bodyColor);
-        pc.setAlpha(255);
-        painter->setPen(QPen(Qt::red, 0.0));
-        painter->drawPath(painterPath);
+        if (isEmpty > 0) {
+            painter->setPen(QPen(m_pathColor, 0.0));
+            painter->setBrush(Qt::NoBrush);
+            for (QPolygonF polygon : m_bridge) {
+                polygon.append(polygon.first());
+                painterPath.addPolygon(polygon);
+                painter->drawPolyline(polygon);
+            }
+        } else {
+            painter->setBrush(Qt::NoBrush);
+            painter->setPen(QPen(m_pathColor, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->drawPath(painterPath);
+            QColor pc(m_bodyColor);
+            pc.setAlpha(255);
+            painter->setPen(QPen(Qt::red, 0.0));
+            painter->drawPath(painterPath);
+        }
     }
     painter->setBrush(m_bodyColor);
     QColor p(m_bodyColor);
@@ -104,7 +109,7 @@ QPainterPath ThermalPreviewItem::shape() const { return sourcePath; }
 
 int ThermalPreviewItem::type() const { return static_cast<int>(GiType::ThermalPr); }
 
-IntPoint ThermalPreviewItem::pos() const { return grob->state().curPos(); }
+Point64 ThermalPreviewItem::pos() const { return grob->state().curPos(); }
 
 Paths ThermalPreviewItem::bridge() const { return m_bridge; }
 
@@ -112,8 +117,6 @@ Paths ThermalPreviewItem::paths() const { return grob->paths(); }
 
 void ThermalPreviewItem::redraw()
 {
-    //    QElapsedTimer t;
-    //    t.start();
 
     if (double d = tool.getDiameter(m_depth); cashedPath.isEmpty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
@@ -133,14 +136,14 @@ void ThermalPreviewItem::redraw()
         Clipper clipper;
         clipper.AddPaths(cashedFrame, ptSubject, true);
         const auto rect(sourcePath.boundingRect());
-        const IntPoint& center(rect.center());
+        const Point64& center(rect.center());
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons());
         for (int i = 0; i < m_node->count(); ++i) { // Gaps
             ClipperOffset offset;
             double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
             offset.AddPath({ center,
-                               IntPoint(
+                               Point64(
                                    static_cast<cInt>((cos(angle) * radius) + center.X),
                                    static_cast<cInt>((sin(angle) * radius) + center.Y)) },
                 jtSquare, etOpenButt);
@@ -155,41 +158,43 @@ void ThermalPreviewItem::redraw()
         Clipper clipper;
         clipper.AddPaths(cashedPath, ptSubject, false);
         clipper.AddPaths(m_bridge, ptClip, true);
-        clipper.Execute(ctDifference, previewPath, pftPositive);
+        clipper.Execute(ctDifference, previewPaths, pftPositive);
     }
 
-    //    qDebug() << "redraw" << (t.nsecsElapsed() / 1000) << "us";
     painterPath = QPainterPath();
-
-    for (QPolygonF polygon : previewPath) {
-        painterPath.moveTo(polygon.takeFirst());
+    for (QPolygonF polygon : previewPaths) {
+        painterPath.moveTo(polygon.first());
         for (QPointF& pt : polygon)
             painterPath.lineTo(pt);
+    }
+
+    if (isEmpty == -1)
+        isEmpty = previewPaths.isEmpty();
+    if (static_cast<bool>(isEmpty) != previewPaths.isEmpty()) {
+        isEmpty = previewPaths.isEmpty();
+        changeColor();
     }
 
     update();
 }
 
-bool ThermalPreviewItem::isValid() const { return !previewPath.isEmpty() && m_node->isChecked(); }
+bool ThermalPreviewItem::isValid() const { return !previewPaths.isEmpty() && m_node->isChecked(); }
 
 void ThermalPreviewItem::changeColor()
 {
-    QPropertyAnimation* a = static_cast<QPropertyAnimation*>(ag->animationAt(0));
-    a->setStartValue(m_bodyColor);
+    pa1.setStartValue(m_bodyColor);
     if (colorState & Selected) {
-        a->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
+        pa1.setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]));
     } else {
-        if (colorState & Used)
-            a->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
-        else
-            a->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
+        if (colorState & Used && !previewPaths.isEmpty()) {
+            pa1.setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]));
+        } else {
+            pa1.setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]));
+        }
     }
-    a = static_cast<QPropertyAnimation*>(ag->animationAt(1));
-
-    a->setStartValue(m_pathColor);
-    a->setEndValue((colorState & Used) ? colors[(int)Colors::Default] : colors[(int)Colors::UnUsed]);
-
-    ag->start();
+    pa2.setStartValue(m_pathColor);
+    pa2.setEndValue(QColor((colorState & Used) ? colors[(int)Colors::Default] : colors[(int)Colors::UnUsed]));
+    agr.start();
 }
 
 void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
@@ -220,24 +225,14 @@ void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event) {
         QGraphicsItem::mouseDoubleClickEvent(event);
-        if (m_node->isChecked())
-            m_node->disable();
-        else
-            m_node->enable();
+        m_node->isChecked() ? m_node->disable() : m_node->enable();
     }
-
-    if (m_node->isChecked())
-        colorState |= Used;
-    else
-        colorState &= ~Used;
-
+    m_node->isChecked() ? colorState |= Used : colorState &= ~Used;
     changeColor();
-    update();
 }
 
 void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
@@ -245,7 +240,6 @@ void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 
 void ThermalPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
-
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);

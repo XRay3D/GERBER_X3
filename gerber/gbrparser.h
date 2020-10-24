@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -40,15 +40,15 @@ private:
     void reset(const QString& fileName);
     void resetStep();
 
-    IntPoint parsePosition(const QString& xyStr);
-    Path arc(const IntPoint& center, double radius, double start, double stop);
-    Path arc(IntPoint p1, IntPoint p2, IntPoint center);
+    Point64 parsePosition(const QString& xyStr);
+    Path arc(const Point64& center, double radius, double start, double stop);
+    Path arc(Point64 p1, Point64 p2, Point64 center);
 
     Paths createLine();
     Paths createPolygon();
 
-    ClipperLib::Clipper m_clipper;
-    ClipperLib::ClipperOffset m_offset;
+    ClipperLib2::Clipper m_clipper;
+    ClipperLib2::ClipperOffset m_offset;
 
     QMap<QString, QString> m_apertureMacro;
 

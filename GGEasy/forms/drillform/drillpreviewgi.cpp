@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -131,14 +131,14 @@ void DrillPrGI::updateTool()
             }
             Path path(hole->item->paths().first());
             if (path.size()) {
-                for (IntPoint& pt : path) {
+                for (Point64& pt : path) {
                     m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
                     m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
                     m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
                     m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
                 }
                 m_toolPath.moveTo(path.first());
-                for (IntPoint& pt : path) {
+                for (Point64& pt : path) {
                     m_toolPath.lineTo(pt);
                 }
             }
@@ -164,7 +164,7 @@ void DrillPrGI::updateTool()
     changeColor();
 }
 
-IntPoint DrillPrGI::pos() const
+Point64 DrillPrGI::pos() const
 {
     switch (m_type) {
     case GiType::SlotPr:
@@ -219,12 +219,12 @@ void DrillPrGI::changeColor()
         animation->setDuration(200);
         animation->setStartValue(m_bodyColor);
         if (colorState & Selected) {
-            animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]);
+            animation->setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::SelectedHovered] : colors[(int)Colors::Selected]));
         } else {
             if (colorState & Used)
-                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]);
+                animation->setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::UsedHovered] : colors[(int)Colors::Used]));
             else
-                animation->setEndValue((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]);
+                animation->setEndValue(QColor((colorState & Hovered) ? colors[(int)Colors::DefaultHovered] : colors[(int)Colors::Default]));
         }
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
@@ -233,9 +233,9 @@ void DrillPrGI::changeColor()
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(m_pathColor);
-        animation->setEndValue((colorState & Tool)
+        animation->setEndValue(QColor((colorState & Tool)
                 ? ((colorState & Used) ? colors[(int)Colors::Tool] : colors[(int)Colors::Default])
-                : colors[(int)Colors::UnUsed]);
+                : colors[(int)Colors::UnUsed]));
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

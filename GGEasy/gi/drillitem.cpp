@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -21,7 +21,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace ClipperLib;
+using namespace ClipperLib2;
 
 DrillItem::DrillItem(Excellon::Hole* hole, Excellon::File* file)
     : GraphicsItem(file)

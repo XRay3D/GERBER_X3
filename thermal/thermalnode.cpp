@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -16,7 +16,7 @@
 #include "thermalnode.h"
 #include "thermalmodel.h"
 
-ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, ThermalPreviewItem* item)
+ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, ThermalPreviewItem* item)
     : container(false)
     , icon(icon)
     , name(name)
@@ -201,7 +201,7 @@ double ThermalNode::tickness() const { return par.tickness; }
 
 int ThermalNode::count() const { return par.count; }
 
-IntPoint ThermalNode::pos() const { return m_pos; }
+Point64 ThermalNode::pos() const { return m_pos; }
 
 ThermalPreviewItem* ThermalNode::item() const { return m_item; }
 

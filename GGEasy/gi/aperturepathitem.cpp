@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -91,15 +91,15 @@ void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (event->modifiers() & Qt::ShiftModifier) {
         setSelected(true);
         const double glueLen = GCodePropertiesForm::glue * uScale;
-        IntPoint dest(m_path.last());
-        IntPoint init(m_path.first());
+        Point64 dest(m_path.last());
+        Point64 init(m_path.first());
         ItemGroup* ig = typedFile<Gerber::File>()->itemGroup(Gerber::File::ApPaths);
         for (int i = 0; i < ig->size(); ++i) {
             auto item = ig->at(i);
             if (item->isSelected())
                 continue;
-            const IntPoint& first = item->paths().first().first();
-            const IntPoint& last = item->paths().first().last();
+            const Point64& first = item->paths().first().first();
+            const Point64& last = item->paths().first().last();
             if (Length(dest, first) < glueLen) {
                 dest = last;
                 item->setSelected(true);

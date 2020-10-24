@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -121,10 +121,10 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k)
     clipper.AddPaths(m_workingPs, ptSubject, true);
     IntRect r(clipper.GetBounds());
     Path outer = {
-        IntPoint(r.left - k, r.top - k),
-        IntPoint(r.right + k, r.top - k),
-        IntPoint(r.right + k, r.bottom + k),
-        IntPoint(r.left - k, r.bottom + k),
+        Point64(r.left - k, r.top - k),
+        Point64(r.right + k, r.top - k),
+        Point64(r.right + k, r.bottom + k),
+        Point64(r.left - k, r.bottom + k),
     };
     // ReversePath(outer);
     clipper.AddPath(outer, ptSubject, true);
@@ -193,8 +193,8 @@ void Creator::addRawPaths(Paths rawPaths)
     const double glueLen = GCodePropertiesForm::glue * uScale;
     Clipper clipper;
     for (int i = 0; i < rawPaths.size(); ++i) {
-        IntPoint& pf = rawPaths[i].first();
-        IntPoint& pl = rawPaths[i].last();
+        Point64& pf = rawPaths[i].first();
+        Point64& pl = rawPaths[i].last();
         if (rawPaths[i].size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
             clipper.AddPath(rawPaths.takeAt(i--), ptSubject, true);
     }
@@ -202,8 +202,8 @@ void Creator::addRawPaths(Paths rawPaths)
     mergeSegments(rawPaths, GCodePropertiesForm::glue * uScale);
 
     for (Path& path : rawPaths) {
-        IntPoint& pf = path.first();
-        IntPoint& pl = path.last();
+        Point64& pf = path.first();
+        Point64& pl = path.last();
         if (path.size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
             clipper.AddPath(path, ptSubject, true);
         else
@@ -302,8 +302,8 @@ void Creator::stacking(Paths& paths)
         clipper.AddPaths(paths, ptSubject, true);
         IntRect r(clipper.GetBounds());
         int k = uScale;
-        Path outer = { IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k) };
+        Path outer = { Point64(r.left - k, r.bottom + k), Point64(r.right + k, r.bottom + k),
+            Point64(r.right + k, r.top - k), Point64(r.left - k, r.top - k) };
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         paths.clear();
@@ -317,8 +317,8 @@ void Creator::stacking(Paths& paths)
         list.append(idx.first);
         for (int i = paths.count() - 1, index = idx.first; i; --i) {
             double d = std::numeric_limits<double>::max();
-            IntPoint pt;
-            for (const IntPoint& pts : paths[i - 1]) {
+            Point64 pt;
+            for (const Point64& pts : paths[i - 1]) {
                 double l = Length(pts, paths[i][index]);
                 if (d >= l) {
                     d = l;
@@ -352,9 +352,9 @@ void Creator::stacking(Paths& paths)
                 QPair<int, int> idx;
                 double d = std::numeric_limits<double>::max();
                 for (int id = 0; id < m_returnPss.last().last().size(); ++id) {
-                    const IntPoint& ptd = m_returnPss.last().last()[id];
+                    const Point64& ptd = m_returnPss.last().last()[id];
                     for (int is = 0; is < path.size(); ++is) {
-                        const IntPoint& pts = path[is];
+                        const Point64& pts = path[is];
                         const double l = Length(ptd, pts);
                         if (d >= l) {
                             d = l;
@@ -420,10 +420,10 @@ void Creator::mergeSegments(Paths& paths, double glue)
                     j = 0;
                     break;
                 }
-                IntPoint& pif = paths[i].first();
-                IntPoint& pil = paths[i].last();
-                IntPoint& pjf = paths[j].first();
-                IntPoint& pjl = paths[j].last();
+                Point64& pif = paths[i].first();
+                Point64& pil = paths[i].last();
+                Point64& pjf = paths[j].first();
+                Point64& pjl = paths[j].last();
                 if (pil == pjf) {
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
@@ -451,10 +451,10 @@ void Creator::mergeSegments(Paths& paths, double glue)
             for (int j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                IntPoint& pif = paths[i].first();
-                IntPoint& pil = paths[i].last();
-                IntPoint& pjf = paths[j].first();
-                IntPoint& pjl = paths[j].last();
+                Point64& pif = paths[i].first();
+                Point64& pil = paths[i].last();
+                Point64& pjf = paths[j].first();
+                Point64& pjl = paths[j].last();
                 if (Length(pil, pjf) < glue) {
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
@@ -557,8 +557,8 @@ bool Creator::createability(bool side)
             clipper.AddPaths(frPaths, ptSubject, true);
             IntRect rect(clipper.GetBounds());
             int k = uScale;
-            Path outer = { IntPoint(rect.left - k, rect.bottom + k), IntPoint(rect.right + k, rect.bottom + k),
-                IntPoint(rect.right + k, rect.top - k), IntPoint(rect.left - k, rect.top - k) };
+            Path outer = { Point64(rect.left - k, rect.bottom + k), Point64(rect.right + k, rect.bottom + k),
+                Point64(rect.right + k, rect.top - k), Point64(rect.left - k, rect.top - k) };
             clipper.AddPath(outer, ptSubject, true);
             clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         }
@@ -629,7 +629,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 
 Paths& Creator::sortB(Paths& src)
 {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    Point64 startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -649,7 +649,7 @@ Paths& Creator::sortB(Paths& src)
 
 Paths& Creator::sortBE(Paths& src)
 {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    Point64 startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
         int swapIdx = firstIdx;
@@ -685,7 +685,7 @@ Paths& Creator::sortBE(Paths& src)
 
 Pathss& Creator::sortB(Pathss& src)
 {
-    IntPoint startPt(
+    Point64 startPt(
         (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
 
     for (int i = 0; i < src.size(); ++i) {
@@ -711,7 +711,7 @@ Pathss& Creator::sortB(Pathss& src)
 
 Pathss& Creator::sortBE(Pathss& src)
 {
-    IntPoint startPt(
+    Point64 startPt(
         (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
@@ -745,15 +745,15 @@ Pathss& Creator::sortBE(Pathss& src)
     return src;
 }
 
-bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
+bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret)
 {
     const int cnt = path.size();
     if (cnt < 2)
         return false;
     QPointF p;
     for (int i = 0; i < cnt; ++i) {
-        const IntPoint& pt1 = path[(i + 1) % cnt];
-        const IntPoint& pt2 = path[i];
+        const Point64& pt1 = path[(i + 1) % cnt];
+        const Point64& pt2 = path[i];
         QLineF l1(pt1, pt2);
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))

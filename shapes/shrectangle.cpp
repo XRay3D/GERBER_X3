@@ -2,11 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -50,15 +50,15 @@ Rectangle::~Rectangle() { }
 void Rectangle::redraw()
 {
     handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
-    IntPoint p1(handlers[Point1]->pos());
-    IntPoint p2(handlers[Point3]->pos());
+    Point64 p1(handlers[Point1]->pos());
+    Point64 p2(handlers[Point3]->pos());
 
     m_paths.first() = {
-        IntPoint { p1.X, p1.Y },
-        IntPoint { p2.X, p1.Y },
-        IntPoint { p2.X, p2.Y },
-        IntPoint { p1.X, p2.Y },
-        IntPoint { p1.X, p1.Y },
+        Point64 { p1.X, p1.Y },
+        Point64 { p2.X, p1.Y },
+        Point64 { p2.X, p2.Y },
+        Point64 { p1.X, p2.Y },
+        Point64 { p1.X, p1.Y },
     };
     if (Area(m_paths.first()) < 0)
         ReversePath(m_paths.first());

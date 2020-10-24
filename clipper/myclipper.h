@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -12,7 +12,8 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "clipper.hpp"
+#include "Clipper2/clipper2.h"
+#include "Clipper2/clipper_offset.h"
 #include <QDebug>
 #include <QPolygonF>
 
@@ -31,7 +32,7 @@
 //    return debug;
 //}
 
-using namespace ClipperLib;
+using namespace ClipperLib2;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
@@ -41,8 +42,8 @@ using Pathss = QVector /*std::vector*/<Paths>;
 //QPolygonF toQPolygon(const Path& p);
 //QVector<QPolygonF> toQPolygons(const Paths& p);
 
-double Angle(const IntPoint& pt1, const IntPoint& pt2);
-double Length(const IntPoint& pt1, const IntPoint& pt2);
+double Angle(const Point64& pt1, const Point64& pt2);
+double Length(const Point64& pt1, const Point64& pt2);
 double Perimeter(const Path& path);
 
 //IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)
@@ -50,7 +51,7 @@ double Perimeter(const Path& path);
 //    return IntPoint(int((qint64(pt1.X) + pt2.X) / 2), int((qint64(pt1.Y) + pt2.Y) / 2));
 //}
 
-Path CirclePath(double diametr, const IntPoint& center = IntPoint());
-Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
-void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
-void TranslatePath(Path& path, const IntPoint& pos);
+Path CirclePath(double diametr, const Point64& center = Point64());
+Path RectanglePath(double width, double height, const Point64& center = Point64());
+void RotatePath(Path& poligon, double angle, const Point64& center = Point64());
+void TranslatePath(Path& path, const Point64& pos);

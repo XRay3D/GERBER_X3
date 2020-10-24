@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
-* Author    :  Bakiev Damir                                                    *
+* Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Bakiev Damir 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -22,7 +22,7 @@
 //#include <QtConcurrent>
 //#include <tooldatabase/tool.h>
 
-using namespace ClipperLib;
+using namespace ClipperLib2;
 
 void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = { 1 });
 
@@ -82,7 +82,7 @@ signals:
 protected:
     bool createability(bool side);
 
-    bool pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr);
+    bool pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret = nullptr);
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
