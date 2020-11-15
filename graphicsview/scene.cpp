@@ -313,7 +313,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
         bool fl = false;
         for (QGraphicsItem* item : items) {
-            if (item && item->type() != static_cast<int>(GiType::Bridge) && item->flags() & QGraphicsItem::ItemIsSelectable) {
+            if (item && static_cast<GiType>(item->type()) != GiType::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
                 fl = true;
                 break;
             }

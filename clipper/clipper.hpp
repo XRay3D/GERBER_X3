@@ -234,7 +234,7 @@ struct Paths : public QVector<Path> {
     }
     Paths(const Paths& v) = default;
 
-    operator QVector<QPolygonF>()
+    operator QVector<QPolygonF>() const
     {
         QVector<QPolygonF> poly;
         poly.reserve(size());
