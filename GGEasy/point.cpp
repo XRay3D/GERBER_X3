@@ -30,7 +30,7 @@
 
 #include "leakdetector.h"
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 QVector<Pin*> Pin::m_pins;
 Marker* Marker::m_markers[2] { nullptr, nullptr };

@@ -12,8 +12,9 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "Clipper2/clipper2.h"
-#include "Clipper2/clipper_offset.h"
+//#include "Clipper2/clipper2.h"
+//#include "Clipper2/clipper_offset.h"
+#include "clipper.hpp"
 #include <QDebug>
 #include <QPolygonF>
 
@@ -32,7 +33,7 @@
 //    return debug;
 //}
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 using Pathss = QVector /*std::vector*/<Paths>;
 
@@ -41,7 +42,7 @@ using Pathss = QVector /*std::vector*/<Paths>;
 
 //QPolygonF toQPolygon(const Path& p);
 //QVector<QPolygonF> toQPolygons(const Paths& p);
-
+using Point64 = IntPoint;
 double Angle(const Point64& pt1, const Point64& pt2);
 double Length(const Point64& pt1, const Point64& pt2);
 double Perimeter(const Path& path);
