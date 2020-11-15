@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         //QTimer::singleShot(120, [this] { selectAll(); });
-        QTimer::singleShot(200, [this] { toolpathActions[GCode::Thermal]->triggered(); });
+        QTimer::singleShot(200, [this] { toolpathActions[GCode::Profile]->triggered(); });
         //QTimer::singleShot(170, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
     App::m_mainWindow = this;
@@ -504,12 +504,12 @@ void MainWindow::createActionsGraphics()
         QList<QGraphicsItem*> si = App::scene()->selectedItems();
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
-            if (item->type() == static_cast<int>(GiType::Gerber)) {
+            if (static_cast<GiType>(item->type()) == GiType::Gerber) {
                 GiGerber* gitem = static_cast<GiGerber*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
                 for (QGraphicsItem* clipItem : si) {
-                    if (clipItem->type() >= static_cast<int>(GiType::ShapeC)) {
+                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShapeC) {
                         clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
                     }
                 }
@@ -566,14 +566,16 @@ void MainWindow::writeSettings()
 void MainWindow::selectAll()
 {
     if (/*  */ toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items())
-            item->setSelected(item->type() == static_cast<int>(GiType::ThermalPr));
+        for (QGraphicsItem* item : App::scene()->items()) {
+            item->setSelected(static_cast<GiType>(item->type()) == GiType::ThermalPr);
+        }
     } else if (toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items()) {
-            const int type(item->type());
-            item->setSelected(type == static_cast<int>(GiType::ApetrurePr)
-                || type == static_cast<int>(GiType::DrillPr)
-                || type == static_cast<int>(GiType::SlotPr));
+            const auto type(static_cast<GiType>(item->type()));
+            item->setSelected( //
+                type == GiType::ApetrurePr || //
+                type == GiType::DrillPr || //
+                type == GiType::SlotPr);
         }
     } else {
         for (QGraphicsItem* item : App::scene()->items())
@@ -586,7 +588,7 @@ void MainWindow::printDialog()
 {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
-    connect(&preview, &QPrintPreviewDialog::paintRequested, [this](QPrinter* pPrinter) {
+    connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
         App::scene()->m_drawPdf = true;
         QRectF rect;
         for (QGraphicsItem* item : App::scene()->items())

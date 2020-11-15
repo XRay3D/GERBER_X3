@@ -114,7 +114,7 @@ QPainterPath Marker::shape() const
     return /*m_shape*/ m_path;
 }
 
-int Marker::type() const { return m_type ? static_cast<int>(GiType::Home) : static_cast<int>(GiType::PointZero); }
+int Marker::type() const { return static_cast<int>(m_type ? GiType::Home : GiType::PointZero); }
 
 void Marker::resetPos(bool fl)
 {
@@ -490,15 +490,9 @@ LayoutFrames::LayoutFrames()
     App::scene()->addItem(this);
 }
 
-LayoutFrames::~LayoutFrames()
-{
-    App::m_layoutFrames = nullptr;
-}
+LayoutFrames::~LayoutFrames() { App::m_layoutFrames = nullptr; }
 
-int LayoutFrames::type() const
-{
-    return static_cast<int>(GiType::LayoutFrames);
-}
+int LayoutFrames::type() const { return static_cast<int>(GiType::LayoutFrames); }
 
 QRectF LayoutFrames::boundingRect() const
 {

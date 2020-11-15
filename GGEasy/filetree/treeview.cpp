@@ -224,7 +224,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             { // edit Shapes::Text
                 QVector<Shapes::Text*> tx;
                 for (const auto& idx : selectedIndexes()) {
-                    if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == static_cast<int>(GiType::ShapeT)) {
+                    if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); static_cast<GiType>(sh->type()) == GiType::ShapeT) {
                         tx.append(static_cast<Shapes::Text*>(sh));
                     }
                 }
