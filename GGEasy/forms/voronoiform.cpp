@@ -87,8 +87,8 @@ void VoronoiForm::createFile()
 
     for (auto* item : App::scene()->selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case  static_cast<int>(GiType::Gerber):
+        switch (static_cast<GiType>(item->type())) {
+        case GiType::Gerber:
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
@@ -101,7 +101,7 @@ void VoronoiForm::createFile()
             }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-       case  GiType::AperturePath:
+        case GiType::AperturePath:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();

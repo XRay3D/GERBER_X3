@@ -92,7 +92,7 @@ ProfileForm::~ProfileForm()
     settings.endGroup();
 
     for (QGraphicsItem* giItem : App::scene()->items()) {
-        if (giItem->type() == static_cast<int>(GiType::Bridge))
+        if (static_cast<GiType>(giItem->type()) == GiType::Bridge)
             delete giItem;
     }
     delete ui;
@@ -114,9 +114,9 @@ void ProfileForm::createFile()
 
     for (auto* sItem : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
-        switch (sItem->type()) {
-        case  static_cast<int>(GiType::Gerber):
-       case  GiType::AperturePath:
+        switch (static_cast<GiType>(sItem->type())) {
+        case GiType::Gerber:
+        case GiType::AperturePath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -126,19 +126,19 @@ void ProfileForm::createFile()
                         return;
                 }
             }
-            if (sItem->type() ==  static_cast<int>(GiType::Gerber))
+            if (static_cast<GiType>(sItem->type()) == GiType::Gerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
             break;
-       case  GiType::ShapeC:
-       case  GiType::ShapeR:
-       case  GiType::ShapeL:
-       case  GiType::ShapeA:
-       case  GiType::ShapeT:
+        case GiType::ShapeC:
+        case GiType::ShapeR:
+        case GiType::ShapeL:
+        case GiType::ShapeA:
+        case GiType::ShapeT:
             wRawPaths.append(gi->paths());
             break;
-       case  GiType::Drill:
+        case GiType::Drill:
             wPaths.append(gi->paths());
             break;
         default:
@@ -164,7 +164,7 @@ void ProfileForm::createFile()
     {
         QVector<QPointF> brv;
         for (QGraphicsItem* item : App::scene()->items()) {
-            if (item->type() == static_cast<int>(GiType::Bridge))
+            if (static_cast<GiType>(item->type()) == GiType::Bridge)
                 brv.append(item->pos());
         }
         if (!brv.isEmpty()) {
@@ -205,6 +205,7 @@ void ProfileForm::on_pbAddBridge_clicked()
     }
     brItem = new BridgeItem(m_lenght, m_size, side, brItem);
     App::scene()->addItem(brItem);
+    brItem->setVisible(true);
 }
 
 void ProfileForm::updateBridge()
@@ -212,8 +213,8 @@ void ProfileForm::updateBridge()
     m_lenght = ui->dsbxBridgeLenght->value();
     m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : App::scene()->items()) {
-        if (item->type() == static_cast<int>(GiType::Bridge))
-            dynamic_cast<BridgeItem*>(item)->update();
+        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+            static_cast<BridgeItem*>(item)->update();
     }
 }
 

@@ -77,7 +77,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
     const auto p(GlobalSettings::getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for (auto item : scene()->selectedItems()) {
-        if (item->type() >= static_cast<int>(GiType::ShapeC)) {
+        if (static_cast<GiType>(item->type()) >= GiType::ShapeC) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto h : shape->handlers) {

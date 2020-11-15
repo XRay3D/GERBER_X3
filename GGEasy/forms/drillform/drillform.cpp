@@ -399,7 +399,7 @@ void DrillForm::on_pbCreate_clicked()
                 int apertureId = model->apertureId(row);
                 pathsMap[usedToolId].toolsApertures.append(apertureId);
                 for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
-                    if (item->type() == static_cast<int>(GiType::SlotPr)) {
+                    if (static_cast<GiType>(item->type()) == GiType::SlotPr) {
                         if (item->fit(ui->dsbxDepth->value())) {
                             for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tool(item->toolId()).diameter())) {
                                 pathsMap[usedToolId].paths.append(path);
@@ -412,7 +412,7 @@ void DrillForm::on_pbCreate_clicked()
                     }
                 }
                 for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
-                    if (item->type() != static_cast<int>(GiType::SlotPr))
+                    if (static_cast<GiType>(item->type()) != GiType::SlotPr)
                         model->setCreate(row, true);
                 }
             }
@@ -446,7 +446,7 @@ void DrillForm::on_pbCreate_clicked()
                 const int apertureId = model->apertureId(row);
                 pathsMap[toolId].toolsApertures.append(apertureId);
                 for (QSharedPointer<DrillPrGI>& item : m_giPeview[apertureId]) {
-                    if (item->type() == static_cast<int>(GiType::SlotPr))
+                    if (static_cast<GiType>(item->type()) == GiType::SlotPr)
                         continue;
                     switch (m_worckType) {
                     case GCode::Profile:

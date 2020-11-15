@@ -61,7 +61,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            if (shape()->type() == static_cast<int>(GiType::ShapeT))
+            if (static_cast<GiType>(shape()->type()) == GiType::ShapeT)
                 return QString("%1 (%2, %3)")
                     .arg(shape()->name())
                     .arg(m_id)
@@ -79,7 +79,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::UserRole:
             return m_id;
         case Qt::EditRole:
-            if (shape()->type() == static_cast<int>(GiType::ShapeT))
+            if (static_cast<GiType>(shape()->type()) == GiType::ShapeT)
                 return static_cast<Text*>(shape())->text();
             return QVariant();
         default:
@@ -108,12 +108,12 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     switch (index.column()) {
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable
-            | (shape()->type() == static_cast<int>(GiType::ShapeT)
+            | (static_cast<GiType>(shape()->type()) == GiType::ShapeT
                     ? Qt::ItemIsEditable
                     : Qt::NoItemFlags);
     case 1:
         return itemFlag
-            | (shape()->type() == static_cast<int>(GiType::ShapeT)
+            | (static_cast<GiType>(shape()->type()) == GiType::ShapeT
                     ? Qt::ItemIsEditable
                     : Qt::NoItemFlags);
     default:
@@ -126,7 +126,7 @@ void Node::menu(QMenu* menu, TreeView* tv) const
     menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
         App::fileModel()->removeRow(row(), index().parent());
     });
-    if (shape()->type() == static_cast<int>(GiType::ShapeT)) {
+    if (static_cast<GiType>(shape()->type()) == GiType::ShapeT) {
         menu->addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
             ShTextDialog dlg({ static_cast<Text*>(shape()) }, tv);
             dlg.exec();

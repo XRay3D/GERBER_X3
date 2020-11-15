@@ -123,9 +123,9 @@ void PocketOffsetForm::createFile()
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case  static_cast<int>(GiType::Gerber):
-       case  GiType::AperturePath:
+        switch (static_cast<GiType>(item->type())) {
+        case GiType::Gerber:
+        case GiType::AperturePath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -135,19 +135,19 @@ void PocketOffsetForm::createFile()
                         return;
                 }
             }
-            if (item->type() ==  static_cast<int>(GiType::Gerber))
+            if (static_cast<GiType>(item->type()) == GiType::Gerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
             break;
-       case  GiType::ShapeC:
-       case  GiType::ShapeR:
-       case  GiType::ShapeL:
-       case  GiType::ShapeA:
-       case  GiType::ShapeT:
+        case GiType::ShapeC:
+        case GiType::ShapeR:
+        case GiType::ShapeL:
+        case GiType::ShapeA:
+        case GiType::ShapeT:
             wRawPaths.append(gi->paths());
             break;
-       case  GiType::Drill:
+        case GiType::Drill:
             wPaths.append(gi->paths());
             break;
         default:

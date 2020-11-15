@@ -101,33 +101,37 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        if (gi && (gi->type() >= static_cast<int>(GiType::ShapeC) || gi->type() == static_cast<int>(GiType::Drill) || gi->type() ==  static_cast<int>(GiType::Gerber) || gi->type() == static_cast<int>(GiType::AperturePath))) {
-            if (!gi->isSelected())
-                continue;
-            for (const Path& path : gi->paths()) {
-                for (int i = 0, s = path.size(); i < s; ++i) {
-                    const QPointF pt1(path[i]);
-                    const QPointF pt2(path[(i + 1) % s]);
-                    const QLineF l1(pos, pt1);
-                    const QLineF l2(pos, pt2);
-                    const QLineF l3(pt2, pt1);
-                    //pvs   if (lastAngle == 0.0)
-                    //pvs        lastAngle = l3.normalVector().angle();
-                    const double p = (l1.length() + l2.length() + l3.length()) / 2;
-                    if (l1.length() < l3.length() && l2.length() < l3.length()) {
-                        const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
-                        if (l > h) {
-                            l = h;
-                            QLineF line(pt1, pt2);
-                            line.setLength(sqrt(l1.length() * l1.length() - h * h));
-                            pt = line.p2();
-                            const QPointF center(l3.center());
-                            if (QLineF(center, pt).length() < m_lenght / 2)
-                                pt = center;
-                            m_angle = line.normalVector().angle();
+        if (gi && gi->isSelected()) {
+            if (auto type(static_cast<GiType>(item->type()));
+                type >= GiType::ShapeC || //
+                type == GiType::Drill || //
+                type == GiType::Gerber || //
+                type == GiType::AperturePath) {
+                for (const Path& path : gi->paths()) {
+                    for (int i = 0, s = path.size(); i < s; ++i) {
+                        const QPointF pt1(path[i]);
+                        const QPointF pt2(path[(i + 1) % s]);
+                        const QLineF l1(pos, pt1);
+                        const QLineF l2(pos, pt2);
+                        const QLineF l3(pt2, pt1);
+                        //pvs   if (lastAngle == 0.0)
+                        //pvs        lastAngle = l3.normalVector().angle();
+                        const double p = (l1.length() + l2.length() + l3.length()) / 2;
+                        if (l1.length() < l3.length() && l2.length() < l3.length()) {
+                            const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
+                            if (l > h) {
+                                l = h;
+                                QLineF line(pt1, pt2);
+                                line.setLength(sqrt(l1.length() * l1.length() - h * h));
+                                pt = line.p2();
+                                const QPointF center(l3.center());
+                                if (QLineF(center, pt).length() < m_lenght / 2)
+                                    pt = center;
+                                m_angle = line.normalVector().angle();
+                            }
                         }
+                        lastAngle = l3.normalVector().angle();
                     }
-                    lastAngle = l3.normalVector().angle();
                 }
             }
         }
@@ -188,6 +192,8 @@ void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (m_ok && pos() == m_lastPos) {
         m_ptr = new BridgeItem(m_lenght, m_size, m_side, m_ptr);
         scene()->addItem(m_ptr);
+        m_ptr->setPos(pos());
+        m_ptr->setVisible(true);
     } else if (!m_ok) {
         deleteLater();
     }
