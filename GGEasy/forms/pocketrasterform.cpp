@@ -101,7 +101,7 @@ void PocketRasterForm::createFile()
                         return;
                 }
             }
-            if (item->type() == static_cast<int>(GiType::Gerber))
+            if (static_cast<GiType>(item->type()) == GiType::Gerber)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
