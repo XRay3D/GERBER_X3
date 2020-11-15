@@ -47,8 +47,8 @@ private:
     Paths createLine();
     Paths createPolygon();
 
-    ClipperLib2::Clipper m_clipper;
-    ClipperLib2::ClipperOffset m_offset;
+    ClipperLib::Clipper m_clipper;
+    ClipperLib::ClipperOffset m_offset;
 
     QMap<QString, QString> m_apertureMacro;
 

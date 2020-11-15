@@ -21,7 +21,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 DrillItem::DrillItem(Excellon::Hole* hole, Excellon::File* file)
     : GraphicsItem(file)

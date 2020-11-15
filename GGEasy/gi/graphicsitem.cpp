@@ -25,7 +25,7 @@
 #include "itemgroup.h"
 #include <QTimer>
 
-#include "boost/pfr/precise.hpp"
+//#include "boost/pfr/precise.hpp"
 #include <iostream>
 
 GraphicsItem::GraphicsItem(AbstractFile* file)

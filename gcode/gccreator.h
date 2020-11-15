@@ -22,7 +22,7 @@
 //#include <QtConcurrent>
 //#include <tooldatabase/tool.h>
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = { 1 });
 

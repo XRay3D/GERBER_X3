@@ -21,7 +21,7 @@
 #include <QFileInfo>
 #include <gi/itemgroup.h>
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 enum class FileType {
     Gerber,

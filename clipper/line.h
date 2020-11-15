@@ -17,7 +17,7 @@
 
 //#include "clipper.hpp"
 //#include <QPolygonF>
-//using namespace ClipperLib2;
+//using namespace ClipperLib;
 
 ///*******************************************************************************
 // * class IntLine

@@ -21,7 +21,17 @@
 namespace Gerber {
 
 class AbstractAperture;
+
+#if __cplusplus > 201703L
 using ApertureMap = std::map<int, QSharedPointer<AbstractAperture>>;
+#else
+struct ApertureMap : std::map<int, QSharedPointer<AbstractAperture>> {
+    bool contains(int key) const
+    {
+        return find(key) != end();
+    }
+};
+#endif
 
 enum ZeroOmissionMode {
     OmitLeadingZeros,

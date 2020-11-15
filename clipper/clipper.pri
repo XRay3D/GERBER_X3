@@ -27,17 +27,17 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/Clipper2/clipper2.h \
-    $$PWD/Clipper2/clipper_offset.h \
-    $$PWD/Clipper2/clipper_triangulation.h \
-#    $$PWD/clipper.hpp \
+#    $$PWD/Clipper2/clipper2.h \
+#    $$PWD/Clipper2/clipper_offset.h \
+#    $$PWD/Clipper2/clipper_triangulation.h \
+    $$PWD/clipper.hpp \
     $$PWD/myclipper.h \
     $$PWD/line.h
 
 SOURCES += \
-    $$PWD/Clipper2/clipper2.cpp \
-    $$PWD/Clipper2/clipper_offset.cpp \
-    $$PWD/Clipper2/clipper_triangulation.cpp \
-#    $$PWD/clipper.cpp \
+#    $$PWD/Clipper2/clipper2.cpp \
+#    $$PWD/Clipper2/clipper_offset.cpp \
+#    $$PWD/Clipper2/clipper_triangulation.cpp \
+    $$PWD/clipper.cpp \
     $$PWD/myclipper.cpp \
     $$PWD/line.cpp

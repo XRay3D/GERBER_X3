@@ -18,7 +18,7 @@
 #include <QPen>
 #include <QPropertyAnimation>
 
-using namespace ClipperLib2;
+using namespace ClipperLib;
 
 enum class GiType {
     Gerber = QGraphicsItem::UserType,
