@@ -34,6 +34,7 @@ namespace GCode {
 Node::Node(int id)
     : AbstractNode(id)
 {
+    file()->createGi();
     file()->itemGroup()->addToScene();
     file()->itemGroup()->setVisible(true);
 }

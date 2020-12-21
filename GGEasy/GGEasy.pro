@@ -47,9 +47,9 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
     TARGET = $$TARGET"_msvc"
-#    QMAKE_CXXFLAGS -= /std:c++17
     QMAKE_CXXFLAGS += /std:c++latest
     message($$TARGET)
+#    DEFINES += LEAK_DETECTOR
 }
 
 gcc* {
