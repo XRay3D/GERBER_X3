@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += G2G
-#SUBDIRS += G2P
+SUBDIRS += GGEasy
 win32-msvc*{
 #    SUBDIRS += GTE_Win
 }
