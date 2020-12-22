@@ -54,7 +54,6 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
         genGcodeAndTile();
         endFile();
     }
-    //createGi();
 }
 
 bool File::save(const QString& name)
@@ -686,25 +685,16 @@ void File::createGiLaser()
 
 void File::write(QDataStream& stream) const
 {
-    //    switch (Project::ver()) {
-    //    case G2G_Ver_4:
     stream << m_gcp;
     stream << m_pocketPaths;
     stream << m_toolPathss;
-    //    case G2G_Ver_3:
-    //        [[fallthrough]];
-    //    case G2G_Ver_2:
-    //        [[fallthrough]];
-    //    case  GiType::G2G_Ver_1::
-    //    }
-    //    stream << *static_cast<const AbstractFile*>(this);
-    //_write(stream);
 }
 
 void File::read(QDataStream& stream)
 {
     auto& gcp = *const_cast<GCodeParams*>(&m_gcp);
     switch (App::project()->ver()) {
+    case ProVer_5:
     case ProVer_4:
         stream >> gcp;
         stream >> m_pocketPaths;
@@ -762,5 +752,6 @@ void File::createGi()
     default:
         break;
     }
+    itemGroup()->setVisible(true);
 }
 }

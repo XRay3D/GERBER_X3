@@ -370,7 +370,6 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
     }
 
     storage.resize(ctr * sizeof(ThermalPreviewItem));
-    qDebug() << storage.size() << ctr;
 
     for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
         auto m(map.mid(i, c));

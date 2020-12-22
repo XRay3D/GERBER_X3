@@ -16,7 +16,7 @@
 #include "gbrtypes.h"
 #include "gi/graphicsitem.h"
 
-class Row;
+struct Row;
 
 class DrillPrGI : public QGraphicsObject {
     Q_OBJECT
@@ -62,7 +62,7 @@ private:
     static QPainterPath drawDrill(const Excellon::Hole* hole);
     static QPainterPath drawSlot(const Excellon::Hole* hole);
 
-    const Row& row;
+    struct Row& row;
 
     const int id = 0;
     const Gerber::GraphicObject* const gbrObj = nullptr;

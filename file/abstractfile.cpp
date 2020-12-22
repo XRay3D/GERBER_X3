@@ -34,8 +34,6 @@ QString AbstractFile::name() const { return m_name; }
 
 void AbstractFile::setFileName(const QString& fileName) { m_name = fileName; }
 
-//ItemGroup* AbstractFile::itemGroup() const { return m_itemGroup.data(); }
-
 Paths AbstractFile::mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
 
 Pathss AbstractFile::groupedPaths() const { return m_groupedPaths; }
@@ -53,36 +51,3 @@ void AbstractFile::setColor(const QColor& color) { m_color = color; }
 int AbstractFile::id() const { return m_id; }
 
 void AbstractFile::setId(int id) { m_id = id; }
-
-//void AbstractFile::_write(QDataStream& stream) const
-//{
-//    stream << m_id;
-//    stream << m_lines;
-//    stream << m_name;
-//    stream << m_mergedPaths;
-//    stream << m_groupedPaths;
-//    stream << m_side;
-//    stream << m_color;
-//    stream << m_date;
-//    stream << itemGroup()->isVisible();
-//}
-
-//void AbstractFile::_read(QDataStream& stream)
-//{
-//    stream >> m_id;
-//    stream >> m_lines;
-//    stream >> m_name;
-//    stream >> m_mergedPaths;
-//    stream >> m_groupedPaths;
-//    stream >> m_side;
-//    stream >> m_color;
-//    stream >> m_date;
-
-//    if (App::splashScreen())
-//        App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
-
-//    createGi();
-//    bool fl;
-//    stream >> fl;
-//    itemGroup()->setVisible(fl);
-//}

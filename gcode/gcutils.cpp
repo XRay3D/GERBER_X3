@@ -15,10 +15,10 @@
 *******************************************************************************/
 #include "gcutils.h"
 #include "app.h"
+#include "math.h"
 #include "project.h"
 #include "settings.h"
 #include <QFileInfo>
-#include "math.h"
 
 namespace GCode {
 
@@ -46,7 +46,7 @@ void GCUtils::setLastDir(QString value)
 {
     if (GlobalSettings::gcSameFolder())
         return;
-    value = QFileInfo(value).absolutePath(); //value.left(value.lastIndexOf('/') + 1);
+    value = QFileInfo(value).absolutePath();
     if (lastDir != value) {
         lastDir = value;
         QSettings settings;

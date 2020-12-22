@@ -205,9 +205,13 @@ include(../gerber/gerber.pri)
 include(../graphicsview/graphicsview.pri)
 include(../shapes/shapes.pri)
 include(../thermal/thermal.pri)
+include(../dxf/dxf.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true
 #pvs_studio.cxxflags = -std=c++17
 #pvs_studio.sources = $${SOURCES}
 #include(../PVS-Studio.pri)
+
+DISTFILES += \
+    ChangeLog.txt

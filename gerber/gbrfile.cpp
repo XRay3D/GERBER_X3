@@ -291,6 +291,7 @@ void File::createGi()
             m_itemGroup[Components]->append(new ComponentItem(c, this));
     }
 
+    // add aperture paths
     {
         auto contains = [&](const Path& path) -> bool {
             constexpr double k = 0.001 * uScale;
@@ -340,7 +341,11 @@ void File::createGi()
     }
 
     if (m_itemGroup[Components]->size())
-        m_itemsType = Components; ////////////////////////
+        m_itemsType = Components;
+    else if (m_itemGroup[Normal]->size())
+        m_itemsType = Normal;
+    else
+        m_itemsType = ApPaths;
 
     m_itemGroup[Normal]->setVisible(false);
     m_itemGroup[ApPaths]->setVisible(false);

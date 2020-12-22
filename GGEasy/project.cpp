@@ -22,12 +22,17 @@
 #include "point.h"
 #include "settings.h"
 #include "shheaders.h"
+#include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileDialog>
+#include <QLabel>
 #include <QMessageBox>
+#include <algorithm>
+#include <execution>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
+#include <gi/aperturepathitem.h>
 
 #include "leakdetector.h"
 
@@ -47,9 +52,13 @@ bool Project::save(QFile& file)
 {
     try {
         QDataStream out(&file);
-        out << (m_ver = ProVer_4);
+        out << (m_ver = ProVer_5);
         switch (m_ver) {
+        case ProVer_5:
+            out << m_isPinsPlaced;
+            [[fallthrough]];
         case ProVer_4:
+            [[fallthrough]];
         case ProVer_3:
             out << m_spacingX;
             out << m_spacingY;
@@ -93,7 +102,11 @@ bool Project::open(QFile& file)
         QPointF tmpPt;
 
         switch (m_ver) {
+        case ProVer_5:
+            in >> m_isPinsPlaced;
+            [[fallthrough]];
         case ProVer_4:
+            [[fallthrough]];
         case ProVer_3:
             in >> m_spacingX;
             in >> m_spacingY;
@@ -145,6 +158,7 @@ void Project::close()
     setStepsY(1);
     setSpaceX(0.0);
     setSpaceY(0.0);
+    m_isPinsPlaced = false;
 }
 
 AbstractFile* Project::file(int id)
@@ -175,48 +189,26 @@ void Project::deleteShape(int id)
         qWarning() << "Error id" << id << "Shape not found";
 }
 
-bool Project::isEmpty()
-{
-    QMutexLocker locker(&m_mutex);
-    for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Excellon))
-            return true;
-    }
-    return false;
-}
-
-int Project::size()
-{
-    return m_files.size();
-}
+int Project::size() { return m_files.size() + m_shapes.size(); }
 
 QRectF Project::getSelectedBoundingRect()
 {
     QMutexLocker locker(&m_mutex);
-    auto si { App::scene()->selectedItems() };
-    QRectF rect;
-    for (auto var : App::scene()->selectedItems())
-        rect = rect.united(var->boundingRect());
 
-    //    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    //    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
-    //    for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-    //        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
-    //            for (const GraphicsItem* const item : *itemGroup) {
-    //                if (item->isSelected()) {
-    //                    for (const Path& path : item->paths()) {
-    //                        for (const IntPoint& pt : path) {
-    //                            topLeft.X = qMin(pt.X, topLeft.X);
-    //                            topLeft.Y = qMin(pt.Y, topLeft.Y);
-    //                            botRight.X = qMax(pt.X, botRight.X);
-    //                            botRight.Y = qMax(pt.Y, botRight.Y);
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //    const QRectF rect(topLeft), botRight));
+    auto selectedItems(App::scene()->selectedItems());
+
+    if (selectedItems.isEmpty())
+        return {};
+
+    auto getRect = [](QGraphicsItem* gi) {
+        return static_cast<GiType>(gi->type()) == GiType::AperturePath
+            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
+            : gi->boundingRect();
+    };
+
+    QRectF rect(getRect(selectedItems.takeFirst()));
+    for (auto gi : selectedItems)
+        rect = rect.united(getRect(gi));
 
     if (!rect.isEmpty())
         setWorckRect(rect);
@@ -320,7 +312,8 @@ Shapes::Shape* Project::aShape(int id)
 
 int Project::addFile(AbstractFile* file)
 {
-    //QMutexLocker locker(&m_mutex);
+    m_isPinsPlaced = false; //QMutexLocker locker(&m_mutex);
+    file->createGi();
     const int id = contains(file->name());
     if (id != -1) {
         reload(id, file);
@@ -335,6 +328,7 @@ int Project::addFile(AbstractFile* file)
 
 int Project::addShape(Shapes::Shape* sh)
 {
+    m_isPinsPlaced = false;
     //QMutexLocker locker(&m_mutex);
     sh->m_id = m_shapes.size() ? m_shapes.lastKey() + 1 : 0;
     sh->setToolTip(QString::number(sh->m_id));
@@ -366,6 +360,30 @@ void Project::setName(const QString& name)
         m_name = name;
 }
 
+bool Project::pinsPlacedMessage()
+{
+    qDebug() << __FUNCTION__ << m_isPinsPlaced;
+    if (m_isPinsPlaced == false) {
+        QMessageBox msgbx(QMessageBox::Information,
+            "",
+            tr("Board dimensions may have changed.\n"
+               "It is advisable to perform automatic placement of the pins\n"
+               "by selecting the necessary work items.\n\n"
+               "Continue saving?"),
+            QMessageBox::Yes | QMessageBox::No, nullptr);
+        {
+            auto label(msgbx.findChild<QLabel*>());
+            label->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(label->size()));
+        }
+        return msgbx.exec() == QMessageBox::No;
+    }
+    return false;
+    /* Размеры платы могли измениться.
+     * Выполните автоматическое размещение штифтов, выбрав необходимые рабочие элементы.
+     * Продолжить сохранение?
+     */
+}
+
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -373,6 +391,9 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 
 void Project::saveSelectedToolpaths()
 {
+    if (pinsPlacedMessage())
+        return;
+
     QVector<GCode::File*> gcFiles(this->files<GCode::File>());
     for (int i = 0; i < gcFiles.size(); ++i) {
         if (!gcFiles[i]->itemGroup()->isVisible())
@@ -451,7 +472,7 @@ double Project::spaceX() const { return m_spacingX; }
 void Project::setSpaceX(double value)
 {
     m_spacingX = value;
-    App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect(true);
 }
 
 double Project::spaceY() const { return m_spacingY; }
@@ -459,7 +480,7 @@ double Project::spaceY() const { return m_spacingY; }
 void Project::setSpaceY(double value)
 {
     m_spacingY = value;
-    App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect(true);
 }
 
 int Project::stepsX() const { return m_stepsX; }
@@ -467,7 +488,7 @@ int Project::stepsX() const { return m_stepsX; }
 void Project::setStepsX(int value)
 {
     m_stepsX = value;
-    App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect(true);
 }
 
 int Project::stepsY() const { return m_stepsY; }
@@ -475,7 +496,7 @@ int Project::stepsY() const { return m_stepsY; }
 void Project::setStepsY(int value)
 {
     m_stepsY = value;
-    App::layoutFrames()->updateRect();
+    App::layoutFrames()->updateRect(true);
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
@@ -483,12 +504,12 @@ QRectF Project::worckRect() const { return m_worckRect; }
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
+    m_isPinsPlaced = true;
     App::layoutFrames()->updateRect();
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
-
     stream << *file;
     return stream;
 }

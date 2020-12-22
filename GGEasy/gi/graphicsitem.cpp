@@ -25,39 +25,19 @@
 #include "itemgroup.h"
 #include <QTimer>
 
-//#include "boost/pfr/precise.hpp"
-#include <iostream>
-
 GraphicsItem::GraphicsItem(AbstractFile* file)
-    : animation(this, "bodyColor")
-    , m_file(file)
+    :   animation(this, "bodyColor")
+    ,
+    m_file(file)
     , m_pen(QPen(Qt::white, 0.0))
     , m_colorPtr(file ? &file->color() : nullptr)
     , m_color(Qt::white)
     , m_bodyColor(m_colorPtr ? *m_colorPtr : m_color)
     , m_pathColor(Qt::transparent)
 {
-
-    //    using namespace boost::pfr::ops; // out-of-the-box ostream operator for all PODs!
-    //    struct my_struct { // no ostream operator defined!
-    //        int i;
-    //        char c;
-    //        double d;
-    //    };
-    //    my_struct s { 100, 'H', 3.141593 };
-    //    std::cout << "my_struct has " << boost::pfr::tuple_size<my_struct>::value
-    //              << " fields: " << s << "\n";
-    //    struct some_person {
-    //        std::string name;
-    //        unsigned birth_year;
-    //    };
-    //    some_person val { "Edgar Allan Poe", 1809 };
-    //    std::cout << boost::pfr::get<0>(val) // No macro!
-    //              << " was born in " << boost::pfr::get<1>(val); // Works with any aggregate initializables!
-
     animation.setDuration(100);
     animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(this, &GraphicsItem::colorChanged, [this] { /*qDebug(__FUNCTION__);*/ update(); });
+    connect(this, &GraphicsItem::colorChanged, [this] { update(); });
     QGraphicsItem::setVisible(false);
 }
 
@@ -73,6 +53,7 @@ void GraphicsItem::setVisible(bool visible)
         QGraphicsObject::setVisible(visible);
     else
         connect(visibleA, &QAbstractAnimation::finished, [visible, this] { QGraphicsObject::setVisible(visible); });
+    QGraphicsObject::setVisible(visible);
 }
 
 const AbstractFile* GraphicsItem::file() const { return m_file; }

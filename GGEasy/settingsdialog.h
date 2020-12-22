@@ -18,12 +18,15 @@
 class SettingsDialog : public QDialog, private Ui::SettingsDialog, private GlobalSettings {
     Q_OBJECT
 
+    int langIndex;
+
 public:
     explicit SettingsDialog(QWidget* parent = nullptr);
     ~SettingsDialog() override = default;
     void readSettings();
     void writeSettings();
     /////////////////////
+    static void translator(QApplication* app, const QString& path);
 
 public slots:
     void reject() override;

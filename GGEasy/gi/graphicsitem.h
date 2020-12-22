@@ -59,7 +59,6 @@ class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
     friend class Excellon::File;
     friend class ItemGroup;
     friend class Project;
-    friend class Project;
 
     Q_OBJECT
 
@@ -85,7 +84,7 @@ public:
 
     QPen pen() const { return m_pen; }
     void setPen(const QPen& pen) { m_pen = pen; colorChanged(); }
-    void setPenColor(QColor* penColor) { m_pnColorPrt = penColor; colorChanged(); }
+    void setPenColor(const QColor* penColor) { m_pnColorPrt = penColor; colorChanged(); }
     // clang-format on
 
     virtual Paths paths() const = 0;

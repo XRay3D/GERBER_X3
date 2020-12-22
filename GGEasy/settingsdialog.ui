@@ -29,7 +29,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabGui">
       <attribute name="title">
@@ -122,6 +122,16 @@
              </property>
             </item>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Language</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cbxLanguage"/>
           </item>
          </layout>
         </widget>
@@ -905,7 +915,7 @@
   <customwidget>
    <class>DoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>doublespinbox.h</header>
+   <header location="global">doublespinbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -37,13 +37,6 @@ Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
-    //    auto si { App::scene()->selectedItems() };
-    //    QRectF rect;
-    //    for (auto var : si) {
-    //        qDebug() << var->type() << var->boundingRect();
-    //        rect = rect.united(var->boundingRect());
-    //    }
-    //    qDebug() << rect;
     QRectF rect(App::project()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
@@ -116,9 +109,9 @@ QPainterPath Marker::shape() const
 
 int Marker::type() const { return static_cast<int>(m_type ? GiType::Home : GiType::PointZero); }
 
-void Marker::resetPos(bool fl)
+void Marker::resetPos(bool flUpdateRect)
 {
-    if (fl && !updateRect())
+    if (flUpdateRect && !updateRect())
         return;
 
     const QRectF rect(App::layoutFrames()->boundingRect());
@@ -506,13 +499,11 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
-    QPen pen(QColor(100, 0, 100), 0.0);
-    pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
-    pen.setJoinStyle(Qt::MiterJoin);
-    //    pen.setStyle(Qt::CustomDashLine);
-    //    pen.setCapStyle(Qt::FlatCap);
-    //    pen.setDashPattern({ 2.0, 5.0 });
-    painter->setPen(pen);
+    {
+        QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView()->scaleFactor());
+        pen.setJoinStyle(Qt::MiterJoin);
+        painter->setPen(pen);
+    }
     painter->drawPath(m_path);
     painter->restore();
 }
@@ -523,12 +514,67 @@ void LayoutFrames::updateRect(bool fl)
     QRectF rect(App::project()->worckRect());
     for (int x = 0; x < App::project()->stepsX(); ++x) {
         for (int y = 0; y < App::project()->stepsY(); ++y) {
-            path.addRect(rect.translated(
-                (rect.width() + App::project()->spaceX()) * x,
-                (rect.height() + App::project()->spaceY()) * y));
+            if (x || y) {
+                path.addRect(rect.translated(
+                    (rect.width() + App::project()->spaceX()) * x,
+                    (rect.height() + App::project()->spaceY()) * y));
+            } else {
+                const double spaceX = qFuzzyIsNull(App::project()->spaceX()) ? 2 : App::project()->spaceX() * 0.5;
+                const double spaceY = qFuzzyIsNull(App::project()->spaceY()) ? 2 : App::project()->spaceY() * 0.5;
+
+                path.moveTo(rect.bottomLeft() + QPointF(-spaceX, 0));
+                path.lineTo(rect.bottomLeft());
+                path.lineTo(rect.bottomLeft() + QPointF(0, +spaceY));
+
+                path.moveTo(rect.bottomRight() + QPointF(+spaceX, 0));
+                path.lineTo(rect.bottomRight());
+                path.lineTo(rect.bottomRight() + QPointF(0, +spaceY));
+
+                path.moveTo(rect.topLeft() + QPointF(-spaceX, 0));
+                path.lineTo(rect.topLeft());
+                path.lineTo(rect.topLeft() + QPointF(0, -spaceY));
+
+                path.moveTo(rect.topRight() + QPointF(+spaceX, 0));
+                path.lineTo(rect.topRight());
+                path.lineTo(rect.topRight() + QPointF(0, -spaceY));
+
+                {
+                    const double mid = rect.height() / 2;
+                    const double len = std::min(rect.height() / 10, spaceX);
+
+                    path.moveTo(rect.topLeft() + QPointF(0, mid - len));
+                    path.lineTo(rect.topLeft() + QPointF(0, mid + len));
+
+                    path.moveTo(rect.topRight() + QPointF(0, mid - len));
+                    path.lineTo(rect.topRight() + QPointF(0, mid + len));
+
+                    path.moveTo(rect.topLeft() + QPointF(0, mid));
+                    path.lineTo(rect.topLeft() + QPointF(-spaceX, mid));
+
+                    path.moveTo(rect.topRight() + QPointF(0, mid));
+                    path.lineTo(rect.topRight() + QPointF(+spaceX, mid));
+                }
+
+                {
+                    const double mid = rect.width() / 2;
+                    const double len = std::min(rect.width() / 10, spaceY);
+
+                    path.moveTo(rect.bottomLeft() + QPointF(mid - len, 0));
+                    path.lineTo(rect.bottomLeft() + QPointF(mid + len, 0));
+
+                    path.moveTo(rect.topLeft() + QPointF(mid - len, 0));
+                    path.lineTo(rect.topLeft() + QPointF(mid + len, 0));
+
+                    path.moveTo(rect.bottomLeft() + QPointF(mid, 0));
+                    path.lineTo(rect.bottomLeft() + QPointF(mid, +spaceY));
+
+                    path.moveTo(rect.topLeft() + QPointF(mid, 0));
+                    path.lineTo(rect.topLeft() + QPointF(mid, -spaceY));
+                }
+            }
         }
     }
-    m_path = path;
+    m_path = std::move(path);
     QGraphicsItem::update();
     scene()->setSceneRect(scene()->itemsBoundingRect());
     if (fl) {

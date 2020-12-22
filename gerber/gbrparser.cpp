@@ -177,7 +177,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
                 m_file->setSide(Bottom);
             m_file->mergedPaths();
             file()->m_components = components.values();
-            m_file->createGi();
+            m_file->groupedPaths();
             emit fileReady(m_file);
             emit fileProgress(m_file->shortName(), 1, 1);
             qDebug() << m_file->shortName() << "Parser" << t.elapsed();
@@ -564,7 +564,7 @@ Paths Parser::createLine()
             throw tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
         double size = rect->m_width * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
-            size = 1;
+            return {};
         ClipperOffset offset;
         offset.AddPath(m_path, jtSquare, etOpenSquare);
         offset.Execute(solution, size);
@@ -573,7 +573,7 @@ Paths Parser::createLine()
     } else {
         double size = file()->m_apertures[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
-            size = 1;
+            return {};
         ClipperOffset offset;
         offset.AddPath(m_path, jtRound, etOpenRound);
         offset.Execute(solution, size);
@@ -600,9 +600,10 @@ bool Parser::parseAperture(const QString& gLine)
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (match.exactMatch(gLine)) {
+        qDebug() << __FUNCTION__ << match.capturedTexts();
         int aperture = match.cap(1).toInt();
-        QString apType = match.cap(2);
-        QString apParameters = match.cap(3);
+        const QString apType = match.cap(2);
+        const QString apParameters = match.cap(3);
         /*
          *    Parse gerber aperture definition into dictionary of apertures.
          *    The following kinds and their attributes are supported:
@@ -683,15 +684,15 @@ bool Parser::parseTransformations(const QString& gLine)
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations { "P", "M", "R", "S" };
-    static const QStringList slLevelPolarity { "D", "C" };
-    static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
+    static const QVector<QChar> slTransformations { 'P', 'M', 'R', 'S' };
+    static const QVector<QChar> slLevelPolarity { 'D', 'C' };
+    static const QVector<QString> slLoadMirroring { "N", "X", "Y", "XY" };
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
     if (match.exactMatch(gLine)) {
-        switch (slTransformations.indexOf(match.cap(1))) {
+        switch (slTransformations.indexOf(match.cap(1)[0])) {
         case trPolarity:
             addPath();
-            switch (slLevelPolarity.indexOf(match.cap(2))) {
+            switch (slLevelPolarity.indexOf(match.cap(2)[0])) {
             case Positive:
                 m_state.setImgPolarity(Positive);
                 break;
@@ -930,7 +931,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
 
         // Set operation code if provided
         if (!match.cap(6).isEmpty())
-            m_state.setDCode(static_cast<DCode>(match.cap(6).toInt()));
+            m_state.setDCode(static_cast<Operation>(match.cap(6).toInt()));
         switch (m_state.dCode()) {
         case D01:
             break;
@@ -1032,11 +1033,11 @@ bool Parser::parseEndOfFile(const QString& gLine)
 
 bool Parser::parseFormat(const QString& gLine)
 {
-    const QStringList zeroOmissionModeList = QString("L|T").split("|");
-    const QStringList coordinateValuesNotationList = QString("A|I").split("|");
+    static const QVector<QChar> zeroOmissionModeList { 'L', 'T' };
+    static const QVector<QChar> coordinateValuesNotationList { 'A', 'I' };
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
     if (match.exactMatch(gLine)) {
-        switch (zeroOmissionModeList.indexOf(match.cap(1))) {
+        switch (zeroOmissionModeList.indexOf(match.cap(1)[0])) {
         case OmitLeadingZeros:
             m_state.format()->zeroOmisMode = OmitLeadingZeros;
             break;
@@ -1046,7 +1047,7 @@ bool Parser::parseFormat(const QString& gLine)
             break;
 #endif
         }
-        switch (coordinateValuesNotationList.indexOf(match.cap(2))) {
+        switch (coordinateValuesNotationList.indexOf(match.cap(2)[0])) {
         case AbsoluteNotation:
             m_state.format()->coordValueNotation = AbsoluteNotation;
             break;
@@ -1158,7 +1159,7 @@ bool Parser::parseGCode(const QString& gLine)
 bool Parser::parseImagePolarity(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%IP(POS|NEG)\\*%$"));
-    static const QList<QString> slImagePolarity(QString("POS|NEG").split("|"));
+    static const QVector<QString> slImagePolarity { "POS", "NEG" };
     if (match.exactMatch(gLine)) {
         switch (slImagePolarity.indexOf(match.cap(1))) {
         case Positive:
@@ -1180,9 +1181,9 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     if (match.exactMatch(gLine)) {
         parsePosition(gLine);
 
-        DCode dcode = m_state.dCode();
+        Operation dcode = m_state.dCode();
         if (!match.cap(2).isEmpty())
-            dcode = static_cast<const DCode>(match.cap(2).toInt());
+            dcode = static_cast<const Operation>(match.cap(2).toInt());
 
         switch (dcode) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
@@ -1241,7 +1242,7 @@ bool Parser::parseDCode(const QString& gLine)
 bool Parser::parseUnitMode(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^%MO(IN|MM)\\*%$"));
-    static const QList<QString> slUnitType(QString("IN|MM").split("|"));
+    static const QVector<QString> slUnitType { "IN", "MM" };
     if (match.exactMatch(gLine)) {
         switch (slUnitType.indexOf(match.cap(1))) {
         case Inches:

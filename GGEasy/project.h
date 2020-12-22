@@ -21,6 +21,7 @@ enum FileVersion {
     ProVer_2,
     ProVer_3,
     ProVer_4,
+    ProVer_5,
 };
 
 namespace Shapes {
@@ -33,7 +34,7 @@ class Project : public QObject {
     Q_OBJECT
 
 public:
-    explicit Project(QObject *parent=nullptr);
+    explicit Project(QObject* parent = nullptr);
     ~Project() override;
 
     bool save(QFile& file);
@@ -43,7 +44,6 @@ public:
     AbstractFile* file(int id);
     void deleteFile(int id);
     void deleteShape(int id);
-    bool isEmpty();
     int size();
 
     bool isModified() { return m_isModified; }
@@ -115,9 +115,10 @@ public:
         m_isModified = true;
         changed();
     }
-
+    bool pinsPlacedMessage();
     void saveSelectedToolpaths();
     bool isUntitled();
+    bool isPinsPlaced() const { return m_isPinsPlaced; }
     void setUntitled(bool value);
 
     double spaceX() const;
@@ -148,6 +149,7 @@ private:
     QString m_name;
     bool m_isModified = false;
     bool m_isUntitled = true;
+    bool m_isPinsPlaced = false;
 
     double m_spacingX = 0.0;
     double m_spacingY = 0.0;

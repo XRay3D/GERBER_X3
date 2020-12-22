@@ -27,6 +27,7 @@ enum class FileType {
     Gerber,
     Excellon,
     GCode,
+    Dxf
 };
 
 enum Side {
@@ -71,10 +72,11 @@ class AbstractFile {
         if (App::splashScreen())
             App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
 
+        bool visible;
+        stream >> visible;
         file.createGi();
-        bool fl;
-        stream >> fl;
-        file.itemGroup()->setVisible(fl);
+        file.itemGroup()->setVisible(visible);
+
         return stream;
     }
 
@@ -127,9 +129,6 @@ protected:
     Side m_side = Top;
     QColor m_color;
     QDateTime m_date;
-
-    //    void _write(QDataStream& stream) const;
-    //    void _read(QDataStream& stream);
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)

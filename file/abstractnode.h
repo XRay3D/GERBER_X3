@@ -66,5 +66,4 @@ protected:
     QList<QSharedPointer<AbstractNode>> childItems;
     inline AbstractFile* file() const { return App::project()->file(m_id); }
     inline Shapes::Shape* shape() const { return App::project()->aShape(m_id); }
-    //Qt::CheckState m_checkState = Qt::Checked;
 };

@@ -19,11 +19,14 @@ class File;
 }
 
 class AperturePathItem : public GraphicsItem {
+    QRectF boundingRect_m;
+
 public:
-    AperturePathItem(const Path& path, Gerber::File* file);
+    AperturePathItem(const Path& path, AbstractFile *file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
+    QRectF boundingRect2() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths() const override;
@@ -38,6 +41,7 @@ protected:
     // QGraphicsItem interface
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+
 protected:
     void changeColor() override { }
 };

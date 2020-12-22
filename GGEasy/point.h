@@ -32,7 +32,7 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    void resetPos(bool fl = true);
+    void resetPos(bool flUpdateRect = true);
     void setPosX(double x);
     void setPosY(double y);
     static Marker* get(Type type) { return m_markers[type]; }

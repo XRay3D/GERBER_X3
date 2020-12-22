@@ -74,7 +74,7 @@ enum QuadrantMode {
     Multi
 };
 
-enum DCode {
+enum Operation {
     D01 = 1,
     D02 = 2,
     D03 = 3
@@ -202,7 +202,7 @@ class State {
     }
 
     Format* m_format = nullptr;
-    DCode m_dCode = D02;
+    Operation m_dCode = D02;
     GCode m_gCode = G01;
     ImagePolarity m_imgPolarity = Positive;
     InterpolationMode m_interpolation = Linear;
@@ -237,8 +237,8 @@ public:
 
     inline Format* format() const { return m_format; }
 
-    inline DCode dCode() const { return m_dCode; }
-    inline void setDCode(DCode dCode) { m_dCode = dCode; }
+    inline Operation dCode() const { return m_dCode; }
+    inline void setDCode(Operation dCode) { m_dCode = dCode; }
 
     inline GCode gCode() const { return m_gCode; }
     inline void setGCode(GCode gCode) { m_gCode = gCode; }

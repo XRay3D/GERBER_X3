@@ -29,6 +29,9 @@
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
+
+#include "dxfparser.h"
+
 #include "thermal.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QtPrintSupport>
@@ -42,6 +45,7 @@ MainWindow::MainWindow(QWidget* parent)
     , recentProjects(this, "recentProjectsList")
     , gerberParser(new Gerber::Parser)
     , excellonParser(new Excellon::Parser)
+    , dxfParser(new Dxf::Parser)
     , m_project(new Project(this))
 
 {
@@ -71,8 +75,15 @@ MainWindow::MainWindow(QWidget* parent)
     connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
     connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
 
+    dxfParser->moveToThread(&parserThread);
+    connect(this, &MainWindow::parseDxfFile, dxfParser, &FileParser::parseFile, Qt::QueuedConnection);
+    connect(dxfParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
+    connect(dxfParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
+    connect(dxfParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
+
     connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
+    connect(&parserThread, &QThread::finished, dxfParser, &QObject::deleteLater);
 
     parserThread.start(QThread::HighestPriority);
 
@@ -107,13 +118,20 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
+    App::m_mainWindow = this;
+
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         int i = 0;
         QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Profile]->triggered(); });
-        QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/motorcyc.dxf"); });
+
+        //        for (int j = 0; j < 50; ++j) {
+        //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
+        //        }
+
+        //QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
-    App::m_mainWindow = this;
 }
 
 MainWindow::~MainWindow()
@@ -166,7 +184,6 @@ void MainWindow::createActions()
     m_dockWidget = new DockWidget(this);
     m_dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
-
     // fileMenu
     createActionsFile();
     // zoomToolBar
@@ -193,6 +210,8 @@ void MainWindow::createActionsFile()
     fileToolBar = addToolBar(tr("File"));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
+    fileToolBar->setToolTip(tr("File"));
+
     // New
     QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"),
         this, &MainWindow::newFile);
@@ -309,6 +328,8 @@ void MainWindow::createActionsService()
 
     toolpathToolBar = addToolBar(tr("Service"));
     toolpathToolBar->setObjectName("tbService");
+    toolpathToolBar->setToolTip(tr("Service"));
+
     //toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     {
@@ -356,6 +377,7 @@ void MainWindow::createActionsZoom()
     vievMenu->setObjectName("vievMenu");
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
+    zoomToolBar->setToolTip(tr("Zoom ToolBar"));
     // Fit best
     auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), graphicsView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
@@ -387,6 +409,7 @@ void MainWindow::createActionsToolPath()
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
+    toolpathToolBar->setToolTip(tr("Toolpath"));
 
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
@@ -459,6 +482,7 @@ void MainWindow::createActionsGraphics()
 {
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
+    tb->setToolTip(tr("Graphics Items"));
     // tb->setEnabled(false);
     QAction* action = nullptr;
     {
@@ -715,6 +739,8 @@ void MainWindow::loadFile(const QString& fileName)
             }
         } else if (excellonParser->isDrillFile(fileName)) {
             emit parseExcellonFile(fileName);
+        } else if (dxfParser->isDxfFile(fileName)) {
+            emit parseDxfFile(fileName);
         } else
             emit parseGerberFile(fileName);
         return;
@@ -816,6 +842,21 @@ QMenu* MainWindow::createPopupMenu()
     return menu;
 }
 
+void MainWindow::translate(const QString& locale)
+{
+    static QTranslator qtTranslator;
+    static QTranslator appTranslator;
+    qDebug() << "locale;" << locale;
+    const QString trFolder(qApp->applicationDirPath().contains("GERBER_X2/bin")
+            ? qApp->applicationDirPath() + "/../GGEasy/translations"
+            : qApp->applicationDirPath() + "/translations");
+
+    qDebug() << qtTranslator.load("qtbase_" + locale + ".qm", trFolder);
+    qDebug() << appTranslator.load(qApp->applicationDisplayName().toLower() + "_" + locale + ".qm", trFolder);
+    qApp->installTranslator(&qtTranslator);
+    qApp->installTranslator(&appTranslator);
+}
+
 void MainWindow::open()
 {
     QStringList files(QFileDialog::getOpenFileNames(
@@ -861,6 +902,15 @@ void MainWindow::showEvent(QShowEvent* event)
     QMainWindow::showEvent(event);
 }
 
+void MainWindow::changeEvent(QEvent* event)
+{
+    // В случае получения события изменения языка приложения
+    if (event->type() == QEvent::LanguageChange) {
+        qDebug() << __FUNCTION__;
+        retranslateUi(this); // переведём окно заново
+    }
+}
+
 //////////////////////////////////////////////////////
 /// \brief DockWidget::DockWidget
 /// \param parent
@@ -874,8 +924,6 @@ DockWidget::DockWidget(QWidget* parent)
 
 void DockWidget::push(QWidget* w)
 {
-    qDebug(Q_FUNC_INFO);
-
     if (widget())
         widgets.push(widget());
     if (w)
@@ -884,7 +932,6 @@ void DockWidget::push(QWidget* w)
 
 void DockWidget::pop()
 {
-    qDebug(Q_FUNC_INFO);
     if (widget()) {
         if (widget()->objectName() == "ErrorDialog") {
             static_cast<QDialog*>(widget())->reject();
@@ -899,14 +946,12 @@ void DockWidget::pop()
 
 void DockWidget::closeEvent(QCloseEvent* event)
 {
-    qDebug(Q_FUNC_INFO);
     pop();
     event->accept();
 }
 
 void DockWidget::showEvent(QShowEvent* event)
 {
-    qDebug(Q_FUNC_INFO);
     event->ignore();
     if (widget() == nullptr)
         QTimer::singleShot(1, this, &QDockWidget::close);

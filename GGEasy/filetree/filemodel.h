@@ -36,6 +36,7 @@ public:
         GerberFiles,
         DrillFiles,
         ToolPath,
+        DxfPath,
         Shapes,
         NodeCount,
     };

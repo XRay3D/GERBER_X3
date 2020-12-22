@@ -16,11 +16,15 @@
 #include "ui_mainwindow.h"
 #include <QStack>
 #include <QThread>
+#include <QTranslator>
 
 namespace Gerber {
 class Parser;
 }
 namespace Excellon {
+class Parser;
+}
+namespace Dxf {
 class Parser;
 }
 namespace GCode {
@@ -46,9 +50,12 @@ public:
     const DockWidget* dockWidget() const { return m_dockWidget; }
     DockWidget* dockWidget() { return m_dockWidget; }
 
+    static void translate(const QString& locale);
+
 signals:
     void parseGerberFile(const QString& filename);
     void parseExcellonFile(const QString& filename);
+    void parseDxfFile(const QString& filename);
 
 private:
     DockWidget* m_dockWidget = nullptr;
@@ -57,6 +64,7 @@ private:
 
     Gerber::Parser* gerberParser;
     Excellon::Parser* excellonParser;
+    Dxf::Parser* dxfParser;
 
     QAction* m_closeAllAct = nullptr;
 
@@ -130,6 +138,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
     void showEvent(QShowEvent* event) override;
+    void changeEvent(QEvent* event) override;
 };
 
 class DockWidget : public QDockWidget {
