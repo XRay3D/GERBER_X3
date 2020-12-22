@@ -190,6 +190,8 @@ void TreeView::closeFile2(const QModelIndex& index)
 
 void TreeView::saveGcodeFile()
 {
+    if (App::project()->pinsPlacedMessage())
+        return;
     auto* file = App::project()->file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::GCUtils::getLastDir().append(m_menuIndex.data().toString()),

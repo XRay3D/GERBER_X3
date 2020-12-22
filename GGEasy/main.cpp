@@ -42,7 +42,6 @@ int main(int argc, char* argv[])
     QGLFormat::setDefaultFormat(glf);
 
     initIcon(qApp->applicationDirPath());
-    translation(&app);
 
     //    QSystemSemaphore semaphore("GGEasy_Semaphore", 1); // создаём семафор
     //    semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
@@ -122,6 +121,17 @@ int main(int argc, char* argv[])
         SettingsDialog().readSettings();
     }
 
+    {
+        QSettings settings;
+        settings.beginGroup("MainWindow");
+        QString locale(settings.value("locale").toString());
+        if (locale.isEmpty())
+            locale = QLocale().name().left(2);
+        settings.setValue("locale", locale);
+        settings.endGroup();
+        MainWindow::translate(locale);
+    }
+
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
     mainWin.setIconSize({ 24, 24 });
@@ -147,30 +157,4 @@ void initIcon(const QString& path)
         path + "/icons/breeze/",
     });
     QIcon::setThemeName("Breeze");
-}
-
-void translation(QApplication* app)
-{
-    const QString loc(QLocale().name().left(2));
-    qDebug() << "locale:" << loc;
-    QString trFolder;
-
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin"))
-        trFolder = qApp->applicationDirPath() + "/../GGEasy/translations/"; // for debug
-    else
-        trFolder = (qApp->applicationDirPath() + "/translations/");
-
-    auto translator = [app](const QString& path) {
-        if (QFile::exists(path)) {
-            QTranslator* pTranslator = new QTranslator(qApp);
-            if (pTranslator->load(path))
-                app->installTranslator(pTranslator);
-            else
-                delete pTranslator;
-        }
-    };
-
-    translator(trFolder + qApp->applicationDisplayName().toLower() + "_" + loc + ".qm");
-    translator(trFolder + "qtbase_" + loc + ".qm");
-    translator(trFolder + "qt_" + loc + ".qm");
 }

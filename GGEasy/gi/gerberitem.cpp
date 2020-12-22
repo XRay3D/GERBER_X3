@@ -81,10 +81,12 @@ Paths* GiGerber::rPaths() { return &m_paths; }
 
 void GiGerber::changeColor()
 {
-    //    auto animation = new QPropertyAnimation(this, "bodyColor");
-    //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    animation.setDuration(100);
+//    auto animation = new QPropertyAnimation(this, "bodyColor");
+//    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+//    animation.setDuration(100);
+
     animation.setStartValue(m_bodyColor);
+
     m_bodyColor = m_colorPtr ? *m_colorPtr : m_color;
 
     switch (colorState) {

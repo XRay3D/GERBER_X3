@@ -32,7 +32,7 @@ HEADERS += \
 #    $$PWD/Clipper2/clipper_triangulation.h \
     $$PWD/clipper.hpp \
     $$PWD/myclipper.h \
-    $$PWD/line.h
+#    $$PWD/cpline.h
 
 SOURCES += \
 #    $$PWD/Clipper2/clipper2.cpp \
@@ -40,4 +40,4 @@ SOURCES += \
 #    $$PWD/Clipper2/clipper_triangulation.cpp \
     $$PWD/clipper.cpp \
     $$PWD/myclipper.cpp \
-    $$PWD/line.cpp
+#    $$PWD/cpline.cpp

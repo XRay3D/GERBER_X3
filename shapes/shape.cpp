@@ -158,6 +158,7 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
 void Shape::changeColor()
 {
     animation.setStartValue(m_bodyColor);
+
     switch (colorState) {
     case Default:
         m_bodyColor = QColor(255, 255, 255, 50);
@@ -172,6 +173,7 @@ void Shape::changeColor()
         m_bodyColor = QColor(255, 0x0, 0x0, 150);
         break;
     }
+
     animation.setEndValue(m_bodyColor);
     animation.start();
 }

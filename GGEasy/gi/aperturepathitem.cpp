@@ -22,7 +22,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
+AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/AbstractFile* file)
     : GraphicsItem(file)
     , m_path(path)
 {
@@ -34,11 +34,14 @@ AperturePathItem::AperturePathItem(const Path& path, Gerber::File* file)
     offset.Execute(tmpPaths, 0.01 * uScale);
     for (const Path& tmpPath : tmpPaths)
         m_selectionShape.addPolygon(tmpPath);
+    boundingRect_m = m_selectionShape.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
 QRectF AperturePathItem::boundingRect() const { return shape().boundingRect(); }
+
+QRectF AperturePathItem::boundingRect2() const { return boundingRect_m; }
 
 void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {

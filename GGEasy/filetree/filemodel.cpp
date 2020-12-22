@@ -14,6 +14,11 @@
 *                                                                              *
 *******************************************************************************/
 #include "filemodel.h"
+
+#include "dxffile.h"
+#include "dxfnode.h"
+#include "tables/layer.h"
+
 #include "exnode.h"
 #include "foldernode.h"
 #include "gbrnode.h"
@@ -31,6 +36,7 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode(tr("Gerber Files")));
     rootItem->append(new FolderNode(tr("Excellon")));
     rootItem->append(new FolderNode(tr("Tool Paths")));
+    rootItem->append(new FolderNode(tr("Dxf Files")));
     rootItem->append(new FolderNode(tr("Shapes")));
     App::m_fileModel = this;
 }
@@ -45,26 +51,42 @@ void FileModel::addFile(AbstractFile* file)
 {
     if (!file)
         return;
-
+    AbstractNode* newItem = nullptr;
     AbstractNode* item(rootItem->child(static_cast<int>(file->type())));
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    beginInsertRows(index, rowCount, rowCount);
-    switch (file->type()) {
-    case FileType::Gerber:
-        item->append(new Gerber::Node(file->id()));
-        break;
-    case FileType::Excellon:
-        item->append(new Excellon::Node(file->id()));
-        break;
-    case FileType::GCode:
-        item->append(new GCode::Node(file->id()));
-        break;
-    default:
-        break;
+    {
+        beginInsertRows(index, rowCount, rowCount);
+        switch (file->type()) {
+        case FileType::Gerber:
+            item->append(newItem = new Gerber::Node(file->id()));
+            break;
+        case FileType::Excellon:
+            item->append(newItem = new Excellon::Node(file->id()));
+            break;
+        case FileType::GCode:
+            item->append(newItem = new GCode::Node(file->id()));
+            break;
+        case FileType::Dxf:
+            item->append(newItem = new Dxf::Node(file->id()));
+            break;
+        default:
+            break;
+        }
+        endInsertRows();
     }
-    endInsertRows();
+
+    //    if (file->type() == FileType::Dxf) {
+    //        Dxf::File* dxfFile(reinterpret_cast<Dxf::File*>(file));
+    //        QModelIndex index = createIndex(0, 0, newItem);
+    //        beginInsertRows(index, 0, dxfFile->layers().size() - 1);
+    //        for (auto& [name, layer] : dxfFile->layers()) {
+    //            qDebug() << name << layer;
+    //            newItem->append(new Dxf::NodeLayer(name, layer));
+    //        }
+    //        endInsertRows();
+    //    }
 
     QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
     emit select(selectIndex);

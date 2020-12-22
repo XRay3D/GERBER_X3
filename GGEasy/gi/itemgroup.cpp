@@ -48,7 +48,7 @@ void ItemGroup::setSelected(const QVector<int>& ids)
 
 void ItemGroup::addToScene()
 {
-    for (QGraphicsItem* item : *this)
+    for (auto item : *this)
         App::scene()->addItem(item);
 }
 

@@ -62,8 +62,11 @@ private:
     ItemsType m_itemsType = Normal;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
+
     //Layer layer = Copper;
     //Miror miror = Vertical;
+    //QPointf offset;
+
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;
 

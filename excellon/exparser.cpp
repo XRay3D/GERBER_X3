@@ -86,7 +86,6 @@ AbstractFile* Parser::parseFile(const QString& fileName)
         delete m_file;
         m_file = nullptr;
     } else {
-        m_file->createGi();
         emit fileReady(m_file);
     }
     return m_file;

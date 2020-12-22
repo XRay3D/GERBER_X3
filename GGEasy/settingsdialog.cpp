@@ -18,6 +18,7 @@
 #include "graphicsview.h"
 #include <QGLWidget>
 #include <QtWidgets>
+#include <mainwindow.h>
 
 #include "leakdetector.h"
 
@@ -69,6 +70,34 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         qApp->setFont(f);
     });
 
+    { // Language
+        cbxLanguage->addItem("English", "en");
+        cbxLanguage->addItem("Русский", "ru");
+
+        QSettings settings;
+        settings.beginGroup("MainWindow");
+        QString locale(settings.value("locale").toString());
+        settings.endGroup();
+
+        for (int i = 0; i < cbxLanguage->count(); ++i) {
+            if (cbxLanguage->itemData(i).toString() == locale) {
+                cbxLanguage->setCurrentIndex(i);
+                langIndex = i;
+                break;
+            }
+        }
+
+        connect(cbxLanguage, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+            const QString locale(cbxLanguage->itemData(index).toString());
+            MainWindow::translate(locale);
+
+            QSettings settings;
+            settings.beginGroup("MainWindow");
+            settings.setValue("locale", locale);
+            settings.endGroup();
+        });
+    }
+
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
     readSettings();
     resize(10, 10);
@@ -77,6 +106,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 void SettingsDialog::readSettings()
 {
     MySettings settings;
+
     settings.beginGroup("Viewer");
     settings.getValue(chbxOpenGl);
     settings.getValue(chbxAntialiasing);
@@ -210,6 +240,17 @@ void SettingsDialog::writeSettings()
     settings.endGroup();
 }
 
+void SettingsDialog::translator(QApplication* app, const QString& path)
+{
+    if (QFile::exists(path)) {
+        QTranslator* pTranslator = new QTranslator(qApp);
+        if (pTranslator->load(path))
+            app->installTranslator(pTranslator);
+        else
+            delete pTranslator;
+    }
+}
+
 void SettingsDialog::reject()
 {
     readSettings();
@@ -218,6 +259,11 @@ void SettingsDialog::reject()
 
 void SettingsDialog::accept()
 {
+    if (langIndex != cbxLanguage->currentIndex()) {
+        QMessageBox::information(this, "", tr("The complete translation of the application will take\n"
+                                              "effect after restarting the application."));
+    }
+
     writeSettings();
     QDialog::accept();
 }
