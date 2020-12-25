@@ -37,7 +37,7 @@ public:
 
     HType hType() const;
     void setHType(const HType& value);
-    inline QRectF rect() const;
+    QRectF rect() const;
 
 private:
     Shape* shape;
