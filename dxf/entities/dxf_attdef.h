@@ -2,14 +2,15 @@
 
 #include "dxf_entity.h"
 namespace Dxf {
-struct ATTDEF final : Entity {
-    ATTDEF(SectionParser* sp);
+struct AttDef final : Entity {
+    AttDef(SectionParser* sp);
 
     // EntityInterface
 public:
-    void draw(const INSERT_ET* const i) const override;
+    void draw(const InsertEntity* const i) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::ATTDEF; };
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarkerAcDbText = 100, //	Маркер подкласса (AcDbText)

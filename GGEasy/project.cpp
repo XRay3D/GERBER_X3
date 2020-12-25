@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "project.h"
 #include "abstractfile.h"
+#include "dxf_file.h"
 #include "excellon.h"
 #include "gbrfile.h"
 #include "gcode.h"
@@ -29,7 +30,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <algorithm>
-#include <execution>
+//#include <execution>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
 #include <gi/aperturepathitem.h>
@@ -200,10 +201,20 @@ QRectF Project::getSelectedBoundingRect()
     if (selectedItems.isEmpty())
         return {};
 
-    auto getRect = [](QGraphicsItem* gi) {
-        return static_cast<GiType>(gi->type()) == GiType::AperturePath
-            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
-            : gi->boundingRect();
+    auto getRect = [](QGraphicsItem* gi) -> QRectF {
+        //        return static_cast<GiType>(gi->type()) == GiType::AperturePath
+        //            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
+        //            : gi->boundingRect();
+        switch (static_cast<GiType>(gi->type())) {
+        case GiType::Gerber:
+            return gi->boundingRect();
+        case GiType::Drill:
+            return gi->boundingRect();
+        case GiType::AperturePath:
+            return static_cast<AperturePathItem*>(gi)->boundingRect2();
+        default:
+            return {};
+        }
     };
 
     QRectF rect(getRect(selectedItems.takeFirst()));
@@ -255,7 +266,9 @@ int Project::contains(const QString& name)
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item->type() == FileType::Gerber || item->type() == FileType::Excellon)
+        if (item->type() == FileType::Gerber
+            || item->type() == FileType::Excellon
+            || item->type() == FileType::Dxf)
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
@@ -291,6 +304,11 @@ bool Project::reload(int id, AbstractFile* file)
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
             break;
+        case FileType::Dxf:
+            Dxf::File* f = static_cast<Dxf::File*>(file);
+            for (auto ig : f->itemGroups())
+                ig->addToScene();
+            break;
         }
         m_files[id] = QSharedPointer<AbstractFile>(file);
         return true;
@@ -314,6 +332,7 @@ int Project::addFile(AbstractFile* file)
 {
     m_isPinsPlaced = false; //QMutexLocker locker(&m_mutex);
     file->createGi();
+    file->setVisible(true);
     const int id = contains(file->name());
     if (id != -1) {
         reload(id, file);
@@ -527,6 +546,9 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
         break;
     case FileType::GCode:
         file = QSharedPointer<AbstractFile>(new GCode::File());
+        break;
+    case FileType::Dxf:
+        file = QSharedPointer<AbstractFile>(new Dxf::File());
         break;
     }
     stream >> *file;

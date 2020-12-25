@@ -30,7 +30,7 @@
 #include "settingsdialog.h"
 #include "shheaders.h"
 
-#include "dxfparser.h"
+#include "dxf_parser.h"
 
 #include "thermal.h"
 #include "tooldatabase/tooldatabase.h"
@@ -123,7 +123,12 @@ MainWindow::MainWindow(QWidget* parent)
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         int i = 0;
         QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/motorcyc.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/motorcyc.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/misc01.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/ELECTROSTATIC_AMP_A.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_BOT.dxf"); });
 
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
@@ -359,6 +364,15 @@ void MainWindow::createActionsService()
     toolpathToolBar->addSeparator();
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { GlobalSettings::setSnap(checked); }));
     action->setCheckable(true);
+
+    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
+        serviceMenu->addSeparator();
+        serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
+            auto r(geometry());
+            r.setSize({ 1280, 720 });
+            setGeometry(r);
+        }));
+    }
 }
 
 void MainWindow::createActionsHelp()
@@ -662,6 +676,7 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
 
 void MainWindow::fileError(const QString& fileName, const QString& error)
 {
+    qWarning() << "fileError " << fileName << error;
     QMessageBox::critical(this, fileName, error);
 }
 

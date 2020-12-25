@@ -235,9 +235,11 @@ void DrillForm::setApertures(const Gerber::ApertureMap* value)
     m_apertures = *value;
 
     uint count = 0;
-    for (auto [_, aperture] : m_apertures)
+    for (auto [_, aperture] : m_apertures) {
+        (void)_;
         if (aperture->isFlashed())
             ++count;
+    }
 
     const Gerber::File* gbrFile = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
 
@@ -418,6 +420,7 @@ void DrillForm::on_pbCreate_clicked()
             }
         }
         for (auto [usedToolId, _] : pathsMap) {
+            (void)_;
             QString indexes;
             for (int id : pathsMap[usedToolId].toolsApertures) {
                 if (indexes.size())

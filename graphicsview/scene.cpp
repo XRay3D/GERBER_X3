@@ -304,12 +304,13 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
         //        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
 
+        // zero cross
         painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));
         painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
         painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
     }
 
-    { // screen mouse cross
+    if (1) { // screen mouse cross
         QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
         bool fl = false;
         for (QGraphicsItem* item : items) {

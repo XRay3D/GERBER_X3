@@ -103,9 +103,9 @@ void TranslatePath(Path& path, const Point64& pos)
 {
     if (pos.X == 0 && pos.Y == 0)
         return;
-    for (Path::size_type i = 0, size = path.size(); i < size; ++i) {
-        path[i].X += pos.X;
-        path[i].Y += pos.Y;
+    for (auto& pt : path) {
+        pt.X += pos.X;
+        pt.Y += pos.Y;
     }
 }
 

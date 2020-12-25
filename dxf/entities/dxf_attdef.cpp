@@ -1,21 +1,18 @@
 #include "dxf_attdef.h"
 #include "dxf_insert.h"
+#include "section/dxf_blocks.h"
+#include "section/dxf_entities.h"
 #include <QGraphicsEllipseItem>
-#include <QGraphicsScene>
-#include <section/blocks.h>
-#include <section/entities.h>
 
-#include <QGraphicsItem>
 #include <QPainter>
 
-
 namespace Dxf {
-ATTDEF::ATTDEF(SectionParser* sp)
+AttDef::AttDef(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void ATTDEF::draw(const INSERT_ET* const i) const
+void AttDef::draw(const InsertEntity* const i) const
 {
     if (i) {
         //        for (int r = 0; r < i->rowCount; ++r) {
@@ -36,10 +33,10 @@ void ATTDEF::draw(const INSERT_ET* const i) const
     }
 }
 
-void ATTDEF::parse(CodeData& code)
+void AttDef::parse(CodeData& code)
 {
     do {
-        data << code;
+        data.push_back(code);
         switch (code.code()) {
         case SubclassMarkerAcDbText: //100
             break; //	Маркер подкласса (AcDbText)
@@ -173,4 +170,7 @@ void ATTDEF::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject AttDef::toGo() const {  return { sp->file, this, {}, {} }; }
+
 }

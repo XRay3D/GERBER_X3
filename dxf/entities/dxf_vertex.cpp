@@ -2,19 +2,18 @@
 
 namespace Dxf {
 
-VERTEX_::VERTEX_(SectionParser* sp)
+Vertex::Vertex(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void VERTEX_::draw(const Dxf::INSERT_ET* const i) const
+void Vertex::draw(const Dxf::InsertEntity* const /*i*/) const
 {
 }
 
-void VERTEX_::parse(Dxf::CodeData& code)
+void Vertex::parse(Dxf::CodeData& code)
 {
     do {
-        data << code;
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker: // Маркер подкласса (AcDbVertex)
             break;
@@ -35,8 +34,10 @@ void VERTEX_::parse(Dxf::CodeData& code)
             break;
         case VertexFlags: // Флаги вершин:
             vertexFlags = code;
+            break;
         case CurveFitTangentDirection: // Направление касательной с дуговым сглаживанием
             curveFitTangentDirection = code;
+            break;
         case PolyfaceMeshVertexIndex1:
         case PolyfaceMeshVertexIndex2:
         case PolyfaceMeshVertexIndex3:

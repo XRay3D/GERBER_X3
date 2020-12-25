@@ -3,12 +3,11 @@
 #include <QMetaEnum>
 
 #include <QGraphicsEllipseItem>
-#include <QGraphicsScene>
+
 #include <QPainter>
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QtMath>
-
 
 namespace Dxf {
 QPolygonF interpolate(const QPolygonF& points, int numValues)
@@ -30,11 +29,11 @@ QPolygonF interpolate(const QPolygonF& points, int numValues)
 }
 
 void BSplineCurve(const QPointF& point1,
-                  const QPointF& point2,
-                  const QPointF& point3,
-                  const QPointF& point4,
-                  const double t,
-                  QPointF& result)
+    const QPointF& point2,
+    const QPointF& point3,
+    const QPointF& point4,
+    const double t,
+    QPointF& result)
 {
     const double t2 = t * t;
     const double t3 = t2 * t;
@@ -82,11 +81,11 @@ double blend(QVector<double>& uVec, double u, int k, int d)
     }
     double b;
     b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) //
-            + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
+        + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
     return b;
 }
 
-void drawBSplineCurve(const SPLINE& poly, QPainterPath& path)
+void drawBSplineCurve(const Spline& poly, QPainterPath& path)
 {
     qDebug("drawBSplineCurve");
     int n, d;
@@ -115,34 +114,34 @@ void drawBSplineCurve(const SPLINE& poly, QPainterPath& path)
     }
 }
 
-SPLINE::SPLINE(SectionParser* sp)
+Spline::Spline(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void SPLINE::draw(const INSERT_ET* const i) const
+void Spline::draw(const InsertEntity* const /*i*/) const
 {
-//    if (i) {
-//    } else {
-//        QPainterPath myPath;
-//        if (0) {
-//            drawBSplineCurve(*this, myPath);
-//            //            myPath.addPolygon(interpolate(ControlPoints, 20));
-//        } else {
-//            for (int i = 0; i < numberOfControlPoints; ++i) {
-//                if (!i) {
-//                    myPath.moveTo(ControlPoints[i]);
-//                } else {
-//                    myPath.quadTo(ControlPoints[i - 1], /*ControlPoints[i - 1],*/ ControlPoints[i]);
-//                }
-//            }
-//        }
-//        auto item = scene->addPath(myPath, QPen(Qt::red /*color()*/, 0.0), Qt::NoBrush);
-//        attachToLayer(item);
-//    }
+    //    if (i) {
+    //    } else {
+    //        QPainterPath myPath;
+    //        if (0) {
+    //            drawBSplineCurve(*this, myPath);
+    //            //            myPath.addPolygon(interpolate(ControlPoints, 20));
+    //        } else {
+    //            for (int i = 0; i < numberOfControlPoints; ++i) {
+    //                if (!i) {
+    //                    myPath.moveTo(ControlPoints[i]);
+    //                } else {
+    //                    myPath.quadTo(ControlPoints[i - 1], /*ControlPoints[i - 1],*/ ControlPoints[i]);
+    //                }
+    //            }
+    //        }
+    //        auto item = scene->addPath(myPath, QPen(Qt::red /*color()*/, 0.0), Qt::NoBrush);
+    //        attachToLayer(item);
+    //    }
 }
 
-void SPLINE::parse(CodeData& code)
+void Spline::parse(CodeData& code)
 {
     qDebug("SPLINE::parse");
 
@@ -151,7 +150,7 @@ void SPLINE::parse(CodeData& code)
     };
 
     do {
-        data << code;
+        data.push_back(code);
         //        qDebug() << '\t' << TypeName(code.code()) << code;
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker: //100
@@ -236,6 +235,8 @@ void SPLINE::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject Spline::toGo() const {  return { sp->file, this, {}, {} }; }
 
 ////////////////////////////////////
 
@@ -603,10 +604,10 @@ double QwtSpline::value(double x) const
 
     const double delta = x - d_data->points[i].x();
     return ((((d_data->a[i] * delta) + d_data->b[i])
-             * delta
-             + d_data->c[i])
+                    * delta
+                + d_data->c[i])
             * delta
-            + d_data->points[i].y());
+        + d_data->points[i].y());
 }
 
 /*!
@@ -673,7 +674,7 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points)
         a[i] = (s[i + 1] - s[i]) / (6.0 * h[i]);
         b[i] = 0.5 * s[i];
         c[i] = (p[i + 1].y() - p[i].y()) / h[i]
-                - (s[i + 1] + 2.0 * s[i]) * h[i] / 6.0;
+            - (s[i + 1] + 2.0 * s[i]) * h[i] / 6.0;
     }
 
     return true;
@@ -763,7 +764,7 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points)
         b[i] = 0.5 * s[i];
         c[i] = (p[i + 1].y() - p[i].y())
                 / h[i]
-                - (s[i + 1] + 2.0 * s[i]) * h[i] / 6.0;
+            - (s[i + 1] + 2.0 * s[i]) * h[i] / 6.0;
     }
 
     return true;

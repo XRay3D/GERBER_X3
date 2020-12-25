@@ -20,7 +20,7 @@ class File;
 
 class GiGerber final : public GraphicsItem {
 public:
-    explicit GiGerber(Paths& m_paths, Gerber::File* file);
+    explicit GiGerber(Paths& m_paths, AbstractFile* file);
     ~GiGerber() override;
 
     // QGraphicsItem interface
@@ -32,12 +32,10 @@ public:
     void redraw() override;
     Paths paths() const override;
     Paths* rPaths() override;
+    // GraphicsItem interface
+    void changeColor() override;
 
 private:
     Paths& m_paths;
     QPolygonF fillPolygon;
-
-    // GraphicsItem interface
-protected:
-    void changeColor() override;
 };

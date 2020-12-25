@@ -64,6 +64,7 @@
 #include <QDebug>
 #include <QPolygonF>
 #include <QVector>
+#include <QtMath>
 
 namespace ClipperLib {
 
@@ -164,8 +165,41 @@ struct IntPoint {
     }
     friend QDebug operator<<(QDebug d, const IntPoint& p)
     {
-        d << "IntPoint(" << p.X << ", " << p.Y << ")";
+        d << "IntPt(" << p.X << ", " << p.Y << ")";
         return d;
+    }
+
+    double angleTo(const IntPoint& pt2) const
+    {
+        const double dx = pt2.X - X;
+        const double dy = pt2.Y - Y;
+        const double theta = atan2(-dy, dx) * 360.0 / (M_PI * 2);
+        return theta;
+        const double theta_normalized = theta < 0 ? theta + 360 : theta;
+        if (qFuzzyCompare(theta_normalized, double(360)))
+            return 0.0;
+        else
+            return theta_normalized;
+    }
+
+    double angleRadTo(const IntPoint& pt2) const
+    {
+        const double dx = pt2.X - X;
+        const double dy = pt2.Y - Y;
+        const double theta = atan2(-dy, dx);
+        return theta;
+        const double theta_normalized = theta < 0 ? theta + (M_PI * 2) : theta;
+        if (qFuzzyCompare(theta_normalized, (M_PI * 2)))
+            return 0.0;
+        else
+            return theta_normalized;
+    }
+
+    double distTo(const IntPoint& pt2) const
+    {
+        double x = pt2.X - X;
+        double y = pt2.Y - Y;
+        return sqrt(x * x + y * y);
     }
 };
 //------------------------------------------------------------------------------

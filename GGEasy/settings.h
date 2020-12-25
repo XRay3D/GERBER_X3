@@ -180,6 +180,7 @@ public:
     /*GUI*/
     static QColor& guiColor(Colors id);
     static bool guiSmoothScSh();
+    static bool animSelection();
 
     /*Gerber/G-Code*/
     static int gbrGcCircleSegments(double radius);
@@ -236,6 +237,7 @@ protected:
         QColor(Qt::red) //G0
     };
     inline static bool m_guiSmoothScSh;
+    inline static bool m_animSelection = true;
 
     /*Gerber/G-Code*/
     inline static double m_gbrGcMinCircleSegmentLength { 0.5 };

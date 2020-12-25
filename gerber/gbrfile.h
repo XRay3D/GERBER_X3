@@ -22,7 +22,7 @@
 #include <gi/itemgroup.h>
 namespace Gerber {
 
-class File : public AbstractFile, public QList<GraphicObject> {
+class File : public AbstractFile, public QVector<GraphicObject> {
     friend class Parser;
 
 public:
@@ -34,21 +34,25 @@ public:
         CutoffGroup,
     };
 
-    enum ItemsType {
-        Normal,
-        ApPaths,
-        Components,
-    };
-
     Format* format() { return &m_format; }
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
     const ApertureMap* apertures() const;
+
+    enum ItemsType {
+        NullType = -1,
+        Normal,
+        ApPaths,
+        Components,
+    };
     void setItemType(ItemsType type);
-    ItemGroup* itemGroup(ItemsType type) const;
-    ItemsType itemsType() const;
+    ItemsType itemsType() const { return m_itemsType; }
+
     FileType type() const override { return FileType::Gerber; }
+
+    ItemGroup* itemGroup(ItemsType type) const;
     ItemGroup* itemGroup() const override;
+
     void addToScene() const;
     void setColor(const QColor& color);
 
@@ -59,7 +63,7 @@ private:
     QList<Component> m_components;
 
     ApertureMap m_apertures;
-    ItemsType m_itemsType = Normal;
+    ItemsType m_itemsType = NullType;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
 

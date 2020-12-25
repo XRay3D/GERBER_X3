@@ -1,30 +1,30 @@
 #include "dxf_insert.h"
-#include <QGraphicsItem>
-#include <QGraphicsScene>
-//#include <dxf/dxf.h>
 
 namespace Dxf {
-INSERT_ET::INSERT_ET(QMap<QString, Block*>& blocks, SectionParser* sp)
+
+InsertEntity::InsertEntity(Blocks& blocks, SectionParser* sp)
     : Entity(sp)
     , blocks(blocks)
 {
 }
 
-void INSERT_ET::draw(const INSERT_ET* const i) const
+void InsertEntity::draw(const InsertEntity* const i) const
 {
     if (!blocks.contains(blockName))
         return;
-
     if (blocks[blockName]->entities.isEmpty())
         return;
 
+    basePoint = blocks[blockName]->basePoint;
+
     for (auto e : blocks[blockName]->entities) {
+
         if (i) {
-            INSERT_ET t(*this);
+            InsertEntity t(*this);
             if (layerName == "0")
                 t.layerName = i->layerName;
-            if (insPt.isNull())
-                t.insPt = i->insPt;
+            if (insPos.isNull())
+                t.insPos = i->insPos;
 
             if (qFuzzyIsNull(rotationAngle))
                 t.rotationAngle = i->rotationAngle;
@@ -35,7 +35,7 @@ void INSERT_ET::draw(const INSERT_ET* const i) const
             }
             e->draw(&t);
         } else if (e->type() != INSERT) {
-            INSERT_ET t(*this);
+            InsertEntity t(*this);
             if (t.layerName == "0")
                 t.layerName = e->layerName;
             e->draw(&t);
@@ -45,23 +45,21 @@ void INSERT_ET::draw(const INSERT_ET* const i) const
     }
 }
 
-void INSERT_ET::parse(CodeData& code)
+void InsertEntity::parse(CodeData& code)
 {
-    data << code;
     do {
         switch (code.code()) {
         case SubclassMrker:
-            break;
-        case var66:
+        case VariableAttributes:
             break;
         case BlockName:
-            blockName = QString(code);
+            blockName = code.string();
             break;
         case InsPtX:
-            insPt.rx() = code;
+            insPos.rx() = code;
             break;
         case InsPtY:
-            insPt.ry() = code;
+            insPos.ry() = code;
             break;
         case InsPtZ:
             break;
@@ -89,22 +87,22 @@ void INSERT_ET::parse(CodeData& code)
             rowSpacing = code;
             break;
         case ExtrusionDirectionX:
-            break;
         case ExtrusionDirectionY:
-            break;
         case ExtrusionDirectionZ:
             break;
         default:
             parseEntity(code);
         }
-        data << (code = sp->nextCode());
+        code = sp->nextCode();
     } while (code.code() != 0);
 }
 
-void INSERT_ET::transform(GraphicObject& item, QPointF tr) const
+void InsertEntity::transform(GraphicObject& item, QPointF tr) const
 {
-    item.setRotation(rotationAngle);
+    item.setPos(-basePoint);
     item.setScale(scaleX, scaleY);
-    item.setPos(insPt + tr);
+    item.setRotation(rotationAngle);
+    item.setPos(insPos + tr);
 }
+
 }

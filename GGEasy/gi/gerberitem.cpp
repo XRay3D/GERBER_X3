@@ -23,7 +23,7 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-GiGerber::GiGerber(Paths& paths, Gerber::File* file)
+GiGerber::GiGerber(Paths& paths, AbstractFile *file)
     : GraphicsItem(file)
     , m_paths(paths)
 {

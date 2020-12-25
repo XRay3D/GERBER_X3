@@ -6,14 +6,12 @@
 
 namespace Dxf {
 
-struct VERTEX_;
-
-struct POLYLINE final : Entity {
-    POLYLINE(SectionParser* sp);
+struct PolyLine final : Entity {
+    PolyLine(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::POLYLINE; }
@@ -69,9 +67,10 @@ public:
         //        128 = образец типа линий непрерывно формируется по периметру вершин этой полилинии
     };
 
-    QPolygonF poly(const QVector<VERTEX_>& vertex) const;
+    QVector<struct Vertex> vertex;
 
-    QVector<VERTEX_> vertex;
+    GraphicObject toGo() const;
+
     int polylineFlags = 0;
     double startWidth = 0.0;
     double endWidth = 0.0;

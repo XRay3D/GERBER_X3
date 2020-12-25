@@ -48,9 +48,9 @@ public:
     virtual void menu(QMenu* menu, TreeView* tv) const = 0;
 
     enum {
-        Name,
-        Layer,
-        Other
+        Name_,
+        Layer_,
+        Other_
     };
 
     AbstractNode(const AbstractNode&) = delete;

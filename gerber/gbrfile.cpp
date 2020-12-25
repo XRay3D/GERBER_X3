@@ -107,7 +107,7 @@ QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
 
 File::File(const QString& fileName)
 {
-    m_itemGroup.append({ new ItemGroup, new ItemGroup });
+    m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
 }
 
@@ -177,9 +177,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
-File::ItemsType File::itemsType() const { return m_itemsType; }
-
-ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroup[type]; }
+ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroups[type]; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -213,11 +211,11 @@ bool File::flashedApertures() const
     return false;
 }
 
-ItemGroup* File::itemGroup() const { return m_itemGroup[m_itemsType]; }
+ItemGroup* File::itemGroup() const { return m_itemGroups[m_itemsType]; }
 
 void File::addToScene() const
 {
-    for (const auto var : m_itemGroup) {
+    for (const auto var : m_itemGroups) {
         var->addToScene();
         var->setZValue(-m_id);
     }
@@ -226,8 +224,8 @@ void File::addToScene() const
 void File::setColor(const QColor& color)
 {
     AbstractFile::setColor(color);
-    m_itemGroup[Normal]->setBrushColor(color);
-    m_itemGroup[ApPaths]->setPen(QPen(color, 0.0));
+    m_itemGroups[Normal]->setBrushColor(color);
+    m_itemGroups[ApPaths]->setPen(QPen(color, 0.0));
 }
 
 void File::setItemType(File::ItemsType type)
@@ -237,16 +235,16 @@ void File::setItemType(File::ItemsType type)
 
     m_itemsType = type;
 
-    m_itemGroup[Normal]->setVisible(false);
-    m_itemGroup[ApPaths]->setVisible(false);
-    m_itemGroup[Components]->setVisible(false);
+    m_itemGroups[Normal]->setVisible(false);
+    m_itemGroups[ApPaths]->setVisible(false);
+    m_itemGroups[Components]->setVisible(false);
 
-    m_itemGroup[m_itemsType]->setVisible(true);
+    m_itemGroups[m_itemsType]->setVisible(m_visible);
 }
 
 void File::write(QDataStream& stream) const
 {
-    stream << *static_cast<const QList<GraphicObject>*>(this); // write  QList<GraphicObject>
+    stream << *static_cast<const QVector<GraphicObject>*>(this); // write  QList<GraphicObject>
     stream << m_apertures;
     stream << m_format;
     //stream << layer;
@@ -254,14 +252,12 @@ void File::write(QDataStream& stream) const
     stream << rawIndex;
     stream << m_itemsType;
     stream << m_components;
-    //    stream << *static_cast<const AbstractFile*>(this);
-    //_write(stream);
 }
 
 void File::read(QDataStream& stream)
 {
     crutch = &m_format; ///////////////////
-    stream >> *static_cast<QList<GraphicObject>*>(this); // read  QList<GraphicObject>
+    stream >> *static_cast<QVector<GraphicObject>*>(this); // read  QList<GraphicObject>
     stream >> m_apertures;
     stream >> m_format;
     //stream >> layer;
@@ -273,8 +269,7 @@ void File::read(QDataStream& stream)
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
-    //    stream >> *static_cast<AbstractFile*>(this);
-    //_read(stream);
+    qDebug() << m_itemsType;
 }
 
 void File::createGi()
@@ -282,13 +277,13 @@ void File::createGi()
     // fill copper
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GiGerber(paths, this);
-        m_itemGroup[Normal]->append(item);
+        m_itemGroups[Normal]->append(item);
     }
 
     // add components
     for (const Component& c : m_components) {
         if (!c.referencePoint.isNull())
-            m_itemGroup[Components]->append(new ComponentItem(c, this));
+            m_itemGroups[Components]->append(new ComponentItem(c, this));
     }
 
     // add aperture paths
@@ -322,36 +317,37 @@ void File::createGi()
                         path.append(path.first());
                         if (!GlobalSettings::gbrSkipDuplicates()) {
                             checkList.push_front(path);
-                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new AperturePathItem(checkList.front(), this));
                         } else if (!contains(path)) {
                             checkList.push_front(path);
-                            m_itemGroup[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new AperturePathItem(checkList.front(), this));
                         }
                     }
                 } else {
                     if (!GlobalSettings::gbrSkipDuplicates()) {
-                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new AperturePathItem(go.path(), this));
                     } else if (!contains(go.path())) {
-                        m_itemGroup[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new AperturePathItem(go.path(), this));
                         checkList.push_front(go.path());
                     }
                 }
             }
         }
     }
+    if (m_itemsType == NullType) {
+        if (m_itemGroups[Components]->size())
+            m_itemsType = Components;
+        else if (m_itemGroups[Normal]->size())
+            m_itemsType = Normal;
+        else
+            m_itemsType = ApPaths;
+    }
 
-    if (m_itemGroup[Components]->size())
-        m_itemsType = Components;
-    else if (m_itemGroup[Normal]->size())
-        m_itemsType = Normal;
-    else
-        m_itemsType = ApPaths;
+    m_itemGroups[Normal]->setVisible(false);
+    m_itemGroups[ApPaths]->setVisible(false);
+    m_itemGroups[Components]->setVisible(false);
 
-    m_itemGroup[Normal]->setVisible(false);
-    m_itemGroup[ApPaths]->setVisible(false);
-    m_itemGroup[Components]->setVisible(false);
-
-    m_itemGroup[m_itemsType]->setVisible(true);
+    m_itemGroups[m_itemsType]->setVisible(m_visible);
 }
 
 }

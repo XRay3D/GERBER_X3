@@ -1,22 +1,25 @@
 #pragma once
 
-#include "block.h"
+#include "dxf_block.h"
 #include "dxf_entity.h"
-#include <set>
+
 namespace Dxf {
-struct INSERT_ET final : Entity {
-    INSERT_ET(QMap<QString, Block*>& blocks, SectionParser* sp);
+
+struct InsertEntity final : Entity {
+    InsertEntity(Blocks& blocks, SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
+    GraphicObject toGo() const override {  return { sp->file, this, {}, {} }; }
+
     void transform(GraphicObject& item, QPointF tr) const;
 
     enum VarType {
         SubclassMrker = 100, // Subclass marker (AcDbBlockReference)
-        var66 = 66, /* Variable attributes-follow flag (optional; default = 0);
+        VariableAttributes = 66, /* Variable attributes-follow flag (optional; default = 0);
                          if the value of attributes-follow flag is 1,
                          a series of attribute entities is expected to follow the insert, terminated by a seqend entity*/
         BlockName = 2, // Block name
@@ -36,9 +39,10 @@ public:
         ExtrusionDirectionZ = 230, // DXF: Z value of extrusion direction (optional)
     };
 
-    QMap<QString, Block*>& blocks;
+    Blocks& blocks;
     QString blockName; // Block name
-    QPointF insPt; // Точка вставки (в ОСК). Файл DXF: значение X; приложение: 3D-точка
+    QPointF insPos; // Точка вставки (в ОСК). Файл DXF: значение X; приложение: 3D-точка
+    mutable QPointF basePoint;
     double scaleX = 1; // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
     double scaleY = 1; // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
     double rotationAngle = 0;
@@ -47,4 +51,5 @@ public:
     double colSpacing = 0; // Column spacing (optional; default = 0)
     double rowSpacing = 0; // Row spacing (optional; default = 0)
 };
+
 }

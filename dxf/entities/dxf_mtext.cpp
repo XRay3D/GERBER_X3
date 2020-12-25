@@ -2,22 +2,22 @@
 
 namespace Dxf {
 
-MTEXT::MTEXT(SectionParser* sp)
+MText::MText(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void MTEXT::draw(const INSERT_ET* const i) const
+void MText::draw(const InsertEntity* const i) const
 {
     if (i) {
     } else {
     }
 }
 
-void MTEXT::parse(CodeData& code)
+void MText::parse(CodeData& code)
 {
     do {
-        data << code;
+        data.push_back(code);
         switch (code.code()) {
         case SubclassMarker: //100
             break; //	100	Маркер подкласса (AcDbMText)
@@ -91,5 +91,7 @@ void MTEXT::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject MText::toGo() const {  return { sp->file, this, {}, {} }; }
 
 }

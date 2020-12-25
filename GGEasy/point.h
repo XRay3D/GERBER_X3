@@ -87,6 +87,7 @@ protected:
 
 class LayoutFrames : public QObject, public QGraphicsItem {
     QPainterPath m_path;
+    QRectF m_rect;
 
 public:
     LayoutFrames();

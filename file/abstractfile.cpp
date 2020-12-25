@@ -22,11 +22,11 @@
 #include "leakdetector.h"
 
 AbstractFile::AbstractFile()
-    : m_itemGroup(1, new ItemGroup)
+    : m_itemGroups(1, new ItemGroup)
 {
 }
 
-AbstractFile::~AbstractFile() { qDeleteAll(m_itemGroup); }
+AbstractFile::~AbstractFile() { qDeleteAll(m_itemGroups); }
 
 QString AbstractFile::shortName() const { return QFileInfo(m_name).fileName(); }
 

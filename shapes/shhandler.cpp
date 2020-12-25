@@ -93,10 +93,10 @@ Handler::Handler(Shape* shape, HType type)
         break;
     }
     App::scene()->addItem(this);
-    hhh.append(this);
+    handlers.append(this);
 }
 
-Handler::~Handler() { hhh.removeOne(this); }
+Handler::~Handler() { handlers.removeOne(this); }
 
 QRectF Handler::boundingRect() const { return rect(); }
 
@@ -128,15 +128,17 @@ void Handler::setPos(const QPointF& pos)
 {
     QGraphicsItem::setPos(pos);
     if (m_hType == Center) {
-        for (int i = 1, end = shape->handlers.size(); i < end; ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos /*()*/ - pt.first());
+        for (int i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
+            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.first());
     } else {
         double k = App::graphicsView()->scaleFactor() * StickingDistance;
-        for (Handler* h : hhh) { // прилипание
-            if (h != this
-                && (!Constructor::item && h->shape != shape)
-                && h->shape->isVisible()
-                && QLineF(h->pos(), pos).length() < k) { // прилипание
+        for (Handler* h : handlers) { // прилипание
+            if (h != this && //
+                !Constructor::item &&//
+                h->shape != shape && //
+                h->shape->isVisible() && //
+                QLineF(h->pos(), pos).length() < k //
+            ) { // прилипание
                 QGraphicsItem::setPos(h->pos());
                 break;
             }

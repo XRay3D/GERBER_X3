@@ -34,7 +34,7 @@ public:
     Format format() const;
     void setFormat(const Format& value);
 
-    ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
+    ItemGroup* itemGroup() const override { return m_itemGroups.last(); }
 
 protected:
     Paths merge() const override;

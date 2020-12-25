@@ -32,10 +32,9 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     // GraphicsItem interface
     Paths paths() const override;
+    void changeColor() override { }
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-protected:
-    void changeColor() override { }
 };

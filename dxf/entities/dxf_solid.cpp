@@ -1,48 +1,36 @@
 #include "dxf_solid.h"
-#include "dxffile.h"
+#include "dxf_file.h"
 #include <QGraphicsPolygonItem>
-#include <QGraphicsScene>
+
 #include <QPolygonF>
 
 namespace Dxf {
 
-SOLID::SOLID(SectionParser* sp)
+Solid::Solid(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void SOLID::draw(const INSERT_ET* const i) const
+void Solid::draw(const InsertEntity* const i) const
 {
-    //    QPolygonF poly;
-    //    qDebug() << "corners" << corners;
-    //    if (corners == 15) {
-    //        poly.reserve(5);
-    //        poly << firstCorner;
-    //        poly << secondCorner;
-    //        poly << fourthCorner;
-    //        poly << thirdCorner;
-    //    } else {
-    //        exit(-100);
-    //    }
-    //    if (i) {
-    //        for (int r = 0; r < i->rowCount; ++r) {
-    //            for (int c = 0; c < i->colCount; ++c) {
-    //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-    //                auto item = scene->addPolygon(poly, QPen(i->color(), thickness, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin), i->color());
-    //                item->setToolTip(layerName);
-    //                i->transform(item, tr);
-    //                i->attachToLayer(item);
-    //            }
-    //        }
-    //    } else {
-    //        attachToLayer(scene->addPolygon(poly, QPen(color(), thickness, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin), color()));
-    //    }
+    if (i) {
+        for (int r = 0; r < i->rowCount; ++r) {
+            for (int c = 0; c < i->colCount; ++c) {
+                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+                GraphicObject go(toGo());
+                i->transform(go, tr);
+                i->attachToLayer(std::move(go));
+            }
+        }
+    } else {
+        attachToLayer(toGo());
+    }
 }
 
-void SOLID::parse(CodeData& code)
+void Solid::parse(CodeData& code)
 {
     do {
-        data << code;
+        data.push_back(code);
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker:
             break;
@@ -96,6 +84,24 @@ void SOLID::parse(CodeData& code)
         }
         code = sp->nextCode();
     } while (code.code() != 0);
+}
+
+GraphicObject Solid::toGo() const
+{
+    QPolygonF poly;
+    if (corners == 15) {
+        poly.reserve(5);
+        poly << firstCorner;
+        poly << secondCorner;
+        poly << fourthCorner;
+        poly << thirdCorner;
+        poly << firstCorner;
+    } else {
+        throw QString("Unsupported type Solid: corners %1!").arg(corners);
+    }
+    Path path(poly);
+    ReversePath(path);
+    return { sp->file, this, path, {} };
 }
 
 }

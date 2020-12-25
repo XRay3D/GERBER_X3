@@ -2,14 +2,16 @@
 
 #include "dxf_entity.h"
 
+#include <QMatrix>
+
 namespace Dxf {
 
-struct LINE final : Entity {
-    LINE(SectionParser* sp);
+struct Line final : Entity {
+    Line(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::LINE; }
@@ -27,6 +29,8 @@ public:
         ExtrusionDirectionY = 220, //  Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
     };
+
+    GraphicObject toGo() const override;
 
     QPointF startPoint;
     QPointF endPoint;

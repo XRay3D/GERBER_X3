@@ -81,7 +81,7 @@ void PolyLine::updateOtherHandlers(Handler* handler)
         int idx = handlers.indexOf(handler);
         if (handler != handlers[1]) {
             if (handlers.size() > 4
-                && handler->pos() == handlers[idx - 2]->pos()) {
+                && QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5) {
                 delete handlers.takeAt(idx - 1);
                 delete handlers.takeAt(idx - 2);
                 idx -= 2;
@@ -91,7 +91,7 @@ void PolyLine::updateOtherHandlers(Handler* handler)
         }
         if (handler != handlers.last()) {
             if (handlers.size() > 4
-                && handler->pos() == handlers[idx + 2]->pos()) {
+                && QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5) {
                 delete handlers.takeAt(idx + 1);
                 delete handlers.takeAt(idx + 1);
             } else
