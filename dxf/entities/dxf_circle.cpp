@@ -1,42 +1,36 @@
 #include "dxf_circle.h"
 #include "dxf_insert.h"
 #include "myclipper.h"
+#include "section/dxf_blocks.h"
+#include "section/dxf_entities.h"
 #include <QGraphicsEllipseItem>
-#include <QGraphicsScene>
-#include <section/blocks.h>
-#include <section/entities.h>
 
 namespace Dxf {
-CIRCLE::CIRCLE(SectionParser* sp)
+Circle::Circle(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void CIRCLE::draw(const INSERT_ET* const i) const
+void Circle::draw(const InsertEntity* const i) const
 {
     if (i) {
         for (int r = 0; r < i->rowCount; ++r) {
             for (int c = 0; c < i->colCount; ++c) {
                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                auto cir(CirclePath(radius * 2 * uScale, centerPoint));
-                cir.append(cir.first());
-                GraphicObject go(sp->file, this, cir, {});
+                GraphicObject go(toGo());
                 i->transform(go, tr);
                 i->attachToLayer(std::move(go));
             }
         }
     } else {
-        auto cir(CirclePath(radius * 2 * uScale, centerPoint));
-        cir.append(cir.first());
-        GraphicObject go(sp->file, this, cir, {});
-        attachToLayer(std::move(go));
+        attachToLayer(toGo());
     }
 }
 
-void CIRCLE::parse(CodeData& code)
+void Circle::parse(CodeData& code)
 {
     do {
-        data << code;
+        data.push_back(code);
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker:
             break;
@@ -66,4 +60,23 @@ void CIRCLE::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject Circle::toGo() const
+{
+    QPainterPath path;
+    QPointF r(radius, radius);
+    path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
+
+    QMatrix m;
+    m.scale(1000, 1000);
+    QPainterPath path2;
+    for (auto& poly : path.toSubpathPolygons(m))
+        path2.addPolygon(poly);
+    QMatrix m2;
+    m2.scale(0.001, 0.001);
+    auto p(path2.toSubpathPolygons(m2));
+
+    return { sp->file, this, p.value(0), {} };
+}
+
 }

@@ -21,12 +21,18 @@ class SettingsDialog : public QDialog, private Ui::SettingsDialog, private Globa
     int langIndex;
 
 public:
-    explicit SettingsDialog(QWidget* parent = nullptr);
+    explicit SettingsDialog(QWidget* parent = nullptr, int tab = -1);
     ~SettingsDialog() override = default;
     void readSettings();
     void writeSettings();
     /////////////////////
     static void translator(QApplication* app, const QString& path);
+    enum {
+        Ui,
+        Gerber,
+        GCode,
+        Utils
+    };
 
 public slots:
     void reject() override;

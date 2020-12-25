@@ -1,8 +1,8 @@
 #pragma once
 
-#include "codedata.h"
+#include "dxf_codedata.h"
 #include "dxf_graphicobject.h"
-#include "section/sectionparser.h"
+#include "section/dxf_sectionparser.h"
 #include <QLineF>
 #include <QObject>
 #include <QPolygonF>
@@ -17,14 +17,15 @@ namespace Dxf {
 QPointF polar(QPointF p, float angle /*radians*/, float distance);
 double angle(QPointF p1, QPointF p2);
 double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge);
-
 std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPointF end_point, float bulge);
 
-struct INSERT_ET;
+struct InsertEntity;
+
 class File;
 
 struct Entity {
     enum Type {
+        NullType = -1,
         ACAD_PROXY_ENTITY,
         ARC,
         ATTDEF,
@@ -70,21 +71,24 @@ struct Entity {
         XLINE,
         //3DFACE,
         //3DSOLID,
+        NULL_ENT,
     };
 
-    QVector<CodeData> data;
+    Codes data;
     SectionParser* sp = nullptr;
     Entity(SectionParser* sp);
     virtual ~Entity() { }
-    virtual void draw(const INSERT_ET* const i = nullptr) const = 0;
+    virtual void draw(const InsertEntity* const i = nullptr) const = 0;
     virtual void parse(CodeData& code) = 0;
+    virtual Type type() const = 0;
+    virtual GraphicObject toGo() const = 0;
+
     static Type TypeVal(const QString& key);
-    static QString TypeName(int key);
+    static QString typeName(int key);
+    QString name() const;
     void parseEntity(CodeData& code);
     QColor color() const;
-    void attachToLayer(GraphicObject&& item) const;
-
-    virtual Type type() const = 0;
+    void attachToLayer(GraphicObject&& go) const;
 
     QString layerName;
     QString handle;
@@ -177,44 +181,45 @@ struct Entity {
 }
 #endif // ENTITY_H
 
-#include "dxf_arc.h" //
-#include "dxf_attdef.h" //
+#include "dxf_arc.h"
+#include "dxf_attdef.h"
+#include "dxf_circle.h"
+#include "dxf_dummy.h"
+#include "dxf_ellipse.h"
+#include "dxf_hatch.h"
+#include "dxf_insert.h"
+#include "dxf_line.h"
+#include "dxf_lwpolyline.h"
+#include "dxf_mtext.h"
+#include "dxf_point.h"
+#include "dxf_polyline.h"
+#include "dxf_solid.h"
+#include "dxf_spline.h"
+#include "dxf_text.h"
 //#include "dxf_attrib.h"
-//#include "body.h"
-#include "dxf_circle.h" //
-//#include "dimension.h"
-#include "dxf_ellipse.h" //
-#include "dxf_hatch.h" //
-//#include "helix.h"
-//#include "image.h"
-#include "dxf_insert.h" //
-//#include "leader.h"
-//#include "light.h"
-#include "dxf_line.h" //
-#include "dxf_lwpolyline.h" //
-//#include "mesh.h"
-//#include "mleader.h"
-//#include "mleaderstyle.h"
-//#include "mline.h"
-#include "dxf_mtext.h" //
-//#include "ole2frame.h"
-//#include "oleframe.h"
-//#include "point.h"
-#include "dxf_polyline.h" //
-//#include "ray.h"
-//#include "region.h"
-//#include "section.h"
-//#include "shape.h"
-#include "dxf_solid.h" //
-#include "dxf_spline.h" //
-//#include "sun.h"
-//#include "surface.h"
-//#include "table.h"
-#include "dxf_text.h" //
-//#include "tolerance.h"
-//#include "trace.h"
-//#include "underlay.h"
-//#include "vertex.h"
-//#include "viewport.h"
-//#include "wipeout.h"
-//#include "xline.h"
+//#include "dxf_body.h"
+//#include "dxf_dimension.h"
+//#include "dxf_helix.h"
+//#include "dxf_image.h"
+//#include "dxf_leader.h"
+//#include "dxf_light.h"
+//#include "dxf_mesh.h"
+//#include "dxf_mleader.h"
+//#include "dxf_mleaderstyle.h"
+//#include "dxf_mline.h"
+//#include "dxf_ole2frame.h"
+//#include "dxf_oleframe.h"
+//#include "dxf_ray.h"
+//#include "dxf_region.h"
+//#include "dxf_section.h"
+//#include "dxf_shape.h"
+//#include "dxf_sun.h"
+//#include "dxf_surface.h"
+//#include "dxf_table.h"
+//#include "dxf_tolerance.h"
+//#include "dxf_trace.h"
+//#include "dxf_underlay.h"
+//#include "dxf_vertex.h"
+//#include "dxf_viewport.h"
+//#include "dxf_wipeout.h"
+//#include "dxf_xline.h"

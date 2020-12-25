@@ -29,6 +29,7 @@
 #include <QStyleOptionGraphicsItem>
 
 #include "leakdetector.h"
+#include "settingsdialog.h"
 
 using namespace ClipperLib;
 
@@ -212,6 +213,10 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     });
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
+    menu.addSeparator();
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 
@@ -411,12 +416,22 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     });
     action->setCheckable(true);
     action->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
+    menu.addSeparator();
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 
-int Pin::type() const { return static_cast<int>(GiType::Pin); }
+int Pin::type() const
+{
+    return static_cast<int>(GiType::Pin);
+}
 
-QVector<Pin*> Pin::pins() { return m_pins; }
+QVector<Pin*> Pin::pins()
+{
+    return m_pins;
+}
 
 void Pin::resetPos(bool fl)
 {
@@ -474,24 +489,27 @@ void Pin::setPos(const QPointF& pos)
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
 {
-    if (App::m_layoutFrames) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class LayoutFrames more than 2 times!!!");
-        exit(1);
-    }
     setZValue(-std::numeric_limits<double>::max());
     App::m_layoutFrames = this;
     App::scene()->addItem(this);
+    setFlag(ItemIsSelectable, false);
 }
 
-LayoutFrames::~LayoutFrames() { App::m_layoutFrames = nullptr; }
+LayoutFrames::~LayoutFrames()
+{
+    App::m_layoutFrames = nullptr;
+}
 
-int LayoutFrames::type() const { return static_cast<int>(GiType::LayoutFrames); }
+int LayoutFrames::type() const
+{
+    return static_cast<int>(GiType::LayoutFrames);
+}
 
 QRectF LayoutFrames::boundingRect() const
 {
     if (App::scene()->drawPdf())
         return QRectF();
-    return m_path.boundingRect();
+    return m_rect;
 }
 
 void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
@@ -512,15 +530,23 @@ void LayoutFrames::updateRect(bool fl)
 {
     QPainterPath path;
     QRectF rect(App::project()->worckRect());
-    for (int x = 0; x < App::project()->stepsX(); ++x) {
-        for (int y = 0; y < App::project()->stepsY(); ++y) {
+    m_rect = rect;
+
+    const int stepsY(App::project()->stepsY()), stepsX(App::project()->stepsX());
+    const double spaceY_(App::project()->spaceY()), spaceX_(App::project()->spaceX());
+
+    m_rect.setHeight(m_rect.height() * stepsY + spaceY_ * (stepsY - 1));
+    m_rect.setWidth(m_rect.width() * stepsX + spaceX_ * (stepsX - 1));
+
+    for (int x = 0; x < stepsX; ++x) {
+        for (int y = 0; y < stepsY; ++y) {
             if (x || y) {
                 path.addRect(rect.translated(
-                    (rect.width() + App::project()->spaceX()) * x,
-                    (rect.height() + App::project()->spaceY()) * y));
+                    (rect.width() + spaceX_) * x,
+                    (rect.height() + spaceY_) * y));
             } else {
-                const double spaceX = qFuzzyIsNull(App::project()->spaceX()) ? 2 : App::project()->spaceX() * 0.5;
-                const double spaceY = qFuzzyIsNull(App::project()->spaceY()) ? 2 : App::project()->spaceY() * 0.5;
+                const double spaceX = qFuzzyIsNull(spaceX_) ? 2 : spaceX_ * 0.5;
+                const double spaceY = qFuzzyIsNull(spaceY_) ? 2 : spaceY_ * 0.5;
 
                 path.moveTo(rect.bottomLeft() + QPointF(-spaceX, 0));
                 path.lineTo(rect.bottomLeft());

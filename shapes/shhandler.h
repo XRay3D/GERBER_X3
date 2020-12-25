@@ -37,14 +37,14 @@ public:
 
     HType hType() const;
     void setHType(const HType& value);
+    inline QRectF rect() const;
 
 private:
     Shape* shape;
     HType m_hType;
     QVector<QPointF> pt;
-    inline QRectF rect() const;
     QPointF lastPos;
-    inline static QVector<Handler*> hhh;
+    inline static QVector<Handler*> handlers;
     void savePos();
 
     // QGraphicsItem interface

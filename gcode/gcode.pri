@@ -38,12 +38,14 @@ contains(QT_ARCH, i386) {
         INCLUDEPATH += C:/dev/CGAL-5.1/auxiliary/gmp/include
         DEFINES += _USE_CGAL_
     }
-    gcc* {
-    #    sudo apt-get install libcgal-dev
-        LIBS += \
-            -lmpfr \
-            -lgmp
-        DEFINES += _USE_CGAL_
+    linux*{
+        gcc* {
+        #    sudo apt-get install libcgal-dev
+            LIBS += \
+                -lmpfr \
+                -lgmp
+            DEFINES += _USE_CGAL_
+        }
     }
 }
 

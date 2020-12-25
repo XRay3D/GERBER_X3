@@ -42,6 +42,7 @@ bool GlobalSettings::gcSameFolder() { return m_gcSameFolder; }
 /*GUI*/
 QColor& GlobalSettings::guiColor(Colors id) { return m_guiColor[static_cast<int>(id)]; }
 bool GlobalSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
+bool GlobalSettings::animSelection() { return m_animSelection; }
 
 /*Gerber/G-Code*/
 int GlobalSettings::gbrGcCircleSegments(double radius)

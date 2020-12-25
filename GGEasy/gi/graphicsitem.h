@@ -46,17 +46,21 @@ enum class GiType {
 };
 
 class AbstractFile;
+class ItemGroup;
 
-namespace Gerber {
-class File;
+namespace Dxf {
+class LayerModel;
 }
 namespace Excellon {
 class File;
 }
+namespace Gerber {
+class File;
+}
 
 class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
-    friend class Gerber::File;
     friend class Excellon::File;
+    friend class Gerber::File;
     friend class ItemGroup;
     friend class Project;
 
@@ -98,6 +102,7 @@ public:
     const T* typedFile() const { return dynamic_cast<const T* const>(m_file); }
 
     int id() const;
+    virtual void changeColor() = 0;
 
 protected:
     QPropertyAnimation animation;
@@ -105,6 +110,7 @@ protected:
     QRectF m_rect;
 
     const AbstractFile* m_file;
+    ItemGroup* itemGroup = nullptr;
     QPainterPath m_shape;
 
     QPen m_pen;
@@ -125,8 +131,6 @@ protected:
     };
 
     int colorState = Default;
-
-    virtual void changeColor() = 0;
 
     // QGraphicsItem interface
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;

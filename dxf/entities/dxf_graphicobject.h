@@ -15,7 +15,12 @@ class GraphicObject {
     {
         stream << go.m_path;
         stream << go.m_paths;
-        //stream << go.m_entity;
+
+        stream << go.m_rotationAngle;
+        stream << go.m_scaleX;
+        stream << go.m_scaleY;
+        stream << go.m_pos;
+
         return stream;
     }
 
@@ -23,7 +28,12 @@ class GraphicObject {
     {
         stream >> go.m_path;
         stream >> go.m_paths;
-        //stream >> go.m_entity;
+
+        stream >> go.m_rotationAngle;
+        stream >> go.m_scaleX;
+        stream >> go.m_scaleY;
+        stream >> go.m_pos;
+
         return stream;
     }
 
@@ -38,26 +48,19 @@ class GraphicObject {
     QPointF m_pos;
 
 public:
-    GraphicObject(
-        const File* file,
-        const Entity* entity,
-        const Path& path,
-        const Paths& paths)
-        : m_gFile(file)
-        , m_entity(entity)
-        , m_path(path)
-        , m_paths(paths)
-    {
-    }
-    void inline setRotation(double rotationAngle) { m_rotationAngle = rotationAngle; }
-    double rotationAngle() const { return m_rotationAngle; }
+    GraphicObject() { }
+    GraphicObject(const File* file, const Entity* entity, const Path& path, const Paths& paths);
 
-    void inline setScale(double scaleX, double scaleY) { m_scaleX = scaleX, m_scaleY = scaleY; }
-    double scaleX() { return m_scaleX; }
-    double scaleY() { return m_scaleY; }
+    void setRotation(double rotationAngle);
+    inline double rotationAngle() const { return m_rotationAngle; }
 
-    void inline setPos(QPointF pos) { m_pos = pos; }
-    QPointF pos() { return m_pos; }
+    void setScale(double scaleX, double scaleY);
+    inline std::tuple<double, double> scale() const { return { m_scaleX, m_scaleY }; }
+    inline double scaleX() const { return m_scaleX; }
+    inline double scaleY() const { return m_scaleY; }
+
+    void setPos(QPointF pos);
+    inline QPointF pos() const { return m_pos; }
 
     inline const File* file() const { return m_gFile; }
     inline const Entity* entity() const { return m_entity; }

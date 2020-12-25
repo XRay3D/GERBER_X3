@@ -1,18 +1,18 @@
 #include "dxf_text.h"
 #include "dxf_insert.h"
 #include <QFont>
-#include <QGraphicsScene>
+
 #include <QGraphicsTextItem>
 #include <QPainter>
 
 namespace Dxf {
 class TextItem final : public ::QGraphicsItem {
-    const TEXT* text;
+    const Text* text;
     QPainterPath path;
     QColor color;
 
 public:
-    TextItem(const TEXT* text, const QColor& color)
+    TextItem(const Text* text, const QColor& color)
         : text(text)
         , color(color)
     {
@@ -50,12 +50,12 @@ public:
     }
 };
 
-TEXT::TEXT(SectionParser* sp)
+Text::Text(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void TEXT::draw(const INSERT_ET* const i) const
+void Text::draw(const InsertEntity* const /*i*/) const
 {
     //    if (i) {
     //        for (int r = 0; r < i->rowCount; ++r) {
@@ -75,7 +75,7 @@ void TEXT::draw(const INSERT_ET* const i) const
     //    }
 }
 
-void TEXT::parse(CodeData& code)
+void Text::parse(CodeData& code)
 {
     do {
         switch (code.code()) {
@@ -95,7 +95,7 @@ void TEXT::parse(CodeData& code)
         case TextHeight:
             textHeight = code;
             break;
-        case Text:
+        case Text_:
             text = QString(code);
             break;
         case Rotation:
@@ -135,5 +135,7 @@ void TEXT::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject Text::toGo() const {  return { sp->file, this, {}, {} }; }
 
 }

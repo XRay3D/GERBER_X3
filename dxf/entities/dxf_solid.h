@@ -4,15 +4,16 @@
 
 namespace Dxf {
 
-struct SOLID final : Entity {
-    SOLID(SectionParser* sp);
+struct Solid final : Entity {
+    Solid(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::SOLID; }
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbTrace)

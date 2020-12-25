@@ -2,12 +2,12 @@
 
 #include "dxf_entity.h"
 namespace Dxf {
-struct CIRCLE final : Entity {
-    CIRCLE(SectionParser* sp);
+struct Circle final : Entity {
+    Circle(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::CIRCLE; }
 
@@ -23,6 +23,9 @@ public:
         ExtrusionDirectionY = 220, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
     };
+
+    GraphicObject toGo() const;
+
     QPointF centerPoint;
     double thickness = 0;
     double radius = 0;

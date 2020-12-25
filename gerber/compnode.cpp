@@ -96,7 +96,7 @@ void ComponentsNode::remove(int row) { childItems.removeAt(row); }
 bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/)
 {
     //    switch (index.column()) {
-    //        //    case Name:
+    //        //    case Name_:
     //        //        switch (role) {
     //        //        case Qt::CheckStateRole:
     //        //            file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -104,7 +104,7 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
     //        //        default:
     //        //            return false;
     //        //        }
-    //        //    case Layer:
+    //        //    case Layer_:
     //        //        switch (role) {
     //        //        case Qt::EditRole:
     //        //            file()->setSide(static_cast<Side>(value.toBool()));
@@ -112,7 +112,7 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
     //        //        default:
     //        //            return false;
     //        //        }
-    //        //    case Other:
+    //        //    case Other_:
     //        //        switch (role) {
     //        //        case Qt::CheckStateRole:
     //        //            m_current = value.value<Qt::CheckState>();
@@ -132,11 +132,11 @@ Qt::ItemFlags ComponentsNode::flags(const QModelIndex& /*index*/) const
     //    if (name.isEmpty())
     //        return itemFlag | Qt::ItemNeverHasChildren;
     //    switch (index.column()) {
-    //        //    case Name:
+    //        //    case Name_:
     //        //        return itemFlag | Qt::ItemIsUserCheckable;
-    //        //    case Layer:
+    //        //    case Layer_:
     //        //        return itemFlag | Qt::ItemIsEditable;
-    //        //    case Other:
+    //        //    case Other_:
     //        //        return itemFlag | Qt::ItemIsUserCheckable;
     //        //    default:
     //        return itemFlag;

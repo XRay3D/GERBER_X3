@@ -34,6 +34,7 @@ public:
     QPainterPath shape() const override;
     // GraphicsItem interface
     Paths paths() const override;
+    void changeColor() override;
     // Shape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
@@ -61,7 +62,5 @@ protected:
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
     virtual void updateOtherHandlers(Handler* handler);
-
-    void changeColor() override;
 };
 }

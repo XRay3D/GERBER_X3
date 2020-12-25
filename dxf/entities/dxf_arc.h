@@ -3,14 +3,15 @@
 #include "dxf_entity.h"
 
 namespace Dxf {
-struct ARC final : Entity {
-    ARC(SectionParser* sp);
+struct Arc final : Entity {
+    Arc(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i) const override;
+    void draw(const InsertEntity* const i) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::ARC; };
+    GraphicObject toGo() const;
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbCircle)
@@ -26,6 +27,8 @@ public:
         ExtrusionDirectionY = 220, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
     };
+
+
     QPointF centerPoint;
     double thickness = 0;
     double radius = 0;

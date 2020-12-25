@@ -1,14 +1,15 @@
 #pragma once
 #include "dxf_entity.h"
 namespace Dxf {
-struct ELLIPSE final : Entity {
-    ELLIPSE(SectionParser* sp);
+struct Ellipse final : Entity {
+    Ellipse(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i) const override;
+    void draw(const InsertEntity* const i) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Entity::ELLIPSE; }
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarker = 100, //	100	Маркер подкласса (AcDbEllipse)

@@ -177,16 +177,16 @@ void TreeView::closeFile()
         App::drillForm()->on_pbClose_clicked();
 }
 
-void TreeView::closeFile2(const QModelIndex& index)
-{
-    qDebug() << m_model;
-    qDebug() << "index.row()" << index.row();
-    qDebug() << "index.parent()" << index.parent();
-    if (index.isValid())
-        m_model->removeRow(index.row(), index.parent());
-    if (App::drillForm())
-        App::drillForm()->on_pbClose_clicked();
-}
+//void TreeView::closeFile2(const QModelIndex& index)
+//{
+//    qDebug() << m_model;
+//    qDebug() << "index.row()" << index.row();
+//    qDebug() << "index.parent()" << index.parent();
+//    if (index.isValid())
+//        m_model->removeRow(index.row(), index.parent());
+//    if (App::drillForm())
+//        App::drillForm()->on_pbClose_clicked();
+//}
 
 void TreeView::saveGcodeFile()
 {
@@ -255,7 +255,6 @@ void TreeView::mousePressEvent(QMouseEvent* event)
         QModelIndex index = indexAt(event->pos());
         if (index.isValid()) {
             if (index.column() == 0) {
-                qDebug() << event->pos() << visualRect(index);
                 if (event->pos().x() > visualRect(index).left() + 44)
                     edit(index);
             } else

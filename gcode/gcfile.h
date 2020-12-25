@@ -31,7 +31,7 @@ public:
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
-    ItemGroup* itemGroup() const override { return m_itemGroup.last(); }
+    ItemGroup* itemGroup() const override { return m_itemGroups.last(); }
 
 private:
     ////////////////////////////////////////

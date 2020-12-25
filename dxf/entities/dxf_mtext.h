@@ -4,14 +4,15 @@
 
 namespace Dxf {
 
-struct MTEXT final : Entity {
-    MTEXT(SectionParser* sp);
+struct MText final : Entity {
+    MText(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i) const override;
+    void draw(const InsertEntity* const i) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::MTEXT; }
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarker = 100, //	100	Маркер подкласса (AcDbMText)

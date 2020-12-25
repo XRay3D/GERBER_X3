@@ -52,7 +52,7 @@ const QString colorName[static_cast<size_t>(Colors::Count)] {
     QObject::tr("G0"),
 };
 
-SettingsDialog::SettingsDialog(QWidget* parent)
+SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     : QDialog(parent)
 {
     setupUi(this);
@@ -101,6 +101,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
     readSettings();
     resize(10, 10);
+    if (tab > -1)
+        tabWidget->setCurrentIndex(tab);
 }
 
 void SettingsDialog::readSettings()
@@ -110,7 +112,8 @@ void SettingsDialog::readSettings()
     settings.beginGroup("Viewer");
     settings.getValue(chbxOpenGl);
     settings.getValue(chbxAntialiasing);
-    m_guiSmoothScSh = settings.getValue(chbxSmoothScSh);
+    m_guiSmoothScSh = settings.getValue(chbxSmoothScSh, m_guiSmoothScSh);
+    m_animSelection = settings.getValue(chbxAnimSelection, m_animSelection);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -189,6 +192,8 @@ void SettingsDialog::writeSettings()
         settings.setValue(chbxAntialiasing);
     }
     m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
+    m_animSelection = settings.setValue(chbxAnimSelection);
+
     settings.endGroup();
 
     settings.beginGroup("Color");

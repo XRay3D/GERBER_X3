@@ -18,11 +18,12 @@
 #include "forms/gcodepropertiesform.h"
 #include "gbrfile.h"
 #include "graphicsview.h"
+#include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/AbstractFile* file)
+AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFile* file)
     : GraphicsItem(file)
     , m_path(path)
 {
@@ -37,6 +38,11 @@ AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/AbstractFil
     boundingRect_m = m_selectionShape.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
+    setSelected(false);
+    if (!timer.isActive()) {
+        timer.start(50);
+        connect(&timer, &QTimer ::timeout, [] { ++AperturePathItem::d; });
+    }
 }
 
 QRectF AperturePathItem::boundingRect() const { return shape().boundingRect(); }
@@ -52,17 +58,21 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
 
     QColor color(m_pen.color());
     QPen pen(m_pen);
-
+    constexpr double dl = 4;
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
         pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
+        pen.setStyle(Qt::CustomDashLine);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setDashOffset(d);
+        pen.setDashPattern({ dl, dl });
     }
     if (option->state & QStyle::State_MouseOver) {
         pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({ 3.0, 3.0 });
+        pen.setDashPattern({ dl, dl });
     }
 
     painter->setPen(pen);
@@ -74,31 +84,17 @@ int AperturePathItem::type() const { return static_cast<int>(GiType::AperturePat
 
 Paths AperturePathItem::paths() const { return { m_path }; }
 
-QPainterPath AperturePathItem::shape() const
-{
-    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
-        m_scale = App::graphicsView()->scaleFactor();
-        m_selectionShape = QPainterPath();
-        ClipperOffset offset;
-        Paths tmpPpath;
-        offset.AddPath(m_path, jtSquare, etOpenButt);
-        offset.Execute(tmpPpath, 5 * uScale * m_scale);
-        for (const Path& path : tmpPpath)
-            m_selectionShape.addPolygon(path);
-    }
-    return m_selectionShape;
-}
+QPainterPath AperturePathItem::shape() const { return m_selectionShape; }
 
 void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (event->modifiers() & Qt::ShiftModifier) {
+    if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
         const double glueLen = GCodePropertiesForm::glue * uScale;
         Point64 dest(m_path.last());
         Point64 init(m_path.first());
-        ItemGroup* ig = typedFile<Gerber::File>()->itemGroup(Gerber::File::ApPaths);
-        for (int i = 0; i < ig->size(); ++i) {
-            auto item = ig->at(i);
+        for (int i = 0; i < itemGroup->size(); ++i) {
+            auto item = itemGroup->at(i);
             if (item->isSelected())
                 continue;
             const Point64& first = item->paths().first().first();
@@ -125,9 +121,31 @@ void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
-    if (change == ItemVisibleChange && !value.toBool()) {
-        m_selectionShape = QPainterPath();
-        m_scale = std::numeric_limits<double>::max();
+    if (change == ItemVisibleChange && value.toBool()) {
+        hoverEnterEvent(nullptr);
+    } else if (change == ItemSelectedChange && GlobalSettings::animSelection()) {
+        if (value.toBool())
+            connect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
+        else {
+            disconnect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
+            update();
+        }
     }
     return value;
+}
+
+void AperturePathItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    if (event)
+        QGraphicsItem::hoverEnterEvent(event);
+    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
+        m_scale = App::graphicsView()->scaleFactor();
+        m_selectionShape = QPainterPath();
+        ClipperOffset offset;
+        Paths tmpPpath;
+        offset.AddPath(m_path, jtSquare, etOpenButt);
+        offset.Execute(tmpPpath, 5 * uScale * m_scale);
+        for (const Path& path : tmpPpath)
+            m_selectionShape.addPolygon(path);
+    }
 }

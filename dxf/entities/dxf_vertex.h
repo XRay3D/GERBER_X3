@@ -4,14 +4,15 @@
 
 namespace Dxf {
 
-struct VERTEX_ final : Entity {
-    VERTEX_(SectionParser* sp = nullptr);
+struct Vertex final : Entity {
+    Vertex(SectionParser* sp = nullptr);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i) const override;
+    void draw(const InsertEntity* const i) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
+    GraphicObject toGo() const override {  return { sp->file, this, {}, {} }; }
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbVertex)

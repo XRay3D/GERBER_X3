@@ -36,7 +36,7 @@ QTimer Node::m_repaintTimer;
 Node::Node(int id)
     : AbstractNode(id)
 {
-    App::project()->file<Gerber::File>(m_id)->addToScene();
+    App::project()->file<File>(m_id)->addToScene();
     connect(&m_repaintTimer, &QTimer::timeout, this, &Node::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
@@ -50,7 +50,7 @@ Node::~Node()
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
-    case Name:
+    case Name_:
         switch (role) {
         case Qt::CheckStateRole:
             file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -58,7 +58,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Layer:
+    case Layer_:
         switch (role) {
         case Qt::EditRole:
             file()->setSide(static_cast<Side>(value.toBool()));
@@ -66,7 +66,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Other:
+    case Other_:
         switch (role) {
         case Qt::CheckStateRole:
             m_current = value.value<Qt::CheckState>();
@@ -83,11 +83,11 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
-    case Name:
+    case Name_:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Layer:
+    case Layer_:
         return itemFlag | Qt::ItemIsEditable;
-    case Other:
+    case Other_:
         return itemFlag | Qt::ItemIsUserCheckable;
     default:
         return itemFlag;
@@ -97,7 +97,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
-    case Name:
+    case Name_:
         switch (role) {
         case Qt::DisplayRole:
             return file()->shortName();
@@ -113,20 +113,20 @@ QVariant Node::data(const QModelIndex& index, int role) const
             QPainter p(&pixmap);
             p.setBrush(color);
             p.drawRect(3, 3, 15, 15);
-            switch (App::project()->file<Gerber::File>(m_id)->itemsType()) {
-            case Gerber::File::ApPaths: {
+            switch (App::project()->file<File>(m_id)->itemsType()) {
+            case File::ApPaths: {
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
                 p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "A");
             } break;
-            case Gerber::File::Components: {
+            case File::Components: {
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
                 p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "C");
             } break;
-            case Gerber::File::Normal:
+            case File::Normal:
                 break;
             }
             return pixmap;
@@ -136,7 +136,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case Layer:
+    case Layer_:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -148,7 +148,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case Other:
+    case Other_:
         switch (role) {
         case Qt::CheckStateRole:
             return m_current;
@@ -173,7 +173,7 @@ void Node::repaint()
     //    int k = -60 + static_cast<int>((count > 1) ? (240.0 / (count - 1)) * row() : 0);
     //    if (k < 0)
     //        k += 360;
-    App::project()->file<Gerber::File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
+    App::project()->file<File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
     App::scene()->update();
 }
 
@@ -182,35 +182,39 @@ void Node::menu(QMenu* menu, TreeView* tv) const
     menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &TreeView::hideOther);
     menu->setToolTipDuration(0);
     menu->setToolTipsVisible(true);
-    Gerber::File* file = App::project()->file<Gerber::File>(m_id);
-    QActionGroup* group = new QActionGroup(menu);
+    File* file = App::project()->file<File>(m_id);
 
-    if (file->itemGroup(Gerber::File::ApPaths)->size()) {
-        auto action = menu->addAction(tr("&Aperture paths"),
-            [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::ApPaths)); });
-        action->setCheckable(true);
-        action->setChecked(file->itemsType() == Gerber::File::ApPaths);
-        action->setToolTip("Displays only aperture paths of copper\n"
-                           "without width and without contacts.");
-        action->setActionGroup(group);
-    }
-    if (file->itemGroup(Gerber::File::Components)->size()) {
-        auto action = menu->addAction(tr("&Components"),
-            [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Components)); });
-        action->setCheckable(true);
-        action->setChecked(file->itemsType() == Gerber::File::Components);
-        //            action->setToolTip("Displays only aperture paths of copper\n"
-        //                               "without width and without contacts.");
-        action->setActionGroup(group);
-    }
-    if (file->itemGroup(Gerber::File::Normal)->size()) {
-        auto action = menu->addAction(tr("&Normal"),
-            [=](bool checked) { file->setItemType(static_cast<Gerber::File::ItemsType>(checked * Gerber::File::Normal)); });
-        action->setCheckable(true);
-        action->setChecked(file->itemsType() == Gerber::File::Normal);
-        //            action->setToolTip("Displays only aperture paths of copper\n"
-        //                               "without width and without contacts.");
-        action->setActionGroup(group);
+    { //QActionGroup
+        menu->addSeparator();
+        QActionGroup* group = new QActionGroup(menu);
+        if (file->itemGroup(File::ApPaths)->size()) {
+            auto action = menu->addAction(tr("&Aperture paths"),
+                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::ApPaths)); });
+            action->setCheckable(true);
+            action->setChecked(file->itemsType() == File::ApPaths);
+            action->setToolTip(tr("Displays only aperture paths of copper\n"
+                                  "without width and without contacts."));
+            action->setActionGroup(group);
+        }
+        if (file->itemGroup(File::Components)->size()) {
+            auto action = menu->addAction(tr("&Components"),
+                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Components)); });
+            action->setCheckable(true);
+            action->setChecked(file->itemsType() == File::Components);
+            //            action->setToolTip("Displays only aperture paths of copper\n"
+            //                               "without width and without contacts.");
+            action->setActionGroup(group);
+        }
+        if (file->itemGroup(File::Normal)->size()) {
+            auto action = menu->addAction(tr("&Normal"),
+                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Normal)); });
+            action->setCheckable(true);
+            action->setChecked(file->itemsType() == File::Normal);
+            //            action->setToolTip("Displays only aperture paths of copper\n"
+            //                               "without width and without contacts.");
+            action->setActionGroup(group);
+        }
+        menu->addSeparator();
     }
 
     menu->addAction(QIcon(), tr("&Show source"), [this] {
@@ -228,7 +232,7 @@ void Node::menu(QMenu* menu, TreeView* tv) const
         delete dialog;
     });
 
-    if (!App::project()->file<Gerber::File>(m_id)->itemGroup(File::Components)->isEmpty()) {
+    if (!App::project()->file<File>(m_id)->itemGroup(File::Components)->isEmpty()) {
         menu->addAction(QIcon(), tr("Show &Components"), [this, tv] {
             ComponentsDialog dialog(tv);
             dialog.setFile(m_id);

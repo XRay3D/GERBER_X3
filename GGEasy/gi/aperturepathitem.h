@@ -13,6 +13,7 @@
 *******************************************************************************/
 #pragma once
 #include "graphicsitem.h"
+#include <QTimer>
 
 namespace Gerber {
 class File;
@@ -20,9 +21,13 @@ class File;
 
 class AperturePathItem : public GraphicsItem {
     QRectF boundingRect_m;
+    int timerId = 0;
+    static inline QTimer timer;
+    static inline int d;
+    void redraw() override { update(); }
 
 public:
-    AperturePathItem(const Path& path, AbstractFile *file);
+    AperturePathItem(const Path& path, AbstractFile* file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -31,6 +36,7 @@ public:
     int type() const override;
     Paths paths() const override;
     QPainterPath shape() const override;
+    void changeColor() override { }
 
 protected:
     QPolygonF m_polygon;
@@ -41,7 +47,5 @@ protected:
     // QGraphicsItem interface
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
-
-protected:
-    void changeColor() override { }
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
 };

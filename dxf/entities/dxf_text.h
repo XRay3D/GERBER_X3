@@ -1,15 +1,16 @@
 #pragma once
 #include "dxf_entity.h"
 namespace Dxf {
-struct TEXT final : Entity {
-    TEXT(SectionParser* sp);
+struct Text final : Entity {
+    Text(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::TEXT; }
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbText)
@@ -18,7 +19,7 @@ public:
         FirstAlignmentPtY = 20,
         FirstAlignmentPtZ = 30, // Файл DXF: значения Y и Z первой точки выравнивания (в ОСК)
         TextHeight = 40, // Высота текста
-        Text = 1, // Значение по умолчанию (сама строка)
+        Text_ = 1, // Значение по умолчанию (сама строка)
         Rotation = 50, // Поворот текста (необязательно; значение по умолчанию = 0)
         RelativeScaleX = 41, // Относительный масштабный коэффициент по оси X: ширина (необязательно; значение по умолчанию = 1)        //Это значение также корректируется при использовании вписываемого текста
         ObliqueAngle = 51, // Угол наклона (необязательно; значение по умолчанию = 0)

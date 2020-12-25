@@ -4,8 +4,8 @@
 #include <QPolygonF>
 
 namespace Dxf {
-struct LWPOLYLINE final : Entity {
-    LWPOLYLINE(SectionParser* sp);
+struct LwPolyline final : Entity {
+    LwPolyline(SectionParser* sp);
     //5
     //8
     //62
@@ -36,13 +36,16 @@ struct LWPOLYLINE final : Entity {
     };
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::LWPOLYLINE; }
     struct Segment : QPointF {
         double bulge = 0.0;
     };
+
+    GraphicObject toGo() const override;
+
     QVector<Segment> poly;
     int counter = 0;
     int polylineFlag = 0;

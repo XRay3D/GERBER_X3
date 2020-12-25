@@ -15,9 +15,9 @@
 *******************************************************************************/
 #include "filemodel.h"
 
-#include "dxffile.h"
-#include "dxfnode.h"
-#include "tables/layer.h"
+#include "dxf_file.h"
+#include "dxf_node.h"
+#include "tables/dxf_layer.h"
 
 #include "exnode.h"
 #include "foldernode.h"

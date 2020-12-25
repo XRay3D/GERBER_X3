@@ -53,7 +53,7 @@ class AbstractFile {
         stream << file.m_side;
         stream << file.m_color;
         stream << file.m_date;
-        stream << file.itemGroup()->isVisible();
+        stream << file.isVisible();
         return stream;
     }
 
@@ -68,15 +68,12 @@ class AbstractFile {
         stream >> file.m_side;
         stream >> file.m_color;
         stream >> file.m_date;
-
         if (App::splashScreen())
             App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
-
         bool visible;
         stream >> visible;
         file.createGi();
-        file.itemGroup()->setVisible(visible);
-
+        file.setVisible(visible);
         return stream;
     }
 
@@ -89,6 +86,7 @@ public:
     void setFileName(const QString& name);
 
     virtual ItemGroup* itemGroup() const = 0;
+    const QVector<ItemGroup*>& itemGroups() const { return m_itemGroups; }
 
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
@@ -107,6 +105,9 @@ public:
     Side side() const;
     void setSide(Side side);
 
+    virtual bool isVisible() const { return (m_visible = itemGroup()->isVisible()); }
+    virtual void setVisible(bool visible) { itemGroup()->setVisible(m_visible = visible); }
+
     const QColor& color() const;
     void setColor(const QColor& color);
 
@@ -120,11 +121,12 @@ protected:
     int m_id = -1;
     virtual Paths merge() const = 0;
 
-    QVector<ItemGroup*> m_itemGroup;
+    QVector<ItemGroup*> m_itemGroups;
     QString m_name;
     QList<QString> m_lines;
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
+    mutable bool m_visible = false;
 
     Side m_side = Top;
     QColor m_color;

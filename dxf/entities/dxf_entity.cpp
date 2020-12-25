@@ -1,6 +1,6 @@
 #include "dxf_entity.h"
-#include "dxffile.h"
-#include "tables/layer.h"
+#include "dxf_file.h"
+#include "tables/dxf_layer.h"
 #include <QMetaEnum>
 
 namespace Dxf {
@@ -14,16 +14,25 @@ Entity::Type Entity::TypeVal(const QString& key)
     return static_cast<Type>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().toUpper().data()));
 }
 
-QString Entity::TypeName(int key) { return staticMetaObject.enumerator(0).valueToKey(key); }
+QString Entity::typeName(int key)
+{
+    return staticMetaObject.enumerator(0).valueToKey(key);
+}
+
+QString Entity::name() const
+{
+    return staticMetaObject.enumerator(0).valueToKey(type());
+}
 
 void Entity::parseEntity(CodeData& code)
 {
+    data.push_back(code);
     switch (code.code()) {
     case LayerName:
-        layerName = code;
+        layerName = code.string();
         break;
     case Handle:
-        handle = code;
+        handle = code.string();
         break;
     default:
         break;
@@ -32,8 +41,8 @@ void Entity::parseEntity(CodeData& code)
 
 QColor Entity::color() const
 {
-    if (auto layer = File::layer(layerName); layer != nullptr) {
-        QColor c(dxfColors[layer->colorNumber]);
+    if (auto layer = sp->file->layer(layerName); layer != nullptr) {
+        QColor c(dxfColors[layer->colorNumber()]);
         c.setAlpha(200);
         return c;
     }
@@ -41,17 +50,23 @@ QColor Entity::color() const
     return QColor(255, 0, 255, 100);
 }
 
-void Entity::attachToLayer(GraphicObject&& item) const
+void Entity::attachToLayer(GraphicObject&& go) const
 {
-    if (File::layer(layerName)) {
-        File::layer(layerName)->gig.emplace_back(item);
+    if (sp == nullptr)
+        throw QString("SectionParser is null!");
+    else if (sp->file == nullptr)
+        throw QString("File in SectionParser is null!");
+    else if (sp->file->layer(layerName))
+        sp->file->layer(layerName)->addGraphicObject(std::move(go));
+    else {
+        throw QString("Layer '%1' not found in file!").arg(layerName);
     }
 }
 
 QPointF polar(QPointF p, float angle, float distance)
 {
     // Returns the point at a specified `angle` and `distance` from point `p`.
-    return p + QPointF { cos(angle) * distance, sin(angle) * distance };
+    return p + QPointF(cos(angle) * distance, sin(angle) * distance);
 }
 
 double angle(QPointF p1, QPointF p2)

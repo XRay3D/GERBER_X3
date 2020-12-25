@@ -4,15 +4,16 @@
 
 namespace Dxf {
 
-struct HATCH final : Entity {
-    HATCH(SectionParser* sp);
+struct Hatch final : Entity {
+    Hatch(SectionParser* sp);
 
     // Entity interface
 public:
-    void draw(const INSERT_ET* const i = nullptr) const override;
+    void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::HATCH; };
+    GraphicObject toGo() const override;
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbHatch)

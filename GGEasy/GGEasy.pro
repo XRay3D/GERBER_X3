@@ -54,9 +54,9 @@ msvc* {
 
 gcc* {
     CONFIG += c++17
-
+    #QMAKE_CXXFLAGS += -std=c++17
     RC_FILE = myapp.rc
-    win32 {
+    win* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
     TARGET = $$TARGET"_gcc"

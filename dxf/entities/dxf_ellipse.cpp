@@ -2,21 +2,21 @@
 
 #include "dxf_insert.h"
 #include <QGraphicsEllipseItem>
-#include <QGraphicsScene>
-#include <section/blocks.h>
-#include <section/entities.h>
 
-#include <QGraphicsItem>
+#include "section/dxf_blocks.h"
+#include "section/dxf_entities.h"
+
+
 #include <QPainter>
 #include <qmath.h>
 
 namespace Dxf {
-ELLIPSE::ELLIPSE(SectionParser* sp)
+Ellipse::Ellipse(SectionParser* sp)
     : Entity(sp)
 {
 }
 
-void ELLIPSE::draw(const INSERT_ET* const i) const
+void Ellipse::draw(const InsertEntity* const /*i*/) const
 {
     //    if (i) {
     //        //        for (int r = 0; r < i->rowCount; ++r) {
@@ -67,10 +67,10 @@ void ELLIPSE::draw(const INSERT_ET* const i) const
     //    }
 }
 
-void ELLIPSE::parse(CodeData& code)
+void Ellipse::parse(CodeData& code)
 {
     do {
-        data << code;
+        data.push_back(code);
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker: //100
             break; //	100	Маркер подкласса (AcDbEllipse)
@@ -114,4 +114,7 @@ void ELLIPSE::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+GraphicObject Ellipse::toGo() const {  return { sp->file, this, {}, {} }; }
+
 }

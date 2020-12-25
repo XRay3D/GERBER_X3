@@ -3,14 +3,6 @@
 Исправил логику размещения булавок и опорных маркеров дома и нуля при редактировании раскладки.
 Гербер содержащий только пути апертур нулевой ширины загружается в режиме пути апертур.
 Добавил настройку принудительного выбора языка.
-dxf
+Добавил поддержку файлов dxf
+Улучшена производительность отображения путей апертур.
 
-
-Dxf::Entity::ARC DC(0, S "ARC")
-Dxf::Entity::ATTDEF DC(0, S "ATTDEF")
-Dxf::Entity::CIRCLE DC(0, S "CIRCLE")
-Dxf::Entity::INSERT DC(0, S "INSERT")
-Dxf::Entity::LINE DC(0, S "LINE")
-Dxf::Entity::POLYLINE DC(0, S "POLYLINE")
-Dxf::Entity::SOLID DC(0, S "SOLID")
-Dxf::Entity::TEXT DC(0, S "TEXT")
