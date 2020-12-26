@@ -19,7 +19,6 @@
 #*******************************************************************************/
 
 QT += core gui opengl widgets printsupport concurrent
-
 TARGET = GGEasy
 
 contains(QT_ARCH, i386) {
@@ -96,7 +95,10 @@ HEADERS += \
     filetree/filemodel.h \
     filetree/foldernode.h \
     filetree/layerdelegate.h \
+    filetree/radiodelegate.h \
+    filetree/sidedelegate.h \
     filetree/treeview.h \
+    filetree/typedelegate.h \
     forms/drillform/drillform.h \
     forms/drillform/drillmodel.h \
     forms/drillform/drillpreviewgi.h \
@@ -143,7 +145,10 @@ SOURCES += \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
     filetree/layerdelegate.cpp \
+    filetree/radiodelegate.cpp \
+    filetree/sidedelegate.cpp \
     filetree/treeview.cpp \
+    filetree/typedelegate.cpp \
     forms/drillform/drillform.cpp \
     forms/drillform/drillmodel.cpp \
     forms/drillform/drillpreviewgi.cpp \

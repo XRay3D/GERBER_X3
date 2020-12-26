@@ -1,6 +1,21 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_layer.h"
 #include "dxf_file.h"
-#include "dxf_values.h"
+#include "dxf_types.h"
 
 namespace Dxf {
 
@@ -56,6 +71,14 @@ void Layer::parse(CodeData& code)
     setColor(dxfColors[m_colorNumber]);
 }
 
+QString Layer::name() const { return m_name; }
+
+int Layer::colorNumber() const { return m_colorNumber; }
+
+const GraphicObjects& Layer::graphicObjects() const { return m_graphicObjects; }
+
+void Layer::addGraphicObject(GraphicObject&& go) { m_graphicObjects.emplace_back(go); }
+
 QColor Layer::color() const
 {
     return m_itemsType == ItemsType::Normal
@@ -70,11 +93,31 @@ void Layer::setColor(const QColor& color)
     m_colorPath = color;
 }
 
-ItemGroup* Layer::itemGroup()
+ItemGroup* Layer::itemGroup() const
 {
     return m_itemsType == ItemsType::Normal
         ? itemGroupNorm
         : itemGroupPath;
+}
+
+bool Layer::isEmpty() const { return !itemGroupNorm && !itemGroupPath; }
+
+ItemsType Layer::itemsType() const { return m_itemsType; }
+
+void Layer::setItemsType(ItemsType itemsType)
+{
+    if (m_itemsType == itemsType)
+        return;
+    m_itemsType = itemsType;
+    if (itemGroupNorm && itemGroupPath) {
+        if (m_itemsType == ItemsType::Normal) {
+            itemGroupNorm->setVisible(true);
+            itemGroupPath->setVisible(false);
+        } else {
+            itemGroupNorm->setVisible(false);
+            itemGroupPath->setVisible(true);
+        }
+    }
 }
 
 }

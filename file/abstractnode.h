@@ -26,13 +26,15 @@ class Shape;
 }
 class QMenu;
 
+QPixmap decoration(QColor color, QChar chr = {});
+
 class AbstractNode {
 public:
     explicit AbstractNode(int id, int type = 0);
     virtual ~AbstractNode();
 
-    AbstractNode* child(int row);
-    AbstractNode* parentItem();
+    AbstractNode* child(int row) const;
+    AbstractNode* parentItem() const;
 
     void setChild(int row, AbstractNode* item);
 
@@ -47,10 +49,11 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu* menu, TreeView* tv) const = 0;
 
-    enum {
-        Name_,
-        Layer_,
-        Other_
+    enum class Column {
+        NameColorVisible,
+        SideType,
+        ItrmsType,
+        Count
     };
 
     AbstractNode(const AbstractNode&) = delete;

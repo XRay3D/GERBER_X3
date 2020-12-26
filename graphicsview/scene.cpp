@@ -63,7 +63,7 @@ void Scene::RenderPdf()
     //QRectF rect(QGraphicsScene::itemsBoundingRect());
     QSizeF size(rect.size());
 
-    qDebug() << size << rect;
+
 
     QPdfWriter pdfWriter(curFile);
     pdfWriter.setPageSizeMM(size);
@@ -302,7 +302,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
             }
         }
 
-        //        qDebug() << "Grid Draw" << t.nsecsElapsed() * 0.001 << "us";
+
 
         // zero cross
         painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));
@@ -335,10 +335,10 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         if (m_frameCount == 0) {
             m_time.start();
             m_time2 = m_time.elapsed() + 1000;
-            qDebug() << m_time.elapsed() << m_time2;
+
         } else {
             if (m_time.elapsed() > m_time2) {
-                qDebug() << m_time.elapsed() << m_time2;
+
                 m_time2 = m_time.elapsed() + 1000;
                 m_frameCount2 = m_frameCount;
                 m_frameCount = 0;

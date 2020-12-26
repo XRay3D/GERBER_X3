@@ -81,7 +81,7 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
 
 PocketOffsetForm::~PocketOffsetForm()
 {
-    qDebug(Q_FUNC_INFO);
+
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");

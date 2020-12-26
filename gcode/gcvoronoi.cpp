@@ -214,7 +214,7 @@ void VoronoiCreator::createVoronoi()
         break;
     }
 
-    qDebug() << "m_returnPs" << m_returnPs.size();
+
     if (width < tool.getDiameter(depth)) {
         m_gcp.gcType = Voronoi;
         m_file = new File({ sortBE(m_returnPs) }, m_gcp);
@@ -662,7 +662,7 @@ void VoronoiCreator::boostVoronoi()
         segments_.append({ pair.first, pair.second });
     }
 
-    qDebug() << "boostVoronoi" << segments_.size();
+
     m_gcp.gcType = Voronoi;
     m_file = new File({ sortBE(segments_) }, m_gcp);
     m_file->setFileName(Tool {}.nameEnc());

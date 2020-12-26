@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_codedata.h"
 
 namespace Dxf {
@@ -109,7 +124,7 @@ CodeData::operator double() const
     try {
         return std::get<double>(varVal);
     } catch (const std::bad_variant_access& ex) {
-        qDebug() << ex.what();
+
         throw QString("Bad variant access: %1, line num %2").arg(ex.what()).arg(lineNum);
     }
 }
@@ -119,7 +134,7 @@ CodeData::operator int64_t() const
     try {
         return std::get<int64_t>(varVal);
     } catch (const std::bad_variant_access& ex) {
-        qDebug() << ex.what();
+
         throw QString("Bad variant access: %1, line num %2").arg(ex.what()).arg(lineNum);
     }
 }
@@ -129,7 +144,7 @@ CodeData::operator int() const
     try {
         return std::get<int64_t>(varVal);
     } catch (const std::bad_variant_access& ex) {
-        qDebug() << ex.what();
+
         throw QString("Bad variant access: %1, line num %2").arg(ex.what()).arg(lineNum);
     }
 }
@@ -139,7 +154,7 @@ CodeData::operator QString() const
     try {
         return std::get<QString>(varVal);
     } catch (const std::bad_variant_access& ex) {
-        qDebug() << ex.what();
+
         throw QString("Bad variant access: %1, line num %2").arg(ex.what()).arg(lineNum);
     }
 }

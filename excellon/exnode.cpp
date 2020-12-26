@@ -33,8 +33,8 @@ Node::Node(int id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (index.column()) {
-    case Name_:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -42,7 +42,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Layer_:
+    case Column::SideType:
         switch (role) {
         case Qt::EditRole:
             file()->setSide(static_cast<Side>(value.toBool()));
@@ -58,10 +58,10 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (index.column()) {
-    case Name_:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Layer_:
+    case Column::SideType:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -71,8 +71,8 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     if (file())
-        switch (index.column()) {
-        case Name_:
+        switch (static_cast<Column>(index.column())) {
+        case Column::NameColorVisible:
             switch (role) {
             case Qt::DisplayRole:
                 return file()->shortName();
@@ -88,7 +88,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
             default:
                 return QVariant();
             }
-        case Layer_:
+        case Column::SideType:
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:

@@ -148,7 +148,7 @@ void DrillItem::updateHole()
     m_diameter = m_hole->state.currentToolDiameter();
     create();
     update();
-    qDebug() << pos();
+
     auto p(pos());
     setPos(1, 1);
     setPos(p);

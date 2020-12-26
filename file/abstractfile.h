@@ -19,6 +19,7 @@
 #include "splashscreen.h"
 #include <QDateTime>
 #include <QFileInfo>
+#include <QModelIndex>
 #include <gi/itemgroup.h>
 
 using namespace ClipperLib;
@@ -35,6 +36,8 @@ enum Side {
     Top,
     Bottom
 };
+
+class QModelIndex;
 
 class AbstractFile {
     //    friend class Project;
@@ -114,6 +117,9 @@ public:
     int id() const;
     void setId(int id);
 
+    QModelIndex fileIndex() const { return m_fileIndex; }
+    void setFileIndex(const QModelIndex& index) { m_fileIndex = index; }
+
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
@@ -127,6 +133,8 @@ protected:
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
     mutable bool m_visible = false;
+
+    QModelIndex m_fileIndex;
 
     Side m_side = Top;
     QColor m_color;

@@ -38,7 +38,7 @@ TreeView::TreeView(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
-    connect(Gerber::Node::repaintTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
+    connect(Gerber::Node::decorationTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
     connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
@@ -84,7 +84,7 @@ TreeView::TreeView(QWidget* parent)
     header()->setStretchLastSection(false);
 
     setItemDelegateForColumn(0, new TextDelegate(this));
-    setItemDelegateForColumn(1, new LayerDelegate(this));
+    setItemDelegateForColumn(1, new SideDelegate(this));
     //    setItemDelegateForColumn(2, new RadioDelegate(this));
     App::m_treeView = this;
 }
@@ -112,7 +112,6 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
         } else if (index.parent() == m_model->index(FileModel::DrillFiles, 0, QModelIndex())) {
             hideOther();
         } else if (index.parent() == m_model->index(FileModel::ToolPath, 0, QModelIndex())) {
-            qDebug(Q_FUNC_INFO);
             hideOther();
             //            {
             //                const int id = m_menuIndex.data(Qt::UserRole).toInt();
@@ -179,9 +178,9 @@ void TreeView::closeFile()
 
 //void TreeView::closeFile2(const QModelIndex& index)
 //{
-//    qDebug() << m_model;
-//    qDebug() << "index.row()" << index.row();
-//    qDebug() << "index.parent()" << index.parent();
+
+
+
 //    if (index.isValid())
 //        m_model->removeRow(index.row(), index.parent());
 //    if (App::drillForm())
@@ -208,6 +207,7 @@ void TreeView::showExcellonDialog() { }
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
+
     m_menuIndex = indexAt(event->pos());
 
     switch (m_menuIndex.parent().row()) {
@@ -246,7 +246,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     }
 
     if (!menu.isEmpty())
-        menu.exec(mapToGlobal(event->pos()));
+        menu.exec(mapToGlobal(event->pos() + QPoint(0, menu.actionGeometry(menu.actions().first()).height())));
 }
 
 void TreeView::mousePressEvent(QMouseEvent* event)

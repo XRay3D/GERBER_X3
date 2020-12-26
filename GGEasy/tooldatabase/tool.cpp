@@ -372,7 +372,7 @@ uint Tool::hash() const
     //    calcHash.addData(reinterpret_cast<const char*>(&m_autoName), sizeof(bool));
     //    calcHash.addData(reinterpret_cast<const char*>(&m_id), sizeof(int));
     //    m_hash = *reinterpret_cast<int*>(calcHash.result().data());
-    //    qDebug() << calcHash.result() << m_hash << qHash(calcHash.result());
+
 
     //        if (m_hash)
     //            return m_hash;

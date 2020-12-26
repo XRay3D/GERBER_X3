@@ -47,7 +47,7 @@ QSizeF GetRealSize()
 //            nullptr); //               reserved
 
 //        if (nullptr == devInfo) {
-//            qDebug("SetupDiGetClassDevsEx");
+
 //            break;
 //        }
 
@@ -60,9 +60,9 @@ QSizeF GetRealSize()
 //                wchar_t uniID[123];
 
 //                if (::SetupDiGetDeviceRegistryProperty(devInfo, &devInfoData, SPDRP_DEVICEDESC /*SPDRP_UI_NUMBER*/, NULL, (PBYTE)(&uniID), sizeof(uniID), NULL)) {
-//                    qDebug() << "UID:" << QString::fromWCharArray(uniID);
+
 //                } else {
-//                    qDebug() << "ERROR:" << ::GetLastError();
+
 //                    break;
 //                }
 
@@ -89,7 +89,7 @@ QSizeF GetRealSize()
 //                    }
 //                    RegCloseKey(hDevRegKey);
 //                } else {
-//                    qDebug() << "ERROR:" << GetLastError();
+
 //                }
 //            } // SetupDiEnumDeviceInfo
 //        } // for

@@ -31,26 +31,26 @@
 
 namespace Gerber {
 
-QTimer Node::m_repaintTimer;
+QTimer Node::m_decorationTimer;
 
 Node::Node(int id)
     : AbstractNode(id)
 {
     App::project()->file<File>(m_id)->addToScene();
-    connect(&m_repaintTimer, &QTimer::timeout, this, &Node::repaint);
-    m_repaintTimer.setSingleShot(true);
-    m_repaintTimer.start(100);
+    connect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
+    m_decorationTimer.setSingleShot(true);
+    m_decorationTimer.start(100);
 }
 
 Node::~Node()
 {
-    m_repaintTimer.start(10);
+    m_decorationTimer.start(10);
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (index.column()) {
-    case Name_:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -58,7 +58,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Layer_:
+    case Column::SideType:
         switch (role) {
         case Qt::EditRole:
             file()->setSide(static_cast<Side>(value.toBool()));
@@ -66,7 +66,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Other_:
+    case Column::ItrmsType:
         switch (role) {
         case Qt::CheckStateRole:
             m_current = value.value<Qt::CheckState>();
@@ -82,12 +82,12 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (index.column()) {
-    case Name_:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Layer_:
+    case Column::SideType:
         return itemFlag | Qt::ItemIsEditable;
-    case Other_:
+    case Column::ItrmsType:
         return itemFlag | Qt::ItemIsUserCheckable;
     default:
         return itemFlag;
@@ -96,8 +96,8 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 QVariant Node::data(const QModelIndex& index, int role) const
 {
-    switch (index.column()) {
-    case Name_:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return file()->shortName();
@@ -105,38 +105,21 @@ QVariant Node::data(const QModelIndex& index, int role) const
             return file()->shortName() + "\n" + file()->name();
         case Qt::CheckStateRole:
             return file()->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole: {
-            QColor color(file()->color());
-            color.setAlpha(255);
-            QPixmap pixmap(22, 22);
-            pixmap.fill(Qt::transparent);
-            QPainter p(&pixmap);
-            p.setBrush(color);
-            p.drawRect(3, 3, 15, 15);
+        case Qt::DecorationRole:
             switch (App::project()->file<File>(m_id)->itemsType()) {
-            case File::ApPaths: {
-                QFont f;
-                f.setBold(true);
-                p.setFont(f);
-                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "A");
-            } break;
-            case File::Components: {
-                QFont f;
-                f.setBold(true);
-                p.setFont(f);
-                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "C");
-            } break;
-            case File::Normal:
-                break;
+            case File::ApPaths:
+                return decoration(file()->color(), 'A');
+            case File::Components:
+                return decoration(file()->color(), 'C');
+            default:
+                return decoration(file()->color());
             }
-            return pixmap;
-        }
         case Qt::UserRole:
             return m_id;
         default:
             return QVariant();
         }
-    case Layer_:
+    case Column::SideType:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -148,7 +131,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case Other_:
+    case Column::ItrmsType:
         switch (role) {
         case Qt::CheckStateRole:
             return m_current;
@@ -161,19 +144,13 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-QTimer* Node::repaintTimer()
-{
-    return &m_repaintTimer;
-}
+QTimer* Node::decorationTimer() { return &m_decorationTimer; }
 
 void Node::repaint()
 {
     const int count = m_parentItem->childCount();
     const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row() : 0);
-    //    int k = -60 + static_cast<int>((count > 1) ? (240.0 / (count - 1)) * row() : 0);
-    //    if (k < 0)
-    //        k += 360;
-    App::project()->file<File>(m_id)->setColor(QColor::fromHsv(k, /*255 - k * 0.2*/ 255, 255, 150));
+    App::project()->file<File>(m_id)->setColor(QColor::fromHsv(k, 255, 255, 150));
     App::scene()->update();
 }
 

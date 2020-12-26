@@ -30,7 +30,7 @@ void GCH::highlightBlock(const QString& text)
     QRegularExpressionMatchIterator i = expression.globalMatch(text);
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
-        //qDebug() << match;
+
 
         static const QVector<QChar> key {
             'F',

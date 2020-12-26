@@ -1,8 +1,21 @@
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #pragma once
 
 #include "dxf_abstracttable.h"
 #include "dxf_file.h"
-#include "dxf_values.h"
+#include "dxf_types.h"
 #include "entities/dxf_graphicobject.h"
 
 class ItemGroup;
@@ -47,33 +60,24 @@ public:
     Layer(File* sp);
     Layer(SectionParser* sp);
     Layer(SectionParser* sp, const QString& name);
-    ~Layer() { qDebug(__FUNCTION__); }
+    ~Layer() = default;
     // TableItem interface
 
     void parse(CodeData& code) override;
     Type type() const override { return AbstractTable::LAYER; };
 
-    QString name() const { return m_name; }
-    int colorNumber() const { return m_colorNumber; }
-    const GraphicObjects& graphicObjects() const { return m_graphicObjects; }
-    void addGraphicObject(GraphicObject&& go) { m_graphicObjects.emplace_back(go); }
-    ItemGroup* itemGroup();
-    ItemsType itemsType() const { return m_itemsType; }
-    void setItemsType(ItemsType itemsType)
-    {
-        if (m_itemsType == itemsType)
-            return;
-        m_itemsType = itemsType;
-        if (itemGroupNorm && itemGroupPath) {
-            if (m_itemsType == ItemsType::Normal) {
-                itemGroupNorm->setVisible(true);
-                itemGroupPath->setVisible(false);
-            } else {
-                itemGroupNorm->setVisible(false);
-                itemGroupPath->setVisible(true);
-            }
-        }
-    }
+    QString name() const;
+
+    int colorNumber() const;
+
+    const GraphicObjects& graphicObjects() const;
+    void addGraphicObject(GraphicObject&& go);
+
+    ItemGroup* itemGroup() const;
+    bool isEmpty() const;
+
+    ItemsType itemsType() const;
+    void setItemsType(ItemsType itemsType);
 
     QColor color() const;
     void setColor(const QColor& color);

@@ -12,22 +12,23 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#include <QStyledItemDelegate>
 
-#include "dxf_entity.h"
-
-namespace Dxf {
-
-class Dummy final : public Entity {
-    Type m_type;
-
+class RadioDelegate : public QStyledItemDelegate {
+    Q_OBJECT
 public:
-    Dummy(SectionParser* sp, Type type = NULL_ENT);
+    RadioDelegate(QObject* parent = nullptr);
+    ~RadioDelegate() override = default;
 
-    // Entity interface
+    // QAbstractItemDelegate interface
 public:
-    void draw(const InsertEntity* const) const override;
-    void parse(CodeData& code) override;
-    Type type() const override { return NULL_ENT; }
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+
+private slots:
+    void commitAndCloseEditor();
 };
-
-}

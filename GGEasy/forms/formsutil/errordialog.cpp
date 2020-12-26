@@ -10,7 +10,8 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
-*******************************************************************************/#include "errordialog.h"
+*******************************************************************************/
+#include "errordialog.h"
 #include "ui_errordialog.h"
 
 #include "gi/erroritem.h"
@@ -184,7 +185,7 @@ ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
 
 ErrorDialog::~ErrorDialog()
 {
-    qDebug(Q_FUNC_INFO);
+
 
     //    App::mainWindow()->dockWidget()->pop();
     delete table->model();

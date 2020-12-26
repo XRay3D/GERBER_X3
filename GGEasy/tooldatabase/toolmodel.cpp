@@ -41,7 +41,7 @@ ToolModel::~ToolModel()
 
 bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
 {
-    //qDebug() << "insertRows" << row << count << data(parent).toString();
+
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
@@ -58,7 +58,7 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
 
 bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    //qDebug() << "removeRows" << row << count << parent << createIndex(row, 0, rootItem);
+
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)

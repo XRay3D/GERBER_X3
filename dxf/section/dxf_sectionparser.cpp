@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_sectionparser.h"
 #include "dxf_file.h"
 #include <QDebug>
@@ -17,7 +32,7 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, Codes::it
     , it(it)
     , file(file)
 {
-    qDebug() << type;
+
 }
 SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* file)
     : type(toType(*(from + 1)))
@@ -26,7 +41,7 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* fil
     , it(from)
     , file(file)
 {
-    qDebug() << type;
+
 }
 
 SectionParser::SectionType SectionParser::toType(const QString& key)
@@ -52,13 +67,13 @@ const CodeData& SectionParser::prevCode() const
 
 bool SectionParser::hasNext() const
 {
-    //qDebug() << "hasNext" << std::distance(it, to) << std::distance(from, to);
+
     return std::distance(it, to) > 0;
 }
 
 bool SectionParser::hasPrev() const
 {
-    //qDebug() << "hasPrev" << std::distance(from, it) << std::distance(from, to);
+
     return std::distance(from, it) > 0;
 }
 

@@ -130,7 +130,7 @@ bool Parser::parseComment(const QString& line)
             const int tCode = static_cast<int>(matchTool.cap(1).toDouble());
             file()->m_tools[tCode] = matchTool.cap(2).toDouble() * 0.0254 * (1.0 / 25.4);
             m_state.tCode = tCode; //m_state.tCode = file()->m_tools.firstKey();
-            qDebug() << m_state.tCode << matchTool.capturedTexts() << file()->m_tools;
+
         }
         return true;
     }
@@ -244,7 +244,7 @@ bool Parser::parseTCode(const QString& line)
     if (match.exactMatch(line)) {
         const QStringList capturedTexts(match.capturedTexts());
         const int index = capturedTexts.indexOf("C");
-        //        qDebug() << capturedTexts << index;
+
         m_state.tCode = match.cap(1).toInt();
         if (index > 0) {
             //            const double k = m_file->format.unitMode ? 1.0 : 25.4;

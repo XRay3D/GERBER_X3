@@ -269,7 +269,7 @@ void File::read(QDataStream& stream)
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
-    qDebug() << m_itemsType;
+
 }
 
 void File::createGi()

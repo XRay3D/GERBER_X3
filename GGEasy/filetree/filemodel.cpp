@@ -17,6 +17,7 @@
 
 #include "dxf_file.h"
 #include "dxf_node.h"
+#include "dxf_types.h"
 #include "tables/dxf_layer.h"
 
 #include "exnode.h"
@@ -27,6 +28,8 @@
 #include "shheaders.h"
 
 #include "leakdetector.h"
+
+#include <QTimer>
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
@@ -51,45 +54,72 @@ void FileModel::addFile(AbstractFile* file)
 {
     if (!file)
         return;
-    AbstractNode* newItem = nullptr;
     AbstractNode* item(rootItem->child(static_cast<int>(file->type())));
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    {
-        beginInsertRows(index, rowCount, rowCount);
-        switch (file->type()) {
+    beginInsertRows(index, rowCount, rowCount);
+    switch (file->type()) {
+    case FileType::Gerber:
+        item->append(new Gerber::Node(file->id()));
+        break;
+    case FileType::Excellon:
+        item->append(new Excellon::Node(file->id()));
+        break;
+    case FileType::GCode:
+        item->append(new GCode::Node(file->id()));
+        break;
+    case FileType::Dxf:
+        item->append(new Dxf::Node(file->id()));
+        break;
+    default:
+        break;
+    }
+    endInsertRows();
+
+    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
+    file->setFileIndex(selectIndex);
+
+    updateFile(selectIndex);
+    emit select(selectIndex);
+}
+
+void FileModel::updateFile(const QModelIndex& fileIndex)
+{
+    if (int id = fileIndex.data().toInt(); id > -1) {
+        switch (App::project()->file(id)->type()) {
         case FileType::Gerber:
-            item->append(newItem = new Gerber::Node(file->id()));
             break;
         case FileType::Excellon:
-            item->append(newItem = new Excellon::Node(file->id()));
             break;
         case FileType::GCode:
-            item->append(newItem = new GCode::Node(file->id()));
             break;
-        case FileType::Dxf:
-            item->append(newItem = new Dxf::Node(file->id()));
-            break;
+        case FileType::Dxf: {
+            const QModelIndex index = createIndex(0, 0, fileIndex.internalId());
+            // clean before insert new layers
+            if (int count = getItem(fileIndex)->childCount(); count) {
+                beginRemoveRows(index, 0, count - 1);
+                auto item = getItem(index);
+                do {
+                    item->remove(--count);
+                } while (count);
+                endRemoveRows();
+            }
+            Dxf::Layers layers;
+            for (auto& [name, layer] : reinterpret_cast<Dxf::File*>(App::project()->file(id))->layers()) {
+                if (!layer->isEmpty())
+                    layers[name] = layer;
+            }
+            beginInsertRows(index, 0, layers.size() - 1);
+            for (auto& [name, layer] : layers) {
+                getItem(index)->append(new Dxf::NodeLayer(name, layer));
+            }
+            endInsertRows();
+        } break;
         default:
             break;
         }
-        endInsertRows();
     }
-
-    //    if (file->type() == FileType::Dxf) {
-    //        Dxf::File* dxfFile(reinterpret_cast<Dxf::File*>(file));
-    //        QModelIndex index = createIndex(0, 0, newItem);
-    //        beginInsertRows(index, 0, dxfFile->layers().size() - 1);
-    //        for (auto& [name, layer] : dxfFile->layers()) {
-    //            qDebug() << name << layer;
-    //            newItem->append(new Dxf::NodeLayer(name, layer));
-    //        }
-    //        endInsertRows();
-    //    }
-
-    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
-    emit select(selectIndex);
 }
 
 void FileModel::addShape(Shapes::Shape* sh)
@@ -167,7 +197,7 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
         case 1:
             return tr("Side");
         case 2:
-            return tr("C");
+            return tr("Type");
         default:
             return QString("");
         }
@@ -199,7 +229,7 @@ bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 
 int FileModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return int(AbstractNode::Column::Count);
 }
 
 int FileModel::rowCount(const QModelIndex& parent) const
