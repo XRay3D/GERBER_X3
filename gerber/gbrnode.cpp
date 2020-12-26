@@ -66,10 +66,11 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case Column::ItrmsType:
+    case Column::ItemsType:
         switch (role) {
-        case Qt::CheckStateRole:
-            m_current = value.value<Qt::CheckState>();
+        case Qt::EditRole:
+            qDebug() << __FUNCTION__ << role << value;
+            App::project()->file<File>(m_id)->setItemType(static_cast<File::ItemsType>(value.toInt()));
             return true;
         default:
             return false;
@@ -87,8 +88,8 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
         return itemFlag | Qt::ItemIsUserCheckable;
     case Column::SideType:
         return itemFlag | Qt::ItemIsEditable;
-    case Column::ItrmsType:
-        return itemFlag | Qt::ItemIsUserCheckable;
+    case Column::ItemsType:
+        return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
     }
@@ -131,10 +132,16 @@ QVariant Node::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case Column::ItrmsType:
+    case Column::ItemsType:
         switch (role) {
-        case Qt::CheckStateRole:
-            return m_current;
+        case Qt::DisplayRole:
+            return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).actName;
+        case Qt::ToolTipRole:
+            return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).actName;
+        case Qt::EditRole:
+            return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).id;
+        case Qt::UserRole:
+            return m_id;
         default:
             return QVariant();
         }
@@ -154,45 +161,44 @@ void Node::repaint()
     App::scene()->update();
 }
 
-void Node::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &TreeView::hideOther);
+    menu->addAction(QIcon::fromTheme("hint"), tr("&Hide other"), tv, &FileTreeView::hideOther);
     menu->setToolTipDuration(0);
     menu->setToolTipsVisible(true);
-    File* file = App::project()->file<File>(m_id);
-
-    { //QActionGroup
-        menu->addSeparator();
-        QActionGroup* group = new QActionGroup(menu);
-        if (file->itemGroup(File::ApPaths)->size()) {
-            auto action = menu->addAction(tr("&Aperture paths"),
-                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::ApPaths)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == File::ApPaths);
-            action->setToolTip(tr("Displays only aperture paths of copper\n"
-                                  "without width and without contacts."));
-            action->setActionGroup(group);
-        }
-        if (file->itemGroup(File::Components)->size()) {
-            auto action = menu->addAction(tr("&Components"),
-                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Components)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == File::Components);
-            //            action->setToolTip("Displays only aperture paths of copper\n"
-            //                               "without width and without contacts.");
-            action->setActionGroup(group);
-        }
-        if (file->itemGroup(File::Normal)->size()) {
-            auto action = menu->addAction(tr("&Normal"),
-                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Normal)); });
-            action->setCheckable(true);
-            action->setChecked(file->itemsType() == File::Normal);
-            //            action->setToolTip("Displays only aperture paths of copper\n"
-            //                               "without width and without contacts.");
-            action->setActionGroup(group);
-        }
-        menu->addSeparator();
-    }
+    //    File* file = App::project()->file<File>(m_id);
+    //    { //QActionGroup
+    //        menu->addSeparator();
+    //        QActionGroup* group = new QActionGroup(menu);
+    //        if (file->itemGroup(File::ApPaths)->size()) {
+    //            auto action = menu->addAction(tr("&Aperture paths"),
+    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::ApPaths)); });
+    //            action->setCheckable(true);
+    //            action->setChecked(file->itemsType() == File::ApPaths);
+    //            action->setToolTip(tr("Displays only aperture paths of copper\n"
+    //                                  "without width and without contacts."));
+    //            action->setActionGroup(group);
+    //        }
+    //        if (file->itemGroup(File::Components)->size()) {
+    //            auto action = menu->addAction(tr("&Components"),
+    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Components)); });
+    //            action->setCheckable(true);
+    //            action->setChecked(file->itemsType() == File::Components);
+    //            //            action->setToolTip("Displays only aperture paths of copper\n"
+    //            //                               "without width and without contacts.");
+    //            action->setActionGroup(group);
+    //        }
+    //        if (file->itemGroup(File::Normal)->size()) {
+    //            auto action = menu->addAction(tr("&Normal"),
+    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Normal)); });
+    //            action->setCheckable(true);
+    //            action->setChecked(file->itemsType() == File::Normal);
+    //            //            action->setToolTip("Displays only aperture paths of copper\n"
+    //            //                               "without width and without contacts.");
+    //            action->setActionGroup(group);
+    //        }
+    //        menu->addSeparator();
+    //    }
 
     menu->addAction(QIcon(), tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
@@ -216,7 +222,7 @@ void Node::menu(QMenu* menu, TreeView* tv) const
             dialog.exec();
         });
     }
-
-    menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &TreeView::closeFile);
+    menu->addSeparator();
+    menu->addAction(QIcon::fromTheme("document-close"), tr("&Close"), tv, &FileTreeView::closeFile);
 }
 }

@@ -159,6 +159,8 @@ void DrillPrGI::updateTool()
             m_toolPath.moveTo(curPos - QPointF(lineKoeff, 0.0));
             m_toolPath.lineTo(curPos + QPointF(lineKoeff, 0.0));
         } break;
+        default:
+            break;
         }
     }
     changeColor();

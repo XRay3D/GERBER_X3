@@ -39,7 +39,17 @@ enum Side {
 
 class QModelIndex;
 
+struct LayerType {
+    int id = -1;
+    QString actName;
+    QString actToolTip;
+};
+
+using LayerTypes = std::vector<LayerType>;
+Q_DECLARE_METATYPE(LayerType)
+
 class AbstractFile {
+
     //    friend class Project;
     friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file);
     friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file);
@@ -102,6 +112,8 @@ public:
     };
 
     virtual FileType type() const = 0;
+    const LayerTypes& displayedTypes() const;
+
     virtual void createGi() = 0;
     //    virtual void selected() = 0;
 
@@ -135,6 +147,7 @@ protected:
     mutable bool m_visible = false;
 
     QModelIndex m_fileIndex;
+    LayerTypes m_layerTypes;
 
     Side m_side = Top;
     QColor m_color;

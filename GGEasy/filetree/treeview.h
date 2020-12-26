@@ -15,13 +15,13 @@
 #include "filemodel.h"
 #include <QTreeView>
 
-class TreeView : public QTreeView {
+class FileTreeView : public QTreeView {
     Q_OBJECT
     friend class MainWindow;
 
 public:
-    explicit TreeView(QWidget* parent = nullptr);
-    ~TreeView() override = default;
+    explicit FileTreeView(QWidget* parent = nullptr);
+    ~FileTreeView() override = default;
     void hideOther();
     void closeFile();
 //    void closeFile2(const QModelIndex& index);

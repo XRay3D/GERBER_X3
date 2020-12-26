@@ -67,7 +67,7 @@ void Hatch::parse(CodeData& code)
         code = sp->nextCode();
         //parseEntity(code);
     } while (code.code() != 0);
-    qDebug("\n" __FUNCTION__);
+    qDebug(__FUNCTION__);
     for (auto& code : data) {
         qDebug() << code;
     }

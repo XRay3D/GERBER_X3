@@ -25,24 +25,11 @@ AbstractNode::AbstractNode(int id, int type)
     , m_type(type)
     , sideStrList(QObject::tr("Top|Bottom").split('|'))
 {
-    //    if (MainWindow::closeAllAct()) {
-    //        MainWindow::closeAllAct()->setEnabled(true);
-    //        MainWindow::exportPdfAct()->setEnabled(true);
-    //    }
 }
 
 AbstractNode::~AbstractNode()
 {
-    //    if (MainWindow::closeAllAct()) {
-    //        MainWindow::closeAllAct()->setEnabled(Project::isEmpty());
-    //        MainWindow::exportPdfAct()->setEnabled(Project::isEmpty());
-    //    }
     if (m_id != -1) {
-        //        QGraphicsScene* scene = App::project()->file(m_id)->itemGroup()->first()->scene();
-        //        if (scene) {
-        //            scene->setSceneRect(scene->itemsBoundingRect());
-        //            scene->update();
-        //        }
         if (m_type)
             App::project()->deleteShape(m_id);
         else

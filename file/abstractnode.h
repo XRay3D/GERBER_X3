@@ -20,7 +20,7 @@
 #include <QVariant>
 
 class AbstractFile;
-class TreeView;
+class FileTreeView;
 namespace Shapes {
 class Shape;
 }
@@ -47,12 +47,12 @@ public:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
-    virtual void menu(QMenu* menu, TreeView* tv) const = 0;
+    virtual void menu(QMenu* menu, FileTreeView* tv) const = 0;
 
     enum class Column {
         NameColorVisible,
         SideType,
-        ItrmsType,
+        ItemsType,
         Count
     };
 

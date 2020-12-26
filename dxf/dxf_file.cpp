@@ -40,10 +40,11 @@ namespace Dxf {
 
 File::File()
 {
-    //    Layer* l;
-    //    m_tables[TableItem::LAYER].append(l = new Layer(this));
-    //    m_tables[TableItem::LAYER].last()->parse(code);
-    //    m_layers[l->name] = l;
+    m_layerTypes = {
+        { int(ItemsType::Normal), QObject::tr("Normal"), "" },
+        { int(ItemsType::Paths), QObject::tr("Paths"), QObject::tr("Displays only aperture paths of copper\n"
+                                                                   "without width and without contacts.") },
+    };
 }
 
 File::~File()
@@ -222,7 +223,7 @@ void File::createGi()
                     clipper.AddPath(go.path(), ptClip, true); // Clipper
                     clipper.AddPaths(go.paths(), ptClip, true); // Clipper
                 }
-                if (!contains(go.path())) {
+                if (!contains(go.path()) && go.path().size()) {
                     auto gItem = new AperturePathItem(go.path(), this);
                     if (go.entity())
                         gItem->setToolTip(QString("Line %1\n%2")

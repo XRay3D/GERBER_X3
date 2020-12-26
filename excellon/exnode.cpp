@@ -106,9 +106,9 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Node::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
+    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
     if (!m_exFormatDialog) {
         menu->addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
             if (App::drillForm())
@@ -118,6 +118,6 @@ void Node::menu(QMenu* menu, TreeView* tv) const
             m_exFormatDialog->show();
         });
     }
-    menu->addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &TreeView::closeFile);
+    menu->addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTreeView::closeFile);
 }
 }

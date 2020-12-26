@@ -17,7 +17,12 @@
 #include "forms/drillform/drillform.h"
 #include "gbrnode.h"
 #include "gcode.h"
-#include "layerdelegate.h"
+
+#include "radiodelegate.h"
+#include "sidedelegate.h"
+#include "textdelegate.h"
+#include "typedelegate.h"
+
 #include "mainwindow.h"
 #include "project.h"
 #include "shheaders.h"
@@ -29,7 +34,7 @@
 
 #include "leakdetector.h"
 
-TreeView::TreeView(QWidget* parent)
+FileTreeView::FileTreeView(QWidget* parent)
     : QTreeView(parent)
     , m_model(new FileModel(this))
 {
@@ -38,41 +43,38 @@ TreeView::TreeView(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
-    connect(Gerber::Node::decorationTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
-    connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
-    connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
-    connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
+    connect(Gerber::Node::decorationTimer(), &QTimer::timeout, this, &FileTreeView::updateIcons);
+    connect(m_model, &FileModel::rowsInserted, this, &FileTreeView::updateTree);
+    connect(m_model, &FileModel::rowsRemoved, this, &FileTreeView::updateTree);
+    connect(m_model, &FileModel::updateActions, this, &FileTreeView::updateTree);
     connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
         selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
     });
 #ifndef QT_DEBUG
-    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::onSelectionChanged);
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::onSelectionChanged);
 #endif
-    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
-    connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
-
-    setIconSize(QSize(22, 22));
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::updateTree);
+    connect(this, &FileTreeView::doubleClicked, this, &FileTreeView::on_doubleClicked);
 
     {
-        int w = indentation();
-        int h = rowHeight(m_model->index(0, 0, QModelIndex()));
+        setIconSize(QSize(24, 24));
+        const int w = indentation();
+        const int h = rowHeight(model()->index(0, 0, QModelIndex()));
         QImage i(w, h, QImage::Format_ARGB32);
+        QPainter p(&i);
+        p.setPen(QColor(128, 128, 128));
+        // │
         i.fill(Qt::transparent);
-        for (int y = 0; y < h; ++y)
-            i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+        p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
         i.save("vline.png", "PNG");
-
-        for (int x = w / 2; x < w; ++x)
-            i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+        // ├─
+        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
         i.save("branch-more.png", "PNG");
-
+        // └─
         i.fill(Qt::transparent);
-        for (int y = 0; y < h / 2; ++y)
-            i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-        for (int x = w / 2; x < w; ++x)
-            i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+        p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
+        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
         i.save("branch-end.png", "PNG");
-
         QFile file(":/qtreeviewstylesheet/QTreeView.qss");
         file.open(QFile::ReadOnly);
         setStyleSheet(file.readAll());
@@ -85,17 +87,18 @@ TreeView::TreeView(QWidget* parent)
 
     setItemDelegateForColumn(0, new TextDelegate(this));
     setItemDelegateForColumn(1, new SideDelegate(this));
+    setItemDelegateForColumn(2, new TypeDelegate(this));
     //    setItemDelegateForColumn(2, new RadioDelegate(this));
     App::m_treeView = this;
 }
 
-void TreeView::updateTree()
+void FileTreeView::updateTree()
 {
     App::m_treeView = nullptr;
     expandAll();
 }
 
-void TreeView::updateIcons()
+void FileTreeView::updateIcons()
 {
     QModelIndex index = m_model->index(0, 0, QModelIndex());
     int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
@@ -103,7 +106,7 @@ void TreeView::updateIcons()
         update(m_model->index(r, 0, index));
 }
 
-void TreeView::on_doubleClicked(const QModelIndex& index)
+void FileTreeView::on_doubleClicked(const QModelIndex& index)
 {
     if (!index.column()) {
         m_menuIndex = index;
@@ -125,7 +128,7 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
     }
 }
 
-void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void FileTreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
@@ -155,7 +158,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
     }
 }
 
-void TreeView::hideOther()
+void FileTreeView::hideOther()
 {
     const int rowCount = static_cast<AbstractNode*>(m_menuIndex.parent().internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
@@ -169,25 +172,22 @@ void TreeView::hideOther()
     m_model->dataChanged(m_menuIndex.sibling(0, 0), m_menuIndex.sibling(rowCount, 0));
 }
 
-void TreeView::closeFile()
+void FileTreeView::closeFile()
 {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
     if (App::drillForm())
         App::drillForm()->on_pbClose_clicked();
 }
 
-//void TreeView::closeFile2(const QModelIndex& index)
+//void FileTreeView::closeFile2(const QModelIndex& index)
 //{
-
-
-
 //    if (index.isValid())
 //        m_model->removeRow(index.row(), index.parent());
 //    if (App::drillForm())
 //        App::drillForm()->on_pbClose_clicked();
 //}
 
-void TreeView::saveGcodeFile()
+void FileTreeView::saveGcodeFile()
 {
     if (App::project()->pinsPlacedMessage())
         return;
@@ -202,9 +202,9 @@ void TreeView::saveGcodeFile()
     file->save(name);
 }
 
-void TreeView::showExcellonDialog() { }
+void FileTreeView::showExcellonDialog() { }
 
-void TreeView::contextMenuEvent(QContextMenuEvent* event)
+void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
 
@@ -249,7 +249,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.exec(mapToGlobal(event->pos() + QPoint(0, menu.actionGeometry(menu.actions().first()).height())));
 }
 
-void TreeView::mousePressEvent(QMouseEvent* event)
+void FileTreeView::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         QModelIndex index = indexAt(event->pos());
@@ -264,7 +264,7 @@ void TreeView::mousePressEvent(QMouseEvent* event)
     QTreeView::mousePressEvent(event);
 }
 
-void TreeView::mouseDoubleClickEvent(QMouseEvent* event)
+void FileTreeView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     m_menuIndex = indexAt(event->pos());
     if (m_menuIndex.isValid() && m_menuIndex.parent().row() > -1)

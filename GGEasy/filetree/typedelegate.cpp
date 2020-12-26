@@ -14,6 +14,8 @@
 *                                                                              *
 *******************************************************************************/
 #include "typedelegate.h"
+#include "abstractfile.h"
+#include "project.h"
 #include <QComboBox>
 
 #include "leakdetector.h"
@@ -25,29 +27,35 @@ TypeDelegate::TypeDelegate(QObject* parent)
 
 QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
 {
-    auto* comboBox = new QComboBox(parent);
-    comboBox->addItems(tr("Solid|Paths").split('|'));
-    comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
-    comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
+    qDebug() << __FUNCTION__;
+    auto comboBox = new QComboBox(parent);
     connect(comboBox, qOverload<int>(&QComboBox::activated), this, &TypeDelegate::emitCommitData);
     return comboBox;
 }
 
 void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
-        return;
+    qDebug() << __FUNCTION__ << App::project()->file(index.data(Qt::UserRole).toInt())->name();
+    auto comboBox = qobject_cast<QComboBox*>(editor);
+    comboBox->clear();
+    int ctr = 0;
+    for (auto& [id, name, toolTip] : App::project()->file(index.data(Qt::UserRole).toInt())->displayedTypes()) {
+        if (id < 0)
+            continue;
+        comboBox->addItem(name, id);
+        comboBox->setItemData(ctr, comboBox->size(), Qt::SizeHintRole);
+        comboBox->setItemData(ctr, toolTip, Qt::ToolTipRole);
+        qDebug() << __FUNCTION__ << ctr << name << id;
+        ++ctr;
+    }
     comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());
     comboBox->showPopup();
 }
 
 void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
-        return;
-    model->setData(index, bool(comboBox->currentIndex()));
+    auto comboBox = qobject_cast<QComboBox*>(editor);
+    model->setData(index, comboBox->currentData());
 }
 
 void TypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }

@@ -38,7 +38,7 @@ class Scene;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
-    friend void TreeView::on_doubleClicked(const QModelIndex&);
+    friend void FileTreeView::on_doubleClicked(const QModelIndex&);
     friend class Recent;
 
 public:

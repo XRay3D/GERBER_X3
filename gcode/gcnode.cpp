@@ -136,11 +136,11 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
         return itemFlag;
     }
 }
-void Node::menu(QMenu* menu, TreeView* tv) const
+void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &TreeView::hideOther);
-    menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &TreeView::saveGcodeFile);
-    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &TreeView::closeFile);
+    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
+    menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &FileTreeView::saveGcodeFile);
+    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTreeView::closeFile);
     menu->addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));

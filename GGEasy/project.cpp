@@ -86,7 +86,6 @@ bool Project::save(QFile& file)
         m_isModified = false;
         return true;
     } catch (...) {
-
     }
     return false;
 }
@@ -94,11 +93,11 @@ bool Project::save(QFile& file)
 bool Project::open(QFile& file)
 {
     try {
+        qDebug() << __FUNCTION__ << file;
         QElapsedTimer t;
         t.start();
         QDataStream in(&file);
         in >> m_ver;
-
 
         QPointF tmpPt;
 
@@ -147,7 +146,6 @@ bool Project::open(QFile& file)
         App::layoutFrames()->updateRect();
         return true;
     } catch (...) {
-
     }
     return false;
 }
@@ -174,7 +172,7 @@ void Project::deleteFile(int id)
 {
     QMutexLocker locker(&m_mutex);
     if (m_files.contains(id)) {
-        m_files.take(id);
+        m_files.remove(id);
         setChanged();
     } else
         qWarning() << "Error id" << id << "File not found";

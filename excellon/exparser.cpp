@@ -97,11 +97,6 @@ bool Parser::isDrillFile(const QString& fileName)
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    //    QString str(file.readAll().trimmed());
-
-    //    if (str.startsWith("M48") && str.endsWith("M30"))
-    //        return true;
-
     QTextStream in(&file);
     QString line;
     const QRegExp match("^T([0]?[0-9]{1})[FSC]((\\d*\\.?\\d+))?.*$");
@@ -130,7 +125,6 @@ bool Parser::parseComment(const QString& line)
             const int tCode = static_cast<int>(matchTool.cap(1).toDouble());
             file()->m_tools[tCode] = matchTool.cap(2).toDouble() * 0.0254 * (1.0 / 25.4);
             m_state.tCode = tCode; //m_state.tCode = file()->m_tools.firstKey();
-
         }
         return true;
     }

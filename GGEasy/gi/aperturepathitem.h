@@ -14,15 +14,20 @@
 #pragma once
 #include "graphicsitem.h"
 #include <QTimer>
+#include <cmath>
 
 namespace Gerber {
 class File;
 }
 
 class AperturePathItem : public GraphicsItem {
-    QRectF boundingRect_m;
+    QRectF m_boundingRect;
     int timerId = 0;
+#ifdef __GNUC__
+    static QTimer timer;
+#else
     static inline QTimer timer;
+#endif
     static inline int d;
     void redraw() override { update(); }
 
@@ -43,6 +48,7 @@ protected:
     const Path& m_path;
     mutable QPainterPath m_selectionShape;
     mutable double m_scale = std::numeric_limits<double>::max();
+    void updateSelection() const;
 
     // QGraphicsItem interface
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
