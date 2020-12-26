@@ -13,14 +13,10 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "layerdelegate.h"
-#include "gbrnode.h"
-
-#include <QApplication>
-#include <QComboBox>
+#include "textdelegate.h"
 #include <QLineEdit>
-#include <QRadioButton>
 
+#include "leakdetector.h"
 
 ////////////////////////////////////////////////////////////
 /// \brief TextDelegate::TextDelegate

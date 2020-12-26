@@ -93,7 +93,7 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="TreeView" name="treeView">
+      <widget class="FileTreeView" name="treeView">
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
@@ -110,7 +110,7 @@
    <header location="global">graphicsview.h</header>
   </customwidget>
   <customwidget>
-   <class>TreeView</class>
+   <class>FileTreeView</class>
    <extends>QTreeView</extends>
    <header>filetree/treeview.h</header>
   </customwidget>

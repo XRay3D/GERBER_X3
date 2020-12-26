@@ -79,14 +79,20 @@ void FileModel::addFile(AbstractFile* file)
 
     QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
     file->setFileIndex(selectIndex);
-
     updateFile(selectIndex);
     emit select(selectIndex);
 }
 
 void FileModel::updateFile(const QModelIndex& fileIndex)
 {
-    if (int id = fileIndex.data().toInt(); id > -1) {
+    int id = fileIndex.data().toInt();
+    //qDebug() << __FUNCTION__ << fileIndex;
+    //qDebug() << __FUNCTION__ << App::project();
+    //qDebug() << __FUNCTION__ << App::project()->file(id);
+    if (!App::project()->file(id))
+        return;
+    //qDebug() << __FUNCTION__ << int(App::project()->file(id)->type());
+    if (fileIndex.isValid() && id > -1) {
         switch (App::project()->file(id)->type()) {
         case FileType::Gerber:
             break;
@@ -110,7 +116,7 @@ void FileModel::updateFile(const QModelIndex& fileIndex)
                 if (!layer->isEmpty())
                     layers[name] = layer;
             }
-            beginInsertRows(index, 0, layers.size() - 1);
+            beginInsertRows(index, 0, int(layers.size() - 1));
             for (auto& [name, layer] : layers) {
                 getItem(index)->append(new Dxf::NodeLayer(name, layer));
             }

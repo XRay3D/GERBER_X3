@@ -40,6 +40,8 @@ Pathss AbstractFile::groupedPaths() const { return m_groupedPaths; }
 
 QList<QString>& AbstractFile::lines() { return m_lines; }
 
+const LayerTypes& AbstractFile::displayedTypes() const { return m_layerTypes; }
+
 Side AbstractFile::side() const { return m_side; }
 
 void AbstractFile::setSide(Side side) { m_side = side; }

@@ -23,6 +23,10 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
+#ifdef __GNUC__
+QTimer AperturePathItem::timer;
+#endif
+
 AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFile* file)
     : GraphicsItem(file)
     , m_path(path)
@@ -33,9 +37,9 @@ AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFi
     ClipperOffset offset;
     offset.AddPath(path, jtSquare, etOpenButt);
     offset.Execute(tmpPaths, 0.01 * uScale);
-    for (const Path& tmpPath : tmpPaths)
+    for (const Path& tmpPath : qAsConst(tmpPaths))
         m_selectionShape.addPolygon(tmpPath);
-    boundingRect_m = m_selectionShape.boundingRect();
+    m_boundingRect = m_selectionShape.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
@@ -45,9 +49,14 @@ AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFi
     }
 }
 
-QRectF AperturePathItem::boundingRect() const { return shape().boundingRect(); }
+QRectF AperturePathItem::boundingRect() const
+{
+    if (m_selectionShape.boundingRect().isEmpty())
+        updateSelection();
+    return m_selectionShape.boundingRect();
+}
 
-QRectF AperturePathItem::boundingRect2() const { return boundingRect_m; }
+QRectF AperturePathItem::boundingRect2() const { return m_boundingRect; }
 
 void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
@@ -58,7 +67,7 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
 
     QColor color(m_pen.color());
     QPen pen(m_pen);
-    constexpr double dl = 4;
+    constexpr double dl = 3;
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
@@ -85,6 +94,21 @@ int AperturePathItem::type() const { return static_cast<int>(GiType::AperturePat
 Paths AperturePathItem::paths() const { return { m_path }; }
 
 QPainterPath AperturePathItem::shape() const { return m_selectionShape; }
+
+void AperturePathItem::updateSelection() const
+{
+    const double scale = App::graphicsView()->scaleFactor();
+    if (m_selectionShape.boundingRect().isEmpty() || !qFuzzyCompare(m_scale, scale)) {
+        m_scale = scale;
+        m_selectionShape = QPainterPath();
+        Paths tmpPpath;
+        ClipperOffset offset;
+        offset.AddPath(m_path, jtSquare, etOpenButt);
+        offset.Execute(tmpPpath, 5 * uScale * m_scale);
+        for (const Path& path : qAsConst(tmpPpath))
+            m_selectionShape.addPolygon(path);
+    }
+}
 
 void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -122,11 +146,12 @@ void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemVisibleChange && value.toBool()) {
-        hoverEnterEvent(nullptr);
+        updateSelection();
     } else if (change == ItemSelectedChange && GlobalSettings::animSelection()) {
-        if (value.toBool())
+        if (value.toBool()) {
+            updateSelection();
             connect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
-        else {
+        } else {
             disconnect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
             update();
         }
@@ -136,16 +161,6 @@ QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, 
 
 void AperturePathItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
-    if (event)
-        QGraphicsItem::hoverEnterEvent(event);
-    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
-        m_scale = App::graphicsView()->scaleFactor();
-        m_selectionShape = QPainterPath();
-        ClipperOffset offset;
-        Paths tmpPpath;
-        offset.AddPath(m_path, jtSquare, etOpenButt);
-        offset.Execute(tmpPpath, 5 * uScale * m_scale);
-        for (const Path& path : tmpPpath)
-            m_selectionShape.addPolygon(path);
-    }
+    QGraphicsItem::hoverEnterEvent(event);
+    updateSelection();
 }

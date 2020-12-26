@@ -158,12 +158,9 @@ void Spline::draw(const InsertEntity* const /*i*/) const
 
 void Spline::parse(CodeData& code)
 {
-
-
-    auto TypeName = [](int key) -> QString {
-        return staticMetaObject.enumerator(1).valueToKey(key);
-    };
-
+    //    auto TypeName = [](int key) -> QString {
+    //        return staticMetaObject.enumerator(1).valueToKey(key);
+    //    };
     do {
         data.push_back(code);
 
@@ -251,7 +248,7 @@ void Spline::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject Spline::toGo() const {  return { sp->file, this, {}, {} }; }
+GraphicObject Spline::toGo() const { return { sp->file, this, {}, {} }; }
 
 ////////////////////////////////////
 

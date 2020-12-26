@@ -109,6 +109,12 @@ File::File(const QString& fileName)
 {
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
+    m_layerTypes = {
+        { Normal, QObject::tr("Normal"), "" },
+        { ApPaths, QObject::tr("Aperture paths"), QObject::tr("Displays only aperture paths of copper\n"
+                                                              "without width and without contacts.") },
+        { Components, QObject::tr("Components"), "" }
+    };
 }
 
 File::~File() { }
@@ -239,7 +245,7 @@ void File::setItemType(File::ItemsType type)
     m_itemGroups[ApPaths]->setVisible(false);
     m_itemGroups[Components]->setVisible(false);
 
-    m_itemGroups[m_itemsType]->setVisible(m_visible);
+    m_itemGroups[m_itemsType]->setVisible(true /*m_visible*/);
 }
 
 void File::write(QDataStream& stream) const
@@ -269,7 +275,6 @@ void File::read(QDataStream& stream)
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
-
 }
 
 void File::createGi()
@@ -342,6 +347,14 @@ void File::createGi()
         else
             m_itemsType = ApPaths;
     }
+
+    m_layerTypes[Normal].id = m_itemGroups[Normal]->size() ? Normal : NullType;
+    m_layerTypes[ApPaths].id = m_itemGroups[ApPaths]->size() ? ApPaths : NullType;
+    m_layerTypes[Components].id = m_itemGroups[Components]->size() ? Components : NullType;
+
+    qDebug() << __FUNCTION__ << m_layerTypes[Normal].id;
+    qDebug() << __FUNCTION__ << m_layerTypes[ApPaths].id;
+    qDebug() << __FUNCTION__ << m_layerTypes[Components].id;
 
     m_itemGroups[Normal]->setVisible(false);
     m_itemGroups[ApPaths]->setVisible(false);

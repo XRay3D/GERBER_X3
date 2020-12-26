@@ -94,9 +94,9 @@ HEADERS += \
     doublespinbox.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
-    filetree/layerdelegate.h \
     filetree/radiodelegate.h \
     filetree/sidedelegate.h \
+    filetree/textdelegate.h \
     filetree/treeview.h \
     filetree/typedelegate.h \
     forms/drillform/drillform.h \
@@ -144,9 +144,9 @@ SOURCES += \
     doublespinbox.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
-    filetree/layerdelegate.cpp \
     filetree/radiodelegate.cpp \
     filetree/sidedelegate.cpp \
+    filetree/textdelegate.cpp \
     filetree/treeview.cpp \
     filetree/typedelegate.cpp \
     forms/drillform/drillform.cpp \
