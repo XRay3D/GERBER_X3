@@ -123,7 +123,7 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
 
 void ComponentItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    qDebug() << event;
+
     QGraphicsItem::mouseMoveEvent(event);
 }
 

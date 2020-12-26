@@ -180,7 +180,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             m_file->groupedPaths();
             emit fileReady(m_file);
             emit fileProgress(m_file->shortName(), 1, 1);
-            qDebug() << m_file->shortName() << "Parser" << t.elapsed();
         }
         m_currentGerbLine.clear();
         m_apertureMacro.clear();
@@ -600,7 +599,7 @@ bool Parser::parseAperture(const QString& gLine)
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (match.exactMatch(gLine)) {
-        qDebug() << __FUNCTION__ << match.capturedTexts();
+
         int aperture = match.cap(1).toInt();
         const QString apType = match.cap(2);
         const QString apParameters = match.cap(3);
@@ -803,7 +802,7 @@ bool Parser::parseAttributes(const QString& gLine)
             case Att::File::ProjectId:
             case Att::File::MD5:
             default:
-                // qDebug() << matchAttr.cap(1) << index << sl
+
                 ;
             }
         } break;
@@ -827,17 +826,17 @@ bool Parser::parseAttributes(const QString& gLine)
             case Att::Aperture::DrillTolerance:
             case Att::Aperture::FlashText:
             default:
-                // qDebug() << matchAttr.cap(1) << index << sl
+
                 ;
             }
             //apertureAttributesStrings.append(matchAttr.cap(2));
-            //qDebug() << matchAttr.cap(1);
+
         } break;
         case Att::Command::TO: {
             QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
             switch (int index = Component::value1(sl.first()); index) {
             case Component::N:
-                // qDebug() << matchAttr.cap(1) << index << sl;
+
                 break;
             case Component::P:
                 components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
@@ -868,7 +867,7 @@ bool Parser::parseAttributes(const QString& gLine)
                 }
                 break;
             default:
-                qDebug("default");
+                qDebug() << __FUNCTION__ << gLine << matchAttr.capturedTexts();
             }
         } break;
         case Att::Command::TD:

@@ -169,7 +169,7 @@ ThermalForm::ThermalForm(QWidget* parent)
 
 ThermalForm::~ThermalForm()
 {
-    qDebug(Q_FUNC_INFO);
+
     par = model->rootItem->child(0)->getParam();
     MySettings settings;
     settings.beginGroup("ThermalForm");
@@ -439,7 +439,7 @@ void ThermalForm::editFile(GCode::File* /*file*/) { }
 
 void ThermalForm::on_dsbxAreaMin_editingFinished()
 {
-    qDebug(Q_FUNC_INFO);
+
     if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
         lastMin = ui->dsbxAreaMin->value();
         createTPI(nullptr);
@@ -448,7 +448,7 @@ void ThermalForm::on_dsbxAreaMin_editingFinished()
 
 void ThermalForm::on_dsbxAreaMax_editingFinished()
 {
-    qDebug(Q_FUNC_INFO);
+
     if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
         lastMax = ui->dsbxAreaMax->value();
         createTPI(nullptr);

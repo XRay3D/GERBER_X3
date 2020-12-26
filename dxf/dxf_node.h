@@ -35,16 +35,20 @@ public:
     void menu(QMenu* menu, TreeView* tv) const override;
 };
 
-//class NodeLayer : public AbstractNode {
-//    const QString name;
-//    const Layer* const layer;
-//public:
-//    explicit NodeLayer(const QString& name, Layer* layer);
-//    ~NodeLayer() override = default;
-//    // AbstractNode interface
-//    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-//    Qt::ItemFlags flags(const QModelIndex& index) const override;
-//    QVariant data(const QModelIndex& index, int role) const override;
-//    void menu(QMenu* menu, TreeView* tv) const override;
-//};
+class NodeLayer : public AbstractNode {
+    friend class Node;
+    const QString name;
+    Layer* const layer;
+
+public:
+    explicit NodeLayer(const QString& name, Layer* layer);
+    ~NodeLayer() override = default;
+
+    // AbstractNode interface
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    void menu(QMenu* menu, TreeView* tv) const override;
+};
+
 }

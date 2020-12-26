@@ -86,7 +86,7 @@ bool Project::save(QFile& file)
         m_isModified = false;
         return true;
     } catch (...) {
-        qDebug() << file.errorString();
+
     }
     return false;
 }
@@ -98,7 +98,7 @@ bool Project::open(QFile& file)
         t.start();
         QDataStream in(&file);
         in >> m_ver;
-        qDebug() << "Project ver:" << m_ver << file;
+
 
         QPointF tmpPt;
 
@@ -143,11 +143,11 @@ bool Project::open(QFile& file)
         }
 
         m_isModified = false;
-        qDebug() << "Project::open" << t.elapsed();
+
         App::layoutFrames()->updateRect();
         return true;
     } catch (...) {
-        qDebug() << file.errorString();
+
     }
     return false;
 }
@@ -281,36 +281,43 @@ bool Project::reload(int id, AbstractFile* file)
     if (m_files.contains(id)) {
         switch (file->type()) {
         case FileType::Gerber: {
-            Gerber::File* f = static_cast<Gerber::File*>(file);
+            auto gbrFile = static_cast<Gerber::File*>(file);
             file->setColor(m_files[id]->color());
             // Normal
-            f->itemGroup(Gerber::File::Normal)->setBrushColor(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brushColor());
-            f->itemGroup(Gerber::File::Normal)->addToScene();
-            f->itemGroup(Gerber::File::Normal)->setZValue(-id);
+            gbrFile->itemGroup(Gerber::File::Normal)->setBrushColor(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::Normal)->brushColor());
+            gbrFile->itemGroup(Gerber::File::Normal)->addToScene();
+            gbrFile->itemGroup(Gerber::File::Normal)->setZValue(-id);
             // ApPaths
-            f->itemGroup(Gerber::File::ApPaths)->setPen(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::ApPaths)->pen());
-            f->itemGroup(Gerber::File::ApPaths)->addToScene();
-            f->itemGroup(Gerber::File::ApPaths)->setZValue(-id);
+            gbrFile->itemGroup(Gerber::File::ApPaths)->setPen(static_cast<Gerber::File*>(m_files[id].data())->itemGroup(Gerber::File::ApPaths)->pen());
+            gbrFile->itemGroup(Gerber::File::ApPaths)->addToScene();
+            gbrFile->itemGroup(Gerber::File::ApPaths)->setZValue(-id);
             // Components
-            f->itemGroup(Gerber::File::Components)->addToScene();
-            f->itemGroup(Gerber::File::Components)->setZValue(-id);
+            gbrFile->itemGroup(Gerber::File::Components)->addToScene();
+            gbrFile->itemGroup(Gerber::File::Components)->setZValue(-id);
+            m_files[id] = QSharedPointer<AbstractFile>(file);
         } break;
-        case FileType::Excellon:
-            static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
+        case FileType::Excellon: {
+            auto excFile = static_cast<Excellon::File*>(file);
+            excFile->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
-            break;
+            m_files[id] = QSharedPointer<AbstractFile>(file);
+
+        } break;
         case FileType::GCode:
             file->itemGroup()->addToScene();
             file->itemGroup()->setZValue(-id);
+            m_files[id] = QSharedPointer<AbstractFile>(file);
             break;
-        case FileType::Dxf:
-            Dxf::File* f = static_cast<Dxf::File*>(file);
-            for (auto ig : f->itemGroups())
+        case FileType::Dxf: {
+            file->setFileIndex(m_files[id]->fileIndex());
+            auto dxfFile = static_cast<Dxf::File*>(file);
+            for (auto ig : dxfFile->itemGroups())
                 ig->addToScene();
-            break;
+            m_files[id] = QSharedPointer<AbstractFile>(file);
+            App::fileModel()->updateFile(file->fileIndex());
+        } break;
         }
-        m_files[id] = QSharedPointer<AbstractFile>(file);
         return true;
     }
     return false;
@@ -381,7 +388,7 @@ void Project::setName(const QString& name)
 
 bool Project::pinsPlacedMessage()
 {
-    qDebug() << __FUNCTION__ << m_isPinsPlaced;
+
     if (m_isPinsPlaced == false) {
         QMessageBox msgbx(QMessageBox::Information,
             "",

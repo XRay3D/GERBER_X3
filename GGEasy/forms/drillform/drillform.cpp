@@ -608,7 +608,6 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
 
 void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    qDebug(Q_FUNC_INFO);
     deselectAll();
     if (previous.isValid() && previous.row() != current.row()) {
         int apertureId = model->apertureId(previous.row());

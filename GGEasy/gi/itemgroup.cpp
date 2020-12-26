@@ -18,7 +18,7 @@
 
 ItemGroup::~ItemGroup()
 {
-    //qDebug("~ItemGroup()");
+
     if (App::scene()->items().size())
         qDeleteAll(*this);
 }

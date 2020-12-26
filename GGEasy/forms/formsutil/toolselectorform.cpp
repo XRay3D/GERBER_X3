@@ -39,7 +39,7 @@ ToolSelectorForm::ToolSelectorForm(QWidget* parent)
 {
     setupUi(this);
 
-    //qDebug() << m_toolFileName;
+
     readTool();
 }
 

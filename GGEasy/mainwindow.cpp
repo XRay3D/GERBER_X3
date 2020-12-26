@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget* parent)
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/misc01.dxf"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/ELECTROSTATIC_AMP_A.dxf"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
+        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_BOT.dxf"); });
 
         //        for (int j = 0; j < 50; ++j) {
@@ -801,7 +801,7 @@ void MainWindow::addFileToPro(AbstractFile* file)
     m_project->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
     if (file->type() == FileType::Gerber)
-        Gerber::Node::repaintTimer()->start();
+        Gerber::Node::decorationTimer()->start();
     graphicsView->zoomFit();
 }
 
@@ -861,13 +861,15 @@ void MainWindow::translate(const QString& locale)
 {
     static QTranslator qtTranslator;
     static QTranslator appTranslator;
-    qDebug() << "locale;" << locale;
-    const QString trFolder(qApp->applicationDirPath().contains("GERBER_X2/bin")
+
+    const QString trFolder(
+        qApp->applicationDirPath().contains("GERBER_X2/bin")
             ? qApp->applicationDirPath() + "/../GGEasy/translations"
             : qApp->applicationDirPath() + "/translations");
 
-    qDebug() << qtTranslator.load("qtbase_" + locale + ".qm", trFolder);
-    qDebug() << appTranslator.load(qApp->applicationDisplayName().toLower() + "_" + locale + ".qm", trFolder);
+    qtTranslator.load("qtbase_" + locale + ".qm", trFolder);
+    appTranslator.load(qApp->applicationDisplayName().toLower() + "_" + locale + ".qm", trFolder);
+
     qApp->installTranslator(&qtTranslator);
     qApp->installTranslator(&appTranslator);
 }
@@ -921,7 +923,7 @@ void MainWindow::changeEvent(QEvent* event)
 {
     // В случае получения события изменения языка приложения
     if (event->type() == QEvent::LanguageChange) {
-        qDebug() << __FUNCTION__;
+
         retranslateUi(this); // переведём окно заново
     }
 }

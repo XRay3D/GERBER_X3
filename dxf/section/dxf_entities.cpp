@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_entities.h"
 #include "dxf_file.h"
 #include "entities/dxf_entity.h"
@@ -18,9 +33,13 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
     , sp(sp)
     , blocks(blocks)
 {
+    entitiesMap.clear();
     do {
-        entityParse(code);
+        entities.append(entityParse(code));
+        entities.last()->parse(code);
+        entitiesMap[key] << entities.last();
     } while (code != "ENDBLK");
+    qDebug() << entitiesMap.keys();
 }
 
 SectionENTITIES::~SectionENTITIES()
@@ -34,169 +53,89 @@ void SectionENTITIES::parse()
     code = nextCode();
     code = nextCode();
     do {
-        entityParse(code);
+        entities.append(entityParse(code));
+        entities.last()->parse(code);
+        entitiesMap[key] << entities.last();
     } while (hasNext());
-
-    for (auto e : qAsConst(entities)) {
+    for (auto e : qAsConst(entities))
         e->draw();
-    }
     qDebug() << entitiesMap.keys();
 }
 
-void SectionENTITIES::entityParse(CodeData& code)
+Entity* SectionENTITIES::entityParse(CodeData& code)
 {
     key = Entity::TypeVal(code);
     switch (key) {
     case Entity::ACAD_PROXY_ENTITY:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::ARC:
-        //entities.append(new Dummy(sp));
-        entities.append(new Arc(sp));
-        break;
+        return new Arc(sp); //return new Dummy(sp);
     case Entity::ATTDEF:
-        //entities.append(new Dummy(sp));
-        entities.append(new AttDef(sp));
-        break;
+        return new AttDef(sp); //return new Dummy(sp);
     case Entity::ATTRIB:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::BODY:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::CIRCLE:
-        //entities.append(new Dummy(sp));
-        entities.append(new Circle(sp));
-        break;
+        return new Circle(sp); //return new Dummy(sp);
     case Entity::DIMENSION:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::ELLIPSE:
-        //entities.append(new Dummy(sp));
-        entities.append(new Ellipse(sp));
-        break;
+        return new Ellipse(sp); //return new Dummy(sp);
     case Entity::HATCH:
-        //entities.append(new Dummy(sp));
-        entities.append(new Hatch(sp));
-        break;
+        return new Hatch(sp); //return new Dummy(sp);
     case Entity::HELIX:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::IMAGE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::INSERT:
-        //entities.append(new Dummy(sp));
-        entities.append(new InsertEntity(blocks, sp));
-        break;
+        return new InsertEntity(blocks, sp); //return new Dummy(sp);
     case Entity::LEADER:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::LIGHT:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::LINE:
-        //entities.append(new Dummy(sp));
-        entities.append(new Line(sp));
-        break;
+        return new Line(sp); //return new Dummy(sp);
     case Entity::LWPOLYLINE:
-        //entities.append(new Dummy(sp));
-        entities.append(new LwPolyline(sp));
-        break;
+        return new LwPolyline(sp); //return new Dummy(sp);
     case Entity::MESH:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::MLEADER:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::MLEADERSTYLE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::MLINE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::MTEXT:
-        //entities.append(new Dummy(sp));
-        entities.append(new MText(sp));
-        break;
+        return new MText(sp); //return new Dummy(sp);
     case Entity::OLE2FRAME:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::OLEFRAME:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::POINT:
-        //entities.append(new Dummy(sp));
-        entities.append(new Point(sp));
-        break;
+        return new Point(sp); //return new Dummy(sp);
     case Entity::POLYLINE:
-        //entities.append(new Dummy(sp, Entity::POLYLINE));
-        entities.append(new PolyLine(sp));
-        break;
+        return new PolyLine(sp); //entities.append(new Dummy(sp, Entity::POLYLINE));
     case Entity::RAY:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::REGION:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::SECTION:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::SEQEND:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::SHAPE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::SOLID:
-        //entities.append(new Dummy(sp));
-        entities.append(new Solid(sp));
-        break;
+        return new Solid(sp); //return new Dummy(sp);
     case Entity::SPLINE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        //entities.append(new Dummy(sp));
-        entities.append(new Spline(sp));
-        break;
+        return new Spline(sp); //return new Dummy(sp);
     case Entity::SUN:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::SURFACE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::TABLE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     case Entity::TEXT:
-        //entities.append(new Dummy(sp));
-        entities.append(new Text(sp));
-        break;
+        return new Text(sp); //return new Dummy(sp);
     case Entity::TOLERANCE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::TRACE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::UNDERLAY:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::VERTEX:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::VIEWPORT:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::WIPEOUT:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-        break;
     case Entity::XLINE:
-        throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
         break;
     default:
-        throw QString("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
-        break;
+        throw QString("Unknown  Entity: %1, %2").arg(key).arg(code.operator QString());
     }
-
-    entities.last()->parse(code);
-    entitiesMap[key] << entities.last();
+    throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }
 }

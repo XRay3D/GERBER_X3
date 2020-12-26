@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_file.h"
 
 #include "section/dxf_blocks.h"
@@ -221,6 +236,8 @@ void File::createGi()
             if (layer->m_groupedPaths.isEmpty()) {
                 clipper.Execute(ctUnion, m_mergedPaths, pftPositive); // Clipper
                 layer->m_groupedPaths = std::move(groupedPaths());
+                for (auto& paths : layer->m_groupedPaths)
+                    CleanPolygons(paths, uScale * 0.0005);
                 m_mergedPaths.clear();
             }
 

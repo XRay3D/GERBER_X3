@@ -13,9 +13,9 @@
 *******************************************************************************/
 #pragma once
 #include "gctypes.h"
+#include "myclipper.h"
 #include <QList>
 #include <QString>
-#include "myclipper.h"
 
 class Project;
 
@@ -114,8 +114,6 @@ protected:
                 }
             }
         }
-        if constexpr (0 && ret.trimmed().isEmpty())
-            qDebug(" ");
         return ret.trimmed();
     }
 

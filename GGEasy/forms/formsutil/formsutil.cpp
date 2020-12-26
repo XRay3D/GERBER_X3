@@ -133,7 +133,7 @@ void FormsUtil::timerEvent(QTimerEvent* event)
         const auto [max, val] = m_tpc->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-        //qDebug() << "timerEvent" << max << val;
+
         progressDialog->setLabelText(m_tpc->msg);
     }
     if (event->timerId() == flikerTimerId) {

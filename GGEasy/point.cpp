@@ -385,7 +385,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                 dst.append(point);
             }
 
-            qDebug() << dst.size();
+
 
             QSettings settings;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)

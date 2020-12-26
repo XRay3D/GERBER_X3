@@ -31,10 +31,10 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu* menu, TreeView* tv) const override;
 
-    static QTimer* repaintTimer();
+    static QTimer* decorationTimer();
 
 private:
-    static QTimer m_repaintTimer;
+    static QTimer m_decorationTimer;
     void repaint();
     Qt::CheckState m_current = Qt::Unchecked;
 };

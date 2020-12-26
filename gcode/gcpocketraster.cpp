@@ -250,7 +250,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     default:
         break;
     }
-    qDebug() << "createRaster" << (t.elapsed() / 1000);
+
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {

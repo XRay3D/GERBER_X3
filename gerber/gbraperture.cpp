@@ -376,7 +376,7 @@ void ApMacro::draw()
         for (int i = 0; i < m_modifiers.size(); ++i) {
             QString var(m_modifiers[i]);
             if (var.at(0) == '0') { // Skip Comment
-                qDebug() << "Macro comment:" << var;
+
                 continue;
             }
 
@@ -755,7 +755,7 @@ void ApBlock::draw()
             clipper.Execute(ctDifference, m_paths, pftNonZero);
     }
     m_size = 1;
-    qDebug() << m_paths.size();
+
     //CleanPolygons(m_paths, 0.0009 * uScale);
 }
 

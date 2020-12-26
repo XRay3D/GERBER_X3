@@ -78,7 +78,7 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 ProfileForm::~ProfileForm()
 {
-    qDebug(Q_FUNC_INFO);
+
 
     MySettings settings;
     settings.beginGroup("ProfileForm");
@@ -250,7 +250,7 @@ void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1
 
 void ProfileForm::editFile(GCode::File* file)
 {
-    qDebug(Q_FUNC_INFO);
+
     GCode::GCodeParams gcp { file->gcp() };
 
     fileId = gcp.fileId;
@@ -287,10 +287,10 @@ void ProfileForm::editFile(GCode::File* file)
     { // GrItems
         m_usedItems.clear();
         auto items { gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
-        qDebug() << items;
+
         auto i = items.constBegin();
         while (i != items.constEnd()) {
-            qDebug() << i.key() << i.value();
+
             auto [_fileId, _] = i.key();
             Q_UNUSED(_)
             App::project()->aFile(_fileId)->itemGroup()->setSelected(i.value());

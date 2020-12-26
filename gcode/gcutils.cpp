@@ -38,7 +38,7 @@ QString GCUtils::getLastDir()
             lastDir = QFileInfo(App::project()->name()).absolutePath();
         settings.setValue("LastGCodeDir", lastDir);
     }
-    qDebug() << QFileInfo(lastDir).absolutePath() << lastDir;
+
     return lastDir += '/';
 }
 

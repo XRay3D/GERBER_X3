@@ -73,7 +73,7 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
 
 ExcellonDialog::~ExcellonDialog()
 {
-    qDebug("~ExcellonDialog()");
+
     delete ui;
 }
 
@@ -89,7 +89,7 @@ void ExcellonDialog::on_pbStep_clicked()
 
 void ExcellonDialog::updateFormat()
 {
-    qDebug("updateFormat");
+
     m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
     m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
 

@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_lwpolyline.h"
 
 #include <QPainterPath>
@@ -158,8 +173,6 @@ GraphicObject LwPolyline::toGo() const
 {
     QPainterPath path;
     const bool dbg = false; //data.first().line() == 17844; /*|| data.first().line() == 18422;*/
-    if (dbg)
-        qDebug() << "Stop" << data.begin()->line();
 
     auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
         if (path.isEmpty())
@@ -199,22 +212,6 @@ GraphicObject LwPolyline::toGo() const
                     source.x() * cx2 + source.x() * cy2 + target.x() * ax2 + target.x() * ay2 + c.x() * bx2 + c.x() * by2 - //
                     source.x() * bx2 - source.x() * by2 - target.x() * cx2 - target.x() * cy2 - c.x() * ax2 - c.x() * ay2));
         }
-        if (dbg) {
-            qDebug() << "center" << center;
-            qDebug() << "center_" << center;
-            qDebug() << "center" << (center == center);
-            qDebug() << QString("\n"
-                                "center x %1\n"
-                                "center_x %2\n"
-                                "center y %3\n"
-                                "center_y %4")
-                            .arg(center.x(), 0, 'f', 10)
-                            .arg(center.x(), 0, 'f', 10)
-                            .arg(center.y(), 0, 'f', 10)
-                            .arg(center.y(), 0, 'f', 10)
-                            .toStdString()
-                            .data();
-        }
 
         //        const double start_angle = qRadiansToDegrees(start_angle_);
         //        const double end_angle = qRadiansToDegrees(end_angle_);
@@ -225,35 +222,6 @@ GraphicObject LwPolyline::toGo() const
             end_angle += 360;
 
         double span = end_angle - start_angle;
-
-        if (dbg)
-            qDebug() << QString("span %1").arg(span, 0, 'f', 10).toStdString().data();
-
-        if (0) {
-            //            if /**/ (span < -180.0 || (compare(span, -180.0) && !(end_angle > start_angle)))
-            //                span += 360.0;
-            //            else if (span > +180.0 || (compare(span, +180.0) && (end_angle > start_angle)))
-            //                span -= 360.0;
-        } else {
-            //            if /**/ (span < -180.0 || (compare(span, -180.0) && !(end_angle > start_angle)))
-            //                span += 360.0;
-            //            else if (span > +180.0 || (compare(span, +180.0) && (end_angle > start_angle)))
-            //                span -= 360.0;
-        }
-
-        if (dbg)
-            qDebug() << QString("span %1\n"
-                                "from %2\n"
-                                "to   %3\n"
-                                "from %4\n"
-                                "to   %5")
-                            .arg(span, 0, 'f', 10)
-                            .arg(start_angle, 0, 'f', 10)
-                            .arg(end_angle, 0, 'f', 10)
-                            .arg(qRadiansToDegrees(start_angle), 0, 'f', 10)
-                            .arg(qRadiansToDegrees(end_angle), 0, 'f', 10)
-                            .toStdString()
-                            .data();
 
         const QPointF rad(radius, radius);
         const QRectF br(center + rad, center - rad);
@@ -266,12 +234,12 @@ GraphicObject LwPolyline::toGo() const
         addSeg(poly.last(), poly.first());
 
     QMatrix m;
-    m.scale(100, 100);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QMatrix m2;
-    m2.scale(0.01, 0.01);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
     Paths paths;

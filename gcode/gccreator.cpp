@@ -44,7 +44,7 @@
 void dbgPaths(Paths ps, const QString& fileName, bool closed, const Tool& tool)
 {
     if (ps.isEmpty()) {
-        qDebug("dbgPaths - ps.isEmpty()");
+
         return;
     }
     for (int i = 0; i < ps.size(); ++i)
@@ -66,7 +66,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool closed, const Tool& tool)
     //    m.lock();
 
     //    if (ps.isEmpty()) {
-    //        qDebug("dbgPaths - ps.isEmpty()");
+
     //        return;
     //    }
     //    const auto polygons = toQPolygons(ps);
@@ -220,8 +220,8 @@ void Creator::addRawPaths(Paths rawPaths)
         ptClip, true);
     clipper.Execute(ctXor, paths, pftEvenOdd);
     m_workingPs.append(paths.mid(1)); // paths.takeFirst();
-    qDebug() << "m_workingPs" << m_workingPs.size();
-    qDebug() << "m_workingRawPs" << m_workingRawPs.size();
+
+
 }
 
 void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(supportPaths); }
@@ -250,9 +250,9 @@ void Creator::createGc()
             }
         }
 
-        //qDebug() << "Creator::createGc() started" << t.elapsed();
+
         create();
-        qDebug() << "Creator::createGc() ended" << t.elapsed();
+
     } catch (Cancel&) {
         //m_cancel = false;
         qWarning() << "Creator::createGc() canceled" << t.elapsed();
@@ -308,7 +308,7 @@ void Creator::stacking(Paths& paths)
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         paths.clear();
     }
-    qDebug() << "polyTree elapsed" << t.elapsed();
+
     m_returnPss.clear();
     /***********************************************************************************************/
     t.start();
@@ -379,7 +379,7 @@ void Creator::stacking(Paths& paths)
     /***********************************************************************************************/
     progress(polyTree.Total());
     stacker({ polyTree.GetFirst(), false });
-    qDebug() << "stacker elapsed" << t.elapsed();
+
     for (Paths& retPaths : m_returnPss) {
         std::reverse(retPaths.begin(), retPaths.end());
         for (int i = 0; i < retPaths.size(); ++i) {

@@ -17,7 +17,7 @@ HEADERS += \
     $$PWD/dxf_file.h \
     $$PWD/dxf_node.h \
     $$PWD/dxf_parser.h \
-    $$PWD/dxf_values.h \
+    $$PWD/dxf_types.h \
     $$PWD/entities/dxf_arc.h \
     $$PWD/entities/dxf_attdef.h \
     $$PWD/entities/dxf_circle.h \
@@ -89,7 +89,7 @@ SOURCES += \
     $$PWD/dxf_file.cpp \
     $$PWD/dxf_node.cpp \
     $$PWD/dxf_parser.cpp \
-    $$PWD/dxf_values.cpp \
+    $$PWD/dxf_types.cpp \
     $$PWD/entities/dxf_arc.cpp \
     $$PWD/entities/dxf_attdef.cpp \
     $$PWD/entities/dxf_circle.cpp \

@@ -81,7 +81,7 @@ QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
         fl ? colorState |= Selected : colorState &= ~Selected;
         changeColor();
     } else if (change == ItemSceneChange) {
-        //qDebug() << value;
+
     }
     return QGraphicsItem::itemChange(change, value);
 }

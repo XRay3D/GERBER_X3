@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -37,9 +39,6 @@ AbstractFile* Parser::parseFile(const QString& fileName)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return nullptr;
 
-    qDebug() << "\n"
-             << fileName;
-
     m_file = new File;
     m_file->setFileName(fileName);
 
@@ -74,7 +73,6 @@ AbstractFile* Parser::parseFile(const QString& fileName)
             getCode();
         } while (!in.atEnd() || *(codes.end() - 1) != "EOF");
         codes.shrink_to_fit();
-        qDebug() << "codes count" << codes.size();
 
         for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
             if (*it == "SECTION")

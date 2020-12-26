@@ -47,7 +47,7 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , m_gcp(gcp)
 {
     if (gcp.tools.first().diameter()) {
-        qDebug(Q_FUNC_INFO);
+
         initSave();
         addInfo();
         statFile();

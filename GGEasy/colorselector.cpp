@@ -51,7 +51,6 @@ bool ColorSelector::eventFilter(QObject* watched, QEvent* event)
             QColor color(m_color);
             connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
             if (dialog.exec() && m_color != color) {
-                //qDebug() << m_color << dialog.currentColor();
                 m_color = color; //dialog.currentColor();
                 ui->frSelectColor->setStyleSheet("QFrame { background: " + m_color.name(QColor::HexArgb) + " }");
             }

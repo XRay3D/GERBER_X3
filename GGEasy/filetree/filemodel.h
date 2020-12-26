@@ -70,6 +70,7 @@ private:
     const QString mimeType;
 
     void addFile(AbstractFile* file);
+    void updateFile(const QModelIndex& fileIndex);
     void addShape(Shapes::Shape* sh);
     AbstractNode* getItem(const QModelIndex& index) const;
 };

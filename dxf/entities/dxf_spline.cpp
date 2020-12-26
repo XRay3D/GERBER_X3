@@ -1,3 +1,18 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #include "dxf_spline.h"
 
 #include <QMetaEnum>
@@ -87,7 +102,7 @@ double blend(QVector<double>& uVec, double u, int k, int d)
 
 void drawBSplineCurve(const Spline& poly, QPainterPath& path)
 {
-    qDebug("drawBSplineCurve");
+
     int n, d;
     d = poly.degreeOfTheSplineCurve; // Enter degree of curve:
     n = poly.ControlPoints.size();
@@ -105,7 +120,7 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path)
             x += basis * poly.ControlPoints[i].x();
             y += basis * poly.ControlPoints[i].y();
         }
-        qDebug() << x << y;
+
         if (u == 0.0 && x != 0.0 && x != 0.0)
             path.moveTo(x, y);
         else if (x != 0.0 && x != 0.0)
@@ -143,7 +158,7 @@ void Spline::draw(const InsertEntity* const /*i*/) const
 
 void Spline::parse(CodeData& code)
 {
-    qDebug("SPLINE::parse");
+
 
     auto TypeName = [](int key) -> QString {
         return staticMetaObject.enumerator(1).valueToKey(key);
@@ -151,7 +166,7 @@ void Spline::parse(CodeData& code)
 
     do {
         data.push_back(code);
-        //        qDebug() << '\t' << TypeName(code.code()) << code;
+
         switch (static_cast<VarType>(code.code())) {
         case SubclassMarker: //100
             break;

@@ -1,5 +1,18 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -67,11 +80,11 @@ int main(int argc, char* argv[])
     //    QCommandLineParser parser;
     //    parser.addPositionalArgument("url", "Url of file to open");
     //    parser.process(app);
-    //    qDebug() << parser.positionalArguments().length() << parser.positionalArguments();
+
     //    if (is_running) {
-    //        qDebug() << "instance()" << sharedMemory.data();
+
     //        system("pause");
-    //        //        qDebug() << instance();
+
     //        //        if (parser.positionalArguments().length()) {
     //        //            for (const QString& fileName : parser.positionalArguments()) {
     //        //                instance()->loadFile(fileName);
@@ -86,7 +99,7 @@ int main(int argc, char* argv[])
     //        splash->setAttribute(Qt::WA_DeleteOnClose);
     //        splash->show();
     //        mainWin = new MainWindow();
-    //        qDebug() << mainWin << sharedMemory.data();
+
     //        instance() = mainWin;
     //        mainWin->setIconSize({ 24, 24 });
     //        mainWin->show();
@@ -106,7 +119,7 @@ int main(int argc, char* argv[])
     //        splash->setAttribute(Qt::WA_DeleteOnClose);
     //        splash->show();
     //        mainWin = new MainWindow();
-    //        qDebug() << mainWin << sharedMemory.data();
+
     //        instance() = mainWin;
     //        mainWin->setIconSize({ 24, 24 });
     //        mainWin->show();

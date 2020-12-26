@@ -1,10 +1,23 @@
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
 #include "abstractfile.h"
 #include "dxf_block.h"
 #include "dxf_codedata.h"
-#include "dxf_values.h"
+#include "dxf_types.h"
 #include <QDebug>
 #include <QFile>
 #include <QObject>
