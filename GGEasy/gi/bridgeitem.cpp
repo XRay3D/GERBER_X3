@@ -98,7 +98,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
 
     QPointF pt;
     double l = std::numeric_limits<double>::max();
-    double lastAngle = 0.0;
+    //    double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && gi->isSelected()) {
@@ -130,7 +130,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                                 m_angle = line.normalVector().angle();
                             }
                         }
-                        lastAngle = l3.normalVector().angle();
+                        //                        lastAngle = l3.normalVector().angle();
                     }
                 }
             }

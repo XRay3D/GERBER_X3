@@ -819,7 +819,7 @@ void MainWindow::createDockWidget(int type)
     auto dwContent = new T(m_dockWidget);
     dwContent->setObjectName(typeid(T).name());
 
-    for (QAction* action : toolpathActions)
+    for (QAction* action : qAsConst(toolpathActions))
         action->setChecked(false);
 
     toolpathActions[type]->setChecked(true);
@@ -867,8 +867,11 @@ void MainWindow::translate(const QString& locale)
             ? qApp->applicationDirPath() + "/../GGEasy/translations"
             : qApp->applicationDirPath() + "/translations");
 
-    qtTranslator.load("qtbase_" + locale + ".qm", trFolder);
-    appTranslator.load(qApp->applicationDisplayName().toLower() + "_" + locale + ".qm", trFolder);
+    const QString qtTr("qtbase_" + locale + ".qm");
+    const QString appTr(qApp->applicationDisplayName() + "_" + locale + ".qm");
+
+    qDebug() << __FUNCTION__ << qtTranslator.load(qtTr, trFolder);
+    qDebug() << __FUNCTION__ << appTranslator.load(appTr, trFolder);
 
     qApp->installTranslator(&qtTranslator);
     qApp->installTranslator(&appTranslator);

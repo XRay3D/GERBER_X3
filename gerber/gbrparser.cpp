@@ -1182,7 +1182,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
 
         Operation dcode = m_state.dCode();
         if (!match.cap(2).isEmpty())
-            dcode = static_cast<const Operation>(match.cap(2).toInt());
+            dcode = static_cast<Operation>(match.cap(2).toInt());
 
         switch (dcode) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки

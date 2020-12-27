@@ -89,14 +89,15 @@ DrillPrGI::DrillPrGI(const Excellon::Hole* hole, Row& row)
 
 void DrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
+
+    painter->setPen({ m_bodyColor, 0.0 });
+    painter->setBrush(m_bodyColor);
+    painter->drawPath(m_sourcePath);
     if (row.toolId > -1) {
         painter->setPen(QPen(m_pathColor, 2 * App::graphicsView()->scaleFactor()));
         painter->setBrush(Qt::NoBrush);
         painter->drawPath(m_toolPath);
     }
-    painter->setPen({ m_bodyColor, 0.0 });
-    painter->setBrush(m_bodyColor);
-    painter->drawPath(m_sourcePath);
     // draw tool
 }
 

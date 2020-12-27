@@ -28,8 +28,8 @@ Node::Node(int id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (index.column()) {
-    case 0:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             shape()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -38,27 +38,22 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
             if (auto text = dynamic_cast<Text*>(shape()); text)
                 text->setText(value.toString());
             return true;
-        default:
-            return false;
         }
-    case 1:
-        if (auto text = dynamic_cast<Text*>(shape()); text) {
-            switch (role) {
-            case Qt::EditRole:
-                text->setSide(static_cast<Side>(value.toBool()));
-                return true;
-            default:
-                return false;
-            }
+        return false;
+    case Column::SideType:
+        if (auto text = dynamic_cast<Text*>(shape()); text && role == Qt::EditRole) {
+            text->setSide(static_cast<Side>(value.toBool()));
+            return true;
         }
+        return false;
     default:
         return false;
     }
 }
 QVariant Node::data(const QModelIndex& index, int role) const
 {
-    switch (index.column()) {
-    case 0:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             if (static_cast<GiType>(shape()->type()) == GiType::ShapeT)
@@ -85,7 +80,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case 1:
+    case Column::SideType:
         if (auto text = dynamic_cast<Text*>(shape()); text) {
             switch (role) {
             case Qt::DisplayRole:
@@ -105,13 +100,13 @@ QVariant Node::data(const QModelIndex& index, int role) const
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
-    switch (index.column()) {
-    case 0:
+    switch (static_cast<Column>(index.column())) {
+    case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable
             | (static_cast<GiType>(shape()->type()) == GiType::ShapeT
                     ? Qt::ItemIsEditable
                     : Qt::NoItemFlags);
-    case 1:
+    case Column::SideType:
         return itemFlag
             | (static_cast<GiType>(shape()->type()) == GiType::ShapeT
                     ? Qt::ItemIsEditable

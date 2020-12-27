@@ -122,13 +122,13 @@ void Text::parse(CodeData& code)
         case TextStyleName:
             break;
         case TextGenerationFlags:
-            textGenerationFlags = static_cast<TextGenerationFlagsE>(code.operator long long());
+            textGenerationFlags = static_cast<TextGenerationFlagsE>(code.operator int64_t());
             break;
         case HorizontalJustType:
-            horizontalJustType = static_cast<HorizontalJustTypeE>(code.operator long long());
+            horizontalJustType = static_cast<HorizontalJustTypeE>(code.operator int64_t());
             break;
         case VerticalJustType:
-            verticalJustType = static_cast<VerticalJustTypeE>(code.operator long long());
+            verticalJustType = static_cast<VerticalJustTypeE>(code.operator int64_t());
             break;
         case SecondAlignmentPointX:
             pt2.rx() = code;
