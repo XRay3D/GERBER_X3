@@ -67,10 +67,11 @@ void Hatch::parse(CodeData& code)
         code = sp->nextCode();
         //parseEntity(code);
     } while (code.code() != 0);
-    qDebug(__FUNCTION__);
-    for (auto& code : data) {
-        qDebug() << code;
-    }
+    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug(__FUNCTION__);
+    //    for (auto& code : data) {
+    //        qDebug() << code;
+    //    }
 }
 
 GraphicObject Hatch::toGo() const
