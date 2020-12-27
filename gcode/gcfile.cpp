@@ -511,7 +511,7 @@ void File::endFile()
     }
 }
 
-QList<QString> File::gCodeText() const { return m_lines; }
+QVector<QString> File::gCodeText() const { return m_lines; }
 
 void File::createGiDrill()
 {

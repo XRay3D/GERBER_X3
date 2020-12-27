@@ -29,7 +29,7 @@ public:
     void parseLines(const QString& gerberLines, const QString& fileName);
 
 private:
-    QList<QString> cleanAndFormatFile(QString data);
+    QVector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
     bool parseNumber(QString Str, cInt& val, int integer, int decimal);

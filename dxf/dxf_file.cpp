@@ -41,9 +41,8 @@ namespace Dxf {
 File::File()
 {
     m_layerTypes = {
-        { int(ItemsType::Normal), QObject::tr("Normal"), "" },
-        { int(ItemsType::Paths), QObject::tr("Paths"), QObject::tr("Displays only aperture paths of copper\n"
-                                                                   "without width and without contacts.") },
+        { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
+        { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
     };
 }
 
@@ -57,8 +56,6 @@ File::~File()
 
 void File::setItemType(ItemsType type)
 {
-    if (m_itemsType == type)
-        return;
     m_itemsType = type;
     for (auto [name, layer] : m_layers) {
         if (layer->itemGroupNorm && layer->itemGroupPath) {
@@ -152,24 +149,6 @@ ItemGroup* File::itemGroup() const
 
 FileType File::type() const { return FileType::Dxf; }
 
-//struct Check {
-//    double area = 0.0;
-//    double len = 0.0;
-//    int size = 0;
-//    bool operator==(Check ch)
-//    {
-//        return qFuzzyCompare(area, ch.area)
-//            && qFuzzyCompare(len, ch.len)
-//            && size == ch.size;
-//    }
-//};
-//bool operator==(Check l, Check r)
-//{
-//    return qFuzzyCompare(l.area, r.area)
-//        && qFuzzyCompare(l.len, r.len)
-//        && l.size == r.size;
-//}
-
 void File::createGi()
 {
     ItemGroup* igNorm = m_itemGroups.last();
@@ -177,37 +156,6 @@ void File::createGi()
     m_itemGroups.append(igPath);
 
     int i = 0;
-
-    //    QVector<Check> checkList;
-    auto contains = [&](const Path& path) -> bool {
-        return false;
-        //        constexpr double k = 0.001 * uScale;
-        //        for (const Path& chPath : checkList) { // find copy
-        //            int counter = 0;
-        //            if (chPath.size() == path.size()) {
-        //                for (const Point64& p1 : chPath) {
-        //                    for (const Point64& p2 : path) {
-        //                        if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-        //                            ++counter;
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            if (counter == path.size())
-        //                return true;
-        //        }
-        //        return false;
-        //        Check ch;
-        //        ch.area = abs(Area(path));
-        //        ch.len = Perimeter(path);
-        //        ch.size = path.size();
-        //        if (checkList.contains(ch))
-        //            return true;
-        //        else
-        //            checkList.append(ch);
-        //        return false;
-    };
 
     for (auto& [name, layer] : m_layers) {
         if (layer->m_graphicObjects.size()) {
@@ -223,7 +171,7 @@ void File::createGi()
                     clipper.AddPath(go.path(), ptClip, true); // Clipper
                     clipper.AddPaths(go.paths(), ptClip, true); // Clipper
                 }
-                if (!contains(go.path()) && go.path().size()) {
+                if (go.path().size()) {
                     auto gItem = new AperturePathItem(go.path(), this);
                     if (go.entity())
                         gItem->setToolTip(QString("Line %1\n%2")
@@ -250,16 +198,11 @@ void File::createGi()
             layer->itemGroupNorm = igNorm;
             layer->itemGroupPath = igPath;
 
-            if (layer->m_itemsType == ItemsType::Null)
+            if (layer->m_itemsType == ItemsType::Null) {
                 layer->m_itemsType = ItemsType::Normal;
-
-            if (layer->m_itemsType == ItemsType::Normal) {
-                layer->itemGroupNorm->setVisible(true);
-                layer->itemGroupPath->setVisible(false);
-            } else {
-                layer->itemGroupNorm->setVisible(false);
-                layer->itemGroupPath->setVisible(true);
-            }
+                layer->setVisible(true);
+            } else
+                layer->setVisible(m_visible);
         }
     }
 }
@@ -268,38 +211,22 @@ bool File::isVisible() const { return m_visible; }
 
 void File::setVisible(bool visible)
 {
-    //    if (m_visible == visible)
-    //        return;
+    if (visible == m_visible)
+        return;
     m_visible = visible;
     if (m_visible) {
-        for (auto [name, visible] : m_layersVisible) {
-            setVisibleLayer(name, visible);
+        for (auto [name, vis] : m_layersVisible) {
+            m_layers[name]->setVisible(vis);
         }
     } else {
         m_layersVisible.clear();
         for (auto [name, layer] : m_layers) {
-            if (layer->itemGroupNorm && layer->itemGroupPath) {
-                m_layersVisible[name] = visibleLayer(name);
-                setVisibleLayer(name, false);
+            if (!layer->isEmpty()) {
+                m_layersVisible[name] = layer->isVisible();
+                m_layers[name]->setVisible(false);
             }
         }
     }
-}
-
-void File::setVisibleLayer(const QString& name, bool visible)
-{
-    if (m_itemsType == ItemsType::Normal)
-        m_layers[name]->itemGroupNorm->setVisible(visible);
-    else
-        m_layers[name]->itemGroupPath->setVisible(visible);
-}
-
-bool File::visibleLayer(const QString& name) const
-{
-    if (m_itemsType == ItemsType::Normal)
-        return m_layers.at(name)->itemGroupNorm->isVisible();
-    else
-        return m_layers.at(name)->itemGroupPath->isVisible();
 }
 
 void File::write(QDataStream& stream) const

@@ -71,7 +71,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             if (layers.at(names[index.row()])->itemGroup())
                 return layers.at(names[index.row()])->itemGroup()->size();
-            return tr("Empty layer");
+            return DxfObj::tr("Empty layer");
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
         }
@@ -80,10 +80,10 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
             if (layers.at(names[index.row()])->itemGroup()) {
-                static const QString ar[] { tr("Solid"), tr("Paths") };
+                static const QString ar[] {DxfObj::tr("Solid"),DxfObj::tr("Paths") };
                 return ar[static_cast<int>(layers.at(names[index.row()])->itemsType())];
             }
-            return tr("Empty layer");
+            return DxfObj::tr("Empty layer");
         case Qt::EditRole:
             return static_cast<int>(layers.at(names[index.row()])->itemsType());
         case Qt::TextAlignmentRole:
@@ -135,11 +135,11 @@ QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int ro
         if (orientation == Qt::Horizontal) {
             switch (section) {
             case Visible:
-                return tr("Visible\n& color");
+                return DxfObj::tr("Visible\n& color");
             case EntityCount:
-                return tr("Entity\ncount");
+                return DxfObj::tr("Entity\ncount");
             case Type:
-                return tr("Visible\ntype");
+                return DxfObj::tr("Visible\ntype");
             }
         } else {
             return names[section];
@@ -175,7 +175,7 @@ ItemsTypeDelegate::ItemsTypeDelegate(QObject* parent)
 QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
 {
     auto* comboBox = new QComboBox(parent);
-    comboBox->addItems({ tr("Solid"), tr("Paths") });
+    comboBox->addItems({DxfObj::tr("Solid"),DxfObj::tr("Paths") });
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
     connect(comboBox, qOverload<int>(&QComboBox::activated), this, &ItemsTypeDelegate::emitCommitData);

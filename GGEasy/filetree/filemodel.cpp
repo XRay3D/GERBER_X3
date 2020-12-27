@@ -190,7 +190,10 @@ QVariant FileModel::data(const QModelIndex& index, int role) const
 
 bool FileModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    return getItem(index)->setData(index, value, role);
+    bool ok = getItem(index)->setData(index, value, role);
+    if (ok)
+        App::project()->setChanged();
+    return ok;
 }
 
 QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const

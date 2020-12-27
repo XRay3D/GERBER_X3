@@ -45,7 +45,7 @@ class Dialog : public QDialog {
 
         pushButtonColorize = new QPushButton(dialog);
         pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
-        pushButtonColorize->setText(tr("Colorize"));
+        pushButtonColorize->setText(DxfObj::tr("Colorize"));
         pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
         verticalLayout->addWidget(pushButtonColorize);
 
@@ -130,7 +130,7 @@ public:
         setAnimated(true);
         setUniformRowHeights(true);
 
-        setWindowTitle("Section HEADER");
+        setWindowTitle(DxfObj::tr("Section HEADER"));
         setColumnCount(2);
         auto iPar = file->header().cbegin();
         QList<QTreeWidgetItem*> items;
@@ -185,25 +185,23 @@ protected:
     }
 };
 
+File* Node::dxfFile() const { return static_cast<File*>(file()); }
+
 Node::Node(int id)
     : AbstractNode(id)
 {
-    File* f = static_cast<File*>(file());
-    for (auto ig : f->itemGroups())
+    for (auto ig : dxfFile()->itemGroups())
         ig->addToScene();
-    //    for (auto& [name, layer] : f->layers()) {
-    //        if (layer->itemGroup())
-    //            append(new Dxf::NodeLayer(name, layer));
-    //    }
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             file()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            emit App::fileModel()->dataChanged(childItems.first()->index(index.column()), childItems.last()->index(index.column()), { role });
             return true;
         default:
             return false;
@@ -220,7 +218,8 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         switch (role) {
         case Qt::EditRole:
             qDebug() << __FUNCTION__ << role << value;
-            App::project()->file<File>(m_id)->setItemType(static_cast<ItemsType>(value.toInt()));
+            dxfFile()->setItemType(static_cast<ItemsType>(value.toInt()));
+            emit App::fileModel()->dataChanged(childItems.first()->index(index.column()), childItems.last()->index(index.column()), { role });
             return true;
         default:
             return false;
@@ -233,7 +232,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case Column::SideType:
@@ -247,7 +246,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 QVariant Node::data(const QModelIndex& index, int role) const
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
@@ -278,11 +277,11 @@ QVariant Node::data(const QModelIndex& index, int role) const
     case Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return file()->displayedTypes().at(int(App::project()->file<File>(m_id)->itemsType())).actName;
+            return file()->displayedTypes().at(int(dxfFile()->itemsType())).actName.left(5).append("...");
         case Qt::ToolTipRole:
-            return file()->displayedTypes().at(int(App::project()->file<File>(m_id)->itemsType())).actName;
+            return file()->displayedTypes().at(int(dxfFile()->itemsType())).actToolTip;
         case Qt::EditRole:
-            return file()->displayedTypes().at(int(App::project()->file<File>(m_id)->itemsType())).id;
+            return file()->displayedTypes().at(int(dxfFile()->itemsType())).id;
         case Qt::UserRole:
             return m_id;
         default:
@@ -296,11 +295,130 @@ QVariant Node::data(const QModelIndex& index, int role) const
 
 void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
-    menu->addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTreeView::closeFile);
+    menu->addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTreeView::hideOther);
+    menu->addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
+        QDialog* dialog = new QDialog(tv);
+        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->resize(600, 600);
+        //Dialog->resize(400, 300);
+        auto verticalLayout = new QVBoxLayout(dialog);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        //tableView
+        auto tableView = new QTableView(dialog);
+        QFont font(tv->font());
+        font.setFamily("Consolas");
+        tableView->setFont(font);
+        tableView->setObjectName(QString::fromUtf8("tableView"));
+        enum {
+            LineNum,
+            LineType,
+            LineData,
+            ColumnCount
+        };
 
+        class Model : public QAbstractTableModel {
+            const QVector<QString>& lines;
+
+        public:
+            Model(const QVector<QString>& lines, QObject* parent = nullptr)
+                : QAbstractTableModel(parent)
+                , lines(lines)
+            {
+            }
+            ~Model() { }
+
+            int rowCount(const QModelIndex& = {}) const override { return lines.size(); }
+            int columnCount(const QModelIndex& = {}) const override { return 3; }
+            Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEnabled | Qt::ItemIsSelectable; }
+
+            QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+            {
+                if (role == Qt::DisplayRole)
+                    switch (index.column()) {
+                    case LineNum:
+                        return index.row() + 1;
+                    case LineType:
+                        return index.row() % 2 ? DxfObj::tr("Data") : DxfObj::tr("Code");
+                    case LineData:
+                        return lines.at(index.row());
+                    }
+                else if (role == Qt::TextAlignmentRole)
+                    switch (index.column()) {
+                    case LineNum:
+                        return Qt::AlignCenter;
+                    case LineType:
+                        return Qt::AlignCenter;
+                    case LineData:
+                        return Qt::AlignVCenter;
+                    }
+                return {};
+            }
+
+            QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+            {
+                if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+                    switch (section) {
+                    case LineNum:
+                        return DxfObj::tr("Line");
+                    case LineType:
+                        return DxfObj::tr("Type");
+                    case LineData:
+                        return DxfObj::tr("Data");
+                    }
+                return {};
+            }
+        };
+        tableView->setModel(new Model(App::project()->file(m_id)->lines()));
+        // horizontal Header
+        tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
+        tableView->horizontalHeader()->setSectionResizeMode(LineData, QHeaderView::Stretch);
+        // vertical Header
+        tableView->verticalHeader()->setVisible(false);
+        tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        tableView->verticalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).height());
+
+        tableView->setAlternatingRowColors(true);
+
+        class ItemDelegate : public QItemDelegate {
+        public:
+            ItemDelegate(QObject* parent = nullptr)
+                : QItemDelegate(parent) {};
+
+            void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+            {
+                if (option.state & QStyle::State_Selected)
+                    painter->fillRect(option.rect, QColor(255, 200, 200));
+                auto option2(option);
+                option2.state &= ~QStyle::State_Selected;
+                QItemDelegate::paint(painter, option2, index);
+            }
+            // QItemDelegate interface
+        protected:
+            void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
+            {
+                if (option.state & QStyle::State_HasFocus) {
+                    painter->setBrush(Qt::NoBrush);
+                    painter->setPen(Qt::red);
+                    painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
+                }
+            };
+        };
+        tableView->setItemDelegate(new ItemDelegate(tableView));
+        verticalLayout->addWidget(tableView);
+
+        auto spinBox = new QSpinBox(dialog);
+        spinBox->setObjectName(QString::fromUtf8("spinBox"));
+        spinBox->setRange(0, tableView->model()->rowCount());
+        dialog->connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), tableView, &QTableView::selectRow);
+        verticalLayout->addWidget(spinBox);
+        verticalLayout->setMargin(6);
+        verticalLayout->setSpacing(6);
+        dialog->exec();
+        delete dialog;
+    });
     menu->addSeparator();
-    menu->addAction(QIcon::fromTheme("color-management"), QObject::tr("Colorize"), [this] {
+    menu->addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Colorize"), [this] {
         const int count = childCount();
         for (int row = 0; row < count; ++row) {
             const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
@@ -313,39 +431,18 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
 
     menu->addSeparator();
     if (layer)
-        menu->addAction(QIcon::fromTheme("layer-visible-on"), QObject::tr("&Layers"), [tv, this] {
+        menu->addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
             auto dialog = new Dialog(static_cast<File*>(file()), layer, tv);
             dialog->show();
         });
     if (header)
-        menu->addAction(QIcon::fromTheme("/*document-close*/"), QObject::tr("Header"), [tv, this] {
+        menu->addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
             auto tw = new TreeWidget(static_cast<File*>(file()), header, tv);
             tw->show();
         });
 
-    { // QActionGroup
-        menu->addSeparator();
-
-        auto group = new QActionGroup(menu);
-
-        File* file = static_cast<File*>(this->file());
-
-        auto action = menu->addAction(QObject::tr("&Solid"), [=](bool checked) {
-            file->setItemType(static_cast<ItemsType>(checked * static_cast<int>(ItemsType::Normal)));
-        });
-        action->setCheckable(true);
-        action->setChecked(file->itemsType() == ItemsType::Normal);
-        action->setToolTip(QObject::tr("Normal"));
-        action->setActionGroup(group);
-
-        action = menu->addAction(QObject::tr("&Paths"), [=](bool checked) {
-            file->setItemType(static_cast<ItemsType>(checked * static_cast<int>(ItemsType::Paths)));
-        });
-        action->setCheckable(true);
-        action->setChecked(file->itemsType() == ItemsType::Paths);
-        action->setToolTip(QObject::tr("Paths_")); //Displays only aperture paths of copper\nwithout width and without contacts."));
-        action->setActionGroup(group);
-    }
+    menu->addSeparator();
+    menu->addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTreeView::closeFile);
 }
 
 ///////////////////////////////////
@@ -361,10 +458,17 @@ NodeLayer::NodeLayer(const QString& name, Layer* layer)
 
 bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
-        if (role == Qt::CheckStateRole)
-            layer->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        if (role == Qt::CheckStateRole) {
+            bool visible = value.value<Qt::CheckState>() == Qt::Checked;
+            layer->setVisible(visible);
+            layer->file()->m_layersVisible[name] = visible;
+            if (visible) {
+                layer->file()->m_visible = visible;
+                emit App::fileModel()->dataChanged(m_parentItem->index(index.column()), m_parentItem->index(index.column()), { role });
+            }
+        }
         return true;
     case Column::ItemsType:
         if (role == Qt::EditRole)
@@ -378,7 +482,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
 Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; //| Qt::ItemIsSelectable;
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case Column::ItemsType:
@@ -390,14 +494,14 @@ Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
 
 QVariant NodeLayer::data(const QModelIndex& index, int role) const
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return name;
         case Qt::CheckStateRole:
-            return layer->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return layer->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return decoration(layer->color());
         case Qt::UserRole:
@@ -408,9 +512,9 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
     case Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).actName;
+            return layer->file()->displayedTypes().at(int(layer->itemsType())).actName.left(5).append("...");
         case Qt::ToolTipRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).actName;
+            return layer->file()->displayedTypes().at(int(layer->itemsType())).actToolTip;
         case Qt::EditRole:
             return layer->file()->displayedTypes().at(int(layer->itemsType())).id;
         case Qt::UserRole:
@@ -426,7 +530,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
 
 void NodeLayer::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("color-management"), QObject::tr("Change color"), [tv, this] {
+    menu->addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(layer->color());
         if (cd.exec()) {

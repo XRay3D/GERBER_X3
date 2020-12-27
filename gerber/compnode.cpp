@@ -37,7 +37,7 @@ ComponentsNode::ComponentsNode(const Gerber::Component& component)
 //ComponentsNode::ComponentsNode(int id, int type)
 //    : m_id(id)
 //    , m_type(type)
-//    , tbStrList(QObject::tr("Top|Bottom").split('|'))
+//    , tbStrList(GbrObj::tr("Top|Bottom").split('|'))
 //{
 //    //    if (MainWindow::closeAllAct()) {
 //    //        MainWindow::closeAllAct()->setEnabled(true);
@@ -154,7 +154,7 @@ QVariant ComponentsNode::data(const QModelIndex& index, int role) const
         return {};
     }
 
-    static const QStringList mountType(QObject::tr("TH|SMD|BGA|Other").split('|'));
+    static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split('|'));
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
         case 0: /* <field> Manufacturer. */

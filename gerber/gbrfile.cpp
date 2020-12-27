@@ -110,10 +110,10 @@ File::File(const QString& fileName)
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
     m_layerTypes = {
-        { Normal, QObject::tr("Normal"), "" },
-        { ApPaths, QObject::tr("Aperture paths"), QObject::tr("Displays only aperture paths of copper\n"
-                                                              "without width and without contacts.") },
-        { Components, QObject::tr("Components"), "" }
+        { Normal, GbrObj::tr("Normal"), GbrObj::tr("Normal view") },
+        { ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
+                                                            "without width and without contacts") },
+        { Components, GbrObj::tr("Components"), GbrObj::tr("Show components") }
     };
 }
 

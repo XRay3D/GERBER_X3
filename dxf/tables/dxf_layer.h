@@ -82,6 +82,10 @@ public:
     QColor color() const;
     void setColor(const QColor& color);
 
+    bool isVisible() const;
+
+    void setVisible(bool visible);
+
 private:
     ItemGroup* itemGroupNorm = nullptr;
     ItemGroup* itemGroupPath = nullptr;
@@ -99,6 +103,7 @@ private:
     int plottingFlag = 0;
     GraphicObjects m_graphicObjects;
     ItemsType m_itemsType = ItemsType::Null;
+    bool m_visible = true;
 
     enum VarType {
         SubclassMarker = 100, // Маркер подкласса (AcDbLayerTableRecord)

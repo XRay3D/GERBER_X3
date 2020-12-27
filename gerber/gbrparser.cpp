@@ -204,9 +204,10 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     mutex.unlock();
 }
 
-QList<QString> Parser::cleanAndFormatFile(QString data)
+QVector<QString> Parser::cleanAndFormatFile(QString data)
 {
-    QList<QString> gerberLines;
+    QVector<QString> gerberLines;
+    gerberLines.reserve(100000);
 
     enum State {
         Param,
@@ -324,6 +325,7 @@ QList<QString> Parser::cleanAndFormatFile(QString data)
             }
         }
     }
+    gerberLines.shrink_to_fit();
     return gerberLines;
 }
 
@@ -438,7 +440,7 @@ void Parser::addFlash()
 {
     m_state.setType(Aperture);
     if (!file()->m_apertures.contains(m_state.aperture()) && file()->m_apertures[m_state.aperture()].data() == nullptr)
-        throw tr("Aperture %1 not found!").arg(m_state.aperture());
+        throw GbrObj::tr("Aperture %1 not found!").arg(m_state.aperture());
 
     AbstractAperture* ap = file()->m_apertures[m_state.aperture()].data();
     Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
@@ -510,10 +512,10 @@ Point64 Parser::parsePosition(const QString& xyStr)
         }
     }
     if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0) {
-        throw tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
+        throw GbrObj::tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0) {
-        throw tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
+        throw GbrObj::tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     return m_state.curPos();
 }
@@ -555,12 +557,12 @@ Paths Parser::createLine()
 {
     Paths solution;
     if (!file()->m_apertures.contains(m_state.aperture()))
-        throw tr("Aperture %1 not found!").arg(m_state.aperture());
+        throw GbrObj::tr("Aperture %1 not found!").arg(m_state.aperture());
 
     if (file()->m_apertures[m_state.aperture()]->type() == Rectangle) {
         ApRectangle* rect = static_cast<ApRectangle*>(file()->m_apertures[m_state.aperture()].data());
         if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
-            throw tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
+            throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
         double size = rect->m_width * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             return {};

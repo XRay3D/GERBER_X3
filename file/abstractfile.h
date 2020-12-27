@@ -104,7 +104,7 @@ public:
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
 
-    QList<QString>& lines();
+    QVector<QString>& lines();
 
     enum Group {
         CopperGroup,
@@ -141,7 +141,7 @@ protected:
 
     QVector<ItemGroup*> m_itemGroups;
     QString m_name;
-    QList<QString> m_lines;
+    QVector<QString> m_lines;
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
     mutable bool m_visible = false;

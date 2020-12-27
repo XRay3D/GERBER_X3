@@ -904,17 +904,17 @@ Public License instead of this License.  But first, please read
         <translation>Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="646"/>
+        <location filename="../forms/drillform/drillform.cpp" line="645"/>
         <source>&amp;Select Tool</source>
         <translation>&amp;Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="670"/>
+        <location filename="../forms/drillform/drillform.cpp" line="669"/>
         <source>&quot; not suitable for T</source>
         <translation>&quot; не подходит для Т</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="683"/>
+        <location filename="../forms/drillform/drillform.cpp" line="682"/>
         <source>&amp;Remove Tool</source>
         <translation>&amp;Убрать инструмент</translation>
     </message>
@@ -922,24 +922,24 @@ Public License instead of this License.  But first, please read
 <context>
     <name>DrillModel</name>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="83"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="152"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="155"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="84"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="149"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="151"/>
         <source>Tool</source>
         <translation>Инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="83"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="84"/>
         <source>Slot</source>
         <translation>Слот</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="118"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="119"/>
         <source>Select Tool</source>
         <translation>Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="150"/>
+        <location filename="../forms/drillform/drillmodel.cpp" line="149"/>
         <source>Aperture</source>
         <translation>Апертура</translation>
     </message>
@@ -952,58 +952,183 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
-    <name>Dxf::ItemsTypeDelegate</name>
+    <name>Dxf::Dialog</name>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="177"/>
-        <source>Solid</source>
-        <translation>Нормальный</translation>
-    </message>
-    <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="177"/>
-        <source>Paths</source>
-        <translation>Контуры</translation>
+        <source>Colorize</source>
+        <translation type="vanished">Раскрасить</translation>
     </message>
 </context>
 <context>
-    <name>Dxf::LayerModel</name>
+    <name>Dxf::DxfObj</name>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="70"/>
+        <location filename="../../dxf/dxf_file.cpp" line="44"/>
+        <source>Normal</source>
+        <translation>Нормальный</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_file.cpp" line="44"/>
+        <source>Displays paths with pen width and fill.</source>
+        <translation>Отображает контуры с шириной пера и заливкой.</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_file.cpp" line="45"/>
         <location filename="../../dxf/tables/dxf_layermodel.cpp" line="83"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="178"/>
+        <source>Paths</source>
+        <translation>Контуры</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_file.cpp" line="45"/>
+        <source>Displays paths without pen width.</source>
+        <translation>Отображает контуры без ширины пера и заливки.</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="298"/>
+        <source>&amp;Hide other</source>
+        <translation>&amp;Скрыть другие</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="299"/>
+        <source>&amp;Show source</source>
+        <translation>&amp;Показать источник</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="48"/>
+        <location filename="../../dxf/dxf_node.cpp" line="421"/>
+        <source>Colorize</source>
+        <translation>Раскрасить</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="133"/>
+        <source>Section HEADER</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="341"/>
+        <location filename="../../dxf/dxf_node.cpp" line="366"/>
+        <source>Data</source>
+        <translation>Данные</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="341"/>
+        <source>Code</source>
+        <translation>Код</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="362"/>
+        <source>Line</source>
+        <translation>Строка</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="364"/>
+        <source>Type</source>
+        <translation>Тип</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="434"/>
+        <source>&amp;Layers</source>
+        <translation>&amp;Слои</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="439"/>
+        <source>Header</source>
+        <translation>Заголовок</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="445"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Закрыть</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/dxf_node.cpp" line="533"/>
+        <source>Change color</source>
+        <translation>Изменить цвет</translation>
+    </message>
+    <message>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="74"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="86"/>
         <source>Empty layer</source>
         <translation>Пустой слой</translation>
     </message>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="80"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="83"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="178"/>
         <source>Solid</source>
-        <translation>Нормальный</translation>
+        <translation>Норм.</translation>
     </message>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="80"/>
-        <source>Paths</source>
-        <translation>Контуры</translation>
-    </message>
-    <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="137"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="138"/>
         <source>Visible
 &amp; color</source>
         <translation>Видимость
 и цвет</translation>
     </message>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="139"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="140"/>
         <source>Entity
 count</source>
         <translation>Кол-во
 сущностей</translation>
     </message>
     <message>
-        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="141"/>
+        <location filename="../../dxf/tables/dxf_layermodel.cpp" line="142"/>
+        <source>Visible
+type</source>
+        <translation>Отображаемый
+тип</translation>
+    </message>
+</context>
+<context>
+    <name>Dxf::ItemsTypeDelegate</name>
+    <message>
+        <source>Solid</source>
+        <translation type="vanished">Нормальный</translation>
+    </message>
+    <message>
+        <source>Paths</source>
+        <translation type="vanished">Контуры</translation>
+    </message>
+</context>
+<context>
+    <name>Dxf::LayerModel</name>
+    <message>
+        <source>Empty layer</source>
+        <translation type="vanished">Пустой слой</translation>
+    </message>
+    <message>
+        <source>Solid</source>
+        <translation type="vanished">Нормальный</translation>
+    </message>
+    <message>
+        <source>Paths</source>
+        <translation type="vanished">Контуры</translation>
+    </message>
+    <message>
+        <source>Visible
+&amp; color</source>
+        <translation type="vanished">Видимость
+и цвет</translation>
+    </message>
+    <message>
+        <source>Entity
+count</source>
+        <translation type="vanished">Кол-во
+сущностей</translation>
+    </message>
+    <message>
         <source>Visible
 type</source>
         <translatorcomment>Displayed
 type</translatorcomment>
-        <translation>Отображаемый
+        <translation type="vanished">Отображаемый
 тип</translation>
+    </message>
+</context>
+<context>
+    <name>Dxf::Node</name>
+    <message>
+        <source>Type</source>
+        <translation type="obsolete">Тип</translation>
     </message>
 </context>
 <context>
@@ -1014,12 +1139,12 @@ type</translatorcomment>
         <translation>Непрорезы:</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="178"/>
+        <location filename="../forms/formsutil/errordialog.cpp" line="179"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="179"/>
+        <location filename="../forms/formsutil/errordialog.cpp" line="180"/>
         <source>Break</source>
         <translation>Прервать</translation>
     </message>
@@ -1027,12 +1152,12 @@ type</translatorcomment>
 <context>
     <name>ErrorModel</name>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="108"/>
+        <location filename="../forms/formsutil/errordialog.cpp" line="109"/>
         <source>Position</source>
         <translation>Расположение</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="110"/>
+        <location filename="../forms/formsutil/errordialog.cpp" line="111"/>
         <source>Area mm²</source>
         <translation>Площадь</translation>
     </message>
@@ -1143,48 +1268,91 @@ type</translatorcomment>
 <context>
     <name>FileModel</name>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="36"/>
+        <location filename="../filetree/filemodel.cpp" line="39"/>
         <source>Gerber Files</source>
         <translation>Файлы Gerber</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="37"/>
+        <location filename="../filetree/filemodel.cpp" line="40"/>
         <source>Excellon</source>
         <translation>Файлы Excellon</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="38"/>
+        <location filename="../filetree/filemodel.cpp" line="41"/>
         <source>Tool Paths</source>
         <translation>УП</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="39"/>
+        <location filename="../filetree/filemodel.cpp" line="42"/>
         <source>Dxf Files</source>
         <translation>Файлы Dxf</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="40"/>
+        <location filename="../filetree/filemodel.cpp" line="43"/>
         <source>Shapes</source>
         <translation>Фигуры</translation>
+    </message>
+    <message>
+        <location filename="../filetree/filemodel.cpp" line="208"/>
+        <source>Type</source>
+        <translation>Тип</translation>
     </message>
     <message>
         <source>Special</source>
         <translation type="vanished">Специальный</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="166"/>
+        <location filename="../filetree/filemodel.cpp" line="204"/>
         <source>Name</source>
         <translation>Название</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="168"/>
+        <location filename="../filetree/filemodel.cpp" line="206"/>
         <source>Side</source>
         <translation>Сторона</translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="170"/>
         <source>C</source>
-        <translation>ссс</translation>
+        <translation type="vanished">ссс</translation>
+    </message>
+</context>
+<context>
+    <name>FileTreeView</name>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="195"/>
+        <source>Save GCode file</source>
+        <translation>Сохранить файл УП</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="197"/>
+        <source>GCode (*.%1)</source>
+        <translation>УП (*.%1)</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="216"/>
+        <source>&amp;Delete All Toolpaths</source>
+        <translation>Удалить &amp;все УП</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="217"/>
+        <location filename="../filetree/treeview.cpp" line="223"/>
+        <source>Really?</source>
+        <translation>В самом деле?</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="220"/>
+        <source>&amp;Save Selected Tool Paths...</source>
+        <translation>Сохранить &amp;выбранные УП...</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="222"/>
+        <source>&amp;Delete All Objects</source>
+        <translation>Удалить &amp;все фигуры</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="234"/>
+        <source>&amp;Edit Selected Texts</source>
+        <translation>&amp;Редактировать выбранные &quot;тексты&quot;</translation>
     </message>
 </context>
 <context>
@@ -1380,15 +1548,176 @@ type</translatorcomment>
     </message>
 </context>
 <context>
+    <name>GbrObj</name>
+    <message>
+        <source>Ref Des</source>
+        <translation type="obsolete">Условное
+обозначение</translation>
+    </message>
+    <message>
+        <source>Manufacturer
+part
+number</source>
+        <translation type="obsolete">Номер
+детали
+производителя</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation type="obsolete">Значение</translation>
+    </message>
+    <message>
+        <source>Mount
+type</source>
+        <translation type="obsolete">Тип
+монтажа</translation>
+    </message>
+    <message>
+        <source>Footprint
+name</source>
+        <translation type="obsolete">Название
+пос. места</translation>
+    </message>
+    <message>
+        <source>Package
+name</source>
+        <translation type="obsolete">Название
+корпуса</translation>
+    </message>
+    <message>
+        <source>Height</source>
+        <translation type="obsolete">Высота</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/compnode.cpp" line="157"/>
+        <source>TH|SMD|BGA|Other</source>
+        <translation>Отверстрие|SMD|BGA|Другое</translation>
+    </message>
+    <message>
+        <source>Bad outline (regular polygon) macro!</source>
+        <translation type="obsolete">Плохой контур (правильный многоугольник) макрос!</translation>
+    </message>
+    <message>
+        <source>Bad thermal macro!</source>
+        <translation type="obsolete">Плохой тепловой макрос!</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrcomponent.cpp" line="76"/>
+        <source>Rotation: %1
+</source>
+        <translation>Вращение: %1
+</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrcomponent.cpp" line="77"/>
+        <source>Value: %1
+</source>
+        <translation>Значение: %1
+</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrcomponent.cpp" line="78"/>
+        <source>Footprint: %1
+</source>
+        <translation>Пос. место: %1
+</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation type="obsolete">Нормальный</translation>
+    </message>
+    <message>
+        <source>Displays only aperture paths of copper
+without width and without contacts.</source>
+        <translation type="obsolete">Отображает только апертурные траектории 
+без ширины дорожек и без контактов.</translation>
+    </message>
+    <message>
+        <source>&amp;Hide other</source>
+        <translation type="obsolete">&amp;Скрыть другие</translation>
+    </message>
+    <message>
+        <source>&amp;Show source</source>
+        <translation type="obsolete">&amp;Показать источник</translation>
+    </message>
+    <message>
+        <source>Show &amp;Components</source>
+        <translation type="obsolete">Показать &amp;РЭК</translation>
+    </message>
+    <message>
+        <source>&amp;Close</source>
+        <translation type="obsolete">&amp;Закрыть</translation>
+    </message>
+    <message>
+        <source>Aperture %1 not found!</source>
+        <translation type="obsolete">Апертура %1 не найдена!</translation>
+    </message>
+    <message>
+        <source>line num %1: &apos;%2&apos;, error value.</source>
+        <translation type="obsolete">номер строки %1: «%2»,  ошибочное значение.</translation>
+    </message>
+    <message>
+        <source>Aperture D%1 (%2) not supported!</source>
+        <translation type="obsolete">Апертура D%1 (%2) не поддерживается!</translation>
+    </message>
+</context>
+<context>
     <name>Gerber::ComponentsModel</name>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="111"/>
+        <source>Ref Des</source>
+        <translation type="vanished">Условное
+обозначение</translation>
+    </message>
+    <message>
+        <source>Manufacturer
+part
+number</source>
+        <translation type="vanished">Номер
+детали
+производителя</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation type="vanished">Значение</translation>
+    </message>
+    <message>
+        <source>Mount
+type</source>
+        <translation type="vanished">Тип
+монтажа</translation>
+    </message>
+    <message>
+        <source>Footprint
+name</source>
+        <translation type="vanished">Название
+пос. места</translation>
+    </message>
+    <message>
+        <source>Package
+name</source>
+        <translation type="vanished">Название
+корпуса</translation>
+    </message>
+    <message>
+        <source>Height</source>
+        <translation type="vanished">Высота</translation>
+    </message>
+</context>
+<context>
+    <name>Gerber::GbrObj</name>
+    <message>
+        <location filename="../../gerber/compmodel.cpp" line="34"/>
+        <source>unsorted</source>
+        <translation>несортированный</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/compmodel.cpp" line="113"/>
         <source>Ref Des</source>
         <translation>Условное
 обозначение</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="113"/>
+        <location filename="../../gerber/compmodel.cpp" line="115"/>
         <source>Manufacturer
 part
 number</source>
@@ -1397,36 +1726,115 @@ number</source>
 производителя</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="117"/>
+        <location filename="../../gerber/compmodel.cpp" line="119"/>
         <source>Value</source>
         <translation>Значение</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="119"/>
+        <location filename="../../gerber/compmodel.cpp" line="121"/>
         <source>Mount
 type</source>
         <translation>Тип
 монтажа</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="122"/>
+        <location filename="../../gerber/compmodel.cpp" line="124"/>
         <source>Footprint
 name</source>
         <translation>Название
 пос. места</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="125"/>
-        <location filename="../../gerber/compmodel.cpp" line="128"/>
+        <location filename="../../gerber/compmodel.cpp" line="127"/>
+        <location filename="../../gerber/compmodel.cpp" line="130"/>
         <source>Package
 name</source>
         <translation>Название
 корпуса</translation>
     </message>
     <message>
-        <location filename="../../gerber/compmodel.cpp" line="131"/>
+        <location filename="../../gerber/compmodel.cpp" line="133"/>
         <source>Height</source>
         <translation>Высота</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbraperture.cpp" line="613"/>
+        <source>Bad outline (regular polygon) macro!</source>
+        <translation>Плохой контур (правильный многоугольник) макрос!</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbraperture.cpp" line="648"/>
+        <source>Bad thermal macro!</source>
+        <translation>Плохой тепловой макрос!</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="113"/>
+        <source>Normal</source>
+        <translation>Нормальный</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="113"/>
+        <source>Normal view</source>
+        <translation>Нормальный вид</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="114"/>
+        <source>Aperture paths</source>
+        <translation>Пути апертуры</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="114"/>
+        <source>Displays only aperture paths of copper
+without width and without contacts</source>
+        <translation>Отображает только апертурные траектории
+дорожек без ширины и без контактов</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="116"/>
+        <source>Components</source>
+        <translation>Элементы</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrfile.cpp" line="116"/>
+        <source>Show components</source>
+        <translation>Показать элементы</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="169"/>
+        <source>&amp;Hide other</source>
+        <translation>&amp;Скрыть другие</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="206"/>
+        <source>&amp;Show source</source>
+        <translation>&amp;Показать источник</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="223"/>
+        <source>Show &amp;Components</source>
+        <translation>Показать &amp;РЭК</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrnode.cpp" line="230"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Закрыть</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrparser.cpp" line="443"/>
+        <location filename="../../gerber/gbrparser.cpp" line="560"/>
+        <source>Aperture %1 not found!</source>
+        <translation>Апертура %1 не найдена!</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrparser.cpp" line="515"/>
+        <location filename="../../gerber/gbrparser.cpp" line="518"/>
+        <source>line num %1: &apos;%2&apos;, error value.</source>
+        <translation>номер строки %1: «%2»,  ошибочное значение.</translation>
+    </message>
+    <message>
+        <location filename="../../gerber/gbrparser.cpp" line="565"/>
+        <source>Aperture D%1 (%2) not supported!</source>
+        <translation>Апертура D%1 (%2) не поддерживается!</translation>
     </message>
 </context>
 <context>
@@ -1436,66 +1844,53 @@ name</source>
         <translation type="vanished">Верх|Низ</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="182"/>
         <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
+        <translation type="vanished">&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="191"/>
         <source>&amp;Aperture paths</source>
-        <translation>Пути &amp;апертур</translation>
+        <translation type="vanished">Пути &amp;апертур</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="195"/>
         <source>Displays only aperture paths of copper
 without width and without contacts.</source>
-        <translation>Отображает только апертурные траектории 
+        <translation type="vanished">Отображает только апертурные траектории 
 без ширины дорожек и без контактов.</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="200"/>
         <source>&amp;Components</source>
-        <translation>Компоненты</translation>
+        <translation type="vanished">Компоненты</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="209"/>
         <source>&amp;Normal</source>
-        <translation>Нормальный вид</translation>
+        <translation type="vanished">Нормальный вид</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="220"/>
         <source>&amp;Show source</source>
-        <translation>&amp;Показать источник</translation>
+        <translation type="vanished">&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="236"/>
         <source>Show &amp;Components</source>
-        <translation>Показать &amp;РЭК</translation>
+        <translation type="vanished">Показать &amp;РЭК</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrnode.cpp" line="243"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
+        <translation type="vanished">&amp;Закрыть</translation>
     </message>
 </context>
 <context>
     <name>Gerber::Parser</name>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="442"/>
-        <location filename="../../gerber/gbrparser.cpp" line="559"/>
         <source>Aperture %1 not found!</source>
-        <translation>Апертура %1 не найдена!</translation>
+        <translation type="vanished">Апертура %1 не найдена!</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="514"/>
-        <location filename="../../gerber/gbrparser.cpp" line="517"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
-        <translation>номер строки %1: «%2»,  ошибочное значение.</translation>
+        <translation type="vanished">номер строки %1: «%2»,  ошибочное значение.</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbrparser.cpp" line="564"/>
         <source>Aperture D%1 (%2) not supported!</source>
-        <translation>Апертура D%1 (%2) не поддерживается!</translation>
+        <translation type="vanished">Апертура D%1 (%2) не поддерживается!</translation>
     </message>
 </context>
 <context>
@@ -1902,18 +2297,18 @@ without width and without contacts.</source>
         <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="879"/>
-        <location filename="../mainwindow.cpp" line="908"/>
+        <location filename="../mainwindow.cpp" line="884"/>
+        <location filename="../mainwindow.cpp" line="913"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="881"/>
+        <location filename="../mainwindow.cpp" line="886"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation>Любой (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="908"/>
+        <location filename="../mainwindow.cpp" line="913"/>
         <source>Project (*.g2g)</source>
         <translation>Проект (*.g2g)</translation>
     </message>
@@ -2398,35 +2793,35 @@ Would you like to continue?</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="16"/>
+        <location filename="../forms/pocketrasterform.cpp" line="29"/>
         <source>Raster On</source>
         <translation>Растр поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="16"/>
+        <location filename="../forms/pocketrasterform.cpp" line="29"/>
         <source>Raster Outside</source>
         <translation>Растр снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="16"/>
+        <location filename="../forms/pocketrasterform.cpp" line="29"/>
         <source>Raster Inside</source>
         <translation>Растр внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="100"/>
-        <location filename="../forms/pocketrasterform.cpp" line="126"/>
+        <location filename="../forms/pocketrasterform.cpp" line="113"/>
+        <location filename="../forms/pocketrasterform.cpp" line="139"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="100"/>
+        <location filename="../forms/pocketrasterform.cpp" line="113"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation>Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="126"/>
+        <location filename="../forms/pocketrasterform.cpp" line="139"/>
         <source>No selected items for working...</source>
         <translation>Нет выбранных элементов для работы...</translation>
     </message>
@@ -2575,12 +2970,12 @@ Would you like to continue?</source>
 <context>
     <name>Project</name>
     <message>
-        <location filename="../project.cpp" line="377"/>
+        <location filename="../project.cpp" line="387"/>
         <source>Untitled.g2g</source>
         <translation>Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="388"/>
+        <location filename="../project.cpp" line="398"/>
         <source>Board dimensions may have changed.
 It is advisable to perform automatic placement of the pins
 by selecting the necessary work items.
@@ -2593,14 +2988,14 @@ Continue saving?</source>
 Продолжить сохранение?</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="435"/>
         <location filename="../project.cpp" line="445"/>
+        <location filename="../project.cpp" line="455"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="435"/>
         <location filename="../project.cpp" line="445"/>
+        <location filename="../project.cpp" line="455"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
@@ -2609,7 +3004,7 @@ Continue saving?</source>
         <translation type="vanished">УП (*.tap)</translation>
     </message>
     <message>
-        <location filename="../project.cpp" line="478"/>
+        <location filename="../project.cpp" line="488"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>
@@ -2678,19 +3073,16 @@ X %2:Y %3</translation>
         <translation>Ошибка в инструменте...!!!</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbraperture.cpp" line="613"/>
         <source>Bad outline (regular polygon) macro!</source>
-        <translation>Плохой контур (правильный многоугольник) макрос!</translation>
+        <translation type="vanished">Плохой контур (правильный многоугольник) макрос!</translation>
     </message>
     <message>
-        <location filename="../../gerber/gbraperture.cpp" line="648"/>
         <source>Bad thermal macro!</source>
-        <translation>Плохой тепловой макрос!</translation>
+        <translation type="vanished">Плохой тепловой макрос!</translation>
     </message>
     <message>
-        <location filename="../filetree/layerdelegate.cpp" line="34"/>
         <location filename="../../file/abstractnode.cpp" line="26"/>
-        <location filename="../../shapes/shtextdialog.cpp" line="33"/>
+        <location filename="../../shapes/shtextdialog.cpp" line="35"/>
         <source>Top|Bottom</source>
         <translation>Верх|Низ</translation>
     </message>
@@ -2750,60 +3142,66 @@ X %2:Y %3</translation>
         <translation>Путь G0</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcnode.cpp" line="143"/>
+        <location filename="../../gcode/gcnode.cpp" line="163"/>
         <source>&amp;Delete Toolpath</source>
         <translation>&amp;Удалить УП</translation>
     </message>
     <message>
-        <location filename="../../file/abstractfile.h" line="72"/>
+        <location filename="../../file/abstractfile.h" line="85"/>
         <source>              Preparing: </source>
         <translation>           Подготовка: </translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="242"/>
-        <location filename="../../excellon/exnode.cpp" line="111"/>
-        <location filename="../../gcode/gcnode.cpp" line="141"/>
+        <location filename="../../excellon/exnode.cpp" line="113"/>
+        <location filename="../../gcode/gcnode.cpp" line="144"/>
         <source>&amp;Hide other</source>
         <translation>&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="246"/>
+        <source>Colorize</source>
+        <translation type="obsolete">Раскрасить</translation>
+    </message>
+    <message>
         <source>&amp;Layers</source>
-        <translation>&amp;Слои</translation>
+        <translation type="vanished">&amp;Слои</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="251"/>
         <source>Header</source>
-        <translation>Заголовок</translation>
+        <translation type="vanished">Заголовок</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="263"/>
         <source>&amp;Solid</source>
-        <translation>&amp;Нормальный</translation>
+        <translation type="vanished">&amp;Нормальный</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="268"/>
         <source>Normal</source>
-        <translation>Нормальный</translation>
+        <translation type="vanished">Нормальный</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="271"/>
+        <source>Paths</source>
+        <translation type="obsolete">Контуры</translation>
+    </message>
+    <message>
+        <source>Displays only aperture paths of copper
+without width and without contacts.</source>
+        <translation type="vanished">Отображает только апертурные траектории 
+без ширины дорожек и без контактов.</translation>
+    </message>
+    <message>
         <source>&amp;Paths</source>
-        <translation>&amp;Контуры</translation>
+        <translation type="vanished">&amp;Контуры</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="276"/>
         <source>Paths_</source>
-        <translation>Контуры</translation>
+        <translation type="vanished">Контуры</translation>
     </message>
     <message>
-        <location filename="../../excellon/exnode.cpp" line="113"/>
+        <location filename="../../excellon/exnode.cpp" line="133"/>
         <source>&amp;Edit Format</source>
         <translation>&amp;Редактировать формат</translation>
     </message>
     <message>
-        <location filename="../../dxf/dxf_node.cpp" line="243"/>
-        <location filename="../../excellon/exnode.cpp" line="121"/>
+        <location filename="../../excellon/exnode.cpp" line="142"/>
         <source>&amp;Close</source>
         <translation>&amp;Закрыть</translation>
     </message>
@@ -2813,7 +3211,8 @@ X %2:Y %3</translation>
         <translation>&amp;Сохранить УП</translation>
     </message>
     <message>
-        <location filename="../../gcode/gcnode.cpp" line="144"/>
+        <location filename="../../excellon/exnode.cpp" line="114"/>
+        <location filename="../../gcode/gcnode.cpp" line="145"/>
         <source>&amp;Show source</source>
         <translation>&amp;Показать источник</translation>
     </message>
@@ -2828,17 +3227,17 @@ X %2:Y %3</translation>
         <translation>Круг</translation>
     </message>
     <message>
-        <location filename="../../shapes/shnode.cpp" line="126"/>
+        <location filename="../../shapes/shnode.cpp" line="121"/>
         <source>&amp;Delete object &quot;%1&quot;</source>
         <translation>&amp;Удалить фигуру &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../shapes/shnode.cpp" line="130"/>
+        <location filename="../../shapes/shnode.cpp" line="125"/>
         <source>&amp;Edit Text</source>
         <translation>&amp;Редактировать текст</translation>
     </message>
     <message>
-        <location filename="../../shapes/shpolyline.cpp" line="58"/>
+        <location filename="../../shapes/shpolyline.cpp" line="60"/>
         <source>Line</source>
         <translation>Линия</translation>
     </message>
@@ -2854,9 +3253,8 @@ X %2:Y %3</translation>
         <translation>Текст</translation>
     </message>
     <message>
-        <location filename="../../gerber/compnode.cpp" line="155"/>
         <source>TH|SMD|BGA|Other</source>
-        <translation>Отверстрие|SMD|BGA|Другое</translation>
+        <translation type="vanished">Отверстрие|SMD|BGA|Другое</translation>
     </message>
     <message>
         <location filename="../../shapes/shhandler.cpp" line="201"/>
@@ -2877,12 +3275,12 @@ X %2:Y %3</translation>
 <context>
     <name>Recent</name>
     <message>
-        <location filename="../recent.cpp" line="35"/>
+        <location filename="../recent.cpp" line="36"/>
         <source>Clear Recent</source>
         <translation>Очистить недавнее</translation>
     </message>
     <message>
-        <location filename="../recent.cpp" line="107"/>
+        <location filename="../recent.cpp" line="108"/>
         <source>&amp;%1 %2</source>
         <translation>&amp;%1 %2</translation>
     </message>
@@ -3248,6 +3646,14 @@ effect after restarting the application.</source>
     </message>
 </context>
 <context>
+    <name>SideDelegate</name>
+    <message>
+        <location filename="../filetree/sidedelegate.cpp" line="29"/>
+        <source>Top|Bottom</source>
+        <translation>Верх|Низ</translation>
+    </message>
+</context>
+<context>
     <name>ThermalForm</name>
     <message>
         <location filename="../../thermal/thermalform.ui" line="14"/>
@@ -3346,37 +3752,37 @@ effect after restarting the application.</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="224"/>
+        <location filename="../../thermal/thermalform.cpp" line="226"/>
         <source>No data to process.</source>
         <translation>Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="263"/>
+        <location filename="../../thermal/thermalform.cpp" line="265"/>
         <source>Thermal</source>
         <translation>Термоизоляция</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="285"/>
+        <location filename="../../thermal/thermalform.cpp" line="287"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="354"/>
+        <location filename="../../thermal/thermalform.cpp" line="356"/>
         <source>Regions</source>
         <translation>Полигоны</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="368"/>
+        <location filename="../../thermal/thermalform.cpp" line="370"/>
         <source>Region</source>
         <translation>Полигон</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="341"/>
+        <location filename="../../thermal/thermalform.cpp" line="343"/>
         <source>Lines</source>
         <translation>Проводники</translation>
     </message>
     <message>
-        <location filename="../../thermal/thermalform.cpp" line="348"/>
+        <location filename="../../thermal/thermalform.cpp" line="350"/>
         <source>Line</source>
         <translation>Проводник</translation>
     </message>
@@ -3685,22 +4091,22 @@ effect after restarting the application.</source>
 <context>
     <name>ToolTreeView</name>
     <message>
-        <location filename="../tooldatabase/tooltreeview.cpp" line="79"/>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="75"/>
         <source>New Group</source>
         <translation>Новая группа</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooltreeview.cpp" line="101"/>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="97"/>
         <source>New Tool </source>
         <translation>Новый инструмент </translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooltreeview.cpp" line="110"/>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="106"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooltreeview.cpp" line="110"/>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="106"/>
         <source>Are you sure you want to delete the item and all content?</source>
         <translation>Вы уверены, что хотите удалить элемент и все данные?</translation>
     </message>
@@ -3708,9 +4114,8 @@ effect after restarting the application.</source>
 <context>
     <name>TreeView</name>
     <message>
-        <location filename="../filetree/treeview.cpp" line="196"/>
         <source>Save GCode file</source>
-        <translation>Сохранить файл УП</translation>
+        <translation type="vanished">Сохранить файл УП</translation>
     </message>
     <message>
         <source>GCode (*.tap)</source>
@@ -3749,35 +4154,28 @@ effect after restarting the application.</source>
         <translation type="vanished">Пути &amp;апертур</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="198"/>
         <source>GCode (*.%1)</source>
-        <translation>УП (*.%1)</translation>
+        <translation type="vanished">УП (*.%1)</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="216"/>
         <source>&amp;Delete All Toolpaths</source>
-        <translation>Удалить &amp;все УП</translation>
+        <translation type="vanished">Удалить &amp;все УП</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="217"/>
-        <location filename="../filetree/treeview.cpp" line="223"/>
         <source>Really?</source>
-        <translation>В самом деле?</translation>
+        <translation type="vanished">В самом деле?</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="220"/>
         <source>&amp;Save Selected Tool Paths...</source>
-        <translation>Сохранить &amp;выбранные УП...</translation>
+        <translation type="vanished">Сохранить &amp;выбранные УП...</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="222"/>
         <source>&amp;Delete All Objects</source>
-        <translation>Удалить &amp;все фигуры</translation>
+        <translation type="vanished">Удалить &amp;все фигуры</translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="234"/>
         <source>&amp;Edit Selected Texts</source>
-        <translation>&amp;Редактировать выбранные &quot;тексты&quot;</translation>
+        <translation type="vanished">&amp;Редактировать выбранные &quot;тексты&quot;</translation>
     </message>
 </context>
 <context>

@@ -20,6 +20,13 @@
 
 namespace Dxf {
 
+class DxfObj : public QObject {
+    Q_OBJECT
+public:
+    DxfObj() { }
+    virtual ~DxfObj() { }
+};
+
 enum class ItemsType {
     Null = -1,
     Normal,
