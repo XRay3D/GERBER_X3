@@ -88,13 +88,14 @@ FileTreeView::FileTreeView(QWidget* parent)
     setItemDelegateForColumn(0, new TextDelegate(this));
     setItemDelegateForColumn(1, new SideDelegate(this));
     setItemDelegateForColumn(2, new TypeDelegate(this));
-    //    setItemDelegateForColumn(2, new RadioDelegate(this));
-    App::m_treeView = this;
+
+    App::m_fileTreeView = this;
 }
+
+FileTreeView::~FileTreeView() { App::m_fileTreeView = nullptr; }
 
 void FileTreeView::updateTree()
 {
-    App::m_treeView = nullptr;
     expandAll();
 }
 
@@ -133,27 +134,39 @@ void FileTreeView::onSelectionChanged(const QItemSelection& selected, const QIte
     if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
         const int row = index.parent().row();
-        if (row == FileModel::GerberFiles || row == FileModel::DrillFiles || row == FileModel::ToolPath) {
+        switch (row) {
+        case FileModel::GerberFiles:
+        case FileModel::DrillFiles:
+        case FileModel::ToolPath: {
             const int id = index.data(Qt::UserRole).toInt();
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(id);
-        }
-        if (row == FileModel::Shapes) {
-            const int id = index.data(Qt::UserRole).toInt();
-            App::project()->aShape(id)->setSelected(true);
+        } break;
+        case FileModel::Shapes:
+            for (auto& index : selected.indexes()) {
+                const int id = index.data(Qt::UserRole).toInt();
+                App::project()->aShape(id)->setSelected(true);
+            }
+            break;
         }
     }
     if (!deselected.indexes().isEmpty()) {
         QModelIndex& index = deselected.indexes().first();
         const int row = index.parent().row();
-        if (row == FileModel::GerberFiles || row == FileModel::DrillFiles || row == FileModel::ToolPath) {
+        switch (row) {
+        case FileModel::GerberFiles:
+        case FileModel::DrillFiles:
+        case FileModel::ToolPath: {
             const int id = index.data(Qt::UserRole).toInt();
             AbstractFile* file = App::project()->file(id);
             file->itemGroup()->setZValue(-id);
-        }
-        if (row == FileModel::Shapes) {
-            const int id = index.data(Qt::UserRole).toInt();
-            App::project()->aShape(id)->setSelected(false);
+        } break;
+        case FileModel::Shapes:
+            for (auto& index : deselected.indexes()) {
+                const int id = index.data(Qt::UserRole).toInt();
+                App::project()->aShape(id)->setSelected(false);
+            }
+            break;
         }
     }
 }
@@ -179,14 +192,6 @@ void FileTreeView::closeFile()
         App::drillForm()->on_pbClose_clicked();
 }
 
-//void FileTreeView::closeFile2(const QModelIndex& index)
-//{
-//    if (index.isValid())
-//        m_model->removeRow(index.row(), index.parent());
-//    if (App::drillForm())
-//        App::drillForm()->on_pbClose_clicked();
-//}
-
 void FileTreeView::saveGcodeFile()
 {
     if (App::project()->pinsPlacedMessage())
@@ -206,38 +211,35 @@ void FileTreeView::showExcellonDialog() { }
 
 void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
 {
-    QMenu menu(this);
-
     m_menuIndex = indexAt(event->pos());
-
+    if (!m_menuIndex.isValid())
+        return;
+    QMenu menu(this);
+    const int childCount = static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount();
     switch (m_menuIndex.parent().row()) {
     case -1:
-        if (m_menuIndex.row() == FileModel::ToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
-            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [this] {
+        if (m_menuIndex.row() == FileModel::ToolPath && childCount) {
+            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [childCount, this] {
                 if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-                    m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+                    m_model->removeRows(0, childCount, m_menuIndex);
             });
             menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
-        } else if (m_menuIndex.row() == FileModel::Shapes && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
-            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Objects"), [this] {
+        } else if (m_menuIndex.row() == FileModel::Shapes && childCount) {
+            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Objects"), [childCount, this] {
                 if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-                    m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+                    m_model->removeRows(0, childCount, m_menuIndex);
             });
-            { // edit Shapes::Text
-                QVector<Shapes::Text*> tx;
-                for (const auto& idx : selectedIndexes()) {
-                    if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); static_cast<GiType>(sh->type()) == GiType::ShapeT) {
-                        tx.append(static_cast<Shapes::Text*>(sh));
-                    }
-                }
-                if (tx.size() > 0)
-                    menu.addAction(QIcon::fromTheme("draw-text"), tr("&Edit Selected Texts"), [tx] {
-                        ShTextDialog dlg(tx, App::mainWindow());
-                        dlg.exec();
-                    });
+            // edit Shapes::Text
+            QVector<Shapes::Text*> tx;
+            for (auto& idx : selectedIndexes()) {
+                if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == int(GiType::ShapeT))
+                    tx.append(static_cast<Shapes::Text*>(sh));
             }
-
-            // ShTextDialog dlg({ this }, App::mainWindow());
+            if (tx.size())
+                menu.addAction(QIcon::fromTheme("draw-text"), tr("&Edit Selected Texts"), [tx] {
+                    ShTextDialog dlg(tx, App::mainWindow());
+                    dlg.exec();
+                });
         }
         break;
     default:
@@ -251,6 +253,7 @@ void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
 
 void FileTreeView::mousePressEvent(QMouseEvent* event)
 {
+    QTreeView::mousePressEvent(event);
     if (event->button() == Qt::LeftButton) {
         QModelIndex index = indexAt(event->pos());
         if (index.isValid()) {
@@ -261,7 +264,6 @@ void FileTreeView::mousePressEvent(QMouseEvent* event)
                 edit(index);
         }
     }
-    QTreeView::mousePressEvent(event);
 }
 
 void FileTreeView::mouseDoubleClickEvent(QMouseEvent* event)

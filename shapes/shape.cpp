@@ -14,6 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "shape.h"
+#include "filetree/treeview.h"
 #include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
@@ -90,7 +91,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
 void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QMenu menu;
-    m_node->menu(&menu, App::treeView());
+    m_node->menu(&menu, App::fileTreeView());
     menu.exec(event->screenPos());
 }
 
@@ -100,6 +101,9 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
         const bool selected = value.toInt();
         for (Handler* item : handlers)
             item->setVisible(selected);
+        if (m_index.isValid()) {
+            App::fileTreeView()->selectionModel()->select(m_index, (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows);
+        }
     }
     return GraphicsItem::itemChange(change, value);
 }

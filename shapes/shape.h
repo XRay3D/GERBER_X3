@@ -12,7 +12,8 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include <gi/graphicsitem.h>
+#include "gi/graphicsitem.h"
+#include <QModelIndex>
 
 namespace Shapes {
 
@@ -41,8 +42,12 @@ public:
 
     void setNode(Node* node);
 
+    QModelIndex index() const { return m_index; }
+    void setFileIndex(const QModelIndex& index) { m_index = index; }
+
 private:
     Node* m_node = nullptr;
+    QModelIndex m_index;
 
 protected:
     mutable QVector<Handler*> handlers;

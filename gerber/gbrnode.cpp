@@ -138,7 +138,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     case Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).actName;
+            return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).shortActName();
         case Qt::ToolTipRole:
             return file()->displayedTypes().at(App::project()->file<File>(m_id)->itemsType()).actToolTip;
         case Qt::EditRole:

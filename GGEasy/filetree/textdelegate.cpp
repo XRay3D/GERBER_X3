@@ -14,6 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "textdelegate.h"
+#include <QDebug>
 #include <QLineEdit>
 
 #include "leakdetector.h"
@@ -27,10 +28,10 @@ TextDelegate::TextDelegate(QObject* parent)
 {
 }
 
-QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
+QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
     auto* le = new QLineEdit(parent);
-    //    le->setText(index.data(Qt::EditRole).toString());
+    m_rect = option.rect;
     connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
     return le;
 }
@@ -38,16 +39,13 @@ QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
 void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     auto* le = qobject_cast<QLineEdit*>(editor);
-    if (!le)
-        return;
+    le->setGeometry(m_rect);
     le->setText(index.data(Qt::EditRole).toString());
 }
 
 void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
     auto* le = qobject_cast<QLineEdit*>(editor);
-    if (!le)
-        return;
     model->setData(index, le->text());
 }
 

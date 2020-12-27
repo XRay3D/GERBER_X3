@@ -58,10 +58,10 @@ void GiGerber::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->setPen(Qt::NoPen);
     painter->drawPolygon(fillPolygon);
 
-    m_pen.setWidthF(option->state & QStyle::State_Selected
-                || option->state & QStyle::State_MouseOver
-            ? 2.0 * App::graphicsView()->scaleFactor()
-            : 0);
+//    m_pen.setWidthF(option->state & QStyle::State_Selected
+//                || option->state & QStyle::State_MouseOver
+//            ? 2.0 * App::graphicsView()->scaleFactor()
+//            : 0);
     m_pen.setColor(m_pathColor);
     painter->strokePath(m_shape, m_pen);
 }

@@ -16,6 +16,9 @@
 
 class TextDelegate : public QStyledItemDelegate {
     Q_OBJECT
+
+    mutable QRect m_rect;
+
 public:
     TextDelegate(QObject* parent = nullptr);
     ~TextDelegate() override = default;

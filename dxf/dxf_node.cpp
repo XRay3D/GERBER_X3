@@ -277,7 +277,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     case Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return file()->displayedTypes().at(int(dxfFile()->itemsType())).actName.left(5).append("...");
+            return file()->displayedTypes().at(int(dxfFile()->itemsType())).shortActName();
         case Qt::ToolTipRole:
             return file()->displayedTypes().at(int(dxfFile()->itemsType())).actToolTip;
         case Qt::EditRole:
@@ -512,7 +512,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
     case Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).actName.left(5).append("...");
+            return layer->file()->displayedTypes().at(int(layer->itemsType())).shortActName();
         case Qt::ToolTipRole:
             return layer->file()->displayedTypes().at(int(layer->itemsType())).actToolTip;
         case Qt::EditRole:
