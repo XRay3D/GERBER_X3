@@ -145,7 +145,12 @@ bool Project::open(QFile& file)
 
         App::layoutFrames()->updateRect();
         return true;
+    } catch (const QString& ex) {
+        qDebug() << __FUNCTION__ << ex;
+    } catch (const std::exception& ex) {
+        qDebug() << __FUNCTION__ << ex.what();
     } catch (...) {
+        qDebug() << __FUNCTION__ << errno;
     }
     return false;
 }

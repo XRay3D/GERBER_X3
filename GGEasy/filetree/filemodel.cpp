@@ -58,40 +58,39 @@ void FileModel::addFile(AbstractFile* file)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
+    AbstractNode* newItem;
     beginInsertRows(index, rowCount, rowCount);
     switch (file->type()) {
     case FileType::Gerber:
-        item->append(new Gerber::Node(file->id()));
+        item->append(newItem = new Gerber::Node(file->id()));
         break;
     case FileType::Excellon:
-        item->append(new Excellon::Node(file->id()));
+        item->append(newItem = new Excellon::Node(file->id()));
         break;
     case FileType::GCode:
-        item->append(new GCode::Node(file->id()));
+        item->append(newItem = new GCode::Node(file->id()));
         break;
     case FileType::Dxf:
-        item->append(new Dxf::Node(file->id()));
+        item->append(newItem = new Dxf::Node(file->id()));
         break;
     default:
         break;
     }
     endInsertRows();
 
-    QModelIndex selectIndex = createIndex(rowCount, 0, item->child(rowCount));
+    QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
+    qDebug() << __FUNCTION__ << selectIndex;
+
     file->setFileIndex(selectIndex);
-    updateFile(selectIndex);
     emit select(selectIndex);
+    updateFile(selectIndex);
 }
 
 void FileModel::updateFile(const QModelIndex& fileIndex)
 {
-    int id = fileIndex.data().toInt();
-    //qDebug() << __FUNCTION__ << fileIndex;
-    //qDebug() << __FUNCTION__ << App::project();
-    //qDebug() << __FUNCTION__ << App::project()->file(id);
+    int id = fileIndex.data(Qt::UserRole).toInt();
     if (!App::project()->file(id))
-        return;
-    //qDebug() << __FUNCTION__ << int(App::project()->file(id)->type());
+        throw QString("App::project()->file(id) is null: id %1!").arg(id);
     if (fileIndex.isValid() && id > -1) {
         switch (App::project()->file(id)->type()) {
         case FileType::Gerber:
