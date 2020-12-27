@@ -89,9 +89,10 @@ protected:
         return "G1";
     }
 
-    QList<QString> savePath(const QPolygonF& path, double spindleSpeed)
+    QVector<QString> savePath(const QPolygonF& path, double spindleSpeed)
     {
-        QList<QString> lines;
+        QVector<QString> lines;
+        lines.reserve(path.size());
         bool skip = true;
         for (const QPointF& point : path) {
             if (skip)
@@ -102,7 +103,7 @@ protected:
         return lines;
     }
 
-    QString formated(const QList<QString>& data)
+    QString formated(const QVector<QString>& data)
     {
         QString ret;
         for (const QString& str : data) {

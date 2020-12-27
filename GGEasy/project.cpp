@@ -455,7 +455,7 @@ void Project::saveSelectedToolpaths()
             name = QFileDialog::getSaveFileName(nullptr, tr("Save GCode file"), name, tr("GCode (*.%1)").arg(GlobalSettings::gcFileExtension()));
             if (name.isEmpty())
                 return;
-            QList<QString> sl;
+            QVector<QString> sl;
             for (int i = 0; i < files.size(); ++i) {
                 GCode::File* file = files[i];
                 file->itemGroup()->setVisible(false);

@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget* parent)
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/misc01.dxf"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/ELECTROSTATIC_AMP_A.dxf"); });
-        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
+        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_BOT.dxf"); });
 
         //        for (int j = 0; j < 50; ++j) {

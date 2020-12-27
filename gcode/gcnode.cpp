@@ -17,7 +17,8 @@
 #include "gcfile.h"
 #include "gch.h"
 #include "project.h"
-#include "qboxlayout.h"
+
+#include <QBoxLayout>
 #include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
@@ -138,9 +139,9 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 }
 void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
     menu->addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), tv, &FileTreeView::saveGcodeFile);
-    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTreeView::closeFile);
+    menu->addSeparator();
+    menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
     menu->addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));
@@ -150,7 +151,7 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         QTextBrowser* textBrowser = new QTextBrowser(dialog);
         textBrowser->setFont(QFont("Consolas"));
-        /*auto gch =*/new GCH(textBrowser->document());
+        new GCH(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
         for (const QString& str : App::project()->file(m_id)->lines())
@@ -158,5 +159,7 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
         dialog->exec();
         delete dialog;
     });
+    menu->addSeparator();
+    menu->addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTreeView::closeFile);
 }
 }

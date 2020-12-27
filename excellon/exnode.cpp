@@ -17,8 +17,10 @@
 
 #include "excellondialog.h"
 #include "exfile.h"
+#include <QBoxLayout>
 #include <QIcon>
 #include <QMenu>
+#include <QTextBrowser>
 #include <filetree/treeview.h>
 #include <forms/drillform/drillform.h>
 
@@ -33,7 +35,7 @@ Node::Node(int id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
@@ -58,7 +60,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case Column::SideType:
@@ -71,7 +73,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     if (file())
-        switch (static_cast<Column>(index.column())) {
+        switch (Column(index.column())) {
         case Column::NameColorVisible:
             switch (role) {
             case Qt::DisplayRole:
@@ -109,6 +111,24 @@ QVariant Node::data(const QModelIndex& index, int role) const
 void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTreeView::hideOther);
+    menu->addAction(QIcon(), QObject::tr("&Show source"), [this] {
+        QDialog* dialog = new QDialog;
+        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->resize(600, 600);
+        //Dialog->resize(400, 300);
+        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+        textBrowser->setFont(QFont("Consolas"));
+        /*auto gch =*/new GCH(textBrowser->document());
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        verticalLayout->addWidget(textBrowser);
+        for (const QString& str : App::project()->file(m_id)->lines())
+            textBrowser->append(str);
+        dialog->exec();
+        delete dialog;
+    });
+    menu->addSeparator();
     if (!m_exFormatDialog) {
         menu->addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
             if (App::drillForm())
@@ -118,6 +138,7 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
             m_exFormatDialog->show();
         });
     }
+    menu->addSeparator();
     menu->addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTreeView::closeFile);
 }
 }

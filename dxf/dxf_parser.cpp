@@ -49,21 +49,24 @@ AbstractFile* Parser::parseFile(const QString& fileName)
 
     QTextStream in(&file);
 
-    auto getCode = [&in, &codes, &line] {
-        QString str(in.readLine());
+    auto getCode = [&in, &codes, &line, this] {
+        // Code
+        QString strCode(in.readLine());
+        m_file->lines().append(strCode);
         bool ok;
-        int multi = 0;
-        auto code(str.toInt(&ok));
+        auto code(strCode.toInt(&ok));
         if (!ok)
-            throw QString("Unknown code: raw str %1, line %2!").arg(str).arg(line);
-        QString value(in.readLine());
-
-        while (value.endsWith("\\P")) {
-            value.append("\n" + in.readLine());
+            throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
+        // Value
+        QString strValue(in.readLine());
+        m_file->lines().append(strValue);
+        int multi = 0;
+        while (strValue.endsWith("\\P")) {
+            m_file->lines().append(in.readLine());
+            strValue.append("\n" + m_file->lines().last());
             ++multi;
         }
-
-        codes.emplace_back(code, value, line);
+        codes.emplace_back(code, strValue, line);
         line += 2 + multi;
         return *(codes.end() - 1);
     };

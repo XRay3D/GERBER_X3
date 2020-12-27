@@ -68,7 +68,7 @@ void AbstractNode::append(AbstractNode* item)
 
 void AbstractNode::remove(int row) { childItems.removeAt(row); }
 
-QModelIndex AbstractNode::index() const { return App::fileModel()->createIndex(row(), 0, reinterpret_cast<quintptr>(this)); }
+QModelIndex AbstractNode::index(int column) const { return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this)); }
 
 int AbstractNode::childCount() const { return childItems.count(); }
 

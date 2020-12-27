@@ -28,7 +28,7 @@ Node::Node(int id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
@@ -52,7 +52,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 }
 QVariant Node::data(const QModelIndex& index, int role) const
 {
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
@@ -100,7 +100,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
-    switch (static_cast<Column>(index.column())) {
+    switch (Column(index.column())) {
     case Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable
             | (static_cast<GiType>(shape()->type()) == GiType::ShapeT

@@ -610,7 +610,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
 
     const int num = static_cast<int>(mod[NumberOfVertices]);
     if (3 > num || num > 12)
-        throw QObject::tr("Bad outline (regular polygon) macro!");
+        throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
     const cInt diameter = static_cast<cInt>(mod[Diameter] * uScale * 0.5);
     const Point64 center(
@@ -645,7 +645,7 @@ void ApMacro::drawThermal(const QList<double>& mod)
     };
 
     if (mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
-        throw QObject::tr("Bad thermal macro!");
+        throw GbrObj::tr("Bad thermal macro!");
 
     const cInt outer = static_cast<cInt>(mod[OuterDiameter] * uScale);
     const cInt inner = static_cast<cInt>(mod[InnerDiameter] * uScale);

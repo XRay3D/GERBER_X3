@@ -38,7 +38,7 @@ Paths AbstractFile::mergedPaths() const { return m_mergedPaths.size() ? m_merged
 
 Pathss AbstractFile::groupedPaths() const { return m_groupedPaths; }
 
-QList<QString>& AbstractFile::lines() { return m_lines; }
+QVector<QString> &AbstractFile::lines() { return m_lines; }
 
 const LayerTypes& AbstractFile::displayedTypes() const { return m_layerTypes; }
 

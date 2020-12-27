@@ -73,9 +73,9 @@ bool Gerber::Component::setData(int key, const QStringList &data)
 QString Gerber::Component::toolTip() const
 {
     QString tt;
-    tt += QString("Rotation: %1\n").arg(rotation);
-    tt += QString("Value: %1\n").arg(value);
-    tt += QString("Footprint: %1\n").arg(footprintName);
+    tt += QString(GbrObj::tr("Rotation: %1\n")).arg(rotation);
+    tt += QString(GbrObj::tr("Value: %1\n")).arg(value);
+    tt += QString(GbrObj::tr("Footprint: %1\n")).arg(footprintName);
     return tt;
 }
 

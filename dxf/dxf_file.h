@@ -29,13 +29,15 @@
 
 namespace Dxf {
 
-class LayerModel;
 class Layer;
+class LayerModel;
+class NodeLayer;
 struct SectionParser;
 
 class File : public AbstractFile {
-    friend class Parser;
     friend class LayerModel;
+    friend class NodeLayer;
+    friend class Parser;
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:
@@ -71,8 +73,6 @@ public:
     void createGi() override;
     bool isVisible() const override;
     void setVisible(bool visible) override;
-    void setVisibleLayer(const QString& name, bool visible);
-    bool visibleLayer(const QString& name) const;
 
 protected:
     void write(QDataStream& stream) const override;

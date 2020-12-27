@@ -20,11 +20,13 @@
 #include <QVariant>
 
 class AbstractFile;
+class FileModel;
 class FileTreeView;
+class QMenu;
+
 namespace Shapes {
 class Shape;
 }
-class QMenu;
 
 QPixmap decoration(QColor color, QChar chr = {});
 
@@ -58,7 +60,7 @@ public:
 
     AbstractNode(const AbstractNode&) = delete;
     AbstractNode& operator=(const AbstractNode&) = delete;
-    QModelIndex index() const;
+    QModelIndex index(int column = 0) const;
 
 protected:
     const int m_id;

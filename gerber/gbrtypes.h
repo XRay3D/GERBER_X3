@@ -20,6 +20,13 @@
 
 namespace Gerber {
 
+class GbrObj : public QObject {
+    Q_OBJECT
+public:
+    GbrObj() { }
+    virtual ~GbrObj() { }
+};
+
 class AbstractAperture;
 
 #if __cplusplus > 201703L

@@ -24,7 +24,7 @@ public:
     ~FileTreeView() override = default;
     void hideOther();
     void closeFile();
-//    void closeFile2(const QModelIndex& index);
+    //    void closeFile2(const QModelIndex& index);
     void saveGcodeFile();
 
 private:

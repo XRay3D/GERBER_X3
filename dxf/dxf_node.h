@@ -24,6 +24,8 @@ class Node : public AbstractNode {
     mutable bool header = true;
     mutable bool layer = true;
 
+    File* dxfFile() const;
+
 public:
     explicit Node(int id);
     ~Node() override = default;

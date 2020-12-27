@@ -93,6 +93,22 @@ void Layer::setColor(const QColor& color)
     m_colorPath = color;
 }
 
+bool Layer::isVisible() const { return m_visible; }
+
+void Layer::setVisible(bool visible)
+{
+    m_visible = visible;
+    if (itemGroupNorm && itemGroupPath) {
+        if (m_itemsType == ItemsType::Normal) {
+            itemGroupNorm->setVisible(m_visible);
+            itemGroupPath->setVisible(false);
+        } else {
+            itemGroupNorm->setVisible(false);
+            itemGroupPath->setVisible(m_visible);
+        }
+    }
+}
+
 ItemGroup* Layer::itemGroup() const
 {
     return m_itemsType == ItemsType::Normal
@@ -100,7 +116,7 @@ ItemGroup* Layer::itemGroup() const
         : itemGroupPath;
 }
 
-bool Layer::isEmpty() const { return !itemGroupNorm && !itemGroupPath; }
+bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
 
 ItemsType Layer::itemsType() const { return m_itemsType; }
 
@@ -111,11 +127,11 @@ void Layer::setItemsType(ItemsType itemsType)
     m_itemsType = itemsType;
     if (itemGroupNorm && itemGroupPath) {
         if (m_itemsType == ItemsType::Normal) {
-            itemGroupNorm->setVisible(true);
+            itemGroupNorm->setVisible(m_visible);
             itemGroupPath->setVisible(false);
         } else {
             itemGroupNorm->setVisible(false);
-            itemGroupPath->setVisible(true);
+            itemGroupPath->setVisible(m_visible);
         }
     }
 }

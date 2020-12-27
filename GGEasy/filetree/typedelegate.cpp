@@ -44,7 +44,7 @@ void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
             continue;
         comboBox->addItem(name, id);
         comboBox->setItemData(ctr, comboBox->size(), Qt::SizeHintRole);
-        comboBox->setItemData(ctr, toolTip, Qt::ToolTipRole);
+        comboBox->setItemData(ctr, name + '\n' + toolTip, Qt::ToolTipRole);
         qDebug() << __FUNCTION__ << ctr << name << id;
         ++ctr;
     }

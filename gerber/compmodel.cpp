@@ -31,7 +31,7 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
 
     QMap<QString, QVector<QPair<int, ComponentsNode*>>> map;
 
-    auto unsorted = new ComponentsNode("unsorted");
+    auto unsorted = new ComponentsNode(GbrObj::tr("unsorted"));
 
     for (const auto& c : file->components()) {
         static const QRegExp rx("(\\D+)(\\d+).*");
@@ -110,27 +110,27 @@ QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, i
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         switch (section) {
         case 0: /* <field> Manufacturer. */
-            return tr("Ref Des");
+            return GbrObj::tr("Ref Des");
         case 1: /* <field> Manufacturer part number. */
-            return tr("Manufacturer\n"
+            return GbrObj::tr("Manufacturer\n"
                       "part\n"
                       "number");
         case 2: /* <field> E.g. 220nF. */
-            return tr("Value");
+            return GbrObj::tr("Value");
         case 3: /* (TH|SMD|BGA|Other) Mount type. */
-            return tr("Mount\n"
+            return GbrObj::tr("Mount\n"
                       "type");
         case 4: /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
-            return tr("Footprint\n"
+            return GbrObj::tr("Footprint\n"
                       "name");
         case 5: /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
-            return tr("Package\n"
+            return GbrObj::tr("Package\n"
                       "name");
         case 6: /* <field> Package description. */
-            return tr("Package\n"
+            return GbrObj::tr("Package\n"
                       "name");
         case 7: /* <decimal> Height, in the unit of the file. */
-            return tr("Height");
+            return GbrObj::tr("Height");
         default:
             return QString("");
         }
