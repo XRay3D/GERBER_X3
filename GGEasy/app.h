@@ -62,7 +62,7 @@ class App {
     inline static Project* m_project = nullptr;
     inline static Scene* m_scene = nullptr;
     inline static SplashScreen* m_splashScreen = nullptr;
-    inline static FileTreeView* m_treeView = nullptr;
+    inline static FileTreeView* m_fileTreeView = nullptr;
 
 public:
     static DrillForm* drillForm() { return m_drillForm; }
@@ -75,5 +75,5 @@ public:
     static Project* project() { return m_project; }
     static Scene* scene() { return m_scene; }
     static SplashScreen* splashScreen() { return m_splashScreen; }
-    static FileTreeView* treeView() { return m_treeView; }
+    static FileTreeView* fileTreeView() { return m_fileTreeView; }
 };

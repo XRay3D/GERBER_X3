@@ -14,23 +14,22 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrcomponent.h"
+#include "gbrtypes.h"
 
+Gerber::Component::Component() { }
 
-
-Gerber::Component::Component() {}
-
-bool Gerber::Component::setMountType(const QString &key)
+bool Gerber::Component::setMountType(const QString& key)
 {
     int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
     mount = static_cast<MountType>(val);
     return val > -1 ? true : false;
 }
 
-int Gerber::Component::value1(const QString &key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
+int Gerber::Component::value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
 
-int Gerber::Component::value2(const QString &key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
+int Gerber::Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
 
-bool Gerber::Component::setData(int key, const QStringList &data)
+bool Gerber::Component::setData(int key, const QStringList& data)
 {
     bool fl = false;
     switch (key) {
@@ -78,5 +77,3 @@ QString Gerber::Component::toolTip() const
     tt += QString(GbrObj::tr("Footprint: %1\n")).arg(footprintName);
     return tt;
 }
-
-

@@ -130,15 +130,15 @@ void Handler::setPos(const QPointF& pos)
     if (m_hType == Center) {
         for (int i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.first());
-    } else {
-        double k = App::graphicsView()->scaleFactor() * StickingDistance;
-        for (Handler* h : handlers) { // прилипание
+    } else if (!Constructor::item) { // прилипание
+        const double k = App::graphicsView()->scaleFactor() * StickingDistance;
+        const bool fl = shape->type() == int(GiType::ShapeL) && shape->handlers.size() > 3;
+        for (Handler* h : handlers) {
             if (h != this && //
-                !Constructor::item &&//
-                h->shape != shape && //
+                (h->shape != shape || (fl && h->hType() != Adder)) && //
                 h->shape->isVisible() && //
                 QLineF(h->pos(), pos).length() < k //
-            ) { // прилипание
+            ) {
                 QGraphicsItem::setPos(h->pos());
                 break;
             }

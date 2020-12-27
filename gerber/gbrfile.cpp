@@ -352,10 +352,6 @@ void File::createGi()
     m_layerTypes[ApPaths].id = m_itemGroups[ApPaths]->size() ? ApPaths : NullType;
     m_layerTypes[Components].id = m_itemGroups[Components]->size() ? Components : NullType;
 
-    qDebug() << __FUNCTION__ << m_layerTypes[Normal].id;
-    qDebug() << __FUNCTION__ << m_layerTypes[ApPaths].id;
-    qDebug() << __FUNCTION__ << m_layerTypes[Components].id;
-
     m_itemGroups[Normal]->setVisible(false);
     m_itemGroups[ApPaths]->setVisible(false);
     m_itemGroups[Components]->setVisible(false);

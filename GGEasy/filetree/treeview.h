@@ -21,10 +21,9 @@ class FileTreeView : public QTreeView {
 
 public:
     explicit FileTreeView(QWidget* parent = nullptr);
-    ~FileTreeView() override = default;
+    ~FileTreeView() override ;
     void hideOther();
     void closeFile();
-    //    void closeFile2(const QModelIndex& index);
     void saveGcodeFile();
 
 private:

@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "compnode.h"
 #include "gbrcomponent.h"
+#include "gbrtypes.h"
 
 #include <QSharedPointer>
 

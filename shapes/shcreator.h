@@ -20,6 +20,8 @@ namespace Shapes {
 
 class Constructor {
     friend class Handler;
+    friend class PolyLine;
+
     inline static int type;
     inline static int counter;
     inline static QPointF point;

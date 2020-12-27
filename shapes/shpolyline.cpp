@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "shpolyline.h"
 #include "scene.h"
+#include "shcreator.h"
 #include "shhandler.h"
 #include <QIcon>
 
@@ -79,26 +80,26 @@ void PolyLine::updateOtherHandlers(Handler* handler)
                 QLineF(handler->pos(), h1->pos()).center());
         }
         handler->setHType(Handler::Corner);
-    } else if (handler->hType() == Handler::Corner) {
+    } else if (handler->hType() == Handler::Corner && !Constructor::item) {
         int idx = handlers.indexOf(handler);
         if (handler != handlers[1]) {
             if (handlers.size() > 4
-                && QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5) {
+                && handler->pos() == handlers[idx - 2]->pos() /*QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5*/) {
                 delete handlers.takeAt(idx - 1);
                 delete handlers.takeAt(idx - 2);
                 idx -= 2;
-            } else
-                handlers[idx - 1]->QGraphicsItem::setPos(
-                    QLineF(handler->pos(), handlers[idx - 2]->pos()).center());
+            } else {
+                handlers[idx - 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx - 2]->pos()).center());
+            }
         }
         if (handler != handlers.last()) {
             if (handlers.size() > 4
-                && QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5) {
+                && handler->pos() == handlers[idx + 2]->pos() /*QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5*/) {
                 delete handlers.takeAt(idx + 1);
                 delete handlers.takeAt(idx + 1);
-            } else
-                handlers[idx + 1]->QGraphicsItem::setPos(
-                    QLineF(handler->pos(), handlers[idx + 2]->pos()).center());
+            } else {
+                handlers[idx + 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx + 2]->pos()).center());
+            }
         }
     }
 }

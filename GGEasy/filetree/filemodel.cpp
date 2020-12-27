@@ -80,7 +80,6 @@ void FileModel::addFile(AbstractFile* file)
 
     QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
     qDebug() << __FUNCTION__ << selectIndex;
-
     file->setFileIndex(selectIndex);
     emit select(selectIndex);
     updateFile(selectIndex);
@@ -140,7 +139,10 @@ void FileModel::addShape(Shapes::Shape* sh)
     auto node = new Shapes::Node(sh->id());
     item->append(node);
     endInsertRows();
-
+    QModelIndex selectIndex = createIndex(rowCount, 0, node);
+    qDebug() << __FUNCTION__ << selectIndex;
+    sh->setFileIndex(selectIndex);
+    emit select(selectIndex);
     emit select(createIndex(rowCount, 0, node));
 }
 
