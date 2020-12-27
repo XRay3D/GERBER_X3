@@ -16,13 +16,13 @@
 #include "dxf_file.h"
 
 #include "section/dxf_blocks.h"
-#include "section/dxf_classes.h"
 #include "section/dxf_entities.h"
 #include "section/dxf_headerparser.h"
-#include "section/dxf_objects.h"
 #include "section/dxf_sectionparser.h"
 #include "section/dxf_tables.h"
-#include "section/dxf_thumbnailimage.h"
+//#include "section/dxf_classes.h"
+//#include "section/dxf_objects.h"
+//#include "section/dxf_thumbnailimage.h"
 
 #include "entities/dxf_entity.h"
 

@@ -26,9 +26,8 @@
 #include <QTimer>
 
 GraphicsItem::GraphicsItem(AbstractFile* file)
-    :   animation(this, "bodyColor")
-    ,
-    m_file(file)
+    : animation(this, "bodyColor")
+    , m_file(file)
     , m_pen(QPen(Qt::white, 0.0))
     , m_colorPtr(file ? &file->color() : nullptr)
     , m_color(Qt::white)
@@ -81,7 +80,6 @@ QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
         fl ? colorState |= Selected : colorState &= ~Selected;
         changeColor();
     } else if (change == ItemSceneChange) {
-
     }
     return QGraphicsItem::itemChange(change, value);
 }

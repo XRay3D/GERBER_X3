@@ -14,6 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "dxf_layermodel.h"
+#include "abstractnode.h"
 #include "dxf_file.h"
 #include "dxf_layer.h"
 #include "gi/itemgroup.h"
@@ -59,24 +60,12 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
             if (layers.at(names[index.row()])->itemGroup())
                 return static_cast<int>(layers.at(names[index.row()])->itemGroup()->isVisible());
             return {};
-        case Qt::DecorationRole: {
-            QColor color(layers.at(names[index.row()])->color());
-            color.setAlpha(255);
-            QPixmap pixmap(22, 22);
-            pixmap.fill(Qt::transparent);
-            QPainter p(&pixmap);
-            p.setBrush(color);
-            p.drawRect(2, 2, 18, 18);
-            return pixmap;
-        }
-            //        case Qt::BackgroundColorRole: {
-            //            QColor color(layers.at(names[index.row()])->color());
-            //            color.setAlpha(255);
-            //            return color;
-            //        }
+        case Qt::DecorationRole:
+            return decoration(layers.at(names[index.row()])->color());
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
         }
+        return {};
     case EntityCount:
         switch (role) {
         case Qt::DisplayRole:
@@ -85,9 +74,8 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
             return tr("Empty layer");
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
-        default:
-            return {};
         }
+        return {};
     case Type:
         switch (role) {
         case Qt::DisplayRole:
@@ -100,10 +88,8 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
             return static_cast<int>(layers.at(names[index.row()])->itemsType());
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
-        default:
-            return {};
         }
-
+        return {};
     default:
         return {};
     }

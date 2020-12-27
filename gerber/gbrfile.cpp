@@ -286,7 +286,7 @@ void File::createGi()
     }
 
     // add components
-    for (const Component& c : m_components) {
+    for (const Component& c : qAsConst(m_components)) {
         if (!c.referencePoint.isNull())
             m_itemGroups[Components]->append(new ComponentItem(c, this));
     }
