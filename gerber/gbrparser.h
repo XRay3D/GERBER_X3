@@ -76,7 +76,8 @@ private:
     QString refDes;
     int aperFunction = -1;
     QMap<int, int> aperFunctionMap;
-    //Attributes att;
+
+    Attr::File attFile;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);

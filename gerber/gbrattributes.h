@@ -1,24 +1,51 @@
 /*******************************************************************************
-*                                                                              *
+*                                                    *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2020                                          *
-*                                                                              *
+*                                                    *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
+*                                                    *
 *******************************************************************************/
 #pragma once
+#include <QDebug>
 #include <QMetaEnum>
 #include <QMetaObject>
 #include <QObject>
+#include <QStringList>
+#include <map>
+
+/*
+
+Каждый атрибут состоит из имени атрибута и необязательного значения атрибута:
+<Attribute> = <AttributeName>[,<AttributeValue>]*
+
+Имена атрибутов соответствуют синтаксису имен в разделе 3.6.5.
+Значение атрибута состоит из одного или нескольких полей, разделенных запятыми, см. Раздел 3.6.6.
+<AttributeValue> = <Field>{,<Field>}
+
+По элементам, к которым они прикреплены, есть три типа атрибутов:
+Тип вложения        Элемент, к которому они прикрепляют метаинформацию
+Атрибуты файла      Прикрепите метаинформацию к файлу целиком.
+Атрибуты диафрагмы  Прикрепите метаинформацию к апертуре или региону. Объекты, созданные апертурой, наследуют метаинформацию апертуры.
+Атрибуты объекта    Прикрепить метаинформацию к объекту напрямую
+
+
+*/
+
 namespace Gerber {
-namespace Att { //Attributes
+
+namespace Attr { //Attributes
+
     struct Command {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+        static int value(const QString& key)
+        {
+            return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
+        }
         enum e {
             TF, // Attribute file. Set a file attribute.    5.2
             TA, // Attribute aperture. Add an aperture attribute to the dictionary or modify it.    5.3
@@ -29,118 +56,133 @@ namespace Att { //Attributes
         Q_GADGET
     };
 
-    struct File {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
-        enum e {
-            Part, /*
-        Identifies the part the file represents, e.g. a single PCB 5.6.2*/
-            FileFunction, /*
-        Identifies the file’s function in the PCB, e.g. top copper layer 5.6.3*/
-            FilePolarity, /*
-        Defines whether the file represents the presence or absence of material
-        in the PCB layer, expressed by positive or negative 5.6.4*/
-            SameCoordinates, /*
-        All files in a fabrication data set with this attribute use the same
-        coordinates. In other words, they align. 5.6.5*/
-            CreationDate, /*
-        Defines the creation date and time of the file. 5.6.6*/
-            GenerationSoftware, /*
-        Identifies the software creating the file. 5.6.7*/
-            ProjectId, /*
-        Defines project and revisions. 5.6.8*/
-            MD5, /*
-        Sets the MD5 file signature or checksum. 5.6.9*/
-        };
-        Q_ENUM(e)
+    struct AbsctractData;
+    struct FileFunction {
         Q_GADGET
+    public:
+        ~FileFunction();
+        enum eFunction {
+            // Drawing
+            ArrayDrawing,
+            AssemblyDrawing,
+            FabricationDrawing,
+            OtherDrawing,
+            // Mask
+            Carbonmask,
+            Goldmask,
+            Heatsinkmask,
+            Peelablemask,
+            Silvermask,
+            Soldermask,
+            Tinmask,
+
+            Component,
+            Copper,
+            Depthrout,
+            Drillmap,
+            Glue,
+            Legend,
+            // Plated
+            NonPlated,
+            Plated,
+            Other,
+            Pads,
+            Paste,
+            Profile,
+            Vcut,
+            Vcutmap,
+            Viafill,
+        };
+        Q_ENUM(eFunction)
+        static eFunction toFunction(const QString& key);
+
+        void parse(const QStringList& list);
+        eFunction m_function;
+        AbsctractData* m_data = nullptr;
     };
 
-    struct FileFunction {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
-        enum e {
-            // Data files
-            Copper, /*L<p>,(Top|Inr|Bot)[,<type>]
-        A conductor or copper layer.
-        L<p> (p is an integer>0) specifies the physical copper layer number. Numbers are consecutive. The top layer is always L1. (L0 does not exist.) The mandatory field (Top|Inr|Bot) specifies it as the top, an inner or the bottom layer; this redundant information helps in handling partial data. The specification of the top layer is “Copper,L1,Top[,type]”, of the bottom layer of an 8 layer job it is Copper,L8,Bot[,type]
-        The top side is the one with the through-hole components, if any.
-        The optional <type> field indicates the layer type. If present it must take one of the following values: Plane, Signal, Mixed or Hatched. */
-            Plated, /*i,j,(PTH|Blind|Buried) [,<label>]
-        Plated drill/rout data, span from copper layer i to layer j. The from/to order is not significant. The (PTH|Blind|Buried) field is mandatory.
-        The label is optional. If present it must take one of the following values: Drill, Rout or Mixed. */
-            NonPlated, /*i,j,(NPTH|Blind|Buried) [,<label>]
-        Non-plated drill/rout data, span from copper layer i to layer j. The from/to order is not significant. The (NPTH|Blind|Buried) field is mandatory.
-        The label is optional. If present it must take one of the following values: Drill, Rout or Mixed. */
-            Profile, /*(P|NP)
-        A file containing the board profile (or outline) and only the board profile. Such a file is mandatory in a PCB fabrication data set. See 5.8.1.
-        The mandatory (P|NP) label indicates whether board is edge-plated or not. */
-            Soldermask, /*(Top|Bot)[,<index>]
-        Solder mask or solder resist.
-        Usually the image represents the solder mask openings; it then has negative polarity, see 5.6.4.
-        The optional field is only needed when there is more than one solder mask on one side – top or bottom. The integer <index> then numbers the solder masks from the PCB side outwards, starting with 1 for the mask directly on the copper. Usually there is only one solder mask on a side, and then <index> is omitted. An example with two top solder masks:
-        Soldermask,Top,1 Mask on the copper
-        Soldermask,Top,2  Mask on the first mask */
-            Legend, /*(Top|Bot)[,<index>]
-        A legend is printed on top of the solder mask to show which component goes where. A.k.a. ‘silk’ or ‘silkscreen’.
-        See the Soldermask entry for an explanation of the index. */
-            Paste, /*(Top|Bot)
-        Locations where paste must be applied. */
-            Glue, /*(Top|Bot)
-        Glue spots used to fix components to the board prior to soldering. */
-            Carbonmask, /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Goldmask, /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Heatsinkmask,
-            /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Peelablemask, /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Silvermask, /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Tinmask, /*(Top|Bot)[,<index>]
-        See Soldermask for the usage of <index>. */
-            Depthrout, /*(Top|Bot)
-        Area that must be routed to a given depth rather than going through the whole board. */
-            Vcut, /*[,(Top|Bot)]
-        Contains the lines that must be v-cut. (V-cutting is also called scoring.)
-        If the optional attachment (Top|Bot) is not present the scoring lines are identical on top and bottom – this is the normal case. In the exceptional case scoring is different on top and bottom two files must be supplied, one with Top and the other with Bot. */
-            Viafill, /*
-        Contains the via’s that must be filled. It is however recommended to specify the filled via’s with the optional field in the .AperFunction ViaDrill. */
-
-            // Drawing files
-            ArrayDrawing, /*
-        A drawing of the array (biscuit, assembly panel, shipment panel, customer panel). */
-            AssemblyDrawing, /*(Top|Bot)
-        A drawing with the locations and reference designators of the components. It is mainly used in PCB assembly. */
-            Drillmap, /*
-        A drawing with the locations of the drilled holes. It often also contains the hole sizes, tolerances and plated/non-plated info. */
-            FabricationDrawing, /*
-        A drawing with additional information for the fabrication of the bare PCB: the location of holes and slots, the board outline, sizes and tolerances, layer stack, material, finish choice, etc. */
-            Vcutmap, /*
-        A drawing with v-cut or scoring information. */
-            OtherDrawing, /*<mandatory field>
-        Any other drawing than the 4 ones above. The mandatory field informally describes its topic. */
-            //  Other files
-            Pads, /*(Top|Bot)
-        A file containing only the pads (SMD, BGA, component, …). Not needed in a fabrication data set. */
-            Other, /*<mandatory field>
-        The value ‘Other’ is to be used if none of the values above fits. By putting ‘Other’ rather than simply omitting the file function attribute it is clear the file has none of the standard functions, already useful information. Do not abuse standard values for a file with a vaguely similar function – use ‘Other’ to keep the function value clean and reliable.
-        The mandatory field informally describes the file function.*/
-            Component,
-            /*L<p>,(Top|Bot) A component layer.
-        L<p> (p is the copper layer number to which
-        the components described in this file are attached) specifies the physical copper layer
-        number. (Top|Bot) indicates if the components are on top, upwards, or on the bottom,
-        downward, of the layer to which they are attached. This syntax caters for embedded
-        components.
-        For jobs without embedded components there is an intentional redundancy. This syntax
-        caters for jobs with embedded components.
-        Example:
-        %TF.FileFunction,Component,L1,Top*%
-        %TF.FileFunction,Component,L4,Bot*%*/
-        };
-        Q_ENUM(e)
+    struct File {
         Q_GADGET
+
+    public:
+        /* Атрибуты файла устанавливаются с помощью команды TF в верхнем регистре с использованием следующего синтаксиса
+         * <TF command> = %TF<AttributeName>[,<AttributeValue>]*%
+         * <AttributeValue> = <Field>{,<Field>}
+         */
+        enum class StdAttr {
+            Part, //Определяет часть, которую представляет файл, например одна печатная плата 5.6.2
+            FileFunction, //Определяет функцию файла на плате, например верхний медный слой 5.6.3
+            FilePolarity, //Положительное или отрицательное. Это определяет, представляет ли изображение присутствие или отсутствие материала. 5.6.4
+            SameCoordinates, //Все файлы в наборе производственных данных с этим атрибутом используют одни и те же координаты. Другими словами, они совпадают. 5.6.5
+            CreationDate, //Определяет дату и время создания файла. 5.6.6
+            GenerationSoftware, //Определяет программное обеспечение, создающее файл. 5.6.7
+            ProjectId, //Определяет проект и редакции. 5.6.8
+            MD5, //Устанавливает подпись или контрольную сумму файла MD5. 5.6.9
+        };
+        Q_ENUM(StdAttr) //0
+        static StdAttr toStdAttr(const QString& key) { return StdAttr(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data())); }
+
+        enum ePart {
+            /* Значение атрибута файла .Part определяет, какая часть описывается.
+             * Атрибут - если он присутствует - должен быть определен в заголовке.
+             */
+            Single, // Одиночная печатная плата
+            Array, // A.k.a. панель заказчика, панель монтажная, панель транспортировочная, бисквит
+            FabricationPanel, // A.k.a. рабочая панель, производственная панель
+            Coupon, // Тестовый купон
+            Other // Other,<mandatory field>         Ни один из вышеперечисленных. Обязательное поле неформально указывает на деталь
+        };
+        Q_ENUM(ePart) //1
+
+        enum eFilePolarity {
+            Positive, // Изображение представляет наличие материала (рекомендуется)
+            Negative, // Изображение представляет собой отсутствие материала
+        };
+        Q_ENUM(eFilePolarity) //2
+        static eFilePolarity toFilePolarityValue(const QString& key) { return eFilePolarity(staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data())); }
+
+        void parse(const QStringList& list)
+        {
+            switch (toStdAttr(list.first())) {
+            case StdAttr::Part:
+                part = list.mid(1);
+                break;
+            case StdAttr::FileFunction:
+                fileFunction.parse(list.mid(1));
+                break;
+            case StdAttr::FilePolarity:
+                filePolarity = toFilePolarityValue(list.last());
+                break;
+            case StdAttr::SameCoordinates:
+                sameCoordinates = list.mid(1);
+                break;
+            case StdAttr::CreationDate:
+                creationDate = list.last();
+                break;
+            case StdAttr::GenerationSoftware:
+                generationSoftware = list.mid(1);
+                break;
+            case StdAttr::ProjectId:
+                projectId = list.mid(1);
+                break;
+            case StdAttr::MD5:
+                md5 = list.last();
+                break;
+            default:;
+                custom[list.first()] = list.mid(1);
+                qDebug() << __FUNCTION__ << custom;
+            }
+        }
+
+        QString creationDate;
+        FileFunction fileFunction;
+        eFilePolarity filePolarity;
+        QStringList generationSoftware;
+        QString md5;
+        QStringList part;
+        QStringList projectId;
+        QStringList sameCoordinates;
+        std::map<QString, QStringList> custom;
     };
 
     struct Aperture {

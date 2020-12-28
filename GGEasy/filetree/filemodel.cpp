@@ -79,10 +79,10 @@ void FileModel::addFile(AbstractFile* file)
     endInsertRows();
 
     QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
-    qDebug() << __FUNCTION__ << selectIndex;
+    qDebug() << __FUNCTION__ << file->name();
     file->setFileIndex(selectIndex);
-    emit select(selectIndex);
     updateFile(selectIndex);
+    emit select(selectIndex);
 }
 
 void FileModel::updateFile(const QModelIndex& fileIndex)
