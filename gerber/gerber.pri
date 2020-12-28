@@ -31,6 +31,7 @@ HEADERS += \
     $$PWD/compmodel.h \
     $$PWD/compnode.h \
     $$PWD/compview.h \
+    $$PWD/gbrattrfilefunction.h \
     $$PWD/gbrattributes.h \
     $$PWD/gbrcomponent.h \
     $$PWD/gbrnode.h \
@@ -45,6 +46,7 @@ SOURCES += \
     $$PWD/compmodel.cpp \
     $$PWD/compnode.cpp \
     $$PWD/compview.cpp \
+    $$PWD/gbrattrfilefunction.cpp \
     $$PWD/gbrattributes.cpp \
     $$PWD/gbrcomponent.cpp \
     $$PWD/gbrnode.cpp \

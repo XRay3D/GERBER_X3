@@ -430,7 +430,7 @@ void Parser::addPath()
         break;
     }
     if (aperFunctionMap.contains(m_state.aperture())
-        && aperFunctionMap[m_state.aperture()] == Att::AperFunction::ComponentOutline) {
+        && aperFunctionMap[m_state.aperture()] == Attr::AperFunction::ComponentOutline) {
         components[refDes].footprint = m_path;
     }
     resetStep();
@@ -461,10 +461,10 @@ void Parser::addFlash()
     }
     if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
         switch (aperFunctionMap[m_state.aperture()]) {
-        case Att::AperFunction::ComponentPin:
+        case Attr::AperFunction::ComponentPin:
             components[refDes].pins.last().pos = m_state.curPos();
             break;
-        case Att::AperFunction::ComponentMain:
+        case Attr::AperFunction::ComponentMain:
             components[refDes].referencePoint = m_state.curPos();
             break;
         }
@@ -598,6 +598,8 @@ Paths Parser::createPolygon()
 
 bool Parser::parseAperture(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (match.exactMatch(gLine)) {
@@ -662,6 +664,8 @@ bool Parser::parseAperture(const QString& gLine)
 
 bool Parser::parseApertureBlock(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp match(QStringLiteral("^%ABD(\\d+)\\*%$"));
     if (match.exactMatch(gLine)) {
         m_abSrIdStack.push({ WorkingType::ApertureBlock, match.cap(1).toInt() });
@@ -679,6 +683,8 @@ bool Parser::parseApertureBlock(const QString& gLine)
 
 bool Parser::parseTransformations(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     enum {
         trPolarity,
         trMirror,
@@ -720,6 +726,8 @@ bool Parser::parseTransformations(const QString& gLine)
 
 bool Parser::parseStepRepeat(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     /*
      *     <SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
      *     <SR close>     = %SR*%
@@ -775,6 +783,8 @@ void Parser::closeStepRepeat()
 
 bool Parser::parseApertureMacros(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp match(QStringLiteral("^%AM([^\\*]+)\\*([^%]+)?(%)?$"));
     // Start macro if(match, else not an AM, carry on.
     if (match.exactMatch(gLine)) {
@@ -788,93 +798,92 @@ bool Parser::parseApertureMacros(const QString& gLine)
 
 bool Parser::parseAttributes(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp matchAttr(QStringLiteral("^%(T[FAOD])(\\.?)(.*)\\*%$"));
     if (matchAttr.exactMatch(gLine)) {
-        switch (Att::Command::value(matchAttr.cap(1))) {
-        case Att::Command::TF: {
-            QStringList sl(matchAttr.cap(3).split(','));
-            int index = Att::File::value(sl.first());
-            switch (index) {
-            case Att::File::Part:
-            case Att::File::FileFunction:
-            case Att::File::FilePolarity:
-            case Att::File::SameCoordinates:
-            case Att::File::CreationDate:
-            case Att::File::GenerationSoftware:
-            case Att::File::ProjectId:
-            case Att::File::MD5:
-            default:
+        switch (Attr::Command::value(matchAttr.cap(1))) {
+        case Attr::Command::TF:
+            attFile.parse(matchAttr.cap(3).split(','));
+            break;
+        case Attr::Command::TA:
+            break;
+            {
+                QStringList sl(matchAttr.cap(3).split(','));
+                int index = Attr::Aperture::value(sl.first());
+                switch (index) {
+                case Attr::Aperture::AperFunction:
+                    if (sl.size() > 1) {
+                        switch (int key = Attr::AperFunction::value(sl[1])) {
+                        case Attr::AperFunction::ComponentMain:
+                        case Attr::AperFunction::ComponentOutline:
+                        case Attr::AperFunction::ComponentPin:
+                            aperFunction = key;
+                            break;
+                        default:
+                            aperFunction = -1;
+                        }
+                    }
+                    break;
+                case Attr::Aperture::DrillTolerance:
+                case Attr::Aperture::FlashText:
+                default:
 
-                ;
+                    ;
+                }
+                //apertureAttributesStrings.append(matchAttr.cap(2));
             }
-        } break;
-        case Att::Command::TA: {
-            QStringList sl(matchAttr.cap(3).split(','));
-            int index = Att::Aperture::value(sl.first());
-            switch (index) {
-            case Att::Aperture::AperFunction:
-                if (sl.size() > 1) {
-                    switch (int key = Att::AperFunction::value(sl[1])) {
-                    case Att::AperFunction::ComponentMain:
-                    case Att::AperFunction::ComponentOutline:
-                    case Att::AperFunction::ComponentPin:
-                        aperFunction = key;
+            break;
+        case Attr::Command::TO:
+            break;
+            {
+                QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
+                switch (int index = Component::value1(sl.first()); index) {
+                case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
+                    break;
+                case Component::P:
+                    components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
+                    break;
+                case Component::C:
+                    switch (int key = Component::value2(sl.first())) {
+                    case Component::Rot:
+                    case Component::Mfr:
+                    case Component::MPN:
+                    case Component::Val:
+                    case Component::Mnt:
+                    case Component::Ftp:
+                    case Component::PgN:
+                    case Component::Hgt:
+                    case Component::LbN:
+                    case Component::LbD:
+                    case Component::Sup:
+                        components[refDes].setData(key, sl);
                         break;
                     default:
-                        aperFunction = -1;
+                        static const QRegExp rx("(\\\\[0-9a-fA-F]{4})");
+                        int pos = 0;
+                        while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
+                            sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
+                        }
+                        refDes = sl.last();
+                        components[refDes].refdes = refDes;
                     }
-                }
-                break;
-            case Att::Aperture::DrillTolerance:
-            case Att::Aperture::FlashText:
-            default:
-
-                ;
-            }
-            //apertureAttributesStrings.append(matchAttr.cap(2));
-
-        } break;
-        case Att::Command::TO: {
-            QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
-            switch (int index = Component::value1(sl.first()); index) {
-            case Component::N:
-
-                break;
-            case Component::P:
-                components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
-                break;
-            case Component::C:
-                switch (int key = Component::value2(sl.first())) {
-                case Component::Rot:
-                case Component::Mfr:
-                case Component::MPN:
-                case Component::Val:
-                case Component::Mnt:
-                case Component::Ftp:
-                case Component::PgN:
-                case Component::Hgt:
-                case Component::LbN:
-                case Component::LbD:
-                case Component::Sup:
-                    components[refDes].setData(key, sl);
                     break;
                 default:
-                    static const QRegExp rx("(\\\\[0-9a-fA-F]{4})");
-                    int pos = 0;
-                    while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
-                        sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
-                    }
-                    refDes = sl.last();
-                    components[refDes].refdes = refDes;
+                    qDebug() << __FUNCTION__ << gLine << matchAttr.capturedTexts();
                 }
-                break;
-            default:
-                qDebug() << __FUNCTION__ << gLine << matchAttr.capturedTexts();
             }
-        } break;
-        case Att::Command::TD:
-            refDes.clear();
-            aperFunction = -1;
+            break;
+        case Attr::Command::TD:
+            break;
+            {
+                enum {
+                    Command,
+                    AttributeName
+                };
+                refDes.clear();
+                aperFunction = -1;
+            }
             break;
         }
         return true;
@@ -1034,6 +1043,8 @@ bool Parser::parseEndOfFile(const QString& gLine)
 
 bool Parser::parseFormat(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QVector<QChar> zeroOmissionModeList { 'L', 'T' };
     static const QVector<QChar> coordinateValuesNotationList { 'A', 'I' };
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
@@ -1159,6 +1170,8 @@ bool Parser::parseGCode(const QString& gLine)
 
 bool Parser::parseImagePolarity(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp match(QStringLiteral("^%IP(POS|NEG)\\*%$"));
     static const QVector<QString> slImagePolarity { "POS", "NEG" };
     if (match.exactMatch(gLine)) {
@@ -1242,6 +1255,8 @@ bool Parser::parseDCode(const QString& gLine)
 
 bool Parser::parseUnitMode(const QString& gLine)
 {
+    if (!gLine.startsWith("%"))
+        return false;
     static const QRegExp match(QStringLiteral("^%MO(IN|MM)\\*%$"));
     static const QVector<QString> slUnitType { "IN", "MM" };
     if (match.exactMatch(gLine)) {

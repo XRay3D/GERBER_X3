@@ -123,7 +123,7 @@ MainWindow::MainWindow(QWidget* parent)
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         int i = 0;
         QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/motorcyc.dxf"); });
+        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-F_Cu.gbr"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/misc01.dxf"); });
         //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/ELECTROSTATIC_AMP_A.dxf"); });
