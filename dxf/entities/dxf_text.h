@@ -15,17 +15,19 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Text final : Entity {
+    Q_GADGET
+public:
     Text(SectionParser* sp);
 
     // Entity interface
-public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::TEXT; }
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbText)
         Thickness = 39, // Толщина (необязательно; значение по умолчанию = 0)
         FirstAlignmentPtX = 10, // Первая точка выравнивания (в ОСК)        //Файл DXF: значение X; приложение: 3D-точка
@@ -51,9 +53,13 @@ public:
     };
 
     enum TextGenerationFlagsE { // 71
+        Norm = 0, // my val
+        MirroredInX = 2, // текст в обратном направлении (зеркально отражен по X)
+        MirroredInY = 4, // текст перевернут (зеркально отражен по Y)
         Backward = 2, // текст в обратном направлении (зеркально отражен по X)
-        UpsideDown = 4 // текст перевернут (зеркально отражен по Y)
+        UpsideDown = 4, // текст перевернут (зеркально отражен по Y)
     };
+    Q_ENUM(TextGenerationFlagsE)
 
     enum HorizontalJustTypeE { // 72
         Left = 0, // слева
@@ -63,22 +69,28 @@ public:
         MiddleH = 4, // посередине (если выравнивание по вертикали = 0)
         Fit = 5, // вписать (если выравнивание по вертикали = 0)
     };
+    Q_ENUM(HorizontalJustTypeE)
+
     enum VerticalJustTypeE { // 73
         Baseline = 0, // по базовой линии
         Bottom = 1, // снизу
         MiddleV = 2, // посередине
         Top = 3, // сверху
     };
+    Q_ENUM(VerticalJustTypeE)
 
     QString text;
+    QString textStyleName = "STANDARD";
+
     QPointF pt1;
     QPointF pt2;
 
-    TextGenerationFlagsE textGenerationFlags = Backward;
-    HorizontalJustTypeE horizontalJustType = Left;
-    VerticalJustTypeE verticalJustType = Baseline;
+    int16_t textGenerationFlag = Norm;
+    int16_t horizontalJustType = Left;
+    int16_t verticalJustType = Baseline;
 
     double thickness = 0;
     double textHeight = 0;
+    double rotation = 0;
 };
 }

@@ -106,7 +106,7 @@ void InsertEntity::parse(CodeData& code)
         case ExtrusionDirectionZ:
             break;
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

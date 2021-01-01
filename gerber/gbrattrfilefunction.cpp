@@ -20,7 +20,7 @@ namespace Gerber::Attr {
 /// \brief AbsctractData::AbsctractData
 /// \param function
 ///
-AbsctractData::AbsctractData(FileFunction::eFunction function)
+AbstrFileFunc::AbstrFileFunc(File::eFunction function)
     : function(function)
 {
 }
@@ -29,8 +29,8 @@ AbsctractData::AbsctractData(FileFunction::eFunction function)
 /// \param function
 /// \param list
 ///
-Copper::Copper(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Copper::Copper(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1)))
     , type(toType(list.value(2)))
@@ -45,8 +45,8 @@ Copper::Copper(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-Plated::Plated(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Plated::Plated(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , layerFrom(list.value(0).toInt())
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
@@ -63,8 +63,8 @@ Plated::Plated(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-NonPlated::NonPlated(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+NonPlated::NonPlated(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , layerFrom(list.value(0).toInt())
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
@@ -81,8 +81,8 @@ NonPlated::NonPlated(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-Legend::Legend(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Legend::Legend(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
 {
@@ -95,8 +95,8 @@ Legend::Legend(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-Mask::Mask(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Mask::Mask(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
     , type(toType(function))
@@ -111,8 +111,8 @@ Mask::Mask(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-Profile::Profile(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Profile::Profile(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , plated(toEdgePlated(list.value(0)))
 {
     qDebug() << __FUNCTION__
@@ -123,8 +123,8 @@ Profile::Profile(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-Paste::Paste(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Paste::Paste(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
 {
     qDebug() << __FUNCTION__
@@ -135,8 +135,8 @@ Paste::Paste(FileFunction::eFunction function, const QStringList& list)
 /// \param function
 /// \param list
 ///
-AssemblyDrawing::AssemblyDrawing(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+AssemblyDrawing::AssemblyDrawing(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
 {
     qDebug() << __FUNCTION__
@@ -147,8 +147,8 @@ AssemblyDrawing::AssemblyDrawing(FileFunction::eFunction function, const QString
 /// \param function
 /// \param list
 ///
-Component::Component(FileFunction::eFunction function, const QStringList& list)
-    : AbsctractData(function)
+Component::Component(File::eFunction function, const QStringList& list)
+    : AbstrFileFunc(function)
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1)))
 {

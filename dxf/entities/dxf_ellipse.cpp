@@ -31,8 +31,8 @@ Ellipse::Ellipse(SectionParser* sp)
 {
 }
 
-void Ellipse::draw(const InsertEntity* const /*i*/) const
-{
+//void Ellipse::draw(const InsertEntity* const i) const
+//{
     //    if (i) {
     //        //        for (int r = 0; r < i->rowCount; ++r) {
     //        //            for (int c = 0; c < i->colCount; ++c) {
@@ -80,13 +80,13 @@ void Ellipse::draw(const InsertEntity* const /*i*/) const
     //        item->setPos(CenterPoint);
     //        attachToLayer(item);
     //    }
-}
+//}
 
 void Ellipse::parse(CodeData& code)
 {
     do {
         data.push_back(code);
-        switch (static_cast<VarType>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: //100
             break; //	100	Маркер подкласса (AcDbEllipse)
 
@@ -124,7 +124,7 @@ void Ellipse::parse(CodeData& code)
             endParameter = code;
             break; //	42	Конечный параметр (значение для полного эллипса — 2 пи)
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

@@ -72,15 +72,21 @@ AbstractFile* Parser::parseFile(const QString& fileName)
     };
 
     try {
+        int progress = 0;
+        //int progressCtr = 0;
         do {
-            getCode();
+            if (auto code = getCode(); code.code() == 0 && code == "SECTION")
+                ++progress;
         } while (!in.atEnd() || *(codes.end() - 1) != "EOF");
         codes.shrink_to_fit();
+
+        //emit fileProgress(m_file->shortName(), progress, progressCtr);
 
         for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
             if (*it == "SECTION")
                 from = it;
             if (auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
+                //emit fileProgress(m_file->shortName(), 0, progressCtr++);
                 to = it;
                 const auto type = SectionParser::toType(*(from + 1));
                 switch (type) {
@@ -114,28 +120,31 @@ AbstractFile* Parser::parseFile(const QString& fileName)
             }
         }
         file.close();
+        if (dxfFile()->m_sections.size() == 0) {
+            delete m_file;
+            m_file = nullptr;
+        } else {
+            //emit fileProgress(m_file->shortName(), 1, 1);
+            emit fileReady(m_file);
+        }
     } catch (const QString& wath) {
         qWarning() << "exeption QString:" << wath;
-        emit fileError("", QFileInfo(fileName).fileName() + "\n" + wath);
+        //emit fileProgress(m_file->shortName(), 1, 1);
+        emit fileError( QFileInfo(fileName).fileName() , wath);
         delete m_file;
         return nullptr;
     } catch (const std::exception& e) {
         qWarning() << "exeption:" << e.what();
-        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error! " + QString(e.what()));
+        //emit fileProgress(m_file->shortName(), 1, 1);
+        emit fileError( QFileInfo(fileName).fileName() , "Unknown Error! " + QString(e.what()));
         delete m_file;
         return nullptr;
     } catch (...) {
         qWarning() << "exeption:" << errno;
-        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error! " + QString::number(errno));
+        //emit fileProgress(m_file->shortName(), 1, 1);
+        emit fileError( QFileInfo(fileName).fileName() , "Unknown Error! " + QString::number(errno));
         delete m_file;
         return nullptr;
-    }
-
-    if (dxfFile()->m_sections.size() == 0) {
-        delete m_file;
-        m_file = nullptr;
-    } else {
-        emit fileReady(m_file);
     }
     return m_file;
 }

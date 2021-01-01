@@ -41,7 +41,6 @@
 *******************************************************************************/
 
 #include "clipper.hpp"
-#include "gbrtypes.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>

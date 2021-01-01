@@ -22,7 +22,9 @@
 
 #include "exnode.h"
 #include "foldernode.h"
+#ifdef GERBER
 #include "gbrnode.h"
+#endif
 #include "gcnode.h"
 #include "project.h"
 #include "shheaders.h"
@@ -58,11 +60,13 @@ void FileModel::addFile(AbstractFile* file)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    AbstractNode* newItem;
+    AbstractNode* newItem = nullptr;
     beginInsertRows(index, rowCount, rowCount);
     switch (file->type()) {
     case FileType::Gerber:
+#ifdef GERBER
         item->append(newItem = new Gerber::Node(file->id()));
+#endif
         break;
     case FileType::Excellon:
         item->append(newItem = new Excellon::Node(file->id()));
@@ -77,9 +81,9 @@ void FileModel::addFile(AbstractFile* file)
         break;
     }
     endInsertRows();
-
+    if (newItem == nullptr)
+        return;
     QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
-    qDebug() << __FUNCTION__ << file->name();
     file->setFileIndex(selectIndex);
     updateFile(selectIndex);
     emit select(selectIndex);
@@ -200,7 +204,7 @@ bool FileModel::setData(const QModelIndex& index, const QVariant& value, int rol
 
 QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    if ((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal)
         switch (section) {
         case 0:
             return tr("Name");

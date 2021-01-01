@@ -13,6 +13,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
+#ifdef GERBER
 #include "componentitem.h"
 #include "abstractfile.h"
 #include "graphicsview.h"
@@ -133,3 +134,4 @@ void ComponentItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 }
 
 Paths ComponentItem::paths() const { return {}; }
+#endif

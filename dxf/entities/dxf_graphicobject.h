@@ -77,8 +77,12 @@ public:
 
     inline const File* file() const { return m_gFile; }
     inline const Entity* entity() const { return m_entity; }
+    // const
     inline const Path& path() const { return m_path; }
     inline const Paths& paths() const { return m_paths; }
+    // edit
+    inline Path& path() { return m_path; }
+    inline Paths& paths() { return m_paths; }
 };
 
 }

@@ -14,6 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrparser.h"
+#include "gbrattrfilefunction.h"
 #include "settings.h"
 #include <QDateTime>
 #include <QDebug>
@@ -97,6 +98,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             emit fileError("", m_file->shortName() + "\n" + "Incorrect File!");
 
         emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
+        qDebug() << __FUNCTION__ << m_file->name();
 
         m_lineNum = 0;
 
@@ -171,7 +173,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         if (file()->isEmpty()) {
             delete m_file;
         } else {
-            if (m_file->shortName().contains("bot", Qt::CaseInsensitive))
+            if (attFile.fileFunction && attFile.fileFunction->side_() == Attr::AbstrFileFunc::Side::Bot) {
+                m_file->setSide(Bottom);
+            } else if (m_file->shortName().contains("bot", Qt::CaseInsensitive))
                 m_file->setSide(Bottom);
             else if (m_file->shortName().contains(".gb", Qt::CaseInsensitive) && !m_file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
                 m_file->setSide(Bottom);

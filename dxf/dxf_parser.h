@@ -13,9 +13,6 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrattributes.h"
-#include "gbrfile.h"
-#include "gbrtypes.h"
 #include "parser.h"
 #include <QObject>
 #include <QStack>

@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include "gbrtypes.h"
 #include "gi/graphicsitem.h"
 
@@ -127,3 +128,4 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
+#endif

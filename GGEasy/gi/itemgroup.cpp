@@ -58,7 +58,7 @@ void ItemGroup::setBrushColor(const QColor& color)
     if (m_brushColor != color) {
         m_brushColor = color;
         for (GraphicsItem* item : *this)
-            item->setColorP(&m_brushColor);
+            item->setColorPtr(&m_brushColor);
     }
 }
 
@@ -74,13 +74,13 @@ void ItemGroup::setPen(const QPen& pen)
 void ItemGroup::setBrushColorP(QColor* col)
 {
     for (GraphicsItem* item : *this)
-        item->setColorP(col);
+        item->setColorPtr(col);
 }
 
 void ItemGroup::setPenColor(QColor* col)
 {
     for (GraphicsItem* item : *this)
-        item->setPenColor(col);
+        item->setPenColorPtr(col);
 }
 
 void ItemGroup::setZValue(qreal z)

@@ -13,6 +13,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
+#ifdef GERBER
 #include "thermalnode.h"
 #include "thermalmodel.h"
 
@@ -224,3 +225,4 @@ void ThermalNode::enable()
 QModelIndex ThermalNode::index(int column) const { return model->createIndex(row(), column, reinterpret_cast<quintptr>(this)); }
 
 bool ThermalNode::isChecked() const { return m_checked; }
+#endif

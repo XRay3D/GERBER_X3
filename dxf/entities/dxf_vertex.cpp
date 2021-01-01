@@ -22,14 +22,14 @@ Vertex::Vertex(SectionParser* sp)
 {
 }
 
-void Vertex::draw(const Dxf::InsertEntity* const /*i*/) const
-{
-}
+//void Vertex::draw(const Dxf::InsertEntity* const /*i*/) const
+//{
+//}
 
 void Vertex::parse(Dxf::CodeData& code)
 {
     do {
-        switch (static_cast<VarType>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: // Маркер подкласса (AcDbVertex)
             break;
         case PointX: // Точка местоположения (ОСК в 2D-среде, МСК в 3D-среде)
@@ -60,7 +60,7 @@ void Vertex::parse(Dxf::CodeData& code)
         case VertexIdentifier:
             break;
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

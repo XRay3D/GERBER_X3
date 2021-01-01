@@ -21,12 +21,12 @@ struct Arc final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i) const override;
+//    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::ARC; };
-    GraphicObject toGo() const;
+    GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbCircle)
         Thickness = 39, // Толщина (необязательно; значение по умолчанию = 0)
         CenterPointX = 10, // Центральная точка (в ОСК)

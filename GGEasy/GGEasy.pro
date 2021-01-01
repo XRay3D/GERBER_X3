@@ -111,15 +111,15 @@ HEADERS += \
     forms/pocketrasterform.h \
     forms/profileform.h \
     forms/voronoiform.h \
-    gi/aperturepathitem.h \
     gi/bridgeitem.h \
     gi/componentitem.h \
+    gi/datapathitem.h \
+    gi/datasoliditem.h \
     gi/drillitem.h \
     gi/erroritem.h \
-    gi/gerberitem.h \
+    gi/gcpathitem.h \
     gi/graphicsitem.h \
     gi/itemgroup.h \
-    gi/pathitem.h \
     leakdetector.h \
     mainwindow.h \
     openingdialog.h \
@@ -161,15 +161,15 @@ SOURCES += \
     forms/pocketrasterform.cpp \
     forms/profileform.cpp \
     forms/voronoiform.cpp \
-    gi/aperturepathitem.cpp \
     gi/bridgeitem.cpp \
     gi/componentitem.cpp \
+    gi/datapathitem.cpp \
+    gi/datasoliditem.cpp \
     gi/drillitem.cpp \
     gi/erroritem.cpp \
-    gi/gerberitem.cpp \
+    gi/gcpathitem.cpp \
     gi/graphicsitem.cpp \
     gi/itemgroup.cpp \
-    gi/pathitem.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \

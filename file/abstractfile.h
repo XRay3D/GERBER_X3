@@ -43,7 +43,7 @@ struct LayerType {
     int id = -1;
     QString actName;
     QString actToolTip;
-    QString shortActName() const { return actName.left(5).append("..."); }
+    QString shortActName() const { return actName; }
 };
 
 using LayerTypes = std::vector<LayerType>;

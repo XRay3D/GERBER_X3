@@ -97,15 +97,17 @@ private:
 
     QString m_name;
     QString lineTypeName;
-    int m_colorNumber = 0;
-    int flags = 0;
-    int lineWeightEnum = 0;
-    int plottingFlag = 0;
+
+    int16_t m_colorNumber = 0;
+    int16_t flags = 0;
+    int16_t lineWeightEnum = 0;
+    int16_t plottingFlag = 0;
+
     GraphicObjects m_graphicObjects;
     ItemsType m_itemsType = ItemsType::Null;
     bool m_visible = true;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbLayerTableRecord)
         LayerName = 2, // Имя слоя
         Flags = 70, // Стандартные флаги (битовые кодовые значения):

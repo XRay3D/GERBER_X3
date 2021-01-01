@@ -13,9 +13,9 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "gerberitem.h"
+#include "datasoliditem.h"
 
-#include "gbrfile.h"
+#include "abstractfile.h"
 #include "graphicsview.h"
 #include "scene.h"
 #include <QElapsedTimer>
@@ -23,7 +23,7 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-GiGerber::GiGerber(Paths& paths, AbstractFile* file)
+DataSolidItem::DataSolidItem(Paths& paths, AbstractFile* file)
     : GraphicsItem(file)
     , m_paths(paths)
 {
@@ -35,17 +35,15 @@ GiGerber::GiGerber(Paths& paths, AbstractFile* file)
     fillPolygon = m_shape.toFillPolygon();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
-    m_pathColor = m_bodyColor;
-    m_pathColor.setAlpha(100);
 }
 
-GiGerber::~GiGerber() { }
+DataSolidItem::~DataSolidItem() { }
 
-QRectF GiGerber::boundingRect() const { return m_shape.boundingRect(); }
+QRectF DataSolidItem::boundingRect() const { return m_shape.boundingRect(); }
 
-QPainterPath GiGerber::shape() const { return m_shape; }
+QPainterPath DataSolidItem::shape() const { return m_shape; }
 
-void GiGerber::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void DataSolidItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
@@ -58,17 +56,17 @@ void GiGerber::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->setPen(Qt::NoPen);
     painter->drawPolygon(fillPolygon);
 
-//    m_pen.setWidthF(option->state & QStyle::State_Selected
-//                || option->state & QStyle::State_MouseOver
-//            ? 2.0 * App::graphicsView()->scaleFactor()
-//            : 0);
+    //    m_pen.setWidthF(option->state & QStyle::State_Selected
+    //                || option->state & QStyle::State_MouseOver
+    //            ? 2.0 * App::graphicsView()->scaleFactor()
+    //            : 0);
     m_pen.setColor(m_pathColor);
     painter->strokePath(m_shape, m_pen);
 }
 
-int GiGerber::type() const { return static_cast<int>(GiType::Gerber); }
+int DataSolidItem::type() const { return static_cast<int>(GiType::Gerber); }
 
-void GiGerber::redraw()
+void DataSolidItem::redraw()
 {
     m_shape = QPainterPath();
     for (Path path : qAsConst(m_paths)) {
@@ -81,11 +79,11 @@ void GiGerber::redraw()
     //update();
 }
 
-Paths GiGerber::paths() const { return m_paths; }
+Paths DataSolidItem::paths() const { return m_paths; }
 
-Paths* GiGerber::rPaths() { return &m_paths; }
+Paths* DataSolidItem::rPaths() { return &m_paths; }
 
-void GiGerber::changeColor()
+void DataSolidItem::changeColor()
 {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));

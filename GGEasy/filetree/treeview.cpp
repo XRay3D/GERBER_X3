@@ -15,7 +15,9 @@
 *******************************************************************************/
 #include "treeview.h"
 #include "forms/drillform/drillform.h"
+#ifdef GERBER
 #include "gbrnode.h"
+#endif
 #include "gcode.h"
 
 #include "radiodelegate.h"
@@ -43,7 +45,9 @@ FileTreeView::FileTreeView(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
+#ifdef GERBER
     connect(Gerber::Node::decorationTimer(), &QTimer::timeout, this, &FileTreeView::updateIcons);
+#endif
     connect(m_model, &FileModel::rowsInserted, this, &FileTreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &FileTreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &FileTreeView::updateTree);
@@ -80,10 +84,10 @@ FileTreeView::FileTreeView(QWidget* parent)
         setStyleSheet(file.readAll());
         header()->setMinimumHeight(h);
     }
-
-    header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    header()->setSectionResizeMode(0, QHeaderView::Stretch);
     header()->setStretchLastSection(false);
+    header()->setSectionResizeMode(QHeaderView::Fixed);
+    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine,"123456789").width());// ~6 символов и ...
+    header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     setItemDelegateForColumn(0, new TextDelegate(this));
     setItemDelegateForColumn(1, new SideDelegate(this));

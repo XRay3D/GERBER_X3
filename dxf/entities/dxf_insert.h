@@ -26,11 +26,11 @@ public:
     void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
-    GraphicObject toGo() const override {  return { sp->file, this, {}, {} }; }
+    GraphicObject toGo() const override { return { sp->file, this, {}, {} }; }
 
     void transform(GraphicObject& item, QPointF tr) const;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMrker = 100, // Subclass marker (AcDbBlockReference)
         VariableAttributes = 66, /* Variable attributes-follow flag (optional; default = 0);
                          if the value of attributes-follow flag is 1,

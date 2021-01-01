@@ -56,7 +56,7 @@ struct Block {
     void parseHeader(CodeData& code);
     void parseData(CodeData& code);
 
-    enum VarType {
+    enum DataEnum {
         EntityType = 0, // Тип объекта (BLOCK)
         Handle = 5, // Дескриптор
         StartOfApplication_definedGroup = 102, // Начало определенной приложением группы "{имя_приложения". Например, "{ACAD_REACTORS" обозначает начало группы постоянных реакторов AutoCAD (необязательно)
@@ -93,7 +93,7 @@ struct Block {
     QString layerName;
     QString blockDescription;
     QPointF basePoint;
-
+    QString xrefPathName;
     Codes bData;
     QVector<Entity*> entities;
     Blocks& blocks;

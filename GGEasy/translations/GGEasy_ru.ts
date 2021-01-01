@@ -3517,7 +3517,7 @@ without width and without contacts.</source>
     <message>
         <location filename="../settingsdialog.ui" line="567"/>
         <source>Spindle/Laser Off:</source>
-        <translation>Включение шпинделя / лазера:</translation>
+        <translation>Выключение шпинделя / лазера:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="581"/>

@@ -19,8 +19,10 @@
 #include "drillmodel.h"
 #include "drillpreviewgi.h"
 #include "excellon.h"
+#ifdef GERBER
 #include "gbraperture.h"
 #include "gbrfile.h"
+#endif
 #include "graphicsview.h"
 #include "point.h"
 #include "scene.h"
@@ -57,6 +59,7 @@ Paths offset(const Path& path, double offset, bool fl = false)
 /// \param aperture
 /// \return
 ///
+#ifdef GERBER
 QIcon drawApertureIcon(Gerber::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
@@ -89,6 +92,7 @@ QIcon drawApertureIcon(Gerber::AbstractAperture* aperture)
     painter.drawPath(painterPath);
     return QIcon(pixmap);
 }
+#endif
 
 QIcon drawDrillIcon()
 {
@@ -228,6 +232,7 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
+#ifdef GERBER
 void DrillForm::setApertures(const Gerber::ApertureMap* value)
 {
     m_type = tAperture;
@@ -285,6 +290,7 @@ void DrillForm::setApertures(const Gerber::ApertureMap* value)
     ui->toolTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     connect(ui->toolTable->selectionModel(), &QItemSelectionModel::currentChanged, this, &DrillForm::on_currentChanged);
 }
+#endif
 
 void DrillForm::setExcellonTools(const Excellon::Tools& value)
 {
@@ -346,6 +352,7 @@ void DrillForm::updateFiles()
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
     }
 
+#ifdef GERBER
     for (Gerber::File* gbrFile : App::project()->files<Gerber::File>()) {
         if (gbrFile->flashedApertures()) {
             ui->cbxFile->addItem(gbrFile->shortName(), QVariant::fromValue(static_cast<void*>(gbrFile)));
@@ -357,6 +364,7 @@ void DrillForm::updateFiles()
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
         }
     }
+#endif
 
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -371,9 +379,11 @@ bool DrillForm::canToShow()
     if (App::project()->files<Excellon::File>().size() > 0)
         return true;
 
+#ifdef GERBER
     for (Gerber::File* file : App::project()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
+#endif
 
     QMessageBox::information(nullptr, "", tr("No data to process."));
     return false;
@@ -572,9 +582,11 @@ void DrillForm::on_pbCreate_clicked()
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
     file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
+#ifdef GERBER
     if (file && file->type() == FileType::Gerber)
         setApertures(static_cast<Gerber::File*>(file)->apertures());
     else
+#endif
         setExcellonTools(static_cast<Excellon::File*>(file)->tools());
     header->onChecked();
 }

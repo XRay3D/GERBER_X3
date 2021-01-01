@@ -104,6 +104,7 @@ private:
     void readSettings();
     void resetToolPathsActions();
     void selectAll();
+    void deSelectAll();
 
     void writeSettings();
 

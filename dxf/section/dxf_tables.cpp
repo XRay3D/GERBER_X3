@@ -57,7 +57,7 @@ void SectionTABLES::parse()
                     //tables[type].append(new LType(this));
                     break;
                 case AbstractTable::STYLE:
-                    //tables[type].append(new Style(this));
+                    tables[type].append(new Style(this));
                     break;
                 case AbstractTable::UCS:
                     //tables[type].append(new UCS(this));

@@ -134,27 +134,27 @@ Spline::Spline(SectionParser* sp)
 {
 }
 
-void Spline::draw(const InsertEntity* const /*i*/) const
-{
-    //    if (i) {
-    //    } else {
-    //        QPainterPath myPath;
-    //        if (0) {
-    //            drawBSplineCurve(*this, myPath);
-    //            //            myPath.addPolygon(interpolate(ControlPoints, 20));
-    //        } else {
-    //            for (int i = 0; i < numberOfControlPoints; ++i) {
-    //                if (!i) {
-    //                    myPath.moveTo(ControlPoints[i]);
-    //                } else {
-    //                    myPath.quadTo(ControlPoints[i - 1], /*ControlPoints[i - 1],*/ ControlPoints[i]);
-    //                }
-    //            }
-    //        }
-    //        auto item = scene->addPath(myPath, QPen(Qt::red /*color()*/, 0.0), Qt::NoBrush);
-    //        attachToLayer(item);
-    //    }
-}
+//void Spline::draw(const InsertEntity* const i) const
+//{
+//    if (i) {
+//    } else {
+//        QPainterPath myPath;
+//        if (0) {
+//            drawBSplineCurve(*this, myPath);
+//            //            myPath.addPolygon(interpolate(ControlPoints, 20));
+//        } else {
+//            for (int i = 0; i < numberOfControlPoints; ++i) {
+//                if (!i) {
+//                    myPath.moveTo(ControlPoints[i]);
+//                } else {
+//                    myPath.quadTo(ControlPoints[i - 1], /*ControlPoints[i - 1],*/ ControlPoints[i]);
+//                }
+//            }
+//        }
+//        auto item = scene->addPath(myPath, QPen(Qt::red /*color()*/, 0.0), Qt::NoBrush);
+//        attachToLayer(item);
+//    }
+//}
 
 void Spline::parse(CodeData& code)
 {
@@ -164,7 +164,7 @@ void Spline::parse(CodeData& code)
     do {
         data.push_back(code);
 
-        switch (static_cast<VarType>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: //100
             break;
         case ExtrusionDirectionX: //210
@@ -217,7 +217,7 @@ void Spline::parse(CodeData& code)
         case EndTangentZ: //33
             break;
         case KnotValue: //40
-            KnotValues.append(code);
+            KnotValues << double(code);
             break;
         case Weight: //41
             weight = code;
@@ -242,7 +242,7 @@ void Spline::parse(CodeData& code)
             break;
 
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

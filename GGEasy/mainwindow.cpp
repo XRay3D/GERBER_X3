@@ -15,24 +15,29 @@
 *******************************************************************************/
 #include "mainwindow.h"
 #include "aboutform.h"
-#include "exparser.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketoffsetform.h"
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
 #include "forms/voronoiform.h"
-#include "gbrnode.h"
+
+// parsers
+#include "exparser.h"
+#ifdef GERBER
 #include "gbrparser.h"
-#include "gi/gerberitem.h"
+#endif
+#include "dxf_parser.h"
+
+#include "gi/datasoliditem.h"
 #include "point.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shheaders.h"
 
-#include "dxf_parser.h"
-
+#ifdef THERMAL
 #include "thermal.h"
+#endif
 #include "tooldatabase/tooldatabase.h"
 #include <QtPrintSupport>
 #include <QtWidgets>
@@ -43,7 +48,9 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , recentFiles(this, "recentFileList")
     , recentProjects(this, "recentProjectsList")
+#ifdef GERBER
     , gerberParser(new Gerber::Parser)
+#endif
     , excellonParser(new Excellon::Parser)
     , dxfParser(new Dxf::Parser)
     , m_project(new Project(this))
@@ -63,26 +70,27 @@ MainWindow::MainWindow(QWidget* parent)
         new LayoutFrames();
     }
 
+#ifdef GERBER
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
     connect(gerberParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &FileParser::fileError, this, &MainWindow::fileError);
+    connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
+#endif
 
     excellonParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseExcellonFile, excellonParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(excellonParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
     connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(excellonParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
+    connect(excellonParser, &FileParser::fileError, this, &MainWindow::fileError);
+    connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
 
     dxfParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseDxfFile, dxfParser, &FileParser::parseFile, Qt::QueuedConnection);
     connect(dxfParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
     connect(dxfParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(dxfParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
-
-    connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
+    connect(dxfParser, &FileParser::fileError, this, &MainWindow::fileError);
     connect(&parserThread, &QThread::finished, dxfParser, &QObject::deleteLater);
 
     parserThread.start(QThread::HighestPriority);
@@ -123,12 +131,16 @@ MainWindow::MainWindow(QWidget* parent)
     if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
         int i = 0;
         QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-F_Cu.gbr"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/DXF/misc01.dxf"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/ELECTROSTATIC_AMP_A.dxf"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"); });
-        //        QTimer::singleShot(++i * 100, [this] { loadFile("D:/T/ELECTROSTATIC_AMP_A_BOT.dxf"); });
+        //                QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-F_Cu.gbr"); });
+        QTimer::singleShot(++i * 100, [this] { loadFile(""
+                                                        "C:/Users/X-Ray/Documents/TopoR/Examples/Example_02/Placement.dxf"
+                                                   // "D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"
+                                                   // "D:/Gerber Test Files/DXF/misc01.dxf"
+                                                   // "D:/ELECTROSTATIC_AMP_A.dxf"
+                                                   // "D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"
+                                                   // "D:/Gerber Test Files/DXF/Complete-Lib-E.dxf"
+                                                   // "D:/T/1mm 30x15x20 V2 trans.dxf" //
+                                               ); });
 
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
@@ -283,6 +295,10 @@ void MainWindow::createActionsEdit()
         this,
         &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
+
+    auto dsaShortcut = new QShortcut(this); // Инициализируем объект
+    dsaShortcut->setKey(Qt::Key_Escape); // Устанавливаем код клавиши
+    connect(dsaShortcut, &QShortcut::activated, this, &MainWindow::deSelectAll); // цепляем обработчик нажатия клавиши
 
     editMenu->addSeparator();
     action = editMenu->addAction(tr("Undo"));
@@ -464,6 +480,7 @@ void MainWindow::createActionsToolPath()
         menu->addAction(toolpathActions[GCode::Voronoi]);
     }
 
+#ifdef THERMAL
     {
         toolpathActions[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
             if (ThermalForm::canToShow()) {
@@ -475,6 +492,7 @@ void MainWindow::createActionsToolPath()
         toolpathActions[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
         menu->addAction(toolpathActions[GCode::Thermal]);
     }
+#endif
 
     {
         toolpathActions[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
@@ -544,7 +562,7 @@ void MainWindow::createActionsGraphics()
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : si) {
             if (static_cast<GiType>(item->type()) == GiType::Gerber) {
-                GiGerber* gitem = static_cast<GiGerber*>(item);
+                DataSolidItem* gitem = static_cast<DataSolidItem*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
                 for (QGraphicsItem* clipItem : si) {
@@ -604,11 +622,13 @@ void MainWindow::writeSettings()
 
 void MainWindow::selectAll()
 {
-    if (/*  */ toolpathActions[GCode::Thermal]->isChecked()) {
+    if (/*  */ toolpathActions.contains(GCode::Thermal)
+        && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items()) {
             item->setSelected(static_cast<GiType>(item->type()) == GiType::ThermalPr);
         }
-    } else if (toolpathActions[GCode::Drill]->isChecked()) {
+    } else if (toolpathActions.contains(GCode::Drill)
+        && toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items()) {
             const auto type(static_cast<GiType>(item->type()));
             item->setSelected( //
@@ -621,6 +641,14 @@ void MainWindow::selectAll()
             if (item->isVisible())
                 item->setSelected(true);
     }
+}
+
+void MainWindow::deSelectAll()
+{
+    qDebug() << __FUNCTION__;
+    for (QGraphicsItem* item : App::scene()->items())
+        if (item->isVisible())
+            item->setSelected(false);
 }
 
 void MainWindow::printDialog()
@@ -677,7 +705,34 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
 void MainWindow::fileError(const QString& fileName, const QString& error)
 {
     qWarning() << "fileError " << fileName << error;
-    QMessageBox::critical(this, fileName, error);
+
+    static QDialog* fileErrordialog;
+    static QTextBrowser* textBrowser;
+
+    if (!fileErrordialog) {
+        fileErrordialog = new QDialog(this);
+        fileErrordialog->setObjectName(QString::fromUtf8("dialog"));
+        fileErrordialog->setWindowTitle(tr("File open errors"));
+
+        fileErrordialog->resize(600, 600);
+
+        auto verticalLayout = new QVBoxLayout(fileErrordialog);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+
+        textBrowser = new QTextBrowser(fileErrordialog);
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+
+        verticalLayout->addWidget(textBrowser);
+
+        verticalLayout->setMargin(6);
+        verticalLayout->setSpacing(6);
+    }
+    fileErrordialog->show();
+    textBrowser->setTextColor(Qt::black);
+    textBrowser->append(fileName);
+    textBrowser->setTextColor(Qt::darkRed);
+    textBrowser->append(error);
+    textBrowser->append("");
 }
 
 void MainWindow::resetToolPathsActions()
@@ -800,8 +855,6 @@ void MainWindow::addFileToPro(AbstractFile* file)
     }
     m_project->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    if (file->type() == FileType::Gerber)
-        Gerber::Node::decorationTimer()->start();
     graphicsView->zoomFit();
 }
 

@@ -104,7 +104,7 @@ public:
         return count;
     }
 
-    void showFiles(const QList<QPair<int, int>>&& fileIds);
+    //    void showFiles(const QList<QPair<int, int>>&& fileIds);
 
     bool contains(AbstractFile* file);
     void setIsModified(bool isModified) { m_isModified = isModified; }

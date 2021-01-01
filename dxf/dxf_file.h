@@ -47,6 +47,7 @@ public:
     HeaderData& header() { return m_header; }
     Layers& layers() { return m_layers; }
     Blocks& blocks() { return m_blocks; }
+    Styles& styles() { return m_styles; }
 
     void setItemType(ItemsType type);
     ItemsType itemsType() const;
@@ -56,7 +57,8 @@ private:
     Blocks m_blocks;
     HeaderData m_header;
     Layers m_layers;
-    std::map<QString, bool> m_layersVisible;
+    Styles m_styles;
+    mutable std::map<QString, bool> m_layersVisible;
     ItemsType m_itemsType = ItemsType::Normal;
 
     enum Group {

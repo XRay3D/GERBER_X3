@@ -17,6 +17,7 @@ HEADERS += \
     $$PWD/dxf_file.h \
     $$PWD/dxf_node.h \
     $$PWD/dxf_parser.h \
+    $$PWD/dxf_sourcedialog.h \
     $$PWD/dxf_types.h \
     $$PWD/entities/dxf_arc.h \
     $$PWD/entities/dxf_attdef.h \
@@ -78,7 +79,7 @@ HEADERS += \
 #    $$PWD/tables/dxf_block_record.h \
 #    $$PWD/tables/dxf_dimstyle.h \
 #    $$PWD/tables/dxf_ltype.h \
-#    $$PWD/tables/dxf_style.h \
+    $$PWD/tables/dxf_style.h \
 #    $$PWD/tables/dxf_ucs.h \
 #    $$PWD/tables/dxf_view.h \
 #    $$PWD/tables/dxf_vport.h \
@@ -89,6 +90,7 @@ SOURCES += \
     $$PWD/dxf_file.cpp \
     $$PWD/dxf_node.cpp \
     $$PWD/dxf_parser.cpp \
+    $$PWD/dxf_sourcedialog.cpp \
     $$PWD/dxf_types.cpp \
     $$PWD/entities/dxf_arc.cpp \
     $$PWD/entities/dxf_attdef.cpp \
@@ -150,7 +152,7 @@ SOURCES += \
 #    $$PWD/tables/dxf_block_record.cpp \
 #    $$PWD/tables/dxf_dimstyle.cpp \
 #    $$PWD/tables/dxf_ltype.cpp \
-#    $$PWD/tables/dxf_style.cpp \
+    $$PWD/tables/dxf_style.cpp \
 #    $$PWD/tables/dxf_ucs.cpp \
 #    $$PWD/tables/dxf_view.cpp \
 #    $$PWD/tables/dxf_vport.cpp \

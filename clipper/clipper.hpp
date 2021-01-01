@@ -97,8 +97,8 @@ static cInt const loRange = 0x7FFF;
 static cInt const hiRange = 0x7FFF;
 #else
 typedef int32_t cInt;
-static cInt const loRange = 0x40000000;
-static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
+static cInt constexpr loRange = std::numeric_limits<int32_t>::max();
+static cInt constexpr hiRange = std::numeric_limits<int32_t>::max(); // 0x40000000; //FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
 typedef unsigned long long ulong64;
 

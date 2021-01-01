@@ -13,6 +13,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
+#ifdef GERBER
 #include "thermalpreviewitem.h"
 
 #include "gccreator.h"
@@ -266,3 +267,4 @@ QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change
     }
     return QGraphicsItem::itemChange(change, value);
 }
+#endif

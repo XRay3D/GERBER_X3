@@ -24,27 +24,27 @@ Line::Line(SectionParser* sp)
 {
 }
 
-void Line::draw(const InsertEntity* const i) const
-{
-    if (i) {
-        for (int r = 0; r < i->rowCount; ++r) {
-            for (int c = 0; c < i->colCount; ++c) {
-                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                GraphicObject go(toGo());
-                i->transform(go, tr);
-                i->attachToLayer(std::move(go));
-            }
-        }
-    } else {
-        attachToLayer(toGo());
-    }
-}
+//void Line::draw(const InsertEntity* const i) const
+//{
+//    if (i) {
+//        for (int r = 0; r < i->rowCount; ++r) {
+//            for (int c = 0; c < i->colCount; ++c) {
+//                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                GraphicObject go(toGo());
+//                i->transform(go, tr);
+//                i->attachToLayer(std::move(go));
+//            }
+//        }
+//    } else {
+//        attachToLayer(toGo());
+//    }
+//}
 
 void Line::parse(CodeData& code)
 {
     do {
         data.push_back(code);
-        switch (static_cast<VarType>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -73,10 +73,12 @@ void Line::parse(CodeData& code)
         case ExtrusionDirectionZ:
             break;
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);
+    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data;
 }
 
 GraphicObject Line::toGo() const

@@ -37,8 +37,10 @@ struct InsertEntity;
 class File;
 
 struct Entity {
+    Q_GADGET
+public:
     enum Type {
-        NullType = -1,
+        NULL_ENT = -1,
         ACAD_PROXY_ENTITY,
         ARC,
         ATTDEF,
@@ -84,27 +86,30 @@ struct Entity {
         XLINE,
         //3DFACE,
         //3DSOLID,
-        NULL_ENT,
     };
+    Q_ENUM(Type)
+    static Type toType(const QString& key);
 
     Codes data;
     SectionParser* sp = nullptr;
     Entity(SectionParser* sp);
     virtual ~Entity() { }
-    virtual void draw(const InsertEntity* const i = nullptr) const = 0;
-    virtual void parse(CodeData& code) = 0;
+    virtual void draw(const InsertEntity* const i = nullptr) const;
+
+    virtual void parse(CodeData& code);
     virtual Type type() const = 0;
     virtual GraphicObject toGo() const = 0;
 
-    static Type TypeVal(const QString& key);
     static QString typeName(int key);
     QString name() const;
-    void parseEntity(CodeData& code);
     QColor color() const;
     void attachToLayer(GraphicObject&& go) const;
 
     QString layerName;
     QString handle;
+    QString softPointerID;
+    int16_t colorNumber = 0;
+
 #ifdef QT_DEBUG
     static constexpr double u = 10.;
     static constexpr double d = 0.1;
@@ -112,7 +117,7 @@ struct Entity {
     static constexpr double u = 100.;
     static constexpr double d = 0.01;
 #endif
-    enum VarType {
+    enum DataEnum {
         EntityName = -1, //    Приложение: имя объекта (изменяется при каждом открытии чертежа)
         //    не пропускается
         EntityType = 0, //    Тип объекта
@@ -193,9 +198,41 @@ struct Entity {
         //    Прим.: Это свойство является устаревшим в программных продуктах на базе AutoCAD начиная с версии 2016. Тем не менее оно поддерживается для обеспечения обратной совместимости с предыдущими версиями.
         //    без значения по умолчанию
     };
+    Q_ENUM(DataEnum)
+    static DataEnum toDataEnum(const QString& key);
 
-    Q_ENUM(Type)
-    Q_GADGET
+    enum Points {
+        PrimaryX = 10,
+        Other1X = 11,
+        Other2X = 12,
+        Other3X = 13,
+        Other4X = 14,
+        Other5X = 15,
+        Other6X = 16,
+        Other7X = 17,
+        Other8X = 18,
+
+        PrimaryY = 20,
+        Other1Y = 21,
+        Other2Y = 22,
+        Other3Y = 23,
+        Other4Y = 24,
+        Other5Y = 25,
+        Other6Y = 26,
+        Other7Y = 27,
+        Other8Y = 28,
+
+        PrimaryZ = 30,
+        Other1Z = 31,
+        Other2Z = 32,
+        Other3Z = 33,
+        Other4Z = 34,
+        Other5Z = 35,
+        Other6Z = 36,
+        Other7Z = 37,
+        Other8Z = 38,
+
+    };
 };
 }
 #endif // ENTITY_H

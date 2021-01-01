@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include <QStyledItemDelegate>
 
 class ThermalDelegate : public QStyledItemDelegate {
@@ -28,3 +29,4 @@ public:
 
     void emitCommitData();
 };
+#endif

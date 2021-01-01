@@ -24,9 +24,119 @@ Entity::Entity(SectionParser* sp)
 {
 }
 
-Entity::Type Entity::TypeVal(const QString& key)
+void Entity::draw(const InsertEntity* const i) const
 {
-    return static_cast<Type>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().toUpper().data()));
+    if (i) {
+        for (int r = 0; r < i->rowCount; ++r) {
+            for (int c = 0; c < i->colCount; ++c) {
+                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+                GraphicObject go(toGo());
+                i->transform(go, tr);
+                i->attachToLayer(std::move(go));
+            }
+        }
+    } else {
+        attachToLayer(toGo());
+    }
+}
+
+void Entity::parse(CodeData& code)
+{
+    switch (code.code()) {
+        //    case LayerName:
+        //        layerName = code.string();
+        //        break;
+        //    case Handle:
+        //        handle = code.string();
+        //        break;
+        //    case ColorNumber:
+        //        colorNumber = code;
+        //        break;
+        //    case SoftPointerID:
+        //        softPointerID = code.string();
+        //        break;
+        //    case NumberOfBytes:
+        //        break;
+
+    case EntityName: //  -1
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case EntityType: // 0
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case Handle: // 5
+        handle = code.string();
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case SoftPointerID: // 330
+        softPointerID = code.string();
+        qDebug() << __FUNCTION__ << DataEnum(code.code()) << code;
+        break;
+    case HardOwnerID: // 360
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case SubclassMarker: // 100
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case E67: // 67
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case E410: // 410
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case LayerName: // 8
+        layerName = code.string();
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case LineType: // 6
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case E347: // 347
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case ColorNumber: // 62
+        colorNumber = code;
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case LineWeight: // 370
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case LineTypeScale: // 48
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case Visibility: // 60
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case NumberOfBytes: // 92
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case BinaryChunk: // 310
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case A24bitColor: // 420
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case ColorName: // 430
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case TransparencyValue: // 440
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case PlotStyleID: // 390
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    case ShadowMode: // 284
+        // qDebug() << __FUNCTION__ << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+        break;
+    default:
+        qDebug() << __FUNCTION__ << "default" << code;
+        break;
+    }
+}
+
+Entity::Type Entity::toType(const QString& key)
+{
+    return Type(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().toUpper().data()));
 }
 
 QString Entity::typeName(int key)
@@ -37,21 +147,6 @@ QString Entity::typeName(int key)
 QString Entity::name() const
 {
     return staticMetaObject.enumerator(0).valueToKey(type());
-}
-
-void Entity::parseEntity(CodeData& code)
-{
-    data.push_back(code);
-    switch (code.code()) {
-    case LayerName:
-        layerName = code.string();
-        break;
-    case Handle:
-        handle = code.string();
-        break;
-    default:
-        break;
-    }
 }
 
 QColor Entity::color() const
@@ -76,6 +171,11 @@ void Entity::attachToLayer(GraphicObject&& go) const
     else {
         throw QString("Layer '%1' not found in file!").arg(layerName);
     }
+}
+
+Entity::DataEnum Entity::toDataEnum(const QString& key)
+{
+    return DataEnum(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().toUpper().data()));
 }
 
 QPointF polar(QPointF p, float angle, float distance)

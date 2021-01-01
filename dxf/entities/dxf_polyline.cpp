@@ -24,25 +24,26 @@ PolyLine::PolyLine(SectionParser* sp)
 {
 }
 
-void PolyLine::draw(const InsertEntity* const i) const
-{
-    if (i) {
-        for (int r = 0; r < i->rowCount; ++r) {
-            for (int c = 0; c < i->colCount; ++c) {
-                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                GraphicObject go(toGo());
-                i->transform(go, tr);
-                i->attachToLayer(std::move(go));
-            }
-        }
-    } else {
-        attachToLayer(toGo());
-    }
-}
+//void PolyLine::draw(const InsertEntity* const i) const
+//{
+//    if (i) {
+//        for (int r = 0; r < i->rowCount; ++r) {
+//            for (int c = 0; c < i->colCount; ++c) {
+//                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                GraphicObject go(toGo());
+//                i->transform(go, tr);
+//                i->attachToLayer(std::move(go));
+//            }
+//        }
+//    } else {
+//        attachToLayer(toGo());
+//    }
+//}
 
 void PolyLine::parse(CodeData& code)
 {
     do {
+        data.push_back(code);
         if (code != "VERTEX") {
             code = sp->nextCode();
             switch (code.code()) {
@@ -56,7 +57,7 @@ void PolyLine::parse(CodeData& code)
                 polylineFlags = code;
                 break;
             default:
-                parseEntity(code);
+                Entity::parse(code);
             }
         } else {
             vertex.append(Dxf::Vertex(sp));
@@ -65,8 +66,10 @@ void PolyLine::parse(CodeData& code)
     } while (code != "SEQEND");
     do {
         code = sp->nextCode();
-        parseEntity(code);
+        Entity::parse(code);
     } while (code.code() != 0);
+    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data;
 }
 
 GraphicObject PolyLine::toGo() const

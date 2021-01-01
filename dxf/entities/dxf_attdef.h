@@ -20,12 +20,12 @@ struct AttDef final : Entity {
 
     // EntityInterface
 public:
-    void draw(const InsertEntity* const i) const override;
+//    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::ATTDEF; };
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarkerAcDbText = 100, //	Маркер подкласса (AcDbText)
         Thickness = 39, //	Толщина (необязательно; значение по умолчанию = 0)
         FirstAlignmentPtX = 10, //	Первая точка выравнивания (в ОСК)

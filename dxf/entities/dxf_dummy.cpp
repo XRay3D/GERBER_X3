@@ -41,9 +41,9 @@ void Dummy::parse(Dxf::CodeData& code)
     default:
         do {
             data.push_back(code);
-            //        switch (static_cast<VarType>(code.code())) {
+            //        switch (static_cast<DataEnum>(code.code())) {
             //        default:
-            //            parseEntity(code);
+            //            Entity::parse(code);
             //        }
             code = sp->nextCode();
         } while (code.code() != 0);

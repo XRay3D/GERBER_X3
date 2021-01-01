@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include "thvars.h"
 
 #include <QAbstractItemModel>
@@ -56,3 +57,4 @@ public:
 private:
     ThermalNode* getItem(const QModelIndex& index) const;
 };
+#endif

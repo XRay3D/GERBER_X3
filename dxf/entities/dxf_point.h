@@ -20,12 +20,12 @@ struct Point final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i) const override;
+//    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return POINT; }
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbPoint)
         Thickness = 39, // Толщина (необязательно; значение по умолчанию = 0)
         PointX = 10, // Центральная точка (в ОСК)
