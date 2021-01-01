@@ -22,12 +22,12 @@ struct Vertex final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i) const override;
+//    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
     GraphicObject toGo() const override {  return { sp->file, this, {}, {} }; }
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbVertex)
         //SubclassMarker2 = 100, // Маркер подкласса (AcDb2dVertex или AcDb3dPolylineVertex)
 

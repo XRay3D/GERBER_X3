@@ -27,9 +27,9 @@ AttDef::AttDef(SectionParser* sp)
 {
 }
 
-void AttDef::draw(const InsertEntity* const i) const
-{
-    if (i) {
+//void AttDef::draw(const InsertEntity* const i) const
+//{
+//    if (i) {
         //        for (int r = 0; r < i->rowCount; ++r) {
         //            for (int c = 0; c < i->colCount; ++c) {
         //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
@@ -41,12 +41,12 @@ void AttDef::draw(const InsertEntity* const i) const
         //                i->attachToLayer(item);
         //            }
         //        }
-    } else {
+//    } else {
         //        auto item = new ArcItem2(this, color());
         //        scene->addItem(item);
         //        attachToLayer(item);
-    }
-}
+//    }
+//}
 
 void AttDef::parse(CodeData& code)
 {
@@ -180,7 +180,7 @@ void AttDef::parse(CodeData& code)
         case TransparencyOfBackgroundFillColor: //441
             break; //	П+R[-99]C[-5]:RCрозрачность цвета заливки фона (не поддерживается)
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

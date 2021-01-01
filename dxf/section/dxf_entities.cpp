@@ -64,7 +64,7 @@ void SectionENTITIES::parse()
 
 Entity* SectionENTITIES::entityParse(CodeData& code)
 {
-    key = Entity::TypeVal(code);
+    key = Entity::toType(code);
     switch (key) {
     case Entity::ACAD_PROXY_ENTITY:
         break;

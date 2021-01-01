@@ -58,7 +58,6 @@ private:
     bool mouseTracking;
 
     QPen meterPen;
-    QPen textPen;
 
     QPoint cursorPos;
 

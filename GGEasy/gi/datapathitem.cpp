@@ -13,21 +13,22 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "aperturepathitem.h"
+#include "datapathitem.h"
 
+#include "abstractfile.h"
 #include "forms/gcodepropertiesform.h"
-#include "gbrfile.h"
 #include "graphicsview.h"
+#include "scene.h"
 #include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
 #ifdef __GNUC__
-QTimer AperturePathItem::timer;
+QTimer DataPathItem::timer;
 #endif
 
-AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFile* file)
+DataPathItem::DataPathItem(const Path& path, /*Gerber::File*/ AbstractFile* file)
     : GraphicsItem(file)
     , m_path(path)
 {
@@ -45,20 +46,20 @@ AperturePathItem::AperturePathItem(const Path& path, /*Gerber::File*/ AbstractFi
     setSelected(false);
     if (!timer.isActive()) {
         timer.start(50);
-        connect(&timer, &QTimer ::timeout, [] { ++AperturePathItem::d; });
+        connect(&timer, &QTimer ::timeout, [] { ++DataPathItem::d; });
     }
 }
 
-QRectF AperturePathItem::boundingRect() const
+QRectF DataPathItem::boundingRect() const
 {
     if (m_selectionShape.boundingRect().isEmpty())
         updateSelection();
     return m_selectionShape.boundingRect();
 }
 
-QRectF AperturePathItem::boundingRect2() const { return m_boundingRect; }
+QRectF DataPathItem::boundingRect2() const { return m_boundingRect; }
 
-void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void DataPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
@@ -68,6 +69,8 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     QColor color(m_pen.color());
     QPen pen(m_pen);
     constexpr double dl = 3;
+    //    if (!App::scene()->drawPdf())
+    //        pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
@@ -75,13 +78,13 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
         pen.setDashOffset(d);
-        pen.setDashPattern({ dl, dl });
+        pen.setDashPattern({ dl, dl - 1 });
     }
     if (option->state & QStyle::State_MouseOver) {
         pen.setWidthF(2.0 * App::graphicsView()->scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({ dl, dl });
+        pen.setDashPattern({ dl, dl - 1 });
     }
 
     painter->setPen(pen);
@@ -89,13 +92,13 @@ void AperturePathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     painter->drawPolyline(m_path);
 }
 
-int AperturePathItem::type() const { return static_cast<int>(GiType::AperturePath); }
+int DataPathItem::type() const { return static_cast<int>(GiType::AperturePath); }
 
-Paths AperturePathItem::paths() const { return { m_path }; }
+Paths DataPathItem::paths() const { return { m_path }; }
 
-QPainterPath AperturePathItem::shape() const { return m_selectionShape; }
+QPainterPath DataPathItem::shape() const { return m_selectionShape; }
 
-void AperturePathItem::updateSelection() const
+void DataPathItem::updateSelection() const
 {
     const double scale = App::graphicsView()->scaleFactor();
     if (m_selectionShape.boundingRect().isEmpty() || !qFuzzyCompare(m_scale, scale)) {
@@ -110,7 +113,7 @@ void AperturePathItem::updateSelection() const
     }
 }
 
-void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void DataPathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
@@ -143,23 +146,23 @@ void AperturePathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     GraphicsItem::mouseReleaseEvent(event);
 }
 
-QVariant AperturePathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant DataPathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemVisibleChange && value.toBool()) {
         updateSelection();
     } else if (change == ItemSelectedChange && GlobalSettings::animSelection()) {
         if (value.toBool()) {
             updateSelection();
-            connect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
+            connect(&timer, &QTimer::timeout, this, &DataPathItem::redraw);
         } else {
-            disconnect(&timer, &QTimer::timeout, this, &AperturePathItem::redraw);
+            disconnect(&timer, &QTimer::timeout, this, &DataPathItem::redraw);
             update();
         }
     }
     return value;
 }
 
-void AperturePathItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+void DataPathItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsItem::hoverEnterEvent(event);
     updateSelection();

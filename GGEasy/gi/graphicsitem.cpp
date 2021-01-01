@@ -40,6 +40,33 @@ GraphicsItem::GraphicsItem(AbstractFile* file)
     QGraphicsItem::setVisible(false);
 }
 
+void GraphicsItem::setColor(const QColor& brush)
+{
+    m_bodyColor = m_color = brush;
+    colorChanged();
+}
+
+void GraphicsItem::setColorPtr(QColor* brushColor)
+{
+    if (brushColor)
+        m_bodyColor = *(m_colorPtr = brushColor);
+    m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
+    colorChanged();
+}
+
+void GraphicsItem::setPen(const QPen& pen)
+{
+    m_pen = pen;
+    colorChanged();
+}
+
+void GraphicsItem::setPenColorPtr(const QColor* penColor)
+{
+    if (penColor)
+        m_pnColorPrt = penColor;
+    colorChanged();
+}
+
 void GraphicsItem::setVisible(bool visible)
 {
     auto visibleA = new QPropertyAnimation(this, "opacity");

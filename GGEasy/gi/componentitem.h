@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include "gbrcomponent.h"
 #include "graphicsitem.h"
 
@@ -38,3 +39,4 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
+#endif

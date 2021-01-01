@@ -21,16 +21,15 @@ namespace Dxf {
 
 struct Hatch final : Entity {
     Hatch(SectionParser* sp);
-
+    ~Hatch();
     // Entity interface
-public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::HATCH; };
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // 	Маркер подкласса (AcDbHatch)
         ElevationPointX = 10, // 	Точка отметки (в ОСК)  	Файл DXF: значение X = 0; приложение: 3D-точка (X и Y всегда равны 0, Z представляет значение отметки)
         ElevationPointY = 20, // 	Файл DXF: значения Y и Z для точки отметки (в ОСК)
@@ -86,83 +85,6 @@ public:
         //	0 = First value	=		, // 	0 = первое значение
         //	1 = Second value	=		, // 	1 = второе значение
         String = 470, // 	Строка (по умолчанию = LINEAR)
-
-        /*  SubclassMarker = 100, // Маркер подкласса (AcDbHatch)
-        ElevationPointX = 10, // Точка отметки (в ОСК)
-        //    Файл DXF: значение X = 0; приложение: 3D-точка (X и Y всегда равны 0, Z представляет значение отметки)
-        ElevationPointY = 20,
-        ElevationPointZ = 30, // Файл DXF: значения Y и Z для точки отметки (в ОСК)
-        //    Значение Y = 0, Z представляет значение отметки
-        ExtrusionDirectionX = 210, // Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
-        //    Файл DXF: значение X; приложение: 3D-вектор
-        ExtrusionDirectionY = 220,
-        ExtrusionDirectionZ = 230, // Файл DXF: значения Y и Z направления выдавливания
-        PatternName = 2, // Имя образца штриховки
-        FillFlag = 70, //  Флаг сплошной заливки (0 = заливка штриховкой, 1 = сплошная заливка); для мполигона — версия мполигона
-        FillColor = 63, //  Для мполигона — цвет заливки штриховкой (как ACI)
-        AssociativityFlag = 71, // Флаг ассоциативности (0 = неассоциативный, 1 = ассоциативный); для мполигона — флаг сплошной заливки (0 = без сплошной заливки; 1 = со сплошной заливкой)
-        NumberOfBoundaryPaths = 91, // Число траекторий контуров (замкнутых контуров)
-        //    Различается
-        //    Данные траекторий контуров. Повторяется столько раз, сколько задано кодом 91. См. "Данные траекторий контуров"
-        Style = 75, // Стиль штриховки:
-        //    0 = область штриховки по принципу "кратность двум" (обычный стиль)
-        //    1 = штриховка только крайней области (внешний стиль)
-        //    2 = штриховка по всей площади (игнорирование стиля)
-        //    0 = Hatch “odd parity” area (Normal style)
-        //    1 = Hatch outermost area only (Outer style)
-        //    2 = Hatch through entire area (Ignore style)
-        PatternType = 76, // Тип образца штриховки:
-        //    0 = из линий
-        //    1 = стандартный
-        //    2 = пользовательский
-        //    0 = User-defined; 1 = Predefined; 2 = Custom
-        PatternAngle = 52, //  Угол образца штриховки (только для заливки штриховкой)
-        PatternScale = 41, //  Масштаб или интервал образца штриховки (только для заливки штриховкой)
-        AnnotationFlag = 73, // Для мполигона — флаг аннотации контура:
-        //    0 = контур не является аннотированным
-        //    1 = контур представляет собой аннотированный контур
-        //    73 For MPolygon, boundary annotation flag (boundary is an
-        //    annotated boundary = 1; boundary is not an annotated boundary
-        //    = 0)
-        DoubleFlag = 77, // Флаг удвоения образца штриховки (только для заливки штриховкой):
-        //    0 = не двойной
-        //    1 = двойной
-        //    0 = not double; 1 = double
-        NumberPatternLines = 78, //  Число линий определения образца
-        //    Различается
-        //    Данные линий образца. Повторяется столько раз, сколько задано кодом 78. См. "Данные образца"
-        PixelSize = 47, // Размер в пикселях, используемый для определения плотности при выполнении различных операций пересечения и отбрасывания лучей в процессе расчета образца штриховки для ассоциативных штриховок и штриховок, созданных с помощью метода затопления
-        NumberOfSeedPoints = 98, // Количество точек-прототипов
-        OffsetVector = 11, // Для мполигона — вектор смещения
-        NumberOfDegenerateBoundaryPaths = 99, // Для мполигона — количество вырожденных траекторий контуров (замкнутых контуров), где вырожденная траектория контура является границей, игнорируемой штриховкой
-        SeedPointX = 10, // Точка-прототип (в ОСК)   Файл DXF: значение X; приложение: 2D-точка (несколько записей)
-        SeedPointY = 20, // Файл DXF: значение Y точки-прототипа (в ОСК); (несколько записей)
-        SolidHatchOrGradient = 450, // Указание сплошной штриховки или градиента; если штриховка сплошная, значения для оставшихся кодов игнорируются, но должны присутствовать. Необязательно; если код 450 указан в файле, то также в файле должны быть и следующие коды: 451, 452, 453, 460, 461, 462 и 470. Если кода 450 нет в файле, то в файле не должно быть следующих кодов: 451, 452, 453, 460, 461, 462 и 470
-        //    0 = сплошная штриховка
-        //    1 = градиент
-        //    0 = Solid hatch
-        //    1 = Gradient
-        // 451, // Ноль зарезервирован для последующего использования
-        HowColorsDefined = 452, // Запись способа определения цветов. Используется только кодом диалогового окна:
-        //    0 = двухцветный градиент
-        //    1 = одноцветный градиент
-        //    0 = Two-color gradient
-        //    1 = Single-color gradient
-        NumberOfColors = 453, // Количество цветов:
-        //    0 = сплошная штриховка
-        //    2 = градиент
-        //    0 = Solid hatch
-        //    2 = Gradient
-        RotationAngle = 460, // Угол поворота в радианах для градиента (по умолчанию = 0, 0)
-        GradientDefinition = 461, // Определение градиента; соответствует параметру "По центру" на вкладке "Градиент" диалогового окна "Штриховка и заливка контура". Каждый градиент имеет два определения: со сдвигом и без. Значение сдвига описывает сглаживание двух определений, которые должны использоваться. Значение 0,0 означает, что следует использовать только версию без сдвига, а значение 1,0 означает, что следует использовать только версию со сдвигом.
-        ColorTintValue = 462, // Значение оттенка цвета, используемое в коде диалогового окна (по умолчанию = 0, 0; диапазон — от 0,0 до 1,0). Значение оттенка цвета представляет собой цвет градиента и определяет степень оттенка в диалоговом окне, если для группового кода штриховки 452 установлено значение 1.
-        // 463, // Зарезервировано для дальнейшего использования:
-        //    0 = первое значение
-        //    1 = второе значение
-        //    0 = First value
-        //    1 = Second value
-        String = 470, // Строка (по умолчанию = LINEAR)
-   */
     };
 
     // Данные штриховки (DXF)
@@ -270,7 +192,71 @@ public:
         EndTangentY = 23, // DXF: значение Y конечной касательной (в ОСК)
     };
 
+    struct Edge {
+        Edge(int type)
+            : type(type)
+        {
+        }
+        virtual ~Edge() = default;
+        virtual QPolygonF toPolygon() const = 0;
+        const int type;
+    };
+    struct LineEdge : Edge {
+        LineEdge(int type)
+            : Edge(type)
+        {
+        }
+        QPointF p1;
+        QPointF p2;
+        QPolygonF toPolygon() const override
+        {
+            QPolygonF p(2);
+            p[0] = p1;
+            p[1] = p2;
+            return p;
+        }
+    };
+    struct CircularArcEdge : Edge {
+        CircularArcEdge(int type)
+            : Edge(type)
+        {
+        }
+        QPolygonF toPolygon() const override
+        {
+            QPolygonF p;
+            return p;
+        }
+    };
+    struct EllipticArcEdge : Edge {
+        EllipticArcEdge(int type)
+            : Edge(type)
+        {
+        }
+        QPolygonF toPolygon() const override
+        {
+            QPolygonF p;
+            return p;
+        }
+    };
+    struct SplineEdge : Edge {
+        SplineEdge(int type)
+            : Edge(type)
+        {
+        }
+        QPolygonF toPolygon() const override
+        {
+            QPolygonF p;
+            return p;
+        }
+    };
+
+    std::vector<std::vector<Edge*>> edges;
+
+    std::vector<QString> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
+
     QPointF centerPoint;
+    std::vector<int> pathTypeFlags;
+    int16_t edgeType = 0;
     double thickness = 0;
     double radius = 0;
 };

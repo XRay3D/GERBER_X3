@@ -15,7 +15,9 @@
 *******************************************************************************/
 #include "drillpreviewgi.h"
 #include "drillmodel.h"
+#ifdef GERBER
 #include "gbrfile.h"
+#endif
 #include "gi/drillitem.h"
 #include "graphicsview.h"
 #include "tooldatabase/tool.h"
@@ -24,6 +26,7 @@
 
 extern Paths offset(const Path& path, double offset, bool fl = false);
 
+#ifdef GERBER
 QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject* go, int id)
 {
     QPainterPath painterPath;
@@ -36,6 +39,7 @@ QPainterPath DrillPrGI::drawApetrure(const Gerber::GraphicObject* go, int id)
         painterPath.addEllipse(go->state().curPos(), hole, hole);
     return painterPath;
 }
+#endif
 
 QPainterPath DrillPrGI::drawDrill(const Excellon::Hole* hole)
 {
@@ -52,6 +56,7 @@ QPainterPath DrillPrGI::drawSlot(const Excellon::Hole* hole)
     return painterPath;
 }
 
+#ifdef GERBER
 DrillPrGI::DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row)
     : row(row)
     , id(id)
@@ -70,6 +75,7 @@ DrillPrGI::DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row)
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
 }
+#endif
 
 DrillPrGI::DrillPrGI(const Excellon::Hole* hole, Row& row)
     : row(row)
@@ -152,6 +158,7 @@ void DrillPrGI::updateTool()
             m_toolPath.moveTo(offsetedPos - QPointF(lineKoeff, 0.0));
             m_toolPath.lineTo(offsetedPos + QPointF(lineKoeff, 0.0));
         } break;
+#ifdef GERBER
         case GiType::ApetrurePr: {
             const QPointF curPos(gbrObj->state().curPos());
             m_toolPath.addEllipse(curPos, diameter * 0.5, diameter * 0.5);
@@ -160,6 +167,7 @@ void DrillPrGI::updateTool()
             m_toolPath.moveTo(curPos - QPointF(lineKoeff, 0.0));
             m_toolPath.lineTo(curPos + QPointF(lineKoeff, 0.0));
         } break;
+#endif
         default:
             break;
         }
@@ -174,8 +182,10 @@ Point64 DrillPrGI::pos() const
         return hole->state.offsetedPos();
     case GiType::DrillPr:
         return hole->state.offsetedPos();
+#ifdef GERBER
     case GiType::ApetrurePr:
         return gbrObj->state().curPos();
+#endif
     default:
         return {};
     }
@@ -190,8 +200,10 @@ Paths DrillPrGI::paths() const
         Paths paths(hole->item->paths());
         return ReversePaths(paths);
     }
+#ifdef GERBER
     case GiType::ApetrurePr:
         return gbrObj->paths();
+#endif
     default:
         return {};
     }
@@ -203,8 +215,10 @@ bool DrillPrGI::fit(double depth)
     case GiType::SlotPr:
     case GiType::DrillPr:
         return m_sourceDiameter > ToolHolder::tool(row.toolId).getDiameter(depth);
+#ifdef GERBER
     case GiType::ApetrurePr:
         return gbrObj->gFile()->apertures()->at(id)->fit(ToolHolder::tool(row.toolId).getDiameter(depth));
+#endif
     default:
         return false;
     }

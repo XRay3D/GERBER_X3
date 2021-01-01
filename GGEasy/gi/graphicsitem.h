@@ -81,15 +81,13 @@ public:
     explicit GraphicsItem(AbstractFile* file = nullptr);
     ~GraphicsItem() override = default;
 
-    // clang-format off
     QColor color() const { return m_color; }
-    void setColor(const QColor& brush) { m_bodyColor = m_color = brush; colorChanged(); }
-    void setColorP(QColor* brushColor) { m_bodyColor = *(m_colorPtr = brushColor); colorChanged(); }
+    void setColor(const QColor& brush);
+    void setColorPtr(QColor* brushColor);
 
     QPen pen() const { return m_pen; }
-    void setPen(const QPen& pen) { m_pen = pen; colorChanged(); }
-    void setPenColor(const QColor* penColor) { m_pnColorPrt = penColor; colorChanged(); }
-    // clang-format on
+    void setPen(const QPen& pen);
+    void setPenColorPtr(const QColor* penColor);
 
     virtual Paths paths() const = 0;
     virtual Paths* rPaths() { return nullptr; }

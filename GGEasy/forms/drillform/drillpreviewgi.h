@@ -13,7 +13,9 @@
 *******************************************************************************/
 #pragma once
 #include "excellon.h"
+#ifdef GERBER
 #include "gbrtypes.h"
+#endif
 #include "gi/graphicsitem.h"
 
 struct Row;
@@ -30,14 +32,18 @@ class DrillPrGI : public QGraphicsObject {
     QColor pathColor() { return m_pathColor; }
     void setPathColor(const QColor& c) { m_pathColor = c; colorChanged(); }
     // clang-format on
+#ifdef GERBER
     static QPainterPath drawPoly(const Gerber::GraphicObject& go);
+#endif
     friend class ThermalNode;
 
 signals:
     void colorChanged();
 
 public:
+#ifdef GERBER
     explicit DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row);
+#endif
     explicit DrillPrGI(const Excellon::Hole* hole, Row& row);
 
     ~DrillPrGI() override = default;
@@ -58,14 +64,18 @@ public:
     void changeColor();
 
 private:
+#ifdef GERBER
     static QPainterPath drawApetrure(const Gerber::GraphicObject* go, int id);
+#endif
     static QPainterPath drawDrill(const Excellon::Hole* hole);
     static QPainterPath drawSlot(const Excellon::Hole* hole);
 
     struct Row& row;
 
     const int id = 0;
+#ifdef GERBER
     const Gerber::GraphicObject* const gbrObj = nullptr;
+#endif
     const Excellon::Hole* const hole = nullptr;
 
     const QPainterPath m_sourcePath;

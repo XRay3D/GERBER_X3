@@ -17,10 +17,10 @@
 
 #include "forms/gcodepropertiesform.h"
 
-#include "gi/aperturepathitem.h"
+#include "gi/datapathitem.h"
 #include "gi/drillitem.h"
-#include "gi/gerberitem.h"
-#include "gi/pathitem.h"
+#include "gi/datasoliditem.h"
+#include "gi/gcpathitem.h"
 #include "graphicsview.h"
 #include "point.h"
 #include "project.h"
@@ -519,12 +519,12 @@ void File::createGiDrill()
     for (const Point64& point : m_toolPathss.first().first()) {
         item = new DrillItem(m_gcp.getTool().diameter(), this);
         item->setPos(point);
-        item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
-        item->setColorP(&GlobalSettings::guiColor(Colors::CutArea));
+        item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
+        item->setColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
         itemGroup()->append(item);
     }
-    item = new PathItem(m_toolPathss.first().first());
-    item->setPenColor(&GlobalSettings::guiColor(Colors::G0));
+    item = new GcPathItem(m_toolPathss.first().first());
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::G0));
     itemGroup()->append(item);
 }
 
@@ -537,9 +537,9 @@ void File::createGiPocket()
         //            offset.AddPaths(m_pocketPaths, jtRound, etClosedPolygon);
         //            offset.Execute(m_pocketPaths, uScale * m_gcp.getToolDiameter() * 0.5);
         //        }
-        item = new GiGerber(m_pocketPaths, nullptr);
+        item = new DataSolidItem(m_pocketPaths, nullptr);
         item->setPen(Qt::NoPen);
-        item->setColorP(&GlobalSettings::guiColor(Colors::CutArea));
+        item->setColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->append(item);
@@ -551,11 +551,11 @@ void File::createGiPocket()
         debugColor.append(QSharedPointer<QColor>(new QColor(QColor::fromHsv(k, 255, 255, 255))));
 
         for (const Path& path : paths) {
-            item = new PathItem(path, this);
+            item = new GcPathItem(path, this);
 #ifdef QT_DEBUG
-            item->setPenColor(debugColor.last().data());
+            item->setPenColorPtr(debugColor.last().data());
 #else
-            item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
+            item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
 #endif
             itemGroup()->append(item);
         }
@@ -564,12 +564,12 @@ void File::createGiPocket()
             Paths g1path;
             for (int j = 0; j < paths.count() - 1; ++j)
                 g1path.append({ paths[j].last(), paths[j + 1].first() });
-            item = new PathItem(g1path);
+            item = new GcPathItem(g1path);
 #ifdef QT_DEBUG
             debugColor.append(QSharedPointer<QColor>(new QColor(0, 0, 255)));
-            item->setPenColor(debugColor.last().data());
+            item->setPenColorPtr(debugColor.last().data());
 #else
-            item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
+            item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
 #endif
             itemGroup()->append(item);
         }
@@ -578,8 +578,8 @@ void File::createGiPocket()
             m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
         }
     }
-    item = new PathItem(m_g0path);
-    item->setPenColor(&GlobalSettings::guiColor(Colors::G0));
+    item = new GcPathItem(m_g0path);
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::G0));
     itemGroup()->append(item);
 }
 
@@ -587,15 +587,15 @@ void File::createGiProfile()
 {
     GraphicsItem* item;
     for (const Paths& paths : m_toolPathss) {
-        item = new PathItem(paths, this);
+        item = new GcPathItem(paths, this);
         item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
+        item->setPenColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
         itemGroup()->append(item);
     }
     int i = 0;
     for (const Paths& paths : m_toolPathss) {
-        item = new PathItem(m_toolPathss[i], this);
-        item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
+        item = new GcPathItem(m_toolPathss[i], this);
+        item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
         itemGroup()->append(item);
         for (int j = 0; j < paths.count() - 1; ++j)
             m_g0path.append({ paths[j].last(), paths[j + 1].first() });
@@ -604,9 +604,9 @@ void File::createGiProfile()
         }
     }
 
-    item = new PathItem(m_g0path);
+    item = new GcPathItem(m_g0path);
     //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
-    item->setPenColor(&GlobalSettings::guiColor(Colors::G0));
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::G0));
     itemGroup()->append(item);
 }
 
@@ -619,25 +619,25 @@ void File::createGiRaster()
     m_g0path.reserve(m_toolPathss.size());
 
     if (m_pocketPaths.size()) {
-        item = new GiGerber(m_pocketPaths, nullptr);
+        item = new DataSolidItem(m_pocketPaths, nullptr);
         item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
-        item->setColorP(&GlobalSettings::guiColor(Colors::CutArea));
+        item->setPenColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
+        item->setColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->append(item);
     } else {
         for (const Paths& paths : m_toolPathss) {
-            item = new PathItem(paths, this);
+            item = new GcPathItem(paths, this);
             item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
+            item->setPenColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
             itemGroup()->append(item);
         }
     }
     int i = 0;
     for (const Paths& paths : m_toolPathss) {
-        item = new PathItem(paths, this);
-        item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
+        item = new GcPathItem(paths, this);
+        item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
         itemGroup()->append(item);
         for (int j = 0; j < paths.count() - 1; ++j)
             m_g0path.append({ paths[j].last(), paths[j + 1].first() });
@@ -645,8 +645,8 @@ void File::createGiRaster()
             m_g0path.append({ m_toolPathss[i].last().last(), m_toolPathss[++i].first().first() });
         }
     }
-    item = new PathItem(m_g0path);
-    item->setPenColor(&GlobalSettings::guiColor(Colors::G0));
+    item = new GcPathItem(m_g0path);
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::G0));
     itemGroup()->append(item);
 }
 
@@ -669,17 +669,17 @@ void File::createGiLaser()
             m_g0path.append({ m_toolPathss[1][i].last(), m_toolPathss[1][i + 1].first() });
     }
 
-    item = new PathItem(paths, this);
+    item = new GcPathItem(paths, this);
     item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
     itemGroup()->append(item);
 
-    item = new PathItem(paths, this);
-    item->setPenColor(&GlobalSettings::guiColor(Colors::ToolPath));
+    item = new GcPathItem(paths, this);
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::ToolPath));
     itemGroup()->append(item);
 
-    item = new PathItem(m_g0path);
-    item->setPenColor(&GlobalSettings::guiColor(Colors::G0));
+    item = new GcPathItem(m_g0path);
+    item->setPenColorPtr(&GlobalSettings::guiColor(Colors::G0));
     itemGroup()->append(item);
 }
 
@@ -732,9 +732,9 @@ void File::createGi()
     case Voronoi:
         if (m_toolPathss.size() > 1) {
             GraphicsItem* item;
-            item = new PathItem(m_toolPathss.last().last(), this);
+            item = new GcPathItem(m_toolPathss.last().last(), this);
             item->setPen(QPen(Qt::black, m_gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setPenColor(&GlobalSettings::guiColor(Colors::CutArea));
+            item->setPenColorPtr(&GlobalSettings::guiColor(Colors::CutArea));
             itemGroup()->append(item);
             createGiPocket();
         } else

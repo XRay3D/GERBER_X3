@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include <QStyledItemDelegate>
 
 class RadioDelegate : public QStyledItemDelegate {
@@ -32,3 +33,4 @@ public:
 private slots:
     void commitAndCloseEditor();
 };
+#endif

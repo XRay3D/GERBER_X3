@@ -21,12 +21,12 @@ struct Spline final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i) const override;
+//    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::SPLINE; }
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, //	100	Маркер подкласса (AcDbSpline)
 
         ExtrusionDirectionX = 210, //	210	Вектор нормали (отсутствует, если сплайн неплоский)
@@ -87,7 +87,7 @@ public:
     int numberOfKnots = 0;
     int splineFlag = 0;
 
-    Q_ENUM(VarType)
+    Q_ENUM(DataEnum)
     Q_GADGET
 };
 

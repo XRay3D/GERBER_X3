@@ -14,27 +14,28 @@
 #pragma once
 #include "graphicsitem.h"
 
-namespace GCode {
+namespace Gerber {
 class File;
 }
 
-class PathItem : public GraphicsItem {
+class DataSolidItem final : public GraphicsItem {
 public:
-    PathItem(const Paths& paths, GCode::File* file = nullptr);
-    PathItem(const Path& path, GCode::File* file = nullptr);
-    ~PathItem() override = default;
+    explicit DataSolidItem(Paths& m_paths, AbstractFile* file);
+    ~DataSolidItem() override;
+
+    // QGraphicsItem interface
     QRectF boundingRect() const override;
+    QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
+    // GraphicsItem interface
+    void redraw() override;
     Paths paths() const override;
+    Paths* rPaths() override;
+    // GraphicsItem interface
+    void changeColor() override;
 
 private:
-    GCode::File* m_gcFile;
-#ifdef QT_DEBUG
-    QPainterPath m_arrows;
-    double m_sc = 0;
-    void updateArrows();
-#endif
-protected:
-    void changeColor() override { }
+    Paths& m_paths;
+    QPolygonF fillPolygon;
 };

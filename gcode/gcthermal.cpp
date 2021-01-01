@@ -14,7 +14,9 @@
 *                                                                              *
 *******************************************************************************/
 #include "gcthermal.h"
+#ifdef GERBER
 #include "gbrfile.h"
+#endif
 #include "gcfile.h"
 #include "project.h"
 
@@ -26,14 +28,19 @@ ThermalCreator::ThermalCreator() { }
 
 void ThermalCreator::create()
 {
+#ifdef GERBER
     createThermal(
         App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()),
         m_gcp.tools.first(),
         m_gcp.params[GCodeParams::Depth].toDouble());
+#else
+    emit fileReady(nullptr);
+#endif
 }
 
 void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
 {
+#ifdef GERBER
     App::m_creator = this;
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
@@ -122,5 +129,6 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     }
+#endif
 }
 }

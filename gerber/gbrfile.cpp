@@ -14,10 +14,10 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrfile.h"
-#include "gi/aperturepathitem.h"
+#include "gi/datapathitem.h"
 #include "gi/componentitem.h"
-#include "gi/gerberitem.h"
-#include "gi/pathitem.h"
+#include "gi/datasoliditem.h"
+#include "gi/datapathitem.h"
 #include "project.h"
 #include "settings.h"
 #include <QElapsedTimer>
@@ -281,7 +281,7 @@ void File::createGi()
 {
     // fill copper
     for (Paths& paths : groupedPaths()) {
-        GraphicsItem* item = new GiGerber(paths, this);
+        GraphicsItem* item = new DataSolidItem(paths, this);
         m_itemGroups[Normal]->append(item);
     }
 
@@ -322,17 +322,17 @@ void File::createGi()
                         path.append(path.first());
                         if (!GlobalSettings::gbrSkipDuplicates()) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
                         } else if (!contains(path)) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new AperturePathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
                         }
                     }
                 } else {
                     if (!GlobalSettings::gbrSkipDuplicates()) {
-                        m_itemGroups[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
                     } else if (!contains(go.path())) {
-                        m_itemGroups[ApPaths]->append(new AperturePathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
                         checkList.push_front(go.path());
                     }
                 }

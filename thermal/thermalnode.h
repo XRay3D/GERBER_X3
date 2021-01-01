@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GERBER
 #include "thermalpreviewitem.h"
 #include "thvars.h"
 #include <QIcon>
@@ -82,3 +83,4 @@ private:
         Qt::PartiallyChecked // index 3
     };
 };
+#endif

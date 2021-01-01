@@ -47,9 +47,9 @@ void GraphicObject::setScale(double scaleX, double scaleY)
             ReversePath(path);
     };
 
-    scale(m_path, m_scaleX, m_scaleY, m_pos);
+    scale(m_path, m_scaleX, m_scaleY, {} /*m_pos*/);
     for (auto& path : m_paths)
-        scale(path, m_scaleX, m_scaleY, m_pos);
+        scale(path, m_scaleX, m_scaleY, {} /*m_pos*/);
 }
 
 void GraphicObject::setPos(QPointF pos)

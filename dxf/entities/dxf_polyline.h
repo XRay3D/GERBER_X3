@@ -24,12 +24,12 @@ struct PolyLine final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::POLYLINE; }
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDb2dPolyline или AcDb3dPolyline)
         EntitiesFollowFlag = 66, // Устарело; ранее — флаг наследования объекта (необязательно; игнорировать, если имеется)
         DummyX = 10, // Файл DXF: всегда 0        // Приложение: "фиктивная" точка; значения X и Y всегда равны нулю, а значение Z является отметкой полилинии (ОСК в 2D, МСК в 3D)
@@ -82,7 +82,7 @@ public:
 
     QVector<struct Vertex> vertex;
 
-    GraphicObject toGo() const;
+    GraphicObject toGo() const override;
 
     int polylineFlags = 0;
     double startWidth = 0.0;

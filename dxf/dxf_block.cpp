@@ -71,6 +71,7 @@ void Block::parseHeader(CodeData& code)
             blockName = code.string();
             break;
         case XrefPathName:
+            xrefPathName = code.string();
             break;
         case BlockDescription:
             blockDescription = code.string();

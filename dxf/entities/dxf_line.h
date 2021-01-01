@@ -24,12 +24,12 @@ struct Line final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::LINE; }
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbLine)
         Thickness = 39, // Толщина (необязательно; значение по умолчанию = 0)
         StartPointX = 10, // Начальная точка (в МСК)  //Файл DXF: значение X; приложение: 3D-точка

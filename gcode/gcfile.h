@@ -17,12 +17,12 @@
 #include "gcutils.h"
 
 class Project;
-class PathItem;
+class GcPathItem;
 
 namespace GCode {
 
 class File : public AbstractFile, private GCUtils {
-    friend class ::PathItem;
+    friend class ::GcPathItem;
     friend class ::Project;
 
 public:

@@ -15,7 +15,9 @@
 *******************************************************************************/
 #include "thermalform.h"
 #include "../gcodepropertiesform.h"
+#ifdef GERBER
 #include "gbrfile.h"
+#endif
 #include "gcode.h"
 #include "gi/bridgeitem.h"
 #include "graphicsview.h"
@@ -45,6 +47,7 @@ enum { Size = 24 };
 
 extern QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
 
+#ifdef GERBER
 QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 {
     static QMutex m;
@@ -79,6 +82,8 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
     painter.drawPath(painterPath);
     return QIcon(pixmap);
 }
+#endif
+
 
 ThermalForm::ThermalForm(QWidget* parent)
     : FormsUtil(new GCode::ThermalCreator, parent)
@@ -114,9 +119,11 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->treeView->setIconSize(QSize(Size, Size));
     connect(ui->treeView, &QTreeView::clicked, ui->treeView, qOverload<const QModelIndex&>(&QTreeView::edit));
 
+#ifdef GERBER
     connect(ui->chbxAperture, &QCheckBox::toggled, [this] { createTPI(nullptr); });
     connect(ui->chbxPath, &QCheckBox::toggled, [this] { createTPI(nullptr); });
     connect(ui->chbxPour, &QCheckBox::toggled, [this] { createTPI(nullptr); });
+#endif
 
     updateName();
 
@@ -134,6 +141,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     if (ui->cbxFile->count() < 1)
         return;
 
+#ifdef GERBER
     {
         ui->treeView->setUniformRowHeights(true);
         ui->treeView->header()->setMinimumHeight(Size);
@@ -167,12 +175,15 @@ ThermalForm::ThermalForm(QWidget* parent)
             ui->treeView->header()->setMinimumHeight(h);
         }
     }
+#endif
 }
 
 ThermalForm::~ThermalForm()
 {
 
+#ifdef GERBER
     par = model->rootItem->child(0)->getParam();
+#endif
     MySettings settings;
     settings.beginGroup("ThermalForm");
     settings.setValue(varName(par.angle));
@@ -197,6 +208,7 @@ void ThermalForm::updateFiles()
 #endif
     ui->cbxFile->clear();
 
+#ifdef GERBER
     for (Gerber::File* file : App::project()->files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortName(), file->id());
@@ -208,6 +220,7 @@ void ThermalForm::updateFiles()
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
         }
     }
+#endif
 
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -219,9 +232,11 @@ void ThermalForm::updateFiles()
 
 bool ThermalForm::canToShow()
 {
+#ifdef GERBER
     for (Gerber::File* file : App::project()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
+#endif
 
     QMessageBox::information(nullptr, "", tr("No data to process."));
     return false;
@@ -239,12 +254,14 @@ void ThermalForm::createFile()
     Paths wPaths;
     Pathss wBridgePaths;
 
+#ifdef GERBER
     for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview) {
         if (item->isValid()) {
             wPaths.append(item->paths());
             wBridgePaths.append(item->bridge());
         }
     }
+#endif
 
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
@@ -268,10 +285,12 @@ void ThermalForm::updateName()
 
 void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
+#ifdef GERBER
     auto file = App::project()->file<Gerber::File>(ui->cbxFile->currentData().toInt());
     createTPI(file->apertures());
+#endif
 }
-
+#ifdef GERBER
 void ThermalForm::createTPI(const Gerber::ApertureMap* value)
 {
     m_sourcePreview.clear();
@@ -389,9 +408,10 @@ void ThermalForm::createTPI(const Gerber::ApertureMap* value)
     if (0 && qApp->applicationDirPath().contains("GERBER_X2/bin"))
         ui->treeView->expandAll();
 }
-
+#endif
 void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
+#ifdef GERBER
     for (auto index : selected.indexes()) {
         auto* node = static_cast<ThermalNode*>(index.internalPointer());
         auto* item = node->item();
@@ -414,6 +434,7 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
             }
         }
     }
+#endif
 }
 
 void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& deselected)
@@ -426,9 +447,11 @@ void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& d
 
 void ThermalForm::redraw()
 {
+#ifdef GERBER
     for (auto item : m_sourcePreview) {
         item->redraw();
     }
+#endif
 }
 
 void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
@@ -444,7 +467,9 @@ void ThermalForm::on_dsbxAreaMin_editingFinished()
 
     if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
         lastMin = ui->dsbxAreaMin->value();
+#ifdef GERBER
         createTPI(nullptr);
+#endif
     }
 }
 
@@ -453,6 +478,8 @@ void ThermalForm::on_dsbxAreaMax_editingFinished()
 
     if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
         lastMax = ui->dsbxAreaMax->value();
+#ifdef GERBER
         createTPI(nullptr);
+#endif
     }
 }

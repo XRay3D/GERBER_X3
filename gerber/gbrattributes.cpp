@@ -15,101 +15,140 @@
 *******************************************************************************/
 #include "gbrattributes.h"
 #include "gbrattrfilefunction.h"
+namespace Gerber::Attr {
 
-///////////////////////////////////////
-/// \brief Gerber::Attr::FileFunction::~FileFunction
-///
-Gerber::Attr::FileFunction::~FileFunction()
+File::StdAttr File::toStdAttr(const QString& key)
 {
-    if (m_data)
-        delete m_data;
+    return StdAttr(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
-Gerber::Attr::FileFunction::eFunction Gerber::Attr::FileFunction::toFunction(const QString& key) { return eFunction(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data())); }
-
-void Gerber::Attr::FileFunction::parse(const QStringList& list)
+File::ePart File::toPart(const QString& key)
 {
-    switch (m_function = toFunction(list.first())) {
-    case eFunction::Legend:
-        m_data = new struct Legend(m_function, list.mid(1));
+    return ePart(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
+}
+
+File::eFilePolarity File::toFilePolarityValue(const QString& key)
+{
+    return eFilePolarity(staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data()));
+}
+
+File::eFunction File::toFunction(const QString& key)
+{
+    return eFunction(staticMetaObject.enumerator(3).keyToValue(key.toLocal8Bit().data()));
+}
+
+void File::parse(const QStringList& list)
+{
+    switch (toStdAttr(list.first())) {
+    case StdAttr::Part:
+        part = list.mid(1);
         break;
-    case eFunction::Component:
-        m_data = new struct Component(m_function, list.mid(1));
+    case StdAttr::FileFunction:
+        switch (const auto function = toFunction(list[1]); function) {
+        case eFunction::Legend:
+            fileFunction = new struct Legend(function, list.mid(2));
+            break;
+        case eFunction::Component:
+            fileFunction = new struct Component(function, list.mid(2));
+            break;
+        case eFunction::Heatsinkmask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::ArrayDrawing:
+            fileFunction = new struct ArrayDrawing(function, list.mid(2));
+            break;
+        case eFunction::AssemblyDrawing:
+            fileFunction = new struct AssemblyDrawing(function, list.mid(2));
+            break;
+        case eFunction::Carbonmask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::Copper:
+            fileFunction = new struct Copper(function, list.mid(2));
+            break;
+        case eFunction::Depthrout:
+            fileFunction = new struct Depthrout(function, list.mid(2));
+            break;
+        case eFunction::Drillmap:
+            fileFunction = new struct Drillmap(function, list.mid(2));
+            break;
+        case eFunction::FabricationDrawing:
+            fileFunction = new struct FabricationDrawing(function, list.mid(2));
+            break;
+        case eFunction::Glue:
+            fileFunction = new struct Glue(function, list.mid(2));
+            break;
+        case eFunction::Goldmask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::NonPlated:
+            fileFunction = new struct NonPlated(function, list.mid(2));
+            break;
+        case eFunction::Other:
+            fileFunction = new struct Other(function, list.mid(2));
+            break;
+        case eFunction::OtherDrawing:
+            fileFunction = new struct OtherDrawing(function, list.mid(2));
+            break;
+        case eFunction::Pads:
+            fileFunction = new struct Pads(function, list.mid(2));
+            break;
+        case eFunction::Paste:
+            fileFunction = new struct Paste(function, list.mid(2));
+            break;
+        case eFunction::Peelablemask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::Plated:
+            fileFunction = new struct Plated(function, list.mid(2));
+            break;
+        case eFunction::Profile:
+            fileFunction = new struct Profile(function, list.mid(2));
+            break;
+        case eFunction::Silvermask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::Soldermask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::Tinmask:
+            fileFunction = new struct Mask(function, list.mid(2));
+            break;
+        case eFunction::Vcut:
+            fileFunction = new struct Vcut(function, list.mid(2));
+            break;
+        case eFunction::Vcutmap:
+            fileFunction = new struct Vcutmap(function, list.mid(2));
+            break;
+        case eFunction::Viafill:
+            fileFunction = new struct Viafill(function, list.mid(2));
+            break;
+        default:;
+            throw QString("Unknownwn File: %1").arg(list.first());
+        }
         break;
-    case eFunction::Heatsinkmask:
-        m_data = new struct Mask(m_function, list.mid(1));
+    case StdAttr::FilePolarity:
+        filePolarity = toFilePolarityValue(list.last());
         break;
-    case eFunction::ArrayDrawing:
-        m_data = new struct ArrayDrawing(m_function, list.mid(1));
+    case StdAttr::SameCoordinates:
+        sameCoordinates = list.mid(1);
         break;
-    case eFunction::AssemblyDrawing:
-        m_data = new struct AssemblyDrawing(m_function, list.mid(1));
+    case StdAttr::CreationDate:
+        creationDate = list.last();
         break;
-    case eFunction::Carbonmask:
-        m_data = new struct Mask(m_function, list.mid(1));
+    case StdAttr::GenerationSoftware:
+        generationSoftware = list.mid(1);
         break;
-    case eFunction::Copper:
-        m_data = new struct Copper(m_function, list.mid(1));
+    case StdAttr::ProjectId:
+        projectId = list.mid(1);
         break;
-    case eFunction::Depthrout:
-        m_data = new struct Depthrout(m_function, list.mid(1));
-        break;
-    case eFunction::Drillmap:
-        m_data = new struct Drillmap(m_function, list.mid(1));
-        break;
-    case eFunction::FabricationDrawing:
-        m_data = new struct FabricationDrawing(m_function, list.mid(1));
-        break;
-    case eFunction::Glue:
-        m_data = new struct Glue(m_function, list.mid(1));
-        break;
-    case eFunction::Goldmask:
-        m_data = new struct Mask(m_function, list.mid(1));
-        break;
-    case eFunction::NonPlated:
-        m_data = new struct NonPlated(m_function, list.mid(1));
-        break;
-    case eFunction::Other:
-        m_data = new struct Other(m_function, list.mid(1));
-        break;
-    case eFunction::OtherDrawing:
-        m_data = new struct OtherDrawing(m_function, list.mid(1));
-        break;
-    case eFunction::Pads:
-        m_data = new struct Pads(m_function, list.mid(1));
-        break;
-    case eFunction::Paste:
-        m_data = new struct Paste(m_function, list.mid(1));
-        break;
-    case eFunction::Peelablemask:
-        m_data = new struct Mask(m_function, list.mid(1));
-        break;
-    case eFunction::Plated:
-        m_data = new struct Plated(m_function, list.mid(1));
-        break;
-    case eFunction::Profile:
-        m_data = new struct Profile(m_function, list.mid(1));
-        break;
-    case eFunction::Silvermask:
-        m_data = new struct Mask(m_function, list.mid(1));
-        break;
-    case eFunction::Soldermask:
-        m_data = new struct Mask(m_function, list.mid(1));
-        break;
-    case eFunction::Tinmask:
-        m_data = new struct Mask(m_function, list.mid(1));
-        break;
-    case eFunction::Vcut:
-        m_data = new struct Vcut(m_function, list.mid(1));
-        break;
-    case eFunction::Vcutmap:
-        m_data = new struct Vcutmap(m_function, list.mid(1));
-        break;
-    case eFunction::Viafill:
-        m_data = new struct Viafill(m_function, list.mid(1));
+    case StdAttr::MD5:
+        md5 = list.last();
         break;
     default:;
-        throw QString("Unknownwn FileFunction: %1").arg(list.first());
+        custom[list.first()] = list.mid(1);
+        //qDebug() << __FUNCTION__ << "custom" << custom;
     }
-    qDebug() << __FUNCTION__ << m_function;
+}
+
 }

@@ -16,8 +16,9 @@
 #include "dxf_file.h"
 #include "dxf_sectionparser.h"
 
-#include "tables/dxf_layer.h"
 #include "tables/dxf_abstracttable.h"
+#include "tables/dxf_layer.h"
+#include "tables/dxf_style.h"
 
 //#include "dxf_appid.h"
 //#include "dxf_block_record.h"

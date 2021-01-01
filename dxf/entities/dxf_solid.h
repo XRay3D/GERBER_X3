@@ -22,13 +22,13 @@ struct Solid final : Entity {
 
     // Entity interface
 public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::SOLID; }
     GraphicObject toGo() const override;
 
-    enum VarType {
+    enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbTrace)
 
         FirstCornerX = 10, // Первая угловая точка        //        Файл DXF: значение X; приложение: 3D-точка

@@ -1,27 +1,15 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-/*******************************************************************************
-*                                                                              *
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
-*                                                                              *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
-*******************************************************************************/
+// https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "qdruler.h"
 
+#include "settings.h"
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTextDocument>
 #include <QTextFormat>
 #include <QtMath>
-#include "settings.h"
 
 QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
     : QWidget(parent)
@@ -40,30 +28,15 @@ QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
     //setFont(txtFont);
 }
 
-QSize QDRuler::minimumSizeHint() const
-{
-    return QSize(RulerBreadth, RulerBreadth);
-}
+QSize QDRuler::minimumSizeHint() const { return QSize(RulerBreadth, RulerBreadth); }
 
-QDRuler::RULER_TYPE QDRuler::RulerType() const
-{
-    return rulerType;
-}
+QDRuler::RULER_TYPE QDRuler::RulerType() const { return rulerType; }
 
-qreal QDRuler::Origin() const
-{
-    return origin;
-}
+qreal QDRuler::Origin() const { return origin; }
 
-qreal QDRuler::RulerUnit() const
-{
-    return rulerUnit;
-}
+qreal QDRuler::RulerUnit() const { return rulerUnit; }
 
-qreal QDRuler::RulerZoom() const
-{
-    return rulerZoom;
-}
+qreal QDRuler::RulerZoom() const { return rulerZoom; }
 
 void QDRuler::SetOrigin(const qreal origin_)
 {
@@ -115,14 +88,13 @@ void QDRuler::mouseMoveEvent(QMouseEvent* event)
 void QDRuler::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event)
-    textPen = QPen(Qt::white);
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
     painter.setPen(QPen(Qt::darkGray, 0.0)); // zero width pen is cosmetic pen
     QRectF rulerRect(rect()); // We want to work with floating point, so we are considering the rect as QRectF
 
     // at first fill the rect
-    painter.fillRect(rulerRect, QColor(10, 10, 10));
+    painter.fillRect(rulerRect, GlobalSettings::guiColor(Colors::Background));
     if (qFuzzyIsNull(rulerZoom))
         return;
 
@@ -156,9 +128,9 @@ void QDRuler::paintEvent(QPaintEvent* event)
     }
 
     // drawing no man's land between the ruler & view
-    if (/* DISABLES CODE */ (1)) {
+    if (/* DISABLES CODE */ (0)) {
         QPointF starPt((Horizontal == rulerType) ? rulerRect.bottomLeft() : rulerRect.topRight());
-        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight());//same branches!!!!!!
+        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight()); //same branches!!!!!!
         painter.setPen(QPen(Qt::red, 2));
         painter.drawLine(starPt, endPt);
     }
@@ -209,7 +181,11 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
         painter->drawLine(QLineF(x1, y1, x2, y2));
         if (drawText) {
             painter->save();
-            painter->setPen(textPen); // zero width pen is cosmetic pen
+            auto color(GlobalSettings::guiColor(Colors::Background));
+            color.setRed(255 - color.red());
+            color.setGreen(255 - color.green());
+            color.setBlue(255 - color.blue());
+            painter->setPen(QPen(color, 0.0));
             painter->setFont(font());
             QString number = QString::number((startTickNo * gridStep * tickKoef * (GlobalSettings ::inch() ? 1.0 / 25.4 : 1.0)));
             if (1) {

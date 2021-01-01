@@ -44,9 +44,10 @@ public:
 extern const Color dxfColors[];
 
 class Layer;
+struct AbstractTable;
 struct Block;
 struct SectionParser;
-struct AbstractTable;
+struct Style;
 
 using GraphicObjects = std::vector<GraphicObject>;
 
@@ -55,6 +56,7 @@ using Blocks = std::map<QString, Block*>;
 using HeaderData = std::map<QString, std::map<int, QVariant>>;
 using Layers = std::map<QString, Layer*>;
 using Sections = std::map<int, SectionParser*>;
+using Styles = std::map<QString, Style*>;
 using Tables = std::map<int, QVector<AbstractTable*>>;
 #else
 struct Blocks : std::map<QString, Block*> {
@@ -68,6 +70,9 @@ struct Layers : std::map<QString, Layer*> {
 };
 struct Sections : std::map<int, SectionParser*> {
     bool contains(int key) const { return find(key) != end(); }
+};
+struct Styles : std::map<QString, Style*> {
+    bool contains(const QString& key) const { return find(key) != end(); }
 };
 struct Tables : std::map<int, QVector<AbstractTable*>> {
     bool contains(int key) const { return find(key) != end(); }

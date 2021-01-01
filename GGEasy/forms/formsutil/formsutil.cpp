@@ -16,7 +16,9 @@
 #include "formsutil.h"
 #include "errordialog.h"
 
+#ifdef GERBER
 #include "gbrfile.h"
+#endif
 #include "gcode.h"
 #include "gi/erroritem.h"
 #include "project.h"
@@ -146,7 +148,9 @@ void FormsUtil::addUsedGi(GraphicsItem* gi)
     if (gi->file()) {
         AbstractFile const* file = gi->file();
         if (file->type() == FileType::Gerber) {
+#ifdef GERBER
             m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].append(gi->id());
+#endif
         } else {
             m_usedItems[{ file->id(), -1 }].append(gi->id());
         }

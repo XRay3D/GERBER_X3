@@ -31,7 +31,7 @@ void SectionHEADER::parse()
         CodeData code(nextCode());
         if (code == "ENDSEC")
             continue;
-        if (code.type() == CodeData::String && QString(code).startsWith('$')) {
+        if (code.type() == CodeData::String && code.string().startsWith('$')) {
             key = code.string();
         } else if (!key.isEmpty()) {
             header[key][code.code()] = code.value();

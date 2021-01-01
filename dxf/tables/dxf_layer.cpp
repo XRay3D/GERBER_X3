@@ -56,7 +56,7 @@ void Layer::parse(CodeData& code)
             lineTypeName = code.string();
             break;
         case PlottingFlag:
-            plottingFlag = code;
+            plottingFlag = code.string().toInt();
             break;
         case LineWeightEnum:
             lineWeightEnum = code;
@@ -126,6 +126,11 @@ void Layer::setItemsType(ItemsType itemsType)
         return;
     m_itemsType = itemsType;
     if (itemGroupNorm && itemGroupPath) {
+        if (itemGroupNorm->isEmpty())
+            m_itemsType = ItemsType::Paths;
+        else if (itemGroupPath->isEmpty())
+            m_itemsType = ItemsType::Normal;
+
         if (m_itemsType == ItemsType::Normal) {
             itemGroupNorm->setVisible(m_visible);
             itemGroupPath->setVisible(false);

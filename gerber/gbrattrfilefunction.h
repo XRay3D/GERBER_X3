@@ -26,15 +26,16 @@ namespace Gerber::Attr {
 /////////////////////////////////////////////////////
 /// \brief The AbsctractData struct
 ///
-struct AbsctractData {
+struct AbstrFileFunc {
     Q_GADGET
 
 public:
+    virtual ~AbstrFileFunc() = default;
     enum class Side {
         Null = -1,
         Top,
+        Bot,
         Inr,
-        Bot
     };
     Q_ENUM(Side)
     static Side toSide(const QString str) { return Side(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
@@ -109,13 +110,14 @@ public:
     Q_ENUM(Layer)
     static Layer toLayer(const QString str) { return Layer(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    AbsctractData(FileFunction::eFunction function);
-    const FileFunction::eFunction function;
+    AbstrFileFunc(File::eFunction function);
+    const File::eFunction function;
+    virtual Side side_() const { return Side::Null; }
 };
 /////////////////////////////////////////////////////
 /// \brief The Copper struc
 ///
-struct Copper : AbsctractData {
+struct Copper : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /* L<p>,(Top|Inr|Bot)[,<type>] */
@@ -140,7 +142,7 @@ public:
     Q_ENUM(Type)
     static Type toType(const QString str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
 
-    Copper(FileFunction::eFunction function, const QStringList& list);
+    Copper(File::eFunction function, const QStringList& list);
     const Layer layer;
     const Side side;
     const Type type;
@@ -148,7 +150,7 @@ public:
 /////////////////////////////////////////////////////
 /// \brief The ArrayDrawing struct
 ///
-struct ArrayDrawing : AbsctractData {
+struct ArrayDrawing : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*
@@ -157,8 +159,8 @@ struct ArrayDrawing : AbsctractData {
      */
 
 public:
-    ArrayDrawing(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    ArrayDrawing(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     //, side(toSide(list.value(0)))
     {
     }
@@ -167,7 +169,7 @@ public:
 /////////////////////////////////////////////////////
 /// \brief The AssemblyDrawing struct
 ///
-struct AssemblyDrawing : AbsctractData {
+struct AssemblyDrawing : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)
@@ -175,13 +177,14 @@ struct AssemblyDrawing : AbsctractData {
                Он в основном используется при сборке печатных плат. */
 
 public:
-    AssemblyDrawing(FileFunction::eFunction function, const QStringList& list);
+    AssemblyDrawing(File::eFunction function, const QStringList& list);
     const Side side;
+    virtual Side side_() const override { return side; }
 };
 /////////////////////////////////////////////////////
 /// \brief The Component struct
 ///
-struct Component : AbsctractData {
+struct Component : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*L<p>,(Top|Bot) A component layer.
@@ -191,77 +194,78 @@ struct Component : AbsctractData {
                 Этот синтаксис предназначен для встроенных компонентов.
                 Для заданий без встроенных компонентов есть преднамеренное резервирование.
                 Example:
-                %TF.FileFunction,Component,L1,Top*%
-                %TF.FileFunction,Component,L4,Bot*%*/
+                %TF.File,Component,L1,Top*%
+                %TF.File,Component,L4,Bot*%*/
 public:
-    Component(FileFunction::eFunction function, const QStringList& list);
+    Component(File::eFunction function, const QStringList& list);
     const Layer layer;
     const Side side;
+    virtual Side side_() const override { return side; }
 };
 /////////////////////////////////////////////////////
 /// \brief The Depthrout struct
 ///
-struct Depthrout : AbsctractData {
+struct Depthrout : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)
                 Area that must be routed to a given depth rather than going through the whole board. */
 
 public:
-    Depthrout(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Depthrout(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Drillmap struct
 ///
-struct Drillmap : AbsctractData {
+struct Drillmap : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*
                A drawing with the locations of the drilled holes. It often also contains the hole sizes, tolerances and plated/non-plated info. */
 
 public:
-    Drillmap(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Drillmap(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The FabricationDrawing struct
 ///
-struct FabricationDrawing : AbsctractData {
+struct FabricationDrawing : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*
                A drawing with additional information for the fabrication of the bare PCB: the location of holes and slots, the board outline, sizes and tolerances, layer stack, material, finish choice, etc. */
 
 public:
-    FabricationDrawing(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    FabricationDrawing(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Glue struct
 ///
-struct Glue : AbsctractData {
+struct Glue : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)
                Glue spots used to fix components to the board prior to soldering. */
 
 public:
-    Glue(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Glue(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Legend struct
 ///
-struct Legend : AbsctractData {
+struct Legend : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)[,<index>]*/ /*
@@ -270,14 +274,15 @@ struct Legend : AbsctractData {
             См. Запись Soldermask для объяснения индекса. */
 
 public:
-    Legend(FileFunction::eFunction function, const QStringList& list);
+    Legend(File::eFunction function, const QStringList& list);
     const Side side;
     const int index;
+    virtual Side side_() const override { return side; }
 };
 /////////////////////////////////////////////////////
 /// \brief The NonPlated struct
 ///
-struct NonPlated : AbsctractData {
+struct NonPlated : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*i,j,(NPTH|Blind|Buried) [,<label>]*/ /*
@@ -303,7 +308,7 @@ public:
     Q_ENUM(Label)
     static Label toLabel(const QString str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    NonPlated(FileFunction::eFunction function, const QStringList& list);
+    NonPlated(File::eFunction function, const QStringList& list);
     const int layerFrom;
     const int layerTo;
     const Type type;
@@ -312,7 +317,7 @@ public:
 /////////////////////////////////////////////////////
 /// \brief The Other struct
 ///
-struct Other : AbsctractData {
+struct Other : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*<mandatory field>
@@ -320,57 +325,58 @@ struct Other : AbsctractData {
                 The mandatory field informally describes the file function.*/
 
 public:
-    Other(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Other(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The OtherDrawing struct
 ///
-struct OtherDrawing : AbsctractData {
+struct OtherDrawing : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*<mandatory field>
                 Any other drawing than the 4 ones above. The mandatory field informally describes its topic. */
     // Other files
 public:
-    OtherDrawing(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    OtherDrawing(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Pads struct
 ///
-struct Pads : AbsctractData {
+struct Pads : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)
                 A file containing only the pads (SMD, BGA, component, …). Not needed in a fabrication data set. */
 
 public:
-    Pads(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Pads(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Paste struct
 ///
-struct Paste : AbsctractData {
+struct Paste : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)*/ /*  Места, где необходимо нанести паяльную пасту. */
 
 public:
-    Paste(FileFunction::eFunction function, const QStringList& list);
+    Paste(File::eFunction function, const QStringList& list);
     const Side side;
+    virtual Side side_() const override { return side; }
 };
 /////////////////////////////////////////////////////
 /// \brief The Plated struct
 ///
-struct Plated : AbsctractData {
+struct Plated : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*i,j,(PTH|Blind|Buried)[,<label>]*/
@@ -398,7 +404,7 @@ public:
     Q_ENUM(Label)
     static Label toLabel(const QString str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    Plated(FileFunction::eFunction function, const QStringList& list);
+    Plated(File::eFunction function, const QStringList& list);
     const int layerFrom;
     const int layerTo;
     const Type type;
@@ -407,7 +413,7 @@ public:
 /////////////////////////////////////////////////////
 /// \brief The Profile struct
 ///
-struct Profile : AbsctractData {
+struct Profile : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(P|NP)*/
@@ -425,13 +431,13 @@ public:
     Q_ENUM(EdgePlated)
     static EdgePlated toEdgePlated(const QString str) { return EdgePlated(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
 
-    Profile(FileFunction::eFunction function, const QStringList& list);
+    Profile(File::eFunction function, const QStringList& list);
     const EdgePlated plated;
 };
 /////////////////////////////////////////////////////
 /// \brief The Soldermask struct
 ///
-struct Mask : AbsctractData {
+struct Mask : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*(Top|Bot)[,<index>]*/
@@ -459,17 +465,18 @@ public:
         Tin,
     };
     Q_ENUM(Type)
-    static Type toType(FileFunction::eFunction function) { return Type(function - FileFunction::Carbonmask); }
+    static Type toType(File::eFunction function) { return Type(function - File::Carbonmask); }
 
-    Mask(FileFunction::eFunction function, const QStringList& list);
+    Mask(File::eFunction function, const QStringList& list);
     const Side side;
     const int index;
     const Type type;
+    virtual Side side_() const override { return side; }
 };
 /////////////////////////////////////////////////////
 /// \brief The Vcut struct
 ///
-struct Vcut : AbsctractData {
+struct Vcut : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*[,(Top|Bot)]
@@ -477,38 +484,38 @@ struct Vcut : AbsctractData {
                If the optional attachment (Top|Bot) is not present the scoring lines are identical on top and bottom – this is the normal case. In the exceptional case scoring is different on top and bottom two files must be supplied, one with Top and the other with Bot. */
 
 public:
-    Vcut(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Vcut(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Vcutmap struct
 ///
-struct Vcutmap : AbsctractData {
+struct Vcutmap : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*
                A drawing with v-cut or scoring information. */
 
 public:
-    Vcutmap(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Vcutmap(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };
 /////////////////////////////////////////////////////
 /// \brief The Viafill struct
 ///
-struct Viafill : AbsctractData {
+struct Viafill : AbstrFileFunc {
     Q_GADGET
     static int value(const QString str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
     /*
                Contains the via’s that must be filled. It is however recommended to specify the filled via’s with the optional field in the .AperFunction ViaDrill. */
 
 public:
-    Viafill(FileFunction::eFunction function, const QStringList& list)
-        : AbsctractData(function)
+    Viafill(File::eFunction function, const QStringList& list)
+        : AbstrFileFunc(function)
     {
     }
 };

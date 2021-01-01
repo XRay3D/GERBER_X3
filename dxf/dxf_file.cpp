@@ -23,14 +23,15 @@
 //#include "section/dxf_classes.h"
 //#include "section/dxf_objects.h"
 //#include "section/dxf_thumbnailimage.h"
+#include "gccreator.h" //////////////////////
 
 #include "entities/dxf_entity.h"
 
 #include "tables/dxf_layer.h"
 
-#include "gi/aperturepathitem.h"
-#include "gi/gerberitem.h"
-#include "gi/pathitem.h"
+#include "gi/datapathitem.h"
+#include "gi/datasoliditem.h"
+#include "gi/gcpathitem.h"
 #include "settings.h"
 
 #include <QDebug>
@@ -57,18 +58,8 @@ File::~File()
 void File::setItemType(ItemsType type)
 {
     m_itemsType = type;
-    for (auto [name, layer] : m_layers) {
-        if (layer->itemGroupNorm && layer->itemGroupPath) {
-            layer->m_itemsType = m_itemsType;
-            if (m_itemsType == ItemsType::Normal) {
-                layer->itemGroupNorm->setVisible(layer->itemGroupPath->isVisible());
-                layer->itemGroupPath->setVisible(false);
-            } else {
-                layer->itemGroupPath->setVisible(layer->itemGroupNorm->isVisible());
-                layer->itemGroupNorm->setVisible(false);
-            }
-        }
-    }
+    for (auto [name, layer] : m_layers)
+        layer->setItemsType(m_itemsType);
 }
 
 ItemsType File::itemsType() const { return m_itemsType; }
@@ -167,39 +158,44 @@ void File::createGi()
             Clipper clipper; // Clipper
 
             for (auto& go : layer->m_graphicObjects) {
-                if (layer->m_groupedPaths.isEmpty()) {
-                    clipper.AddPath(go.path(), ptClip, true); // Clipper
-                    clipper.AddPaths(go.paths(), ptClip, true); // Clipper
-                }
-                if (go.path().size()) {
-                    auto gItem = new AperturePathItem(go.path(), this);
-                    if (go.entity())
+                if (layer->m_groupedPaths.isEmpty() && go.paths().size())
+                    clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
+
+                if (go.path().size() > 1) {
+                    auto gItem = new DataPathItem(go.path(), this);
+                    if (go.entity()) {
                         gItem->setToolTip(QString("Line %1\n%2")
                                               .arg(go.entity()->data[0].line())
                                               .arg(go.entity()->name()));
-                    gItem->setPenColor(&layer->m_colorPath);
+                    }
+                    gItem->setPenColorPtr(&layer->m_colorPath);
                     igPath->append(gItem);
                 }
             }
 
-            if (layer->m_groupedPaths.isEmpty()) {
-                clipper.Execute(ctUnion, m_mergedPaths, pftPositive); // Clipper
-                layer->m_groupedPaths = std::move(groupedPaths());
-                for (auto& paths : layer->m_groupedPaths)
-                    CleanPolygons(paths, uScale * 0.0005);
+            try {
+                if (layer->m_groupedPaths.isEmpty()) {
+                    clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
+                    //                dbgPaths(m_mergedPaths, "m_mergedPaths", true);
+                    layer->m_groupedPaths = std::move(groupedPaths());
+                    for (auto& paths : layer->m_groupedPaths)
+                        CleanPolygons(paths, uScale * 0.0005);
+                    m_mergedPaths.clear();
+                }
+            } catch (...) {
                 m_mergedPaths.clear();
             }
 
             for (Paths& paths : layer->m_groupedPaths) {
-                auto gItem = new GiGerber(paths, this);
-                gItem->setColorP(&layer->m_colorNorm);
+                auto gItem = new DataSolidItem(paths, this);
+                gItem->setColorPtr(&layer->m_colorNorm);
                 igNorm->append(gItem);
             }
             layer->itemGroupNorm = igNorm;
             layer->itemGroupPath = igPath;
 
             if (layer->m_itemsType == ItemsType::Null) {
-                layer->m_itemsType = ItemsType::Normal;
+                layer->setItemsType(ItemsType::Normal);
                 layer->setVisible(true);
             } else
                 layer->setVisible(m_visible);
@@ -240,6 +236,13 @@ void File::write(QDataStream& stream) const
         }
     }
     stream << m_itemsType;
+    if (!m_layersVisible.size() && m_visible) {
+        for (auto [name, layer] : m_layers) {
+            if (!layer->isEmpty()) {
+                m_layersVisible[name] = layer->isVisible();
+            }
+        }
+    }
     stream << m_layersVisible;
 }
 

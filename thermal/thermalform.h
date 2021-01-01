@@ -14,7 +14,9 @@
 #pragma once
 #include "forms/formsutil/formsutil.h"
 
+#ifdef GERBER
 #include "gbrtypes.h"
+#endif
 #include "thvars.h"
 
 class ThermalModel;
@@ -52,10 +54,14 @@ private slots:
 private:
     Ui::ThermalForm* ui;
 
+#ifdef GERBER
     void createTPI(const Gerber::ApertureMap* value);
+#endif
     QByteArray storage;
     QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
+#ifdef GERBER
     Gerber::ApertureMap m_apertures;
+#endif
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void setSelection(const QModelIndex& selected, const QModelIndex& deselected);

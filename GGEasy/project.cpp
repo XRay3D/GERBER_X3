@@ -17,7 +17,9 @@
 #include "abstractfile.h"
 #include "dxf_file.h"
 #include "excellon.h"
+#ifdef GERBER
 #include "gbrfile.h"
+#endif
 #include "gcode.h"
 #include "mainwindow.h"
 #include "point.h"
@@ -33,7 +35,7 @@
 //#include <execution>
 #include <filetree/filemodel.h>
 #include <forms/gcodepropertiesform.h>
-#include <gi/aperturepathitem.h>
+#include <gi/datapathitem.h>
 
 #include "leakdetector.h"
 
@@ -214,7 +216,7 @@ QRectF Project::getSelectedBoundingRect()
         case GiType::Drill:
             return gi->boundingRect();
         case GiType::AperturePath:
-            return static_cast<AperturePathItem*>(gi)->boundingRect2();
+            return static_cast<DataPathItem*>(gi)->boundingRect2();
         default:
             return {};
         }
@@ -283,6 +285,7 @@ bool Project::reload(int id, AbstractFile* file)
     file->setId(id);
     if (m_files.contains(id)) {
         switch (file->type()) {
+#ifdef GERBER
         case FileType::Gerber: {
             auto gbrFile = static_cast<Gerber::File*>(file);
             file->setColor(m_files[id]->color());
@@ -299,6 +302,7 @@ bool Project::reload(int id, AbstractFile* file)
             gbrFile->itemGroup(Gerber::File::Components)->setZValue(-id);
             m_files[id] = QSharedPointer<AbstractFile>(file);
         } break;
+#endif
         case FileType::Excellon: {
             auto excFile = static_cast<Excellon::File*>(file);
             excFile->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
@@ -320,6 +324,8 @@ bool Project::reload(int id, AbstractFile* file)
             m_files[id] = QSharedPointer<AbstractFile>(file);
             App::fileModel()->updateFile(file->fileIndex());
         } break;
+        default:
+            return false;
         }
         return true;
     }
@@ -367,16 +373,16 @@ int Project::addShape(Shapes::Shape* sh)
     return sh->m_id;
 }
 
-void Project::showFiles(const QList<QPair<int, int>>&& fileIds)
-{
-    for (auto file : m_files)
-        file->itemGroup()->setVisible(false);
-    for (auto [fileId, giType] : fileIds) {
-        if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
-            file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
-        m_files[fileId]->itemGroup()->setVisible(true);
-    }
-}
+//void Project::showFiles(const QList<QPair<int, int>>&& fileIds)
+//{
+//    for (auto file : m_files)
+//        file->itemGroup()->setVisible(false);
+//    for (auto [fileId, giType] : fileIds) {
+//        if (giType > -1 && m_files[fileId]->type() == FileType::Gerber)
+//            file<Gerber::File>(fileId)->setItemType(static_cast<Gerber::File::ItemsType>(giType));
+//        m_files[fileId]->itemGroup()->setVisible(true);
+//    }
+//}
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
 
@@ -548,9 +554,11 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     int type;
     stream >> type;
     switch (static_cast<FileType>(type)) {
+#ifdef GERBER
     case FileType::Gerber:
         file = QSharedPointer<AbstractFile>(new Gerber::File());
         break;
+#endif
     case FileType::Excellon:
         file = QSharedPointer<AbstractFile>(new Excellon::File());
         break;
@@ -560,6 +568,8 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
     case FileType::Dxf:
         file = QSharedPointer<AbstractFile>(new Dxf::File());
         break;
+    default:
+        return stream;
     }
     stream >> *file;
     return stream;

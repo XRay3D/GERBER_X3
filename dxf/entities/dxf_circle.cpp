@@ -26,27 +26,27 @@ Circle::Circle(SectionParser* sp)
 {
 }
 
-void Circle::draw(const InsertEntity* const i) const
-{
-    if (i) {
-        for (int r = 0; r < i->rowCount; ++r) {
-            for (int c = 0; c < i->colCount; ++c) {
-                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                GraphicObject go(toGo());
-                i->transform(go, tr);
-                i->attachToLayer(std::move(go));
-            }
-        }
-    } else {
-        attachToLayer(toGo());
-    }
-}
+//void Circle::draw(const InsertEntity* const i) const
+//{
+//    if (i) {
+//        for (int r = 0; r < i->rowCount; ++r) {
+//            for (int c = 0; c < i->colCount; ++c) {
+//                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                GraphicObject go(toGo());
+//                i->transform(go, tr);
+//                i->attachToLayer(std::move(go));
+//            }
+//        }
+//    } else {
+//        attachToLayer(toGo());
+//    }
+//}
 
 void Circle::parse(CodeData& code)
 {
     do {
         data.push_back(code);
-        switch (static_cast<VarType>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -70,7 +70,7 @@ void Circle::parse(CodeData& code)
         case ExtrusionDirectionZ:
             break;
         default:
-            parseEntity(code);
+            Entity::parse(code);
         }
         code = sp->nextCode();
     } while (code.code() != 0);

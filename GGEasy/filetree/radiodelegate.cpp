@@ -13,6 +13,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
+#ifdef GERBER
 #include "radiodelegate.h"
 #include "gbrnode.h"
 #include <QApplication>
@@ -96,3 +97,4 @@ void RadioDelegate::commitAndCloseEditor()
     // emit commitData(editor);
     // emit closeEditor(editor);
 }
+#endif

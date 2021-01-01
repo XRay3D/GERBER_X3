@@ -13,14 +13,14 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "pathitem.h"
+#include "gcpathitem.h"
 
 #include "gcode.h"
 #include "graphicsview.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-PathItem::PathItem(const Paths& paths, GCode::File* file)
+GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
     : m_gcFile(file)
 {
     for (const Path& path : paths)
@@ -36,7 +36,7 @@ PathItem::PathItem(const Paths& paths, GCode::File* file)
 #endif
 }
 
-PathItem::PathItem(const Path& path, GCode::File* file)
+GcPathItem::GcPathItem(const Path& path, GCode::File* file)
     : m_gcFile(file)
 {
     m_shape.addPolygon(path);
@@ -51,9 +51,9 @@ PathItem::PathItem(const Path& path, GCode::File* file)
 #endif
 }
 
-QRectF PathItem::boundingRect() const { return m_rect; }
+QRectF GcPathItem::boundingRect() const { return m_rect; }
 
-void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     Q_UNUSED(option)
 
@@ -92,11 +92,11 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 #endif
 }
 
-int PathItem::type() const { return static_cast<int>(GiType::Path); }
+int GcPathItem::type() const { return static_cast<int>(GiType::Path); }
 
-Paths PathItem::paths() const { return {} /*m_paths*/; }
+Paths GcPathItem::paths() const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
-void PathItem::updateArrows()
+void GcPathItem::updateArrows()
 {
     m_sc = App::graphicsView()->scaleFactor();
     m_arrows = QPainterPath(); //.clear();

@@ -22,7 +22,7 @@ struct LwPolyline final : Entity {
     //5
     //8
     //62
-    enum VarType {
+    enum DataEnum {
         SubclassMrker = 100, // Маркер подкласса (AcDbPolyline)
         NumberOfVertices = 90, // Число вершин
         PolylineFlag = 70, // Флаг полилинии (битовый код); значение по умолчанию = 0:
@@ -49,7 +49,7 @@ struct LwPolyline final : Entity {
     };
     // Entity interface
 public:
-    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override { return Type::LWPOLYLINE; }
@@ -60,13 +60,13 @@ public:
     GraphicObject toGo() const override;
 
     QVector<Segment> poly;
-    int counter = 0;
-    int polylineFlag = 0;
-    int numberOfVertices = 0;
+    int16_t counter = 0;
+    int16_t polylineFlag = 0;
+    int32_t numberOfVertices = 0;
     double startWidth = 0.0;
     double endWidth = 0.0;
     double constantWidth = 0.0;
-    int elevation = 0;
+    int16_t elevation = 0;
     double thickness = 0.0;
 };
 }

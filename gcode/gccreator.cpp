@@ -16,7 +16,6 @@
 #include "gccreator.h"
 #include "errno.h"
 #include "forms/gcodepropertiesform.h"
-#include "gbraperture.h"
 #include "gcfile.h"
 #include "gcvoronoi.h"
 #include "gi/erroritem.h"
@@ -41,7 +40,7 @@
 
 #include "leakdetector.h"
 
-void dbgPaths(Paths ps, const QString& fileName, bool closed, const Tool& tool)
+void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool)
 {
     if (ps.isEmpty()) {
 
@@ -51,7 +50,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool closed, const Tool& tool)
         if (ps[i].isEmpty())
             ps.remove(i--);
 
-    if (closed)
+    if (close)
         for (Path& p : ps)
             p.append(p.first());
 

@@ -13,6 +13,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
+#ifdef GERBER
 #include "thermaldelegate.h"
 #include "doublespinbox.h"
 #include "thermalmodel.h"
@@ -110,3 +111,4 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 }
 
 void ThermalDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+#endif

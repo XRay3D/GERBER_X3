@@ -16,6 +16,7 @@
 #include "dxf_node.h"
 
 #include "dxf_file.h"
+#include "dxf_sourcedialog.h"
 #include "tables/dxf_layer.h"
 #include "tables/dxf_layermodel.h"
 
@@ -297,123 +298,7 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
 {
     menu->addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTreeView::hideOther);
     menu->addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
-        QDialog* dialog = new QDialog(tv);
-        dialog->setObjectName(QString::fromUtf8("dialog"));
-        dialog->resize(600, 600);
-        //Dialog->resize(400, 300);
-        auto verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        //tableView
-        auto tableView = new QTableView(dialog);
-        QFont font(tv->font());
-        font.setFamily("Consolas");
-        tableView->setFont(font);
-        tableView->setObjectName(QString::fromUtf8("tableView"));
-        enum {
-            LineNum,
-            LineType,
-            LineData,
-            ColumnCount
-        };
-
-        class Model : public QAbstractTableModel {
-            const QVector<QString>& lines;
-
-        public:
-            Model(const QVector<QString>& lines, QObject* parent = nullptr)
-                : QAbstractTableModel(parent)
-                , lines(lines)
-            {
-            }
-            ~Model() { }
-
-            int rowCount(const QModelIndex& = {}) const override { return lines.size(); }
-            int columnCount(const QModelIndex& = {}) const override { return 3; }
-            Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEnabled | Qt::ItemIsSelectable; }
-
-            QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
-            {
-                if (role == Qt::DisplayRole)
-                    switch (index.column()) {
-                    case LineNum:
-                        return index.row() + 1;
-                    case LineType:
-                        return index.row() % 2 ? DxfObj::tr("Data") : DxfObj::tr("Code");
-                    case LineData:
-                        return lines.at(index.row());
-                    }
-                else if (role == Qt::TextAlignmentRole)
-                    switch (index.column()) {
-                    case LineNum:
-                        return Qt::AlignCenter;
-                    case LineType:
-                        return Qt::AlignCenter;
-                    case LineData:
-                        return Qt::AlignVCenter;
-                    }
-                return {};
-            }
-
-            QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
-            {
-                if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-                    switch (section) {
-                    case LineNum:
-                        return DxfObj::tr("Line");
-                    case LineType:
-                        return DxfObj::tr("Type");
-                    case LineData:
-                        return DxfObj::tr("Data");
-                    }
-                return {};
-            }
-        };
-        tableView->setModel(new Model(App::project()->file(m_id)->lines()));
-        // horizontal Header
-        tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
-        tableView->horizontalHeader()->setSectionResizeMode(LineData, QHeaderView::Stretch);
-        // vertical Header
-        tableView->verticalHeader()->setVisible(false);
-        tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        tableView->verticalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).height());
-
-        tableView->setAlternatingRowColors(true);
-
-        class ItemDelegate : public QItemDelegate {
-        public:
-            ItemDelegate(QObject* parent = nullptr)
-                : QItemDelegate(parent) {};
-
-            void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
-            {
-                if (option.state & QStyle::State_Selected)
-                    painter->fillRect(option.rect, QColor(255, 200, 200));
-                auto option2(option);
-                option2.state &= ~QStyle::State_Selected;
-                QItemDelegate::paint(painter, option2, index);
-            }
-            // QItemDelegate interface
-        protected:
-            void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
-            {
-                if (option.state & QStyle::State_HasFocus) {
-                    painter->setBrush(Qt::NoBrush);
-                    painter->setPen(Qt::red);
-                    painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
-                }
-            };
-        };
-        tableView->setItemDelegate(new ItemDelegate(tableView));
-        verticalLayout->addWidget(tableView);
-
-        auto spinBox = new QSpinBox(dialog);
-        spinBox->setObjectName(QString::fromUtf8("spinBox"));
-        spinBox->setRange(0, tableView->model()->rowCount());
-        dialog->connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), tableView, &QTableView::selectRow);
-        verticalLayout->addWidget(spinBox);
-        verticalLayout->setMargin(6);
-        verticalLayout->setSpacing(6);
+        auto dialog = new SourceDialog(m_id, tv);
         dialog->exec();
         delete dialog;
     });

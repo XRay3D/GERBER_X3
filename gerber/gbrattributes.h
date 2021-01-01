@@ -56,11 +56,48 @@ namespace Attr { //Attributes
         Q_GADGET
     };
 
-    struct AbsctractData;
-    struct FileFunction {
+    struct AbstrFileFunc;
+    struct File {
         Q_GADGET
+
     public:
-        ~FileFunction();
+        /* Атрибуты файла устанавливаются с помощью команды TF в верхнем регистре с использованием следующего синтаксиса
+         * <TF command> = %TF<AttributeName>[,<AttributeValue>]*%
+         * <AttributeValue> = <Field>{,<Field>}
+         */
+        enum class StdAttr {
+            Part, //Определяет часть, которую представляет файл, например одна печатная плата 5.6.2
+            FileFunction, //Определяет функцию файла на плате, например верхний медный слой 5.6.3
+            FilePolarity, //Положительное или отрицательное. Это определяет, представляет ли изображение присутствие или отсутствие материала. 5.6.4
+            SameCoordinates, //Все файлы в наборе производственных данных с этим атрибутом используют одни и те же координаты. Другими словами, они совпадают. 5.6.5
+            CreationDate, //Определяет дату и время создания файла. 5.6.6
+            GenerationSoftware, //Определяет программное обеспечение, создающее файл. 5.6.7
+            ProjectId, //Определяет проект и редакции. 5.6.8
+            MD5, //Устанавливает подпись или контрольную сумму файла MD5. 5.6.9
+        };
+        Q_ENUM(StdAttr) //0
+        static StdAttr toStdAttr(const QString& key);
+
+        enum class ePart {
+            /* Значение атрибута файла .Part определяет, какая часть описывается.
+             * Атрибут - если он присутствует - должен быть определен в заголовке.
+             */
+            Single, // Одиночная печатная плата
+            Array, // A.k.a. панель заказчика, панель монтажная, панель транспортировочная, бисквит
+            FabricationPanel, // A.k.a. рабочая панель, производственная панель
+            Coupon, // Тестовый купон
+            Other // Other,<mandatory field>         Ни один из вышеперечисленных. Обязательное поле неформально указывает на деталь
+        };
+        Q_ENUM(ePart) //1
+        static ePart toPart(const QString& key);
+
+        enum eFilePolarity {
+            Positive, // Изображение представляет наличие материала (рекомендуется)
+            Negative, // Изображение представляет собой отсутствие материала
+        };
+        Q_ENUM(eFilePolarity) //2
+        static eFilePolarity toFilePolarityValue(const QString& key);
+
         enum eFunction {
             // Drawing
             ArrayDrawing,
@@ -97,85 +134,9 @@ namespace Attr { //Attributes
         static eFunction toFunction(const QString& key);
 
         void parse(const QStringList& list);
-        eFunction m_function;
-        AbsctractData* m_data = nullptr;
-    };
-
-    struct File {
-        Q_GADGET
-
-    public:
-        /* Атрибуты файла устанавливаются с помощью команды TF в верхнем регистре с использованием следующего синтаксиса
-         * <TF command> = %TF<AttributeName>[,<AttributeValue>]*%
-         * <AttributeValue> = <Field>{,<Field>}
-         */
-        enum class StdAttr {
-            Part, //Определяет часть, которую представляет файл, например одна печатная плата 5.6.2
-            FileFunction, //Определяет функцию файла на плате, например верхний медный слой 5.6.3
-            FilePolarity, //Положительное или отрицательное. Это определяет, представляет ли изображение присутствие или отсутствие материала. 5.6.4
-            SameCoordinates, //Все файлы в наборе производственных данных с этим атрибутом используют одни и те же координаты. Другими словами, они совпадают. 5.6.5
-            CreationDate, //Определяет дату и время создания файла. 5.6.6
-            GenerationSoftware, //Определяет программное обеспечение, создающее файл. 5.6.7
-            ProjectId, //Определяет проект и редакции. 5.6.8
-            MD5, //Устанавливает подпись или контрольную сумму файла MD5. 5.6.9
-        };
-        Q_ENUM(StdAttr) //0
-        static StdAttr toStdAttr(const QString& key) { return StdAttr(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data())); }
-
-        enum ePart {
-            /* Значение атрибута файла .Part определяет, какая часть описывается.
-             * Атрибут - если он присутствует - должен быть определен в заголовке.
-             */
-            Single, // Одиночная печатная плата
-            Array, // A.k.a. панель заказчика, панель монтажная, панель транспортировочная, бисквит
-            FabricationPanel, // A.k.a. рабочая панель, производственная панель
-            Coupon, // Тестовый купон
-            Other // Other,<mandatory field>         Ни один из вышеперечисленных. Обязательное поле неформально указывает на деталь
-        };
-        Q_ENUM(ePart) //1
-
-        enum eFilePolarity {
-            Positive, // Изображение представляет наличие материала (рекомендуется)
-            Negative, // Изображение представляет собой отсутствие материала
-        };
-        Q_ENUM(eFilePolarity) //2
-        static eFilePolarity toFilePolarityValue(const QString& key) { return eFilePolarity(staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data())); }
-
-        void parse(const QStringList& list)
-        {
-            switch (toStdAttr(list.first())) {
-            case StdAttr::Part:
-                part = list.mid(1);
-                break;
-            case StdAttr::FileFunction:
-                fileFunction.parse(list.mid(1));
-                break;
-            case StdAttr::FilePolarity:
-                filePolarity = toFilePolarityValue(list.last());
-                break;
-            case StdAttr::SameCoordinates:
-                sameCoordinates = list.mid(1);
-                break;
-            case StdAttr::CreationDate:
-                creationDate = list.last();
-                break;
-            case StdAttr::GenerationSoftware:
-                generationSoftware = list.mid(1);
-                break;
-            case StdAttr::ProjectId:
-                projectId = list.mid(1);
-                break;
-            case StdAttr::MD5:
-                md5 = list.last();
-                break;
-            default:;
-                custom[list.first()] = list.mid(1);
-                qDebug() << __FUNCTION__ << custom;
-            }
-        }
 
         QString creationDate;
-        FileFunction fileFunction;
+        AbstrFileFunc* fileFunction = nullptr;
         eFilePolarity filePolarity;
         QStringList generationSoftware;
         QString md5;
