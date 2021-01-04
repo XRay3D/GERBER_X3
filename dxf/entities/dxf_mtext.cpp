@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "dxf_mtext.h"
 #include "dxf_file.h"
+#include "settings.h"
 #include "tables/dxf_style.h"
 
 #include <QFont>
@@ -113,59 +114,90 @@ void MText::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
+
 GraphicObject MText::toGo() const
 {
-    if (!sp->file->styles().contains(textStyleName))
-        return { sp->file, this, {}, {} };
+    //    qDebug() << __FUNCTION__ << data.size();
+    //    for (auto& code : data)
+    //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
-    //    qDebug() << __FUNCTION__;
-    //    for (auto& code : data) {
-    //        qDebug() << "\t" << DataEnum(code.code()) << code.value();
-    //    }
-
-    QPainterPath path;
+    double ascent = 0.0;
+    double descent = 0.0;
+    double height = 0.0;
+    double scaleX = 0.0;
+    double scaleY = 0.0;
 
     QString text(textString);
     text.replace("\\P", "\n");
-
-    QStringList list(textString.split("\\P"));
-
-    Style* style = sp->file->styles()[textStyleName];
-
-    QFont font(style->font);
-
-    QFontMetricsF fmf(font);
-    double scaleX = 0.0;
-    double scaleY = 0.0;
-    scaleX = scaleY = style->fixedTextHeight / fmf.height();
-
-    QSizeF size(fmf.size(Qt::TextWordWrap, text));
-
+    QStringList list(text.split('\n'));
+    qDebug() << __FUNCTION__ << list;
+    QFont font;
     QPointF offset;
-    offset.ry() -= fmf.descent();
+    QSizeF size;
+    if (sp->file->styles().contains(textStyleName)) {
+        Style* style = sp->file->styles()[textStyleName];
+        font = style->font;
+        if (AppSettings::dxfOverrideFonts()) {
+            font.setFamily(AppSettings::dxfDefaultFont());
+            font.setBold(AppSettings::dxfBoldFont());
+            font.setItalic(AppSettings::dxfItalicFont());
+        }
+        QFontMetricsF fmf(font);
+        //        offset.ry() -= fmf.descent();
+        ascent = fmf.ascent();
+        descent = fmf.descent();
+        height = fmf.height();
+        size = fmf.size(0, text);
+        scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fmf.height();
+        if (drawingDirection == ByStyle) {
+            if (style->textGenerationFlag & Style::MirroredInX)
+                scaleX = -scaleX;
+            if (style->textGenerationFlag & Style::MirroredInY)
+                scaleY = -scaleY;
+        }
+        qDebug() << __FUNCTION__ << fmf;
+    } else {
+        font.setFamily(AppSettings::dxfDefaultFont());
+        font.setPointSize(100);
+        if (AppSettings::dxfOverrideFonts()) {
+            font.setBold(AppSettings::dxfBoldFont());
+            font.setItalic(AppSettings::dxfItalicFont());
+        }
+        QFontMetricsF fmf(font);
+        //        offset.ry() -= fmf.descent();
+        ascent = fmf.ascent();
+        descent = fmf.descent();
+        height = fmf.height();
+        size = fmf.size(0, text);
+        scaleX = scaleY = nominalTextHeight / fmf.height();
+        qDebug() << __FUNCTION__ << fmf;
+    }
+    qDebug() << __FUNCTION__ << size << height << (size.height() / height) << ascent;
 
     switch (attachmentPoint) {
     case TopLeft: //      вверху слева
-        offset.ry() += size.height() + fmf.ascent();
+        offset.ry() += size.height() - descent;
         break;
     case TopCenter: //    вверху по центру
-        offset.ry() += size.height() + fmf.ascent();
         offset.rx() -= size.width() / 2;
+        offset.ry() += size.height() - descent;
         break;
     case TopRight: //     вверху справа
-        offset.ry() += size.height() + fmf.ascent();
         offset.rx() -= size.width();
+        offset.ry() += size.height() - descent;
         break;
     case MiddleLeft: //   посередине слева
-        offset.ry() += fmf.ascent() / 2;
+        offset.ry() += size.height() / 2 - descent;
+        offset.ry() -= descent;
         break;
     case MiddleCenter: // посередине по центру
-        offset.ry() += fmf.ascent() / 2;
         offset.rx() -= size.width() / 2;
+        offset.ry() += size.height() / 2 - descent;
         break;
     case MiddleRight: //  посередине справа
-        offset.ry() += fmf.ascent() / 2;
         offset.rx() -= size.width();
+        offset.ry() += size.height() / 2 - descent;
         break;
     case BottomLeft: //   снизу слева;
         break;
@@ -176,15 +208,28 @@ GraphicObject MText::toGo() const
         offset.rx() -= size.width();
         break;
     }
-    if (drawingDirection == ByStyle) {
-        if (style->textGenerationFlag & Style::MirroredInX)
-            scaleX = -scaleX;
-        if (style->textGenerationFlag & Style::MirroredInY)
-            scaleY = -scaleY;
-    }
 
-    for (int i = 0; i < list.size(); ++i) {
-        path.addText(offset + QPointF(0, (size.height() / list.size()) * (i + 1) - size.height()), font, list[i]);
+    QPainterPath path;
+
+    for (int i = list.size() - 1; i >= 0; --i) {
+        double x = 0.0;
+        switch (attachmentPoint) {
+        case TopLeft: //      вверху слева
+        case MiddleLeft: //   посередине слева
+        case BottomLeft: //   снизу слева;
+            break;
+        case TopCenter: //    вверху по центру
+        case MiddleCenter: // посередине по центру
+        case BottomCenter: // снизу по центру
+            x = (size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width()) * 0.5;
+            break;
+        case TopRight: //     вверху справа
+        case MiddleRight: //  посередине справа
+        case BottomRight: //  снизу справа
+            x = size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width();
+            break;
+        }
+        path.addText(offset - QPointF(-x, size.height() - height * (i + 1)), font, list[i]);
     }
 
     QMatrix m;

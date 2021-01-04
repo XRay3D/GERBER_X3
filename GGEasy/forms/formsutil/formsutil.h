@@ -12,12 +12,15 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "gcode.h"
+
+#include "gcode/gcode.h"
+
 #include <QThread>
 #include <QWidget>
 
 namespace GCode {
 class File;
+class Creator;
 }
 
 class GraphicsItem;
@@ -45,16 +48,13 @@ protected:
     virtual void timerEvent(QTimerEvent* event) override;
 
     GCode::Creator* m_tpc = nullptr;
-
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
-
+    UsedItems m_usedItems;
+    Side boardSide = Top;
     void addUsedGi(GraphicsItem* gi);
 
-    UsedItems m_usedItems;
-
     QString m_fileName;
-    Side boardSide = Top;
 
     bool m_editMode = false;
     int fileId = -1;

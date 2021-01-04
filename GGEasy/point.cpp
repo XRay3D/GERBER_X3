@@ -14,8 +14,11 @@
 *                                                                              *
 *******************************************************************************/
 #include "point.h"
+#include "project.h"
+
+#include "gcode/gcode.h"
+
 #include "forms/gcodepropertiesform.h"
-#include "gcode.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
@@ -38,7 +41,7 @@ Marker* Marker::m_markers[2] { nullptr, nullptr };
 
 bool updateRect()
 {
-    QRectF rect(App::project()->getSelectedBoundingRect());
+    QRectF rect(App::scene()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
                 QObject::tr("There are no selected items to define the border.\n"
@@ -52,7 +55,8 @@ bool updateRect()
 }
 
 Marker::Marker(Type type)
-    : m_type(type)
+    : QGraphicsObject(nullptr)
+    , m_type(type)
 {
     m_markers[type] = this;
     setAcceptHoverEvents(true);
@@ -87,7 +91,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if (App::scene()->drawPdf())
         return;
 
-    QColor c(m_type == Home ? GlobalSettings::guiColor(Colors::Home) : GlobalSettings::guiColor(Colors::Zero));
+    QColor c(m_type == Home ? AppSettings::guiColor(Colors::Home) : AppSettings::guiColor(Colors::Zero));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -118,36 +122,36 @@ void Marker::resetPos(bool flUpdateRect)
     const QRectF rect(App::layoutFrames()->boundingRect());
 
     if (m_type == Home)
-        switch (GlobalSettings::mkrHomePos()) {
+        switch (AppSettings::mkrHomePos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + GlobalSettings::mkrHomeOffset());
+            setPos(rect.topLeft() + AppSettings::mkrHomeOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + GlobalSettings::mkrHomeOffset());
+            setPos(rect.topRight() + AppSettings::mkrHomeOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + GlobalSettings::mkrHomeOffset());
+            setPos(rect.bottomLeft() + AppSettings::mkrHomeOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + GlobalSettings::mkrHomeOffset());
+            setPos(rect.bottomRight() + AppSettings::mkrHomeOffset());
             break;
         default:
             setPos({});
             break;
         }
     else {
-        switch (GlobalSettings::mkrZeroPos()) {
+        switch (AppSettings::mkrZeroPos()) {
         case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + GlobalSettings::mkrZeroOffset());
+            setPos(rect.topLeft() + AppSettings::mkrZeroOffset());
             break;
         case Qt::BottomRightCorner:
-            setPos(rect.topRight() + GlobalSettings::mkrZeroOffset());
+            setPos(rect.topRight() + AppSettings::mkrZeroOffset());
             break;
         case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + GlobalSettings::mkrZeroOffset());
+            setPos(rect.bottomLeft() + AppSettings::mkrZeroOffset());
             break;
         case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + GlobalSettings::mkrZeroOffset());
+            setPos(rect.bottomRight() + AppSettings::mkrZeroOffset());
             break;
         default:
             setPos({});
@@ -155,6 +159,10 @@ void Marker::resetPos(bool flUpdateRect)
         }
     }
     updateGCPForm();
+    if (m_type == Home)
+        App::project()->setHomePos(pos());
+    else
+        App::project()->setZeroPos(pos());
 }
 
 void Marker::setPosX(double x)
@@ -173,6 +181,10 @@ void Marker::setPosY(double y)
         return;
     point.setY(y);
     setPos(point);
+    if (m_type == Home)
+        App::project()->setHomePos(pos());
+    else
+        App::project()->setZeroPos(pos());
 }
 
 void Marker::updateGCPForm()
@@ -224,9 +236,8 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 /// \brief Pin::Pin
 /// \param parent
 ///
-Pin::Pin(QObject* parent)
-    : QObject(parent)
-    , QGraphicsItem(nullptr)
+Pin::Pin()
+    : QGraphicsObject(nullptr)
     , m_index(m_pins.size())
 {
     setObjectName("Pin");
@@ -263,7 +274,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (App::scene()->drawPdf())
         return;
 
-    QColor c(GlobalSettings::guiColor(Colors::Pin));
+    QColor c(AppSettings::guiColor(Colors::Pin));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -348,8 +359,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
-
-    App::project()->setChanged();
+    App::project()->setPinsPos(pt);
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -384,8 +394,6 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                     continue;
                 dst.append(point);
             }
-
-
 
             QSettings settings;
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -439,7 +447,7 @@ void Pin::resetPos(bool fl)
         if (!updateRect())
             return;
 
-    const QPointF offset(GlobalSettings::mkrPinOffset());
+    const QPointF offset(AppSettings::mkrPinOffset());
     const QRectF rect(App::layoutFrames()->boundingRect()); //App::project()->worckRect()
 
     QPointF pt[] {
@@ -471,7 +479,7 @@ void Pin::resetPos(bool fl)
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pt[i]);
 
-    App::project()->setChanged();
+    App::project()->setPinsPos(pt);
 }
 
 void Pin::updateToolTip()
@@ -488,16 +496,17 @@ void Pin::setPos(const QPointF& pos)
 
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
+    : QGraphicsObject(nullptr)
 {
     setZValue(-std::numeric_limits<double>::max());
-    App::m_layoutFrames = this;
+    App::m_app->m_layoutFrames = this;
     App::scene()->addItem(this);
     setFlag(ItemIsSelectable, false);
 }
 
 LayoutFrames::~LayoutFrames()
 {
-    App::m_layoutFrames = nullptr;
+    App::m_app->m_layoutFrames = nullptr;
 }
 
 int LayoutFrames::type() const

@@ -27,7 +27,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm)
 {
-    if (App::m_gCodePropertiesForm) {
+    if (App::m_app->m_gCodePropertiesForm) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class GCodePropertiesForm more than 2 times!!!");
         exit(1);
     }
@@ -47,11 +47,12 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { glue = val; });
-    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosX(val); });
-    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Home)->setPosY(val); });
-    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosX(val); });
-    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), [](double val) { Marker::get(Marker::Zero)->setPosY(val); });
+    connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setGlue);
+
+    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Home), &Marker::setPosX);
+    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Home), &Marker::setPosY);
+    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Zero), &Marker::setPosX);
+    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Zero), &Marker::setPosY);
 
     if (App::project()) {
         connect(ui->dsbxSpaceX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
@@ -89,11 +90,11 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
     ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
 
-    safeZ = ui->dsbxSafeZ->value();
-    boardThickness = ui->dsbxThickness->value();
-    copperThickness = ui->dsbxCopperThickness->value();
-    clearence = ui->dsbxClearence->value();
-    plunge = ui->dsbxPlunge->value();
+    App::project()->setSafeZ(ui->dsbxSafeZ->value());
+    App::project()->setBoardThickness(ui->dsbxThickness->value());
+    App::project()->setCopperThickness(ui->dsbxCopperThickness->value());
+    App::project()->setClearence(ui->dsbxClearence->value());
+    App::project()->setPlunge(ui->dsbxPlunge->value());
 
     connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
         if (parent
@@ -120,12 +121,12 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
         button->setIconSize({ 16, 16 });
     }
 
-    App::m_gCodePropertiesForm = this;
+    App::m_app->m_gCodePropertiesForm = this;
 }
 
 GCodePropertiesForm::~GCodePropertiesForm()
 {
-    App::m_gCodePropertiesForm = nullptr;
+    App::m_app->m_gCodePropertiesForm = nullptr;
 
     if (Marker::get(Marker::Home))
         Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
@@ -142,11 +143,11 @@ GCodePropertiesForm::~GCodePropertiesForm()
     settings.setValue(ui->dsbxGlue);
     settings.endGroup();
 
-    safeZ = ui->dsbxSafeZ->value();
-    boardThickness = ui->dsbxThickness->value();
-    copperThickness = ui->dsbxCopperThickness->value();
-    clearence = ui->dsbxClearence->value();
-    plunge = ui->dsbxPlunge->value();
+    App::project()->setSafeZ(ui->dsbxSafeZ->value());
+    App::project()->setBoardThickness(ui->dsbxThickness->value());
+    App::project()->setCopperThickness(ui->dsbxCopperThickness->value());
+    App::project()->setClearence(ui->dsbxClearence->value());
+    App::project()->setPlunge(ui->dsbxPlunge->value());
 
     delete ui;
 }

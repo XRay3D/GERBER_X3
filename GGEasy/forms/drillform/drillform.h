@@ -12,11 +12,13 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#ifdef GBR_
 #include "extypes.h"
-#ifdef GERBER
 #include "gbrtypes.h"
 #endif
-#include "gcode.h"
+
+#include "gcode/gcode.h"
+
 #include <QHeaderView>
 #include <QWidget>
 
@@ -40,10 +42,10 @@ public:
     explicit DrillForm(QWidget* parent = nullptr);
     ~DrillForm() override;
 
-#ifdef GERBER
+#ifdef GBR_
     void setApertures(const Gerber::ApertureMap* value);
-#endif
     void setExcellonTools(const Excellon::Tools& value);
+#endif
     void updateFiles();
     static bool canToShow();
 
@@ -74,12 +76,12 @@ private:
     Ui::DrillForm* ui;
 
     int m_type;
-#ifdef GERBER
+#ifdef GBR_
     Gerber::ApertureMap m_apertures;
-#endif
     Excellon::Tools m_tools;
+#endif
     QMap<int, QVector<QSharedPointer<DrillPrGI>>> m_giPeview;
-    AbstractFile* file = nullptr;
+    FileInterface* file = nullptr;
     QCheckBox* checkBox;
     Header* header;
     void clear();

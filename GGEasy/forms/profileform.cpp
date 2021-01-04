@@ -16,7 +16,8 @@
 #include "profileform.h"
 #include "ui_profileform.h"
 
-#include "gi/bridgeitem.h"
+#include "forms/bridgeitem.h"
+#include "project.h"
 #include "scene.h"
 #include "settings.h"
 #include <QMessageBox>
@@ -79,7 +80,6 @@ ProfileForm::ProfileForm(QWidget* parent)
 ProfileForm::~ProfileForm()
 {
 
-
     MySettings settings;
     settings.beginGroup("ProfileForm");
     settings.setValue(ui->dsbxBridgeLenght);
@@ -109,7 +109,7 @@ void ProfileForm::createFile()
 
     Paths wPaths;
     Paths wRawPaths;
-    AbstractFile const* file = nullptr;
+    FileInterface const* file = nullptr;
     bool skip { true };
 
     for (auto* sItem : App::scene()->selectedItems()) {
@@ -293,7 +293,7 @@ void ProfileForm::editFile(GCode::File* file)
 
             auto [_fileId, _] = i.key();
             Q_UNUSED(_)
-            App::project()->aFile(_fileId)->itemGroup()->setSelected(i.value());
+            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
             ++i;
         }
     }

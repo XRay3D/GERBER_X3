@@ -14,9 +14,9 @@
 *                                                                              *
 *******************************************************************************/
 #include "depthform.h"
-
+#include "app.h"
 #include "doublespinbox.h"
-#include "forms/gcodepropertiesform.h"
+#include "project.h"
 #include "settings.h"
 #include <QtWidgets>
 
@@ -43,13 +43,13 @@ DepthForm::DepthForm(QWidget* parent)
     connect(rbCopper, &QRadioButton::toggled, [this](bool checked) {
         if (checked) {
             dsbx->setEnabled(false);
-            dsbx->setValue(GCodePropertiesForm::copperThickness);
+            dsbx->setValue(App::project()->copperThickness());
         }
     });
     connect(rbBoard, &QRadioButton::toggled, [this](bool checked) {
         if (checked) {
             dsbx->setEnabled(false);
-            dsbx->setValue(GCodePropertiesForm::boardThickness);
+            dsbx->setValue(App::project()->boardThickness());
         }
     });
 

@@ -110,8 +110,8 @@ public:
     Q_ENUM(Layer)
     static Layer toLayer(const QString str) { return Layer(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    AbstrFileFunc(File::eFunction function);
-    const File::eFunction function;
+    AbstrFileFunc(File::Function function);
+    const File::Function function;
     virtual Side side_() const { return Side::Null; }
 };
 /////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ public:
     Q_ENUM(Type)
     static Type toType(const QString str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
 
-    Copper(File::eFunction function, const QStringList& list);
+    Copper(File::Function function, const QStringList& list);
     const Layer layer;
     const Side side;
     const Type type;
@@ -159,7 +159,7 @@ struct ArrayDrawing : AbstrFileFunc {
      */
 
 public:
-    ArrayDrawing(File::eFunction function, const QStringList& list)
+    ArrayDrawing(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     //, side(toSide(list.value(0)))
     {
@@ -177,7 +177,7 @@ struct AssemblyDrawing : AbstrFileFunc {
                Он в основном используется при сборке печатных плат. */
 
 public:
-    AssemblyDrawing(File::eFunction function, const QStringList& list);
+    AssemblyDrawing(File::Function function, const QStringList& list);
     const Side side;
     virtual Side side_() const override { return side; }
 };
@@ -197,7 +197,7 @@ struct Component : AbstrFileFunc {
                 %TF.File,Component,L1,Top*%
                 %TF.File,Component,L4,Bot*%*/
 public:
-    Component(File::eFunction function, const QStringList& list);
+    Component(File::Function function, const QStringList& list);
     const Layer layer;
     const Side side;
     virtual Side side_() const override { return side; }
@@ -212,7 +212,7 @@ struct Depthrout : AbstrFileFunc {
                 Area that must be routed to a given depth rather than going through the whole board. */
 
 public:
-    Depthrout(File::eFunction function, const QStringList& list)
+    Depthrout(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -227,7 +227,7 @@ struct Drillmap : AbstrFileFunc {
                A drawing with the locations of the drilled holes. It often also contains the hole sizes, tolerances and plated/non-plated info. */
 
 public:
-    Drillmap(File::eFunction function, const QStringList& list)
+    Drillmap(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -242,7 +242,7 @@ struct FabricationDrawing : AbstrFileFunc {
                A drawing with additional information for the fabrication of the bare PCB: the location of holes and slots, the board outline, sizes and tolerances, layer stack, material, finish choice, etc. */
 
 public:
-    FabricationDrawing(File::eFunction function, const QStringList& list)
+    FabricationDrawing(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -257,7 +257,7 @@ struct Glue : AbstrFileFunc {
                Glue spots used to fix components to the board prior to soldering. */
 
 public:
-    Glue(File::eFunction function, const QStringList& list)
+    Glue(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -274,7 +274,7 @@ struct Legend : AbstrFileFunc {
             См. Запись Soldermask для объяснения индекса. */
 
 public:
-    Legend(File::eFunction function, const QStringList& list);
+    Legend(File::Function function, const QStringList& list);
     const Side side;
     const int index;
     virtual Side side_() const override { return side; }
@@ -308,7 +308,7 @@ public:
     Q_ENUM(Label)
     static Label toLabel(const QString str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    NonPlated(File::eFunction function, const QStringList& list);
+    NonPlated(File::Function function, const QStringList& list);
     const int layerFrom;
     const int layerTo;
     const Type type;
@@ -325,7 +325,7 @@ struct Other : AbstrFileFunc {
                 The mandatory field informally describes the file function.*/
 
 public:
-    Other(File::eFunction function, const QStringList& list)
+    Other(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -340,7 +340,7 @@ struct OtherDrawing : AbstrFileFunc {
                 Any other drawing than the 4 ones above. The mandatory field informally describes its topic. */
     // Other files
 public:
-    OtherDrawing(File::eFunction function, const QStringList& list)
+    OtherDrawing(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -355,7 +355,7 @@ struct Pads : AbstrFileFunc {
                 A file containing only the pads (SMD, BGA, component, …). Not needed in a fabrication data set. */
 
 public:
-    Pads(File::eFunction function, const QStringList& list)
+    Pads(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -369,7 +369,7 @@ struct Paste : AbstrFileFunc {
     /*(Top|Bot)*/ /*  Места, где необходимо нанести паяльную пасту. */
 
 public:
-    Paste(File::eFunction function, const QStringList& list);
+    Paste(File::Function function, const QStringList& list);
     const Side side;
     virtual Side side_() const override { return side; }
 };
@@ -404,7 +404,7 @@ public:
     Q_ENUM(Label)
     static Label toLabel(const QString str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
 
-    Plated(File::eFunction function, const QStringList& list);
+    Plated(File::Function function, const QStringList& list);
     const int layerFrom;
     const int layerTo;
     const Type type;
@@ -431,7 +431,7 @@ public:
     Q_ENUM(EdgePlated)
     static EdgePlated toEdgePlated(const QString str) { return EdgePlated(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
 
-    Profile(File::eFunction function, const QStringList& list);
+    Profile(File::Function function, const QStringList& list);
     const EdgePlated plated;
 };
 /////////////////////////////////////////////////////
@@ -465,9 +465,9 @@ public:
         Tin,
     };
     Q_ENUM(Type)
-    static Type toType(File::eFunction function) { return Type(function - File::Carbonmask); }
+    static Type toType(File::Function function) { return Type(function - File::Carbonmask); }
 
-    Mask(File::eFunction function, const QStringList& list);
+    Mask(File::Function function, const QStringList& list);
     const Side side;
     const int index;
     const Type type;
@@ -484,7 +484,7 @@ struct Vcut : AbstrFileFunc {
                If the optional attachment (Top|Bot) is not present the scoring lines are identical on top and bottom – this is the normal case. In the exceptional case scoring is different on top and bottom two files must be supplied, one with Top and the other with Bot. */
 
 public:
-    Vcut(File::eFunction function, const QStringList& list)
+    Vcut(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -499,7 +499,7 @@ struct Vcutmap : AbstrFileFunc {
                A drawing with v-cut or scoring information. */
 
 public:
-    Vcutmap(File::eFunction function, const QStringList& list)
+    Vcutmap(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }
@@ -514,7 +514,7 @@ struct Viafill : AbstrFileFunc {
                Contains the via’s that must be filled. It is however recommended to specify the filled via’s with the optional field in the .AperFunction ViaDrill. */
 
 public:
-    Viafill(File::eFunction function, const QStringList& list)
+    Viafill(File::Function function, const QStringList& /*list*/)
         : AbstrFileFunc(function)
     {
     }

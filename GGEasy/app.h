@@ -12,8 +12,10 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include <QtGlobal>
-#include <exception>
+
+#include <QDebug>
+#include <QObject>
+#include <map>
 
 namespace GCode {
 class Creator;
@@ -33,9 +35,11 @@ class Project;
 class Scene;
 class SplashScreen;
 class FileTreeView;
+class ParserInterface;
+
+using ParserInterfaces = std::map<int, std::pair<ParserInterface*, QObject*>>;
 
 class App {
-    //    Q_DISABLE_COPY(App)
     friend class DrillForm;
     friend class FileModel;
     friend class GCode::Creator;
@@ -52,28 +56,46 @@ class App {
     friend class SplashScreen;
     friend class FileTreeView;
 
-    inline static DrillForm* m_drillForm = nullptr;
-    inline static FileModel* m_fileModel = nullptr;
-    inline static GCode::Creator* m_creator = nullptr;
-    inline static GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
-    inline static GraphicsView* m_graphicsView = nullptr;
-    inline static LayoutFrames* m_layoutFrames = nullptr;
-    inline static MainWindow* m_mainWindow = nullptr;
-    inline static Project* m_project = nullptr;
-    inline static Scene* m_scene = nullptr;
-    inline static SplashScreen* m_splashScreen = nullptr;
-    inline static FileTreeView* m_fileTreeView = nullptr;
+    inline static App* m_app = nullptr;
+
+    DrillForm* m_drillForm = nullptr;
+    FileModel* m_fileModel = nullptr;
+    GCode::Creator* m_creator = nullptr;
+    GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
+    GraphicsView* m_graphicsView = nullptr;
+    LayoutFrames* m_layoutFrames = nullptr;
+    MainWindow* m_mainWindow = nullptr;
+    Project* m_project = nullptr;
+    Scene* m_scene = nullptr;
+    SplashScreen* m_splashScreen = nullptr;
+    FileTreeView* m_fileTreeView = nullptr;
+    ParserInterfaces m_parserInterfaces;
 
 public:
-    static DrillForm* drillForm() { return m_drillForm; }
-    static FileModel* fileModel() { return m_fileModel; }
-    static GCode::Creator* creator() { return m_creator; }
-    static GCodePropertiesForm* gCodePropertiesForm() { return m_gCodePropertiesForm; }
-    static GraphicsView* graphicsView() { return m_graphicsView; }
-    static LayoutFrames* layoutFrames() { return m_layoutFrames; }
-    static MainWindow* mainWindow() { return m_mainWindow; }
-    static Project* project() { return m_project; }
-    static Scene* scene() { return m_scene; }
-    static SplashScreen* splashScreen() { return m_splashScreen; }
-    static FileTreeView* fileTreeView() { return m_fileTreeView; }
+    explicit App()
+    {
+        if (!m_app)
+            m_app = this;
+    }
+    App(const App&) = delete;
+    App(App&&) = delete;
+    App& operator=(App&& a) = delete;
+    App& operator=(const App& app) = delete;
+    ~App() { }
+
+    static App* app() { return m_app; }
+    static void setApp(App* app) { m_app = app; }
+    static DrillForm* drillForm() { return m_app->m_drillForm; }
+    static FileModel* fileModel() { return m_app->m_fileModel; }
+    static GCode::Creator* creator() { return m_app->m_creator; }
+    static GCodePropertiesForm* gCodePropertiesForm() { return m_app->m_gCodePropertiesForm; }
+    static GraphicsView* graphicsView() { return m_app->m_graphicsView; }
+    static LayoutFrames* layoutFrames() { return m_app->m_layoutFrames; }
+    static MainWindow* mainWindow() { return m_app->m_mainWindow; }
+    static Project* project() { return m_app->m_project; }
+    static Scene* scene() { return m_app->m_scene; }
+    static SplashScreen* splashScreen() { return m_app->m_splashScreen; }
+    static FileTreeView* fileTreeView() { return m_app->m_fileTreeView; }
+    static ParserInterface* parserInterface(int type) { return m_app->m_parserInterfaces.contains(type) ? m_app->m_parserInterfaces[type].first : nullptr; }
+    static ParserInterfaces& parserInterfaces() { return m_app->m_parserInterfaces; }
 };

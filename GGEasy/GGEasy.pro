@@ -21,34 +21,50 @@
 QT += core gui opengl widgets printsupport concurrent
 TARGET = GGEasy
 
-contains(QT_ARCH, i386) {
-    message("32-bit")
-    TARGET = $$TARGET"_x32"
-} else {
-    message("64-bit")
-    TARGET = $$TARGET"_x64"
-}
-
 TEMPLATE = app
 
 RESOURCES += res/resources.qrc
-
-#DEFINES += QT_DEBUG
-DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
 
 ICON = 256.png
 
 #macx: ICON = resources/icon.icns
 
+DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
+
+SUFIX = ""
+
+contains(QT_ARCH, i386) {
+    SUFIX = "_x32"
+} else {
+    SUFIX = "_x64"
+}
+msvc* {
+    SUFIX = $$SUFIX"_msvc"
+}
+gcc* {
+    SUFIX = $$SUFIX"_gcc"
+}
+CONFIG(debug, debug|release){
+    SUFIX = $$SUFIX"_d"
+}
+
+TARGET = $$TARGET$$SUFIX
+
+message($$TARGET)
+
 msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
-    TARGET = $$TARGET"_msvc"
     QMAKE_CXXFLAGS += /std:c++latest
-    message($$TARGET)
-#    DEFINES += LEAK_DETECTOR
+    #DEFINES += LEAK_DETECTOR
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFIX
 }
 
 gcc* {
@@ -58,18 +74,17 @@ gcc* {
     win* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
-    TARGET = $$TARGET"_gcc"
-    message($$TARGET)
-}
-
-CONFIG(debug, debug|release){
-    message("debug")
-    TARGET = $$TARGET"_d"
-    message($$TARGET)
+    LIBS += "-L"$$_PRO_FILE_PWD_/../lib
+    LIBS += -lclipper$$SUFIX
+    LIBS += -lfiletree$$SUFIX
+    LIBS += -lgi$$SUFIX
+    LIBS += -lgraphicsview$$SUFIX
+    LIBS += -lsettings$$SUFIX
+    LIBS += -lproject$$SUFIX
 }
 
 linux {
-# sudo apt install mesa-common-dev
+    # sudo apt install mesa-common-dev
     DEFINES += linux
     greaterThan(QT_MINOR_VERSION, 12){
         LIBS += -ltbb # Why????? sudo apt-get install libtbb-dev
@@ -79,7 +94,13 @@ linux {
 DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 INCLUDEPATH += $$PWD/forms/formsutil/
-INCLUDEPATH += $$PWD/../magic_get-1.0.4/include/
+#INCLUDEPATH += $$PWD/../magic_get-1.0.4/include/
+INCLUDEPATH += ../clipper
+INCLUDEPATH += ../filetree
+INCLUDEPATH += ../gerber
+INCLUDEPATH += ../gi
+INCLUDEPATH += ../settings
+INCLUDEPATH += ../project
 
 TRANSLATIONS += \
     translations/GGEasy_en.ts \
@@ -92,13 +113,6 @@ HEADERS += \
     colorselector.h \
     datastream.h \
     doublespinbox.h \
-    filetree/filemodel.h \
-    filetree/foldernode.h \
-    filetree/radiodelegate.h \
-    filetree/sidedelegate.h \
-    filetree/textdelegate.h \
-    filetree/treeview.h \
-    filetree/typedelegate.h \
     forms/drillform/drillform.h \
     forms/drillform/drillmodel.h \
     forms/drillform/drillpreviewgi.h \
@@ -111,22 +125,29 @@ HEADERS += \
     forms/pocketrasterform.h \
     forms/profileform.h \
     forms/voronoiform.h \
-    gi/bridgeitem.h \
-    gi/componentitem.h \
-    gi/datapathitem.h \
-    gi/datasoliditem.h \
-    gi/drillitem.h \
-    gi/erroritem.h \
-    gi/gcpathitem.h \
-    gi/graphicsitem.h \
-    gi/itemgroup.h \
+    forms/bridgeitem.h \
+    gcode/gccreator.h \
+    gcode/gcfile.h \
+    gcode/gch.h \
+    gcode/gcnode.h \
+    gcode/gcode.h \
+    gcode/gcparser.h \
+    gcode/gcpocketoffset.h \
+    gcode/gcpocketraster.h \
+    gcode/gcprofile.h \
+    gcode/gcthermal.h \
+    gcode/gctypes.h \
+    gcode/gcutils.h \
+    gcode/gcvoronoi.h \
+    gcode/voroni/jc_voronoi.h \
+    interfaces/file.h \
+    interfaces/node.h \
+    interfaces/parser.h \
     leakdetector.h \
     mainwindow.h \
     openingdialog.h \
     point.h \
-    project.h \
     recent.h \
-    settings.h \
     settingsdialog.h \
     splashscreen.h \
     tooldatabase/tool.h \
@@ -142,13 +163,6 @@ SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
     doublespinbox.cpp \
-    filetree/filemodel.cpp \
-    filetree/foldernode.cpp \
-    filetree/radiodelegate.cpp \
-    filetree/sidedelegate.cpp \
-    filetree/textdelegate.cpp \
-    filetree/treeview.cpp \
-    filetree/typedelegate.cpp \
     forms/drillform/drillform.cpp \
     forms/drillform/drillmodel.cpp \
     forms/drillform/drillpreviewgi.cpp \
@@ -161,21 +175,26 @@ SOURCES += \
     forms/pocketrasterform.cpp \
     forms/profileform.cpp \
     forms/voronoiform.cpp \
-    gi/bridgeitem.cpp \
-    gi/componentitem.cpp \
-    gi/datapathitem.cpp \
-    gi/datasoliditem.cpp \
-    gi/drillitem.cpp \
-    gi/erroritem.cpp \
-    gi/gcpathitem.cpp \
-    gi/graphicsitem.cpp \
-    gi/itemgroup.cpp \
+    forms/bridgeitem.cpp \
+    gcode/gccreator.cpp \
+    gcode/gcfile.cpp \
+    gcode/gch.cpp \
+    gcode/gcnode.cpp \
+    gcode/gcparser.cpp \
+    gcode/gcpocketoffset.cpp \
+    gcode/gcpocketraster.cpp \
+    gcode/gcprofile.cpp \
+    gcode/gcthermal.cpp \
+    gcode/gcutils.cpp \
+    gcode/gcvoronoi.cpp \
+    gcode/voroni/jc_voronoi.cpp \
+    interfaces/file.cpp \
+    interfaces/node.cpp \
+    interfaces/parser.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \
-    project.cpp \
     recent.cpp \
-    settings.cpp \
     settingsdialog.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
@@ -202,15 +221,18 @@ FORMS += \
     tooldatabase/tooleditform.ui \
 
 
+#include(../dxf/dxf.pri)
+#include(../excellon/excellon.pri)
+#include(../file/file.pri)
+#include(../gcode/gcode.pri)
+#include(../shapes/shapes.pri)
+#include(../thermal/thermal.pri)
 include(../clipper/clipper.pri)
-include(../excellon/excellon.pri)
-include(../file/file.pri)
-include(../gcode/gcode.pri)
-include(../gerber/gerber.pri)
+include(../filetree/filetree.pri)
+#include(../gerber/gerber.pri)
+include(../gi/gi.pri)
 include(../graphicsview/graphicsview.pri)
-include(../shapes/shapes.pri)
-include(../thermal/thermal.pri)
-include(../dxf/dxf.pri)
+include(../project/project.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true

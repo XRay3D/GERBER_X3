@@ -14,10 +14,10 @@
 *                                                                              *
 *******************************************************************************/
 #include "dxf_layermodel.h"
-#include "abstractnode.h"
+#include "interfaces/node.h"
 #include "dxf_file.h"
 #include "dxf_layer.h"
-#include "gi/itemgroup.h"
+#include "itemgroup.h"
 
 #include <QComboBox>
 #include <QGraphicsScene>

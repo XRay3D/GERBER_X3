@@ -13,7 +13,7 @@
 *******************************************************************************/
 #pragma once
 //#include "gctypes.h"
-#include "abstractfile.h"
+#include "interfaces/file.h"
 #include "gcutils.h"
 
 class Project;
@@ -21,7 +21,7 @@ class GcPathItem;
 
 namespace GCode {
 
-class File : public AbstractFile, private GCUtils {
+class File : public FileInterface, private GCUtils {
     friend class ::GcPathItem;
     friend class ::Project;
 
@@ -69,7 +69,7 @@ private:
     void saveLaserHLDI(const QPointF& offset);
     QVector<QSharedPointer<QColor>> debugColor;
 
-    // AbstractFile interfaces
+    // FileInterface interfaces
 protected:
     virtual Paths merge() const override { return {}; }
     void write(QDataStream& stream) const override;

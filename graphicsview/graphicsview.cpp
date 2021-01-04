@@ -15,12 +15,12 @@
 *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
-#include "gi/bridgeitem.h"
+//#include "gi/bridgeitem.h"
 #include "mainwindow.h"
 #include "qdruler.h"
 #include "scene.h"
 #include "settings.h"
-#include "shheaders.h"
+//#include "shheaders.h"
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
@@ -35,7 +35,7 @@ constexpr double zoomFactor2 = 1.7;
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    if (App::m_graphicsView) {
+    if (App::m_app->m_graphicsView) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class GraphicsView more than 2 times!!!");
         exit(1);
     }
@@ -68,10 +68,10 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler->SetMouseTrack(true);
 
     // add items to grid layout
-    QPushButton* corner = new QPushButton(GlobalSettings::inch() ? "I" : "M", this);
+    QPushButton* corner = new QPushButton(AppSettings::inch() ? "I" : "M", this);
     connect(corner, &QPushButton::clicked, [this, corner](bool fl) {
         corner->setText(fl ? "I" : "M");
-        GlobalSettings::setInch(fl);
+        AppSettings::setInch(fl);
         scene()->update();
         hRuler->update();
         vRuler->update();
@@ -104,11 +104,11 @@ GraphicsView::GraphicsView(QWidget* parent)
     setScene(m_scene = new Scene(this));
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
 
-    setStyleSheet("QGraphicsView { background: " + GlobalSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
-    App::m_graphicsView = this;
+    setStyleSheet("QGraphicsView { background: " + AppSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
+    App::m_app->m_graphicsView = this;
 }
 
-GraphicsView::~GraphicsView() { App::m_graphicsView = nullptr; }
+GraphicsView::~GraphicsView() { App::m_app->m_graphicsView = nullptr; }
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
 {
@@ -156,7 +156,7 @@ void GraphicsView::zoomIn()
     if (getScale() > 10000.0)
         return;
 
-    if (GlobalSettings::guiSmoothScSh()) {
+    if (AppSettings::guiSmoothScSh()) {
         anim(this, "scale", getScale(), getScale() * zoomFactor2);
     } else {
         scale(zoomFactor, zoomFactor);
@@ -168,7 +168,7 @@ void GraphicsView::zoomOut()
 {
     if (getScale() < 1.0)
         return;
-    if (GlobalSettings::guiSmoothScSh()) {
+    if (AppSettings::guiSmoothScSh()) {
         anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor2));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
@@ -186,7 +186,7 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders)
     //    const auto r2(dstRect.toRect());
     //    if (r1 == r2)
     //        return;
-    if (GlobalSettings::guiSmoothScSh()) {
+    if (AppSettings::guiSmoothScSh()) {
         anim(this, "viewRect", getViewRect(), dstRect);
     } else {
         QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
@@ -201,11 +201,11 @@ double GraphicsView::scaleFactor()
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
-    if (event->modifiers() & Qt::AltModifier || GlobalSettings::snap()) {
+    if (event->modifiers() & Qt::AltModifier || AppSettings::snap()) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        const double gs = GlobalSettings::gridStep(matrix().m11());
+        const double gs = AppSettings::gridStep(matrix().m11());
 #else
-        const double gs = GlobalSettings::gridStep(transform().m11());
+        const double gs = AppSettings::gridStep(transform().m11());
 #endif
         QPointF px(mapToScene(event->pos()) / gs);
         px.setX(gs * round(px.x()));
@@ -273,7 +273,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::ShiftModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::horizontalScrollBar();
-            if (GlobalSettings::guiSmoothScSh()) {
+            if (AppSettings::guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - delta);
@@ -283,7 +283,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::NoModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::verticalScrollBar();
-            if (GlobalSettings::guiSmoothScSh()) {
+            if (AppSettings::guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - delta);
@@ -351,18 +351,18 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if (event->button() == Qt::RightButton) {
-        { // удаление мостика
-            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-            if (item && static_cast<GiType>(item->type()) == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
-                delete item;
-        }
+        //        { // удаление мостика
+        //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
+        //            if (item && static_cast<GiType>(item->type()) == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
+        //                delete item;
+        //        }
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         setInteractive(false);
         //Ruler
         m_scene->setDrawRuller(true);
         m_scene->setCross2(mappedPos(event));
-        Shapes::Constructor::finalizeShape();
+        //        Shapes::Constructor::finalizeShape();
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
@@ -383,10 +383,10 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         m_scene->setDrawRuller(false);
-        Shapes::Constructor::finalizeShape();
+        //        Shapes::Constructor::finalizeShape();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
-        Shapes::Constructor::addShapePoint(mappedPos(event));
+        //        Shapes::Constructor::addShapePoint(mappedPos(event));
     }
 }
 
@@ -396,7 +396,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
     mouseMove(point);
-    Shapes::Constructor::updateShape(point);
+    //    Shapes::Constructor::updateShape(point);
     QGraphicsView::mouseMoveEvent(event);
 }
 

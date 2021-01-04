@@ -24,7 +24,6 @@
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
-#include "shpolyline.h"
 #include "stdio.h"
 #include "string.h"
 #include <QDebug>
@@ -342,7 +341,7 @@ void Creator::stacking(Paths& paths)
             Path path(node->Contour);
             if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
                 ReversePath(path);
-            if (GlobalSettings::gbrCleanPolygons())
+            if (AppSettings::gbrCleanPolygons())
                 CleanPolygon(path, uScale * 0.0005);
             if (m_returnPss.isEmpty() || newPaths) {
                 m_returnPss.append({ path });
@@ -534,7 +533,7 @@ bool Creator::createability(bool side)
         ClipperOffset offset(uScale);
         offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, -r);
-        if (GlobalSettings::gbrCleanPolygons())
+        if (AppSettings::gbrCleanPolygons())
             CleanPolygons(frPaths, uScale * 0.0005);
         offset.Clear();
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);

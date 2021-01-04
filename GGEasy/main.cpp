@@ -18,14 +18,41 @@
 #include "settingsdialog.h"
 #include "splashscreen.h"
 #include "version.h"
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
 #include <QGLWidget>
+#include <QProxyStyle>
 #include <QSettings>
 #include <QTranslator>
 
 #include "leakdetector.h"
+
+class ProxyStyle : public QProxyStyle {
+    //Q_OBJECT
+
+public:
+    ProxyStyle(QStyle* style = nullptr)
+        : QProxyStyle(style)
+    {
+    }
+
+    ProxyStyle(const QString& key)
+        : QProxyStyle(key)
+    {
+    }
+
+    virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0) const
+    {
+        switch (metric) {
+        case QStyle::PM_SmallIconSize:
+            return 22;
+        default:
+            return QProxyStyle::pixelMetric(metric, option, widget);
+        }
+    }
+};
 
 void initIcon(const QString& path);
 void translation(QApplication* app);
@@ -40,7 +67,12 @@ int main(int argc, char* argv[])
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     Q_INIT_RESOURCE(resources);
+
+    App a;
+    AppSettings s;
+
     QApplication app(argc, argv);
+    app.setStyle(new ProxyStyle);
 
     app.setApplicationName("GGEasy");
     app.setOrganizationName(VER_COMPANYNAME_STR);

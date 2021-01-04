@@ -28,6 +28,7 @@ public:
     void draw(const InsertEntity* const) const override;
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
+    GraphicObject toGo() const override { return {}; }
 };
 
 }

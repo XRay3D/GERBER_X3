@@ -14,10 +14,12 @@
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
-#include "abstractfile.h"
 #include "dxf_block.h"
 #include "dxf_codedata.h"
 #include "dxf_types.h"
+#include "interfaces/file.h"
+#include "itemgroup.h"
+
 #include <QDebug>
 #include <QFile>
 #include <QObject>
@@ -25,7 +27,6 @@
 #include <QVector>
 #include <algorithm>
 #include <forward_list>
-#include <gi/itemgroup.h>
 
 namespace Dxf {
 
@@ -34,7 +35,7 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public AbstractFile {
+class File : public FileInterface {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Parser;
@@ -49,8 +50,8 @@ public:
     Blocks& blocks() { return m_blocks; }
     Styles& styles() { return m_styles; }
 
-    void setItemType(ItemsType type);
-    ItemsType itemsType() const;
+    void setItemType(int type) override;
+    int itemsType() const override;
 
 private:
     Sections m_sections;
@@ -59,7 +60,6 @@ private:
     Layers m_layers;
     Styles m_styles;
     mutable std::map<QString, bool> m_layersVisible;
-    ItemsType m_itemsType = ItemsType::Normal;
 
     enum Group {
         CopperGroup,
@@ -68,9 +68,9 @@ private:
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     void grouping(PolyNode* node, Pathss* pathss, Group group);
 
-    // AbstractFile interface
+    // FileInterface interface
 public:
-    ItemGroup* itemGroup() const override;
+    void initFrom(FileInterface* file) override;
     FileType type() const override;
     void createGi() override;
     bool isVisible() const override;

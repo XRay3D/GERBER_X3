@@ -47,7 +47,7 @@ struct ViaDrill : AbstrAperFunc {
     В необязательном поле указывается защита переходного отверстия
     в соответствии с IPC-4761.*/
 public:
-    ViaDrill(Aperture::Function function, const QStringList& list)
+    ViaDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -59,7 +59,7 @@ struct BackDrill : AbstrAperFunc {
    Отверстие для удаления обшивки с подпяточного пролета
    путем просверливания этого подпролетного участка большего диаметра.*/
 public:
-    BackDrill(Aperture::Function function, const QStringList& list)
+    BackDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -77,7 +77,7 @@ struct ComponentDrill : AbstrAperFunc {
     Этикетка может быть нанесена только на отверстия PTH.
     См. Также ComponentPad.*/
 public:
-    ComponentDrill(Aperture::Function function, const QStringList& list)
+    ComponentDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -93,7 +93,7 @@ struct MechanicalDrill : AbstrAperFunc {
     • BreakOut: отверстия без покрытия, образующие отрывной язычок,
     используемый при разводке с разрывом.*/
 public:
-    MechanicalDrill(Aperture::Function function, const QStringList& list)
+    MechanicalDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -105,7 +105,7 @@ struct CastellatedDrill : AbstrAperFunc {
    Металлизированные отверстия, прорезанные краем платы;
    используется для соединения печатных плат.*/
 public:
-    CastellatedDrill(Aperture::Function function, const QStringList& list)
+    CastellatedDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -117,7 +117,7 @@ struct OtherDrill : AbstrAperFunc {
    Отверстие, но ничего из вышеперечисленного.
    Обязательное поле неформально описывает тип.*/
 public:
-    OtherDrill(Aperture::Function function, const QStringList& list)
+    OtherDrill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -129,7 +129,7 @@ struct ComponentPad : AbstrAperFunc {
    Только для компонентов со сквозным отверстием; SMD и BGA имеют свой собственный выделенный тип.
    См. Также ComponentDrill.*/
 public:
-    ComponentPad(Aperture::Function function, const QStringList& list)
+    ComponentPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -144,7 +144,7 @@ struct SMDPad : AbstrAperFunc {
    Когда контактная площадка SMD содержит сквозное отверстие, контактная площадка, к которой припаяна SMD, на внешнем слое с SMD - это SMDPad, все остальные контактные площадки в стеке - ViaPad. Если контактная площадка SMD содержит встроенную контактную площадку, как и должно быть, то эта встроенная контактная площадка, конечно же, является ViaPad.*/
 
 public:
-    SMDPad(Aperture::Function function, const QStringList& list)
+    SMDPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -159,7 +159,7 @@ struct BGAPad : AbstrAperFunc {
    Когда контактная площадка BGA имеет сквозное отверстие, контактная площадка, к которой припаяна BGA, является BGAPad, все остальные контактные площадки в стеке - ViaPad. Если контактная площадка BGA содержит встроенную контактную площадку, как и должно быть, то эта встроенная контактная площадка, конечно же, является ViaPad.*/
 
 public:
-    BGAPad(Aperture::Function function, const QStringList& list)
+    BGAPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -170,7 +170,7 @@ struct ConnectorPad : AbstrAperFunc {
     /*Крайняя контактная площадка.
    Применимо только для внешних слоев.*/
 public:
-    ConnectorPad(Aperture::Function function, const QStringList& list)
+    ConnectorPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -180,7 +180,7 @@ struct HeatsinkPad : AbstrAperFunc {
     /*Радиатор или термопрокладка, обычно для SMD*/
 /*Радиатор или термопрокладка, обычно для SMD*/
 public:
-    HeatsinkPad(Aperture::Function function, const QStringList& list)
+    HeatsinkPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -196,7 +196,7 @@ struct ViaPad : AbstrAperFunc {
     однако их основная функция - это компонентная площадка, и они должны иметь эту функцию;
     аналогично для тестовых площадок, переходное отверстие в BGA и т. д.*/
 public:
-    ViaPad(Aperture::Function function, const QStringList& list)
+    ViaPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -208,7 +208,7 @@ struct TestPad : AbstrAperFunc {
     Иногда тестовая площадка просверливается и также имеет функцию перехода для экономии места. Такая площадка должна быть указана как тестовая. (Из конструкции ясно, что он имеет функцию перехода, но изготовитель должен знать, что это тестовая площадка, и это не очевидно. Точно так же контактная площадка компонента может также функционировать как переходное отверстие, но остается контактной площадкой компонента. )*/
 
 public:
-    TestPad(Aperture::Function function, const QStringList& list)
+    TestPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -219,7 +219,7 @@ struct CastellatedPad : AbstrAperFunc {
     /*Подушечки на металлизированных отверстиях, прорезанных краем доски; используется для соединения печатных плат.*/
 
 public:
-    CastellatedPad(Aperture::Function function, const QStringList& list)
+    CastellatedPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -232,7 +232,7 @@ struct FiducialPad : AbstrAperFunc {
    Спецификатор (Local | GlobalPanel) является обязательным. Контактные площадки для локальных реперных знаков используются для определения положения отдельного компонента, глобальные для определения местоположения отдельной печатной платы и панели для определения местоположения панели.*/
 
 public:
-    FiducialPad(Aperture::Function function, const QStringList& list)
+    FiducialPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -243,7 +243,7 @@ struct ThermalReliefPad : AbstrAperFunc {
     /*Тепловая разгрузочная площадка, соединенная с окружающей медью, ограничивая тепловой поток.*/
 
 public:
-    ThermalReliefPad(Aperture::Function function, const QStringList& list)
+    ThermalReliefPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -254,7 +254,7 @@ struct WasherPad : AbstrAperFunc {
     /*Прокладка вокруг отверстия без покрытия без электрической функции. Несколько приложений, например прокладка, укрепляющая печатную плату в месте крепления болтом - отсюда и название шайба.*/
 
 public:
-    WasherPad(Aperture::Function function, const QStringList& list)
+    WasherPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -265,7 +265,7 @@ struct AntiPad : AbstrAperFunc {
     /*Колодка с очищающей полярностью (LPC), создающая зазор в плоскости. Это освобождает место для прохода сверла без соединения с самолетом. Обратите внимание, что установка самого атрибута AntiPad не влияет на изображение и, следовательно, не превращает панель в LPC как побочный эффект - это должно быть сделано явно с помощью команды% LPC *%.*/
 
 public:
-    AntiPad(Aperture::Function function, const QStringList& list)
+    AntiPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -277,7 +277,7 @@ struct OtherPad : AbstrAperFunc {
     Прокладка, не указанная выше. Обязательное поле неформально описывает тип.*/
 
 public:
-    OtherPad(Aperture::Function function, const QStringList& list)
+    OtherPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -289,7 +289,7 @@ struct Conductor : AbstrAperFunc {
    (Обратите внимание, что рисование - плохая практика, но если вам нужно рисовать, по крайней мере, добавьте атрибут, чтобы было ясно, что означает клубок рисунков.)*/
 
 public:
-    Conductor(Aperture::Function function, const QStringList& list)
+    Conductor(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -301,7 +301,7 @@ struct EtchedComponent : AbstrAperFunc {
    Для списка соединений САПР это такие же компоненты, как и другие: имена цепей с обеих сторон различаются. (Тем не менее, для электрического испытания голой платы они могут проводить медь и соединять сеть с обеих сторон.)*/
 
 public:
-    EtchedComponent(Aperture::Function function, const QStringList& list)
+    EtchedComponent(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -312,7 +312,7 @@ struct NonConductor : AbstrAperFunc {
     /*Медь, не выполняющая роль проводника, не имеющая электрической функции; обычно текст на печатной плате, такой как номер детали и версия. Не то чтобы этот атрибут можно было применить только к меди, а не к элементам чертежа в медном слое; см. также Нематериал и Профиль.*/
 
 public:
-    NonConductor(Aperture::Function function, const QStringList& list)
+    NonConductor(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -323,7 +323,7 @@ struct CopperBalancing : AbstrAperFunc {
     /*Медный узор добавлен для балансировки медного покрытия при нанесении покрытия.*/
 
 public:
-    CopperBalancing(Aperture::Function function, const QStringList& list)
+    CopperBalancing(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -333,7 +333,7 @@ struct Border : AbstrAperFunc {
     /**/
 /*Медный бордюр производственной панели.*/
 public:
-    Border(Aperture::Function function, const QStringList& list)
+    Border(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -345,7 +345,7 @@ struct OtherCopper : AbstrAperFunc {
    Указывает на другую функцию. Обязательное поле неформально описывает тип.*/
 
 public:
-    OtherCopper(Aperture::Function function, const QStringList& list)
+    OtherCopper(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -362,7 +362,7 @@ struct ComponentMain : AbstrAperFunc {
     nn - номер апертуры, целое число ≥ 10.
     */
 public:
-    ComponentMain(Aperture::Function function, const QStringList& list)
+    ComponentMain(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -378,7 +378,7 @@ struct ComponentOutline : AbstrAperFunc {
    %ADDnnC,0.100*% (mm)
    %ADDnnC,0.004*% (in)*/
 public:
-    ComponentOutline(Aperture::Function function, const QStringList& list)
+    ComponentOutline(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -398,7 +398,7 @@ struct ComponentPin : AbstrAperFunc {
    Эти контакты не видны, что позволяет избежать загромождения изображения.*/
 
 public:
-    ComponentPin(Aperture::Function function, const QStringList& list)
+    ComponentPin(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -409,7 +409,7 @@ struct ProfileA : AbstrAperFunc {
     /*Обозначает чертежи и дуги, которые точно определяют профиль или контур печатной платы. Это содержимое файла профиля, но оно также может присутствовать в других слоях. См. 6.1.5*/
 
 public:
-    ProfileA(Aperture::Function function, const QStringList& list)
+    ProfileA(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -420,7 +420,7 @@ struct NonMaterial : AbstrAperFunc {
     /*Значение атрибута NonMaterial определяет объекты, которые представляют не физический материал, а элементы чертежа. NonMaterial имеет значение только для файлов, которые определяют структуру физических слоев печатной платы, таких как медные слои или паяльная маска. К сожалению, такие файлы иногда содержат не только данные, представляющие материал, но также элементы чертежа, такие как рамка и основная надпись. (Примечание: элементы чертежа не следует смешивать с данными шаблона, все, см. 6.1.6.2. Используйте файлы чертежей для чертежей.).*/
 
 public:
-    NonMaterial(Aperture::Function function, const QStringList& list)
+    NonMaterial(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -433,7 +433,7 @@ struct Material : AbstrAperFunc {
     Для слоев меди и сверла Материал разделен на более конкретные функции, такие как площадка SMD. Используйте специальные функции, когда они доступны, а не «Материал».*/
 
 public:
-    Material(Aperture::Function function, const QStringList& list)
+    Material(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }
@@ -446,7 +446,7 @@ struct OtherA : AbstrAperFunc {
    Обязательное поле неформально описывает функцию диафрагмы.*/
 
 public:
-    OtherA(Aperture::Function function, const QStringList& list)
+    OtherA(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
     {
     }

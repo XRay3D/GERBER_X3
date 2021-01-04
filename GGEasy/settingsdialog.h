@@ -15,7 +15,7 @@
 #include "settings.h"
 #include "ui_settingsdialog.h"
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog, private GlobalSettings {
+class SettingsDialog : public QDialog, private Ui::SettingsDialog, private AppSettings {
     Q_OBJECT
 
     int langIndex;

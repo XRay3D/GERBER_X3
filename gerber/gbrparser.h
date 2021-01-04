@@ -12,23 +12,47 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
+#include "app.h"
 #include "gbrattributes.h"
 #include "gbrfile.h"
 #include "gbrtypes.h"
-#include "parser.h"
+
+#include "interfaces/parser.h"
+#include "settings.h"
+
 #include <QObject>
 #include <QStack>
 
 namespace Gerber {
 
-class Parser : public FileParser {
+class Parser : public QObject, public ParserInterface {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "gerber.json")
+    Q_INTERFACES(ParserInterface)
+
 public:
     Parser(QObject* parent = nullptr);
-    AbstractFile* parseFile(const QString& fileName) override;
-    void parseLines(const QString& gerberLines, const QString& fileName);
+
+    bool thisIsIt(const QString& fileName) override;
+    QObject* getObject() override;
+    int type() const override;
+    NodeInterface* createNode(FileInterface* file) override;
+    std::shared_ptr<FileInterface> createFile() override;
+    void setupInterface(App* a, AppSettings* s) override;
+    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
+
+public slots:
+    FileInterface* parseFile(const QString& fileName, int type) override;
+
+signals:
+    void fileReady(FileInterface* file) override;
+    void fileProgress(const QString& fileName, int max, int value) override;
+    void fileError(const QString& fileName, const QString& error) override;
 
 private:
+    void parseLines(const QString& gerberLines, const QString& fileName);
+
     QVector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
@@ -74,10 +98,10 @@ private:
     StepRepeatStr m_stepRepeat;
     QMap<QString, Component> components;
     QString refDes;
-    int aperFunction = -1;
-    QMap<int, int> aperFunctionMap;
+    QMap<int, Attr::Aperture> aperFunctionMap;
 
     Attr::File attFile;
+    Attr::Aperture attAper;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -98,5 +122,7 @@ private:
     inline File* file() { return reinterpret_cast<File*>(m_file); }
 
     /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
+    App app;
+    AppSettings appSettings;
 };
 }

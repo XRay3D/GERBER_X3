@@ -14,8 +14,13 @@
 *                                                                              *
 *******************************************************************************/
 #include "scene.h"
+
+#include "datapathitem.h"
+#include "graphicsitem.h"
 #include "graphicsview.h"
+#include "project.h"
 #include "settings.h"
+
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -27,7 +32,6 @@
 #include <QPdfWriter>
 #include <QTime>
 #include <QtMath>
-#include <gi/graphicsitem.h>
 
 QTime m_time;
 int m_time2;
@@ -37,14 +41,14 @@ int m_frameCount2;
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    if (App::m_scene) {
+    if (App::m_app->m_scene) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
         exit(1);
     }
-    App::m_scene = this;
+    App::m_app->m_scene = this;
 }
 
-Scene::~Scene() { App::m_scene = nullptr; }
+Scene::~Scene() { App::m_app->m_scene = nullptr; }
 
 void Scene::RenderPdf()
 {
@@ -62,8 +66,6 @@ void Scene::RenderPdf()
 
     //QRectF rect(QGraphicsScene::itemsBoundingRect());
     QSizeF size(rect.size());
-
-
 
     QPdfWriter pdfWriter(curFile);
     pdfWriter.setPageSizeMM(size);
@@ -85,6 +87,39 @@ QRectF Scene::itemsBoundingRect()
     m_drawPdf = true;
     QRectF rect(QGraphicsScene::itemsBoundingRect());
     m_drawPdf = false;
+    return rect;
+}
+
+QRectF Scene::getSelectedBoundingRect()
+{
+    auto selectedItems(App::scene()->selectedItems());
+
+    if (selectedItems.isEmpty())
+        return {};
+
+    auto getRect = [](QGraphicsItem* gi) -> QRectF {
+        //        return static_cast<GiType>(gi->type()) == GiType::AperturePath
+        //            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
+        //            : gi->boundingRect();
+        switch (static_cast<GiType>(gi->type())) {
+        case GiType::Gerber:
+            return gi->boundingRect();
+        case GiType::Drill:
+            return gi->boundingRect();
+        case GiType::AperturePath:
+            return static_cast<DataPathItem*>(gi)->boundingRect2();
+        default:
+            return {};
+        }
+    };
+
+    QRectF rect(getRect(selectedItems.takeFirst()));
+    for (auto gi : selectedItems)
+        rect = rect.united(getRect(gi));
+
+    if (!rect.isEmpty())
+        App::project()->setWorckRect(rect);
+
     return rect;
 }
 
@@ -123,21 +158,21 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString(GlobalSettings::inch() ? "  ∆X: %1 in\n"
-                                                          "  ∆Y: %2 in\n"
-                                                          "  ∆/: %3 in\n"
-                                                          "  Area: %4 in²\n"
-                                                          "  Angle: %5°"
-                                                        : "  ∆X: %1 mm\n"
-                                                          "  ∆Y: %2 mm\n"
-                                                          "  ∆/: %3 mm\n"
-                                                          "  Area: %4 mm²\n"
-                                                          "  Angle: %5°")
-                             .arg(rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(length / (GlobalSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg((rect.width() / (GlobalSettings::inch() ? 25.4 : 1.0))
-                                     * (rect.height() / (GlobalSettings::inch() ? 25.4 : 1.0)),
+    const QString text = QString(AppSettings::inch() ? "  ∆X: %1 in\n"
+                                                       "  ∆Y: %2 in\n"
+                                                       "  ∆/: %3 in\n"
+                                                       "  Area: %4 in²\n"
+                                                       "  Angle: %5°"
+                                                     : "  ∆X: %1 mm\n"
+                                                       "  ∆Y: %2 mm\n"
+                                                       "  ∆/: %3 mm\n"
+                                                       "  Area: %4 mm²\n"
+                                                       "  Angle: %5°")
+                             .arg(rect.width() / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.height() / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(length / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg((rect.width() / (AppSettings::inch() ? 25.4 : 1.0))
+                                     * (rect.height() / (AppSettings::inch() ? 25.4 : 1.0)),
                                  4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
@@ -204,7 +239,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, GlobalSettings::guiColor(Colors::Background));
+    painter->fillRect(rect, AppSettings::guiColor(Colors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -216,14 +251,14 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         const long upScale = 100000;
         const long forLimit = 1000;
         const double downScale = 1.0 / upScale;
-        static bool in = GlobalSettings::inch();
+        static bool in = AppSettings::inch();
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != GlobalSettings::inch()) {
-            in = GlobalSettings::inch();
+        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != AppSettings::inch()) {
+            in = AppSettings::inch();
             m_scale = views().first()->matrix().m11();
 #else
-        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != GlobalSettings::inch()) {
-            in = GlobalSettings::inch();
+        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != AppSettings::inch()) {
+            in = AppSettings::inch();
             m_scale = views().first()->transform().m11();
 #endif
             if (qFuzzyIsNull(m_scale))
@@ -234,7 +269,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
             vGrid.clear();
 
             // Grid Step 0.1
-            double gridStep = GlobalSettings::gridStep(m_scale);
+            double gridStep = AppSettings::gridStep(m_scale);
             for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
                       right = static_cast<long>(rect.right() * upScale),
                       step = static_cast<long>(gridStep * upScale), nlp = 0;
@@ -278,9 +313,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         }
 
         const QColor color[] {
-            GlobalSettings::guiColor(Colors::Grid1),
-            GlobalSettings::guiColor(Colors::Grid5),
-            GlobalSettings::guiColor(Colors::Grid10),
+            AppSettings::guiColor(Colors::Grid1),
+            AppSettings::guiColor(Colors::Grid5),
+            AppSettings::guiColor(Colors::Grid10),
         };
 
         painter->save();
@@ -301,8 +336,6 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
                     painter->drawLine(QLineF(rect.left(), vPos * downScale + k2, rect.right(), vPos * downScale + k2));
             }
         }
-
-
 
         // zero cross
         painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));

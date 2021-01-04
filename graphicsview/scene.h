@@ -23,7 +23,7 @@ public:
     ~Scene() override;
     void RenderPdf();
     QRectF itemsBoundingRect();
-
+    QRectF getSelectedBoundingRect();
     bool drawPdf();
 
     void setCross1(const QPointF& cross);

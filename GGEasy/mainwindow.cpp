@@ -15,25 +15,23 @@
 *******************************************************************************/
 #include "mainwindow.h"
 #include "aboutform.h"
+#include "app.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketoffsetform.h"
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
 #include "forms/voronoiform.h"
+#include "project.h"
+#include "ui_mainwindow.h"
 
-// parsers
-#include "exparser.h"
-#ifdef GERBER
-#include "gbrparser.h"
-#endif
-#include "dxf_parser.h"
-
-#include "gi/datasoliditem.h"
+#include "datasoliditem.h"
 #include "point.h"
 #include "project.h"
 #include "settingsdialog.h"
+#ifdef SH_
 #include "shheaders.h"
+#endif
 
 #ifdef THERMAL
 #include "thermal.h"
@@ -44,58 +42,91 @@
 
 #include "leakdetector.h"
 
+bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
+{
+    return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
+}
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
     , recentFiles(this, "recentFileList")
     , recentProjects(this, "recentProjectsList")
-#ifdef GERBER
-    , gerberParser(new Gerber::Parser)
-#endif
-    , excellonParser(new Excellon::Parser)
-    , dxfParser(new Dxf::Parser)
     , m_project(new Project(this))
-
 {
-    setupUi(this);
+    App::m_app->m_mainWindow = this;
+
+    ui->setupUi(this);
 
     initWidgets();
 
     {
         new Marker(Marker::Home);
         new Marker(Marker::Zero);
-        new Pin(App::scene());
-        new Pin(App::scene());
-        new Pin(App::scene());
-        new Pin(App::scene());
-        new LayoutFrames();
+        new Pin();
+        new Pin();
+        new Pin();
+        new Pin();
+
+        connect(m_project, &Project::homePosChanged, [](const QPointF& pos) { Marker::get(Marker::Home)->setPos(pos); });
+        connect(m_project, &Project::zeroPosChanged, [](const QPointF& pos) { Marker::get(Marker::Zero)->setPos(pos); });
+        connect(m_project, &Project::pinsPosChanged, [](QPointF* pos) {
+            for (int i = 0; i < 4; ++i)
+                Pin::pins()[i]->setPos(pos[i]);
+        });
+        connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
+        GCodePropertiesForm(nullptr); // init default vars;
+        connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
     }
 
-#ifdef GERBER
-    gerberParser->moveToThread(&parserThread);
-    connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
-    connect(gerberParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    connect(gerberParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(gerberParser, &FileParser::fileError, this, &MainWindow::fileError);
-    connect(&parserThread, &QThread::finished, gerberParser, &QObject::deleteLater);
+    { // load plugins
+        QDir dir(QApplication::applicationDirPath());
+        // Поиск всех файлов в папке "Plugins"
+        QStringList listFiles;
+        if (dir.exists())
+#ifdef QT_DEBUG
+            listFiles = dir.entryList(QStringList("*d.dll"), QDir::Files);
+#else
+            listFiles = dir.entryList(QStringList("*.dll"), QDir::Files);
 #endif
+        // Проход по всем файлам
+        for (QString str : listFiles) {
+            QPluginLoader loader(dir.absolutePath() + "/" + str);
+            // Загрузка плагина
+            QObject* pobj = loader.instance();
+            if (pobj && qobject_cast<ParserInterface*>(pobj)) {
+                auto parser = qobject_cast<ParserInterface*>(pobj);
+                qDebug() << __FUNCTION__ << pobj;
+                parser->setupInterface(App::app(), AppSettings::appSettings());
+                App::m_app->m_parserInterfaces.emplace(parser->type(), std::pair(parser, pobj));
+            }
+        }
+    }
+    // connect plugins
+    for (auto& [type, pair] : App::m_app->m_parserInterfaces) {
+        auto& [parser, pobj] = pair;
+        pobj->moveToThread(&parserThread);
+        connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
+        connect(pobj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
+        connect(pobj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
+        connect(this, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+    }
 
-    excellonParser->moveToThread(&parserThread);
-    connect(this, &MainWindow::parseExcellonFile, excellonParser, &FileParser::parseFile, Qt::QueuedConnection);
-    connect(excellonParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    connect(excellonParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(excellonParser, &FileParser::fileError, this, &MainWindow::fileError);
-    connect(&parserThread, &QThread::finished, excellonParser, &QObject::deleteLater);
-
-    dxfParser->moveToThread(&parserThread);
-    connect(this, &MainWindow::parseDxfFile, dxfParser, &FileParser::parseFile, Qt::QueuedConnection);
-    connect(dxfParser, &FileParser::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-    connect(dxfParser, &FileParser::fileProgress, this, &MainWindow::fileProgress);
-    connect(dxfParser, &FileParser::fileError, this, &MainWindow::fileError);
-    connect(&parserThread, &QThread::finished, dxfParser, &QObject::deleteLater);
+    { // add dummy gcode plugin
+        auto parser = new GCode::Parser(this);
+        App::m_app->m_parserInterfaces.emplace(parser->type(),
+            std::pair(
+                static_cast<ParserInterface*>(parser),
+                static_cast<QObject*>(parser)));
+    }
 
     parserThread.start(QThread::HighestPriority);
 
-    connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+    connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+
+    connect(ui->treeView, &FileTreeView::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui->treeView, &FileTreeView::saveGCodeFiles, this, &MainWindow::saveGCodeFiles);
+    connect(ui->treeView, &FileTreeView::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
         setStyleSheet("QGroupBox, .QFrame {"
@@ -120,28 +151,36 @@ MainWindow::MainWindow(QWidget* parent)
     ToolHolder::readTools();
     setCurrentFile(QString());
 
-    {
-        GCodePropertiesForm(nullptr); // init vars;
-    }
-
     readSettings();
 
-    App::m_mainWindow = this;
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+        //        int i = 0;
+        //        int k = 100;
 
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
-        int i = 0;
-        QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        //                QTimer::singleShot(++i * 100, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-F_Cu.gbr"); });
-        QTimer::singleShot(++i * 100, [this] { loadFile(""
-                                                        "C:/Users/X-Ray/Documents/TopoR/Examples/Example_02/Placement.dxf"
-                                                   // "D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"
-                                                   // "D:/Gerber Test Files/DXF/misc01.dxf"
-                                                   // "D:/ELECTROSTATIC_AMP_A.dxf"
-                                                   // "D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"
-                                                   // "D:/Gerber Test Files/DXF/Complete-Lib-E.dxf"
-                                                   // "D:/T/1mm 30x15x20 V2 trans.dxf" //
-                                               ); });
+        //        QDir dir("D:/Gerber Test Files/MB1180_Gerber_Rev C");
+        //        QStringList listFiles;
+        //        if (dir.exists())
+        //            listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
+        //        for (QString str : listFiles) {
+        //            str = dir.path() + '/' + str;
+        //            qDebug() << __FUNCTION__ << str;
+        //            QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
+        //            break;
+        //        }
+        //        k = 300;
+        //        QTimer::singleShot(++i * k, [this] { selectAll(); });
+        //        QTimer::singleShot(++i * k, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        //        QTimer::singleShot(++i * k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
 
+        // "D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"
+        // "D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf"
+        // "C:/Users/X-Ray/Documents/TopoR/Examples/Example_02/Placement.dxf"
+        // "D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"
+        // "D:/Gerber Test Files/DXF/misc01.dxf"
+        // "D:/ELECTROSTATIC_AMP_A.dxf"
+        // "D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"
+        // "D:/Gerber Test Files/DXF/Complete-Lib-E.dxf"
+        // "D:/T/1mm 30x15x20 V2 trans.dxf" //
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
@@ -155,12 +194,12 @@ MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
-    App::m_mainWindow = nullptr;
+    App::m_app->m_mainWindow = nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin") || maybeSave()) {
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin") || maybeSave()) {
         writeSettings();
         delete m_dockWidget; //->close();
         qApp->closeAllWindows();
@@ -192,7 +231,6 @@ void MainWindow::about()
 void MainWindow::initWidgets()
 {
     createActions();
-    connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
     setUnifiedTitleAndToolBarOnMac(true);
 }
 
@@ -235,6 +273,7 @@ void MainWindow::createActionsFile()
     action->setShortcuts(QKeySequence::New);
     action->setStatusTip(tr("Create a new file"));
     fileToolBar->addAction(action);
+
     // Open
     action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."),
         this, &MainWindow::open);
@@ -255,7 +294,7 @@ void MainWindow::createActionsFile()
     fileToolBar->addAction(action);
     // Save Selected Tool Paths
     action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
-        m_project, &Project::saveSelectedToolpaths);
+        this, &MainWindow::saveSelectedGCodeFiles);
     action->setStatusTip(tr("Save selected toolpaths"));
     fileToolBar->addAction(action);
     // Export PDF
@@ -373,15 +412,15 @@ void MainWindow::createActionsService()
             Marker::get(Marker::Home)->resetPos(false);
             Marker::get(Marker::Zero)->resetPos(false);
         }
-        graphicsView->zoomFit();
+        ui->graphicsView->zoomFit();
     }));
 
     serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { GlobalSettings::setSnap(checked); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { AppSettings::setSnap(checked); }));
     action->setCheckable(true);
 
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) { // (need for debug)
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         serviceMenu->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
@@ -409,26 +448,26 @@ void MainWindow::createActionsZoom()
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     zoomToolBar->setToolTip(tr("Zoom ToolBar"));
     // Fit best
-    auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), graphicsView, &GraphicsView::zoomFit);
+    auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
     vievMenu->addAction(action);
     // 100%
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), graphicsView, &GraphicsView::zoom100);
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
     action->setShortcut(tr("Ctrl+0"));
     vievMenu->addAction(action);
     // Zoom in
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), graphicsView, &GraphicsView::zoomIn);
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
     action->setShortcut(QKeySequence::ZoomIn);
     vievMenu->addAction(action);
     // Zoom out
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), graphicsView, &GraphicsView::zoomOut);
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
     action->setShortcut(QKeySequence::ZoomOut);
     vievMenu->addAction(action);
     // Separator
     zoomToolBar->addSeparator();
     vievMenu->addSeparator();
     // Zoom to selected
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), graphicsView, &GraphicsView::zoomToSelected);
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
     action->setShortcut(QKeySequence("F12"));
     vievMenu->addAction(action);
 }
@@ -512,6 +551,7 @@ void MainWindow::createActionsToolPath()
 
 void MainWindow::createActionsGraphics()
 {
+#ifdef SH_
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     tb->setToolTip(tr("Graphics Items"));
@@ -552,9 +592,9 @@ void MainWindow::createActionsGraphics()
             Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeT) : 0, checked ? action : nullptr);
         });
     }
-    // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] { graphicsView->setPt(Line); });
-    // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] { graphicsView->setPt(ArcPT); });
-    // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] { graphicsView->setPt(Text); });
+    // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] {  ui->graphicsView->setPt(Line); });
+    // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] {  ui->graphicsView->setPt(ArcPT); });
+    // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] {  ui->graphicsView->setPt(Text); });
     tb->addSeparator();
 
     auto ex = [](ClipType type) {
@@ -587,6 +627,99 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
     tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
+#endif
+}
+
+void MainWindow::saveGCodeFile(int id)
+{
+    qDebug() << __FUNCTION__;
+    if (m_project->pinsPlacedMessage())
+        return;
+    auto* file = m_project->file<GCode::File>(id);
+    QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
+        GCode::GCUtils::getLastDir().append(file->shortName()),
+        tr("GCode (*.%1)").arg(AppSettings::gcFileExtension())));
+
+    if (name.isEmpty())
+        return;
+
+    file->save(name);
+}
+
+void MainWindow::saveGCodeFiles()
+{
+    qDebug() << __FUNCTION__;
+}
+
+void MainWindow::saveSelectedGCodeFiles()
+{
+    qDebug() << __FUNCTION__;
+    if (m_project->pinsPlacedMessage())
+        return;
+
+    QVector<GCode::File*> gcFiles(m_project->files<GCode::File>());
+    for (int i = 0; i < gcFiles.size(); ++i) {
+        if (!gcFiles[i]->itemGroup()->isVisible())
+            gcFiles.remove(i--);
+    }
+
+    using Key = QPair<uint, Side>;
+
+    QMap<Key, QList<GCode::File*>> mm;
+    for (GCode::File* file : gcFiles)
+        mm[{ file->getTool().hash(), file->side() }].append(file);
+
+    for (const Key& key : mm.keys()) {
+        QList<GCode::File*> files(mm.value(key));
+        if (files.size() < 2) {
+            for (GCode::File* file : files) {
+                QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
+                if (!name.endsWith("tap"))
+                    name += QStringList({ "_TS", "_BS" })[file->side()];
+                name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(AppSettings::gcFileExtension()));
+                if (name.isEmpty())
+                    return;
+                file->save(name);
+                file->itemGroup()->setVisible(false);
+            }
+        } else {
+            QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
+            if (!name.endsWith("tap"))
+                name += QStringList({ "_TS", "_BS" })[files.first()->side()];
+            name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(AppSettings::gcFileExtension()));
+            if (name.isEmpty())
+                return;
+            QVector<QString> sl;
+            for (int i = 0; i < files.size(); ++i) {
+                GCode::File* file = files[i];
+                file->itemGroup()->setVisible(false);
+                file->initSave();
+                if (i == 0)
+                    file->statFile();
+                file->addInfo(true);
+                file->genGcodeAndTile();
+                if (i == (files.size() - 1))
+                    file->endFile();
+                sl.append(file->gCodeText());
+            }
+            QFile file(name);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                QString str;
+                for (QString& s : sl) {
+                    if (!s.isEmpty())
+                        str.append(s);
+                    if (!str.endsWith('\n'))
+                        str.append("\n");
+                }
+                out << str;
+            }
+            file.close();
+        }
+    }
+
+    if (mm.isEmpty())
+        QMessageBox::information(nullptr, "", QObject::tr("No selected toolpath files."));
 }
 
 void MainWindow::newFile()
@@ -603,7 +736,7 @@ void MainWindow::readSettings()
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
     lastPath = settings.value("lastPath").toString();
-    if (qApp->applicationDirPath().contains("GERBER_X2/bin")) {
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) {
         loadFile(settings.value("project").toString());
     }
     settings.endGroup();
@@ -789,51 +922,23 @@ void MainWindow::editGcFile(GCode::File* file)
     }
 }
 
-void MainWindow::loadFile(const QString& fileName)
-{
-    if (m_project->contains(fileName) != -1
-        && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
-            == QMessageBox::Cancel) {
-        return;
-    }
-    QFile file(fileName);
-    if (!file.exists())
-        return;
-    if (file.open(QFile::ReadOnly)) {
-        lastPath = QFileInfo(fileName).absolutePath();
-        if (fileName.endsWith(".g2g")) {
-            if (closeProject()) {
-                m_project->open(file);
-                setCurrentFile(fileName);
-                QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
-            }
-        } else if (excellonParser->isDrillFile(fileName)) {
-            emit parseExcellonFile(fileName);
-        } else if (dxfParser->isDxfFile(fileName)) {
-            emit parseDxfFile(fileName);
-        } else
-            emit parseGerberFile(fileName);
-        return;
-    }
-    QMessageBox::warning(this, tr("Warning"), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
-}
-
 bool MainWindow::saveFile(const QString& fileName)
 {
-    QFile file(fileName);
-    if (file.open(QFile::WriteOnly)) {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        m_project->save(file);
-        QApplication::restoreOverrideCursor();
+    bool ok;
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    if (ok = m_project->save(fileName); ok) {
         setCurrentFile(fileName);
         statusBar()->showMessage(tr("File saved"), 2000);
-        return true;
+    } else {
+        QMessageBox::warning(this,
+            tr("Warning"),
+            tr("Cannot write file %1:\n%2.")
+                .arg(QDir::toNativeSeparators(fileName))
+                .arg("file.errorString()"));
     }
-    QMessageBox::warning(this,
-        tr("Warning"),
-        tr("Cannot write file %1:\n%2.")
-            .arg(QDir::toNativeSeparators(fileName), file.errorString()));
-    return false;
+    QApplication::restoreOverrideCursor();
+
+    return ok;
 }
 
 void MainWindow::setCurrentFile(const QString& fileName)
@@ -847,15 +952,16 @@ void MainWindow::setCurrentFile(const QString& fileName)
     setWindowFilePath(m_project->name());
 }
 
-void MainWindow::addFileToPro(AbstractFile* file)
+void MainWindow::addFileToPro(FileInterface* file)
 {
+    qDebug() << __FUNCTION__ << file;
     if (m_project->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
     }
     m_project->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    graphicsView->zoomFit();
+    ui->graphicsView->zoomFit();
 }
 
 QString MainWindow::strippedName(const QString& fullFileName)
@@ -903,7 +1009,7 @@ QMenu* MainWindow::createPopupMenu()
     QMenu* menu = QMainWindow::createPopupMenu();
     menu->removeAction(m_dockWidget->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
-    menu->removeAction(treeDockWidget->toggleViewAction());
+    menu->removeAction(ui->treeDockWidget->toggleViewAction());
     menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
     menu->addAction(tr("Icon size = 48"), [this]() { setIconSize(QSize(48, 48)); });
     menu->addAction(tr("Icon size = 72"), [this]() { setIconSize(QSize(72, 72)); });
@@ -916,7 +1022,7 @@ void MainWindow::translate(const QString& locale)
     static QTranslator appTranslator;
 
     const QString trFolder(
-        qApp->applicationDirPath().contains("GERBER_X2/bin")
+        qApp->applicationDirPath().contains("GERBER_X3/bin")
             ? qApp->applicationDirPath() + "/../GGEasy/translations"
             : qApp->applicationDirPath() + "/translations");
 
@@ -928,6 +1034,43 @@ void MainWindow::translate(const QString& locale)
 
     qApp->installTranslator(&qtTranslator);
     qApp->installTranslator(&appTranslator);
+}
+
+void MainWindow::loadFile(const QString& fileName)
+{
+    if (!QFile(fileName).exists())
+        return;
+    lastPath = QFileInfo(fileName).absolutePath();
+    if (fileName.endsWith(".g2g")) {
+        if (closeProject()) {
+            m_project->open(fileName);
+            setCurrentFile(fileName);
+            QTimer::singleShot(100, Qt::CoarseTimer, ui->graphicsView, &GraphicsView::zoomFit);
+        }
+    } else {
+        if (m_project->contains(fileName) != -1
+            && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+                == QMessageBox::Cancel) {
+            return;
+        }
+        qDebug() << __FUNCTION__;
+        for (auto& [type, pair] : App::m_app->m_parserInterfaces) {
+            auto& [parser, pobj] = pair;
+            if (parser->thisIsIt(fileName)) {
+                qDebug() << __FUNCTION__;
+                emit parseFile(fileName, int(type));
+                //emit /**/ (this->*parseSignal[int(type)])(fileName);
+                return;
+            }
+        }
+    }
+
+    /* else if (excellonParser->isDrillFile(fileName)) {
+            emit parseExcellonFile(fileName);
+        } else if (dxfParser->isDxfFile(fileName)) {
+            emit parseDxfFile(fileName);
+        } else
+            emit parseGerberFile(fileName);*/
 }
 
 void MainWindow::open()
@@ -979,8 +1122,7 @@ void MainWindow::changeEvent(QEvent* event)
 {
     // В случае получения события изменения языка приложения
     if (event->type() == QEvent::LanguageChange) {
-
-        retranslateUi(this); // переведём окно заново
+        ui->retranslateUi(this); // переведём окно заново
     }
 }
 

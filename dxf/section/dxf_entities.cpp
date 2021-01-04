@@ -129,13 +129,15 @@ Entity* SectionENTITIES::entityParse(CodeData& code)
     case Entity::TRACE:
     case Entity::UNDERLAY:
     case Entity::VERTEX:
+        break;
     case Entity::VIEWPORT:
+        return new Dummy(sp); //return new Dummy(sp);
     case Entity::WIPEOUT:
     case Entity::XLINE:
         break;
     default:
-        throw QString("Unknown  Entity: %1, %2").arg(key).arg(code.operator QString());
+        throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
     }
-    throw QString("Not implemented: %1, %2").arg(key).arg(code.operator QString());
+    throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }
 }

@@ -18,13 +18,14 @@
 
 #include "drillmodel.h"
 #include "drillpreviewgi.h"
+#ifdef GBR_
 #include "excellon.h"
-#ifdef GERBER
 #include "gbraperture.h"
 #include "gbrfile.h"
 #endif
 #include "graphicsview.h"
 #include "point.h"
+#include "project.h"
 #include "scene.h"
 #include "settings.h"
 #include "tooldatabase/tooldatabase.h"
@@ -59,7 +60,7 @@ Paths offset(const Path& path, double offset, bool fl = false)
 /// \param aperture
 /// \return
 ///
-#ifdef GERBER
+#ifdef GBR_
 QIcon drawApertureIcon(Gerber::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
@@ -115,7 +116,7 @@ DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
 {
-    if (App::m_drillForm) {
+    if (App::m_app->m_drillForm) {
         QMessageBox::critical(nullptr, "Err", "You cannot create class DrillForm more than 2 times!!!");
         exit(1);
     }
@@ -210,12 +211,12 @@ DrillForm::DrillForm(QWidget* parent)
 
     parent->setWindowTitle(ui->label->text());
 
-    App::m_drillForm = this;
+    App::m_app->m_drillForm = this;
 }
 
 DrillForm::~DrillForm()
 {
-    App::m_drillForm = nullptr;
+    App::m_app->m_drillForm = nullptr;
     MySettings settings;
     settings.beginGroup("DrillForm");
     settings.setValue(ui->rbClimb);
@@ -232,7 +233,7 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
-#ifdef GERBER
+#ifdef GBR_
 void DrillForm::setApertures(const Gerber::ApertureMap* value)
 {
     m_type = tAperture;
@@ -292,48 +293,48 @@ void DrillForm::setApertures(const Gerber::ApertureMap* value)
 }
 #endif
 
-void DrillForm::setExcellonTools(const Excellon::Tools& value)
-{
-    m_type = tTool;
-    clear();
+//void DrillForm::setExcellonTools(const Excellon::Tools& value)
+//{
+//    m_type = tTool;
+//    clear();
 
-    m_tools = value;
-    model = new DrillModel(m_type, static_cast<int>(m_tools.size()), this);
+//    m_tools = value;
+//    model = new DrillModel(m_type, static_cast<int>(m_tools.size()), this);
 
-    const Excellon::File* exFile = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
+//    const Excellon::File* exFile = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
 
-    std::map<int, QVector<const Excellon::Hole*>> cacheHoles;
-    for (const Excellon::Hole& hole : *exFile)
-        cacheHoles[hole.state.tCode] << &hole;
+//    std::map<int, QVector<const Excellon::Hole*>> cacheHoles;
+//    for (const Excellon::Hole& hole : *exFile)
+//        cacheHoles[hole.state.tCode] << &hole;
 
-    for (auto [toolNum, diameter] : m_tools) {
-        //for (toolIt = m_tools.cbegin(); toolIt != m_tools.cend(); ++toolIt) {
-        QString name(tr("Tool Ø%1mm").arg(diameter));
-        Row& row = model->appendRow(name, drawDrillIcon(), toolNum); ///->
-        bool isSlot = false;
-        for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
-            if (!hole->state.path.isEmpty())
-                isSlot = true;
+//    for (auto [toolNum, diameter] : m_tools) {
+//        //for (toolIt = m_tools.cbegin(); toolIt != m_tools.cend(); ++toolIt) {
+//        QString name(tr("Tool Ø%1mm").arg(diameter));
+//        Row& row = model->appendRow(name, drawDrillIcon(), toolNum); ///->
+//        bool isSlot = false;
+//        for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
+//            if (!hole->state.path.isEmpty())
+//                isSlot = true;
 
-            auto* item = new DrillPrGI(hole, row);
-            m_giPeview[toolNum].append(QSharedPointer<DrillPrGI>(item));
-            App::scene()->addItem(item);
-        }
-        model->setSlot(model->rowCount() - 1, isSlot); ///<-
-        if (diameter > 0.0)
-            pickUpTool(toolNum, diameter, isSlot);
-    }
+//            auto* item = new DrillPrGI(hole, row);
+//            m_giPeview[toolNum].append(QSharedPointer<DrillPrGI>(item));
+//            App::scene()->addItem(item);
+//        }
+//        model->setSlot(model->rowCount() - 1, isSlot); ///<-
+//        if (diameter > 0.0)
+//            pickUpTool(toolNum, diameter, isSlot);
+//    }
 
-    delete ui->toolTable->model();
-    ui->toolTable->setModel(model);
-    connect(model, &DrillModel::set, header, &Header::set);
-    //    header->onCheckedV(header->checked());
-    ui->toolTable->resizeColumnsToContents();
-    ui->toolTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->toolTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->toolTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    connect(ui->toolTable->selectionModel(), &QItemSelectionModel::currentChanged, this, &DrillForm::on_currentChanged);
-}
+//    delete ui->toolTable->model();
+//    ui->toolTable->setModel(model);
+//    connect(model, &DrillModel::set, header, &Header::set);
+//    //    header->onCheckedV(header->checked());
+//    ui->toolTable->resizeColumnsToContents();
+//    ui->toolTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+//    ui->toolTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//    ui->toolTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+//    connect(ui->toolTable->selectionModel(), &QItemSelectionModel::currentChanged, this, &DrillForm::on_currentChanged);
+//}
 
 void DrillForm::updateFiles()
 {
@@ -346,13 +347,13 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (Excellon::File* exFile : App::project()->files<Excellon::File>()) {
-        ui->cbxFile->addItem(exFile->shortName(), QVariant::fromValue(static_cast<void*>(exFile)));
-        ui->cbxFile->setItemIcon(ui->cbxFile->count() - 1, QIcon::fromTheme("drill-path"));
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-    }
+    //    for (Excellon::File* exFile : App::project()->files<Excellon::File>()) {
+    //        ui->cbxFile->addItem(exFile->shortName(), QVariant::fromValue(static_cast<void*>(exFile)));
+    //        ui->cbxFile->setItemIcon(ui->cbxFile->count() - 1, QIcon::fromTheme("drill-path"));
+    //        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
+    //    }
 
-#ifdef GERBER
+#ifdef GBR_
     for (Gerber::File* gbrFile : App::project()->files<Gerber::File>()) {
         if (gbrFile->flashedApertures()) {
             ui->cbxFile->addItem(gbrFile->shortName(), QVariant::fromValue(static_cast<void*>(gbrFile)));
@@ -376,10 +377,9 @@ void DrillForm::updateFiles()
 
 bool DrillForm::canToShow()
 {
+#ifdef GBR_
     if (App::project()->files<Excellon::File>().size() > 0)
         return true;
-
-#ifdef GERBER
     for (Gerber::File* file : App::project()->files<Gerber::File>())
         if (file->flashedApertures())
             return true;
@@ -581,14 +581,14 @@ void DrillForm::on_pbCreate_clicked()
 
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
-    file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
-#ifdef GERBER
+    file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+#ifdef GBR_
     if (file && file->type() == FileType::Gerber)
         setApertures(static_cast<Gerber::File*>(file)->apertures());
     else
 #endif
-        setExcellonTools(static_cast<Excellon::File*>(file)->tools());
-    header->onChecked();
+        //        setExcellonTools(static_cast<Excellon::File*>(file)->tools());
+        header->onChecked();
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)
