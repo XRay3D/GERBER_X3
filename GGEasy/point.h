@@ -17,7 +17,8 @@
 
 bool updateRect();
 
-class Marker : public QGraphicsItem {
+class Marker : public QGraphicsObject {
+    Q_OBJECT
 public:
     enum Type {
         Zero,
@@ -51,9 +52,10 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
 
-class Pin : public QObject, public QGraphicsItem {
+class Pin : public QGraphicsObject {
+    Q_OBJECT
 public:
-    Pin(QObject* parent);
+    Pin();
     ~Pin() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -85,13 +87,14 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
 
-class LayoutFrames : public QObject, public QGraphicsItem {
+class LayoutFrames : public QGraphicsObject {
+    Q_OBJECT
     QPainterPath m_path;
     QRectF m_rect;
 
 public:
     LayoutFrames();
-    virtual ~LayoutFrames() override;
+    ~LayoutFrames() override;
     int type() const override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

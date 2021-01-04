@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "dxf_text.h"
 #include "dxf_file.h"
+#include "settings.h"
 #include "tables/dxf_style.h"
 
 #include <QFont>
@@ -89,27 +90,71 @@ void Text::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+QDebug operator<<(QDebug debug, const QFontMetricsF& fm)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "FM(";
+    debug.nospace() << "\n\tascent: " << fm.ascent();
+    debug.nospace() << "\n\taverageCharWidth: " << fm.averageCharWidth();
+    debug.nospace() << "\n\tcapHeight: " << fm.capHeight();
+    debug.nospace() << "\n\tdescent: " << fm.descent();
+    debug.nospace() << "\n\theight: " << fm.height();
+    debug.nospace() << "\n\tleading: " << fm.leading();
+    debug.nospace() << "\n\tlineSpacing: " << fm.lineSpacing();
+    debug.nospace() << "\n\tlineWidth: " << fm.lineWidth();
+    debug.nospace() << "\n\tmaxWidth: " << fm.maxWidth();
+    debug.nospace() << "\n\tminLeftBearing: " << fm.minLeftBearing();
+    debug.nospace() << "\n\tminRightBearing: " << fm.minRightBearing();
+    debug.nospace() << "\n\toverlinePos: " << fm.overlinePos();
+    debug.nospace() << "\n\tstrikeOutPos: " << fm.strikeOutPos();
+    debug.nospace() << "\n\tunderlinePos: " << fm.underlinePos();
+    debug.nospace() << "\n\txHeight: " << fm.xHeight();
+    debug.nospace() << ')';
+    return debug;
+}
+
 GraphicObject Text::toGo() const
 {
-    if (!sp->file->styles().contains(textStyleName))
-        return { sp->file, this, {}, {} };
+    //    qDebug() << __FUNCTION__ << data.size();
+    //    for (auto& code : data)
+    //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
-    QPainterPath path;
-
-    Style* style = sp->file->styles()[textStyleName];
-
-    QFont font(style->font);
-
-    QFontMetricsF fmf(font);
+    double ascent = 0.0;
     double scaleX = 0.0;
     double scaleY = 0.0;
-    scaleX = scaleY = style->fixedTextHeight / (fmf.height());
 
-    QSizeF size(fmf.size(Qt::TextSingleLine, text));
-
+    QFont font;
     QPointF offset;
-    offset.ry() -= fmf.descent();
-
+    QSizeF size;
+    if (sp->file->styles().contains(textStyleName)) {
+        Style* style = sp->file->styles()[textStyleName];
+        font = style->font;
+        if (AppSettings::dxfOverrideFonts()) {
+            font.setFamily(AppSettings::dxfDefaultFont());
+            font.setBold(AppSettings::dxfBoldFont());
+            font.setItalic(AppSettings::dxfItalicFont());
+        }
+        QFontMetricsF fmf(font);
+        scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fmf.height();
+        offset.ry() -= fmf.descent();
+        ascent = fmf.ascent();
+        size = fmf.size(0, text);
+        qDebug() << __FUNCTION__ << fmf;
+    } else {
+        font.setFamily(AppSettings::dxfDefaultFont());
+        font.setPointSize(100);
+        if (AppSettings::dxfOverrideFonts()) {
+            font.setBold(AppSettings::dxfBoldFont());
+            font.setItalic(AppSettings::dxfItalicFont());
+        }
+        QFontMetricsF fmf(font);
+        scaleX = scaleY = textHeight / fmf.height();
+        offset.ry() -= fmf.descent();
+        ascent = fmf.ascent();
+        size = fmf.size(0, text);
+        qDebug() << __FUNCTION__ << fmf;
+    }
+    qDebug() << __FUNCTION__ << scaleX << scaleY;
     switch (horizontalJustType) {
     case Left: // 0
         offset.rx();
@@ -134,10 +179,10 @@ GraphicObject Text::toGo() const
     case Bottom: // 1
         break;
     case MiddleV: // 2
-        offset.ry() += fmf.ascent() / 2;
+        offset.ry() += ascent / 2;
         break;
     case Top: // 3
-        offset.ry() += fmf.ascent();
+        offset.ry() += ascent;
         break;
     }
 
@@ -146,6 +191,7 @@ GraphicObject Text::toGo() const
     if (textGenerationFlag & MirroredInY)
         scaleY = -scaleY;
 
+    QPainterPath path;
     path.addText(offset, font, text);
 
     QMatrix m;
@@ -165,5 +211,4 @@ GraphicObject Text::toGo() const
 
     return { sp->file, this, {}, paths };
 }
-
 }

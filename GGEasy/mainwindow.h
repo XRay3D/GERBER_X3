@@ -12,21 +12,18 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
+#include "interfaces/file.h"
+#include "interfaces/parser.h"
+
 #include "recent.h"
-#include "ui_mainwindow.h"
+
+#include <QDockWidget>
+#include <QMainWindow>
 #include <QStack>
 #include <QThread>
 #include <QTranslator>
 
-namespace Gerber {
-class Parser;
-}
-namespace Excellon {
-class Parser;
-}
-namespace Dxf {
-class Parser;
-}
 namespace GCode {
 class File;
 }
@@ -34,12 +31,18 @@ class File;
 class DockWidget;
 class Project;
 class QProgressDialog;
+class QToolBar;
 class Scene;
 
-class MainWindow : public QMainWindow, private Ui::MainWindow {
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow {
     Q_OBJECT
-    friend void FileTreeView::on_doubleClicked(const QModelIndex&);
+    //    friend void FileTreeView::on_doubleClicked(const QModelIndex&);
     friend class Recent;
+    friend class Project;
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -51,20 +54,21 @@ public:
     DockWidget* dockWidget() { return m_dockWidget; }
 
     static void translate(const QString& locale);
+    void loadFile(const QString& fileName);
 
 signals:
-    void parseGerberFile(const QString& filename);
-    void parseExcellonFile(const QString& filename);
-    void parseDxfFile(const QString& filename);
+    void parseFile(const QString& filename, int type);
+
+private slots:
+    void fileError(const QString& fileName, const QString& error);
+    void fileProgress(const QString& fileName, int max, int value);
+    void addFileToPro(FileInterface* file);
 
 private:
+    Ui::MainWindow* ui;
     DockWidget* m_dockWidget = nullptr;
     Recent recentFiles;
     Recent recentProjects;
-
-    Gerber::Parser* gerberParser;
-    Excellon::Parser* excellonParser;
-    Dxf::Parser* dxfParser;
 
     QAction* m_closeAllAct = nullptr;
 
@@ -86,8 +90,6 @@ private:
 
     QMap<QString, QProgressDialog*> m_progressDialogs;
 
-    //file
-
     void open();
     bool save();
     bool saveAs();
@@ -96,8 +98,7 @@ private:
     bool closeProject();
     template <class T>
     void createDockWidget(/*QWidget* dwContent,*/ int type);
-    void fileError(const QString& fileName, const QString& error);
-    void fileProgress(const QString& fileName, int max, int value);
+
     void initWidgets();
 
     void printDialog();
@@ -117,6 +118,10 @@ private:
     void createActionsZoom();
     void createActionsToolPath();
     void createActionsGraphics();
+    // save GCode
+    void saveGCodeFile(int id);
+    void saveGCodeFiles();
+    void saveSelectedGCodeFiles();
 
     QString strippedName(const QString& fullFileName);
 
@@ -127,12 +132,9 @@ private:
     void editGcFile(GCode::File* file);
 
 public:
-    void loadFile(const QString& fileName);
-
 private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
-    void addFileToPro(AbstractFile* file);
 
     // QWidget interface
 protected:

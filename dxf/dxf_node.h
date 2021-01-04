@@ -13,14 +13,14 @@
 *******************************************************************************/
 #pragma once
 
-#include "abstractnode.h"
+#include "interfaces/node.h"
 
 namespace Dxf {
 
 class File;
 class Layer;
 
-class Node : public AbstractNode {
+class Node : public NodeInterface {
     mutable bool header = true;
     mutable bool layer = true;
 
@@ -30,14 +30,14 @@ public:
     explicit Node(int id);
     ~Node() override = default;
 
-    // AbstractNode interface
+    // NodeInterface interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu* menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTreeView* tv) const override;
 };
 
-class NodeLayer : public AbstractNode {
+class NodeLayer : public NodeInterface {
     friend class Node;
     const QString name;
     Layer* const layer;
@@ -46,11 +46,11 @@ public:
     explicit NodeLayer(const QString& name, Layer* layer);
     ~NodeLayer() override = default;
 
-    // AbstractNode interface
+    // NodeInterface interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu* menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTreeView* tv) const override;
 };
 
 }

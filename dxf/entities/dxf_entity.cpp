@@ -163,13 +163,13 @@ QColor Entity::color() const
 void Entity::attachToLayer(GraphicObject&& go) const
 {
     if (sp == nullptr)
-        throw QString("SectionParser is null!");
+        throw DxfObj::tr("SectionParser is null!");
     else if (sp->file == nullptr)
-        throw QString("File in SectionParser is null!");
+        throw DxfObj::tr("File in SectionParser is null!");
     else if (sp->file->layer(layerName))
         sp->file->layer(layerName)->addGraphicObject(std::move(go));
     else {
-        throw QString("Layer '%1' not found in file!").arg(layerName);
+        throw DxfObj::tr("Layer '%1' not found in file!").arg(layerName);
     }
 }
 

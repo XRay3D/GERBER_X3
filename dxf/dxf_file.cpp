@@ -20,18 +20,18 @@
 #include "section/dxf_headerparser.h"
 #include "section/dxf_sectionparser.h"
 #include "section/dxf_tables.h"
+
+#include "entities/dxf_entity.h"
+#include "tables/dxf_layer.h"
+
 //#include "section/dxf_classes.h"
 //#include "section/dxf_objects.h"
 //#include "section/dxf_thumbnailimage.h"
-#include "gccreator.h" //////////////////////
+//#include "gccreator.h" //////////////////////
 
-#include "entities/dxf_entity.h"
-
-#include "tables/dxf_layer.h"
-
-#include "gi/datapathitem.h"
-#include "gi/datasoliditem.h"
-#include "gi/gcpathitem.h"
+#include "datapathitem.h"
+#include "datasoliditem.h"
+#include "gcpathitem.h"
 #include "settings.h"
 
 #include <QDebug>
@@ -41,6 +41,7 @@ namespace Dxf {
 
 File::File()
 {
+    m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
         { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
@@ -55,14 +56,14 @@ File::~File()
         delete v;
 }
 
-void File::setItemType(ItemsType type)
+void File::setItemType(int type)
 {
     m_itemsType = type;
     for (auto [name, layer] : m_layers)
-        layer->setItemsType(m_itemsType);
+        layer->setItemsType(ItemsType(m_itemsType));
 }
 
-ItemsType File::itemsType() const { return m_itemsType; }
+int File::itemsType() const { return m_itemsType; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
@@ -123,6 +124,13 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
+void File::initFrom(FileInterface* file)
+{
+    setFileIndex(file->fileIndex());
+    for (auto ig : itemGroups())
+        ig->addToScene();
+}
+
 Layer* File::layer(const QString& name)
 {
     if (m_layers.contains(name)) {
@@ -131,11 +139,6 @@ Layer* File::layer(const QString& name)
         return m_layers[name] = new Layer(m_sections.begin()->second, name);
     }
     return nullptr;
-}
-
-ItemGroup* File::itemGroup() const
-{
-    return m_itemGroups.first();
 }
 
 FileType File::type() const { return FileType::Dxf; }

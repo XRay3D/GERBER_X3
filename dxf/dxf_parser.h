@@ -13,7 +13,11 @@
 *******************************************************************************/
 #pragma once
 
-#include "parser.h"
+#include "app.h"
+
+#include "interfaces/parser.h"
+#include "settings.h"
+
 #include <QObject>
 #include <QStack>
 
@@ -21,16 +25,36 @@ namespace Dxf {
 
 class File;
 
-class Parser : public FileParser {
+class Parser : public QObject, public ParserInterface {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
+    Q_INTERFACES(ParserInterface)
+
 public:
     explicit Parser(QObject* parent = nullptr);
-    // FileParser interface
-    AbstractFile* parseFile(const QString& fileName) override;
-    bool isDxfFile(const QString& fileName);
+
+    // ParserInterface interface
+    bool thisIsIt(const QString& fileName) override;
+    QObject* getObject() override;
+    int type() const override;
+    NodeInterface* createNode(FileInterface* file) override;
+    std::shared_ptr<FileInterface> createFile() override;
+    void setupInterface(App*, AppSettings* s) override;
+    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
+    void updateFileModel(FileInterface* file) override;
+
+public slots:
+    FileInterface* parseFile(const QString& fileName, int type) override;
+
+signals:
+    void fileReady(FileInterface* file) override;
+    void fileProgress(const QString& fileName, int max, int value) override;
+    void fileError(const QString& fileName, const QString& error) override;
 
 private:
-    File* dxfFile() { return reinterpret_cast<File*>(m_file); };
+    File* dxfFile();
+    App app;
+    AppSettings appSettings;
 };
 
 }

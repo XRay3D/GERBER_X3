@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>1600</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -60,7 +60,7 @@
    <property name="minimumSize">
     <size>
      <width>100</width>
-     <height>111</height>
+     <height>119</height>
     </size>
    </property>
    <property name="features">
@@ -112,7 +112,7 @@
   <customwidget>
    <class>FileTreeView</class>
    <extends>QTreeView</extends>
-   <header>filetree/treeview.h</header>
+   <header location="global">treeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

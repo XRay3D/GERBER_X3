@@ -12,12 +12,15 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "abstractnode.h"
-#include <QObject>
+
 #include "gbrfile.h"
 
+#include "interfaces/node.h"
+
+#include <QObject>
+
 namespace Gerber {
-class Node : public QObject, public AbstractNode {
+class Node : public QObject, public NodeInterface {
     Q_OBJECT
 
 public:
@@ -25,11 +28,11 @@ public:
     ~Node() override;
 
 public:
-    // AbstractNode interface
+    // NodeInterface interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu* menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTreeView* tv) const override;
 
     static QTimer* decorationTimer();
 

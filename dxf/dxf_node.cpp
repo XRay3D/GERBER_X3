@@ -21,12 +21,12 @@
 #include "tables/dxf_layermodel.h"
 
 #include "scene.h"
+#include "treeview.h"
+
 #include <QColorDialog>
 #include <QIcon>
 #include <QMenu>
 #include <QtWidgets>
-#include <filetree/treeview.h>
-#include <forms/drillform/drillform.h>
 
 #include "leakdetector.h"
 
@@ -189,10 +189,9 @@ protected:
 File* Node::dxfFile() const { return static_cast<File*>(file()); }
 
 Node::Node(int id)
-    : AbstractNode(id)
+    : NodeInterface(id)
 {
-    for (auto ig : dxfFile()->itemGroups())
-        ig->addToScene();
+    file()->addToScene();
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -219,7 +218,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         switch (role) {
         case Qt::EditRole:
             qDebug() << __FUNCTION__ << role << value;
-            dxfFile()->setItemType(static_cast<ItemsType>(value.toInt()));
+            dxfFile()->setItemType(value.toInt());
             emit App::fileModel()->dataChanged(childItems.first()->index(index.column()), childItems.last()->index(index.column()), { role });
             return true;
         default:
@@ -294,16 +293,16 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Node::menu(QMenu* menu, FileTreeView* tv) const
+void Node::menu(QMenu& menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTreeView::hideOther);
-    menu->addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
+    menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTreeView::hideOther);
+    menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
         auto dialog = new SourceDialog(m_id, tv);
         dialog->exec();
         delete dialog;
     });
-    menu->addSeparator();
-    menu->addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Colorize"), [this] {
+    menu.addSeparator();
+    menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Colorize"), [this] {
         const int count = childCount();
         for (int row = 0; row < count; ++row) {
             const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
@@ -314,20 +313,20 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
         }
     });
 
-    menu->addSeparator();
+    menu.addSeparator();
     if (layer)
-        menu->addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
+        menu.addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
             auto dialog = new Dialog(static_cast<File*>(file()), layer, tv);
             dialog->show();
         });
     if (header)
-        menu->addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
+        menu.addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
             auto tw = new TreeWidget(static_cast<File*>(file()), header, tv);
             tw->show();
         });
 
-    menu->addSeparator();
-    menu->addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTreeView::closeFile);
+    menu.addSeparator();
+    menu.addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTreeView::closeFile);
 }
 
 ///////////////////////////////////
@@ -335,7 +334,7 @@ void Node::menu(QMenu* menu, FileTreeView* tv) const
 ///// \param id
 /////
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
-    : AbstractNode(-1, -1)
+    : NodeInterface(-1, -1)
     , name(name)
     , layer(layer)
 {
@@ -413,9 +412,9 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void NodeLayer::menu(QMenu* menu, FileTreeView* tv) const
+void NodeLayer::menu(QMenu& menu, FileTreeView* tv) const
 {
-    menu->addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
+    menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(layer->color());
         if (cd.exec()) {

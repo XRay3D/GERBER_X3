@@ -15,6 +15,7 @@
 *******************************************************************************/
 #include "dxf_parser.h"
 #include "dxf_file.h"
+#include "dxf_node.h"
 
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
@@ -26,15 +27,22 @@
 
 #include "tables/dxf_layer.h"
 
+#include "treeview.h"
+
+#include <QMenu>
+#include <QMessageBox>
+
 namespace Dxf {
 
 Parser::Parser(QObject* parent)
-    : FileParser(parent)
+    : QObject(parent)
 {
 }
 
-AbstractFile* Parser::parseFile(const QString& fileName)
+FileInterface* Parser::parseFile(const QString& fileName, int type_)
 {
+    if (type_ != type())
+        return nullptr;
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return nullptr;
@@ -130,26 +138,28 @@ AbstractFile* Parser::parseFile(const QString& fileName)
     } catch (const QString& wath) {
         qWarning() << "exeption QString:" << wath;
         //emit fileProgress(m_file->shortName(), 1, 1);
-        emit fileError( QFileInfo(fileName).fileName() , wath);
+        emit fileError(QFileInfo(fileName).fileName(), wath);
         delete m_file;
         return nullptr;
     } catch (const std::exception& e) {
         qWarning() << "exeption:" << e.what();
         //emit fileProgress(m_file->shortName(), 1, 1);
-        emit fileError( QFileInfo(fileName).fileName() , "Unknown Error! " + QString(e.what()));
+        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
         delete m_file;
         return nullptr;
     } catch (...) {
         qWarning() << "exeption:" << errno;
         //emit fileProgress(m_file->shortName(), 1, 1);
-        emit fileError( QFileInfo(fileName).fileName() , "Unknown Error! " + QString::number(errno));
+        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
         delete m_file;
         return nullptr;
     }
     return m_file;
 }
 
-bool Parser::isDxfFile(const QString& fileName)
+File* Parser::dxfFile() { return reinterpret_cast<File*>(m_file); }
+
+bool Parser::thisIsIt(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -173,4 +183,56 @@ bool Parser::isDxfFile(const QString& fileName)
     } while (false);
     return false;
 }
+
+QObject* Parser::getObject() { return this; }
+
+int Parser::type() const { return int(FileType::Dxf); }
+
+NodeInterface* Parser::createNode(FileInterface* file) { return new Node(file->id()); }
+
+std::shared_ptr<FileInterface> Parser::createFile() { return std::make_shared<File>(); }
+
+void Parser::setupInterface(App* a, AppSettings* s)
+{
+    app.setApp(a);
+    appSettings.setApp(s);
+}
+
+void Parser::createMainMenu(QMenu& menu, FileTreeView* tv)
+{
+    menu.addAction(QIcon::fromTheme("document-close"), tr("&Close All Files"), [tv] {
+        if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            tv->closeFiles();
+    });
+}
+
+void Parser::updateFileModel(FileInterface* file)
+{
+    const auto fm = App::fileModel();
+    const QModelIndex& fileIndex(file->fileIndex());
+    const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
+    qDebug() << __FUNCTION__ << (index == fileIndex);
+    // clean before insert new layers
+    if (int count = fm->getItem(fileIndex)->childCount(); count) {
+        fm->beginRemoveRows_(index, 0, count - 1);
+        auto item = fm->getItem(index);
+        do {
+            item->remove(--count);
+        } while (count);
+        fm->endRemoveRows_();
+    }
+    Dxf::Layers layers;
+    for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
+        qDebug() << __FUNCTION__ << name << layer;
+        if (!layer->isEmpty())
+            layers[name] = layer;
+    }
+    fm->beginInsertRows_(index, 0, int(layers.size() - 1));
+    for (auto& [name, layer] : layers) {
+        qDebug() << __FUNCTION__ << name << layer;
+        fm->getItem(index)->append(new Dxf::NodeLayer(name, layer));
+    }
+    fm->endInsertRows_();
+}
+
 }

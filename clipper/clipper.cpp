@@ -46,10 +46,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#ifndef GTE
-#include "gcode.h"
+//#ifndef GTE
+//#include "gcode.h"
+//#endif
 #include "settings.h"
-#endif
 #include <ostream>
 #include <stdexcept>
 #include <vector>
@@ -1627,13 +1627,13 @@ bool Clipper::ExecuteInternal()
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
-#ifndef GTE
-        GCode::Creator::progress(static_cast<int>(m_Scanbeam.size()));
-#endif
+//#ifndef GTE
+//        GCode::Creator::progress(static_cast<int>(m_Scanbeam.size()));
+//#endif
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-#ifndef GTE
-            GCode::Creator::progress();
-#endif
+//#ifndef GTE
+//            GCode::Creator::progress();
+//#endif
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {
@@ -3901,7 +3901,7 @@ void ClipperOffset::DoOffset(double delta)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
 #ifndef GTE
-        steps = GlobalSettings::gbrGcCircleSegments(delta * dScale);
+        steps = AppSettings::gbrGcCircleSegments(delta * dScale);
 #else
         steps = 36;
 #endif

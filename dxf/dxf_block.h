@@ -33,16 +33,16 @@ struct Block {
     {
         //        switch (static_cast<FileType>(type)) {
         //        case FileType::Gerber:
-        //            file = QSharedPointer<AbstractFile>(new Gerber::File());
+        //            file = QSharedPointer<FileInterface>(new Gerber::File());
         //            break;
         //        case FileType::Excellon:
-        //            file = QSharedPointer<AbstractFile>(new Excellon::File());
+        //            file = QSharedPointer<FileInterface>(new Excellon::File());
         //            break;
         //        case FileType::GCode:
-        //            file = QSharedPointer<AbstractFile>(new GCode::File());
+        //            file = QSharedPointer<FileInterface>(new GCode::File());
         //            break;
         //        case FileType::Dxf:
-        //            file = QSharedPointer<AbstractFile>(new Dxf::File());
+        //            file = QSharedPointer<FileInterface>(new Dxf::File());
         //            break;
         //        }
         //        stream >> *file;

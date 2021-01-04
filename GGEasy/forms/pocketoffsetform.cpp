@@ -118,7 +118,7 @@ void PocketOffsetForm::createFile()
 
     Paths wPaths;
     Paths wRawPaths;
-    AbstractFile const* file = nullptr;
+    FileInterface const* file = nullptr;
     bool skip { true };
 
     for (auto* item : App::scene()->selectedItems()) {

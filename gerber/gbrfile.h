@@ -16,13 +16,15 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-#include "abstractfile.h"
+#include "interfaces/file.h"
+#include "itemgroup.h"
+
 #include <QDebug>
 #include <forward_list>
-#include <gi/itemgroup.h>
+
 namespace Gerber {
 
-class File : public AbstractFile, public QVector<GraphicObject> {
+class File : public FileInterface, QVector<GraphicObject> {
     friend class Parser;
 
 public:
@@ -45,16 +47,15 @@ public:
         ApPaths,
         Components,
     };
-    void setItemType(ItemsType type);
-    ItemsType itemsType() const { return m_itemsType; }
+    void setItemType(int type) override;
+    int itemsType() const override;
+    void initFrom(FileInterface* file) override;
 
     FileType type() const override { return FileType::Gerber; }
 
-    ItemGroup* itemGroup(ItemsType type) const;
-    ItemGroup* itemGroup() const override;
-
     void addToScene() const;
-    void setColor(const QColor& color);
+    void setColor(const QColor& color) override;
+
 
 protected:
     Paths merge() const override;
@@ -63,7 +64,6 @@ private:
     QList<Component> m_components;
 
     ApertureMap m_apertures;
-    ItemsType m_itemsType = NullType;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
 
@@ -74,12 +74,12 @@ private:
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;
 
-    // AbstractFile interface
+    // NodeInterface interface
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
-    // AbstractFile interface
+    // NodeInterface interface
 public:
     void createGi() override;
     const QList<Component>& components() const;

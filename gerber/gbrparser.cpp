@@ -14,13 +14,20 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrparser.h"
+#include "gbrattraperfunction.h"
 #include "gbrattrfilefunction.h"
+#include "gbrnode.h"
+
 #include "settings.h"
+#include "treeview.h"
+
 #include <QDateTime>
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
+#include <QMenu>
+#include <QMessageBox>
 #include <QMutex>
 #include <QTextCodec>
 #include <QTextStream>
@@ -61,12 +68,14 @@ namespace Gerber {
 const int id1 = qRegisterMetaType<Gerber::File*>("G::GFile*");
 
 Parser::Parser(QObject* parent)
-    : FileParser(parent)
+    : QObject(parent)
 {
 }
 
-AbstractFile* Parser::parseFile(const QString& fileName)
+FileInterface* Parser::parseFile(const QString& fileName, int type_)
 {
+    if (type_ != type())
+        return nullptr;
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
@@ -76,6 +85,43 @@ AbstractFile* Parser::parseFile(const QString& fileName)
     return m_file;
 }
 
+bool Parser::thisIsIt(const QString& fileName)
+{
+    QFile file(fileName);
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream in(&file);
+        static const QRegExp match(QStringLiteral("%FS[LTD]?[AI]X\\d{2}Y\\d{2}\\*%"));
+        QString line;
+        while (in.readLineInto(&line)) {
+            if (line.startsWith('%') && match.exactMatch(line))
+                return true;
+        }
+    }
+    return false;
+}
+
+QObject* Parser::getObject() { return this; }
+
+int Parser::type() const { return int(FileType::Gerber); }
+
+NodeInterface* Parser::createNode(FileInterface* file) { return new Node(file->id()); }
+
+std::shared_ptr<FileInterface> Parser::createFile() { return std::make_shared<File>(); }
+
+void Parser::setupInterface(App* a, AppSettings* s)
+{
+    app.setApp(a);
+    appSettings.setApp(s);
+}
+
+void Parser::createMainMenu(QMenu& menu, FileTreeView* tv)
+{
+    menu.addAction(QIcon::fromTheme("document-close"), tr("&Close All Files"), [tv] {
+        if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            tv->closeFiles();
+    });
+}
+
 void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 {
     static QMutex mutex;
@@ -83,13 +129,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     try {
         QElapsedTimer t;
         t.start();
-
-        static const QRegExp match(QStringLiteral("FS[L|T|D]?[A|I]X\\d{2}Y\\d{2}\\*"));
-        if (match.indexIn(gerberLines) == -1) {
-            emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
-            mutex.unlock();
-            return;
-        }
 
         reset(fileName);
 
@@ -173,12 +212,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         if (file()->isEmpty()) {
             delete m_file;
         } else {
-            if (attFile.fileFunction && attFile.fileFunction->side_() == Attr::AbstrFileFunc::Side::Bot) {
+            if (attFile.m_function && attFile.m_function->side_() == Attr::AbstrFileFunc::Side::Bot) {
                 m_file->setSide(Bottom);
             } else if (m_file->shortName().contains("bot", Qt::CaseInsensitive))
                 m_file->setSide(Bottom);
             else if (m_file->shortName().contains(".gb", Qt::CaseInsensitive) && !m_file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
                 m_file->setSide(Bottom);
+
+            if (attFile.m_function && attFile.m_function->function == Attr::File::Profile)
+                file()->setItemType(File::ApPaths);
+
             m_file->mergedPaths();
             file()->m_components = components.values();
             m_file->groupedPaths();
@@ -201,9 +244,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     } catch (...) {
         //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
         //        qWarning() << "exeption S:" << errStr;
-        //        emit fileError("", m_file->shortName() + "\n" + errStr);
+        //        emit  fileError("", m_file->shortName() + "\n" + errStr);
         //        file()->clear();
-        //        emit fileProgress(m_file->shortName(), 1, 1);
+        //        emit  fileProgress(m_file->shortName(), 1, 1);
     }
     mutex.unlock();
 }
@@ -434,7 +477,7 @@ void Parser::addPath()
         break;
     }
     if (aperFunctionMap.contains(m_state.aperture())
-        && aperFunctionMap[m_state.aperture()] == Attr::AperFunction::ComponentOutline) {
+        && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
         components[refDes].footprint = m_path;
     }
     resetStep();
@@ -464,11 +507,11 @@ void Parser::addFlash()
         break;
     }
     if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
-        switch (aperFunctionMap[m_state.aperture()]) {
-        case Attr::AperFunction::ComponentPin:
+        switch (aperFunctionMap[m_state.aperture()].m_function->function) {
+        case Attr::Aperture::ComponentPin:
             components[refDes].pins.last().pos = m_state.curPos();
             break;
-        case Attr::AperFunction::ComponentMain:
+        case Attr::Aperture::ComponentMain:
             components[refDes].referencePoint = m_state.curPos();
             break;
         }
@@ -491,7 +534,7 @@ void Parser::reset(const QString& fileName)
     ///////////////
     components.clear();
     refDes.clear();
-    aperFunction = -1;
+    attAper = {};
     aperFunctionMap.clear();
 }
 
@@ -529,7 +572,7 @@ Path Parser::arc(const Point64& center, double radius, double start, double stop
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
 
-    const int intSteps = GlobalSettings::gbrGcCircleSegments(radius * dScale); //MinStepsPerCircle;
+    const int intSteps = AppSettings::gbrGcCircleSegments(radius * dScale); //MinStepsPerCircle;
 
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * M_PI;
@@ -659,8 +702,8 @@ bool Parser::parseAperture(const QString& gLine)
             //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file()->format())));
             break;
         }
-        if (aperFunction > -1)
-            aperFunctionMap[aperture] = aperFunction;
+        if (attAper.m_function)
+            aperFunctionMap[aperture] = attAper;
         return true;
     }
     return false;
@@ -811,73 +854,71 @@ bool Parser::parseAttributes(const QString& gLine)
             attFile.parse(matchAttr.cap(3).split(','));
             break;
         case Attr::Command::TA:
+            attAper.parse(matchAttr.cap(3).split(','));
             break;
-            {
-                QStringList sl(matchAttr.cap(3).split(','));
-                int index = Attr::Aperture::value(sl.first());
-                switch (index) {
-                case Attr::Aperture::AperFunction:
-                    if (sl.size() > 1) {
-                        switch (int key = Attr::AperFunction::value(sl[1])) {
-                        case Attr::AperFunction::ComponentMain:
-                        case Attr::AperFunction::ComponentOutline:
-                        case Attr::AperFunction::ComponentPin:
-                            aperFunction = key;
-                            break;
-                        default:
-                            aperFunction = -1;
-                        }
-                    }
-                    break;
-                case Attr::Aperture::DrillTolerance:
-                case Attr::Aperture::FlashText:
-                default:
+            //            break;
+            //            {
+            //                QStringList sl(matchAttr.cap(3).split(','));
+            //                int index = Attr::Aperture::value(sl.first());
+            //                switch (index) {
+            //                case Attr::Aperture::AperFunction:
+            //                    if (sl.size() > 1) {
+            //                        switch (int key = Attr::AperFunction::value(sl[1])) {
+            //                        case Attr::AperFunction::ComponentMain:
+            //                        case Attr::AperFunction::ComponentOutline:
+            //                        case Attr::AperFunction::ComponentPin:
+            //                            aperFunction = key;
+            //                            break;
+            //                        default:
+            //                            aperFunction = -1;
+            //                        }
+            //                    }
+            //                    break;
+            //                case Attr::Aperture::DrillTolerance:
+            //                case Attr::Aperture::FlashText:
+            //                default:
 
-                    ;
-                }
-                //apertureAttributesStrings.append(matchAttr.cap(2));
-            }
-            break;
-        case Attr::Command::TO:
-            break;
-            {
-                QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
-                switch (int index = Component::value1(sl.first()); index) {
-                case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
-                    break;
-                case Component::P:
-                    components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
-                    break;
-                case Component::C:
-                    switch (int key = Component::value2(sl.first())) {
-                    case Component::Rot:
-                    case Component::Mfr:
-                    case Component::MPN:
-                    case Component::Val:
-                    case Component::Mnt:
-                    case Component::Ftp:
-                    case Component::PgN:
-                    case Component::Hgt:
-                    case Component::LbN:
-                    case Component::LbD:
-                    case Component::Sup:
-                        components[refDes].setData(key, sl);
-                        break;
-                    default:
-                        static const QRegExp rx("(\\\\[0-9a-fA-F]{4})");
-                        int pos = 0;
-                        while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
-                            sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
-                        }
-                        refDes = sl.last();
-                        components[refDes].refdes = refDes;
-                    }
+            //                    ;
+            //                }
+            //                //apertureAttributesStrings.append(matchAttr.cap(2));
+            //            }
+        case Attr::Command::TO: {
+            QStringList sl(matchAttr.cap(3).remove('"').split(',')); // remove symbol "
+            switch (int index = Component::value1(sl.first()); index) {
+            case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
+                break;
+            case Component::P:
+                components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
+                break;
+            case Component::C:
+                switch (int key = Component::value2(sl.first())) {
+                case Component::Rot:
+                case Component::Mfr:
+                case Component::MPN:
+                case Component::Val:
+                case Component::Mnt:
+                case Component::Ftp:
+                case Component::PgN:
+                case Component::Hgt:
+                case Component::LbN:
+                case Component::LbD:
+                case Component::Sup:
+                    components[refDes].setData(key, sl);
                     break;
                 default:
-                    qDebug() << __FUNCTION__ << gLine << matchAttr.capturedTexts();
+                    static const QRegExp rx("(\\\\[0-9a-fA-F]{4})");
+                    int pos = 0;
+                    while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
+                        sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
+                    }
+                    refDes = sl.last();
+                    components[refDes].refdes = refDes;
                 }
+                break;
+            default:
+                qDebug() << __FUNCTION__ << gLine << matchAttr.capturedTexts();
             }
-            break;
+        } break;
         case Attr::Command::TD:
             break;
             {
@@ -886,7 +927,7 @@ bool Parser::parseAttributes(const QString& gLine)
                     AttributeName
                 };
                 refDes.clear();
-                aperFunction = -1;
+                attAper = {};
             }
             break;
         }

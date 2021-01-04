@@ -12,7 +12,10 @@
 *                                                                              *
 *******************************************************************************/
 #include "recent.h"
+
 #include "mainwindow.h"
+
+#include <QMenu>
 #include <QSettings>
 
 Recent::Recent(MainWindow* mainWindow, QString&& recentFilesKey)

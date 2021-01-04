@@ -16,11 +16,13 @@
 #include "formsutil.h"
 #include "errordialog.h"
 
-#ifdef GERBER
+#ifdef GBR_
 #include "gbrfile.h"
 #endif
-#include "gcode.h"
-#include "gi/erroritem.h"
+
+#include "gcode/gcode.h"
+
+#include "erroritem.h"
 #include "project.h"
 #include "qprogressdialog.h"
 #include "scene.h"
@@ -146,9 +148,9 @@ void FormsUtil::timerEvent(QTimerEvent* event)
 void FormsUtil::addUsedGi(GraphicsItem* gi)
 {
     if (gi->file()) {
-        AbstractFile const* file = gi->file();
+        FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
-#ifdef GERBER
+#ifdef GBR_
             m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].append(gi->id());
 #endif
         } else {

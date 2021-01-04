@@ -14,7 +14,7 @@
 #include "errordialog.h"
 #include "ui_errordialog.h"
 
-#include "gi/erroritem.h"
+#include "erroritem.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "scene.h"

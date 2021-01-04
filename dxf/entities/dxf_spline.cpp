@@ -134,36 +134,10 @@ Spline::Spline(SectionParser* sp)
 {
 }
 
-//void Spline::draw(const InsertEntity* const i) const
-//{
-//    if (i) {
-//    } else {
-//        QPainterPath myPath;
-//        if (0) {
-//            drawBSplineCurve(*this, myPath);
-//            //            myPath.addPolygon(interpolate(ControlPoints, 20));
-//        } else {
-//            for (int i = 0; i < numberOfControlPoints; ++i) {
-//                if (!i) {
-//                    myPath.moveTo(ControlPoints[i]);
-//                } else {
-//                    myPath.quadTo(ControlPoints[i - 1], /*ControlPoints[i - 1],*/ ControlPoints[i]);
-//                }
-//            }
-//        }
-//        auto item = scene->addPath(myPath, QPen(Qt::red /*color()*/, 0.0), Qt::NoBrush);
-//        attachToLayer(item);
-//    }
-//}
-
 void Spline::parse(CodeData& code)
 {
-    //    auto TypeName = [](int key) -> QString {
-    //        return staticMetaObject.enumerator(1).valueToKey(key);
-    //    };
     do {
         data.push_back(code);
-
         switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: //100
             break;
@@ -240,7 +214,6 @@ void Spline::parse(CodeData& code)
             break;
         case FitPointsZ: //31
             break;
-
         default:
             Entity::parse(code);
         }

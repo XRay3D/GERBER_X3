@@ -41,6 +41,9 @@ namespace Gerber {
 
 namespace Attr { //Attributes
 
+    struct AbstrFileFunc;
+    struct AbstrAperFunc;
+
     struct Command {
         static int value(const QString& key)
         {
@@ -56,7 +59,6 @@ namespace Attr { //Attributes
         Q_GADGET
     };
 
-    struct AbstrFileFunc;
     struct File {
         Q_GADGET
 
@@ -98,7 +100,7 @@ namespace Attr { //Attributes
         Q_ENUM(eFilePolarity) //2
         static eFilePolarity toFilePolarityValue(const QString& key);
 
-        enum eFunction {
+        enum Function {
             // Drawing
             ArrayDrawing,
             AssemblyDrawing,
@@ -130,13 +132,13 @@ namespace Attr { //Attributes
             Vcutmap,
             Viafill,
         };
-        Q_ENUM(eFunction)
-        static eFunction toFunction(const QString& key);
+        Q_ENUM(Function)
+        static Function toFunction(const QString& key);
 
         void parse(const QStringList& list);
 
         QString creationDate;
-        AbstrFileFunc* fileFunction = nullptr;
+        std::shared_ptr<AbstrFileFunc> m_function;
         eFilePolarity filePolarity;
         QStringList generationSoftware;
         QString md5;
@@ -147,73 +149,117 @@ namespace Attr { //Attributes
     };
 
     struct Aperture {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
-        enum e {
-            AperFunction, /*
-        Function objects created with the apertures, e.g. SMD pad 5.6.10*/
-            DrillTolerance, /*
-        Tolerance of drill holes 5.6.11*/
-            FlashText, /*
-        If a flash represents text allows to define string, font, … 5.6.12*/
-        };
-        Q_ENUM(e)
         Q_GADGET
+    public:
+        static int value(const QString& key);
+        enum StdAttr {
+            // AperFunction objects created with the apertures, e.g. SMD pad 5.6.10
+            AperFunction,
+            // Tolerance of drill holes 5.6.11
+            DrillTolerance,
+            // If a flash represents text allows to define string, font, … 5.6.12
+            FlashText,
+        };
+        Q_ENUM(StdAttr)
+        StdAttr toStdAttr(const QString& key);
+
+        enum Function {
+            ViaDrill,
+            BackDrill,
+            ComponentDrill,
+            MechanicalDrill,
+            CastellatedDrill,
+            OtherDrill,
+            ComponentPad,
+            SMDPad,
+            BGAPad,
+            ConnectorPad,
+            HeatsinkPad,
+            ViaPad,
+            TestPad,
+            CastellatedPad,
+            FiducialPad,
+            ThermalReliefPad,
+            WasherPad,
+            AntiPad,
+            OtherPad,
+            Conductor,
+            EtchedComponent,
+            NonConductor,
+            CopperBalancing,
+            Border,
+            OtherCopper,
+            // Component
+            ComponentMain,
+            ComponentOutline,
+            ComponentPin,
+            //
+            Profile,
+            NonMaterial,
+            Material,
+            Other,
+        };
+        Q_ENUM(Function)
+        Function toFunction(const QString& key);
+
+        void parse(const QStringList& list);
+        std::shared_ptr<AbstrAperFunc> m_function;
     };
 
-    struct AperFunction {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
-        enum e {
-            ComponentMain, /* This aperture is flashed at the centroid of a component.
-        The flash carries the object attributes with the main
-        characteristics of the component.
-        The following aperture must be used:
-        %ADD10C,0.300*% (mm)
-        %ADD10C,0.012*% (in)*/
-            ComponentOutline, /*(Body|Lead2Lead|Footprint|Courtyard)
-        This attribute is used to draw the outline of the
-        component. An outline is a sequence of connected
-        draws and arcs. They are said to connect only if they are
-        defined consecutively, with the second starting where
-        the first one ends. Thus, the order in which they are
-        defined is significant. A contour is closed: the end point
-        of the last draw/arc must coincide with the start point of
-        the first. Outlines cannot m_instance-intersect.
-        Four different types of outlines are defined. See drawing,
-        courtesy Thiadmer Riemersma:
-        Outlines of different types on the same component are
-        allowed.
-        The following aperture must be used:
-        %ADD11C,0.100*% (mm)
-        %ADD11C,0.004*% (in)*/
-            ComponentPin,
-            /*An aperture whose flash point indicates the location of
-        the component pins (leads). The .P object attribute must
-        be attached to each flash to identify the reference
-        descriptor and pin.
-        For the key pin, typically pin "1" or "A1", the following
-        diamond shape aperture must be used:
-        %ADD12P,0.360X4X0.0*% (mm)
-        %ADD12P,0.017X4X0.0*% (in)
-        The key pin is then visible in the image.
-        For all other pins the following zero size aperture must
-        be used:
-        %ADD13C,0*%...(both mm and in)
-        These pins are not visible which avoids cluttering the
-        image.*/
-        };
-        Q_ENUM(e)
-        Q_GADGET
-    };
-    struct ComponentOutline {
-        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
-        enum e {
-            Body,
-            Lead2Lead,
-            Footprint,
-            Courtyard,
-        };
-        Q_ENUM(e)
-        Q_GADGET
-    };
+    //    struct AperFunction {
+    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+    //        enum e {
+    //            ComponentMain, /* This aperture is flashed at the centroid of a component.
+    //        The flash carries the object attributes with the main
+    //        characteristics of the component.
+    //        The following aperture must be used:
+    //        %ADD10C,0.300*% (mm)
+    //        %ADD10C,0.012*% (in)*/
+    //            ComponentOutline, /*(Body|Lead2Lead|Footprint|Courtyard)
+    //        This attribute is used to draw the outline of the
+    //        component. An outline is a sequence of connected
+    //        draws and arcs. They are said to connect only if they are
+    //        defined consecutively, with the second starting where
+    //        the first one ends. Thus, the order in which they are
+    //        defined is significant. A contour is closed: the end point
+    //        of the last draw/arc must coincide with the start point of
+    //        the first. Outlines cannot m_instance-intersect.
+    //        Four different types of outlines are defined. See drawing,
+    //        courtesy Thiadmer Riemersma:
+    //        Outlines of different types on the same component are
+    //        allowed.
+    //        The following aperture must be used:
+    //        %ADD11C,0.100*% (mm)
+    //        %ADD11C,0.004*% (in)*/
+    //            ComponentPin,
+    //            /*An aperture whose flash point indicates the location of
+    //        the component pins (leads). The .P object attribute must
+    //        be attached to each flash to identify the reference
+    //        descriptor and pin.
+    //        For the key pin, typically pin "1" or "A1", the following
+    //        diamond shape aperture must be used:
+    //        %ADD12P,0.360X4X0.0*% (mm)
+    //        %ADD12P,0.017X4X0.0*% (in)
+    //        The key pin is then visible in the image.
+    //        For all other pins the following zero size aperture must
+    //        be used:
+    //        %ADD13C,0*%...(both mm and in)
+    //        These pins are not visible which avoids cluttering the
+    //        image.*/
+    //        };
+    //        Q_ENUM(e)
+    //        Q_GADGET
+    //    };
+    //    struct ComponentOutline {
+    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+    //        enum e {
+    //            Body,
+    //            Lead2Lead,
+    //            Footprint,
+    //            Courtyard,
+    //        };
+    //        Q_ENUM(e)
+    //        Q_GADGET
+    //    };
 }
 }

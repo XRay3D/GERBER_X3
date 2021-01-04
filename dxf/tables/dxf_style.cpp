@@ -15,7 +15,9 @@
 *******************************************************************************/
 #include "dxf_style.h"
 #include "dxf_file.h"
+#include "settings.h"
 #include <QFontDatabase>
+
 namespace Dxf {
 
 Style::Style(SectionParser* sp)
@@ -58,14 +60,13 @@ void Style::parse(CodeData& code)
                 font.setBold(false);
                 font.setItalic(false);
             }
-            if ((int32_t(code) & 0x1000020) == 0x1000020) {
+            if ((int32_t(code) & 0x1000020) == 0x1000020)
                 font.setBold(true);
-            }
-            if ((int32_t(code) & 0x2000030) == 0x2000030) {
+            if ((int32_t(code) & 0x2000030) == 0x2000030)
                 font.setItalic(true);
-            }
             break;
         case FontFamily: //1000
+            font.setPointSize(100);
             for (auto& family : QFontDatabase().families()) {
                 if (family.contains(code.string(), Qt::CaseInsensitive)) {
                     font.setFamily(code.string());
@@ -74,9 +75,8 @@ void Style::parse(CodeData& code)
             }
             if (font.family() != code) {
                 qDebug() << __FUNCTION__ << font.family();
-                font.setFamily("Arial");
+                font.setFamily(AppSettings::dxfDefaultFont());
             }
-            font.setPointSize(100);
             break;
         default:
             AbstractTable::parse(code);

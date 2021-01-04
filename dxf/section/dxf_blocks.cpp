@@ -34,7 +34,7 @@ void SectionBLOCKS::parse()
                 blocks[block->blockName] = block;
             } else {
                 delete block;
-                throw QString("blockName ERR!");
+                throw DxfObj::tr("blockName ERR!");
             }
         }
     } while (code != "ENDSEC");

@@ -33,7 +33,7 @@
 
 namespace GCode {
 Node::Node(int id)
-    : AbstractNode(id)
+    : NodeInterface(id)
 {
     file()->itemGroup()->addToScene();
 }
@@ -73,7 +73,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            if (file()->shortName().endsWith(GlobalSettings::gcFileExtension()))
+            if (file()->shortName().endsWith(AppSettings::gcFileExtension()))
                 return file()->shortName();
             else
                 return file()->shortName() + QStringList({ "_TS", "_BS" })[file()->side()];
@@ -125,11 +125,11 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
     case 0:
-        if (file()->shortName().contains(GlobalSettings::gcFileExtension()))
+        if (file()->shortName().contains(AppSettings::gcFileExtension()))
             return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
     case 1: {
-        if (file()->shortName().contains(GlobalSettings::gcFileExtension()))
+        if (file()->shortName().contains(AppSettings::gcFileExtension()))
             return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }

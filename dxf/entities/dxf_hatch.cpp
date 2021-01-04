@@ -15,7 +15,6 @@
 *******************************************************************************/
 #include "dxf_hatch.h"
 #include "dxf_file.h"
-#include "gccreator.h" /////////////////////
 
 #include <QPolygonF>
 
@@ -160,9 +159,9 @@ void Hatch::parse(CodeData& code)
                 //break;
             case Spline: // 4
                 //break;
-                throw QString("Unimplemented edge type in HATCH: %1").arg(edgeType);
+                throw DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType);
             default:
-                throw QString("Unknown edge type in HATCH: %1").arg(edgeType);
+                throw DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType);
             }
             break;
         case NumberOfSourceBoundaryObjects: // 97

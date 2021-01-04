@@ -14,12 +14,15 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrfile.h"
-#include "gi/datapathitem.h"
-#include "gi/componentitem.h"
-#include "gi/datasoliditem.h"
-#include "gi/datapathitem.h"
+#include "componentitem.h"
+
+#include "componentitem.h"
+#include "datapathitem.h"
+#include "datasoliditem.h"
+#include "interfaces/node.h"
 #include "project.h"
 #include "settings.h"
+
 #include <QElapsedTimer>
 #include <QSemaphore>
 #include <QThread>
@@ -140,7 +143,7 @@ Paths File::merge() const
         else
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
     }
-    if (GlobalSettings::gbrCleanPolygons())
+    if (AppSettings::gbrCleanPolygons())
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
     return m_mergedPaths;
 }
@@ -183,8 +186,6 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
-ItemGroup* File::itemGroup(ItemsType type) const { return m_itemGroups[type]; }
-
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
     if (m_groupedPaths.isEmpty()) {
@@ -217,8 +218,6 @@ bool File::flashedApertures() const
     return false;
 }
 
-ItemGroup* File::itemGroup() const { return m_itemGroups[m_itemsType]; }
-
 void File::addToScene() const
 {
     for (const auto var : m_itemGroups) {
@@ -229,12 +228,29 @@ void File::addToScene() const
 
 void File::setColor(const QColor& color)
 {
-    AbstractFile::setColor(color);
+    m_color = color;
     m_itemGroups[Normal]->setBrushColor(color);
     m_itemGroups[ApPaths]->setPen(QPen(color, 0.0));
 }
 
-void File::setItemType(File::ItemsType type)
+void File::initFrom(FileInterface* file)
+{
+    file->setColor(file->color());
+    // Normal
+    itemGroup(Gerber::File::Normal)->setBrushColor(file->itemGroup(Gerber::File::Normal)->brushColor());
+    itemGroup(Gerber::File::Normal)->addToScene();
+    itemGroup(Gerber::File::Normal)->setZValue(-id());
+    // ApPaths
+    itemGroup(Gerber::File::ApPaths)->setPen(file->itemGroup(Gerber::File::ApPaths)->pen());
+    itemGroup(Gerber::File::ApPaths)->addToScene();
+    itemGroup(Gerber::File::ApPaths)->setZValue(-id());
+    // Components
+    itemGroup(Gerber::File::Components)->addToScene();
+    itemGroup(Gerber::File::Components)->setZValue(-id());
+    setFileIndex(file->fileIndex());
+}
+
+void File::setItemType(int type)
 {
     if (m_itemsType == type)
         return;
@@ -247,6 +263,8 @@ void File::setItemType(File::ItemsType type)
 
     m_itemGroups[m_itemsType]->setVisible(true /*m_visible*/);
 }
+
+int File::itemsType() const { return m_itemsType; }
 
 void File::write(QDataStream& stream) const
 {
@@ -315,12 +333,12 @@ void File::createGi()
 
         for (const GraphicObject& go : *this) {
             if (!go.path().isEmpty()) {
-                if (GlobalSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
+                if (AppSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
                     Paths paths;
                     SimplifyPolygon(go.path(), paths);
                     for (Path& path : paths) {
                         path.append(path.first());
-                        if (!GlobalSettings::gbrSkipDuplicates()) {
+                        if (!AppSettings::gbrSkipDuplicates()) {
                             checkList.push_front(path);
                             m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
                         } else if (!contains(path)) {
@@ -329,7 +347,7 @@ void File::createGi()
                         }
                     }
                 } else {
-                    if (!GlobalSettings::gbrSkipDuplicates()) {
+                    if (!AppSettings::gbrSkipDuplicates()) {
                         m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
                     } else if (!contains(go.path())) {
                         m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));

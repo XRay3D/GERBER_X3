@@ -112,7 +112,7 @@ GraphicObject Solid::toGo() const
         poly << thirdCorner;
         poly << firstCorner;
     } else {
-        throw QString("Unsupported type Solid: corners %1!").arg(corners);
+        throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners);
     }
     Path path(poly);
     ReversePath(path);

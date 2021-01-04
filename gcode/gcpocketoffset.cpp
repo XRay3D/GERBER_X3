@@ -57,7 +57,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
             ClipperOffset offset(uScale);
             offset.AddPaths(paths, jtRound, etClosedPolygon);
             offset.Execute(paths, m_dOffset);
-            if (GlobalSettings::gbrCleanPolygons())
+            if (AppSettings::gbrCleanPolygons())
                 CleanPolygons(paths, uScale * 0.0005);
             Paths tmpPaths;
             int counter = steps;
@@ -80,7 +80,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
         }
         Paths paths;
         offset.Execute(paths, m_dOffset);
-        if (GlobalSettings::gbrCleanPolygons())
+        if (AppSettings::gbrCleanPolygons())
             CleanPolygons(paths, uScale * 0.0005);
         int counter = steps;
         if (counter > 1) {
@@ -143,7 +143,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, jtRound, etClosedPolygon);
         offset.Execute(paths, -m_dOffset);
-        if (GlobalSettings::gbrCleanPolygons())
+        if (AppSettings::gbrCleanPolygons())
             CleanPolygons(paths, uScale * 0.0005);
         fillPaths.append(paths);
         Paths offsetPaths;
@@ -224,7 +224,7 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
                 ClipperOffset offset(uScale);
                 offset.AddPaths(fillPaths[i], jtRound, etClosedPolygon);
                 offset.Execute(tmp, -m_dOffset + uScale * 0.001);
-                if (GlobalSettings::gbrCleanPolygons())
+                if (AppSettings::gbrCleanPolygons())
                     CleanPolygons(tmp, uScale * 0.0005);
             }
             { // объединение рамок
@@ -245,7 +245,7 @@ void PocketCreator::createMultiTool(QVector<Tool>& tools, double depth)
             ClipperOffset offset(uScale);
             offset.AddPaths(paths, jtRound, etClosedPolygon);
             offset.Execute(wp, -m_dOffset + 1); // + 1 <- поправка при расчёте впритык.
-            if (GlobalSettings::gbrCleanPolygons())
+            if (AppSettings::gbrCleanPolygons())
                 CleanPolygons(wp, uScale * 0.0005);
 
             if (tIdx) { // обрезка текущего пути предыдущим
