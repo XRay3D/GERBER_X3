@@ -13,6 +13,9 @@
 *******************************************************************************/
 #pragma once
 
+#include "../tooldatabase/tool.h"
+#include "../settings/settings.h"
+
 #include <QDebug>
 #include <QObject>
 #include <map>
@@ -35,9 +38,9 @@ class Project;
 class Scene;
 class SplashScreen;
 class FileTreeView;
-class ParserInterface;
+class FilePluginInterface;
 
-using ParserInterfaces = std::map<int, std::pair<ParserInterface*, QObject*>>;
+using ParserInterfaces = std::map<int, std::pair<FilePluginInterface*, QObject*>>;
 
 class App {
     friend class DrillForm;
@@ -70,6 +73,8 @@ class App {
     SplashScreen* m_splashScreen = nullptr;
     FileTreeView* m_fileTreeView = nullptr;
     ParserInterfaces m_parserInterfaces;
+    AppSettings m_appSettings;
+    ToolHolder m_toolHolder;
 
 public:
     explicit App()
@@ -83,8 +88,8 @@ public:
     App& operator=(const App& app) = delete;
     ~App() { }
 
-    static App* app() { return m_app; }
-    static void setApp(App* app) { m_app = app; }
+    static App* get() { return m_app; }
+    static void set(App* app) { m_app = app; }
     static DrillForm* drillForm() { return m_app->m_drillForm; }
     static FileModel* fileModel() { return m_app->m_fileModel; }
     static GCode::Creator* creator() { return m_app->m_creator; }
@@ -96,6 +101,9 @@ public:
     static Scene* scene() { return m_app->m_scene; }
     static SplashScreen* splashScreen() { return m_app->m_splashScreen; }
     static FileTreeView* fileTreeView() { return m_app->m_fileTreeView; }
-    static ParserInterface* parserInterface(int type) { return m_app->m_parserInterfaces.contains(type) ? m_app->m_parserInterfaces[type].first : nullptr; }
+    static FilePluginInterface* parserInterface(int type) { return m_app->m_parserInterfaces.contains(type) ? m_app->m_parserInterfaces[type].first : nullptr; }
     static ParserInterfaces& parserInterfaces() { return m_app->m_parserInterfaces; }
+
+    static AppSettings& settings() { return m_app->m_appSettings; }
+    static ToolHolder& toolHolder() { return m_app->m_toolHolder; }
 };

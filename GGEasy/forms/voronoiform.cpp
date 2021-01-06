@@ -88,7 +88,7 @@ void VoronoiForm::createFile()
     for (auto* item : App::scene()->selectedItems()) {
         auto* gi = dynamic_cast<GraphicsItem*>(item);
         switch (static_cast<GiType>(item->type())) {
-        case GiType::Gerber:
+        case GiType::DataSolid:
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
@@ -99,9 +99,9 @@ void VoronoiForm::createFile()
                         return;
                 }
             }
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            wPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
             break;
-        case GiType::AperturePath:
+        case GiType::DataPath:
             //RawItem* gi = static_cast<RawItem*>(item);
             if (!file) {
                 file = gi->file();
@@ -113,13 +113,13 @@ void VoronoiForm::createFile()
                         return;
                 }
             }
-            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            wRawPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
             break;
             //        case DrillItemType:
             //            //            if (static_cast<DrillItem*>(item)->isSlot())
-            //            //                wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            //            //                wrPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
             //            //            else
-            //            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            //            wPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
             //            break;
         default:
             break;
@@ -135,7 +135,7 @@ void VoronoiForm::createFile()
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    gpc.tools.append(tool);
+    gpc.tools.push_back(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::Tolerance] = ui->dsbxPrecision->value();
     gpc.params[GCode::GCodeParams::Width] = ui->dsbxWidth->value() + 0.001;

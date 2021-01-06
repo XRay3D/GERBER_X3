@@ -18,9 +18,9 @@
 class ItemGroup : public QList<GraphicsItem*> {
 public:
     ~ItemGroup();
-    void append(GraphicsItem* item);
+    void push_back(GraphicsItem* item);
     void setVisible(bool visible);
-    void setSelected(const QVector<int>& ids);
+    void setSelected(const mvector<int>& ids);
     bool isVisible() { return m_visible; }
     void addToScene();
     QColor brushColor() const { return m_brushColor; }

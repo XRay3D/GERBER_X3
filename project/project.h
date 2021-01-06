@@ -13,6 +13,8 @@
 *******************************************************************************/
 #pragma once
 
+#include "mvector.h"
+
 #include <QMutex>
 #include <QMutexLocker>
 #include <QObject>
@@ -35,6 +37,7 @@ class Shape;
 
 class FileInterface;
 class QFile;
+enum class FileType;
 
 class Project : public QObject {
     Q_OBJECT
@@ -83,21 +86,21 @@ public:
         return false;
     }
 
-    template <typename T>
-    QVector<T*> files()
+    template <typename T = FileInterface>
+    mvector<T*> files()
     {
         QMutexLocker locker(&m_mutex);
-        QVector<T*> rfiles;
+        mvector<T*> rfiles;
         for (const auto& [id, sp] : m_files) {
             T* file = dynamic_cast<T*>(sp.get());
             if (file)
-                rfiles.append(file);
+                rfiles.push_back(file);
         }
         return rfiles;
     }
 
     template <typename T>
-    QVector<T*> count()
+    mvector<T*> count()
     {
         QMutexLocker locker(&m_mutex);
         int count = 0;
@@ -108,12 +111,13 @@ public:
         return count;
     }
 
+    mvector<FileInterface*> files(FileType type);
+    mvector<FileInterface*> files(const mvector<FileType> types);
+
     Shapes::Shape* shape(int id);
 
     int addFile(FileInterface* file);
     int addShape(Shapes::Shape* sh);
-
-    //    void showFiles(const QList<QPair<int, int>>&& fileIds);
 
     bool contains(FileInterface* file);
     QString name();
@@ -131,11 +135,11 @@ public:
     double spaceY() const;
     void setSpaceY(double value);
 
-    int stepsX() const;
-    void setStepsX(int value);
+    uint stepsX() const;
+    void setStepsX(uint value);
 
-    int stepsY() const;
-    void setStepsY(int value);
+    uint stepsY() const;
+    void setStepsY(uint value);
 
     double safeZ() const;
     void setSafeZ(double safeZ);
@@ -177,8 +181,8 @@ signals:
 
 private:
     int m_ver;
-    std::map<int, std::shared_ptr<FileInterface>> m_files;
-    std::map<int, std::shared_ptr<Shapes::Shape>> m_shapes;
+    std::map<int, std::shared_ptr<FileInterface>, std::greater<int>> m_files;
+    std::map<int, std::shared_ptr<Shapes::Shape>, std::greater<int>> m_shapes;
     QMutex m_mutex;
     QString m_fileName;
     QString m_name;
@@ -200,6 +204,6 @@ private:
 
     double m_spacingX = 0.0;
     double m_spacingY = 0.0;
-    int m_stepsX = 1;
-    int m_stepsY = 1;
+    uint m_stepsX = 1;
+    uint m_stepsY = 1;
 };

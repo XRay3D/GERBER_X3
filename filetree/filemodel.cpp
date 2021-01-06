@@ -29,7 +29,7 @@
 #endif
 
 #include "interfaces/file.h"
-#include "interfaces/parser.h"
+#include "interfaces/fileplugin.h"
 
 #include "leakdetector.h"
 
@@ -40,11 +40,11 @@ FileModel::FileModel(QObject* parent)
     , rootItem(new FolderNode("rootItem", -1))
     , mimeType(QStringLiteral("application/GCodeItem"))
 {
-    rootItem->append(new FolderNode(tr("Gerber Files"), int(FileType::Gerber)));
-    rootItem->append(new FolderNode(tr("Excellon"), int(FileType::Excellon)));
-    rootItem->append(new FolderNode(tr("Tool Paths"), int(FileType::GCode)));
-    rootItem->append(new FolderNode(tr("Dxf Files"), int(FileType::Dxf)));
-    rootItem->append(new FolderNode(tr("Shapes"), int(FileType::Shapes)));
+    rootItem->push_back(new FolderNode(tr("Gerber Files"), int(FileType::Gerber)));
+    rootItem->push_back(new FolderNode(tr("Excellon"), int(FileType::Excellon)));
+    rootItem->push_back(new FolderNode(tr("Tool Paths"), int(FileType::GCode)));
+    rootItem->push_back(new FolderNode(tr("Dxf Files"), int(FileType::Dxf)));
+    rootItem->push_back(new FolderNode(tr("Shapes"), int(FileType::Shapes)));
     App::m_app->m_fileModel = this;
 }
 
@@ -65,7 +65,7 @@ void FileModel::addFile(FileInterface* file)
 
     NodeInterface* newItem = nullptr;
     beginInsertRows(index, rowCount, rowCount);
-    item->append(newItem = App::parserInterface(type)->createNode(file));
+    item->push_back(newItem = App::parserInterface(type)->createNode(file));
     endInsertRows();
     if (newItem == nullptr)
         return;
@@ -86,7 +86,7 @@ void FileModel::addShape(Shapes::Shape* sh)
 
     beginInsertRows(index, rowCount, rowCount);
     auto node = new Shapes::Node(sh->id());
-    item->append(node);
+    item->push_back(node);
     endInsertRows();
     QModelIndex selectIndex = createIndex(rowCount, 0, node);
     qDebug() << __FUNCTION__ << selectIndex;
@@ -218,8 +218,8 @@ int FileModel::rowCount(const QModelIndex& parent) const
 //    //            if (!item)
 //    //                item = rootItem;
 //    //            if (index.isValid()) {
-//    //                encodedData.append(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
-//    //                encodedData.append("|");
+//    //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+//    //                encodedData.push_back("|");
 //    //            }
 //    //        }
 //    //    }
@@ -232,8 +232,8 @@ int FileModel::rowCount(const QModelIndex& parent) const
 //        if (noCopy != index.row()) {
 //            noCopy = index.row();
 //            if (index.isValid()) {
-//                encodedData.append(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
-//                encodedData.append("|");
+//                encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
+//                encodedData.push_back("|");
 //            }
 //        }
 //    }

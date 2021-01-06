@@ -14,6 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "gch.h"
+#include "clipper.hpp"
 #include <QRegularExpression>
 
 GCH::GCH(QTextDocument* parent)
@@ -31,8 +32,7 @@ void GCH::highlightBlock(const QString& text)
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
 
-
-        static const QVector<QChar> key {
+        static const mvector<QChar> key {
             'F',
             'G',
             'M',
@@ -41,7 +41,7 @@ void GCH::highlightBlock(const QString& text)
             'Y',
             'Z',
         };
-        static const QVector<Qt::GlobalColor> color {
+        static const mvector<Qt::GlobalColor> color {
             Qt::darkMagenta, // 'F',
             Qt::black, //       'G',
             Qt::darkYellow, //  'M',
@@ -50,7 +50,7 @@ void GCH::highlightBlock(const QString& text)
             Qt::darkGreen, //   'Y',
             Qt::blue, //        'Z',
         };
-        myClassFormat.setForeground(color.value(key.indexOf(match.captured(1).front().toUpper())));
+        myClassFormat.setForeground(color[key.indexOf(match.captured(1).front().toUpper())]);
         setFormat(match.capturedStart(), match.capturedLength(), myClassFormat);
     }
 }

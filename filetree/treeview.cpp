@@ -20,7 +20,6 @@
 #include "shheaders.h"
 #endif
 
-//#include "gcode/gcode.h"
 #include "settings.h"
 
 #include "interfaces/file.h"
@@ -30,7 +29,6 @@
 #include "sidedelegate.h"
 #include "textdelegate.h"
 #include "typedelegate.h"
-//#include "project.h"
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QMenu>
@@ -43,62 +41,18 @@
 
 FileTreeView::FileTreeView(QWidget* parent)
     : QTreeView(parent)
-    , m_model(new FileModel(this))
 {
-    setModel(m_model);
     setAlternatingRowColors(true);
     setAnimated(true);
     setUniformRowHeights(true);
 
-    connect(m_model, &FileModel::rowsInserted, this, &FileTreeView::updateTree);
-    connect(m_model, &FileModel::rowsRemoved, this, &FileTreeView::updateTree);
-    connect(m_model, &FileModel::updateActions, this, &FileTreeView::updateTree);
-//    connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
-//        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
-//    });
-#ifndef QT_DEBUG
-    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::onSelectionChanged);
-#endif
-    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::updateTree);
-    connect(this, &FileTreeView::doubleClicked, this, &FileTreeView::on_doubleClicked);
-
-    {
-        setIconSize(QSize(24, 24));
-        const int w = indentation();
-        const int h = rowHeight(model()->index(0, 0, QModelIndex()));
-        QImage i(w, h, QImage::Format_ARGB32);
-        QPainter p(&i);
-        p.setPen(QColor(128, 128, 128));
-        // │
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
-        i.save("vline.png", "PNG");
-        // ├─
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("branch-more.png", "PNG");
-        // └─
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("branch-end.png", "PNG");
-        QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-        file.open(QFile::ReadOnly);
-        setStyleSheet(file.readAll());
-        header()->setMinimumHeight(h);
-    }
-    header()->setStretchLastSection(false);
-    header()->setSectionResizeMode(QHeaderView::Fixed);
-    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, "123456789").width()); // ~6 символов и ...
-    header()->setSectionResizeMode(0, QHeaderView::Stretch);
-
-    setItemDelegateForColumn(0, new TextDelegate(this));
-    setItemDelegateForColumn(1, new SideDelegate(this));
-    setItemDelegateForColumn(2, new TypeDelegate(this));
-
     App::m_app->m_fileTreeView = this;
 }
 
-FileTreeView::~FileTreeView() { App::m_app->m_fileTreeView = nullptr; }
+FileTreeView::~FileTreeView()
+{
+    App::m_app->m_fileTreeView = nullptr;
+}
 
 void FileTreeView::updateTree()
 {
@@ -203,6 +157,57 @@ void FileTreeView::closeFiles()
     m_model->removeRows(0, m_childCount, m_menuIndex);
 }
 
+void FileTreeView::setModel(QAbstractItemModel* model)
+{
+    QTreeView::setModel(m_model = static_cast<FileModel*>(model));
+
+    connect(m_model, &FileModel::rowsInserted, this, &FileTreeView::updateTree);
+    connect(m_model, &FileModel::rowsRemoved, this, &FileTreeView::updateTree);
+    connect(m_model, &FileModel::updateActions, this, &FileTreeView::updateTree);
+//    connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
+//        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+//    });
+#ifndef QT_DEBUG
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::onSelectionChanged);
+#endif
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::updateTree);
+    connect(this, &FileTreeView::doubleClicked, this, &FileTreeView::on_doubleClicked);
+
+    header()->setStretchLastSection(false);
+    header()->setSectionResizeMode(QHeaderView::Fixed);
+    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, "123456789").width()); // ~6 символов и ...
+    header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+    setItemDelegateForColumn(0, new TextDelegate(this));
+    setItemDelegateForColumn(1, new SideDelegate(this));
+    setItemDelegateForColumn(2, new TypeDelegate(this));
+
+    {
+        setIconSize(QSize(24, 24));
+        const int w = indentation();
+        const int h = rowHeight(model->index(0, 0, QModelIndex()));
+        QImage i(w, h, QImage::Format_ARGB32);
+        QPainter p(&i);
+        p.setPen(QColor(128, 128, 128));
+        // │
+        i.fill(Qt::transparent);
+        p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
+        i.save("settings/vline.png", "PNG");
+        // ├─
+        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+        i.save("settings/branch-more.png", "PNG");
+        // └─
+        i.fill(Qt::transparent);
+        p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
+        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+        i.save("settings/branch-end.png", "PNG");
+        QFile file(":/qtreeviewstylesheet/QTreeView.qss");
+        file.open(QFile::ReadOnly);
+        setStyleSheet(file.readAll());
+        header()->setMinimumHeight(h);
+    }
+}
+
 void FileTreeView::showExcellonDialog() { }
 
 void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
@@ -234,10 +239,10 @@ void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
     //                    m_model->removeRows(0, m_childCount, m_menuIndex);
     //            });
     //            //            // edit Shapes::Text
-    //            //            QVector<Shapes::Text*> tx;
+    //            //            mvector<Shapes::Text*> tx;
     //            //            for (auto& idx : selectedIndexes()) {
     //            //                if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == int(GiType::ShapeT))
-    //            //                    tx.append(static_cast<Shapes::Text*>(sh));
+    //            //                    tx.push_back(static_cast<Shapes::Text*>(sh));
     //            //            }
     //            //            if (tx.size())
     //            //                menu.addAction(QIcon::fromTheme("draw-text"), tr("&Edit Selected Texts"), [tx] {

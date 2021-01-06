@@ -1,13 +1,13 @@
 QTreeView::branch:has-siblings:!adjoins-item {
-    border-image: url(vline.png);
+    border-image: url(settings/vline.png);
 }
 
 QTreeView::branch:!has-children:has-siblings:adjoins-item {
-    border-image: url(branch-more.png);
+    border-image: url(settings/branch-more.png);
 }
 
 QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-    border-image: url(branch-end.png);
+    border-image: url(settings/branch-end.png);
 }
 /*
 QTreeView::branch:has-children:!has-siblings:closed,QTreeView::branch:closed:has-children:has-siblings {

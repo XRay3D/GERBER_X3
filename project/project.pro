@@ -1,31 +1,21 @@
-TEMPLATE    = lib
-CONFIG      += staticlib
-QT          += widgets
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2020                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
+include(../staticlib.pri)
+include(../defines.pri)
+include(../suffix.pri)
 
-DESTDIR = $$_PRO_FILE_PWD_/../lib
-
-DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
-
-SUFIX = ""
-
-contains(QT_ARCH, i386) {
-    SUFIX = "_x32"
-} else {
-    SUFIX = "_x64"
-}
-msvc* {
-    SUFIX = $$SUFIX"_msvc"
-}
-gcc* {
-    SUFIX = $$SUFIX"_gcc"
-}
-CONFIG(debug, debug|release){
-    SUFIX = $$SUFIX"_d"
-}
-
-TARGET = $$TARGET$$SUFIX
+TARGET = $$TARGET$$SUFFIX
 
 message($$TARGET)
 
@@ -33,11 +23,11 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
 }
 
 gcc* {
@@ -46,11 +36,11 @@ gcc* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
     LIBS += "-L"$$_PRO_FILE_PWD_/../lib
-    LIBS += -lclipper$$SUFIX
-    LIBS += -lsettings$$SUFIX
-    LIBS += -lgraphicsview$$SUFIX
-    LIBS += -lgi$$SUFIX
-    LIBS += -lfiletree$$SUFIX
+    LIBS += -lclipper$$SUFFIX
+    LIBS += -lsettings$$SUFFIX
+    LIBS += -lgraphicsview$$SUFFIX
+    LIBS += -lgi$$SUFFIX
+    LIBS += -lfiletree$$SUFFIX
 }
 
 linux {
@@ -68,15 +58,7 @@ INCLUDEPATH += ../graphicsview
 INCLUDEPATH += ../gi
 INCLUDEPATH += ../filetree
 
-#OBJECTS_DIR = $$_PRO_FILE_PWD_
-
 EXAMPLE_FILES = gerber.json
-
-# install
-#target.path = $$[QT_INSTALL_EXAMPLES]/widgets/tools/echoplugin/plugins
-#INSTALLS += target
-
-#CONFIG += install_ok  # Do not cargo-cult this!
 
 HEADERS += \
     project.h \

@@ -17,7 +17,7 @@
 #include "gcfile.h"
 #include "gch.h"
 #include "gcnode.h"
-#include "gcparser.h"
+#include "gcplugin.h"
 #include "gcpocketoffset.h"
 #include "gcpocketraster.h"
 #include "gcprofile.h"

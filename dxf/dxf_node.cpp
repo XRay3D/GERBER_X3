@@ -162,15 +162,15 @@ public:
             // │
             i.fill(Qt::transparent);
             p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
-            i.save("vline.png", "PNG");
+            i.save("settings/vline.png", "PNG");
             // ├─
             p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-            i.save("branch-more.png", "PNG");
+            i.save("settings/branch-more.png", "PNG");
             // └─
             i.fill(Qt::transparent);
             p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
             p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-            i.save("branch-end.png", "PNG");
+            i.save("settings/branch-end.png", "PNG");
             QFile file(":/qtreeviewstylesheet/QTreeView.qss");
             file.open(QFile::ReadOnly);
             setStyleSheet(file.readAll());

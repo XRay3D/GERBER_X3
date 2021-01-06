@@ -29,7 +29,7 @@ DataSolidItem::DataSolidItem(Paths& paths, FileInterface* file)
 {
     for (Path path : qAsConst(m_paths)) {
         if (path.size())
-            path.append(path.first());
+            path.push_back(path.front());
         m_shape.addPolygon(path);
     }
     fillPolygon = m_shape.toFillPolygon();
@@ -64,13 +64,13 @@ void DataSolidItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     painter->strokePath(m_shape, m_pen);
 }
 
-int DataSolidItem::type() const { return static_cast<int>(GiType::Gerber); }
+int DataSolidItem::type() const { return static_cast<int>(GiType::DataSolid); }
 
 void DataSolidItem::redraw()
 {
     m_shape = QPainterPath();
     for (Path path : qAsConst(m_paths)) {
-        path.append(path.first());
+        path.push_back(path.front());
         m_shape.addPolygon(path);
     }
     fillPolygon = m_shape.toFillPolygon();

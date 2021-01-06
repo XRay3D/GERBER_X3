@@ -14,17 +14,24 @@
 #pragma once
 #include "settings.h"
 #include "ui_settingsdialog.h"
+#include "mvector.h"
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog, private AppSettings {
+class SettingsTabInterface;
+
+class SettingsDialog : public QDialog, private Ui::SettingsDialog {
     Q_OBJECT
 
     int langIndex;
+    MySettings settings;
+    mvector<SettingsTabInterface*> tabs;
 
 public:
     explicit SettingsDialog(QWidget* parent = nullptr, int tab = -1);
-    ~SettingsDialog() override = default;
+    ~SettingsDialog() override;
     void readSettings();
     void writeSettings();
+    void readSettingsDialog();
+    void writeSettingsDialog();
     /////////////////////
     static void translator(QApplication* app, const QString& path);
     enum {
@@ -37,4 +44,8 @@ public:
 public slots:
     void reject() override;
     void accept() override;
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override;
 };

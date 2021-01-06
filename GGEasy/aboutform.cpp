@@ -32,7 +32,7 @@ AboutForm::AboutForm(QWidget* parent)
 #else
     QString str(QString(/*BUILD_DATE*/__DATE__ " " __TIME__).append("<br/>MSC_VER: ") + QString::number(_MSC_VER));
 #endif
-    str.append("<br/>Application Version: " + qApp->applicationVersion());
+    str.push_back("<br/>Application Version: " + qApp->applicationVersion());
     ui->lblAbout->setText(ui->lblAbout->text().arg(/*qApp->applicationVersion()*/ str));
     connect(ui->cmdOk_2, &QPushButton::clicked, this, &AboutForm::accept);
     connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) { QDesktopServices::openUrl(link); });

@@ -25,6 +25,7 @@ public:
     void hideOther();
     void closeFile();
     void closeFiles();
+    void setModel(QAbstractItemModel* model) override;
 
 signals:
     void saveGCodeFile(int id);
@@ -34,7 +35,7 @@ signals:
 private:
     void updateTree();
     void updateIcons();
-    FileModel* const m_model;
+    FileModel* m_model;
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

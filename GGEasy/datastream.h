@@ -12,6 +12,9 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
+#include "mvector.h"
+
 #include <QDataStream>
 #include <type_traits>
 
@@ -34,9 +37,9 @@ inline QDataStream& operator<<(QDataStream& s, E e)
 }
 
 template <typename T>
-inline QDataStream& operator>>(QDataStream& s, std::vector<T>& c)
+inline QDataStream& operator>>(QDataStream& s, mvector<T>& c)
 {
-    using Container = std::vector<T>;
+    using Container = mvector<T>;
     c.clear();
     quint32 n;
     s >> n;
@@ -54,9 +57,9 @@ inline QDataStream& operator>>(QDataStream& s, std::vector<T>& c)
 }
 
 template <typename T>
-inline QDataStream& operator<<(QDataStream& s, const std::vector<T>& c)
+inline QDataStream& operator<<(QDataStream& s, const mvector<T>& c)
 {
-    using Container = std::vector<T>;
+    using Container = mvector<T>;
     s << quint32(c.size());
     for (const typename Container::value_type& t : c)
         s << t;
@@ -86,6 +89,43 @@ inline QDataStream& operator>>(QDataStream& s, std::map<Key, T>& map)
 
 template <class Key, class T>
 inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T>& map)
+{
+    s << quint32(map.size());
+    // Deserialization should occur in the reverse order.
+    // Otherwise, value() will return the least recently inserted
+    // value instead of the most recently inserted one.
+    auto it = map.cend();
+    auto begin = map.cbegin();
+    while (it != begin) {
+        --it;
+        s << it->first << it->second;
+    }
+    return s;
+}
+
+template <class Key, class T>
+inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, std::greater<int>>& map)
+{
+    //StreamStateSaver stateSaver(&s);
+    using Container = std::map<Key, T>;
+    map.clear();
+    quint32 n;
+    s >> n;
+    for (quint32 i = 0; i < n; ++i) {
+        typename Container::key_type k;
+        typename Container::mapped_type t;
+        s >> k >> t;
+        if (s.status() != QDataStream::Ok) {
+            map.clear();
+            break;
+        }
+        map.emplace(k, t);
+    }
+    return s;
+}
+
+template <class Key, class T>
+inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, std::greater<int>>& map)
 {
     s << quint32(map.size());
     // Deserialization should occur in the reverse order.

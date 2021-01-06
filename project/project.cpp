@@ -38,8 +38,10 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
 {
     int type;
     stream >> type;
-    file = App::parserInterface(type)->createFile();
-    stream >> *file;
+    if (App::parserInterfaces().contains(type)) {
+        file = App::parserInterface(type)->createFile();
+        stream >> *file;
+    }
     return stream;
 }
 
@@ -241,8 +243,8 @@ QRectF Project::getBoundingRect()
     Point64 topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
     Point64 botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const auto& [id, filePtr] : m_files) {
-        if (auto itemGroup = filePtr->itemGroup(); itemGroup->isVisible()) {
-            for (const GraphicsItem* const item : *itemGroup) {
+        if (filePtr && filePtr->itemGroup()->isVisible()) {
+            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
                 for (const Path& path : item->paths()) {
                     for (const Point64& pt : path) {
                         topLeft.X = qMin(pt.X, topLeft.X);
@@ -263,8 +265,8 @@ QString Project::fileNames()
     QString fileNames;
     for (const auto& [id, sp] : m_files) {
         FileInterface* item = sp.get();
-        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon))
-            fileNames.append(item->name()).append('|');
+        if (sp && (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon)))
+            fileNames.append(item->name()).push_back('|');
     }
     return fileNames;
 }
@@ -274,9 +276,7 @@ int Project::contains(const QString& name)
     QMutexLocker locker(&m_mutex);
     for (const auto& [id, sp] : m_files) {
         FileInterface* item = sp.get();
-        if (item->type() == FileType::Gerber
-            || item->type() == FileType::Excellon
-            || item->type() == FileType::Dxf)
+        if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
@@ -296,6 +296,34 @@ bool Project::reload(int id, FileInterface* file)
     return false;
 }
 
+mvector<FileInterface*> Project::files(FileType type)
+{
+    QMutexLocker locker(&m_mutex);
+    mvector<FileInterface*> rfiles;
+    rfiles.reserve(m_files.size());
+    for (const auto& [id, sp] : m_files) {
+        if (sp && sp.get()->type() == type)
+            rfiles.push_back(sp.get());
+    }
+    rfiles.shrink_to_fit();
+    return rfiles;
+}
+
+mvector<FileInterface*> Project::files(const mvector<FileType> types)
+{
+    QMutexLocker locker(&m_mutex);
+    mvector<FileInterface*> rfiles;
+    rfiles.reserve(m_files.size());
+    for (auto type : types) {
+        for (const auto& [id, sp] : m_files) {
+            if (sp && sp.get()->type() == type)
+                rfiles.push_back(sp.get());
+        }
+    }
+    rfiles.shrink_to_fit();
+    return rfiles;
+}
+
 Shapes::Shape* Project::shape(int id)
 {
     QMutexLocker locker(&m_mutex);
@@ -311,10 +339,7 @@ int Project::addFile(FileInterface* file)
     if (id != -1) {
         reload(id, file);
     } else if (file->id() == -1) {
-        int newId = -1;
-        for (const auto& [id, sp] : m_files)
-            newId = std::max(newId, id);
-        ++newId;
+        int newId = m_files.size() ? newId = m_files.begin()->first + 1 : 0;
         file->setId(newId);
         m_files.emplace(newId, file);
         App::fileModel()->addFile(file);
@@ -414,18 +439,18 @@ void Project::setSpaceY(double value)
     setChanged();
 }
 
-int Project::stepsX() const { return m_stepsX; }
+uint Project::stepsX() const { return m_stepsX; }
 
-void Project::setStepsX(int value)
+void Project::setStepsX(uint value)
 {
     m_stepsX = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-int Project::stepsY() const { return m_stepsY; }
+uint Project::stepsY() const { return m_stepsY; }
 
-void Project::setStepsY(int value)
+void Project::setStepsY(uint value)
 {
     m_stepsY = value;
     emit layoutFrameUpdate(true);

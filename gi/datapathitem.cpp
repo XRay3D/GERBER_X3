@@ -92,7 +92,7 @@ void DataPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->drawPolyline(m_path);
 }
 
-int DataPathItem::type() const { return static_cast<int>(GiType::AperturePath); }
+int DataPathItem::type() const { return static_cast<int>(GiType::DataPath); }
 
 Paths DataPathItem::paths() const { return { m_path }; }
 
@@ -118,14 +118,14 @@ void DataPathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
         const double glueLen = App::project()->glue() * uScale;
-        Point64 dest(m_path.last());
-        Point64 init(m_path.first());
+        Point64 dest(m_path.back());
+        Point64 init(m_path.front());
         for (int i = 0; i < itemGroup->size(); ++i) {
             auto item = itemGroup->at(i);
             if (item->isSelected())
                 continue;
-            const Point64& first = item->paths().first().first();
-            const Point64& last = item->paths().first().last();
+            const Point64& first = item->paths().front().front();
+            const Point64& last = item->paths().front().back();
             if (Length(dest, first) < glueLen) {
                 dest = last;
                 item->setSelected(true);
@@ -150,7 +150,7 @@ QVariant DataPathItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
 {
     if (change == ItemVisibleChange && value.toBool()) {
         updateSelection();
-    } else if (change == ItemSelectedChange && AppSettings::animSelection()) {
+    } else if (change == ItemSelectedChange && App::settings().animSelection()) {
         if (value.toBool()) {
             updateSelection();
             connect(&timer, &QTimer::timeout, this, &DataPathItem::redraw);

@@ -17,6 +17,7 @@
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "splashscreen.h"
+#include "tool.h"
 #include "version.h"
 
 #include <QApplication>
@@ -43,15 +44,73 @@ public:
     {
     }
 
-    virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0) const
+    virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0) const override
     {
         switch (metric) {
         case QStyle::PM_SmallIconSize:
             return 22;
+            //        case QStyle::PM_LayoutBottomMargin:
+            //        case QStyle::PM_LayoutTopMargin:
+            //        case QStyle::PM_LayoutLeftMargin:
+            //        case QStyle::PM_LayoutRightMargin:
+            //            return 22;
+            //        case QStyle::PM_LayoutHorizontalSpacing:
+            //        case QStyle::PM_LayoutVerticalSpacing:
+            //            return 22;
+            //        case QStyle::PM_ToolBarItemMargin:
+            //        case QStyle::PM_ToolBarItemSpacing:
+            //            return 22;
+            //        case QStyle::PM_MenuHMargin:
+            //        case QStyle::PM_MenuVMargin:
+            //        case QStyle::PM_MenuBarItemSpacing:
+            //        case QStyle::PM_MenuBarVMargin:
+            //        case QStyle::PM_MenuBarHMargin:
+            //        case QStyle::PM_FocusFrameVMargin:
+            //        case QStyle::PM_FocusFrameHMargin:
+            //            return 22;
         default:
             return QProxyStyle::pixelMetric(metric, option, widget);
         }
     }
+    //    virtual void drawComplexControl(ComplexControl cc, const QStyleOptionComplex* opt, QPainter* p, const QWidget* w = nullptr) const override
+    //    {
+    //        if (w && w->objectName() == "treeView") {
+    //            qDebug() << __FUNCTION__ << cc;
+    //            p->setBrush(Qt::red);
+    //            p->drawRect(opt->rect);
+    //            return;
+    //        }
+    //        QProxyStyle::drawComplexControl(cc, opt, p, w);
+    //    }
+    //    virtual void drawControl(ControlElement element, const QStyleOption* opt, QPainter* p, const QWidget* w = nullptr) const override
+    //    {
+    //        if (w && w->objectName() == "treeView") {
+    //            qDebug() << __FUNCTION__ << element;
+    //            p->setBrush(Qt::red);
+    //            p->drawRect(opt->rect);
+    //            return;
+    //        }
+    //        QProxyStyle::drawControl(element, opt, p, w);
+    //    }
+    //    virtual void drawItemPixmap(QPainter* p, const QRect& rect, int alignment, const QPixmap& pixmap) const override
+    //    {
+    //        //if (w&&w->objectName() == "treeView") {
+    //        qDebug() << __FUNCTION__ << alignment;
+    //        p->setBrush(Qt::red);
+    //        p->drawRect(rect);
+    //        return;
+    //        //}
+    //    }
+    //    virtual void drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPainter* p, const QWidget* w = nullptr) const override
+    //    {
+    //        if (w && w->objectName() == "treeView") {
+    //            qDebug() << __FUNCTION__ << pe;
+    //            p->setBrush(Qt::red);
+    //            p->drawRect(opt->rect);
+    //            return;
+    //        }
+    //        QProxyStyle::drawPrimitive(pe, opt, p, w);
+    //    }
 };
 
 void initIcon(const QString& path);
@@ -66,16 +125,20 @@ int main(int argc, char* argv[])
 
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    //QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+    //QApplication::setAttribute(Qt::AA_Use96Dpi);
+
     Q_INIT_RESOURCE(resources);
 
     App a;
     AppSettings s;
+    ToolHolder t;
 
     QApplication app(argc, argv);
     app.setStyle(new ProxyStyle);
 
     app.setApplicationName("GGEasy");
-    app.setOrganizationName(VER_COMPANYNAME_STR);
+    app.setOrganizationName("settings" /*VER_COMPANYNAME_STR*/);
     app.setApplicationVersion(VER_PRODUCTVERSION_STR);
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -161,10 +224,6 @@ int main(int argc, char* argv[])
     SplashScreen* splash = new SplashScreen(QPixmap(QLatin1String(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
-
-    {
-        SettingsDialog().readSettings();
-    }
 
     {
         QSettings settings;

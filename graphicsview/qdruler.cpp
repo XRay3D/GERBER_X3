@@ -3,7 +3,7 @@
 // https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "qdruler.h"
 
-#include "settings.h"
+#include "app.h"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -95,11 +95,11 @@ void QDRuler::paintEvent(QPaintEvent* event)
     QRectF rulerRect(rect()); // We want to work with floating point, so we are considering the rect as QRectF
 
     // at first fill the rect
-    painter.fillRect(rulerRect, AppSettings::guiColor(Colors::Background));
+    painter.fillRect(rulerRect, App::settings().guiColor(GuiColors::Background));
     if (qFuzzyIsNull(rulerZoom))
         return;
 
-    gridStep = AppSettings::gridStep(rulerZoom);
+    gridStep = App::settings().gridStep(rulerZoom);
 
     // drawing a scale of 0.1
     if ((gridStep * rulerZoom) > 35) {
@@ -182,13 +182,13 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
         painter->drawLine(QLineF(x1, y1, x2, y2));
         if (drawText) {
             painter->save();
-            auto color(AppSettings::guiColor(Colors::Background));
+            auto color(App::settings().guiColor(GuiColors::Background));
             color.setRed(255 - color.red());
             color.setGreen(255 - color.green());
             color.setBlue(255 - color.blue());
             painter->setPen(QPen(color, 0.0));
             painter->setFont(font());
-            QString number = QString::number((startTickNo * gridStep * tickKoef * (AppSettings ::inch() ? 1.0 / 25.4 : 1.0)));
+            QString number = QString::number((startTickNo * gridStep * tickKoef * (App::settings().inch() ? 1.0 / 25.4 : 1.0)));
             if (1) {
                 if (startTickNo != 0) {
                     if (step > 0.0)

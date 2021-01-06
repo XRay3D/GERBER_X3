@@ -151,10 +151,10 @@ void FormsUtil::addUsedGi(GraphicsItem* gi)
         FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
 #ifdef GBR_
-            m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].append(gi->id());
+            m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
 #endif
         } else {
-            m_usedItems[{ file->id(), -1 }].append(gi->id());
+            m_usedItems[{ file->id(), -1 }].push_back(gi->id());
         }
     }
 }

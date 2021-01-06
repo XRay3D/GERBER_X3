@@ -23,13 +23,13 @@ ItemGroup::~ItemGroup()
         qDeleteAll(*this);
 }
 
-void ItemGroup::append(GraphicsItem* item)
+void ItemGroup::push_back(GraphicsItem* item)
 {
     item->m_id = QList::size() ? QList::last()->m_id + 1 : 0;
     item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->m_id));
     item->setVisible(m_visible);
     item->itemGroup = this;
-    QList::append(item);
+    QList::push_back(item);
 }
 
 void ItemGroup::setVisible(bool visible)
@@ -41,7 +41,7 @@ void ItemGroup::setVisible(bool visible)
     }
 }
 
-void ItemGroup::setSelected(const QVector<int>& ids)
+void ItemGroup::setSelected(const mvector<int>& ids)
 {
     for (GraphicsItem* item : *this)
         item->setSelected(ids.contains(item->id()));

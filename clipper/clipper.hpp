@@ -49,7 +49,8 @@
 //use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated
 
-#include "stdint.h"
+#include "mvector.h"
+
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -58,12 +59,11 @@
 #include <queue>
 #include <set>
 #include <stdexcept>
-#include <vector>
+#include <stdint.h>
 
 #include <QDataStream>
 #include <QDebug>
 #include <QPolygonF>
-#include <QVector>
 #include <QtMath>
 
 namespace ClipperLib {
@@ -204,26 +204,25 @@ struct IntPoint {
 };
 //------------------------------------------------------------------------------
 
-//typedef QVector /*std::vector*/<IntPoint> Path;
-//typedef QVector /*std::vector*/<Path> Paths;
+//typedef mvector /*mvector*/<IntPoint> Path;
+//typedef mvector /*mvector*/<Path> Paths;
 
-struct Path : public QVector<IntPoint> {
-    Path() = default;
-    Path(int size)
-        : QVector(size)
+struct Path : public mvector<IntPoint> {
+    Path(int size = 0)
+        : mvector<IntPoint>(size)
     {
     }
     Path(int size, const IntPoint& t)
-        : QVector(size, t)
+        : mvector<IntPoint>(size, t)
     {
     }
-    Path(const QVector<IntPoint>& v)
-        : QVector(v)
+    Path(const mvector<IntPoint>& v)
+        : mvector<IntPoint>(v)
     {
     }
 
     Path(const std::initializer_list<IntPoint>& v)
-        : QVector(v)
+        : mvector<IntPoint>(v)
     {
     }
 
@@ -233,7 +232,7 @@ struct Path : public QVector<IntPoint> {
     {
         reserve(v.size());
         for (auto& pt : v) {
-            append(pt);
+            push_back(pt);
         }
     }
 
@@ -248,48 +247,47 @@ struct Path : public QVector<IntPoint> {
     //    int id {};
 };
 
-struct Paths : public QVector<Path> {
-    Paths() = default;
-    Paths(int size)
-        : QVector(size)
+struct Paths : public mvector<Path> {
+    Paths(int size = 0)
+        : mvector<Path>(size)
     {
     }
     Paths(int size, const Path& t)
-        : QVector(size, t)
+        : mvector<Path>(size, t)
     {
     }
-    Paths(const QVector<Path>& v)
-        : QVector(v)
+    Paths(const mvector<Path>& v)
+        : mvector<Path>(v)
     {
     }
     Paths(const std::initializer_list<Path>& v)
-        : QVector(v)
+        : mvector<Path>(v)
     {
     }
     Paths(const Paths& v) = default;
 
-    operator QVector<QPolygonF>() const
+    operator mvector<QPolygonF>() const
     {
-        QVector<QPolygonF> poly;
-        poly.reserve(size());
-        for (const auto& pt : *this)
-            poly << pt;
-        return poly;
+        mvector<QPolygonF> polys;
+        polys.reserve(size());
+        for (const auto& poly : *this)
+            polys.emplace_back(poly);
+        return polys;
     }
 
     //    int id {};
 };
 
-inline Path& operator<<(Path& poly, const IntPoint& p)
-{
-    poly.push_back(p);
-    return poly;
-}
-inline Paths& operator<<(Paths& polys, const Path& p)
-{
-    polys.push_back(p);
-    return polys;
-}
+//inline Path& operator<<(Path& poly, const IntPoint& p)
+//{
+//    poly.push_back(p);
+//    return poly;
+//}
+//inline Paths& operator<<(Paths& polys, const Path& p)
+//{
+//    polys.push_back(p);
+//    return polys;
+//}
 
 std::ostream& operator<<(std::ostream& s, const IntPoint& p);
 std::ostream& operator<<(std::ostream& s, const Path& p);
@@ -328,7 +326,7 @@ enum EndType { etClosedPolygon,
     etOpenRound };
 
 class PolyNode;
-typedef QVector<PolyNode*> PolyNodes;
+typedef mvector<PolyNode*> PolyNodes;
 
 class PolyNode {
 public:
@@ -340,11 +338,11 @@ public:
     PolyNode* GetNext() const;
     bool IsHole() const;
     bool IsOpen() const;
-    int ChildCount() const;
+    size_t ChildCount() const;
 
 private:
     //PolyNode& operator =(PolyNode& other);
-    int Index; //node index in Parent.Childs
+    size_t Index; //node index in Parent.Childs
     bool m_IsOpen;
     JoinType m_jointype;
     EndType m_endtype;
@@ -412,10 +410,10 @@ struct OutPt;
 struct OutRec;
 struct Join;
 
-typedef QVector /*std::vector*/<OutRec*> PolyOutList;
-typedef QVector /*std::vector*/<TEdge*> EdgeList;
-typedef QVector /*std::vector*/<Join*> JoinList;
-typedef QVector /*std::vector*/<IntersectNode*> IntersectList;
+typedef mvector /*mvector*/<OutRec*> PolyOutList;
+typedef mvector /*mvector*/<TEdge*> EdgeList;
+typedef mvector /*mvector*/<Join*> JoinList;
+typedef mvector /*mvector*/<IntersectNode*> IntersectList;
 
 //------------------------------------------------------------------------------
 
@@ -449,7 +447,7 @@ protected:
     void DeleteFromAEL(TEdge* e);
     void UpdateEdgeIntoAEL(TEdge*& e);
 
-    typedef QVector /*std::vector*/<LocalMinimum> MinimaList;
+    typedef mvector /*mvector*/<LocalMinimum> MinimaList;
     MinimaList::iterator m_CurrentLM;
     MinimaList m_MinimaList;
 
@@ -578,7 +576,7 @@ private:
     Paths m_destPolys;
     Path m_srcPoly;
     Path m_destPoly;
-    QVector /*std::vector*/<DoublePoint> m_normals;
+    mvector /*mvector*/<DoublePoint> m_normals;
     double m_delta, m_sinA, m_sin, m_cos;
     double m_miterLim, m_StepsPerRad;
     IntPoint m_lowest;

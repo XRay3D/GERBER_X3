@@ -105,8 +105,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
             if (auto type(static_cast<GiType>(item->type()));
                 type >= GiType::ShapeC || //
                 type == GiType::Drill || //
-                type == GiType::Gerber || //
-                type == GiType::AperturePath) {
+                type == GiType::DataSolid || //
+                type == GiType::DataPath) {
                 for (const Path& path : gi->paths()) {
                     for (int i = 0, s = path.size(); i < s; ++i) {
                         const QPointF pt1(path[i]);

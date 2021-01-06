@@ -22,24 +22,26 @@ using namespace ClipperLib;
 #include <QPropertyAnimation>
 
 enum class GiType {
-    Gerber = QGraphicsItem::UserType,
-    Bridge,
+    DataPath = QGraphicsItem::UserType,
+    DataSolid,
     Drill,
-    Path,
-    Home,
-    PointZero,
-    AperturePath,
-    Pin,
-    LayoutFrames,
 
-    ThermalPr, // ThermalForm
-    SlotPr, // DrillForm
-    DrillPr, // DrillForm
-    ApetrurePr, // DrillForm
+    MarkHome = QGraphicsItem::UserType + 100,
+    MarkLayoutFrames,
+    MarkPin,
+    MarkZero,
 
-    Error,
+    Path = QGraphicsItem::UserType + 200,
+    Bridge,
 
-    ShapeC = QGraphicsItem::UserType + 100,
+    PrThermal = QGraphicsItem::UserType + 300, // ThermalForm
+    PrSlot, // DrillForm
+    PrDrill, // DrillForm
+    PrApetrure, // DrillForm
+
+    Error = QGraphicsItem::UserType + 400, // ThermalForm
+
+    ShapeC = QGraphicsItem::UserType + 500,
     ShapeR,
     ShapeL,
     ShapeA,

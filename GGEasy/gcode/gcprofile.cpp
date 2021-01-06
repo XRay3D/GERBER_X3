@@ -49,14 +49,14 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         m_returnPs = m_workingPs;
 
         for (Path& path : m_returnPs)
-            path.append(path.first());
+            path.push_back(path.first());
 
         // fix direction
         if (m_gcp.convent())
             ReversePaths(m_returnPs);
 
         if (m_workingRawPs.size())
-            m_returnPs.append(m_workingRawPs);
+            m_returnPs.push_back(m_workingRawPs);
 
     } else {
         // calc offset
@@ -74,7 +74,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
             offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
             offset.Execute(m_workingRawPs, dOffset);
             if (!m_workingRawPs.isEmpty())
-                m_returnPs.append(m_workingRawPs);
+                m_returnPs.push_back(m_workingRawPs);
         }
 
         // fix direction
@@ -84,7 +84,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
             ReversePaths(m_returnPs);
 
         for (Path& path : m_returnPs)
-            path.append(path.first());
+            path.push_back(path.first());
     }
 
     if (m_returnPs.isEmpty()) {
@@ -93,10 +93,10 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     }
 
     // find Bridges
-    QVector<BridgeItem*> bridgeItems;
+    mvector<BridgeItem*> bridgeItems;
     for (QGraphicsItem* item : App::scene()->items()) {
         if (static_cast<GiType>(item->type()) == GiType::Bridge)
-            bridgeItems.append(static_cast<BridgeItem*>(item));
+            bridgeItems.push_back(static_cast<BridgeItem*>(item));
     }
     // create Bridges
     if (bridgeItems.size()) {
@@ -106,7 +106,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
             for (BridgeItem* bi : bridgeItems) {
                 Point64 pt;
                 if (pointOnPolygon(bi->getPath(), path, &pt))
-                    biStack.append({ bi, pt });
+                    biStack.push_back({ bi, pt });
             }
             if (!biStack.isEmpty()) {
                 Paths paths;
@@ -135,14 +135,14 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
                 // merge result toolPaths
                 mergeSegments(paths);
                 m_returnPs.remove(index--);
-                m_returnPss.append(sortBE(paths));
+                m_returnPss.push_back(sortBE(paths));
             }
         }
     }
 
     sortB(m_returnPs);
     if (m_returnPs.size() != 0)
-        m_returnPss.append(m_returnPs);
+        m_returnPss.push_back(m_returnPs);
     sortBE(m_returnPss);
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);

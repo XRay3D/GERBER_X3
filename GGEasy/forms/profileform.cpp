@@ -115,8 +115,8 @@ void ProfileForm::createFile()
     for (auto* sItem : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
         switch (static_cast<GiType>(sItem->type())) {
-        case GiType::Gerber:
-        case GiType::AperturePath:
+        case GiType::DataSolid:
+        case GiType::DataPath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -126,20 +126,20 @@ void ProfileForm::createFile()
                         return;
                 }
             }
-            if (static_cast<GiType>(sItem->type()) == GiType::Gerber)
-                wPaths.append(gi->paths());
+            if (static_cast<GiType>(sItem->type()) == GiType::DataSolid)
+                wPaths.push_back(gi->paths());
             else
-                wRawPaths.append(gi->paths());
+                wRawPaths.push_back(gi->paths());
             break;
         case GiType::ShapeC:
         case GiType::ShapeR:
         case GiType::ShapeL:
         case GiType::ShapeA:
         case GiType::ShapeT:
-            wRawPaths.append(gi->paths());
+            wRawPaths.push_back(gi->paths());
             break;
         case GiType::Drill:
-            wPaths.append(gi->paths());
+            wPaths.push_back(gi->paths());
             break;
         default:
             break;
@@ -155,21 +155,21 @@ void ProfileForm::createFile()
     GCode::GCodeParams gcp;
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tools.append(tool);
+    gcp.tools.push_back(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     if (ui->cbxStrip->isEnabled())
         gcp.params[GCode::GCodeParams::Strip] = ui->cbxStrip->isChecked();
     gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
 
     {
-        QVector<QPointF> brv;
+        QPolygonF brv;
         for (QGraphicsItem* item : App::scene()->items()) {
             if (static_cast<GiType>(item->type()) == GiType::Bridge)
-                brv.append(item->pos());
+                brv.push_back(item->pos());
         }
         if (!brv.isEmpty()) {
-            gcp.params[GCode::GCodeParams::Bridges].setValue(brv);
-            gcp.params[GCode::GCodeParams::BridgeLen].setValue(ui->dsbxBridgeLenght->value());
+            //gcp.params[GCode::GCodeParams::Bridges].fromValue(brv);
+            gcp.params[GCode::GCodeParams::BridgeLen] = ui->dsbxBridgeLenght->value();
         }
     }
 
@@ -301,12 +301,12 @@ void ProfileForm::editFile(GCode::File* file)
     { // Bridges
         if (gcp.params.contains(GCode::GCodeParams::Bridges)) {
             ui->dsbxBridgeLenght->setValue(gcp.params[GCode::GCodeParams::BridgeLen].toDouble());
-            for (auto& pos : gcp.params[GCode::GCodeParams::Bridges].value<QVector<QPointF>>()) {
-                brItem = new BridgeItem(m_lenght, m_size, side, brItem);
-                App::scene()->addItem(brItem);
-                brItem->setPos(pos);
-                brItem->m_lastPos = pos;
-            }
+            //            for (auto& pos : gcp.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
+            //                brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+            //                App::scene()->addItem(brItem);
+            //                brItem->setPos(pos);
+            //                brItem->m_lastPos = pos;
+            //            }
             updateBridge();
             brItem = new BridgeItem(m_lenght, m_size, side, brItem);
             //        delete item;

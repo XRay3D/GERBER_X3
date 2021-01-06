@@ -17,10 +17,12 @@ HEADERS += \
     $$PWD/componentitem.h \
     $$PWD/datapathitem.h \
     $$PWD/datasoliditem.h \
+    $$PWD/drillpreviewgi.h \
     $$PWD/erroritem.h \
     $$PWD/gcpathitem.h \
     $$PWD/graphicsitem.h \
     $$PWD/itemgroup.h \
+    $$PWD/drillitem.h \
 
 #SOURCES += \
 #    $$PWD/componentitem.cpp \

@@ -26,6 +26,7 @@ namespace Gerber {
 
 class File : public FileInterface, QVector<GraphicObject> {
     friend class Parser;
+    friend class Plugin;
 
 public:
     explicit File(const QString& name = "");
@@ -55,7 +56,6 @@ public:
 
     void addToScene() const;
     void setColor(const QColor& color) override;
-
 
 protected:
     Paths merge() const override;
