@@ -14,8 +14,8 @@
 *                                                                              *
 *******************************************************************************/
 #include "myclipper.h"
+#include "app.h"
 #include "qmath.h"
-#include "settings.h"
 #include <QElapsedTimer>
 #include <QLineF>
 
@@ -58,7 +58,7 @@ Path CirclePath(double diametr, const Point64& center)
         return Path();
 
     const double radius = diametr * 0.5;
-    const int intSteps = AppSettings::gbrGcCircleSegments(radius * dScale);
+    const int intSteps = App::settings().clpCircleSegments(radius * dScale);
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
         poligon[i] = Point64(

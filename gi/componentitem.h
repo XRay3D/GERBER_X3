@@ -18,9 +18,9 @@
 
 class ComponentItem final : public GraphicsItem {
     const Gerber::Component& m_component;
-    QVector<QRectF> pins;
+    mvector<QRectF> pins;
     mutable QPainterPath pathRefDes;
-    mutable QVector<QPair<QPainterPath, QPointF>> pathPins;
+    mutable mvector<QPair<QPainterPath, QPointF>> pathPins;
     mutable double m_scale = std::numeric_limits<double>::max();
     mutable QPointF pt;
 

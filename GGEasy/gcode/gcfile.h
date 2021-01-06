@@ -38,8 +38,8 @@ private:
     Pathss m_toolPathss; /////
     const GCodeParams m_gcp; ////
 
-    QVector<QVector<QPolygonF>> normalizedPathss(const QPointF& offset);
-    QVector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
+    mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
+    mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
 
     void initSave();
     void genGcodeAndTile();
@@ -66,7 +66,7 @@ private:
     void saveMillingRaster(const QPointF& offset);
 
     void saveLaserHLDI(const QPointF& offset);
-    QVector<QSharedPointer<QColor>> debugColor;
+    mvector<QSharedPointer<QColor>> debugColor;
 
     // FileInterface interfaces
 protected:
@@ -77,7 +77,7 @@ protected:
 public:
     void createGi() override;
 
-    QVector<QString> gCodeText() const;
+    mvector<QString> gCodeText() const;
     Tool getTool() const;
     const GCodeParams& gcp() const;
 };

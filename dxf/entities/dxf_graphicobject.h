@@ -22,7 +22,7 @@ struct Entity;
 
 class GraphicObject {
     friend class File;
-    friend class Parser;
+    friend class Plugin;
 
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
     {

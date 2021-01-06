@@ -15,10 +15,11 @@
 *******************************************************************************/
 #include "gccreator.h"
 #include "errno.h"
-#include "project.h"
+#include "erroritem.h"
+#include "filemodel.h"
+#include "forms/bridgeitem.h"
 #include "gcfile.h"
 #include "gcvoronoi.h"
-#include "erroritem.h"
 #include "locale.h"
 #include "point.h"
 #include "project.h"
@@ -32,8 +33,6 @@
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
-#include "filemodel.h"
-#include "forms/bridgeitem.h"
 #include <limits>
 #include <stdexcept>
 
@@ -41,17 +40,17 @@
 
 void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool)
 {
-    if (ps.isEmpty()) {
+    if (ps.empty()) {
 
         return;
     }
-    for (int i = 0; i < ps.size(); ++i)
-        if (ps[i].isEmpty())
-            ps.remove(i--);
+    for (size_t i = 0; i < ps.size(); ++i)
+        if (ps[i].empty())
+            ps.erase(ps.begin() + i--);
 
     if (close)
         for (Path& p : ps)
-            p.append(p.first());
+            p.push_back(p.front());
 
     //assert(ps.isEmpty());
     GCode::GCodeParams gcp { tool, 0.0, GCode::Profile };
@@ -72,7 +71,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool)
     //        if (path.size() < 2)
     //            continue;
     //        auto pl = new Shapes::PolyLine(path[0], path[1]);
-    //        for (int i = 2; i < path.size(); ++i)
+    //        for (size_t i = 2; i < path.size(); ++i)
     //            pl->addPt(path[i]);
     //        //        for (auto& p : path.mid(3))
     //        //            pl->addPt(p);
@@ -135,26 +134,26 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k)
             if (!node->IsHole()) {
                 Path& path = node->Contour;
                 paths.push_back(path);
-                for (int i = 0, end = node->ChildCount(); i < end; ++i) {
+                for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
                     path = node->Childs[i]->Contour;
                     paths.push_back(path);
                 }
-                m_groupedPss.append(paths);
+                m_groupedPss.push_back(paths);
             }
-            for (int i = 0, end = node->ChildCount(); i < end; ++i)
+            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
                 grouping(node->Childs[i], group);
             break;
         case CopperPaths:
             if (node->IsHole()) {
                 Path& path = node->Contour;
                 paths.push_back(path);
-                for (int i = 0, end = node->ChildCount(); i < end; ++i) {
+                for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
                     path = node->Childs[i]->Contour;
                     paths.push_back(path);
                 }
                 m_groupedPss.push_back(paths);
             }
-            for (int i = 0, end = node->ChildCount(); i < end; ++i)
+            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
                 grouping(node->Childs[i], group);
             break;
         }
@@ -164,8 +163,8 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k)
     grouping(polyTree.GetFirst(), group);
 
     if (group == CutoffPaths) {
-        if (m_groupedPss.size() > 1 && m_groupedPss.first().size() == 2)
-            m_groupedPss.removeFirst();
+        if (m_groupedPss.size() > 1 && m_groupedPss.front().size() == 2)
+            m_groupedPss.erase(m_groupedPss.begin());
     }
 
     return m_groupedPss;
@@ -176,36 +175,38 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k)
 ///
 void Creator::addRawPaths(Paths rawPaths)
 {
-    if (rawPaths.isEmpty())
+    if (rawPaths.empty())
         return;
 
     //    if (m_gcp.side() == On) {
-    //        m_workingRawPs.append(rawPaths);
+    //        m_workingRawPs.push_back(rawPaths);
     //        return;
     //    }
 
-    for (int i = 0; i < rawPaths.size(); ++i)
+    for (size_t i = 0; i < rawPaths.size(); ++i)
         if (rawPaths[i].size() < 2)
-            rawPaths.remove(i--);
+            rawPaths.erase(rawPaths.begin() + i--);
 
     const double glueLen = App::project()->glue() * uScale;
     Clipper clipper;
-    for (int i = 0; i < rawPaths.size(); ++i) {
-        Point64& pf = rawPaths[i].first();
-        Point64& pl = rawPaths[i].last();
-        if (rawPaths[i].size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
-            clipper.AddPath(rawPaths.takeAt(i--), ptSubject, true);
+    for (size_t i = 0; i < rawPaths.size(); ++i) {
+        Point64& pf = rawPaths[i].front();
+        Point64& pl = rawPaths[i].back();
+        if (rawPaths[i].size() > 3 && (pf == pl || Length(pf, pl) < glueLen)) {
+            clipper.AddPath(rawPaths[i], ptSubject, true);
+            rawPaths.erase(rawPaths.begin() + i--);
+        }
     }
 
     mergeSegments(rawPaths, App::project()->glue() * uScale);
 
     for (Path& path : rawPaths) {
-        Point64& pf = path.first();
-        Point64& pl = path.last();
+        Point64& pf = path.front();
+        Point64& pl = path.back();
         if (path.size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
             clipper.AddPath(path, ptSubject, true);
         else
-            m_workingRawPs.append(path);
+            m_workingRawPs.push_back(path);
     }
 
     IntRect r(clipper.GetBounds());
@@ -217,14 +218,12 @@ void Creator::addRawPaths(Paths rawPaths)
                         { r.left - k, r.top - k } },
         ptClip, true);
     clipper.Execute(ctXor, paths, pftEvenOdd);
-    m_workingPs.append(paths.mid(1)); // paths.takeFirst();
-
-
+    m_workingPs.insert(m_workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
-void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(supportPaths); }
+void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.insert(m_supportPss.end(), supportPaths.begin(), supportPaths.end()); }
 
-void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
+void Creator::addPaths(const Paths& paths) { m_workingPs.insert(m_workingPs.end(), paths.begin(), paths.end()); }
 
 void Creator::createGc()
 {
@@ -236,7 +235,7 @@ void Creator::createGc()
             type() == Raster) {
             switch (m_gcp.side()) {
             case Outer:
-                groupedPaths(CutoffPaths, m_gcp.tools.first().getDiameter(m_gcp.getDepth()) * uScale + 100);
+                groupedPaths(CutoffPaths, m_gcp.tools.front().getDiameter(m_gcp.getDepth()) * uScale + 100);
                 createability(CutoffPaths);
                 break;
             case Inner:
@@ -247,7 +246,6 @@ void Creator::createGc()
                 break;
             }
         }
-
 
         create();
 
@@ -290,7 +288,7 @@ QPair<int, int> Creator::getProgress()
 
 void Creator::stacking(Paths& paths)
 {
-    if (paths.isEmpty())
+    if (paths.empty())
         return;
     QElapsedTimer t;
     t.start();
@@ -312,8 +310,8 @@ void Creator::stacking(Paths& paths)
     t.start();
     auto mathBE = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
         QList<int> list;
-        list.append(idx.first);
-        for (int i = paths.count() - 1, index = idx.first; i; --i) {
+        list.push_back(idx.first);
+        for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double d = std::numeric_limits<double>::max();
             Point64 pt;
             for (const Point64& pts : paths[i - 1]) {
@@ -325,11 +323,11 @@ void Creator::stacking(Paths& paths)
             }
             if (d <= m_toolDiameter) {
                 list.prepend(paths[i - 1].indexOf(pt));
-                index = list.first();
+                index = list.front();
             } else
                 return false;
         }
-        for (int i = 0; i < paths.count(); ++i)
+        for (size_t i = 0; i < paths.size(); ++i)
             std::rotate(paths[i].begin(), paths[i].begin() + list[i], paths[i].end());
         std::rotate(path.begin(), path.begin() + idx.second, path.end());
         return true;
@@ -337,21 +335,21 @@ void Creator::stacking(Paths& paths)
     using Worck = QPair<PolyNode*, bool>;
     std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
         auto [node, newPaths] = w;
-        if (!m_returnPss.isEmpty() || newPaths) {
+        if (!m_returnPss.empty() || newPaths) {
             Path path(node->Contour);
             if (!(m_gcp.convent() ^ !node->IsHole()) ^ !(m_gcp.side() == Outer))
                 ReversePath(path);
-            if (AppSettings::gbrCleanPolygons())
-                CleanPolygon(path, uScale * 0.0005);
-            if (m_returnPss.isEmpty() || newPaths) {
-                m_returnPss.append({ path });
+            //            if (App::settings().gbrCleanPolygons())
+            //                CleanPolygon(path, uScale * 0.0005);
+            if (m_returnPss.empty() || newPaths) {
+                m_returnPss.push_back({ path });
             } else {
                 // check distance;
                 QPair<int, int> idx;
                 double d = std::numeric_limits<double>::max();
-                for (int id = 0; id < m_returnPss.last().last().size(); ++id) {
-                    const Point64& ptd = m_returnPss.last().last()[id];
-                    for (int is = 0; is < path.size(); ++is) {
+                for (size_t id = 0; id < m_returnPss.back().back().size(); ++id) {
+                    const Point64& ptd = m_returnPss.back().back()[id];
+                    for (size_t is = 0; is < path.size(); ++is) {
                         const Point64& pts = path[is];
                         const double l = Length(ptd, pts);
                         if (d >= l) {
@@ -361,15 +359,15 @@ void Creator::stacking(Paths& paths)
                         }
                     }
                 }
-                if (d <= m_toolDiameter && mathBE(m_returnPss.last(), path, idx))
-                    m_returnPss.last().append(path);
+                if (d <= m_toolDiameter && mathBE(m_returnPss.back(), path, idx))
+                    m_returnPss.back().push_back(path);
                 else
-                    m_returnPss.append({ path });
+                    m_returnPss.push_back({ path });
             }
-            for (int i = 0, end = node->ChildCount(); i < end; ++i)
+            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
                 stacker({ node->Childs[i], static_cast<bool>(i) });
         } else { // Start from here
-            for (int i = 0, end = node->ChildCount(); i < end; ++i)
+            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
                 stacker({ node->Childs[i], true });
         }
         progress();
@@ -380,17 +378,17 @@ void Creator::stacking(Paths& paths)
 
     for (Paths& retPaths : m_returnPss) {
         std::reverse(retPaths.begin(), retPaths.end());
-        for (int i = 0; i < retPaths.size(); ++i) {
-            if (retPaths[i].isEmpty())
-                retPaths.remove(i--);
+        for (size_t i = 0; i < retPaths.size(); ++i) {
+            if (retPaths[i].empty())
+                retPaths.erase(retPaths.begin() + i--);
         }
         for (Path& path : retPaths)
-            path.append(path.first());
+            path.push_back(path.front());
     }
     sortB(m_returnPss);
     //    for (auto& paths : m_returnPss) {
     //        bool ff, fl;
-    //        for (int f = 0, l = paths.size() - 1; f < l; ++f, --l) {
+    //        for (size_t f = 0, l = paths.size() - 1; f < l; ++f, --l) {
     //            if (f) {
     //                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
     //                    ReversePath(paths[f]);
@@ -406,11 +404,11 @@ void Creator::stacking(Paths& paths)
 
 void Creator::mergeSegments(Paths& paths, double glue)
 {
-    int size;
+    size_t size;
     do {
         size = paths.size();
-        for (int i = 0; i < paths.size(); ++i) {
-            for (int j = 0; j < paths.size(); ++j) {
+        for (size_t i = 0; i < paths.size(); ++i) {
+            for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
                 if (i >= paths.size() || j >= paths.size()) {
@@ -418,24 +416,24 @@ void Creator::mergeSegments(Paths& paths, double glue)
                     j = 0;
                     break;
                 }
-                Point64& pif = paths[i].first();
-                Point64& pil = paths[i].last();
-                Point64& pjf = paths[j].first();
-                Point64& pjl = paths[j].last();
+                Point64& pif = paths[i].front();
+                Point64& pil = paths[i].back();
+                Point64& pjf = paths[j].front();
+                Point64& pjl = paths[j].back();
                 if (pil == pjf) {
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    paths.erase(paths.begin() + j--);
                     continue;
                 }
                 if (pif == pjl) {
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+                    paths.erase(paths.begin() + i--);
                     break;
                 }
                 if (pil == pjl) {
                     ReversePath(paths[j]);
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    paths.erase(paths.begin() + j--);
                     continue;
                 }
             }
@@ -445,28 +443,28 @@ void Creator::mergeSegments(Paths& paths, double glue)
         return;
     do {
         size = paths.size();
-        for (int i = 0; i < paths.size(); ++i) {
-            for (int j = 0; j < paths.size(); ++j) {
+        for (size_t i = 0; i < paths.size(); ++i) {
+            for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                Point64& pif = paths[i].first();
-                Point64& pil = paths[i].last();
-                Point64& pjf = paths[j].first();
-                Point64& pjl = paths[j].last();
+                Point64& pif = paths[i].front();
+                Point64& pil = paths[i].back();
+                Point64& pjf = paths[j].front();
+                Point64& pjl = paths[j].back();
                 if (Length(pil, pjf) < glue) {
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    paths.erase(paths.begin() + j--);
                     continue;
                 }
                 if (Length(pif, pjl) < glue) {
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+                    paths.erase(paths.begin() + i--);
                     break;
                 }
                 if (Length(pil, pjl) < glue) {
                     ReversePath(paths[j]);
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    paths.erase(paths.begin() + j--);
                     continue;
                 }
             }
@@ -519,13 +517,13 @@ void Creator::progress()
 bool Creator::createability(bool side)
 {
     //    Paths wpe;
-    const double d = m_gcp.tools.last().getDiameter(m_gcp.getDepth()) * uScale;
+    const double d = m_gcp.tools.back().getDiameter(m_gcp.getDepth()) * uScale;
     const double r = d * 0.5;
     const double testArea = d * d - M_PI * r * r;
 
     Paths srcPaths;
-    for (int pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
-        srcPaths.append(m_groupedPss[pIdx]);
+    for (size_t pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
+        srcPaths.insert(srcPaths.end(), m_groupedPss[pIdx].begin(), m_groupedPss[pIdx].end());
     }
 
     Paths frPaths;
@@ -533,8 +531,8 @@ bool Creator::createability(bool side)
         ClipperOffset offset(uScale);
         offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, -r);
-        if (AppSettings::gbrCleanPolygons())
-            CleanPolygons(frPaths, uScale * 0.0005);
+        //        if (App::settings().gbrCleanPolygons())
+        //            CleanPolygons(frPaths, uScale * 0.0005);
         offset.Clear();
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, r + 100);
@@ -548,7 +546,7 @@ bool Creator::createability(bool side)
         clipper.Execute(ctDifference, frPaths, pftPositive);
     }
 
-    if (!frPaths.isEmpty()) {
+    if (!frPaths.empty()) {
         PolyTree polyTree;
         {
             Clipper clipper;
@@ -567,7 +565,7 @@ bool Creator::createability(bool side)
             } else {
                 QSet<int> skip;
                 for (auto& point : node->Contour) {
-                    for (int i = 0; i < srcPaths.size(); ++i) {
+                    for (size_t i = 0; i < srcPaths.size(); ++i) {
                         if (skip.contains(i))
                             continue;
                         const auto& path = srcPaths[i];
@@ -586,7 +584,7 @@ bool Creator::createability(bool side)
 
         const std::function<void(PolyNode*, double)> creator = [&creator, test, testArea, this](PolyNode* node, double area) {
             if (node && !node->IsHole()) { // init run
-                for (int i = 0; i < node->ChildCount(); ++i) {
+                for (size_t i = 0; i < node->ChildCount(); ++i) {
                     if (area = -Area(node->Childs[i]->Contour); testArea < area) {
                         if (test(node->Childs[i])) {
                             creator(node->Childs[i], area);
@@ -597,13 +595,13 @@ bool Creator::createability(bool side)
                 static Paths paths;
                 paths.clear();
                 paths.reserve(node->ChildCount() + 1);
-                paths.append(std::move(node->Contour)); // init path
-                for (int i = 0; i < node->ChildCount(); ++i) {
+                paths.push_back(std::move(node->Contour)); // init path
+                for (size_t i = 0; i < node->ChildCount(); ++i) {
                     area += Area(node->Childs[i]->Contour);
-                    paths.append(std::move(node->Childs[i]->Contour));
+                    paths.push_back(std::move(node->Childs[i]->Contour));
                 }
-                items.append(new ErrorItem(paths, area * dScale * dScale));
-                for (int i = 0; i < node->ChildCount(); ++i) {
+                items.push_back(new ErrorItem(paths, area * dScale * dScale));
+                for (size_t i = 0; i < node->ChildCount(); ++i) {
                     creator(node->Childs[i], area);
                 }
             }
@@ -611,7 +609,7 @@ bool Creator::createability(bool side)
         creator(polyTree.GetFirst(), 0);
     }
 
-    if (!items.isEmpty())
+    if (!items.empty())
         isContinueCalc();
 
     return true;
@@ -628,17 +626,17 @@ void Creator::setGcp(const GCodeParams& gcp)
 Paths& Creator::sortB(Paths& src)
 {
     Point64 startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
-    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        int swapIdx = firstIdx;
+    for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
-        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = Length(startPt, src[secondIdx].first());
+        for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double length = Length(startPt, src[secondIdx].front());
             if (destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
             }
         }
-        startPt = src[swapIdx].last();
+        startPt = src[swapIdx].back();
         if (swapIdx != firstIdx)
             std::swap(src[firstIdx], src[swapIdx]);
     }
@@ -648,14 +646,14 @@ Paths& Creator::sortB(Paths& src)
 Paths& Creator::sortBE(Paths& src)
 {
     Point64 startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
-    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         progress(src.size(), firstIdx);
-        int swapIdx = firstIdx;
+        size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
-        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = Length(startPt, src[secondIdx].first());
-            const double lenLast = Length(startPt, src[secondIdx].last());
+        for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double lenFirst = Length(startPt, src[secondIdx].front());
+            const double lenLast = Length(startPt, src[secondIdx].back());
             if (lenFirst < lenLast) {
                 if (destLen > lenFirst) {
                     destLen = lenFirst;
@@ -674,7 +672,7 @@ Paths& Creator::sortBE(Paths& src)
         }
         if (reverse)
             ReversePath(src[swapIdx]);
-        startPt = src[swapIdx].last();
+        startPt = src[swapIdx].back();
         if (swapIdx != firstIdx)
             std::swap(src[firstIdx], src[swapIdx]);
     }
@@ -686,21 +684,21 @@ Pathss& Creator::sortB(Pathss& src)
     Point64 startPt(
         (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
 
-    for (int i = 0; i < src.size(); ++i) {
-        if (src[i].isEmpty())
-            src.remove(i--);
+    for (size_t i = 0; i < src.size(); ++i) {
+        if (src[i].empty())
+            src.erase(src.begin() + i--);
     }
-    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        int swapIdx = firstIdx;
+    for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
-        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = Length(startPt, src[secondIdx].first().first());
+        for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double length = Length(startPt, src[secondIdx].front().front());
             if (destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
             }
         }
-        startPt = src[swapIdx].last().last();
+        startPt = src[swapIdx].back().back();
         if (swapIdx != firstIdx)
             std::swap(src[firstIdx], src[swapIdx]);
     }
@@ -711,13 +709,13 @@ Pathss& Creator::sortBE(Pathss& src)
 {
     Point64 startPt(
         (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
-    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        int swapIdx = firstIdx;
+    for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
-        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = Length(startPt, src[secondIdx].first().first());
-            const double lenLast = Length(startPt, src[secondIdx].last().last());
+        for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double lenFirst = Length(startPt, src[secondIdx].front().front());
+            const double lenLast = Length(startPt, src[secondIdx].back().back());
             if (lenFirst < lenLast) {
                 if (destLen > lenFirst) {
                     destLen = lenFirst;
@@ -734,9 +732,9 @@ Pathss& Creator::sortBE(Pathss& src)
         }
         //        if (reverse)
         //            std::reverse(src[swapIdx].begin(), src[swapIdx].end());
-        //        startPt = src[swapIdx].last().last();
+        //        startPt = src[swapIdx].back().back();
         if (swapIdx != firstIdx && !reverse) {
-            startPt = src[swapIdx].last().last();
+            startPt = src[swapIdx].back().back();
             std::swap(src[firstIdx], src[swapIdx]);
         }
     }
@@ -745,11 +743,11 @@ Pathss& Creator::sortBE(Pathss& src)
 
 bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret)
 {
-    const int cnt = path.size();
+    const size_t cnt = path.size();
     if (cnt < 2)
         return false;
     QPointF p;
-    for (int i = 0; i < cnt; ++i) {
+    for (size_t i = 0; i < cnt; ++i) {
         const Point64& pt1 = path[(i + 1) % cnt];
         const Point64& pt2 = path[i];
         QLineF l1(pt1, pt2);

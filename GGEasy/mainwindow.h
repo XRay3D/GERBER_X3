@@ -14,7 +14,7 @@
 #pragma once
 
 #include "interfaces/file.h"
-#include "interfaces/parser.h"
+#include "interfaces/fileplugin.h"
 
 #include "recent.h"
 

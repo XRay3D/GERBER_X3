@@ -143,8 +143,8 @@ Paths File::merge() const
         else
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
     }
-    if (AppSettings::gbrCleanPolygons())
-        CleanPolygons(m_mergedPaths, 0.0005 * uScale);
+    if (Settings::cleanPolygons())
+        CleanPolygons(m_mergedPaths, Settings::cleanPolygonsDist() * uScale);
     return m_mergedPaths;
 }
 
@@ -333,12 +333,12 @@ void File::createGi()
 
         for (const GraphicObject& go : *this) {
             if (!go.path().isEmpty()) {
-                if (AppSettings::gbrSimplifyRegions() && go.path().first() == go.path().last()) {
+                if (Settings::simplifyRegions() && go.path().first() == go.path().last()) {
                     Paths paths;
                     SimplifyPolygon(go.path(), paths);
                     for (Path& path : paths) {
                         path.append(path.first());
-                        if (!AppSettings::gbrSkipDuplicates()) {
+                        if (!Settings::skipDuplicates()) {
                             checkList.push_front(path);
                             m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
                         } else if (!contains(path)) {
@@ -347,7 +347,7 @@ void File::createGi()
                         }
                     }
                 } else {
-                    if (!AppSettings::gbrSkipDuplicates()) {
+                    if (!Settings::skipDuplicates()) {
                         m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
                     } else if (!contains(go.path())) {
                         m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));

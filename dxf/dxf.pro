@@ -1,34 +1,21 @@
-TEMPLATE        = lib
-CONFIG         += plugin
-QT             += widgets opengl
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2020                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
+include(../plugin.pri)
+include(../defines.pri)
+include(../suffix.pri)
 
-#HEADERS         = echoplugin.h
-#SOURCES         = echoplugin.cpp
-TARGET          = $$qtLibraryTarget(dxf)
-#DESTDIR = $$_PRO_FILE_PWD_/../bin
-
-DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
-
-SUFIX = ""
-
-contains(QT_ARCH, i386) {
-    SUFIX = "_x32"
-} else {
-    SUFIX = "_x64"
-}
-msvc* {
-    SUFIX = $$SUFIX"_msvc"
-}
-gcc* {
-    SUFIX = $$SUFIX"_gcc"
-}
-CONFIG(debug, debug|release){
-    SUFIX = $$SUFIX"_d"
-}
-
-TARGET = $$TARGET$$SUFIX
+TARGET = $$TARGET$$SUFFIX
 
 message($$TARGET)
 
@@ -36,12 +23,12 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
 }
 
 gcc* {
@@ -50,12 +37,12 @@ gcc* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
     LIBS += "-L"$$_PRO_FILE_PWD_/../lib
-    LIBS += -lclipper$$SUFIX
-    LIBS += -lsettings$$SUFIX
-    LIBS += -lgraphicsview$$SUFIX
-    LIBS += -lgi$$SUFIX
-    LIBS += -lfiletree$$SUFIX
-    LIBS += -lproject$$SUFIX
+    LIBS += -lclipper$$SUFFIX
+    LIBS += -lsettings$$SUFFIX
+    LIBS += -lgraphicsview$$SUFFIX
+    LIBS += -lgi$$SUFFIX
+    LIBS += -lfiletree$$SUFFIX
+    LIBS += -lproject$$SUFFIX
 }
 
 linux {
@@ -76,21 +63,14 @@ INCLUDEPATH += ../gi
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../project
 
-#OBJECTS_DIR = $$_PRO_FILE_PWD_
-
 EXAMPLE_FILES = gerber.json
 
-# install
-#target.path = $$[QT_INSTALL_EXAMPLES]/widgets/tools/echoplugin/plugins
-#INSTALLS += target
-
-#CONFIG += install_ok  # Do not cargo-cult this!
 HEADERS += \
     dxf_block.h \
     dxf_codedata.h \
     dxf_file.h \
     dxf_node.h \
-    dxf_parser.h \
+    dxf_plugin.h \
     dxf_sourcedialog.h \
     dxf_types.h \
     entities/dxf_arc.h \
@@ -163,7 +143,7 @@ SOURCES += \
     dxf_codedata.cpp \
     dxf_file.cpp \
     dxf_node.cpp \
-    dxf_parser.cpp \
+    dxf_plugin.cpp \
     dxf_sourcedialog.cpp \
     dxf_types.cpp \
     entities/dxf_arc.cpp \

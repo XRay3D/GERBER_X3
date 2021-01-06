@@ -69,9 +69,9 @@ protected:
     Paths m_g0path;
 
     inline static QString lastDir;
-    inline static const QVector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    inline static const mvector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 
-    QVector<double> getDepths();
+    mvector<double> getDepths();
 
     bool formatFlags[Size];
     QString lastValues[6];
@@ -89,21 +89,21 @@ protected:
         return "G1";
     }
 
-    QVector<QString> savePath(const QPolygonF& path, double spindleSpeed)
+    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed)
     {
-        QVector<QString> lines;
+        mvector<QString> lines;
         lines.reserve(path.size());
         bool skip = true;
         for (const QPointF& point : path) {
             if (skip)
                 skip = false;
             else
-                lines.append(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed) }));
+                lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed) }));
         }
         return lines;
     }
 
-    QString formated(const QVector<QString>& data)
+    QString formated(const mvector<QString>& data)
     {
         QString ret;
         for (const QString& str : data) {

@@ -91,10 +91,10 @@ public:
         return 0;
     }
 
-    void append(NodeInterface* item)
+    void push_back(NodeInterface* item)
     {
         item->m_parentItem = this;
-        childItems.append(QSharedPointer<NodeInterface>(item));
+        childItems.push_back(QSharedPointer<NodeInterface>(item));
     }
     void remove(int row) { childItems.removeAt(row); }
 

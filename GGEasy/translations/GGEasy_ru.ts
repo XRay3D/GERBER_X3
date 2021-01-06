@@ -1879,7 +1879,7 @@ without width and without contacts.</source>
     </message>
 </context>
 <context>
-    <name>Gerber::Parser</name>
+    <name>Gerber::Plugin</name>
     <message>
         <source>Aperture %1 not found!</source>
         <translation type="vanished">Апертура %1 не найдена!</translation>

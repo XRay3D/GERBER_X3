@@ -31,7 +31,7 @@ class AbstractAperture;
 }
 
 class DrillModel;
-class DrillPrGI;
+class AbstractDrillPrGI;
 class Header;
 class QCheckBox;
 
@@ -43,7 +43,6 @@ public:
     ~DrillForm() override;
 
 #ifdef GBR_
-    void setApertures(const Gerber::ApertureMap* value);
     void setExcellonTools(const Excellon::Tools& value);
 #endif
     void updateFiles();
@@ -65,8 +64,8 @@ private:
     void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
     void on_customContextMenuRequested(const QPoint& pos);
 
-    void updateToolsOnGi(int toolId);
-    void pickUpTool(int apertureId, double diameter, bool isSlot = false);
+    void updateToolsOnGi(int apToolId);
+    void pickUpTool(const double k = 0.05); // 5%
 
     //    inline void updateCreateButton();
     inline void setSelected(int id, bool fl);
@@ -80,7 +79,7 @@ private:
     Gerber::ApertureMap m_apertures;
     Excellon::Tools m_tools;
 #endif
-    QMap<int, QVector<QSharedPointer<DrillPrGI>>> m_giPeview;
+    DrillPreviewGiMap m_giPeview;
     FileInterface* file = nullptr;
     QCheckBox* checkBox;
     Header* header;
@@ -114,7 +113,7 @@ protected:
 
 private:
     int flag = Qt::Unchecked;
-    mutable QVector<QRect> m_checkRect;
+    mutable mvector<QRect> m_checkRect;
     void setChecked(int index, bool ch);
     bool checked(int index) const;
     DrillModel* model() const;

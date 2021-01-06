@@ -43,7 +43,7 @@ public:
     }
 
     template <typename T>
-    auto getValue(const QString& key, T& value, const QVariant& defaultValue = QVariant()) const
+    auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const
     {
         value = QSettings::value(key, defaultValue).value<T>();
         return value;
@@ -69,7 +69,7 @@ public:
             return widget->currentIndex();
         } else if constexpr (std::is_same_v<W, QFontComboBox>) { //
             QSettings::setValue(name, widget->currentFont().family());
-            return widget->currentIndex();
+            return widget->currentFont().family();
         } else if constexpr (std::is_same_v<W, QLineEdit>) {
             QSettings::setValue(name, widget->text());
             return widget->text();
@@ -85,7 +85,7 @@ public:
     }
 
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
-    auto getValue(W* widget, const QVariant& defaultValue = QVariant()) const
+    auto getValue(W* widget, const QVariant& defaultValue = {}) const
     {
         const QString name { widget->objectName() };
         assert(!name.isEmpty());
@@ -119,8 +119,8 @@ public:
         }
     }
 
-    template <typename V, typename = std::enable_if_t<std::is_fundamental_v<V>>>
-    auto getValue(V& val, const char* name, V def) const
+    template <typename V, typename = std::enable_if_t<std::is_arithmetic_v<V>>>
+    auto getValue(V& val, const char* name, V def = {}) const
     {
         if constexpr (std::is_floating_point_v<V>) {
             val = QSettings::value(name, def).toDouble();
@@ -133,7 +133,7 @@ public:
         }
     }
 
-    template <typename V, typename = std::enable_if_t<std::is_fundamental_v<V>>>
+    template <typename V, typename = std::enable_if_t<std::is_arithmetic_v<V>>>
     auto setValue(V val, const char* name)
     {
         QSettings::setValue(name, val);
@@ -141,30 +141,30 @@ public:
     }
 };
 
-enum class Colors : int {
-    Background,
-    Pin,
-    CutArea,
-    Grid1,
-    Grid5,
-    Grid10,
-    Hole,
-    Home,
-    ToolPath,
-    Zero,
-    G0,
-    Count
+struct GuiColors {
+    enum : int {
+        Background,
+        Pin,
+        CutArea,
+        Grid1,
+        Grid5,
+        Grid10,
+        Hole,
+        Home,
+        ToolPath,
+        Zero,
+        G0,
+        Count
+    };
 };
 
-namespace HomePosition {
-enum {
+enum HomePosition : int {
     BottomLeft,
     BottomRight,
     TopLeft,
     TopRight,
     AlwaysZero
 };
-}
 
 class SettingsDialog;
 
@@ -174,91 +174,43 @@ class AppSettings {
 public:
     explicit AppSettings();
 
-    AppSettings(const AppSettings&) = delete;
-    AppSettings(AppSettings&&) = delete;
-    AppSettings& operator=(AppSettings&& a) = delete;
-    AppSettings& operator=(const AppSettings& app) = delete;
+    //    AppSettings(const AppSettings&) = delete;
+    //    AppSettings(AppSettings&&) = delete;
+    //    AppSettings& operator=(AppSettings&& a) = delete;
+    //    AppSettings& operator=(const AppSettings& app) = delete;
 
-    static void setApp(AppSettings* appSettings);
-    static AppSettings* appSettings();
-
-    /*G-Code*/
-    static QString gcFileExtension();
-    static QString gcFormat();
-    static QString gcLaserConstOn();
-    static QString gcLaserDynamOn();
-    static QString gcSpindleLaserOff();
-    static QString gcSpindleOn();
-
-    static QString gcStart();
-    static QString gcEnd();
-
-    static QString gcLaserStart();
-    static QString gcLaserEnd();
-
-    static bool gcInfo();
-    static bool gcSameFolder();
-
-    /*DXF*/
-    static QString dxfDefaultFont();
-    static bool dxfBoldFont();
-    static bool dxfItalicFont();
-    static bool dxfOverrideFonts();
+    //    void set(AppSettings* appSettings);
+    //    AppSettings* ptr();
 
     /*GUI*/
-    static QColor& guiColor(Colors id);
-    static bool guiSmoothScSh();
-    static bool animSelection();
+    QColor& guiColor(int id);
+    bool guiSmoothScSh();
+    bool animSelection();
 
-    /*Gerber/G-Code*/
-    static int gbrGcCircleSegments(double radius);
+    /*Clipper*/
+    int clpCircleSegments(double radius);
 
-    /*Gerber*/
-    static bool gbrCleanPolygons();
-    static bool gbrSimplifyRegions();
-    static bool gbrSkipDuplicates();
+    /*Markers*/
+    QPointF mkrHomeOffset();
+    int mkrHomePos();
+    QPointF mkrPinOffset();
+    QPointF mkrZeroOffset();
+    int mkrZeroPos();
 
-    static QPointF mkrHomeOffset();
-    static int mkrHomePos();
-    static QPointF mkrPinOffset();
-    static QPointF mkrZeroOffset();
-    static int mkrZeroPos();
     /*Other*/
-    static double gridStep(double scale);
-    static bool inch();
-    static void setInch(bool val);
-    static QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = Qt::NoModifier);
-    static void setSnap(bool val);
-    static bool snap();
+    double gridStep(double scale);
+    bool inch();
+    void setInch(bool val);
+    QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = Qt::NoModifier);
+    void setSnap(bool val);
+    bool snap();
 
 private:
-    inline static AppSettings* m_settings = nullptr;
-    /*G-Code*/
-    QString m_gcFileExtension = { "tap" };
-    QString m_gcFormat { "G?X?Y?Z?F?S?" };
-    QString m_gcLaserConstOn { "M3" };
-    QString m_gcLaserDynamOn { "M4" };
-    QString m_gcSpindleLaserOff { "M5" };
-    QString m_gcSpindleOn { "M3" };
-
-    QString m_gcStart { "G21 G17 G90\nM3 S?" };
-    QString m_gcEnd { "M5\nM30" };
-
-    QString m_gcLaserStart { "G21 G17 G90" };
-    QString m_gcLaserEnd { "M30" };
-
-    bool m_gcInfo { true };
-    bool m_gcSameFolder { true };
-
-    /*DXF*/
-    QString m_dxfDefaultFont { "Arial" };
-    bool m_dxfBoldFont { false };
-    bool m_dxfItalicFont { false };
-    bool m_dxfOverrideFonts { false };
+    //    inline static AppSettings* m_settings = nullptr;
 
     /*GUI*/
     enum { gridColor = 100 };
-    QColor m_guiColor[static_cast<int>(Colors::Count)] {
+    QColor m_guiColor[GuiColors::Count] {
         QColor(Qt::black), //Background
         QColor(255, 255, 0, 120), //Pin
         QColor(Qt::gray), //CutArea
@@ -274,14 +226,9 @@ private:
     bool m_guiSmoothScSh;
     bool m_animSelection = true;
 
-    /*Gerber/G-Code*/
-    double m_gbrGcMinCircleSegmentLength { 0.5 };
-    int m_gbrGcMinCircleSegments { 36 };
-
-    /*Gerber*/
-    bool m_gbrCleanPolygons;
-    bool m_gbrSimplifyRegions;
-    bool m_gbrSkipDuplicates;
+    /*Clipper*/
+    double m_clpMinCircleSegmentLength { 0.5 };
+    int m_clpMinCircleSegments { 36 };
 
     /*Markers*/
     QPointF m_mrkHomeOffset;
@@ -291,6 +238,6 @@ private:
     int m_mrkZeroPos { Qt::BottomLeftCorner };
 
     /*Other*/
-    bool m_inch;
-    bool m_snap;
+    bool m_inch = false;
+    bool m_snap = false;
 };

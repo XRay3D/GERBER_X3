@@ -38,7 +38,7 @@ struct SectionParser;
 class File : public FileInterface {
     friend class LayerModel;
     friend class NodeLayer;
-    friend class Parser;
+    friend class Plugin;
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:

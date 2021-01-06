@@ -60,10 +60,10 @@ QIcon errorIcon(const QPainterPath& path)
 }
 
 class ErrorModel : public QAbstractTableModel {
-    QVector<ErrorItem*> items;
+    mvector<ErrorItem*> items;
 
 public:
-    ErrorModel(QVector<ErrorItem*> items, QObject* parent = nullptr)
+    ErrorModel(mvector<ErrorItem*> items, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
         , items(items)
     {
@@ -162,7 +162,7 @@ protected:
     }
 };
 
-ErrorDialog::ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent)
+ErrorDialog::ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent)
     : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::ErrorDialog)
 {

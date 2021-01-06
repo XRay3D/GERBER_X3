@@ -53,7 +53,7 @@ QStringList Recent::readRecentFiles(QSettings& settings)
     const int count = settings.beginReadArray(recentFilesKey);
     for (int i = 0; i < count; ++i) {
         settings.setArrayIndex(i);
-        result.append(settings.value(fileKey()).toString());
+        result.push_back(settings.value(fileKey()).toString());
     }
     settings.endArray();
     return result;

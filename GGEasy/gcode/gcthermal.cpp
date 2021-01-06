@@ -60,7 +60,7 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
 //            ReversePaths(m_returnPs);
 
 //        for (Path& path : m_returnPs)
-//            path.append(path.first());
+//            path.push_back(path.first());
 
 //        if (m_returnPs.isEmpty()) {
 //            emit fileReady(nullptr);
@@ -118,8 +118,8 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
 
 //    if (m_returnPs.size()) {
 //        //        for (Path& path : m_returnPs)
-//        //            path.append(path.first());
-//        m_returnPss.append(sortB(m_returnPs));
+//        //            path.push_back(path.first());
+//        m_returnPss.push_back(sortB(m_returnPs));
 //    }
 //    if (m_returnPss.isEmpty()) {
 //        emit fileReady(nullptr);

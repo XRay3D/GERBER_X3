@@ -49,10 +49,10 @@
 //#ifndef GTE
 //#include "gcode.h"
 //#endif
-#include "settings.h"
+#include "app.h"
 #include <ostream>
 #include <stdexcept>
-#include <vector>
+#include "mvector.h"
 
 #include "leakdetector.h"
 
@@ -200,9 +200,9 @@ PolyNode::PolyNode()
 }
 //------------------------------------------------------------------------------
 
-int PolyNode::ChildCount() const
+size_t PolyNode::ChildCount() const
 {
-    return (int)Childs.size();
+    return Childs.size();
 }
 //------------------------------------------------------------------------------
 
@@ -3901,7 +3901,7 @@ void ClipperOffset::DoOffset(double delta)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
 #ifndef GTE
-        steps = AppSettings::gbrGcCircleSegments(delta * dScale);
+        steps = App::settings().clpCircleSegments(delta * dScale);
 #else
         steps = 36;
 #endif

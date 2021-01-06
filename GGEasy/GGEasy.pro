@@ -19,52 +19,37 @@
 #*******************************************************************************/
 
 QT += core gui opengl widgets printsupport concurrent
+
 TARGET = GGEasy
+
+include(../defines.pri)
+include(../suffix.pri)
 
 TEMPLATE = app
 
 RESOURCES += res/resources.qrc
 
 ICON = 256.png
-
 #macx: ICON = resources/icon.icns
 
-DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-DEFINES += "BUILD_DATE=\"\\\"$$_DATE_\\\"\""
-
-SUFIX = ""
-
-contains(QT_ARCH, i386) {
-    SUFIX = "_x32"
-} else {
-    SUFIX = "_x64"
-}
-msvc* {
-    SUFIX = $$SUFIX"_msvc"
-}
-gcc* {
-    SUFIX = $$SUFIX"_gcc"
-}
-CONFIG(debug, debug|release){
-    SUFIX = $$SUFIX"_d"
-}
-
-TARGET = $$TARGET$$SUFIX
+TARGET = $$TARGET$$SUFFIX
 
 message($$TARGET)
+
+DESTDIR = $$_PRO_FILE_PWD_/../bin
 
 msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/tooldatabase$$SUFFIX
 }
 
 gcc* {
@@ -75,12 +60,13 @@ gcc* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
     LIBS += "-L"$$_PRO_FILE_PWD_/../lib
-    LIBS += -lclipper$$SUFIX
-    LIBS += -lfiletree$$SUFIX
-    LIBS += -lgi$$SUFIX
-    LIBS += -lgraphicsview$$SUFIX
-    LIBS += -lsettings$$SUFIX
-    LIBS += -lproject$$SUFIX
+    LIBS += -lclipper$$SUFFIX
+    LIBS += -lfiletree$$SUFFIX
+    LIBS += -lgi$$SUFFIX
+    LIBS += -lgraphicsview$$SUFFIX
+    LIBS += -lproject$$SUFFIX
+    LIBS += -lsettings$$SUFFIX
+    LIBS += -ltooldatabase$$SUFFIX
 }
 
 linux {
@@ -91,16 +77,16 @@ linux {
     }
 }
 
-DESTDIR = $$_PRO_FILE_PWD_/../bin
 
-INCLUDEPATH += $$PWD/forms/formsutil/
+#INCLUDEPATH += $$PWD/forms/formsutil/
 #INCLUDEPATH += $$PWD/../magic_get-1.0.4/include/
 INCLUDEPATH += ../clipper
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../gerber
 INCLUDEPATH += ../gi
-INCLUDEPATH += ../settings
 INCLUDEPATH += ../project
+INCLUDEPATH += ../settings
+INCLUDEPATH += ../tooldatabase
 
 TRANSLATIONS += \
     translations/GGEasy_en.ts \
@@ -112,26 +98,25 @@ HEADERS += \
     application.h \
     colorselector.h \
     datastream.h \
+    depthform.h \
     doublespinbox.h \
+    forms/bridgeitem.h \
     forms/drillform/drillform.h \
     forms/drillform/drillmodel.h \
-    forms/drillform/drillpreviewgi.h \
-    forms/formsutil/depthform.h \
     forms/formsutil/errordialog.h \
     forms/formsutil/formsutil.h \
-    forms/formsutil/toolselectorform.h \
     forms/gcodepropertiesform.h \
     forms/pocketoffsetform.h \
     forms/pocketrasterform.h \
     forms/profileform.h \
     forms/voronoiform.h \
-    forms/bridgeitem.h \
     gcode/gccreator.h \
+    gcode/gcdrillitem.h \
     gcode/gcfile.h \
     gcode/gch.h \
     gcode/gcnode.h \
     gcode/gcode.h \
-    gcode/gcparser.h \
+    gcode/gcplugin.h \
     gcode/gcpocketoffset.h \
     gcode/gcpocketraster.h \
     gcode/gcprofile.h \
@@ -141,46 +126,47 @@ HEADERS += \
     gcode/gcvoronoi.h \
     gcode/voroni/jc_voronoi.h \
     interfaces/file.h \
+    interfaces/fileplugin.h \
     interfaces/node.h \
-    interfaces/parser.h \
     leakdetector.h \
     mainwindow.h \
+    mvector.h \
     openingdialog.h \
     point.h \
     recent.h \
     settingsdialog.h \
     splashscreen.h \
-    tooldatabase/tool.h \
-    tooldatabase/tooldatabase.h \
-    tooldatabase/tooleditdialog.h \
-    tooldatabase/tooleditform.h \
-    tooldatabase/toolitem.h \
-    tooldatabase/toolmodel.h \
-    tooldatabase/tooltreeview.h \
+    toolselectorform.h \
+#    tooldatabase/tool.h \
+#    tooldatabase/tooldatabase.h \
+#    tooldatabase/tooleditdialog.h \
+#    tooldatabase/tooleditform.h \
+#    tooldatabase/toolitem.h \
+#    tooldatabase/toolmodel.h \
+#    tooldatabase/tooltreeview.h \
     version.h \
 
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
+    depthform.cpp \
     doublespinbox.cpp \
+    forms/bridgeitem.cpp \
     forms/drillform/drillform.cpp \
     forms/drillform/drillmodel.cpp \
-    forms/drillform/drillpreviewgi.cpp \
-    forms/formsutil/depthform.cpp \
     forms/formsutil/errordialog.cpp \
     forms/formsutil/formsutil.cpp \
-    forms/formsutil/toolselectorform.cpp \
     forms/gcodepropertiesform.cpp \
     forms/pocketoffsetform.cpp \
     forms/pocketrasterform.cpp \
     forms/profileform.cpp \
     forms/voronoiform.cpp \
-    forms/bridgeitem.cpp \
     gcode/gccreator.cpp \
+    gcode/gcdrillitem.cpp \
     gcode/gcfile.cpp \
     gcode/gch.cpp \
     gcode/gcnode.cpp \
-    gcode/gcparser.cpp \
+    gcode/gcplugin.cpp \
     gcode/gcpocketoffset.cpp \
     gcode/gcpocketraster.cpp \
     gcode/gcprofile.cpp \
@@ -188,21 +174,22 @@ SOURCES += \
     gcode/gcutils.cpp \
     gcode/gcvoronoi.cpp \
     gcode/voroni/jc_voronoi.cpp \
-    interfaces/file.cpp \
-    interfaces/node.cpp \
-    interfaces/parser.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \
     recent.cpp \
     settingsdialog.cpp \
-    tooldatabase/tool.cpp \
-    tooldatabase/tooldatabase.cpp \
-    tooldatabase/tooleditdialog.cpp \
-    tooldatabase/tooleditform.cpp \
-    tooldatabase/toolitem.cpp \
-    tooldatabase/toolmodel.cpp \
-    tooldatabase/tooltreeview.cpp \
+    toolselectorform.cpp \
+#    tooldatabase/tool.cpp \
+#    tooldatabase/tooldatabase.cpp \
+#    tooldatabase/tooleditdialog.cpp \
+#    tooldatabase/tooleditform.cpp \
+#    tooldatabase/toolitem.cpp \
+#    tooldatabase/toolmodel.cpp \
+#    tooldatabase/tooltreeview.cpp \
+#    interfaces/file.cpp \
+#    interfaces/fileplugin.cpp \
+#    interfaces/node.cpp \
 
 FORMS += \
     aboutform.ui \
@@ -216,9 +203,9 @@ FORMS += \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
-    tooldatabase/tooldatabase.ui \
-    tooldatabase/tooleditdialog.ui \
-    tooldatabase/tooleditform.ui \
+#    tooldatabase/tooldatabase.ui \
+#    tooldatabase/tooleditdialog.ui \
+#    tooldatabase/tooleditform.ui \
 
 
 #include(../dxf/dxf.pri)
@@ -233,6 +220,7 @@ include(../filetree/filetree.pri)
 include(../gi/gi.pri)
 include(../graphicsview/graphicsview.pri)
 include(../project/project.pri)
+include(../tooldatabase/tooldatabase.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true

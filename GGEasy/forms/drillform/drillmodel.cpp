@@ -15,7 +15,7 @@
 *******************************************************************************/
 #include "drillmodel.h"
 #include "drillform.h"
-#include "tooldatabase/tool.h"
+#include "tool.h"
 
 #include <QBitmap>
 #include <QDebug>
@@ -28,18 +28,23 @@ DrillModel::DrillModel(int type, int rowCount, QObject* parent)
     m_data.reserve(rowCount);
 }
 
-Row& DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
+DrillModel::DrillModel(QObject* parent)
+    : QAbstractTableModel(parent)
 {
-    m_data.append(Row(name, icon, id));
-    return m_data.last();
 }
+
+//Row& DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
+//{
+//    m_data.emplace_back(name, icon, id);
+//    return m_data.back();
+//}
 
 void DrillModel::setToolId(int row, int id)
 {
     if (m_data[row].toolId != id)
         m_data[row].useForCalc = id > -1;
     m_data[row].toolId = id;
-    emit set(row, id != -1);
+    emit set(row, id > -1);
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
@@ -127,9 +132,9 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         else
             switch (role) {
             case Qt::DisplayRole:
-                return ToolHolder::tool(m_data[row].toolId).name();
+                return App::toolHolder().tool(m_data[row].toolId).name();
             case Qt::DecorationRole:
-                return ToolHolder::tool(m_data[row].toolId).icon();
+                return App::toolHolder().tool(m_data[row].toolId).icon();
             case Qt::UserRole:
                 return m_data[row].toolId;
             default:

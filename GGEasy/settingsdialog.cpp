@@ -16,6 +16,8 @@
 #include "settingsdialog.h"
 #include "colorselector.h"
 #include "graphicsview.h"
+#include "interfaces/fileplugin.h"
+
 #include <QGLWidget>
 #include <QtWidgets>
 #include <mainwindow.h>
@@ -24,7 +26,7 @@
 
 const int gridColor = 100;
 
-const QColor defaultColor[static_cast<size_t>(Colors::Count)] {
+const QColor defaultColor[GuiColors::Count] {
     QColor(), //Background
     QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
@@ -38,7 +40,7 @@ const QColor defaultColor[static_cast<size_t>(Colors::Count)] {
     QColor(Qt::red) //G0
 };
 
-const QString colorName[static_cast<size_t>(Colors::Count)] {
+const QString colorName[GuiColors::Count] {
     QObject::tr("Background"),
     QObject::tr("Pin"),
     QObject::tr("CutArea"),
@@ -58,8 +60,8 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     setupUi(this);
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
-    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
-        formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_settings->m_guiColor[i], defaultColor[i], gbxColor));
+    for (int i = 0; i < GuiColors::Count; ++i) {
+        formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(App::settings().m_guiColor[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
 
@@ -70,56 +72,68 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         qApp->setFont(f);
     });
 
-    { // Language
-        cbxLanguage->addItem("English", "en");
-        cbxLanguage->addItem("Русский", "ru");
+    // Language
+    cbxLanguage->addItem("English", "en");
+    cbxLanguage->addItem("Русский", "ru");
 
-        QSettings settings;
-        settings.beginGroup("MainWindow");
-        QString locale(settings.value("locale").toString());
-        settings.endGroup();
+    settings.beginGroup("MainWindow");
+    QString locale(settings.value("locale").toString());
+    settings.endGroup();
 
-        for (int i = 0; i < cbxLanguage->count(); ++i) {
-            if (cbxLanguage->itemData(i).toString() == locale) {
-                cbxLanguage->setCurrentIndex(i);
-                langIndex = i;
-                break;
-            }
+    for (int i = 0; i < cbxLanguage->count(); ++i) {
+        if (cbxLanguage->itemData(i).toString() == locale) {
+            cbxLanguage->setCurrentIndex(i);
+            langIndex = i;
+            break;
         }
-
-        connect(cbxLanguage, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-            const QString locale(cbxLanguage->itemData(index).toString());
-            MainWindow::translate(locale);
-
-            QSettings settings;
-            settings.beginGroup("MainWindow");
-            settings.setValue("locale", locale);
-            settings.endGroup();
-        });
     }
 
+    connect(cbxLanguage, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+        const QString locale(cbxLanguage->itemData(index).toString());
+        MainWindow::translate(locale);
+        settings.beginGroup("MainWindow");
+        settings.setValue("locale", locale);
+        settings.endGroup();
+    });
+
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
+
+    tabs.reserve(App::parserInterfaces().size());
+    for (auto& [type, pair] : App::parserInterfaces()) {
+        auto& [parser, pobj] = pair;
+        auto [tab, name] = parser->createSettingsTab(tabwMain);
+        if (!tab)
+            continue;
+        tabs.push_back(tab);
+        tabwMain->addTab(tab, name);
+        tab->readSettings(settings);
+    }
+
     readSettings();
-    resize(10, 10);
+    readSettingsDialog();
+    qDebug() << __FUNCTION__ << "tab" << tab;
     if (tab > -1)
-        tabWidget->setCurrentIndex(tab);
+        tabwMain->setCurrentIndex(tab);
+}
+
+SettingsDialog::~SettingsDialog()
+{
+    writeSettingsDialog();
 }
 
 void SettingsDialog::readSettings()
 {
-    MySettings settings;
-
     /*GUI*/
     settings.beginGroup("Viewer");
     settings.getValue(chbxOpenGl);
     settings.getValue(chbxAntialiasing);
-    m_settings->m_guiSmoothScSh = settings.getValue(chbxSmoothScSh, m_settings->m_guiSmoothScSh);
-    m_settings->m_animSelection = settings.getValue(chbxAnimSelection, m_settings->m_animSelection);
+    App::settings().m_guiSmoothScSh = settings.getValue(chbxSmoothScSh, App::settings().m_guiSmoothScSh);
+    App::settings().m_animSelection = settings.getValue(chbxAnimSelection, App::settings().m_animSelection);
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
-        m_settings->m_guiColor[i].setNamedColor(settings.value(QString("%1").arg(i), m_settings->m_guiColor[i].name(QColor::HexArgb)).toString());
+    for (int i = 0; i < GuiColors::Count; ++i)
+        App::settings().m_guiColor[i].setNamedColor(settings.value(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb)).toString());
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -128,69 +142,33 @@ void SettingsDialog::readSettings()
     cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
-    /*Gerber*/
-    settings.beginGroup("Gerber");
-    m_settings->m_gbrCleanPolygons = settings.getValue(chbxCleanPolygons, m_settings->m_gbrCleanPolygons);
-    m_settings->m_gbrSimplifyRegions = settings.getValue(chbxSimplifyRegions, m_settings->m_gbrSimplifyRegions);
-    m_settings->m_gbrSkipDuplicates = settings.getValue(chbxSkipDuplicates, m_settings->m_gbrSkipDuplicates);
-    m_settings->m_gbrGcMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, m_settings->m_gbrGcMinCircleSegmentLength);
-    m_settings->m_gbrGcMinCircleSegments = settings.getValue(sbxMinCircleSegments, m_settings->m_gbrGcMinCircleSegments);
-    settings.endGroup();
-
-    /*G-Code*/
-    settings.beginGroup("GCode");
-    m_settings->m_gcInfo = settings.getValue(chbxInfo, m_settings->m_gcInfo);
-    m_settings->m_gcSameFolder = settings.getValue(chbxSameGFolder, m_settings->m_gcSameFolder);
-    m_settings->m_gcFileExtension = settings.getValue(leFileExtension, m_settings->m_gcFileExtension);
-    m_settings->m_gcFormat = settings.getValue(leFormat, m_settings->m_gcFormat);
-    m_settings->m_gcLaserConstOn = settings.getValue(leLaserCPC, m_settings->m_gcLaserConstOn);
-    m_settings->m_gcLaserDynamOn = settings.getValue(leLaserDPC, m_settings->m_gcLaserDynamOn);
-    m_settings->m_gcSpindleOn = settings.getValue(leSpindleCC, m_settings->m_gcSpindleOn);
-    m_settings->m_gcSpindleLaserOff = settings.getValue(leSpindleLaserOff, m_settings->m_gcSpindleLaserOff);
-
-    m_settings->m_gcEnd = settings.getValue(pteEnd, m_settings->m_gcEnd);
-    m_settings->m_gcStart = settings.getValue(pteStart, m_settings->m_gcStart);
-
-    m_settings->m_gcLaserEnd = settings.getValue(pteLaserEnd, m_settings->m_gcLaserEnd);
-    m_settings->m_gcLaserStart = settings.getValue(pteLaserStart, m_settings->m_gcLaserStart);
-    settings.endGroup();
-
-    /*DXF*/
-    settings.beginGroup("Dxf");
-    m_settings->m_dxfDefaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
-    m_settings->m_dxfBoldFont = settings.getValue(chbxDxfBoldFont, false);
-    m_settings->m_dxfItalicFont = settings.getValue(chbxDxfItalicFont, false);
-    m_settings->m_dxfOverrideFonts = settings.getValue(chbxDxfOverrideFonts, false);
+    /*Clipper*/
+    settings.beginGroup("Clipper");
+    App::settings().m_clpMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, App::settings().m_clpMinCircleSegmentLength);
+    App::settings().m_clpMinCircleSegments = settings.getValue(sbxMinCircleSegments, App::settings().m_clpMinCircleSegments);
     settings.endGroup();
 
     /*Markers*/
     settings.beginGroup("Home");
-    settings.getValue("homeOffset", m_settings->m_mrkHomeOffset);
-    settings.getValue("pinOffset", m_settings->m_mrkPinOffset, QPointF(6, 6));
-    settings.getValue("zeroOffset", m_settings->m_mrkZeroOffset);
-    dsbxHomeX->setValue(m_settings->m_mrkHomeOffset.x());
-    dsbxHomeY->setValue(m_settings->m_mrkHomeOffset.y());
-    dsbxPinX->setValue(m_settings->m_mrkPinOffset.x());
-    dsbxPinY->setValue(m_settings->m_mrkPinOffset.y());
-    dsbxZeroX->setValue(m_settings->m_mrkZeroOffset.x());
-    dsbxZeroY->setValue(m_settings->m_mrkZeroOffset.y());
-    m_settings->m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::TopLeft);
-    m_settings->m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::TopLeft);
+    settings.getValue("homeOffset", App::settings().m_mrkHomeOffset);
+    settings.getValue("pinOffset", App::settings().m_mrkPinOffset, QPointF(6, 6));
+    settings.getValue("zeroOffset", App::settings().m_mrkZeroOffset);
+    dsbxHomeX->setValue(App::settings().m_mrkHomeOffset.x());
+    dsbxHomeY->setValue(App::settings().m_mrkHomeOffset.y());
+    dsbxPinX->setValue(App::settings().m_mrkPinOffset.x());
+    dsbxPinY->setValue(App::settings().m_mrkPinOffset.y());
+    dsbxZeroX->setValue(App::settings().m_mrkZeroOffset.x());
+    dsbxZeroY->setValue(App::settings().m_mrkZeroOffset.y());
+    App::settings().m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::TopLeft);
+    App::settings().m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
-
-    /*SettingsDialog*/
-    settings.beginGroup("SettingsDialog");
-    //    if (isVisible())
-    //        settings.setValue("geometry", saveGeometry());
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
-    settings.getValue(tabWidget);
-    settings.endGroup();
+    /*Other*/
+    settings.getValue(App::settings().m_inch, "inch", false);
+    settings.getValue(App::settings().m_snap, "snap", false);
 }
 
 void SettingsDialog::writeSettings()
 {
-    MySettings settings;
-
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
@@ -205,67 +183,54 @@ void SettingsDialog::writeSettings()
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxAntialiasing);
     }
-    m_settings->m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
-    m_settings->m_animSelection = settings.setValue(chbxAnimSelection);
+    App::settings().m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
+    App::settings().m_animSelection = settings.setValue(chbxAnimSelection);
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
-        settings.setValue(QString("%1").arg(i), m_settings->m_guiColor[i].name(QColor::HexArgb));
+    for (int i = 0; i < GuiColors::Count; ++i)
+        settings.setValue(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb));
     settings.endGroup();
 
     settings.beginGroup("Application");
     settings.setValue("FontSize", cbxFontSize->currentText());
     settings.endGroup();
 
-    /*Gerber*/
-    settings.beginGroup("Gerber");
-    m_settings->m_gbrCleanPolygons = settings.setValue(chbxCleanPolygons);
-    m_settings->m_gbrGcMinCircleSegmentLength = settings.setValue(dsbxMinCircleSegmentLength);
-    m_settings->m_gbrGcMinCircleSegments = settings.setValue(sbxMinCircleSegments);
-    m_settings->m_gbrSimplifyRegions = settings.setValue(chbxSimplifyRegions);
-    m_settings->m_gbrSkipDuplicates = settings.setValue(chbxSkipDuplicates);
-    settings.endGroup();
-
-    /*G-Code*/
-    settings.beginGroup("GCode");
-    m_settings->m_gcFileExtension = settings.setValue(leFileExtension);
-    m_settings->m_gcFormat = settings.setValue(leFormat);
-    m_settings->m_gcInfo = settings.setValue(chbxInfo);
-    m_settings->m_gcLaserConstOn = settings.setValue(leLaserCPC);
-    m_settings->m_gcLaserDynamOn = settings.setValue(leLaserDPC);
-    m_settings->m_gcSameFolder = settings.setValue(chbxSameGFolder);
-    m_settings->m_gcSpindleLaserOff = settings.setValue(leSpindleLaserOff);
-    m_settings->m_gcSpindleOn = settings.setValue(leSpindleCC);
-
-    m_settings->m_gcStart = settings.setValue(pteStart);
-    m_settings->m_gcEnd = settings.setValue(pteEnd);
-
-    m_settings->m_gcLaserStart = settings.setValue(pteLaserStart);
-    m_settings->m_gcLaserEnd = settings.setValue(pteLaserEnd);
-    settings.endGroup();
-
-    /*DXF*/
-    settings.beginGroup("Dxf");
-    m_settings->m_dxfDefaultFont = settings.setValue(fcbxDxfDefaultFont);
-    m_settings->m_dxfBoldFont = settings.setValue(chbxDxfBoldFont);
-    m_settings->m_dxfItalicFont = settings.setValue(chbxDxfItalicFont);
-    m_settings->m_dxfOverrideFonts = settings.setValue(chbxDxfOverrideFonts);
+    /*Clipper*/
+    settings.beginGroup("Clipper");
+    App::settings().m_clpMinCircleSegmentLength = settings.setValue(dsbxMinCircleSegmentLength);
+    App::settings().m_clpMinCircleSegments = settings.setValue(sbxMinCircleSegments);
     settings.endGroup();
 
     /*Markers*/
     settings.beginGroup("Home");
-    m_settings->m_mrkHomeOffset = settings.setValue("homeOffset", QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
-    m_settings->m_mrkHomePos = settings.setValue(cbxHomePos);
-    m_settings->m_mrkPinOffset = settings.setValue("pinOffset", QPointF(dsbxPinX->value(), dsbxPinY->value()));
-    m_settings->m_mrkZeroOffset = settings.setValue("zeroOffset", QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
-    m_settings->m_mrkZeroPos = settings.setValue(cbxZeroPos);
+    App::settings().m_mrkHomeOffset = settings.setValue("homeOffset", QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
+    App::settings().m_mrkHomePos = settings.setValue(cbxHomePos);
+    App::settings().m_mrkPinOffset = settings.setValue("pinOffset", QPointF(dsbxPinX->value(), dsbxPinY->value()));
+    App::settings().m_mrkZeroOffset = settings.setValue("zeroOffset", QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
+    App::settings().m_mrkZeroPos = settings.setValue(cbxZeroPos);
     settings.endGroup();
 
-    /*SettingsDialog*/
+    /*Other*/
+    settings.setValue(App::settings().m_inch, "inch");
+    settings.setValue(App::settings().m_snap, "snap");
+    for (auto tab : tabs)
+        tab->writeSettings(settings);
+}
+
+void SettingsDialog::readSettingsDialog()
+{ /*SettingsDialog*/
+    settings.beginGroup("SettingsDialog");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    qDebug() << __FUNCTION__ << "index" << settings.setValue(tabwMain);
+    settings.endGroup();
+}
+
+void SettingsDialog::writeSettingsDialog()
+{ /*SettingsDialog*/
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
-    settings.setValue(tabWidget);
+    qDebug() << __FUNCTION__ << "index" << settings.setValue(tabwMain);
     settings.endGroup();
 }
 
@@ -295,4 +260,13 @@ void SettingsDialog::accept()
 
     writeSettings();
     QDialog::accept();
+}
+
+void SettingsDialog::showEvent(QShowEvent* event)
+{
+    int width = 0;
+    for (int i = 0; i < tabwMain->tabBar()->count(); ++i)
+        width += tabwMain->tabBar()->tabRect(i).width();
+    resize(width + 20, 10);
+    QDialog::showEvent(event);
 }

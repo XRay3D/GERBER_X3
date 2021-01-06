@@ -284,7 +284,7 @@ public:
 
 class GraphicObject {
     friend class File;
-    friend class Parser;
+    friend class Plugin;
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
     {
         stream << go.m_path;
@@ -343,6 +343,22 @@ struct StepRepeatStr {
     double i = 0.0;
     double j = 0.0;
     QList<GraphicObject> storage;
+};
+
+class Settings {
+protected:
+    static inline bool m_cleanPolygons;
+    static inline double m_cleanPolygonsDist = 0.0005;
+
+    static inline bool m_simplifyRegions;
+    static inline bool m_skipDuplicates;
+
+public:
+    static bool cleanPolygons() { return m_cleanPolygons; }
+    static double cleanPolygonsDist() { return m_cleanPolygonsDist; }
+
+    static bool simplifyRegions() { return m_simplifyRegions; }
+    static bool skipDuplicates() { return m_skipDuplicates; }
 };
 
 } // namespace Gerber

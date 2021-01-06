@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
-    <height>575</height>
+    <width>457</width>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,9 +27,9 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tabwMain">
      <property name="currentIndex">
-      <number>4</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabGui">
       <attribute name="title">
@@ -217,150 +217,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabGerber">
-      <attribute name="title">
-       <string>Gerber</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="topMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>6</number>
-       </property>
-       <property name="bottomMargin">
-        <number>6</number>
-       </property>
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Gerber / G-Code</string>
-         </property>
-         <layout class="QFormLayout" name="formLayout_3">
-          <property name="labelAlignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>9</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="minimumCircleSegmentsLabel">
-            <property name="text">
-             <string>Minimum points of circle aproximation:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="sbxMinCircleSegments">
-            <property name="minimum">
-             <number>12</number>
-            </property>
-            <property name="maximum">
-             <number>360</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="minimumCircleSegmentLengthLabel">
-            <property name="text">
-             <string>The minimum length of circle aproximation:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="DoubleSpinBox" name="dsbxMinCircleSegmentLength">
-            <property name="suffix">
-             <string> mm</string>
-            </property>
-            <property name="decimals">
-             <number>2</number>
-            </property>
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>10.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.500000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Gerber</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>9</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
-          </property>
-          <item>
-           <widget class="QCheckBox" name="chbxCleanPolygons">
-            <property name="text">
-             <string>Cleaning Polygons</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chbxSkipDuplicates">
-            <property name="text">
-             <string>Skip duplicates</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chbxSimplifyRegions">
-            <property name="text">
-             <string>Simplify Regions</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tabGCode">
       <attribute name="title">
        <string>G-Code</string>
@@ -403,7 +259,7 @@
         <widget class="QLineEdit" name="leFileExtension"/>
        </item>
        <item>
-        <widget class="QTabWidget" name="tabWidget_2">
+        <widget class="QTabWidget" name="tawGCode">
          <property name="currentIndex">
           <number>0</number>
          </property>
@@ -580,19 +436,7 @@
       <attribute name="title">
        <string>Utils</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="topMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>6</number>
-       </property>
-       <property name="bottomMargin">
-        <number>6</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
@@ -890,43 +734,11 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>DXF</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_9">
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="topMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>6</number>
-       </property>
-       <property name="bottomMargin">
-        <number>6</number>
-       </property>
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>Font</string>
+          <string>ClipperLib arcs aprox</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_4">
+         <layout class="QFormLayout" name="formLayout_3">
           <property name="labelAlignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
@@ -934,7 +746,7 @@
            <number>6</number>
           </property>
           <property name="topMargin">
-           <number>6</number>
+           <number>9</number>
           </property>
           <property name="rightMargin">
            <number>6</number>
@@ -943,54 +755,48 @@
            <number>6</number>
           </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_18">
+           <widget class="QLabel" name="minimumCircleSegmentsLabel">
             <property name="text">
-             <string>Default Font:</string>
+             <string>Minimum points of circle aproximation:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QFontComboBox" name="fcbxDxfDefaultFont"/>
+           <widget class="QSpinBox" name="sbxMinCircleSegments">
+            <property name="minimum">
+             <number>12</number>
+            </property>
+            <property name="maximum">
+             <number>360</number>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_20">
+           <widget class="QLabel" name="minimumCircleSegmentLengthLabel">
             <property name="text">
-             <string>Bold:</string>
+             <string>The minimum length of circle aproximation:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QCheckBox" name="chbxDxfBoldFont">
-            <property name="text">
-             <string/>
+           <widget class="DoubleSpinBox" name="dsbxMinCircleSegmentLength">
+            <property name="suffix">
+             <string> mm</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Italic:</string>
+            <property name="decimals">
+             <number>2</number>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QCheckBox" name="chbxDxfItalicFont">
-            <property name="text">
-             <string/>
+            <property name="minimum">
+             <double>0.010000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>Override declared fonts in DXF:</string>
+            <property name="maximum">
+             <double>10.000000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="chbxDxfOverrideFonts">
-            <property name="text">
-             <string/>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.500000000000000</double>
             </property>
            </widget>
           </item>
@@ -998,7 +804,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

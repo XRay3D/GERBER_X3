@@ -36,7 +36,7 @@
 #ifdef THERMAL
 #include "thermal.h"
 #endif
-#include "tooldatabase/tooldatabase.h"
+#include "tooldatabase.h"
 #include <QtPrintSupport>
 #include <QtWidgets>
 
@@ -60,24 +60,23 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
 
-    {
-        new Marker(Marker::Home);
-        new Marker(Marker::Zero);
-        new Pin();
-        new Pin();
-        new Pin();
-        new Pin();
+    new Marker(Marker::Home);
+    new Marker(Marker::Zero);
+    new Pin();
+    new Pin();
+    new Pin();
+    new Pin();
 
-        connect(m_project, &Project::homePosChanged, [](const QPointF& pos) { Marker::get(Marker::Home)->setPos(pos); });
-        connect(m_project, &Project::zeroPosChanged, [](const QPointF& pos) { Marker::get(Marker::Zero)->setPos(pos); });
-        connect(m_project, &Project::pinsPosChanged, [](QPointF* pos) {
-            for (int i = 0; i < 4; ++i)
-                Pin::pins()[i]->setPos(pos[i]);
-        });
-        connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
-        GCodePropertiesForm(nullptr); // init default vars;
-        connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
-    }
+    connect(m_project, &Project::homePosChanged, Marker::get(Marker::Home), qOverload<const QPointF&>(&Marker::setPos));
+    connect(m_project, &Project::homePosChanged, [](const QPointF& pos) { Marker::get(Marker::Home)->setPos(pos); });
+    connect(m_project, &Project::zeroPosChanged, [](const QPointF& pos) { Marker::get(Marker::Zero)->setPos(pos); });
+    connect(m_project, &Project::pinsPosChanged, [](QPointF pos[4]) {
+        for (int i = 0; i < 4; ++i)
+            Pin::pins()[i]->setPos(pos[i]);
+    });
+    connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
+    GCodePropertiesForm(nullptr); // init default vars;
+    connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
 
     { // load plugins
         QDir dir(QApplication::applicationDirPath());
@@ -94,16 +93,16 @@ MainWindow::MainWindow(QWidget* parent)
             QPluginLoader loader(dir.absolutePath() + "/" + str);
             // Загрузка плагина
             QObject* pobj = loader.instance();
-            if (pobj && qobject_cast<ParserInterface*>(pobj)) {
-                auto parser = qobject_cast<ParserInterface*>(pobj);
+            if (pobj && qobject_cast<FilePluginInterface*>(pobj)) {
+                auto parser = qobject_cast<FilePluginInterface*>(pobj);
                 qDebug() << __FUNCTION__ << pobj;
-                parser->setupInterface(App::app(), AppSettings::appSettings());
-                App::m_app->m_parserInterfaces.emplace(parser->type(), std::pair(parser, pobj));
+                parser->setupInterface(App::get());
+                App::parserInterfaces().emplace(parser->type(), std::pair(parser, pobj));
             }
         }
     }
     // connect plugins
-    for (auto& [type, pair] : App::m_app->m_parserInterfaces) {
+    for (auto& [type, pair] : App::parserInterfaces()) {
         auto& [parser, pobj] = pair;
         pobj->moveToThread(&parserThread);
         connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
@@ -113,16 +112,18 @@ MainWindow::MainWindow(QWidget* parent)
     }
 
     { // add dummy gcode plugin
-        auto parser = new GCode::Parser(this);
-        App::m_app->m_parserInterfaces.emplace(parser->type(),
+        auto parser = new GCode::Plugin(this);
+        App::parserInterfaces().emplace(parser->type(),
             std::pair(
-                static_cast<ParserInterface*>(parser),
+                static_cast<FilePluginInterface*>(parser),
                 static_cast<QObject*>(parser)));
     }
 
     parserThread.start(QThread::HighestPriority);
 
     connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+
+    ui->treeView->setModel(new FileModel(ui->treeView));
 
     connect(ui->treeView, &FileTreeView::saveGCodeFile, this, &MainWindow::saveGCodeFile);
     connect(ui->treeView, &FileTreeView::saveGCodeFiles, this, &MainWindow::saveGCodeFiles);
@@ -148,13 +149,13 @@ MainWindow::MainWindow(QWidget* parent)
                       "subcontrol-position: top center; }" /* position at the top center */
         );
     }
-    ToolHolder::readTools();
+    App::toolHolder().readTools();
     setCurrentFile(QString());
 
     readSettings();
 
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
-        //        int i = 0;
+        int i = 0;
         //        int k = 100;
 
         //        QDir dir("D:/Gerber Test Files/MB1180_Gerber_Rev C");
@@ -185,7 +186,7 @@ MainWindow::MainWindow(QWidget* parent)
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
 
-        //QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Drill]->triggered(); });
         //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
@@ -417,7 +418,7 @@ void MainWindow::createActionsService()
 
     serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { AppSettings::setSnap(checked); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { App::settings().setSnap(checked); }));
     action->setCheckable(true);
 
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
@@ -612,7 +613,7 @@ void MainWindow::createActionsGraphics()
                 }
                 clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
                 if (gitem->rPaths()->isEmpty()) {
-                    rmi.append(gitem);
+                    rmi.push_back(gitem);
                 } else {
                     ReversePaths(*gitem->rPaths());
                     gitem->redraw();
@@ -638,7 +639,7 @@ void MainWindow::saveGCodeFile(int id)
     auto* file = m_project->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::GCUtils::getLastDir().append(file->shortName()),
-        tr("GCode (*.%1)").arg(AppSettings::gcFileExtension())));
+        tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
 
     if (name.isEmpty())
         return;
@@ -657,8 +658,8 @@ void MainWindow::saveSelectedGCodeFiles()
     if (m_project->pinsPlacedMessage())
         return;
 
-    QVector<GCode::File*> gcFiles(m_project->files<GCode::File>());
-    for (int i = 0; i < gcFiles.size(); ++i) {
+    mvector<GCode::File*> gcFiles(m_project->files<GCode::File>());
+    for (size_t i = 0; i < gcFiles.size(); ++i) {
         if (!gcFiles[i]->itemGroup()->isVisible())
             gcFiles.remove(i--);
     }
@@ -667,7 +668,7 @@ void MainWindow::saveSelectedGCodeFiles()
 
     QMap<Key, QList<GCode::File*>> mm;
     for (GCode::File* file : gcFiles)
-        mm[{ file->getTool().hash(), file->side() }].append(file);
+        mm[{ file->getTool().hash(), file->side() }].push_back(file);
 
     for (const Key& key : mm.keys()) {
         QList<GCode::File*> files(mm.value(key));
@@ -676,7 +677,7 @@ void MainWindow::saveSelectedGCodeFiles()
                 QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
                 if (!name.endsWith("tap"))
                     name += QStringList({ "_TS", "_BS" })[file->side()];
-                name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(AppSettings::gcFileExtension()));
+                name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
                 if (name.isEmpty())
                     return;
                 file->save(name);
@@ -686,10 +687,10 @@ void MainWindow::saveSelectedGCodeFiles()
             QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith("tap"))
                 name += QStringList({ "_TS", "_BS" })[files.first()->side()];
-            name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(AppSettings::gcFileExtension()));
+            name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
             if (name.isEmpty())
                 return;
-            QVector<QString> sl;
+            mvector<QString> sl;
             for (int i = 0; i < files.size(); ++i) {
                 GCode::File* file = files[i];
                 file->itemGroup()->setVisible(false);
@@ -700,7 +701,7 @@ void MainWindow::saveSelectedGCodeFiles()
                 file->genGcodeAndTile();
                 if (i == (files.size() - 1))
                     file->endFile();
-                sl.append(file->gCodeText());
+                sl.push_back(file->gCodeText());
             }
             QFile file(name);
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -708,9 +709,9 @@ void MainWindow::saveSelectedGCodeFiles()
                 QString str;
                 for (QString& s : sl) {
                     if (!s.isEmpty())
-                        str.append(s);
+                        str.push_back(s);
                     if (!str.endsWith('\n'))
-                        str.append("\n");
+                        str.push_back("\n");
                 }
                 out << str;
             }
@@ -731,6 +732,7 @@ void MainWindow::newFile()
 
 void MainWindow::readSettings()
 {
+    SettingsDialog().readSettings();
     QSettings settings;
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
@@ -758,16 +760,16 @@ void MainWindow::selectAll()
     if (/*  */ toolpathActions.contains(GCode::Thermal)
         && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items()) {
-            item->setSelected(static_cast<GiType>(item->type()) == GiType::ThermalPr);
+            item->setSelected(static_cast<GiType>(item->type()) == GiType::PrThermal);
         }
     } else if (toolpathActions.contains(GCode::Drill)
         && toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items()) {
             const auto type(static_cast<GiType>(item->type()));
             item->setSelected( //
-                type == GiType::ApetrurePr || //
-                type == GiType::DrillPr || //
-                type == GiType::SlotPr);
+                type == GiType::PrApetrure || //
+                type == GiType::PrDrill || //
+                type == GiType::PrSlot);
         }
     } else {
         for (QGraphicsItem* item : App::scene()->items())
@@ -957,7 +959,7 @@ void MainWindow::addFileToPro(FileInterface* file)
     qDebug() << __FUNCTION__ << file;
     if (m_project->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
-        setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+        setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
     }
     m_project->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
@@ -1092,7 +1094,7 @@ void MainWindow::open()
         }
     }
     //    QString name(QFileInfo(files.first()).path());
-    //    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
+    //    setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
 }
 
 bool MainWindow::save()

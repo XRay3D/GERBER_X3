@@ -20,7 +20,7 @@
 //#include <QThread>
 //#include <QThreadPool>
 //#include <QtConcurrent>
-//#include <tooldatabase/tool.h>
+//#include "tool.h"
 
 using namespace ClipperLib;
 
@@ -72,7 +72,7 @@ public:
     static void progress();
     QString msg;
 
-    QVector<ErrorItem*> items;
+    mvector<ErrorItem*> items;
 
 signals:
     void fileReady(GCode::File* file);

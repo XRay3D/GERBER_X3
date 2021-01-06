@@ -36,14 +36,14 @@ private:
     friend inline uint qHash(const Pair& tag, uint seed);
 
     using Pairs = QSet<Pair>;
-    using Pairss = QVector<Pairs>;
+    using Pairss = mvector<Pairs>;
     struct OrdPath {
         int count = 1;
         Point64 Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;
-        inline void append(OrdPath* opt)
+        inline void push_back(OrdPath* opt)
         {
             ++count;
             Last->Next = opt;
@@ -54,10 +54,10 @@ private:
         {
             Path rp;
             rp.reserve(count);
-            rp.append(Pt);
+            rp.push_back(Pt);
             OrdPath* next = Next;
             while (next) {
-                rp.append(next->Pt);
+                rp.push_back(next->Pt);
                 next = next->Next;
             }
             return rp;

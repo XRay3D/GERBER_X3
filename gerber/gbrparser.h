@@ -13,44 +13,23 @@
 *******************************************************************************/
 #pragma once
 
-#include "app.h"
 #include "gbrattributes.h"
-#include "gbrfile.h"
+#include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-#include "interfaces/parser.h"
-#include "settings.h"
-
-#include <QObject>
-#include <QStack>
+class FilePluginInterface;
 
 namespace Gerber {
 
-class Parser : public QObject, public ParserInterface {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "gerber.json")
-    Q_INTERFACES(ParserInterface)
+class ApBlock;
+
+class Parser {
+    FilePluginInterface* const interface;
 
 public:
-    Parser(QObject* parent = nullptr);
+    Parser(FilePluginInterface* interface);
 
-    bool thisIsIt(const QString& fileName) override;
-    QObject* getObject() override;
-    int type() const override;
-    NodeInterface* createNode(FileInterface* file) override;
-    std::shared_ptr<FileInterface> createFile() override;
-    void setupInterface(App* a, AppSettings* s) override;
-    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
-
-public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
-
-signals:
-    void fileReady(FileInterface* file) override;
-    void fileProgress(const QString& fileName, int max, int value) override;
-    void fileError(const QString& fileName, const QString& error) override;
-
-private:
+protected:
     void parseLines(const QString& gerberLines, const QString& fileName);
 
     QVector<QString> cleanAndFormatFile(QString data);
@@ -119,10 +98,9 @@ private:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    inline File* file() { return reinterpret_cast<File*>(m_file); }
+    ApBlock* apBlock(int id);
 
-    /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
-    App app;
-    AppSettings appSettings;
+    File* file = nullptr;
 };
+
 }

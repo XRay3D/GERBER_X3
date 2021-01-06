@@ -102,11 +102,11 @@ QRectF Scene::getSelectedBoundingRect()
         //            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
         //            : gi->boundingRect();
         switch (static_cast<GiType>(gi->type())) {
-        case GiType::Gerber:
+        case GiType::DataSolid:
             return gi->boundingRect();
         case GiType::Drill:
             return gi->boundingRect();
-        case GiType::AperturePath:
+        case GiType::DataPath:
             return static_cast<DataPathItem*>(gi)->boundingRect2();
         default:
             return {};
@@ -158,7 +158,7 @@ void Scene::drawRuller(QPainter* painter)
 
     QFont font;
     font.setPixelSize(16);
-    const QString text = QString(AppSettings::inch() ? "  ∆X: %1 in\n"
+    const QString text = QString(App::settings().inch() ? "  ∆X: %1 in\n"
                                                        "  ∆Y: %2 in\n"
                                                        "  ∆/: %3 in\n"
                                                        "  Area: %4 in²\n"
@@ -168,11 +168,11 @@ void Scene::drawRuller(QPainter* painter)
                                                        "  ∆/: %3 mm\n"
                                                        "  Area: %4 mm²\n"
                                                        "  Angle: %5°")
-                             .arg(rect.width() / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(rect.height() / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(length / (AppSettings::inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg((rect.width() / (AppSettings::inch() ? 25.4 : 1.0))
-                                     * (rect.height() / (AppSettings::inch() ? 25.4 : 1.0)),
+                             .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+                             .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0))
+                                     * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)),
                                  4, 'f', 3, '0')
                              .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
 
@@ -239,7 +239,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, AppSettings::guiColor(Colors::Background));
+    painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -251,14 +251,14 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         const long upScale = 100000;
         const long forLimit = 1000;
         const double downScale = 1.0 / upScale;
-        static bool in = AppSettings::inch();
+        static bool in = App::settings().inch();
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != AppSettings::inch()) {
-            in = AppSettings::inch();
+        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != App::settings().inch()) {
+            in = App::settings().inch();
             m_scale = views().first()->matrix().m11();
 #else
-        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != AppSettings::inch()) {
-            in = AppSettings::inch();
+        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != App::settings().inch()) {
+            in = App::settings().inch();
             m_scale = views().first()->transform().m11();
 #endif
             if (qFuzzyIsNull(m_scale))
@@ -269,7 +269,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
             vGrid.clear();
 
             // Grid Step 0.1
-            double gridStep = AppSettings::gridStep(m_scale);
+            double gridStep = App::settings().gridStep(m_scale);
             for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
                       right = static_cast<long>(rect.right() * upScale),
                       step = static_cast<long>(gridStep * upScale), nlp = 0;
@@ -313,9 +313,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         }
 
         const QColor color[] {
-            AppSettings::guiColor(Colors::Grid1),
-            AppSettings::guiColor(Colors::Grid5),
-            AppSettings::guiColor(Colors::Grid10),
+            App::settings().guiColor(GuiColors::Grid1),
+            App::settings().guiColor(GuiColors::Grid5),
+            App::settings().guiColor(GuiColors::Grid10),
         };
 
         painter->save();

@@ -68,10 +68,10 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler->SetMouseTrack(true);
 
     // add items to grid layout
-    QPushButton* corner = new QPushButton(AppSettings::inch() ? "I" : "M", this);
+    QPushButton* corner = new QPushButton(App::settings().inch() ? "I" : "M", this);
     connect(corner, &QPushButton::clicked, [this, corner](bool fl) {
         corner->setText(fl ? "I" : "M");
-        AppSettings::setInch(fl);
+        App::settings().setInch(fl);
         scene()->update();
         hRuler->update();
         vRuler->update();
@@ -104,7 +104,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     setScene(m_scene = new Scene(this));
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
 
-    setStyleSheet("QGraphicsView { background: " + AppSettings::guiColor(Colors::Background).name(QColor::HexRgb) + " }");
+    setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
     App::m_app->m_graphicsView = this;
 }
 
@@ -156,7 +156,7 @@ void GraphicsView::zoomIn()
     if (getScale() > 10000.0)
         return;
 
-    if (AppSettings::guiSmoothScSh()) {
+    if (App::settings().guiSmoothScSh()) {
         anim(this, "scale", getScale(), getScale() * zoomFactor2);
     } else {
         scale(zoomFactor, zoomFactor);
@@ -168,7 +168,7 @@ void GraphicsView::zoomOut()
 {
     if (getScale() < 1.0)
         return;
-    if (AppSettings::guiSmoothScSh()) {
+    if (App::settings().guiSmoothScSh()) {
         anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor2));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
@@ -186,7 +186,7 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders)
     //    const auto r2(dstRect.toRect());
     //    if (r1 == r2)
     //        return;
-    if (AppSettings::guiSmoothScSh()) {
+    if (App::settings().guiSmoothScSh()) {
         anim(this, "viewRect", getViewRect(), dstRect);
     } else {
         QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
@@ -201,11 +201,11 @@ double GraphicsView::scaleFactor()
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const
 {
-    if (event->modifiers() & Qt::AltModifier || AppSettings::snap()) {
+    if (event->modifiers() & Qt::AltModifier || App::settings().snap()) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        const double gs = AppSettings::gridStep(matrix().m11());
+        const double gs = App::settings().gridStep(matrix().m11());
 #else
-        const double gs = AppSettings::gridStep(transform().m11());
+        const double gs = App::settings().gridStep(transform().m11());
 #endif
         QPointF px(mapToScene(event->pos()) / gs);
         px.setX(gs * round(px.x()));
@@ -273,7 +273,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::ShiftModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::horizontalScrollBar();
-            if (AppSettings::guiSmoothScSh()) {
+            if (App::settings().guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - delta);
@@ -283,7 +283,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::NoModifier:
         if (!event->angleDelta().x()) {
             auto scrollBar = QAbstractScrollArea::verticalScrollBar();
-            if (AppSettings::guiSmoothScSh()) {
+            if (App::settings().guiSmoothScSh()) {
                 anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
             } else {
                 scrollBar->setValue(scrollBar->value() - delta);

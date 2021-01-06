@@ -1,16 +1,37 @@
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2020                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
 TEMPLATE = subdirs
 
+# app
 SUBDIRS += \
-    GGEasy \
-    clipper \
-    dxf \
-    filetree \
-    gerber \
-    gi \
-    graphicsview \
-    project \
-    settings \
+    GGEasy \#       main app
+    clipper \#      static lib
+    filetree \#     static lib
+    gi \#           static lib
+    graphicsview \# static lib
+    project \#      static lib
+    settings \#     static lib
+    tooldatabase \# static lib
+
+# plugins
+SUBDIRS += \
+#    dxf \
+#    gerber \
+
+SUBDIRS += \
 #    GTE_Win \
+
 
 win32-msvc*{
 #    SUBDIRS += GTE_Win

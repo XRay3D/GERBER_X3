@@ -138,10 +138,10 @@ GraphicObject MText::toGo() const
     if (sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
         font = style->font;
-        if (AppSettings::dxfOverrideFonts()) {
-            font.setFamily(AppSettings::dxfDefaultFont());
-            font.setBold(AppSettings::dxfBoldFont());
-            font.setItalic(AppSettings::dxfItalicFont());
+        if (Settings::overrideFonts()) {
+            font.setFamily(Settings::defaultFont());
+            font.setBold(Settings::boldFont());
+            font.setItalic(Settings::italicFont());
         }
         QFontMetricsF fmf(font);
         //        offset.ry() -= fmf.descent();
@@ -158,11 +158,11 @@ GraphicObject MText::toGo() const
         }
         qDebug() << __FUNCTION__ << fmf;
     } else {
-        font.setFamily(AppSettings::dxfDefaultFont());
+        font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
-        if (AppSettings::dxfOverrideFonts()) {
-            font.setBold(AppSettings::dxfBoldFont());
-            font.setItalic(AppSettings::dxfItalicFont());
+        if (Settings::overrideFonts()) {
+            font.setBold(Settings::boldFont());
+            font.setItalic(Settings::italicFont());
         }
         QFontMetricsF fmf(font);
         //        offset.ry() -= fmf.descent();

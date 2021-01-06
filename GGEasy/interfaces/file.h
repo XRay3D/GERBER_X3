@@ -14,9 +14,9 @@
 #pragma once
 
 #include "datastream.h"
+#include "fileplugin.h"
 #include "itemgroup.h"
 #include "myclipper.h"
-#include "parser.h"
 #include "splashscreen.h"
 
 #include "app.h"
@@ -52,9 +52,9 @@ struct LayerType {
     QString actToolTip;
     QString shortActName() const { return actName; }
 };
+Q_DECLARE_METATYPE(LayerType)
 
 using LayerTypes = std::vector<LayerType>;
-Q_DECLARE_METATYPE(LayerType)
 
 class FileInterface {
 
@@ -131,14 +131,14 @@ public:
             return m_itemGroups[m_itemsType];
         else if (0 <= type && type < m_itemGroups.size())
             return m_itemGroups[type];
-        return m_itemGroups.first();
+        return m_itemGroups.front();
     }
-    const QVector<ItemGroup*>& itemGroups() const { return m_itemGroups; }
+    const mvector<ItemGroup*>& itemGroups() const { return m_itemGroups; }
 
     Paths mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
     Pathss groupedPaths() const { return m_groupedPaths; }
 
-    QVector<QString>& lines() { return m_lines; }
+    mvector<QString>& lines() { return m_lines; }
 
     enum Group {
         CopperGroup,
@@ -179,9 +179,9 @@ protected:
     int m_itemsType = -1;
     virtual Paths merge() const = 0;
 
-    QVector<ItemGroup*> m_itemGroups;
+    mvector<ItemGroup*> m_itemGroups;
     QString m_name;
-    QVector<QString> m_lines;
+    mvector<QString> m_lines;
     mutable Paths m_mergedPaths;
     Pathss m_groupedPaths;
     mutable bool m_visible = false;

@@ -103,8 +103,8 @@ void PocketRasterForm::createFile()
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (static_cast<GiType>(item->type())) {
-        case GiType::Gerber:
-        case GiType::AperturePath:
+        case GiType::DataSolid:
+        case GiType::DataPath:
             if (!file) {
                 file = gi->file();
                 boardSide = file->side();
@@ -114,20 +114,20 @@ void PocketRasterForm::createFile()
                         return;
                 }
             }
-            if (static_cast<GiType>(item->type()) == GiType::Gerber)
-                wPaths.append(gi->paths());
+            if (static_cast<GiType>(item->type()) == GiType::DataSolid)
+                wPaths.push_back(gi->paths());
             else
-                wRawPaths.append(gi->paths());
+                wRawPaths.push_back(gi->paths());
             break;
         case GiType::ShapeC:
         case GiType::ShapeR:
         case GiType::ShapeL:
         case GiType::ShapeA:
         case GiType::ShapeT:
-            wRawPaths.append(gi->paths());
+            wRawPaths.push_back(gi->paths());
             break;
         case GiType::Drill:
-            wPaths.append(gi->paths());
+            wPaths.push_back(gi->paths());
             break;
         default:
             break;
@@ -143,7 +143,7 @@ void PocketRasterForm::createFile()
     GCode::GCodeParams gcp;
     gcp.setConvent(ui->rbConventional->isChecked());
     gcp.setSide(side);
-    gcp.tools.append(tool);
+    gcp.tools.push_back(tool);
 
     gcp.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();

@@ -12,6 +12,9 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
+#include "mvector.h"
+
 #include <QDialog>
 
 class ErrorItem;
@@ -25,7 +28,7 @@ class ErrorDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ErrorDialog(const QVector<ErrorItem*>& items, QWidget* parent = nullptr);
+    explicit ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent = nullptr);
     ~ErrorDialog();
 
 private:

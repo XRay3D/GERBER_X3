@@ -75,7 +75,7 @@ void Style::parse(CodeData& code)
             }
             if (font.family() != code) {
                 qDebug() << __FUNCTION__ << font.family();
-                font.setFamily(AppSettings::dxfDefaultFont());
+                font.setFamily(Settings::defaultFont());
             }
             break;
         default:
