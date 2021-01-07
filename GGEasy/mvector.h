@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDebug>
 #include <algorithm>
 #include <vector>
 
@@ -24,59 +25,58 @@ struct mvector : std::vector<T> {
     {
     }
 
-    bool isEmpty() { return V::empty(); }
+    inline bool isEmpty() const noexcept { return V::empty(); }
 
-    size_t count() { return V::size(); }
+    inline size_t count() const noexcept { return V::size(); }
 
-    T& first() { return V::front(); }
-    T& last() { return V::back(); }
+    inline T& first() noexcept { return V::front(); }
+    inline T& last() noexcept { return V::back(); }
 
-    const T& first() const { return V::front(); }
-    const T& last() const { return V::back(); }
+    inline const T& first() const noexcept { return V::front(); }
+    inline const T& last() const noexcept { return V::back(); }
 
-    void push_back(const V& Val)
-    {
-        V::insert(V::end(), Val.begin(), Val.end());
-    }
+    inline void push_back(const V& Val) { V::insert(V::end(), Val.begin(), Val.end()); }
+    inline void push_back(const T& Val) { V::emplace_back(Val); }
+    inline void push_back(T&& Val) { V::emplace_back(std::move(Val)); }
 
-    void push_back(const T& Val) // insert element at end, provide strong guarantee
-    {
-        V::emplace_back(Val);
-    }
+    inline void append(const T& Val) { V::emplace_back(Val); }
+    inline void append(T&& Val) { V::emplace_back(std::move(Val)); }
+    inline void append(const V& Val) { V::insert(V::end(), Val.begin(), Val.end()); }
 
-    void push_back(T&& Val) // insert by moving into element at end, provide strong guarantee
-    {
-        V::emplace_back(_STD move(Val));
-    }
+    inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
-    void remove(size_t idx)
-    {
-        V::erase(V::begin() + idx);
-    }
-
-    V mid(size_t idx, int len = -1)
+    V mid(size_t idx, size_t len = 0)
     {
         V v;
-        v.insert(V::end(), V::begin() + idx, (len > 0 //
-                                                     ? std::clamp(V::begin() + idx + len, V::begin() + idx, V::end()) //
-                                                     : V::end()));
+        if (idx >= V::size())
+            return v;
+        typename V::iterator end;
+        typename V::iterator begin = V::begin() + idx;
+        if (len == 0)
+            end = V::end();
+        else if (idx + len > V::size())
+            end = begin + (V::size() - idx);
+        else
+            end = begin + len;
+        v.reserve(std::distance(begin, end));
+        v.insert(v.end(), begin, end);
         return v;
     }
 
-    void prepend(const T& Val) // insert element at end, provide strong guarantee
-    {
-        V::insert(V::begin(), 1, Val);
-    }
-
-    void prepend(T&& Val) // insert by moving into element at end, provide strong guarantee
-    {
-        V::insert(V::begin(), 1, _STD move(Val));
-    }
+    inline void prepend(const T& Val) { V::insert(V::begin(), 1, Val); }
+    inline void prepend(T&& Val) { V::insert(V::begin(), 1, std::move(Val)); }
 
     T takeLast()
     {
         T v(std::move(V::back()));
         V::erase(V::end() - 1);
+        return v;
+    }
+
+    T takeFirst()
+    {
+        T v(std::move(V::front()));
+        V::erase(V::begin());
         return v;
     }
 
@@ -92,7 +92,7 @@ struct mvector : std::vector<T> {
         return v;
     }
 
-    inline auto indexOf(const T& p) const
+    inline auto indexOf(const T& p) const noexcept
     {
         if (auto it = std::find(V::begin(), V::end(), p); it == V::end())
             return std::distance(V::begin() + 1, V::begin());
@@ -100,7 +100,7 @@ struct mvector : std::vector<T> {
             return std::distance(V::begin(), it);
     }
 
-    inline bool contains(const T& t) const
+    inline bool contains(const T& t) const noexcept
     {
         return std::find(V::begin(), V::end(), t) != V::end();
     }

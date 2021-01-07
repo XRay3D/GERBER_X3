@@ -13,6 +13,7 @@
 *******************************************************************************/
 #pragma once
 
+#include "datastream.h"
 #include "myclipper.h"
 
 namespace Dxf {

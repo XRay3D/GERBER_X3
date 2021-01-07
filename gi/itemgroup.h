@@ -18,7 +18,7 @@
 class ItemGroup : public QList<GraphicsItem*> {
 public:
     ~ItemGroup();
-    void push_back(GraphicsItem* item);
+    void append(GraphicsItem* item);
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);
     bool isVisible() { return m_visible; }

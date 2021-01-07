@@ -39,20 +39,22 @@
 * used has retained a Delphi flavour.                                          *
 *                                                                              *
 *******************************************************************************/
-
+#define NDEBUG
 #include "clipper.hpp"
+#include "app.h"
+#include "mvector.h"
+
+#ifndef GTE
+#include "gcode/gccreator.h"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-//#ifndef GTE
-//#include "gcode.h"
-//#endif
-#include "app.h"
 #include <ostream>
 #include <stdexcept>
-#include "mvector.h"
 
 #include "leakdetector.h"
 
@@ -922,11 +924,13 @@ ClipperBase::ClipperBase() //constructor
 {
     m_CurrentLM = m_MinimaList.begin(); //begin() == end() here
     m_UseFullRange = false;
+    ProgressCancel::setClipper(this);
 }
 //------------------------------------------------------------------------------
 
 ClipperBase::~ClipperBase() //destructor
 {
+    ProgressCancel::setClipper(nullptr);
     Clear();
 }
 //------------------------------------------------------------------------------
@@ -1377,6 +1381,7 @@ bool ClipperBase::PopScanbeam(cInt& Y)
         return false;
     Y = m_Scanbeam.top();
     m_Scanbeam.pop();
+    ProgressCancel::incCurrent();
     while (!m_Scanbeam.empty() && Y == m_Scanbeam.top()) {
         m_Scanbeam.pop();
     } // Pop duplicates.
@@ -1627,13 +1632,11 @@ bool Clipper::ExecuteInternal()
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
-//#ifndef GTE
-//        GCode::Creator::progress(static_cast<int>(m_Scanbeam.size()));
-//#endif
+        ProgressCancel::setMax(m_Scanbeam.size());
+        ProgressCancel::setCurrent(0);
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-//#ifndef GTE
-//            GCode::Creator::progress();
-//#endif
+            if (m_cancel)
+                throw cancelException(__FUNCTION__);
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {
@@ -1644,10 +1647,12 @@ bool Clipper::ExecuteInternal()
             botY = topY;
             InsertLocalMinimaIntoAEL(botY);
         }
-    } /* catch (bool e) {
-        throw e;
-    }*/
-    catch (...) {
+    } catch (const cancelException& ce) {
+        ClearJoins();
+        ClearGhostJoins();
+        m_cancel = false;
+        throw ce;
+    } catch (...) {
         succeeded = false;
     }
 
@@ -4378,31 +4383,31 @@ void CleanPolygons(Paths& polys, double distance)
 void Minkowski(const Path& poly, const Path& path, Paths& solution, bool isSum, bool isClosed)
 {
     int delta = (isClosed ? 1 : 0);
-    int polyCnt = poly.size();
-    int pathCnt = path.size();
+    size_t polyCnt = poly.size();
+    size_t pathCnt = path.size();
     Paths pp;
     pp.reserve(pathCnt);
     if (isSum)
-        for (int i = 0; i < pathCnt; ++i) {
+        for (size_t i = 0; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for (int j = 0; j < poly.size(); ++j)
+            for (size_t j = 0; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X + poly[j].X, path[i].Y + poly[j].Y));
             pp.push_back(p);
         }
     else
-        for (int i = 0; i < pathCnt; ++i) {
+        for (size_t i = 0; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for (int j = 0; j < poly.size(); ++j)
+            for (size_t j = 0; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X - poly[j].X, path[i].Y - poly[j].Y));
             pp.push_back(p);
         }
 
     solution.clear();
     solution.reserve((pathCnt + delta) * (polyCnt + 1));
-    for (int i = 0; i < pathCnt - 1 + delta; ++i)
-        for (int j = 0; j < polyCnt; ++j) {
+    for (size_t i = 0; i < pathCnt - 1 + delta; ++i)
+        for (size_t j = 0; j < polyCnt; ++j) {
             Path quad;
             quad.reserve(4);
             quad.push_back(pp[i % pathCnt][j % polyCnt]);

@@ -65,7 +65,7 @@ mvector<double> GCUtils::getDepths()
     mvector<double> depths(count);
     for (int i = 0; i < count; ++i)
         depths[i] = (i + 1) * -depth;
-    depths.back() = -gDepth - m_gcp.getTool().getDepth();
+    depths.back() = -gDepth - m_gcp.getTool().depth();
     return depths;
 }
 }

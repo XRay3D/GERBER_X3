@@ -112,7 +112,7 @@ void TranslatePath(Path& path, const Point64& pos)
 double Perimeter(const Path& path)
 {
     double p = 0.0;
-    for (int i = 0, j = path.size() - 1; i < path.size(); ++i) {
+    for (size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
         double x = path[j].X - path[i].X;
         double y = path[j].Y - path[i].Y;
         p += x * x + y * y;

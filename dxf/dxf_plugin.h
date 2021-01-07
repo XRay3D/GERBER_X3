@@ -38,7 +38,7 @@ public:
     NodeInterface* createNode(FileInterface* file) override;
     std::shared_ptr<FileInterface> createFile() override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
-    void setupInterface(App*, AppSettings* s) override;
+    void setupInterface(App*) override;
     void createMainMenu(QMenu& menu, FileTreeView* tv) override;
     void updateFileModel(FileInterface* file) override;
 
@@ -51,7 +51,7 @@ signals:
     void fileError(const QString& fileName, const QString& error) override;
 
 private:
-    File* dxfFile();
+    File* file = nullptr;
 };
 
 }

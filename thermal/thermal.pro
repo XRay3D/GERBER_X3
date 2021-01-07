@@ -23,8 +23,12 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/graphicsview$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/tooldatabase$$SUFFIX
 }
 
@@ -34,8 +38,12 @@ gcc* {
         LIBS += -lsetupapi -lAdvapi32 -lpsapi
     }
     LIBS += "-L"$$_PRO_FILE_PWD_/../lib
-    LIBS += -lproject$$SUFFIX
+    LIBS += -lclipper$$SUFFIX
     LIBS += -lsettings$$SUFFIX
+    LIBS += -lgraphicsview$$SUFFIX
+    LIBS += -lgi$$SUFFIX
+    LIBS += -lfiletree$$SUFFIX
+    LIBS += -lproject$$SUFFIX
     LIBS += -ltooldatabase$$SUFFIX
 }
 
@@ -47,36 +55,29 @@ linux {
     }
 }
 
+
 INCLUDEPATH += ../GGEasy
-INCLUDEPATH += ../settings
 INCLUDEPATH += ../clipper
+INCLUDEPATH += ../settings
 INCLUDEPATH += ../graphicsview
+INCLUDEPATH += ../gi
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../project
 INCLUDEPATH += ../tooldatabase
 
-SOURCES += \
-    bridgeitem.cpp \
-    componentitem.cpp \
-    datapathitem.cpp \
-    datasoliditem.cpp \
-    drillitem.cpp \
-    drillpreviewgi.cpp \
-    erroritem.cpp \
-    gcpathitem.cpp \
-    graphicsitem.cpp \
-    itemgroup.cpp \
-    thermalpreviewitem.cpp
+FORMS += \
+    thermalform.ui
 
 HEADERS += \
-    bridgeitem.h \
-    componentitem.h \
-    datapathitem.h \
-    datasoliditem.h \
-    drillitem.h \
-    drillpreviewgi.h \
-    erroritem.h \
-    gcpathitem.h \
-    graphicsitem.h \
-    itemgroup.h \
-    thermalpreviewitem.h
+    thermal.h \
+    thermaldelegate.h \
+    thermalform.h \
+    thermalmodel.h \
+    thermalnode.h \
+    thvars.h
+
+SOURCES += \
+    thermaldelegate.cpp \
+    thermalform.cpp \
+    thermalmodel.cpp \
+    thermalnode.cpp

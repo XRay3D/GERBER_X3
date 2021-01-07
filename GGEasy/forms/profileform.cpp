@@ -16,7 +16,7 @@
 #include "profileform.h"
 #include "ui_profileform.h"
 
-#include "forms/bridgeitem.h"
+#include "bridgeitem.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"

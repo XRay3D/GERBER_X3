@@ -30,6 +30,7 @@
 
 #include "leakdetector.h"
 
+
 class ProxyStyle : public QProxyStyle {
     //Q_OBJECT
 

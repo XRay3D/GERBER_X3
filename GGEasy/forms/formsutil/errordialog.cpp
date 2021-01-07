@@ -185,8 +185,6 @@ ErrorDialog::ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent)
 
 ErrorDialog::~ErrorDialog()
 {
-
-
     //    App::mainWindow()->dockWidget()->pop();
     delete table->model();
     delete ui;

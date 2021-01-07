@@ -14,6 +14,7 @@
 include(../plugin.pri)
 include(../defines.pri)
 include(../suffix.pri)
+QT += concurrent
 
 TARGET = $$TARGET$$SUFFIX
 
@@ -30,6 +31,7 @@ msvc* {
     LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/tooldatabase$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/thermal$$SUFFIX
 }
 
 gcc* {
@@ -45,6 +47,7 @@ gcc* {
     LIBS += -lfiletree$$SUFFIX
     LIBS += -lproject$$SUFFIX
     LIBS += -ltooldatabase$$SUFFIX
+    LIBS += -lthermal$$SUFFIX
 }
 
 linux {
@@ -63,6 +66,7 @@ INCLUDEPATH += ../gi
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../project
 INCLUDEPATH += ../tooldatabase
+INCLUDEPATH += ../thermal
 
 EXAMPLE_FILES = gerber.json
 

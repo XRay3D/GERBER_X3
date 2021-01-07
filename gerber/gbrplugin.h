@@ -39,7 +39,8 @@ public:
     void createMainMenu(QMenu& menu, FileTreeView* tv) override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
-    DrillPreviewGiMap createtDrillPreviewGi(FileInterface* file, std::vector<Row>& data) override;
+    DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
+    ThermalPreviewGiVec createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool) override;
 
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
@@ -50,6 +51,7 @@ signals:
     void fileError(const QString& fileName, const QString& error) override;
 
 private:
-    QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
+    QIcon drawApertureIcon(AbstractAperture* aperture) const;
+    QIcon drawRegionIcon(const GraphicObject& go) const;
 };
 }

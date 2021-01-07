@@ -13,33 +13,43 @@
 *******************************************************************************/
 #pragma once
 
+#include "exparser.h"
+
 #include "interfaces/fileplugin.h"
 
 #include <QObject>
+#include <QStack>
 
-namespace GCode {
+namespace Excellon {
 
-class Plugin : public QObject, public FilePluginInterface {
+class Plugin : public QObject, public FilePluginInterface, Parser {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "excellon.json")
+    Q_INTERFACES(FilePluginInterface)
+
 public:
-    explicit Plugin(QObject* parent = nullptr);
-    QObject* getObject() override;
+    Plugin(QObject* parent = nullptr);
+
     bool thisIsIt(const QString& fileName) override;
+    QObject* getObject() override;
     int type() const override;
-
     NodeInterface* createNode(FileInterface* file) override;
-    SettingsTab createSettingsTab(QWidget* parent) override;
     std::shared_ptr<FileInterface> createFile() override;
-
-    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
     void setupInterface(App* a) override;
+    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
+    //    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
+    void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
+    DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
 
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
 
 signals:
-    void fileError(const QString& fileName, const QString& error) override;
-    void fileProgress(const QString& fileName, int max, int value) override;
     void fileReady(FileInterface* file) override;
+    void fileProgress(const QString& fileName, int max, int value) override;
+    void fileError(const QString& fileName, const QString& error) override;
+
+private:
+    QIcon drawDrillIcon();
 };
 }

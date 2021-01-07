@@ -177,7 +177,7 @@ void File::saveMillingProfile(const QPointF& offset)
                     for (size_t k = 0; k < depths.size(); ++k) {
                         m_lines.push_back(formated({ g1(), z(depths[k]), feed(plungeRate()) }));
                         auto sp(savePath(path, spindleSpeed()));
-                        m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+                        m_lines.push_back(sp);
                         //                    bool skip = true;
                         //                    for (QPointF& point : path) {
                         //                        if (skip)
@@ -192,7 +192,7 @@ void File::saveMillingProfile(const QPointF& offset)
                     startPath(path.front());
                     m_lines.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
                     auto sp(savePath(path, spindleSpeed()));
-                    m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+                    m_lines.push_back(sp);
                     //                    bool skip = true;
                     //                    for (QPointF& point : path) {
                     //                        if (skip)
@@ -217,7 +217,7 @@ void File::saveLaserProfile(const QPointF& offset)
         for (auto& path : paths) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+            m_lines.push_back(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -243,7 +243,7 @@ void File::saveMillingRaster(const QPointF& offset)
                 startPath(path.front());
                 m_lines.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
                 auto sp(savePath(path, spindleSpeed()));
-                m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+                m_lines.push_back(sp);
                 //                bool skip = true;
                 //                for (QPointF& point : path) {
                 //                    if (skip)
@@ -270,7 +270,7 @@ void File::saveLaserHLDI(const QPointF& offset)
     for (QPolygonF& path : pathss.front()) {
         if (i++ % 2) {
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+            m_lines.push_back(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -280,7 +280,7 @@ void File::saveLaserHLDI(const QPointF& offset)
             //            }
         } else {
             auto sp(savePath(path, 0));
-            m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+            m_lines.push_back(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -295,7 +295,7 @@ void File::saveLaserHLDI(const QPointF& offset)
         for (QPolygonF& path : pathss.back()) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.insert(m_lines.end(), sp.begin(), sp.end());
+            m_lines.push_back(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)

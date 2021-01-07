@@ -18,6 +18,8 @@
 struct Row;
 
 class AbstractDrillPrGI : public QGraphicsObject {
+    friend class ThermalNode;
+
     Q_OBJECT
 
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
@@ -29,22 +31,12 @@ class AbstractDrillPrGI : public QGraphicsObject {
     QColor pathColor() { return m_pathColor; }
     void setPathColor(const QColor& c) { m_pathColor = c; colorChanged(); }
     // clang-format on
-#ifdef GBR_
-    static QPainterPath drawPoly(const Gerber::GraphicObject& go);
-#endif
-    friend class ThermalNode;
 
 signals:
     void colorChanged();
 
 public:
-    AbstractDrillPrGI(int id, Row& row);
-#ifdef GBR_
-    explicit DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row);
-#endif
-#ifdef EX_
-    explicit DrillPrGI(const Excellon::Hole* hole, Row& row);
-#endif
+    AbstractDrillPrGI(Row& row);
     ~AbstractDrillPrGI() override = default;
 
     // QGraphicsItem interface
@@ -55,134 +47,19 @@ public:
     int type() const override;
     double sourceDiameter() const;
     int toolId() const;
-    virtual void updateTool() = 0;
-    //    {
-    //    if (row.toolId > -1)
-    //        colorState |= Tool;
-    //    else
-    //        colorState &= ~Tool;
 
-    //    if (row.toolId > -1) {
-    //        m_toolPath = QPainterPath(); //.clear();
-    //        const double diameter = App::toolHolder().tool(row.toolId).diameter();
-    //        const double lineKoeff = diameter * 0.7;
-    //        switch (m_type) {
-    //        case GiType::SlotPr: {
-    //            Paths tmpPpath;
-    //            ClipperOffset offset;
-    //            offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
-    //            offset.Execute(tmpPpath, diameter * 0.5 * uScale);
-    //            for (Path& path : tmpPpath) {
-    //                path.push_back(path.first());
-    //                m_toolPath.addPolygon(path);
-    //            }
-    //            Path path(hole->item->paths().first());
-    //            if (path.size()) {
-    //                for (Point64& pt : path) {
-    //                    m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
-    //                    m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
-    //                    m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
-    //                    m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
-    //                }
-    //                m_toolPath.moveTo(path.first());
-    //                for (Point64& pt : path) {
-    //                    m_toolPath.lineTo(pt);
-    //                }
-    //            }
-    //        } break;
-    //        case GiType::DrillPr: {
-    //            const QPointF offsetedPos(hole->state.offsetedPos());
-    //            m_toolPath.addEllipse(offsetedPos, diameter * 0.5, diameter * 0.5);
-    //            m_toolPath.moveTo(offsetedPos - QPointF(0.0, lineKoeff));
-    //            m_toolPath.lineTo(offsetedPos + QPointF(0.0, lineKoeff));
-    //            m_toolPath.moveTo(offsetedPos - QPointF(lineKoeff, 0.0));
-    //            m_toolPath.lineTo(offsetedPos + QPointF(lineKoeff, 0.0));
-    //        } break;
-    //#ifdef GBR_
-    //        case GiType::ApetrurePr: {
-    //            const QPointF curPos(gbrObj->state().curPos());
-    //            m_toolPath.addEllipse(curPos, diameter * 0.5, diameter * 0.5);
-    //            m_toolPath.moveTo(curPos - QPointF(0.0, lineKoeff));
-    //            m_toolPath.lineTo(curPos + QPointF(0.0, lineKoeff));
-    //            m_toolPath.moveTo(curPos - QPointF(lineKoeff, 0.0));
-    //            m_toolPath.lineTo(curPos + QPointF(lineKoeff, 0.0));
-    //        } break;
-    //#endif
-    //        default:
-    //            break;
-    //        }
-    //    }
-    //        changeColor();
-    //    }
+    virtual void updateTool() = 0;
     virtual Point64 pos() const = 0;
-    //    {
-    //        switch (m_type) {
-    //        //    case GiType::SlotPr:
-    //        //        return hole->state.offsetedPos();
-    //        //    case GiType::DrillPr:
-    //        //        return hole->state.offsetedPos();
-    //        //#ifdef GBR_
-    //        //    case GiType::ApetrurePr:
-    //        //        return gbrObj->state().curPos();
-    //        //#endif
-    //        default:
-    //            return {};
-    //        }
-    //    }
     virtual Paths paths() const = 0;
-    //    {
-    //        switch (m_type) {
-    //        //    case GiType::SlotPr:
-    //        //        return hole->item->paths();
-    //        //    case GiType::DrillPr: {
-    //        //        Paths paths(hole->item->paths());
-    //        //        return ReversePaths(paths);
-    //        //    }
-    //        //#ifdef GBR_
-    //        //    case GiType::ApetrurePr:
-    //        //        return gbrObj->paths();
-    //        //#endif
-    //        default:
-    //            return {};
-    //        }
-    //    }
     virtual bool fit(double depth) = 0;
-    //    {
-    //        switch (m_type) {
-    //        //    case GiType::SlotPr:
-    //        //    case GiType::DrillPr:
-    //        //        return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth);
-    //        //#ifdef GBR_
-    //        //    case GiType::ApetrurePr:
-    //        //        return gbrObj->gFile()->apertures()->at(id)->fit(App::toolHolder().tool(row.toolId).getDiameter(depth));
-    //        //#endif
-    //        default:
-    //            return false;
-    //        }
-    //    }
 
     void changeColor();
 
 protected:
-#ifdef GBR_
-    static QPainterPath drawApetrure(const Gerber::GraphicObject* go, int id);
-#endif
-#ifdef EX_
-    static QPainterPath drawDrill(const Excellon::Hole* hole);
-    static QPainterPath drawSlot(const Excellon::Hole* hole);
-#endif
+    QPainterPath m_sourcePath;
+    QPainterPath m_toolPath;
 
     struct Row& row;
-
-    const int id = 0;
-#ifdef GBR_
-    const Gerber::GraphicObject* const gbrObj = nullptr;
-#endif
-#ifdef EX_
-    const Excellon::Hole* const hole = nullptr;
-#endif
-
-    QPainterPath m_sourcePath;
 
     double m_sourceDiameter;
     GiType m_type;
@@ -210,7 +87,7 @@ protected:
         qRgba(0, 255, 0, light), //     SelectedHovered green light
         qRgba(255, 0, 0, dark), //      Used            red dark
         qRgba(255, 0, 0, light), //     UsedHovered     red light
-        qRgba(255, 255, 255, /*0*/ 255), //     UnUsed          transparent
+        qRgba(255, 255, 255, 255), //   UnUsed          transparent
         qRgba(255, 255, 255, dark), //  Tool            white
     };
 
@@ -229,39 +106,3 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
-
-//namespace Gerber {
-
-//class DrillPrGI : public AbstractDrillPrGI {
-//    Q_OBJECT
-
-//#ifdef GBR_
-//    static QPainterPath drawPoly(const Gerber::GraphicObject& go);
-//#endif
-
-//public:
-//#ifdef GBR_
-//    explicit DrillPrGI(const Gerber::GraphicObject* go, int id, Row& row);
-//#endif
-//#ifdef EX_
-//    explicit DrillPrGI(const Excellon::Hole* hole, Row& row);
-//#endif
-
-//private:
-//#ifdef GBR_
-//    static QPainterPath drawApetrure(const Gerber::GraphicObject* go, int id);
-//#endif
-//#ifdef EX_
-//    static QPainterPath drawDrill(const Excellon::Hole* hole);
-//    static QPainterPath drawSlot(const Excellon::Hole* hole);
-//#endif
-
-//#ifdef GBR_
-//    const Gerber::GraphicObject* const gbrObj = nullptr;
-//#endif
-//#ifdef EX_
-//    const Excellon::Hole* const hole = nullptr;
-//#endif
-//};
-
-//}

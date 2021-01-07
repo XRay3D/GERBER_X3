@@ -12,9 +12,9 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#include "mvector.h"
 #include "settings.h"
 #include "ui_settingsdialog.h"
-#include "mvector.h"
 
 class SettingsTabInterface;
 
@@ -36,9 +36,9 @@ public:
     static void translator(QApplication* app, const QString& path);
     enum {
         Ui,
-        Gerber,
+        Utils,
         GCode,
-        Utils
+        Gerber,
     };
 
 public slots:

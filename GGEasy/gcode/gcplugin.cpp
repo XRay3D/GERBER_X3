@@ -50,7 +50,7 @@ void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)
         tv, &FileTreeView::saveSelectedGCodeFiles);
 }
 
-std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
+SettingsTab Plugin::createSettingsTab(QWidget* parent)
 {
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxInfo;
@@ -71,163 +71,140 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             : SettingsTabInterface(parent)
         {
             setObjectName(QString::fromUtf8("tabGCode"));
-            auto verticalLayout1 = new QVBoxLayout(this);
-            verticalLayout1->setObjectName(QString::fromUtf8("verticalLayout1"));
-            verticalLayout1->setContentsMargins(6, 6, 6, 6);
-
+            auto /**/ verticalLayout1 = new QVBoxLayout(this);
+            /**/ verticalLayout1->setObjectName(QString::fromUtf8("/**/verticalLayout1"));
+            /**/ verticalLayout1->setContentsMargins(6, 6, 6, 6);
+            // chbxSameGFolder
             chbxSameGFolder = new QCheckBox(this);
             chbxSameGFolder->setObjectName(QString::fromUtf8("chbxSameGFolder"));
+            chbxSameGFolder->setText(QApplication::translate("SettingsDialog", "Save the G-Code to the project folder.", nullptr));
+            /**/ verticalLayout1->addWidget(chbxSameGFolder);
 
-            verticalLayout1->addWidget(chbxSameGFolder);
-
+            // chbxInfo
             chbxInfo = new QCheckBox(this);
             chbxInfo->setObjectName(QString::fromUtf8("chbxInfo"));
+            chbxInfo->setText(QApplication::translate("SettingsDialog", "Add a comment with the parameters G-\320\241ode", nullptr));
+            /**/ verticalLayout1->addWidget(chbxInfo);
 
-            verticalLayout1->addWidget(chbxInfo);
-
-            auto label_14 = new QLabel(this);
-            label_14->setObjectName(QString::fromUtf8("label_14"));
-
-            verticalLayout1->addWidget(label_14);
-
+            // File Extension
+            auto lblFileExtension = new QLabel(this);
+            lblFileExtension->setObjectName(QString::fromUtf8("lblFileExtension"));
+            lblFileExtension->setText(QApplication::translate("SettingsDialog", "File Extension:", nullptr));
+            /**/ verticalLayout1->addWidget(lblFileExtension);
             leFileExtension = new QLineEdit(this);
             leFileExtension->setObjectName(QString::fromUtf8("leFileExtension"));
+            /**/ verticalLayout1->addWidget(leFileExtension);
 
-            verticalLayout1->addWidget(leFileExtension);
+            auto tabwStart = new QTabWidget(this);
+            tabwStart->setObjectName(QString::fromUtf8("tabwStart"));
+            { // Tab Milling
 
-            auto tabWidget_2 = new QTabWidget(this);
-            tabWidget_2->setObjectName(QString::fromUtf8("tabWidget_2"));
-            auto tabMilling = new QWidget();
-            tabMilling->setObjectName(QString::fromUtf8("tabMilling"));
-            auto verticalLayout_5 = new QVBoxLayout(tabMilling);
-            verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
-            verticalLayout_5->setContentsMargins(6, 6, 6, 6);
-            auto label = new QLabel(tabMilling);
-            label->setObjectName(QString::fromUtf8("label"));
+                auto tabMilling = new QWidget();
+                tabMilling->setObjectName(QString::fromUtf8("tabMilling"));
+                auto verticalLayoutM = new QVBoxLayout(tabMilling);
+                verticalLayoutM->setObjectName(QString::fromUtf8("verticalLayoutM"));
+                verticalLayoutM->setContentsMargins(6, 6, 6, 6);
 
-            verticalLayout_5->addWidget(label);
+                auto lblStartM = new QLabel(tabMilling);
+                lblStartM->setObjectName(QString::fromUtf8("lblStartM"));
+                lblStartM->setText(QApplication::translate("SettingsDialog", "Start with:", nullptr));
+                verticalLayoutM->addWidget(lblStartM);
+                pteStart = new QPlainTextEdit(tabMilling);
+                pteStart->setObjectName(QString::fromUtf8("pteStart"));
+                verticalLayoutM->addWidget(pteStart);
 
-            pteStart = new QPlainTextEdit(tabMilling);
-            pteStart->setObjectName(QString::fromUtf8("pteStart"));
+                auto lblEndM = new QLabel(tabMilling);
+                lblEndM->setObjectName(QString::fromUtf8("lblEndM"));
+                lblEndM->setText(QApplication::translate("SettingsDialog", "Finish with:", nullptr));
+                verticalLayoutM->addWidget(lblEndM);
+                pteEnd = new QPlainTextEdit(tabMilling);
+                pteEnd->setObjectName(QString::fromUtf8("pteEnd"));
+                verticalLayoutM->addWidget(pteEnd);
 
-            verticalLayout_5->addWidget(pteStart);
+                tabwStart->addTab(tabMilling, QString());
+                tabwStart->setTabText(tabwStart->indexOf(tabMilling), QApplication::translate("SettingsDialog", "Milling", nullptr));
+            }
+            { // Tab Laser
+                auto tabLaser = new QWidget();
+                tabLaser->setObjectName(QString::fromUtf8("tabLaser"));
+                auto verticalLayoutL = new QVBoxLayout(tabLaser);
+                verticalLayoutL->setObjectName(QString::fromUtf8("verticalLayoutL"));
+                verticalLayoutL->setContentsMargins(6, 6, 6, 6);
 
-            auto label_2 = new QLabel(tabMilling);
-            label_2->setObjectName(QString::fromUtf8("label_2"));
+                auto lblStartL = new QLabel(tabLaser);
+                lblStartL->setObjectName(QString::fromUtf8("lblStartL"));
+                lblStartL->setText(QApplication::translate("SettingsDialog", "Start with:", nullptr));
+                verticalLayoutL->addWidget(lblStartL);
+                pteLaserStart = new QPlainTextEdit(tabLaser);
+                pteLaserStart->setObjectName(QString::fromUtf8("pteLaserStart"));
+                verticalLayoutL->addWidget(pteLaserStart);
 
-            verticalLayout_5->addWidget(label_2);
+                auto lblEndL = new QLabel(tabLaser);
+                lblEndL->setObjectName(QString::fromUtf8("lblStartL"));
+                lblEndL->setText(QApplication::translate("SettingsDialog", "Finish with:", nullptr));
+                verticalLayoutL->addWidget(lblEndL);
+                pteLaserEnd = new QPlainTextEdit(tabLaser);
+                pteLaserEnd->setObjectName(QString::fromUtf8("pteLaserEnd"));
+                verticalLayoutL->addWidget(pteLaserEnd);
 
-            pteEnd = new QPlainTextEdit(tabMilling);
-            pteEnd->setObjectName(QString::fromUtf8("pteEnd"));
+                tabwStart->addTab(tabLaser, QString());
+                tabwStart->setTabText(tabwStart->indexOf(tabLaser), QApplication::translate("SettingsDialog", "Laser", nullptr));
+            }
+            /**/ verticalLayout1->addWidget(tabwStart);
 
-            verticalLayout_5->addWidget(pteEnd);
-
-            tabWidget_2->addTab(tabMilling, QString());
-            auto tabLaser = new QWidget();
-            tabLaser->setObjectName(QString::fromUtf8("tabLaser"));
-            auto verticalLayout_6 = new QVBoxLayout(tabLaser);
-            verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
-            verticalLayout_6->setContentsMargins(6, 6, 6, 6);
-            auto label_15 = new QLabel(tabLaser);
-            label_15->setObjectName(QString::fromUtf8("label_15"));
-
-            verticalLayout_6->addWidget(label_15);
-
-            pteLaserStart = new QPlainTextEdit(tabLaser);
-            pteLaserStart->setObjectName(QString::fromUtf8("pteLaserStart"));
-
-            verticalLayout_6->addWidget(pteLaserStart);
-
-            auto label_16 = new QLabel(tabLaser);
-            label_16->setObjectName(QString::fromUtf8("label_16"));
-
-            verticalLayout_6->addWidget(label_16);
-
-            pteLaserEnd = new QPlainTextEdit(tabLaser);
-            pteLaserEnd->setObjectName(QString::fromUtf8("pteLaserEnd"));
-
-            verticalLayout_6->addWidget(pteLaserEnd);
-
-            tabWidget_2->addTab(tabLaser, QString());
-
-            verticalLayout1->addWidget(tabWidget_2);
-
-            auto label_3 = new QLabel(this);
-            label_3->setObjectName(QString::fromUtf8("label_3"));
-
-            verticalLayout1->addWidget(label_3);
-
+            auto lblFormat = new QLabel(this);
+            lblFormat->setObjectName(QString::fromUtf8("lblFormat"));
+            lblFormat->setText(QApplication::translate("SettingsDialog", "The format of the line with the coordinates:", nullptr));
+            /**/ verticalLayout1->addWidget(lblFormat);
             leFormat = new QLineEdit(this);
             leFormat->setObjectName(QString::fromUtf8("leFormat"));
-
-            verticalLayout1->addWidget(leFormat);
-
-            auto groupBox_6 = new QGroupBox(this);
-            groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
-            auto formLayout_2 = new QFormLayout(groupBox_6);
-            formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
-            formLayout_2->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-            formLayout_2->setContentsMargins(6, 9, 6, 6);
-            auto label_10 = new QLabel(groupBox_6);
-            label_10->setObjectName(QString::fromUtf8("label_10"));
-            label_10->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-
-            formLayout_2->setWidget(0, QFormLayout::LabelRole, label_10);
-
-            leSpindleCC = new QLineEdit(groupBox_6);
-            leSpindleCC->setObjectName(QString::fromUtf8("leSpindleCC"));
-
-            formLayout_2->setWidget(0, QFormLayout::FieldRole, leSpindleCC);
-
-            auto label_11 = new QLabel(groupBox_6);
-            label_11->setObjectName(QString::fromUtf8("label_11"));
-            label_11->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-
-            formLayout_2->setWidget(1, QFormLayout::LabelRole, label_11);
-
-            leLaserCPC = new QLineEdit(groupBox_6);
-            leLaserCPC->setObjectName(QString::fromUtf8("leLaserCPC"));
-
-            formLayout_2->setWidget(1, QFormLayout::FieldRole, leLaserCPC);
-
-            auto label_12 = new QLabel(groupBox_6);
-            label_12->setObjectName(QString::fromUtf8("label_12"));
-            label_12->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-
-            formLayout_2->setWidget(2, QFormLayout::LabelRole, label_12);
-
-            leLaserDPC = new QLineEdit(groupBox_6);
-            leLaserDPC->setObjectName(QString::fromUtf8("leLaserDPC"));
-
-            formLayout_2->setWidget(2, QFormLayout::FieldRole, leLaserDPC);
-
-            auto label_13 = new QLabel(groupBox_6);
-            label_13->setObjectName(QString::fromUtf8("label_13"));
-
-            formLayout_2->setWidget(3, QFormLayout::LabelRole, label_13);
-
-            leSpindleLaserOff = new QLineEdit(groupBox_6);
-            leSpindleLaserOff->setObjectName(QString::fromUtf8("leSpindleLaserOff"));
-
-            formLayout_2->setWidget(3, QFormLayout::FieldRole, leSpindleLaserOff);
-
-            verticalLayout1->addWidget(groupBox_6);
-
-            chbxInfo->setText(QApplication::translate("SettingsDialog", "Add a comment with the parameters G-\320\241ode", nullptr));
-            groupBox_6->setTitle(QApplication::translate("SettingsDialog", "Spindle / Laser Control Code", nullptr));
-            label->setText(QApplication::translate("SettingsDialog", "Start with:", nullptr));
-            label_10->setText(QApplication::translate("SettingsDialog", "Spindle On:", nullptr));
-            label_11->setText(QApplication::translate("SettingsDialog", "Constant Laser Power Mode On:", nullptr));
-            label_12->setText(QApplication::translate("SettingsDialog", "Dynamic Laser Power Mode On:", nullptr));
-            label_13->setText(QApplication::translate("SettingsDialog", "Spindle/Laser Off:", nullptr));
-            label_14->setText(QApplication::translate("SettingsDialog", "File Extension:", nullptr));
-            label_15->setText(QApplication::translate("SettingsDialog", "Start with:", nullptr));
-            label_16->setText(QApplication::translate("SettingsDialog", "Finish with:", nullptr));
-            label_2->setText(QApplication::translate("SettingsDialog", "Finish with:", nullptr));
-            label_3->setText(QApplication::translate("SettingsDialog", "The format of the line with the coordinates:", nullptr));
             leFormat->setToolTip(QApplication::translate("SettingsDialog", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
-            tabWidget_2->setTabText(tabWidget_2->indexOf(tabLaser), QApplication::translate("SettingsDialog", "Laser", nullptr));
-            tabWidget_2->setTabText(tabWidget_2->indexOf(tabMilling), QApplication::translate("SettingsDialog", "Milling", nullptr));
+            /**/ verticalLayout1->addWidget(leFormat);
+
+            auto grbxSpindle = new QGroupBox(this);
+            grbxSpindle->setObjectName(QString::fromUtf8("grbxSpindle"));
+            grbxSpindle->setTitle(QApplication::translate("SettingsDialog", "Spindle / Laser Control Code", nullptr));
+            auto formLayoutgrbxSpindle = new QFormLayout(grbxSpindle);
+            formLayoutgrbxSpindle->setObjectName(QString::fromUtf8("formLayoutgrbxSpindle"));
+            formLayoutgrbxSpindle->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+            formLayoutgrbxSpindle->setContentsMargins(6, 9, 6, 6);
+
+            auto lblSpindleCC = new QLabel(grbxSpindle);
+            lblSpindleCC->setObjectName(QString::fromUtf8("lblSpindleCC"));
+            lblSpindleCC->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+            lblSpindleCC->setText(QApplication::translate("SettingsDialog", "Spindle On:", nullptr));
+            formLayoutgrbxSpindle->setWidget(0, QFormLayout::LabelRole, lblSpindleCC);
+            leSpindleCC = new QLineEdit(grbxSpindle);
+            leSpindleCC->setObjectName(QString::fromUtf8("leSpindleCC"));
+            formLayoutgrbxSpindle->setWidget(0, QFormLayout::FieldRole, leSpindleCC);
+
+            auto lblLaserCPC = new QLabel(grbxSpindle);
+            lblLaserCPC->setObjectName(QString::fromUtf8("lblLaserCPC"));
+            lblLaserCPC->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+            lblLaserCPC->setText(QApplication::translate("SettingsDialog", "Constant Laser Power Mode On:", nullptr));
+            formLayoutgrbxSpindle->setWidget(1, QFormLayout::LabelRole, lblLaserCPC);
+            leLaserCPC = new QLineEdit(grbxSpindle);
+            leLaserCPC->setObjectName(QString::fromUtf8("leLaserCPC"));
+            formLayoutgrbxSpindle->setWidget(1, QFormLayout::FieldRole, leLaserCPC);
+
+            auto lblLaserDPC = new QLabel(grbxSpindle);
+            lblLaserDPC->setObjectName(QString::fromUtf8("lblLaserDPC"));
+            lblLaserDPC->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+            lblLaserDPC->setText(QApplication::translate("SettingsDialog", "Dynamic Laser Power Mode On:", nullptr));
+            formLayoutgrbxSpindle->setWidget(2, QFormLayout::LabelRole, lblLaserDPC);
+            leLaserDPC = new QLineEdit(grbxSpindle);
+            leLaserDPC->setObjectName(QString::fromUtf8("leLaserDPC"));
+            formLayoutgrbxSpindle->setWidget(2, QFormLayout::FieldRole, leLaserDPC);
+
+            auto lblSpindleLaserOff = new QLabel(grbxSpindle);
+            lblSpindleLaserOff->setObjectName(QString::fromUtf8("lblSpindleLaserOff"));
+            lblSpindleLaserOff->setText(QApplication::translate("SettingsDialog", "Spindle/Laser Off:", nullptr));
+            formLayoutgrbxSpindle->setWidget(3, QFormLayout::LabelRole, lblSpindleLaserOff);
+            leSpindleLaserOff = new QLineEdit(grbxSpindle);
+            leSpindleLaserOff->setObjectName(QString::fromUtf8("leSpindleLaserOff"));
+            formLayoutgrbxSpindle->setWidget(3, QFormLayout::FieldRole, leSpindleLaserOff);
+
+            /**/ verticalLayout1->addWidget(grbxSpindle);
         }
         virtual ~Tab() override { qDebug(__FUNCTION__); }
 

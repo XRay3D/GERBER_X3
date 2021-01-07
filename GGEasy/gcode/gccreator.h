@@ -28,22 +28,73 @@ void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool
 
 class ErrorItem;
 
+//namespace GCode {
+//class Creator;
+//}
+
+class ProgressCancel {
+    static inline int m_max = 0;
+    static inline int m_current = 0;
+    static inline bool m_cancel = false;
+    //    static inline GCode::Creator* m_creator = nullptr;
+    static inline ClipperLib::ClipperBase* m_clipper = nullptr;
+
+public:
+    ProgressCancel() { }
+
+    static void reset()
+    {
+        m_max = 0;
+        m_current = 0;
+        m_cancel = false;
+        //        m_creator = nullptr;
+        m_clipper = nullptr;
+    }
+
+    //    static GCode::Creator* creator() { return m_creator; }
+    //    static void setCreator(GCode::Creator* creator) { m_creator = creator; }
+
+    static void setClipper(ClipperLib::ClipperBase* clipper) { m_clipper = clipper; }
+    static ClipperLib::ClipperBase* clipper() { return m_clipper; }
+
+    static int getMax() { return m_max; }
+    static void setMax(int max) { m_max = max; }
+
+    static int getCurrent() { return m_current; }
+    static void setCurrent(int current = 0) { m_current = current; }
+    static void incCurrent() { ++m_current; }
+
+    static bool getCancel() { return m_cancel; }
+    static bool getCancelThrow()
+    {
+        if (m_cancel)
+            throw cancelException(__FUNCTION__);
+        return m_cancel;
+    }
+    static void setCancel(bool cancel)
+    {
+        m_cancel = cancel;
+        if (m_clipper && cancel)
+            m_clipper->cancel();
+    }
+};
+
 namespace GCode {
 
 class File;
 
-class Creator : public QObject {
+class Creator : public QObject, public ProgressCancel {
     Q_OBJECT
 
 public:
-    Creator() { }
+    Creator();
     void reset();
     //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~Creator() override;
 
     File* file() const;
 
-    QPair<int, int> getProgress();
+    std::pair<int, int> getProgress();
 
     void addRawPaths(Paths rawPaths);
     void addSupportPaths(Pathss supportPaths);
@@ -51,11 +102,11 @@ public:
 
     Pathss& groupedPaths(Grouping group, cInt k = uScale);
 
-    static Paths& sortB(Paths& src);
-    static Paths& sortBE(Paths& src);
+    /*static*/ Paths& sortB(Paths& src);
+    /*static*/ Paths& sortBE(Paths& src);
 
-    static Pathss& sortB(Pathss& src);
-    static Pathss& sortBE(Pathss& src);
+    /*static*/ Pathss& sortB(Pathss& src);
+    /*static*/ Pathss& sortBE(Pathss& src);
 
     void createGc();
     void createGc(const GCodeParams& gcp);
@@ -67,9 +118,10 @@ public:
     GCodeParams getGcp() const;
     void setGcp(const GCodeParams& gcp);
 
-    static void progress(int progressMax);
-    static void progress(int progressMax, int progressVal);
-    static void progress();
+    //    static void //PROG .3setProgMax(int progressMax);
+    //    static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
+    //    static void //PROG setProgInc();
+
     QString msg;
 
     mvector<ErrorItem*> items;
@@ -89,9 +141,10 @@ protected:
     virtual void create() = 0;
     virtual GCodeType type() = 0;
 
-    inline static bool m_cancel;
-    inline static int m_progressMax;
-    inline static int m_progressVal;
+    //    inline static ClipperBase* m_clipperPtr;
+    //    inline static bool m_cancel;
+    //    static inline int //PROG  m_progressMax;
+    //    static inline int //PROG m_progressVal;
 
     File* m_file = nullptr;
     Paths m_workingPs;
