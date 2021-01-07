@@ -16,7 +16,7 @@
 #include "gcprofile.h"
 #include "gcfile.h"
 
-#include "forms/bridgeitem.h"
+#include "bridgeitem.h"
 
 #include "scene.h"
 
@@ -34,7 +34,7 @@ void ProfileCreator::create()
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    App::m_app->m_creator = this;
+    
 
     m_toolDiameter = tool.getDiameter(depth);
 

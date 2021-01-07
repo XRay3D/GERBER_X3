@@ -50,6 +50,7 @@ msvc* {
     LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/tooldatabase$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/thermal$$SUFFIX
 }
 
 gcc* {
@@ -67,6 +68,7 @@ gcc* {
     LIBS += -lproject$$SUFFIX
     LIBS += -lsettings$$SUFFIX
     LIBS += -ltooldatabase$$SUFFIX
+    LIBS += -lthermal$$SUFFIX
 }
 
 linux {
@@ -86,6 +88,7 @@ INCLUDEPATH += ../gerber
 INCLUDEPATH += ../gi
 INCLUDEPATH += ../project
 INCLUDEPATH += ../settings
+INCLUDEPATH += ../thermal
 INCLUDEPATH += ../tooldatabase
 
 TRANSLATIONS += \
@@ -100,7 +103,6 @@ HEADERS += \
     datastream.h \
     depthform.h \
     doublespinbox.h \
-    forms/bridgeitem.h \
     forms/drillform/drillform.h \
     forms/drillform/drillmodel.h \
     forms/formsutil/errordialog.h \
@@ -137,13 +139,6 @@ HEADERS += \
     settingsdialog.h \
     splashscreen.h \
     toolselectorform.h \
-#    tooldatabase/tool.h \
-#    tooldatabase/tooldatabase.h \
-#    tooldatabase/tooleditdialog.h \
-#    tooldatabase/tooleditform.h \
-#    tooldatabase/toolitem.h \
-#    tooldatabase/toolmodel.h \
-#    tooldatabase/tooltreeview.h \
     version.h \
 
 SOURCES += \
@@ -151,7 +146,6 @@ SOURCES += \
     colorselector.cpp \
     depthform.cpp \
     doublespinbox.cpp \
-    forms/bridgeitem.cpp \
     forms/drillform/drillform.cpp \
     forms/drillform/drillmodel.cpp \
     forms/formsutil/errordialog.cpp \
@@ -180,16 +174,6 @@ SOURCES += \
     recent.cpp \
     settingsdialog.cpp \
     toolselectorform.cpp \
-#    tooldatabase/tool.cpp \
-#    tooldatabase/tooldatabase.cpp \
-#    tooldatabase/tooleditdialog.cpp \
-#    tooldatabase/tooleditform.cpp \
-#    tooldatabase/toolitem.cpp \
-#    tooldatabase/toolmodel.cpp \
-#    tooldatabase/tooltreeview.cpp \
-#    interfaces/file.cpp \
-#    interfaces/fileplugin.cpp \
-#    interfaces/node.cpp \
 
 FORMS += \
     aboutform.ui \
@@ -203,23 +187,19 @@ FORMS += \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
-#    tooldatabase/tooldatabase.ui \
-#    tooldatabase/tooleditdialog.ui \
-#    tooldatabase/tooleditform.ui \
-
 
 #include(../dxf/dxf.pri)
 #include(../excellon/excellon.pri)
 #include(../file/file.pri)
 #include(../gcode/gcode.pri)
+#include(../gerber/gerber.pri)
 #include(../shapes/shapes.pri)
-#include(../thermal/thermal.pri)
 include(../clipper/clipper.pri)
 include(../filetree/filetree.pri)
-#include(../gerber/gerber.pri)
 include(../gi/gi.pri)
 include(../graphicsview/graphicsview.pri)
 include(../project/project.pri)
+include(../thermal/thermal.pri)
 include(../tooldatabase/tooldatabase.pri)
 
 #pvs_studio.target = pvs

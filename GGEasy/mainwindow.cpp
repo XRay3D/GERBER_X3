@@ -186,7 +186,8 @@ MainWindow::MainWindow(QWidget* parent)
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
 
-        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Drill]->triggered(); });
+        QTimer::singleShot(++i * 100, [this] { selectAll(); });
+        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Thermal]->triggered(); });
         //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
@@ -520,7 +521,6 @@ void MainWindow::createActionsToolPath()
         menu->addAction(toolpathActions[GCode::Voronoi]);
     }
 
-#ifdef THERMAL
     {
         toolpathActions[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
             if (ThermalForm::canToShow()) {
@@ -532,7 +532,6 @@ void MainWindow::createActionsToolPath()
         toolpathActions[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
         menu->addAction(toolpathActions[GCode::Thermal]);
     }
-#endif
 
     {
         toolpathActions[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {

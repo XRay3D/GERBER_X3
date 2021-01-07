@@ -17,6 +17,7 @@
 #include <QFont>
 #include <QPointF>
 #include <QSettings>
+//#include <concepts> //
 #include <stdexcept>
 #include <type_traits>
 
@@ -33,6 +34,16 @@ class QTabWidget;
 
 #define varName(val) val, #val
 
+//template <typename T>
+//concept Checkable = requires(T *a)
+//{
+//    // clang-format off
+//    { a->isChecked() };// -> std::convertible_to<int>;
+//    { a->objectName() };// -> std::convertible_to<QString>;
+//    { a->setChecked({}) };
+//    // clang-format on
+//};
+
 class MySettings : public QSettings {
 public:
     template <typename T>
@@ -48,6 +59,15 @@ public:
         value = QSettings::value(key, defaultValue).value<T>();
         return value;
     }
+
+    //    template <Checkable W>
+    //    auto setValue(W widget)
+    //    {
+    //        const QString name { widget->objectName() };
+    //        assert(!name.isEmpty());
+    //        QSettings::setValue(name, widget->isChecked());
+    //        return widget->isChecked();
+    //    }
 
     template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
     auto setValue(W* widget)

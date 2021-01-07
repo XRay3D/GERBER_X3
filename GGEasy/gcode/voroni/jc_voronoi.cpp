@@ -776,6 +776,7 @@ static void jcv_fillgaps(jcv_diagram* diagram)
 {
     jcv_context_internal* internal = diagram->internal;
     for (int i = 0; i < internal->numsites; ++i) {
+        ProgressCancel::incCurrent();
         jcv_site* site = &internal->sites[i];
 
         // They're sorted CCW, so if the current->pos[1] != next->pos[0], then we have a gap
@@ -996,9 +997,7 @@ void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, con
     qsort(sites, (size_t)num_points, sizeof(jcv_site), jcv_point_cmp);
 
     int offset = 0;
-    GCode::Creator::progress(num_points);
     for (int i = 0; i < num_points; i++) {
-        GCode::Creator::progress();
         const jcv_site* s = &sites[i];
         // Remove duplicates, to avoid anomalies
         if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -1016,7 +1015,8 @@ void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, con
         sites[i - offset] = sites[i];
     }
     num_points -= offset;
-
+    ProgressCancel::setMax(num_points * 3);
+    ProgressCancel::setCurrent(0);
     if (rect == 0) {
         _jcv_calc_bounds(num_points, points, &d->min, &d->max);
         d->min.x -= 10;
@@ -1044,6 +1044,7 @@ void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, con
 
     int finished = 0;
     while (!finished) {
+        ProgressCancel::incCurrent();
         jcv_point lowest_pq_point;
         if (!jcv_pq_empty(pq)) {
             jcv_halfedge* he = (jcv_halfedge*)jcv_pq_top(pq);
@@ -1062,6 +1063,7 @@ void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, con
     }
 
     for (jcv_halfedge* he = internal->beachline_start->right; he != internal->beachline_end; he = he->right) {
+        ProgressCancel::incCurrent();
         jcv_finishline(internal, he->edge);
     }
 

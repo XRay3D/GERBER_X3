@@ -197,22 +197,22 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                 }
             } else {
                 for (cInt var = start, flag = 0; var < end; flag = (flag ? 0 : 1), var += m_stepOver) {
-                    map.push_back({ { left, right, var, flag } });
+                    map.push_back({ left, right, var, flag });
                 }
             }
             if (/* DISABLES CODE */ (0)) {
-                m_progressMax += m_groupedPss.size() + map.size();
-                for (int i = 0; i < map.size(); ++i) {
+                //PROG  m_progressMax += m_groupedPss.size() + map.size();
+                for (size_t i = 0; i < map.size(); ++i) {
                     scan(map[i]);
-                    ++m_progressVal;
+                    //++PROG m_progressVal;
                 }
             } else {
-                m_progressMax += m_groupedPss.size() + map.size();
-                for (int i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
+                //PROG  m_progressMax += m_groupedPss.size() + map.size();
+                for (size_t i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
                     auto m(map.mid(i, c));
                     QFuture<void> future = QtConcurrent::map(m, scan);
                     future.waitForFinished();
-                    m_progressVal += m.size();
+                    //PROG m_progressVal += m.size();
                 }
             }
 
@@ -325,7 +325,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         }
     }
 
-    progress(0, 0);
+    //PROG //PROG .3setProgMaxAndVal(0, 0);
 
     { //  calculate
         Clipper c;
@@ -419,7 +419,7 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
         Paths paths;
 
         for (int i = 0; i < src.size(); ++i) {
-            progress(src.size(), i);
+            //PROG //PROG .3setProgMaxAndVal(src.size(), i);
             if (yLast != src[i].first().Y) {
                 adder(paths);
                 reverse = !reverse;

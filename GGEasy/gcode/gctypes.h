@@ -14,12 +14,13 @@
 #pragma once
 
 #include "datastream.h"
-#include "tool.h"
+#include "../tooldatabase/tool.h"
 
 #include "mvector.h"
+#include <QDebug>
 #include <QVariant>
 
-using UsedItems = QMap<QPair<int, int>, mvector<int>>;
+using UsedItems = QMap<std::pair<int, int>, mvector<int>>;
 
 namespace GCode {
 
@@ -60,6 +61,7 @@ enum Grouping {
 };
 
 struct variant : std::variant<int, double, UsedItems> {
+    using V = std::variant<int, double, UsedItems>;
     friend QDataStream& operator>>(QDataStream& stream, variant& type)
     {
         size_t index;
@@ -89,29 +91,68 @@ struct variant : std::variant<int, double, UsedItems> {
 
     template <class T>
     variant(const T& val)
+        : V(val)
     {
-        *this = val;
     }
 
     template <class T>
-    variant& operator=(const T& val)
+    variant(T&& val)
+        : V(std::move(val))
     {
-        using To = std::decay_t<T>;
-        if constexpr /**/ (std::is_integral_v<To>) {
-            *this = int(val);
-        } else if constexpr (std::is_floating_point_v<To>) {
-            *this = double(val);
-        } else if constexpr (std::is_same_v<To, UsedItems>) {
-            *this = val;
-        }
-        return *this;
     }
 
-    int toInt() const { return std::get<int>(*this); }
+    int toInt() const
+    {
+        return std::visit([](auto&& val) -> int {
+            using T = std::decay_t<decltype(val)>;
+            if constexpr (std::is_same_v<T, UsedItems>) {
+                return int{};
+            } else {
+                return int(val);
+            } }, *this);
+        //        try {
+        //            if(index())
+        //            return std::get<int>(*this);
+        //        } catch (const std::exception& e) {
+        //            //qDebug() << __FUNCTION__ << e.what();
+        //            return {};
+        //        }
+    }
 
-    bool toBool() const { return std::get<int>(*this); }
+    bool toBool() const
+    {
+        return std::visit([](auto&& val) -> bool {
+            using T = std::decay_t<decltype(val)>;
+            if constexpr (std::is_same_v<T, UsedItems>) {
+                return bool{};
+            } else {
+                return bool(val);
+            } }, *this);
+        //        try {
+        //            return std::get<int>(*this);
+        //        } catch (const std::exception& e) {
+        //            //qDebug() << __FUNCTION__ <<
+        //            e.what();
+        //            return {};
+        //        }
+    }
 
-    double toDouble() const { return std::get<double>(*this); }
+    double toDouble() const
+    {
+        return std::visit([](auto&& val) -> double {
+            using T = std::decay_t<decltype(val)>;
+            if constexpr (std::is_same_v<T, UsedItems>) {
+                return {};
+            } else {
+                return double(val);
+            } }, *this);
+        //        try {
+        //            return std::get<double>(*this);
+        //        } catch (const std::exception& e) {
+        //            //qDebug() << __FUNCTION__ << e.what();
+        //            return {};
+        //        }
+    }
 
     template <class T>
     void setValue(const T& val) { *this = val; }
@@ -164,7 +205,7 @@ struct GCodeParams {
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type)
     {
-        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<QPair<int, int>, mvector<int>>");
+        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream >> type.tools;
         stream >> type.params;
@@ -174,7 +215,7 @@ struct GCodeParams {
 
     friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type)
     {
-        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<QPair<int, int>, mvector<int>>");
+        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream << type.tools;
         stream << type.params;

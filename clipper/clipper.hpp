@@ -116,60 +116,91 @@ struct IntPoint {
           Y(y),
           Z(z) {};
 #else
-    IntPoint(cInt x = 0, cInt y = 0)
+#endif
+    IntPoint(cInt x = 0, cInt y = 0) noexcept
         : X(x)
         , Y(y)
     {
     }
-    IntPoint(const QPointF& p)
+
+    IntPoint(IntPoint&& p) noexcept = default;
+    IntPoint(const IntPoint& p) noexcept = default;
+    IntPoint& operator=(IntPoint&& p) noexcept = default;
+    IntPoint& operator=(const IntPoint& p) noexcept = default;
+    IntPoint(QPointF&& p) noexcept
         : X(p.x() * uScale)
         , Y(p.y() * uScale)
     {
     }
-#endif
-    bool isNull() const
+    IntPoint(const QPointF& p) noexcept
+        : X(p.x() * uScale)
+        , Y(p.y() * uScale)
+    {
+    }
+    IntPoint& operator=(QPointF&& p) noexcept
+    {
+        X = p.x() * uScale;
+        Y = p.y() * uScale;
+        return *this;
+    }
+    IntPoint& operator=(const QPointF& p) noexcept
+    {
+        X = p.x() * uScale;
+        Y = p.y() * uScale;
+        return *this;
+    }
+
+    bool isNull() const noexcept
     {
         return X == 0 && Y == 0;
     }
-    friend inline IntPoint& operator*=(IntPoint& pt, double s)
+
+    friend inline IntPoint& operator*=(IntPoint& pt, double s) noexcept
     {
         pt.X *= s;
         pt.Y *= s;
         return pt;
     }
-    operator QPointF() const
+
+    operator QPointF() const noexcept
     {
         return { X * dScale, Y * dScale };
     }
-    friend inline bool operator<(const IntPoint& a, const IntPoint& b)
+
+    friend inline bool operator<(const IntPoint& a, const IntPoint& b) noexcept
     {
         return std::tuple(a.X, a.Y) < std::tuple(b.X, b.Y);
     }
-    friend inline bool operator==(const IntPoint& a, const IntPoint& b)
+
+    friend inline bool operator==(const IntPoint& a, const IntPoint& b) noexcept
     {
         return a.X == b.X && a.Y == b.Y;
     }
-    friend inline bool operator!=(const IntPoint& a, const IntPoint& b)
+
+    friend inline bool operator!=(const IntPoint& a, const IntPoint& b) noexcept
     {
         return a.X != b.X || a.Y != b.Y;
     }
+
     friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
     {
         stream.writeRawData(reinterpret_cast<const char*>(&pt), sizeof(IntPoint));
         return stream;
     }
+
     friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt)
     {
         stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(IntPoint));
         return stream;
     }
+
     friend QDebug operator<<(QDebug d, const IntPoint& p)
     {
         d << "IntPt(" << p.X << ", " << p.Y << ")";
         return d;
     }
 
-    double angleTo(const IntPoint& pt2) const
+    double angleTo(const IntPoint& pt2) const noexcept
     {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
@@ -182,7 +213,7 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double angleRadTo(const IntPoint& pt2) const
+    double angleRadTo(const IntPoint& pt2) const noexcept
     {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
@@ -195,7 +226,7 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double distTo(const IntPoint& pt2) const
+    double distTo(const IntPoint& pt2) const noexcept
     {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
@@ -239,7 +270,7 @@ struct Path : public mvector<IntPoint> {
     operator QPolygonF() const
     {
         QPolygonF poly;
-        poly.reserve(size() + 1); // +1 if need closed polygons
+        poly.reserve(int(size() + 1)); // +1 if need closed polygons
         for (const auto pt : *this)
             poly << pt;
         return poly;
@@ -430,6 +461,7 @@ public:
     IntRect GetBounds();
     bool PreserveCollinear() { return m_PreserveCollinear; }
     void PreserveCollinear(bool value) { m_PreserveCollinear = value; }
+    void cancel() { m_cancel = true; } // need for terminate
 
 protected:
     void DisposeLocalMinimaList();
@@ -460,7 +492,22 @@ protected:
 
     typedef std::priority_queue<cInt> ScanbeamList;
     ScanbeamList m_Scanbeam;
+    bool m_cancel = false; // need for terminate
 };
+
+class cancelException : public std::exception {
+public:
+    cancelException(const char* description)
+        : m_descr(description)
+    {
+    }
+    ~cancelException() noexcept override = default;
+    const char* what() const noexcept override { return m_descr.c_str(); }
+
+private:
+    std::string m_descr;
+};
+
 //------------------------------------------------------------------------------
 
 class Clipper : public virtual ClipperBase {

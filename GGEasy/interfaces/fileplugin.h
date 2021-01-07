@@ -32,8 +32,11 @@ class AppSettings;
 class FileModel;
 class FileTreeView;
 class QMenu;
+class ThParam2;
+class ThermalPreviewItem;
 
 using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
+using ThermalPreviewGiVec = mvector<std::shared_ptr<ThermalPreviewItem>>;
 
 class SettingsTabInterface : public QWidget {
 public:
@@ -52,51 +55,33 @@ class FilePluginInterface {
 public:
     explicit FilePluginInterface() { }
     virtual ~FilePluginInterface() { }
-    virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
-    [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
-    [[nodiscard]] virtual QObject* getObject() = 0;
-    [[nodiscard]] virtual int type() const = 0;
+    virtual QObject* getObject() = 0;
+    virtual bool thisIsIt(const QString& fileName) = 0;
+    virtual int type() const = 0;
+
+    [[nodiscard]] virtual DrillPreviewGiMap createDrillPreviewGi(FileInterface* /*file*/, mvector<Row>& /*data*/) { return {}; };
+    [[nodiscard]] virtual ThermalPreviewGiVec createThermalPreviewGi(FileInterface* /*file*/, const ThParam2&, Tool& /*tool*/) { return {}; };
     [[nodiscard]] virtual NodeInterface* createNode(FileInterface* file) = 0;
+    [[nodiscard]] virtual SettingsTab createSettingsTab(QWidget* /*parent*/) { return { nullptr, "" }; };
     [[nodiscard]] virtual std::shared_ptr<FileInterface> createFile() = 0;
-    [[nodiscard]] virtual SettingsTab createSettingsTab(QWidget* parent)
-    {
-        Q_UNUSED(parent)
-        return { nullptr, "" };
-    };
-    [[nodiscard]] virtual DrillPreviewGiMap createtDrillPreviewGi(FileInterface* file, mvector<Row>& data)
-    {
-        Q_UNUSED(file)
-        Q_UNUSED(data)
-        return {};
-    };
-    virtual void addToDrillForm(FileInterface* file, QComboBox* cbx)
-    {
-        Q_UNUSED(file)
-        Q_UNUSED(cbx)
-    };
 
+    virtual void addToDrillForm(FileInterface* /*file*/, QComboBox* /*cbx*/) {};
+    virtual void createMainMenu(QMenu& /*menu*/, FileTreeView* /*tv*/) {};
     virtual void setupInterface(App* a) = 0;
-    virtual void createMainMenu(QMenu& menu, FileTreeView* tv)
-    {
-        Q_UNUSED(menu)
-        Q_UNUSED(tv)
-    };
-    virtual void updateFileModel(FileInterface* file)
-    {
-        Q_UNUSED(file)
-    };
+    virtual void updateFileModel(FileInterface* /*file*/) {};
 
-    //signals:
-    virtual void fileReady(FileInterface* file) = 0;
-    virtual void fileProgress(const QString& fileName, int max, int value) = 0;
+    // signals:
     virtual void fileError(const QString& fileName, const QString& error) = 0;
+    virtual void fileWarning(const QString& /*fileName*/, const QString& /*warning*/) {};
+    virtual void fileProgress(const QString& fileName, int max, int value) = 0;
+    virtual void fileReady(FileInterface* file) = 0;
+
+    // slots:
+    virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
 
 protected:
-    FileInterface* m_file = nullptr;
     App app;
-    enum {
-        IconSize = 24,
-    };
+    enum { IconSize = 24 };
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.FilePluginInterface"

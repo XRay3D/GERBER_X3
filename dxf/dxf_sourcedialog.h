@@ -35,10 +35,10 @@ signals:
 };
 
 class Model : public QAbstractTableModel {
-    const QVector<QString>& lines;
+    const mvector<QString>& lines;
 
 public:
-    Model(const QVector<QString>& lines, QObject* parent = nullptr)
+    Model(const mvector<QString>& lines, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
         , lines(lines)
     {

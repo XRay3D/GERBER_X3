@@ -20,6 +20,20 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
 
+template <class T1, class T2>
+inline QDataStream& operator>>(QDataStream& s, std::pair<T1, T2>& p)
+{
+    s >> p.first >> p.second;
+    return s;
+}
+
+template <class T1, class T2>
+inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p)
+{
+    s << p.first << p.second;
+    return s;
+}
+
 template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 inline QDataStream& operator>>(QDataStream& s, E& e)
 {
@@ -66,6 +80,38 @@ inline QDataStream& operator<<(QDataStream& s, const mvector<T>& c)
     return s;
 }
 
+template <typename T>
+inline QDataStream& operator>>(QDataStream& s, std::vector<T>& c)
+{
+    using Container = mvector<T>;
+    c.clear();
+    quint32 n;
+    s >> n;
+    c.reserve(n);
+    for (quint32 i = 0; i < n; ++i) {
+        typename Container::value_type t;
+        s >> t;
+        if (s.status() != QDataStream::Ok) {
+            c.clear();
+            break;
+        }
+        c.push_back(t);
+    }
+    return s;
+}
+
+template <typename T>
+inline QDataStream& operator<<(QDataStream& s, const std::vector<T>& c)
+{
+    using Container = mvector<T>;
+    s << quint32(c.size());
+    for (const typename Container::value_type& t : c)
+        s << t;
+    return s;
+}
+////////////////////////////////////////////////////////////////
+/// std::map<Key, T>
+///
 template <class Key, class T>
 inline QDataStream& operator>>(QDataStream& s, std::map<Key, T>& map)
 {
@@ -102,7 +148,9 @@ inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T>& map)
     }
     return s;
 }
-
+////////////////////////////////////////////////////////////////
+/// std::map<Key, T, std::greater<int>>
+///
 template <class Key, class T>
 inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, std::greater<int>>& map)
 {

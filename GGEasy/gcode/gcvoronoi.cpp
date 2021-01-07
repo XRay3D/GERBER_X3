@@ -60,8 +60,8 @@ inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
 
 ///////////////////////////////////
 
-#include <cstdio>
 #include "mvector.h"
+#include <cstdio>
 
 #include <boost/polygon/voronoi.hpp>
 using boost::polygon::high;
@@ -194,8 +194,6 @@ void VoronoiCreator::create()
 
 void VoronoiCreator::createVoronoi()
 {
-    App::m_app->m_creator = this;
-
     const auto& tool = m_gcp.tools.first();
     const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
     const auto width = m_gcp.params[GCodeParams::Width].toDouble();
@@ -213,7 +211,6 @@ void VoronoiCreator::createVoronoi()
         /**************/ return;
         break;
     }
-
 
     if (width < tool.getDiameter(depth)) {
         m_gcp.gcType = Voronoi;
@@ -298,12 +295,15 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
 {
     msg = tr("Merge Paths");
     sortBE(paths);
-    int max;
+    size_t max;
     do {
         max = paths.size();
-        for (int i = 0; i < paths.size(); ++i) {
-            progress(max, max - paths.size()); // progress
-            for (int j = 0; j < paths.size(); ++j) {
+        for (size_t i = 0; i < paths.size(); ++i) {
+            setMax(max);
+            setCurrent(max - paths.size());
+            getCancelThrow();
+
+            for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
                 else if (paths[i].first() == paths[j].first()) {
@@ -352,7 +352,7 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
 
 void VoronoiCreator::clean(Path& path)
 {
-    for (int i = 1; i < path.size() - 2; ++i) {
+    for (size_t i = 1; i < path.size() - 2; ++i) {
         QLineF line(path[i], path[i + 1]);
         if (line.length() < m_gcp.params[GCodeParams::Tolerance].toDouble()) {
             path[i] = (line.center());
@@ -361,7 +361,7 @@ void VoronoiCreator::clean(Path& path)
         }
     }
     const double kAngle = 1; //0.2;
-    for (int i = 1; i < path.size() - 1; ++i) {
+    for (size_t i = 1; i < path.size() - 1; ++i) {
         const double a1 = Angle(path[i - 1], path[i]);
         const double a2 = Angle(path[i], path[i + 1]);
         if (abs(a1 - a2) < kAngle) {
@@ -386,7 +386,7 @@ void VoronoiCreator::cgalVoronoi()
     for (const Paths& paths : m_groupedPss) {
         progress(m_groupedPss.size(), ++c);
         for (const Path& path : paths) {
-            for (int i = 0; i < path.size(); ++i) {
+            for (size_t i = 0; i < path.size(); ++i) {
                 const IntPoint& point = path[i];
                 const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({ path.last().X, path.last().Y }, { point.X, point.Y })
                                              : SDG2::Site_2::construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
@@ -471,14 +471,14 @@ void VoronoiCreator::jcVoronoi()
     auto condei = [&points, tolerance, &id](Point64 tmp, Point64 point) { // split long segments
         QLineF line(tmp, point);
         if (line.length() > tolerance) {
-            for (int i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
+            for (size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
                 Point64 pt((line.p2()));
                 points.push_back({ static_cast<jcv_real>(pt.X), static_cast<jcv_real>(pt.Y), id });
             }
         }
     };
-    progress(7, 1); // progress
+    //PROG //PROG .3setProgMaxAndVal(7, 1); // progress
     for (const Paths& paths : m_groupedPss) {
         for (const Path& path : paths) {
             Point64 tmp(path.first());
@@ -491,7 +491,7 @@ void VoronoiCreator::jcVoronoi()
         }
         ++id;
     }
-    progress(7, 2); // progress
+    //PROG //PROG .3setProgMaxAndVal(7, 2); // progress
     for (const Path& path : m_workingRawPs) {
         Point64 tmp(path.first());
         for (const Point64& point : path) {
@@ -524,7 +524,6 @@ void VoronoiCreator::jcVoronoi()
         };
         const jcv_site* sites = jcv_diagram_get_sites(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
-
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
@@ -541,11 +540,11 @@ void VoronoiCreator::jcVoronoi()
 
     for (const Pairs& edge : edges) {
         m_returnPs.push_back(toPath(edge));
-        progress(edges.size(), m_returnPs.size()); // progress
+        //PROG //PROG .3setProgMaxAndVal(edges.size(), m_returnPs.size()); // progress
     }
     mergePaths(m_returnPs, 0.005 * uScale);
     m_returnPs.push_back(toPath(frame));
-    for (int i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
+    for (size_t i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
         if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].back()) < tolerance * 0.5 * uScale)
             m_returnPs.remove(i--);
     }
@@ -572,7 +571,7 @@ void VoronoiCreator::boostVoronoi()
     for (const Paths& paths : m_groupedPss) {
         progress(m_groupedPss.size(), ++c);
         for (const Path& path : paths) {
-            for (int i = 0; i < path.size(); ++i) {
+            for (size_t i = 0; i < path.size(); ++i) {
                 const IntPoint& point = path[i];
                 !i ? segments.push_back(Segment { path.last(), point })
                    : segments.push_back(Segment { path[i - 1], point });
@@ -662,7 +661,6 @@ void VoronoiCreator::boostVoronoi()
         segments_.push_back({ pair.first, pair.second });
     }
 
-
     m_gcp.gcType = Voronoi;
     m_file = new File({ sortBE(segments_) }, m_gcp);
     m_file->setFileName(Tool {}.nameEnc());
@@ -702,7 +700,9 @@ Paths VoronoiCreator::toPath(const Pairs& pairs)
 
         const int max = merge.size();
         for (int i = 0; i < merge.size(); ++i) {
-            progress(max, max - merge.size()); // progress
+            setMax(max);
+            setCurrent(max - merge.size());
+            getCancelThrow();
             for (int j = 0; j < merge.size(); ++j) {
                 if (i == j)
                     continue;

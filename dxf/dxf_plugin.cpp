@@ -42,35 +42,35 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
 {
     if (type_ != type())
         return nullptr;
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    QFile file_(fileName);
+    if (!file_.open(QIODevice::ReadOnly | QIODevice::Text))
         return nullptr;
 
-    m_file = new File;
-    m_file->setFileName(fileName);
+    file = new File;
+    file->setFileName(fileName);
 
     int line = 1;
 
     Codes codes;
     codes.reserve(10000);
 
-    QTextStream in(&file);
+    QTextStream in(&file_);
 
     auto getCode = [&in, &codes, &line, this] {
         // Code
         QString strCode(in.readLine());
-        m_file->lines().append(strCode);
+        file->lines().append(strCode);
         bool ok;
         auto code(strCode.toInt(&ok));
         if (!ok)
             throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
-        m_file->lines().append(strValue);
+        file->lines().append(strValue);
         int multi = 0;
         while (strValue.endsWith("\\P")) {
-            m_file->lines().append(in.readLine());
-            strValue.append("\n" + m_file->lines().last());
+            file->lines().append(in.readLine());
+            strValue.append("\n" + file->lines().last());
             ++multi;
         }
         codes.emplace_back(code, strValue, line);
@@ -86,6 +86,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
                 ++progress;
         } while (!in.atEnd() || *(codes.end() - 1) != "EOF");
         codes.shrink_to_fit();
+        file_.close();
 
         //emit fileProgress(m_file->shortName(), progress, progressCtr);
 
@@ -98,19 +99,19 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
                 const auto type = SectionParser::toType(*(from + 1));
                 switch (type) {
                 case SectionParser::HEADER:
-                    dxfFile()->m_sections[type] = new SectionHEADER(dxfFile(), from, to);
+                    file->m_sections[type] = new SectionHEADER(file, from, to);
                     break;
                 case SectionParser::CLASSES:
                     //dxfFile()->m_sections[type] = new SectionCLASSES(dxfFile(), from, to);
                     break;
                 case SectionParser::TABLES:
-                    dxfFile()->m_sections[type] = new SectionTABLES(dxfFile(), from, to);
+                    file->m_sections[type] = new SectionTABLES(file, from, to);
                     break;
                 case SectionParser::BLOCKS:
-                    dxfFile()->m_sections[type] = new SectionBLOCKS(dxfFile(), from, to);
+                    file->m_sections[type] = new SectionBLOCKS(file, from, to);
                     break;
                 case SectionParser::ENTITIES:
-                    dxfFile()->m_sections[type] = new SectionENTITIES(dxfFile(), from, to);
+                    file->m_sections[type] = new SectionENTITIES(file, from, to);
                     break;
                 case SectionParser::OBJECTS:
                     //dxfFile()->m_sections[type] = new SectionOBJECTS(dxfFile(), from, to);
@@ -122,41 +123,38 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
                     throw QString("Unknowh Section!");
                     break;
                 }
-                if (dxfFile()->m_sections.contains(type))
-                    dxfFile()->m_sections[type]->parse();
+                if (file->m_sections.contains(type))
+                    file->m_sections[type]->parse();
             }
         }
-        file.close();
-        if (dxfFile()->m_sections.size() == 0) {
-            delete m_file;
-            m_file = nullptr;
+        if (file->m_sections.size() == 0) {
+            delete file;
+            file = nullptr;
         } else {
             //emit fileProgress(m_file->shortName(), 1, 1);
-            emit fileReady(m_file);
+            emit fileReady(file);
         }
     } catch (const QString& wath) {
         qWarning() << "exeption QString:" << wath;
         //emit fileProgress(m_file->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), wath);
-        delete m_file;
+        delete file;
         return nullptr;
     } catch (const std::exception& e) {
         qWarning() << "exeption:" << e.what();
         //emit fileProgress(m_file->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
-        delete m_file;
+        delete file;
         return nullptr;
     } catch (...) {
         qWarning() << "exeption:" << errno;
         //emit fileProgress(m_file->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
-        delete m_file;
+        delete file;
         return nullptr;
     }
-    return m_file;
+    return file;
 }
-
-File* Plugin::dxfFile() { return reinterpret_cast<File*>(m_file); }
 
 bool Plugin::thisIsIt(const QString& fileName)
 {
@@ -191,11 +189,7 @@ NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->i
 
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
-void Plugin::setupInterface(App* a, AppSettings* s)
-{
-    app.setApp(a);
-    set.setApp(s);
-}
+void Plugin::setupInterface(App* a) { app.set(a); }
 
 void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)
 {
@@ -324,7 +318,7 @@ void Plugin::updateFileModel(FileInterface* file)
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
         qDebug() << __FUNCTION__ << name << layer;
-        fm->getItem(index)->append(new Dxf::NodeLayer(name, layer));
+        fm->getItem(index)->push_back(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
 }

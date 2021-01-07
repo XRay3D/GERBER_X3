@@ -13,20 +13,12 @@
 *******************************************************************************/
 #pragma once
 
-#include "../tooldatabase/tool.h"
 #include "../settings/settings.h"
+#include "../tooldatabase/tool.h"
 
 #include <QDebug>
 #include <QObject>
 #include <map>
-
-namespace GCode {
-class Creator;
-class PocketCreator;
-class ProfileCreator;
-class VoronoiCreator;
-class ThermalCreator;
-}
 
 class DrillForm;
 class FileModel;
@@ -45,11 +37,6 @@ using ParserInterfaces = std::map<int, std::pair<FilePluginInterface*, QObject*>
 class App {
     friend class DrillForm;
     friend class FileModel;
-    friend class GCode::Creator;
-    friend class GCode::PocketCreator;
-    friend class GCode::ProfileCreator;
-    friend class GCode::ThermalCreator;
-    friend class GCode::VoronoiCreator;
     friend class GCodePropertiesForm;
     friend class GraphicsView;
     friend class LayoutFrames;
@@ -63,7 +50,6 @@ class App {
 
     DrillForm* m_drillForm = nullptr;
     FileModel* m_fileModel = nullptr;
-    GCode::Creator* m_creator = nullptr;
     GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
     GraphicsView* m_graphicsView = nullptr;
     LayoutFrames* m_layoutFrames = nullptr;
@@ -92,7 +78,6 @@ public:
     static void set(App* app) { m_app = app; }
     static DrillForm* drillForm() { return m_app->m_drillForm; }
     static FileModel* fileModel() { return m_app->m_fileModel; }
-    static GCode::Creator* creator() { return m_app->m_creator; }
     static GCodePropertiesForm* gCodePropertiesForm() { return m_app->m_gCodePropertiesForm; }
     static GraphicsView* graphicsView() { return m_app->m_graphicsView; }
     static LayoutFrames* layoutFrames() { return m_app->m_layoutFrames; }

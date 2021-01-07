@@ -14,19 +14,23 @@
 *                                                                              *
 *******************************************************************************/
 #include "gccreator.h"
-#include "errno.h"
+
+#include "app.h"
 #include "erroritem.h"
-#include "filemodel.h"
-#include "forms/bridgeitem.h"
 #include "gcfile.h"
-#include "gcvoronoi.h"
-#include "locale.h"
 #include "point.h"
 #include "project.h"
-#include "scene.h"
-#include "settings.h"
-#include "stdio.h"
-#include "string.h"
+//#include "errno.h"
+//#include "filemodel.h"
+//#include "forms/bridgeitem.h"
+//#include "gccreator.h"
+//#include "gcvoronoi.h"
+//#include "locale.h"
+//#include "scene.h"
+//#include "settings.h"
+//#include "stdio.h"
+//#include "string.h"
+
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
@@ -84,16 +88,12 @@ void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool)
 
 namespace GCode {
 
-struct Cancel {
-    Cancel() { }
-};
+Creator::Creator() { }
 
 void Creator::reset()
 {
-    App::m_app->m_creator = nullptr;
-    m_cancel = false;
-    m_progressMax = 0;
-    m_progressVal = 0;
+    ProgressCancel::reset();
+    //    setCreator(this);
 
     m_file = nullptr;
 
@@ -109,7 +109,7 @@ void Creator::reset()
     m_stepOver = 0.0;
 }
 
-Creator::~Creator() { App::m_app->m_creator = nullptr; }
+Creator::~Creator() { ProgressCancel::reset(); }
 
 Pathss& Creator::groupedPaths(Grouping group, cInt k)
 {
@@ -221,9 +221,9 @@ void Creator::addRawPaths(Paths rawPaths)
     m_workingPs.insert(m_workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
-void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.insert(m_supportPss.end(), supportPaths.begin(), supportPaths.end()); }
+void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.push_back(supportPaths); }
 
-void Creator::addPaths(const Paths& paths) { m_workingPs.insert(m_workingPs.end(), paths.begin(), paths.end()); }
+void Creator::addPaths(const Paths& paths) { m_workingPs.push_back(paths); }
 
 void Creator::createGc()
 {
@@ -246,14 +246,15 @@ void Creator::createGc()
                 break;
             }
         }
-
-        create();
-
-    } catch (Cancel&) {
-        //m_cancel = false;
-        qWarning() << "Creator::createGc() canceled" << t.elapsed();
-    } catch (std::exception& e) {
+        if (!getCancel())
+            create();
+        qWarning() << "Creator::createGc() finish:" << t.elapsed();
+    } catch (const cancelException& e) {
+        qWarning() << "Creator::createGc() canceled:" << e.what() << t.elapsed();
+    } catch (const std::exception& e) {
         qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
+    } catch (...) {
+        qWarning() << "Creator::createGc() exeption:" << errno << t.elapsed();
     }
 }
 
@@ -265,25 +266,23 @@ void Creator::createGc(const GCodeParams& gcp)
 
 void Creator::cancel() // direct connection!!
 {
-    m_cancel = true;
+    qDebug(__FUNCTION__);
+    setCancel(true);
     condition.wakeAll();
 }
 
 void Creator::proceed() // direct connection!!
 {
-    m_cancel = false;
+    qDebug(__FUNCTION__);
+    setCancel(false);
     condition.wakeAll();
 }
 
 GCode::File* Creator::file() const { return m_file; }
 
-QPair<int, int> Creator::getProgress()
+std::pair<int, int> Creator::getProgress()
 {
-    if (m_cancel) {
-        m_cancel = false;
-        throw Cancel();
-    }
-    return { m_progressMax, m_progressVal };
+    return { getMax(), getCurrent() };
 }
 
 void Creator::stacking(Paths& paths)
@@ -308,8 +307,8 @@ void Creator::stacking(Paths& paths)
     m_returnPss.clear();
     /***********************************************************************************************/
     t.start();
-    auto mathBE = [this](Paths& paths, Path& path, QPair<int, int> idx) -> bool {
-        QList<int> list;
+    auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+        QList<size_t> list;
         list.push_back(idx.first);
         for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double d = std::numeric_limits<double>::max();
@@ -332,7 +331,7 @@ void Creator::stacking(Paths& paths)
         std::rotate(path.begin(), path.begin() + idx.second, path.end());
         return true;
     };
-    using Worck = QPair<PolyNode*, bool>;
+    using Worck = std::pair<PolyNode*, bool>;
     std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
         auto [node, newPaths] = w;
         if (!m_returnPss.empty() || newPaths) {
@@ -345,7 +344,7 @@ void Creator::stacking(Paths& paths)
                 m_returnPss.push_back({ path });
             } else {
                 // check distance;
-                QPair<int, int> idx;
+                std::pair<size_t, size_t> idx;
                 double d = std::numeric_limits<double>::max();
                 for (size_t id = 0; id < m_returnPss.back().back().size(); ++id) {
                     const Point64& ptd = m_returnPss.back().back()[id];
@@ -370,10 +369,10 @@ void Creator::stacking(Paths& paths)
             for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
                 stacker({ node->Childs[i], true });
         }
-        progress();
+        //PROG setProgInc();
     };
     /***********************************************************************************************/
-    progress(polyTree.Total());
+    //PROG .3setProgMax(polyTree.Total());
     stacker({ polyTree.GetFirst(), false });
 
     for (Paths& retPaths : m_returnPss) {
@@ -479,43 +478,14 @@ void Creator::isContinueCalc()
     condition.wait(&mutex);
     mutex.unlock();
     items.clear();
-    if (m_cancel)
-        throw Cancel();
-}
-
-void Creator::progress(int progressMax)
-{
-    if (App::m_app->m_creator != nullptr)
-        m_progressMax += progressMax;
-}
-
-void Creator::progress(int progressMax, int progressVal)
-{
-    if (m_cancel) {
-        m_cancel = false;
-        throw Cancel();
-    }
-    m_progressVal = progressVal;
-    m_progressMax = progressMax;
-}
-
-void Creator::progress()
-{
-    if (m_cancel) {
-        m_cancel = false;
-        throw Cancel();
-    }
-    if (App::m_app->m_creator != nullptr)
-        if (m_progressMax < ++m_progressVal) {
-            if (m_progressMax == 0)
-                m_progressMax = 100;
-            else
-                m_progressMax *= 2;
-        }
+    //    if (m_cancel)
+    //        throw cancelException("canceled by user");
 }
 
 bool Creator::createability(bool side)
 {
+    QElapsedTimer t;
+    t.start();
     //    Paths wpe;
     const double d = m_gcp.tools.back().getDiameter(m_gcp.getDepth()) * uScale;
     const double r = d * 0.5;
@@ -523,8 +493,9 @@ bool Creator::createability(bool side)
 
     Paths srcPaths;
     for (size_t pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
-        srcPaths.insert(srcPaths.end(), m_groupedPss[pIdx].begin(), m_groupedPss[pIdx].end());
+        srcPaths.push_back(m_groupedPss[pIdx]);
     }
+    qDebug() << __FUNCTION__ << "insert" << t.elapsed();
 
     Paths frPaths;
     {
@@ -537,6 +508,7 @@ bool Creator::createability(bool side)
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, r + 100);
     }
+    qDebug() << __FUNCTION__ << "offset" << t.elapsed();
     if (side == CopperPaths)
         ReversePaths(srcPaths);
     {
@@ -545,7 +517,8 @@ bool Creator::createability(bool side)
         clipper.AddPaths(srcPaths, ptSubject);
         clipper.Execute(ctDifference, frPaths, pftPositive);
     }
-
+    qDebug() << __FUNCTION__ << "clipper1" << t.elapsed();
+    QString last(msg);
     if (!frPaths.empty()) {
         PolyTree polyTree;
         {
@@ -558,6 +531,7 @@ bool Creator::createability(bool side)
             clipper.AddPath(outer, ptSubject, true);
             clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         }
+        qDebug() << __FUNCTION__ << "clipper2" << t.elapsed();
 
         auto test = [&srcPaths, side](PolyNode* node) -> bool {
             if (node->ChildCount() > 0) {
@@ -582,6 +556,10 @@ bool Creator::createability(bool side)
             return false;
         };
 
+        setMax(frPaths.size());
+        setCurrent();
+
+        msg = tr("Creativity check");
         const std::function<void(PolyNode*, double)> creator = [&creator, test, testArea, this](PolyNode* node, double area) {
             if (node && !node->IsHole()) { // init run
                 for (size_t i = 0; i < node->ChildCount(); ++i) {
@@ -600,7 +578,8 @@ bool Creator::createability(bool side)
                     area += Area(node->Childs[i]->Contour);
                     paths.push_back(std::move(node->Childs[i]->Contour));
                 }
-                items.push_back(new ErrorItem(paths, area * dScale * dScale));
+                incCurrent();
+                items.emplace_back(new ErrorItem(paths, area * dScale * dScale));
                 for (size_t i = 0; i < node->ChildCount(); ++i) {
                     creator(node->Childs[i], area);
                 }
@@ -608,10 +587,10 @@ bool Creator::createability(bool side)
         };
         creator(polyTree.GetFirst(), 0);
     }
-
+    qDebug() << __FUNCTION__ << "creator" << t.elapsed();
+    msg = last;
     if (!items.empty())
         isContinueCalc();
-
     return true;
 }
 
@@ -622,6 +601,37 @@ void Creator::setGcp(const GCodeParams& gcp)
     m_gcp = gcp;
     reset();
 }
+
+//void Creator:://PROG .3setProgMax(int progressMax)
+//{
+//    //        if (App::m_app->m_creator != nullptr)
+//    //PROG  m_progressMax += progressMax;
+//}
+
+//void Creator:: //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal)
+//{
+//    //        if (m_cancel) {
+//    //            m_cancel = false;
+//    //            throw cancelException("canceled by user");
+//    //        }
+//    //PROG m_progressVal = progressVal;
+//    //PROG  m_progressMax = progressMax;
+//}
+
+//void Creator:://PROG setProgInc()
+//{
+//    //        if (m_cancel) {
+//    //            m_cancel = false;
+//    //            throw cancelException("canceled by user");
+//    //        }
+//    if (App::m_app->m_creator != nullptr)
+//        if (//PROG  m_progressMax < ++//PROG m_progressVal) {
+//            if (//PROG  m_progressMax == 0)
+//                //PROG  m_progressMax = 100;
+//            else
+//                //PROG  m_progressMax *= 2;
+//        }
+//}
 
 Paths& Creator::sortB(Paths& src)
 {
@@ -647,7 +657,7 @@ Paths& Creator::sortBE(Paths& src)
 {
     Point64 startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        progress(src.size(), firstIdx);
+        //PROG //PROG .3setProgMaxAndVal(src.size(), firstIdx);
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;

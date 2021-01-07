@@ -18,6 +18,8 @@
 #include "dxf_types.h"
 #include "entities/dxf_graphicobject.h"
 
+#include "datastream.h"
+
 class ItemGroup;
 
 namespace Dxf {

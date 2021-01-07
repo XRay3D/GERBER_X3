@@ -22,12 +22,14 @@ SUBDIRS += \
     graphicsview \# static lib
     project \#      static lib
     settings \#     static lib
+    thermal \#      static lib
     tooldatabase \# static lib
 
 # plugins
 SUBDIRS += \
-#    dxf \
-#    gerber \
+    dxf \
+    excellon \
+    gerber \
 
 SUBDIRS += \
 #    GTE_Win \

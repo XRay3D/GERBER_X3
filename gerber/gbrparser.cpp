@@ -185,9 +185,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     mutex.unlock();
 }
 
-QVector<QString> Parser::cleanAndFormatFile(QString data)
+mvector<QString> Parser::cleanAndFormatFile(QString data)
 {
-    QVector<QString> gerberLines;
+    mvector<QString> gerberLines;
     gerberLines.reserve(100000);
 
     enum State {
@@ -967,7 +967,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             //arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
             // Последняя точка в вычисленной дуге может иметь числовые ошибки.
             // Точной конечной точкой является указанная (x, y). Заменить.
-            m_state.curPos() = { x, y };
+            m_state.curPos() = IntPoint{ x, y };
             if (arcPolygon.size())
                 arcPolygon.last() = m_state.curPos();
             else

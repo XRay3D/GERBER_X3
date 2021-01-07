@@ -29,6 +29,7 @@ msvc* {
     LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/filetree$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
+    LIBS += -l$$_PRO_FILE_PWD_/../lib/tooldatabase$$SUFFIX
 }
 
 gcc* {
@@ -43,6 +44,7 @@ gcc* {
     LIBS += -lgi$$SUFFIX
     LIBS += -lfiletree$$SUFFIX
     LIBS += -lproject$$SUFFIX
+    LIBS += -ltooldatabase$$SUFFIX
 }
 
 linux {
@@ -62,6 +64,7 @@ INCLUDEPATH += ../graphicsview
 INCLUDEPATH += ../gi
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../project
+INCLUDEPATH += ../tooldatabase
 
 EXAMPLE_FILES = gerber.json
 
