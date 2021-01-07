@@ -58,7 +58,7 @@
   <customwidget>
    <class>ToolEditForm</class>
    <extends>QWidget</extends>
-   <header>tooldatabase/tooleditform.h</header>
+   <header location="global">tooleditform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
