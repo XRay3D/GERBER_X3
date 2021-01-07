@@ -1,0 +1,198 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+/*******************************************************************************
+*                                                                              *
+* Author    :  Damir Bakiev                                                    *
+* Version   :  na                                                              *
+* Date      :  01 February 2020                                                *
+* Website   :  na                                                              *
+* Copyright :  Damir Bakiev 2016-2020                                          *
+*                                                                              *
+* License:                                                                     *
+* Use, modification & distribution is subject to Boost Software License Ver 1. *
+* http://www.boost.org/LICENSE_1_0.txt                                         *
+*                                                                              *
+*******************************************************************************/
+#include "thermalpreviewitem.h"
+
+#include "../thermal/thermalnode.h"
+#include "app.h"
+
+#include "graphicsview.h"
+#include "tool.h"
+#include <QAnimationGroup>
+#include <QElapsedTimer>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QIcon>
+#include <QMenu>
+#include <QMutex>
+#include <QPainter>
+#include <QParallelAnimationGroup>
+#include <QPropertyAnimation>
+#include <QStyleOptionGraphicsItem>
+#include <QtMath>
+
+#include "leakdetector.h"
+
+ThermalPreviewItem::ThermalPreviewItem(Tool& tool)
+    : agr(this)
+    , pa1(this, "bodyColor")
+    , pa2(this, "pathColor")
+    , tool(tool)
+    , m_bodyColor(colors[(int)Colors::Default])
+    , m_pathColor(colors[(int)Colors::UnUsed])
+
+{
+    agr.addAnimation(&pa1);
+    agr.addAnimation(&pa2);
+
+    pa1.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    pa1.setDuration(150);
+    pa2.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    pa2.setDuration(150);
+
+    setAcceptHoverEvents(true);
+    setFlag(ItemIsSelectable, true);
+    setOpacity(0);
+    setZValue(std::numeric_limits<double>::max() - 10);
+
+    static QMutex m;
+    m.lock();
+    thpi.append(this);
+    m.unlock();
+}
+
+ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
+
+void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
+{
+    if (tool.isValid() && m_pathColor.alpha()) {
+        //        if (isEmpty > 0) {
+        //            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
+        //            painter->setBrush(Qt::NoBrush);
+        //            for (QPolygonF polygon : m_bridge) {
+        //                polygon.append(polygon.first());
+        //                painterPath.addPolygon(polygon);
+        //                painter->drawPolyline(polygon);
+        //            }
+        //        } else {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QPen(App::settings().guiColor(GuiColors::CutArea), diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->drawPath(painterPath);
+        QColor pc(m_bodyColor);
+        pc.setAlpha(255);
+        painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::graphicsView()->scaleFactor()));
+        painter->drawPath(painterPath);
+        //        }
+    }
+    painter->setBrush(m_bodyColor);
+    QColor p(m_bodyColor);
+    p.setAlpha(255);
+    painter->setPen(QPen(p, 0.0));
+    painter->drawPath(sourcePath);
+}
+
+QRectF ThermalPreviewItem::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
+
+QPainterPath ThermalPreviewItem::shape() const { return sourcePath; }
+
+int ThermalPreviewItem::type() const { return static_cast<int>(GiType::PrThermal); }
+
+Paths ThermalPreviewItem::bridge() const { return m_bridge; }
+
+bool ThermalPreviewItem::isValid() const { return !previewPaths.isEmpty() && m_node->isChecked(); }
+
+void ThermalPreviewItem::changeColor()
+{
+    pa1.setStartValue(m_bodyColor);
+    if (colorState & Selected) {
+        pa1.setEndValue(QColor((colorState & Hovered)
+                ? colors[(int)Colors::SelectedHovered]
+                : colors[(int)Colors::Selected]));
+    } else {
+        if (colorState & Used && !previewPaths.isEmpty()) {
+            pa1.setEndValue(QColor((colorState & Hovered)
+                    ? colors[(int)Colors::UsedHovered]
+                    : colors[(int)Colors::Used]));
+        } else {
+            pa1.setEndValue(QColor((colorState & Hovered)
+                    ? colors[(int)Colors::DefaultHovered]
+                    : colors[(int)Colors::Default]));
+        }
+    }
+    pa2.setStartValue(m_pathColor);
+    pa2.setEndValue(QColor((colorState & Used)
+            ? App::settings().guiColor(GuiColors::CutArea)
+            : colors[(int)Colors::UnUsed]));
+    agr.start();
+}
+
+void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QMenu menu;
+    if (m_node->isChecked())
+        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
+            for (auto item : thpi)
+                if ((item == this || item->isSelected()) && item->m_node->isChecked()) {
+                    item->m_node->disable();
+                    item->update();
+                    item->mouseDoubleClickEvent(nullptr);
+                }
+        });
+    else
+        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
+            for (auto item : thpi)
+                if ((item == this || item->isSelected()) && !item->m_node->isChecked()) {
+                    item->m_node->enable();
+                    item->update();
+                    item->mouseDoubleClickEvent(nullptr);
+                }
+        });
+    menu.exec(event->screenPos());
+}
+
+void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event) {
+        QGraphicsItem::mouseDoubleClickEvent(event);
+        m_node->isChecked() ? m_node->disable() : m_node->enable();
+    }
+    m_node->isChecked() ? colorState |= Used : colorState &= ~Used;
+    changeColor();
+}
+
+void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    colorState |= Hovered;
+    changeColor();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void ThermalPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    colorState &= ~Hovered;
+    changeColor();
+    QGraphicsItem::hoverLeaveEvent(event);
+}
+
+QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemSelectedChange) {
+        if (value.toInt()) {
+            colorState |= Selected;
+            emit selectionChanged(m_node->index(), {});
+        } else {
+            colorState &= ~Selected;
+            emit selectionChanged({}, m_node->index());
+        }
+        changeColor();
+    } else if (change == ItemVisibleChange) {
+        auto animation = new QPropertyAnimation(this, "opacity");
+        animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+        animation->setDuration(200);
+        animation->setStartValue(0.0);
+        animation->setEndValue(1.0);
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
