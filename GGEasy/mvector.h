@@ -7,11 +7,11 @@
 template <class T>
 struct mvector : std::vector<T> {
     using V = std::vector<T>;
-    mvector(int size = 0)
+    mvector(size_t size = 0)
         : std::vector<T>(size)
     {
     }
-    mvector(int size, const T& t)
+    mvector(size_t size, const T& t)
         : std::vector<T>(size, t)
     {
     }
@@ -19,10 +19,25 @@ struct mvector : std::vector<T> {
         : std::vector<T>(v)
     {
     }
+    mvector(mvector<T>&& v)
+        : std::vector<T>(v)
+    {
+    }
 
     mvector(const std::initializer_list<T>& v)
         : std::vector<T>(v)
     {
+    }
+
+    mvector& operator=(const mvector<T>& v)
+    {
+        V::operator=(v);
+        return *this;
+    }
+    mvector& operator=(mvector<T>&& v)
+    {
+        V::operator=(std::move(v));
+        return *this;
     }
 
     inline bool isEmpty() const noexcept { return V::empty(); }
@@ -43,17 +58,28 @@ struct mvector : std::vector<T> {
     inline void append(T&& Val) { V::emplace_back(std::move(Val)); }
     inline void append(const V& Val) { V::insert(V::end(), Val.begin(), Val.end()); }
 
+    //    template <class... _Valty>
+    //    decltype(auto) emplace_back(_Valty&&... _Val)
+    //    {
+    //        return V::template emplace_back<_Valty...>(_Val...);
+    //    }
+    //    template <class... _Valty>
+    //    decltype(auto) emplace_back(_Valty&... _Val)
+    //    {
+    //        return V::template emplace_back<_Valty...>(_Val...);
+    //    }
+
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
-    V mid(size_t idx, size_t len = 0)
+    mvector mid(size_t idx, size_t len = 0) const
     {
-        V v;
+        mvector v;
         if (idx >= V::size())
             return v;
-        typename V::iterator end;
-        typename V::iterator begin = V::begin() + idx;
+        typename V::const_iterator end;
+        typename V::const_iterator begin = V::cbegin() + idx;
         if (len == 0)
-            end = V::end();
+            end = V::cend();
         else if (idx + len > V::size())
             end = begin + (V::size() - idx);
         else
@@ -62,6 +88,24 @@ struct mvector : std::vector<T> {
         v.insert(v.end(), begin, end);
         return v;
     }
+
+    //    mvector mid(size_t idx, size_t len = 0)
+    //    {
+    //        mvector v;
+    //        if (idx >= V::size())
+    //            return v;
+    //        typename V::iterator end;
+    //        const typename V::iterator begin = V::begin() + idx;
+    //        if (len == 0)
+    //            end = V::end();
+    //        else if (idx + len > V::size())
+    //            end = begin + (V::size() - idx);
+    //        else
+    //            end = begin + len;
+    //        v.reserve(std::distance(begin, end));
+    //        v.insert(v.end(), begin, end);
+    //        return v;
+    //    }
 
     inline void prepend(const T& Val) { V::insert(V::begin(), 1, Val); }
     inline void prepend(T&& Val) { V::insert(V::begin(), 1, std::move(Val)); }

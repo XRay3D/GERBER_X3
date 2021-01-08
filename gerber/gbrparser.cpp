@@ -20,7 +20,7 @@
 #include "gbrattrfilefunction.h"
 #include "gbrfile.h"
 
-#include "interfaces/fileplugin.h"
+#include "interfaces/pluginfile.h"
 
 #include "leakdetector.h"
 

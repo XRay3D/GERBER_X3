@@ -16,7 +16,7 @@
 #include "settingsdialog.h"
 #include "colorselector.h"
 #include "graphicsview.h"
-#include "interfaces/fileplugin.h"
+#include "interfaces/pluginfile.h"
 
 #include <QGLWidget>
 #include <QtWidgets>

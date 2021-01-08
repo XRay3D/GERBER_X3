@@ -238,15 +238,23 @@ struct IntPoint {
 //typedef mvector /*mvector*/<IntPoint> Path;
 //typedef mvector /*mvector*/<Path> Paths;
 
-struct Path : public mvector<IntPoint> {
-    Path(int size = 0)
+struct Path : mvector<IntPoint> {
+    Path(size_t size = 0)
         : mvector<IntPoint>(size)
     {
     }
-    Path(int size, const IntPoint& t)
+    Path(size_t size, const IntPoint& t)
         : mvector<IntPoint>(size, t)
     {
     }
+    //    Path(const IntPoint& t)
+    //        : mvector<IntPoint>(1, t)
+    //    {
+    //    }
+    //    Path(IntPoint&& t)
+    //        : mvector<IntPoint>(1, t)
+    //    {
+    //    }
     Path(const mvector<IntPoint>& v)
         : mvector<IntPoint>(v)
     {
@@ -278,17 +286,21 @@ struct Path : public mvector<IntPoint> {
     //    int id {};
 };
 
-struct Paths : public mvector<Path> {
-    Paths(int size = 0)
+struct Paths : mvector<Path> {
+    Paths(size_t size = 0)
         : mvector<Path>(size)
     {
     }
-    Paths(int size, const Path& t)
+    Paths(size_t size, const Path& t)
         : mvector<Path>(size, t)
     {
     }
     Paths(const mvector<Path>& v)
         : mvector<Path>(v)
+    {
+    }
+    Paths(mvector<Path>&& v)
+        : mvector<Path>(std::move(v))
     {
     }
     Paths(const std::initializer_list<Path>& v)

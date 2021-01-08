@@ -14,9 +14,6 @@
 *                                                                              *
 *******************************************************************************/
 #include "gcthermal.h"
-#ifdef GERBER
-#include "gbrfile.h"
-#endif
 #include "gcfile.h"
 #include "project.h"
 
@@ -28,50 +25,45 @@ ThermalCreator::ThermalCreator() { }
 
 void ThermalCreator::create()
 {
-#ifdef GERBER
     createThermal(
-        App::project()->file<Gerber::File>(m_gcp.params[GCodeParams::FileId].toInt()),
+        App::project()->file(m_gcp.params[GCodeParams::FileId].toInt()),
         m_gcp.tools.first(),
         m_gcp.params[GCodeParams::Depth].toDouble());
-#else
     emit fileReady(nullptr);
-#endif
 }
 
-void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const double depth)
+void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth)
 {
-#ifdef GERBER
+    m_toolDiameter = tool.getDiameter(depth);
+    const double dOffset = m_toolDiameter * uScale * 0.5;
 
-//    m_toolDiameter = tool.getDiameter(depth);
-//    const double dOffset = m_toolDiameter * uScale * 0.5;
+    { // create tool path
+        // execute offset
+        {
+            ClipperOffset offset;
+            offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
+            offset.Execute(m_returnPs, dOffset);
+        }
 
-//    { // create tool path
-//        // execute offset
-//        {
-//            ClipperOffset offset;
-//            offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
-//            offset.Execute(m_returnPs, dOffset);
-//        }
+        // fix direction
+        if (m_gcp.side() == Outer && !m_gcp.convent())
+            ReversePaths(m_returnPs);
+        else if (m_gcp.side() == Inner && m_gcp.convent())
+            ReversePaths(m_returnPs);
 
-//        // fix direction
-//        if (m_gcp.side() == Outer && !m_gcp.convent())
-//            ReversePaths(m_returnPs);
-//        else if (m_gcp.side() == Inner && m_gcp.convent())
-//            ReversePaths(m_returnPs);
+        for (Path& path : m_returnPs)
+            path.push_back(path.first());
 
-//        for (Path& path : m_returnPs)
-//            path.push_back(path.first());
+        if (m_returnPs.isEmpty()) {
+            emit fileReady(nullptr);
+            return;
+        }
+        //dbgPaths(m_returnPs, "tool path");
+    }
 
-//        if (m_returnPs.isEmpty()) {
-//            emit fileReady(nullptr);
-//            return;
-//        }
-//        //dbgPaths(m_returnPs, "tool path");
-//    }
-
-//    // create frame
-//    Paths framePaths;
-//    {
+    // create frame
+    Paths framePaths;
+    {
 //        Clipper clipper;
 //        {
 //            ClipperOffset offset;
@@ -106,29 +98,28 @@ void ThermalCreator::createThermal(Gerber::File* file, const Tool& tool, const d
 //        }
 //        clipper.Execute(ctUnion, framePaths, pftEvenOdd);
 //        //dbgPaths(framePaths, "framePaths", true);
-//    }
+    }
 
-//    {
-//        Clipper clipper;
-//        clipper.AddPaths(m_returnPs, ptSubject, false);
-//        clipper.AddPaths(framePaths, ptClip, true);
-//        clipper.Execute(ctDifference, m_returnPs, pftPositive);
-//        sortBE(m_returnPs);
-//    }
+    {
+        Clipper clipper;
+        clipper.AddPaths(m_returnPs, ptSubject, false);
+        clipper.AddPaths(framePaths, ptClip, true);
+        clipper.Execute(ctDifference, m_returnPs, pftPositive);
+        sortBE(m_returnPs);
+    }
 
-//    if (m_returnPs.size()) {
-//        //        for (Path& path : m_returnPs)
-//        //            path.push_back(path.first());
-//        m_returnPss.push_back(sortB(m_returnPs));
-//    }
-//    if (m_returnPss.isEmpty()) {
-//        emit fileReady(nullptr);
-//    } else {
-//        m_gcp.gcType = Thermal;
-//        m_file = new GCode::File(sortB(m_returnPss), m_gcp);
-//        m_file->setFileName(tool.nameEnc());
-//        emit fileReady(m_file);
-//    }
-#endif
+    if (m_returnPs.size()) {
+        //        for (Path& path : m_returnPs)
+        //            path.push_back(path.first());
+        m_returnPss.push_back(sortB(m_returnPs));
+    }
+    if (m_returnPss.isEmpty()) {
+        emit fileReady(nullptr);
+    } else {
+        m_gcp.gcType = Thermal;
+        m_file = new GCode::File(sortB(m_returnPss), m_gcp);
+        m_file->setFileName(tool.nameEnc());
+        emit fileReady(m_file);
+    }
 }
 }

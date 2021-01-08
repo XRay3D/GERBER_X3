@@ -13,6 +13,7 @@
 *******************************************************************************/
 #pragma once
 #include "datastream.h"
+#include "interfaces/plugintypes.h"
 #include "myclipper.h"
 #include <QDebug>
 
@@ -282,7 +283,7 @@ public:
     inline void setRotating(double rotating) { m_rotating = rotating; }
 };
 
-class GraphicObject {
+class GraphicObject : public ::GraphicObject {
     friend class File;
     friend class Plugin;
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
@@ -327,6 +328,33 @@ public:
     inline const Path& path() const { return m_path; }
     inline const Paths& paths() const { return m_paths; }
     inline State state() const { return m_state; }
+
+    Path line() const override { return m_path.size() == 2 ? m_path : Path(); }
+    Path lineW() const override { return m_path.size() == 2 ? m_paths.front() : Path(); } // polygon
+
+    Path polyLine() const override { return closed() ? Path() : m_path; }
+    Paths polyLineW() const override { return closed() ? Paths() : m_paths; } // closed
+
+    Path elipse() const override; // { return m_gFile.; } // circle
+    Paths elipseW() const override; // { return {}; }
+
+    Path arc() const override { return {}; } // part of elipse
+    Path arcW() const override { return {}; }
+
+    Path polygon() const override { return closed() ? m_path : Path(); }
+    Paths polygonWholes() const override { return m_paths; }
+
+    Path hole() const override { return !positive() ? m_path : Path(); }
+    Paths holes() const override
+    {
+        if (!positive())
+            return { m_paths.first() };
+        else
+            return m_paths.mid(1);
+    }
+
+    bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; } // not hole
+    bool closed() const override { return m_path.front() == m_path.back(); } // front == back
 };
 
 struct StepRepeatStr {

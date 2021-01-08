@@ -163,7 +163,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                         acc.push_back(toNext);
                     } else {
                         for (Path& dst : scanLine) {
-                            for (int i = 0; i < toNext.size(); ++i) {
+                            for (size_t i = 0; i < toNext.size(); ++i) {
                                 Path& next = toNext[i];
                                 if (dst.last() == next.first()) {
                                     dst.push_back(next.mid(1));
@@ -197,7 +197,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                 }
             } else {
                 for (cInt var = start, flag = 0; var < end; flag = (flag ? 0 : 1), var += m_stepOver) {
-                    map.push_back({ left, right, var, flag });
+                    map.push_back(Worck{ { left, right, var, flag } });
                 }
             }
             if (/* DISABLES CODE */ (0)) {

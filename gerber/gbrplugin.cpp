@@ -323,7 +323,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
 
             data.emplace_back(std::move(name), drawApertureIcon(aperture.data()), apDCode, drillDiameter);
             for (const GraphicObject* go : cacheApertures[apDCode])
-                giPeview[apDCode].emplace_back(std::make_shared<DrillPrGI>(go, apDCode, data.back()));
+                giPeview[apDCode].push_back(std::make_shared<DrillPrGI>(go, apDCode, data.back()));
         }
     }
 
