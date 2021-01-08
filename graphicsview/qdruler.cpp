@@ -200,8 +200,8 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
             QRectF textRect(QFontMetricsF(font()).boundingRect(number));
             textRect.setWidth(textRect.width() + 1);
             if (isHorzRuler) {
-                painter->translate(x1 + 3, textRect.height() + 6);
-                painter->drawText(textRect, number);
+                painter->translate(x1 + 3, textRect.height());
+                painter->drawText(textRect, Qt::AlignCenter, number);
             } else {
                 painter->translate(textRect.height() - 3, y1 - 3);
                 painter->rotate(-90);

@@ -24,6 +24,8 @@
 
 namespace Gerber {
 
+
+
 class File : public FileInterface, QVector<GraphicObject> {
     friend class Parser;
     friend class Plugin;

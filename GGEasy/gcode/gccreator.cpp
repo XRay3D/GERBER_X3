@@ -579,7 +579,7 @@ bool Creator::createability(bool side)
                     paths.push_back(std::move(node->Childs[i]->Contour));
                 }
                 incCurrent();
-                items.emplace_back(new ErrorItem(paths, area * dScale * dScale));
+                items.push_back(new ErrorItem(paths, area * dScale * dScale));
                 for (size_t i = 0; i < node->ChildCount(); ++i) {
                     creator(node->Childs[i], area);
                 }

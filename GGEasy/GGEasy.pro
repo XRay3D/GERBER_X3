@@ -128,8 +128,9 @@ HEADERS += \
     gcode/gcvoronoi.h \
     gcode/voroni/jc_voronoi.h \
     interfaces/file.h \
-    interfaces/fileplugin.h \
     interfaces/node.h \
+    interfaces/pluginfile.h \
+    interfaces/plugintypes.h \
     leakdetector.h \
     mainwindow.h \
     mvector.h \

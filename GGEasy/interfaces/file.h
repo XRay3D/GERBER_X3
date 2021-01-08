@@ -14,7 +14,10 @@
 #pragma once
 
 #include "datastream.h"
-#include "fileplugin.h"
+
+#include "pluginfile.h"
+#include "plugintypes.h"
+
 #include "itemgroup.h"
 #include "myclipper.h"
 #include "splashscreen.h"
@@ -27,32 +30,6 @@
 #include <QModelIndex>
 
 #include "leakdetector.h"
-
-using namespace ClipperLib;
-
-enum class FileType {
-    Gerber,
-    Excellon,
-    GCode,
-    Dxf,
-    Shapes
-};
-
-enum Side {
-    NullSide = -1,
-    Top,
-    Bottom
-};
-
-class QModelIndex;
-
-struct LayerType {
-    int id = -1;
-    QString actName;
-    QString actToolTip;
-    QString shortActName() const { return actName; }
-};
-Q_DECLARE_METATYPE(LayerType)
 
 using LayerTypes = std::vector<LayerType>;
 

@@ -13,7 +13,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/fileplugin.h"
+#include "interfaces/pluginfile.h"
 
 #include <QObject>
 

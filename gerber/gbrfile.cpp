@@ -33,6 +33,16 @@ namespace Gerber {
 
 static Format* crutch;
 
+Path GraphicObject::elipse() const { return m_state.dCode() == D03
+            && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
+        ? m_path
+        : Path(); } // circle
+Paths GraphicObject::elipseW() const { return m_state.dCode() == D03
+            && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
+            && m_gFile->apertures()->at(m_state.aperture())->withHole()
+        ? m_paths
+        : Paths(); }
+
 QDebug operator<<(QDebug debug, const State& state)
 {
     QDebugStateSaver saver(debug);
