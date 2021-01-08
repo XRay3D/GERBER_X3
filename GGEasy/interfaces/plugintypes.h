@@ -39,6 +39,9 @@ struct GraphicObject {
 
     virtual bool positive() const { return {}; } // not hole
     virtual bool closed() const { return {}; } // front == back
+
+    virtual Path path() const { return {}; }
+    virtual Paths paths() const { return {}; }
 };
 
 enum class FileType {

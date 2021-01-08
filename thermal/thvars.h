@@ -20,7 +20,8 @@ struct ThParam {
 };
 
 class ThermalModel;
-struct ThParam2 {
+class ThParam2 {
+public:
     ThParam par;
     ThermalModel* model = nullptr;
     bool perture = false;

@@ -97,6 +97,16 @@ NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->i
 
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Excellon File" },
+        { "Version", "1.0" },
+        { "Vendor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Info" },
+    };
+}
+
 void Plugin::setupInterface(App* a) { app.set(a); }
 
 void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)
@@ -302,7 +312,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     for (const Excellon::Hole& hole : *exFile)
         cacheHoles[hole.state.tCode] << &hole;
 
-    data.reserve(cacheHoles.size());// !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
+    data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
 
     for (auto [toolNum, diameter] : exFile->tools()) {
         QString name(tr("Tool Ø%1mm").arg(diameter));

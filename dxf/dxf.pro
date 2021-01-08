@@ -19,6 +19,9 @@ TARGET = $$TARGET$$SUFFIX
 
 message($$TARGET)
 
+VERSION_PE_HEADER = 1.0
+VERSION = 1.0.0.0
+
 msvc* {
     LIBS += -lsetupapi -lAdvapi32
     QMAKE_CXXFLAGS += /std:c++latest

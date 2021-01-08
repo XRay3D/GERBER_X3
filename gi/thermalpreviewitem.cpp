@@ -66,7 +66,7 @@ ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
 
 void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (tool.isValid() && m_pathColor.alpha()) {
+    if (m_pathColor.alpha()) {
         //        if (isEmpty > 0) {
         //            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
         //            painter->setBrush(Qt::NoBrush);
@@ -76,13 +76,29 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
         //                painter->drawPolyline(polygon);
         //            }
         //        } else {
-        painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(App::settings().guiColor(GuiColors::CutArea), diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->drawPath(painterPath);
-        QColor pc(m_bodyColor);
-        pc.setAlpha(255);
-        painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::graphicsView()->scaleFactor()));
-        painter->drawPath(painterPath);
+        if (agr.state() == QAbstractAnimation::Running) {
+            int a;
+            QColor c1(App::settings().guiColor(GuiColors::CutArea));
+            a = App::settings().guiColor(GuiColors::CutArea).alpha();
+            c1.setAlpha(std::clamp(pathColor().alpha(), 0, a));
+            painter->setBrush(Qt::NoBrush);
+            painter->setPen(QPen(c1, diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->drawPath(painterPath);
+
+            QColor c2(App::settings().guiColor(GuiColors::ToolPath));
+            a = App::settings().guiColor(GuiColors::ToolPath).alpha();
+            c2.setAlpha(std::clamp(pathColor().alpha(), 0, a));
+            painter->setPen(QPen(c2, 2 * App::graphicsView()->scaleFactor()));
+            painter->drawPath(painterPath);
+        } else {
+            painter->setBrush(Qt::NoBrush);
+            painter->setPen(QPen(App::settings().guiColor(GuiColors::CutArea), diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter->drawPath(painterPath);
+            QColor pc(m_bodyColor);
+            pc.setAlpha(255);
+            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::graphicsView()->scaleFactor()));
+            painter->drawPath(painterPath);
+        }
         //        }
     }
     painter->setBrush(m_bodyColor);
@@ -122,7 +138,7 @@ void ThermalPreviewItem::changeColor()
     }
     pa2.setStartValue(m_pathColor);
     pa2.setEndValue(QColor((colorState & Used)
-            ? App::settings().guiColor(GuiColors::CutArea)
+            ? colors[(int)Colors::Used]
             : colors[(int)Colors::UnUsed]));
     agr.start();
 }

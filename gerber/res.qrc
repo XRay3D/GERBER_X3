@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gerber.json</file>
+    </qresource>
+</RCC>

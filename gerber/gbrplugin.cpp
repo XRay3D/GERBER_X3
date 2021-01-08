@@ -129,10 +129,13 @@ bool Plugin::thisIsIt(const QString& fileName)
         static const QRegExp match(QStringLiteral("%FS[LTD]?[AI]X\\d{2}Y\\d{2}\\*%"));
         QString line;
         while (in.readLineInto(&line)) {
-            if (line.startsWith('%') && match.exactMatch(line))
+            if (line.startsWith('%') && match.exactMatch(line)) {
+                qDebug() << __FUNCTION__ << true;
                 return true;
+            }
         }
     }
+    qDebug() << __FUNCTION__ << false;
     return false;
 }
 
@@ -143,6 +146,16 @@ int Plugin::type() const { return int(FileType::Gerber); }
 NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->id()); }
 
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
+
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Gerber X3 File" },
+        { "Version", "1.0" },
+        { "Vendor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Info" },
+    };
+}
 
 void Plugin::setupInterface(App* a) { app.set(a); }
 
@@ -309,6 +322,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
             cacheApertures[go.state().aperture()].push_back(&go);
 
     assert(count == cacheApertures.size()); // assert on != - false
+
     data.reserve(count); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
     for (auto [apDCode, aperture] : *m_apertures) {
         if (aperture && aperture->isFlashed()) {
@@ -417,6 +431,8 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         int strageIdx = -1;
     };
 
+    param.model->appendRow(QIcon(), tr("All"), param.par);
+
     mvector<Worker> map;
     auto creator = [this, &m_sourcePreview, &tool, &param](Worker w) {
         static QMutex m;
@@ -494,6 +510,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
             map.push_back({ go, thermalNodes[Region], tr("Region"), ctr++ });
         }
     }
+
 #ifdef QT_DEBUG
     for (auto& worker : map) {
         creator(worker);

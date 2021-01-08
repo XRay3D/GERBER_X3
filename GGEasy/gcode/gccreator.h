@@ -33,8 +33,8 @@ class ErrorItem;
 //}
 
 class ProgressCancel {
-    static inline int m_max = 0;
-    static inline int m_current = 0;
+    static inline size_t m_max = 0;
+    static inline size_t m_current = 0;
     static inline bool m_cancel = false;
     //    static inline GCode::Creator* m_creator = nullptr;
     static inline ClipperLib::ClipperBase* m_clipper = nullptr;
@@ -57,11 +57,11 @@ public:
     static void setClipper(ClipperLib::ClipperBase* clipper) { m_clipper = clipper; }
     static ClipperLib::ClipperBase* clipper() { return m_clipper; }
 
-    static int getMax() { return m_max; }
-    static void setMax(int max) { m_max = max; }
+    static size_t getMax() { return m_max; }
+    static void setMax(size_t max) { m_max = max; }
 
-    static int getCurrent() { return m_current; }
-    static void setCurrent(int current = 0) { m_current = current; }
+    static size_t getCurrent() { return m_current; }
+    static void setCurrent(size_t current = 0) { m_current = current; }
     static void incCurrent() { ++m_current; }
 
     static bool getCancel() { return m_cancel; }

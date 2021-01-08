@@ -14,6 +14,8 @@
 *                                                                              *
 *******************************************************************************/
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
+
 #include "aboutform.h"
 #include "app.h"
 #include "forms/drillform/drillform.h"
@@ -22,8 +24,9 @@
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
 #include "forms/voronoiform.h"
+#include "plugindialog.h"
 #include "project.h"
-#include "ui_mainwindow.h"
+#include "thermalform.h"
 
 #include "datasoliditem.h"
 #include "point.h"
@@ -33,9 +36,6 @@
 #include "shheaders.h"
 #endif
 
-#ifdef THERMAL
-#include "thermal.h"
-#endif
 #include "tooldatabase.h"
 #include <QtPrintSupport>
 #include <QtWidgets>
@@ -83,21 +83,21 @@ MainWindow::MainWindow(QWidget* parent)
         // Поиск всех файлов в папке "Plugins"
         QStringList listFiles;
         if (dir.exists())
-#ifdef QT_DEBUG
-            listFiles = dir.entryList(QStringList("*d.dll"), QDir::Files);
-#else
             listFiles = dir.entryList(QStringList("*.dll"), QDir::Files);
-#endif
+
         // Проход по всем файлам
         for (QString str : listFiles) {
             QPluginLoader loader(dir.absolutePath() + "/" + str);
             // Загрузка плагина
             QObject* pobj = loader.instance();
-            if (pobj && qobject_cast<FilePluginInterface*>(pobj)) {
-                auto parser = qobject_cast<FilePluginInterface*>(pobj);
-                qDebug() << __FUNCTION__ << pobj;
+            qDebug() << __FUNCTION__ << str << pobj;
+            if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
                 parser->setupInterface(App::get());
-                App::parserInterfaces().emplace(parser->type(), std::pair(parser, pobj));
+                PI pi {
+                    parser,
+                    pobj,
+                };
+                App::parserInterfaces().emplace(parser->type(), pi);
             }
         }
     }
@@ -113,10 +113,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     { // add dummy gcode plugin
         auto parser = new GCode::Plugin(this);
-        App::parserInterfaces().emplace(parser->type(),
-            std::pair(
-                static_cast<FilePluginInterface*>(parser),
-                static_cast<QObject*>(parser)));
+        PI pi {
+            static_cast<FilePluginInterface*>(parser),
+            static_cast<QObject*>(parser)
+        };
+        App::parserInterfaces().emplace(parser->type(), pi);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -440,6 +441,15 @@ void MainWindow::createActionsHelp()
 
     action = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
     action->setStatusTip(tr("Show the Qt library's About box"));
+
+    helpMenu->addSeparator();
+
+    action = helpMenu->addAction(tr("About &Plugins…"), [this] {
+        DialogAboutPlugins(this).exec();
+        //        PluginDialog dialog(qApp->applicationDirPath(), {}, this);
+        //        dialog.exec();
+    });
+    action->setStatusTip(tr("Show loaded plugins…"));
 }
 
 void MainWindow::createActionsZoom()
@@ -1055,8 +1065,9 @@ void MainWindow::loadFile(const QString& fileName)
             return;
         }
         qDebug() << __FUNCTION__;
-        for (auto& [type, pair] : App::m_app->m_parserInterfaces) {
-            auto& [parser, pobj] = pair;
+        for (auto& [type, tuple] : App::parserInterfaces()) {
+            auto& [parser, pobj] = tuple;
+            qDebug() << __FUNCTION__ << pobj;
             if (parser->thisIsIt(fileName)) {
                 qDebug() << __FUNCTION__;
                 emit parseFile(fileName, int(type));

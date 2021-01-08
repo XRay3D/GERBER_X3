@@ -86,6 +86,7 @@ INCLUDEPATH += ../clipper
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../gerber
 INCLUDEPATH += ../gi
+INCLUDEPATH += ../graphicsview
 INCLUDEPATH += ../project
 INCLUDEPATH += ../settings
 INCLUDEPATH += ../thermal
@@ -135,6 +136,7 @@ HEADERS += \
     mainwindow.h \
     mvector.h \
     openingdialog.h \
+    plugindialog.h \
     point.h \
     recent.h \
     settingsdialog.h \
@@ -171,6 +173,7 @@ SOURCES += \
     gcode/voroni/jc_voronoi.cpp \
     main.cpp \
     mainwindow.cpp \
+    plugindialog.cpp \
     point.cpp \
     recent.cpp \
     settingsdialog.cpp \
@@ -195,13 +198,14 @@ FORMS += \
 #include(../gcode/gcode.pri)
 #include(../gerber/gerber.pri)
 #include(../shapes/shapes.pri)
-include(../clipper/clipper.pri)
-include(../filetree/filetree.pri)
-include(../gi/gi.pri)
-include(../graphicsview/graphicsview.pri)
-include(../project/project.pri)
-include(../thermal/thermal.pri)
-include(../tooldatabase/tooldatabase.pri)
+
+#include(../clipper/clipper.pri)
+#include(../filetree/filetree.pri)
+#include(../gi/gi.pri)
+#include(../graphicsview/graphicsview.pri)
+#include(../project/project.pri)
+#include(../thermal/thermal.pri)
+#include(../tooldatabase/tooldatabase.pri)
 
 #pvs_studio.target = pvs
 #pvs_studio.output = true

@@ -22,6 +22,8 @@
 
 class DrillForm;
 class FileModel;
+class FilePluginInterface;
+class FileTreeView;
 class GCodePropertiesForm;
 class GraphicsView;
 class LayoutFrames;
@@ -29,11 +31,21 @@ class MainWindow;
 class Project;
 class Scene;
 class SplashScreen;
-class FileTreeView;
-class FilePluginInterface;
 
-using ParserInterfaces = std::map<int, std::pair<FilePluginInterface*, QObject*>>;
+//struct PI {
+//    FilePluginInterface* plugin = nullptr;
+//    QObject* object = nullptr;
+//    QJsonObject* json = nullptr;
+//};
 
+using PI = std::tuple<FilePluginInterface*, QObject*>;
+#if __cplusplus > 201703L
+using ParserInterfacesMap = std::map<int, PI>;
+#else
+struct ParserInterfacesMap : std::map<int, PI> {
+    bool contains(int key) const { return find(key) != end(); }
+};
+#endif
 class App {
     friend class DrillForm;
     friend class FileModel;
@@ -58,7 +70,7 @@ class App {
     Scene* m_scene = nullptr;
     SplashScreen* m_splashScreen = nullptr;
     FileTreeView* m_fileTreeView = nullptr;
-    ParserInterfaces m_parserInterfaces;
+    ParserInterfacesMap m_parserInterfaces;
     AppSettings m_appSettings;
     ToolHolder m_toolHolder;
 
@@ -86,8 +98,11 @@ public:
     static Scene* scene() { return m_app->m_scene; }
     static SplashScreen* splashScreen() { return m_app->m_splashScreen; }
     static FileTreeView* fileTreeView() { return m_app->m_fileTreeView; }
-    static FilePluginInterface* parserInterface(int type) { return m_app->m_parserInterfaces.contains(type) ? m_app->m_parserInterfaces[type].first : nullptr; }
-    static ParserInterfaces& parserInterfaces() { return m_app->m_parserInterfaces; }
+
+    static FilePluginInterface* parserInterface(int type) { return m_app->m_parserInterfaces.contains(type)
+            ? std::get<FilePluginInterface*>(m_app->m_parserInterfaces[type])
+            : nullptr; }
+    static ParserInterfacesMap& parserInterfaces() { return m_app->m_parserInterfaces; }
 
     static AppSettings& settings() { return m_app->m_appSettings; }
     static ToolHolder& toolHolder() { return m_app->m_toolHolder; }

@@ -35,6 +35,7 @@ public:
     int type() const override;
     NodeInterface* createNode(FileInterface* file) override;
     std::shared_ptr<FileInterface> createFile() override;
+    QJsonObject info() const override;
     void setupInterface(App* a) override;
     void createMainMenu(QMenu& menu, FileTreeView* tv) override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;

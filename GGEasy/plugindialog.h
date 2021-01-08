@@ -13,39 +13,25 @@
 *******************************************************************************/
 #pragma once
 
-#include "extypes.h"
+#include <QDialog>
 
-#include "interfaces/pluginfile.h"
+class QDialogButtonBox;
+class QPushButton;
+class QTreeWidget;
+class QVBoxLayout;
 
-class FileInterface;
+class DialogAboutPlugins : public QDialog {
+    QDialogButtonBox* buttonBox;
+    QTreeWidget* treeWidget;
+    QVBoxLayout* verticalLayout;
+    QPushButton* pbClose;
+    QPushButton* pbInfo;
 
-namespace Excellon {
+    void setupUi(QDialog* Dialog); // setupUi
 
-class Parser {
-    FilePluginInterface* const interface;
+    void retranslateUi(QDialog* Dialog); // retranslateUi
 
 public:
-    explicit Parser(FilePluginInterface* const interface);
-    FileInterface* parseFile(const QString& fileName);
-    static double parseNumber(QString Str, const State& state);
-
-private:
-    bool parseComment(const QString& line);
-    bool parseGCode(const QString& line);
-    bool parseMCode(const QString& line);
-    bool parseTCode(const QString& line);
-    bool parsePos(const QString& line);
-    bool parseSlot(const QString& line);
-    bool parseRepeat(const QString& line);
-    bool parseFormat(const QString& line);
-    bool parseNumber(QString Str, double& val);
-
-    void circularRout();
-
-    QPolygonF arc(QPointF p1, QPointF p2, QPointF center);
-
-protected:
-    File* file = nullptr;
-    State m_state;
+    DialogAboutPlugins(QWidget* parent = nullptr);
+    virtual ~DialogAboutPlugins();
 };
-} // namespace Excellon

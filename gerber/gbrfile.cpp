@@ -243,6 +243,15 @@ void File::setColor(const QColor& color)
     m_itemGroups[ApPaths]->setPen(QPen(color, 0.0));
 }
 
+mvector<const ::GraphicObject*> File::graphicObjects() const
+{
+    mvector<const ::GraphicObject*> go(size());
+    size_t i = 0;
+    for (auto& refGo : *this)
+        go[i++] = &refGo;
+    return go;
+}
+
 void File::initFrom(FileInterface* file)
 {
     file->setColor(file->color());

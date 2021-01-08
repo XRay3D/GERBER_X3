@@ -291,10 +291,10 @@ void ProfileForm::editFile(GCode::File* file)
         auto i = items.constBegin();
         while (i != items.constEnd()) {
 
-            auto [_fileId, _] = i.key();
-            Q_UNUSED(_)
-            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
-            ++i;
+            //            auto [_fileId, _] = i.key();
+            //            Q_UNUSED(_)
+            //            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
+            //            ++i;
         }
     }
 

@@ -330,7 +330,7 @@ void DrillForm::on_pbCreate_clicked()
                 Path& path = pathsMap[toolId].drillPath;
                 Point64 point1((Marker::get(Marker::Home)->pos()));
                 { // sort by distance
-                    int counter = 0;
+                    size_t counter = 0;
                     while (counter < path.size()) {
                         int selector = 0;
                         double length = std::numeric_limits<double>::max();

@@ -99,8 +99,8 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
 
     tabs.reserve(App::parserInterfaces().size());
-    for (auto& [type, pair] : App::parserInterfaces()) {
-        auto& [parser, pobj] = pair;
+    for (auto& [type, tuple] : App::parserInterfaces()) {
+        auto& [parser, pobj] = tuple;
         auto [tab, name] = parser->createSettingsTab(tabwMain);
         if (!tab)
             continue;

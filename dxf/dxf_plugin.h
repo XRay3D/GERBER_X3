@@ -13,7 +13,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/fileplugin.h"
+#include "interfaces/pluginfile.h"
 
 #include <QObject>
 #include <QStack>
@@ -37,6 +37,7 @@ public:
     int type() const override;
     NodeInterface* createNode(FileInterface* file) override;
     std::shared_ptr<FileInterface> createFile() override;
+    QJsonObject info() const override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
     void setupInterface(App*) override;
     void createMainMenu(QMenu& menu, FileTreeView* tv) override;
