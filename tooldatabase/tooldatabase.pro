@@ -23,18 +23,15 @@ msvc* {
     LIBS += -lsetupapi -lAdvapi32
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
-#    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
-#    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
+    #    LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
+    #    LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
 }
 
 gcc* {
     CONFIG += c++17
-    win* {
-        LIBS += -lsetupapi -lAdvapi32 -lpsapi
-    }
-#    LIBS += "-L"$$_PRO_FILE_PWD_/../lib
-#    LIBS += -lproject$$SUFFIX
-#    LIBS += -lsettings$$SUFFIX
+    #    LIBS += "-L"$$_PRO_FILE_PWD_/../lib
+    #    LIBS += -lproject$$SUFFIX
+    #    LIBS += -lsettings$$SUFFIX
 }
 
 linux {

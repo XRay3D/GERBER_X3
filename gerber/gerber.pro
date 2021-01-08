@@ -16,6 +16,8 @@ include(../defines.pri)
 include(../suffix.pri)
 QT += concurrent
 
+VERSION = 1.2.3.4
+
 TARGET = $$TARGET$$SUFFIX
 
 message($$TARGET)
@@ -107,3 +109,6 @@ SOURCES += \
 
 FORMS += \
     compdialog.ui
+
+RESOURCES += \
+    res.qrc

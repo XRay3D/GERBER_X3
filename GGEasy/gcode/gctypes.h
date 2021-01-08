@@ -13,14 +13,15 @@
 *******************************************************************************/
 #pragma once
 
-#include "datastream.h"
 #include "../tooldatabase/tool.h"
+#include "datastream.h"
 
 #include "mvector.h"
 #include <QDebug>
 #include <QVariant>
 
-using UsedItems = QMap<std::pair<int, int>, mvector<int>>;
+using UsedItems = QMap<std::pair<int, int>, std::vector<int>>;
+using V = std::variant<int, double, UsedItems>;
 
 namespace GCode {
 
@@ -60,46 +61,52 @@ enum Grouping {
     CutoffPaths,
 };
 
-struct variant : std::variant<int, double, UsedItems> {
-    using V = std::variant<int, double, UsedItems>;
-    friend QDataStream& operator>>(QDataStream& stream, variant& type)
+struct variant {
+    V var;
+    friend QDataStream& operator>>(QDataStream& stream, variant& v)
     {
         size_t index;
         stream >> index;
         switch (index) {
         case 0:
-            type = int {};
+            v = int {};
             break;
         case 1:
-            type = double {};
+            v = double {};
             break;
         case 2:
-            type = UsedItems {};
+            v = UsedItems {};
             break;
         }
-        std::visit([&stream](auto&& val) { stream >> val; }, type);
+        std::visit([&stream](auto&& val) { stream >> val; }, v.var);
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const variant& type)
+    friend QDataStream& operator<<(QDataStream& stream, const variant& v)
     {
-        stream << type.index();
-        std::visit([&stream](auto&& val) { stream << val; }, type);
+        stream << v.index();
+        std::visit([&stream](auto&& val) { stream << val; }, v.var);
         return stream;
     }
+    //    variant() = default;
+    //    variant(variant&&) = default;
+    //    variant(const variant&) = default;
+    //    variant& operator=(variant&&) = default;
+    //    variant& operator=(const variant&) = default;
     variant() { }
 
     template <class T>
     variant(const T& val)
-        : V(val)
+        : var(val)
+    {
+    }
+    template <class T>
+    variant(T&& val)
+        : var(std::move(val))
     {
     }
 
-    template <class T>
-    variant(T&& val)
-        : V(std::move(val))
-    {
-    }
+    size_t index() const { return var.index(); }
 
     int toInt() const
     {
@@ -109,7 +116,7 @@ struct variant : std::variant<int, double, UsedItems> {
                 return int{};
             } else {
                 return int(val);
-            } }, *this);
+            } }, var);
         //        try {
         //            if(index())
         //            return std::get<int>(*this);
@@ -127,7 +134,7 @@ struct variant : std::variant<int, double, UsedItems> {
                 return bool{};
             } else {
                 return bool(val);
-            } }, *this);
+            } }, var);
         //        try {
         //            return std::get<int>(*this);
         //        } catch (const std::exception& e) {
@@ -145,7 +152,7 @@ struct variant : std::variant<int, double, UsedItems> {
                 return {};
             } else {
                 return double(val);
-            } }, *this);
+            } }, var);
         //        try {
         //            return std::get<double>(*this);
         //        } catch (const std::exception& e) {
@@ -155,13 +162,13 @@ struct variant : std::variant<int, double, UsedItems> {
     }
 
     template <class T>
-    void setValue(const T& val) { *this = val; }
+    void setValue(const T& val) { var = val; }
 
     template <class T>
-    void setValue(T&& val) { *this = val; }
+    void setValue(T&& val) { var = val; }
 
     template <class T>
-    auto value() const { return std::get<std::decay_t<T>>(*this); }
+    decltype(auto) value() const { return std::get<std::decay_t<T>>(var); }
 };
 
 struct GCodeParams {

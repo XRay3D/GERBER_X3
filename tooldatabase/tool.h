@@ -133,7 +133,13 @@ private:
     bool m_autoName;
 };
 
+#if __cplusplus > 201703L
 using Tools = std::map<int, Tool, std::greater<int>>;
+#else
+struct Tools : std::map<int, Tool, std::greater<int>> {
+    bool contains(int key) const { return find(key) != end(); }
+};
+#endif
 
 class ToolHolder {
     friend class ToolItem;

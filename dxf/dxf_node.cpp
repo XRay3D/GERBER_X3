@@ -94,8 +94,8 @@ public:
         });
 
         connect(pushButtonColorize, &QPushButton::clicked, [colors, file, this] {
-            const int count = colors.size();
-            int ctr = 0;
+            const size_t count = colors.size();
+            size_t ctr = 0;
             for (auto& [name, color] : colors) {
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
                 auto layer = file->layers().at(name);

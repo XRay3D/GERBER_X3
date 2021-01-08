@@ -108,7 +108,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                 type == GiType::DataSolid || //
                 type == GiType::DataPath) {
                 for (const Path& path : gi->paths()) {
-                    for (int i = 0, s = path.size(); i < s; ++i) {
+                    for (size_t i = 0, s = path.size(); i < s; ++i) {
                         const QPointF pt1(path[i]);
                         const QPointF pt2(path[(i + 1) % s]);
                         const QLineF l1(pos, pt1);

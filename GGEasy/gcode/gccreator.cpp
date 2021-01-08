@@ -308,7 +308,7 @@ void Creator::stacking(Paths& paths)
     /***********************************************************************************************/
     t.start();
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
-        QList<size_t> list;
+        QList<std::iterator_traits<Path::iterator>::difference_type> list;
         list.push_back(idx.first);
         for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double d = std::numeric_limits<double>::max();
@@ -537,7 +537,7 @@ bool Creator::createability(bool side)
             if (node->ChildCount() > 0) {
                 return true;
             } else {
-                QSet<int> skip;
+                QSet<size_t> skip;
                 for (auto& point : node->Contour) {
                     for (size_t i = 0; i < srcPaths.size(); ++i) {
                         if (skip.contains(i))

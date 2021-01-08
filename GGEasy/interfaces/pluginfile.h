@@ -59,20 +59,26 @@ public:
     virtual bool thisIsIt(const QString& fileName) = 0;
     virtual int type() const = 0;
 
-    [[nodiscard]] virtual DrillPreviewGiMap createDrillPreviewGi(FileInterface* /*file*/, mvector<Row>& /*data*/) { return {}; };
-    [[nodiscard]] virtual ThermalPreviewGiVec createThermalPreviewGi(FileInterface* /*file*/, const ThParam2&, Tool& /*tool*/) { return {}; };
+    [[nodiscard]] virtual DrillPreviewGiMap createDrillPreviewGi(
+        [[maybe_unused]] FileInterface* file,
+        [[maybe_unused]] mvector<Row>& data) { return {}; };
+    [[nodiscard]] virtual ThermalPreviewGiVec createThermalPreviewGi(
+        [[maybe_unused]] FileInterface* file,
+        [[maybe_unused]] const ThParam2& param,
+        [[maybe_unused]] Tool& tool) { return {}; };
     [[nodiscard]] virtual NodeInterface* createNode(FileInterface* file) = 0;
-    [[nodiscard]] virtual SettingsTab createSettingsTab(QWidget* /*parent*/) { return { nullptr, "" }; };
+    [[nodiscard]] virtual SettingsTab createSettingsTab([[maybe_unused]] QWidget* parent) { return { nullptr, "" }; };
     [[nodiscard]] virtual std::shared_ptr<FileInterface> createFile() = 0;
+    [[nodiscard]] virtual QJsonObject info() const = 0;
 
-    virtual void addToDrillForm(FileInterface* /*file*/, QComboBox* /*cbx*/) {};
-    virtual void createMainMenu(QMenu& /*menu*/, FileTreeView* /*tv*/) {};
+    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
+    virtual void createMainMenu([[maybe_unused]] QMenu& menu, [[maybe_unused]] FileTreeView* tv) {};
     virtual void setupInterface(App* a) = 0;
-    virtual void updateFileModel(FileInterface* /*file*/) {};
+    virtual void updateFileModel([[maybe_unused]] FileInterface* file) {};
 
     // signals:
     virtual void fileError(const QString& fileName, const QString& error) = 0;
-    virtual void fileWarning(const QString& /*fileName*/, const QString& /*warning*/) {};
+    virtual void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning) {};
     virtual void fileProgress(const QString& fileName, int max, int value) = 0;
     virtual void fileReady(FileInterface* file) = 0;
 

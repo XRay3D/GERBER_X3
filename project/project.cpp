@@ -45,13 +45,13 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator<<(QDataStream& stream, [[maybe_unused]] const std::shared_ptr<Shapes::Shape>& sh)
 {
     //    stream << *sh;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator>>(QDataStream& stream, [[maybe_unused]] std::shared_ptr<Shapes::Shape>& sh)
 {
     int type;
     stream >> type;
@@ -348,7 +348,7 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape(Shapes::Shape* sh)
+int Project::addShape([[maybe_unused]] Shapes::Shape* sh)
 {
     return -1;
     //    m_isPinsPlaced = false;

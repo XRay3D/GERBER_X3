@@ -38,6 +38,16 @@ NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->i
 
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "GCode File Static" },
+        { "Version", "1.0" },
+        { "Vendor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Info" }
+    };
+}
+
 void Plugin::setupInterface(App*) { }
 
 void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)

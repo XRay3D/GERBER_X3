@@ -71,7 +71,6 @@ QDebug operator<<(QDebug debug, const Tool& t)
 
 Tool::Tool()
     : m_name(QObject::tr("Default"))
-    , m_type(EndMill)
     , m_angle(0.0)
     , m_diameter(1.0)
     , m_feedRate(100.0)
@@ -80,14 +79,15 @@ Tool::Tool()
     , m_plungeRate(600.0)
     , m_spindleSpeed(12000.0)
     , m_stepover(0.5)
-    , m_autoName(true)
     , m_id(0)
+    , m_type(EndMill)
+    , m_autoName(true)
+
 {
 }
 
 Tool::Tool(int)
     : m_name(QObject::tr("Default"))
-    , m_type(EndMill)
     , m_angle(0.0)
     , m_diameter(0.0)
     , m_feedRate(100.0)
@@ -96,8 +96,9 @@ Tool::Tool(int)
     , m_plungeRate(600.0)
     , m_spindleSpeed(12000.0)
     , m_stepover(0.5)
-    , m_autoName(true)
     , m_id(0)
+    , m_type(EndMill)
+    , m_autoName(true)
 {
 }
 

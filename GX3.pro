@@ -27,8 +27,8 @@ SUBDIRS += \
 
 # plugins
 SUBDIRS += \
-#    dxf \
-#    excellon \
+    dxf \
+    excellon \
     gerber \
 
 SUBDIRS += \

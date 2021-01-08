@@ -104,18 +104,22 @@ public:
 
     ItemGroup* itemGroup(int type = -1) const
     {
-        if (type == -1 && 0 <= m_itemsType && m_itemsType < m_itemGroups.size())
+        const int size(static_cast<int>(m_itemGroups.size()));
+        if (type == -1 && 0 <= m_itemsType && m_itemsType < size)
             return m_itemGroups[m_itemsType];
-        else if (0 <= type && type < m_itemGroups.size())
+        else if (0 <= type && type < size)
             return m_itemGroups[type];
         return m_itemGroups.front();
     }
+
     const mvector<ItemGroup*>& itemGroups() const { return m_itemGroups; }
 
     Paths mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
     Pathss groupedPaths() const { return m_groupedPaths; }
 
     mvector<QString>& lines() { return m_lines; }
+    const mvector<QString>& lines() const { return m_lines; }
+    virtual mvector<const GraphicObject*> graphicObjects() const { return {}; }
 
     enum Group {
         CopperGroup,

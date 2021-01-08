@@ -61,46 +61,46 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         //dbgPaths(m_returnPs, "tool path");
     }
 
-    // create frame
     Paths framePaths;
-    {
-//        Clipper clipper;
-//        {
-//            ClipperOffset offset;
-//            for (const Gerber::GraphicObject& go : *file) {
-//                if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive) {
-//                    offset.AddPaths(go.paths(), jtMiter, etClosedPolygon);
-//                }
-//            }
-//            offset.Execute(framePaths, dOffset - 0.005 * uScale);
-//            //dbgPaths(framePaths, "Gerber::Line", true);
-//            clipper.AddPaths(framePaths, ptSubject, true);
-//        }
-//        if (!m_gcp.params[GCodeParams::IgnoreCopper].toInt()) {
-//            ClipperOffset offset;
-//            for (const Gerber::GraphicObject& go : *file) {
-//                if (go.state().type() == Gerber::Region) {
-//                    if (go.state().imgPolarity() == Gerber::Positive)
-//                        offset.AddPaths(go.paths(), jtMiter, etClosedPolygon);
-//                    else {
-//                        Paths paths(go.paths());
-//                        ReversePaths(paths);
-//                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
-//                    }
-//                }
-//            }
-//            offset.Execute(framePaths, dOffset - 0.005 * uScale);
-//            //dbgPaths(framePaths, "Gerber::Region", true);
-//            clipper.AddPaths(framePaths, ptClip, true);
-//        }
-//        for (const Paths& paths : m_supportPss) {
-//            clipper.AddPaths(paths, ptClip, true);
-//        }
-//        clipper.Execute(ctUnion, framePaths, pftEvenOdd);
-//        //dbgPaths(framePaths, "framePaths", true);
+    { // create frame
+        const auto graphicObjects(file->graphicObjects());
+        Clipper clipper;
+        {
+            ClipperOffset offset;
+            for (auto go : graphicObjects) {
+                if (go->positive()) {
+                    offset.AddPaths(go->polyLineW(), jtMiter, etClosedPolygon);
+                }
+            }
+            offset.Execute(framePaths, dOffset - 0.005 * uScale);
+            //dbgPaths(framePaths, "Line", true);
+            clipper.AddPaths(framePaths, ptSubject, true);
+        }
+        if (!m_gcp.params[GCodeParams::IgnoreCopper].toInt()) {
+            ClipperOffset offset;
+            for (auto go : graphicObjects) {
+                //                if (go->closed()) {
+                //                    if (go->positive())
+                offset.AddPaths(go->polygonWholes(), jtMiter, etClosedPolygon);
+                //                    else {
+                //                        Paths paths(go->polygonWholes());
+                //                        ReversePaths(paths);
+                //                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                //                    }
+                //                }
+            }
+            offset.Execute(framePaths, dOffset - 0.005 * uScale);
+            //dbgPaths(framePaths, "Region", true);
+            clipper.AddPaths(framePaths, ptClip, true);
+        }
+        for (const Paths& paths : m_supportPss) {
+            clipper.AddPaths(paths, ptClip, true);
+        }
+        clipper.Execute(ctUnion, framePaths, pftEvenOdd);
+        //dbgPaths(framePaths, "framePaths", true);
     }
 
-    {
+    { // Execute
         Clipper clipper;
         clipper.AddPaths(m_returnPs, ptSubject, false);
         clipper.AddPaths(framePaths, ptClip, true);
@@ -108,11 +108,9 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         sortBE(m_returnPs);
     }
 
-    if (m_returnPs.size()) {
-        //        for (Path& path : m_returnPs)
-        //            path.push_back(path.first());
+    if (m_returnPs.size())
         m_returnPss.push_back(sortB(m_returnPs));
-    }
+
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {

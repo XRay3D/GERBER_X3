@@ -323,11 +323,14 @@ public:
         , m_state(state)
     {
     }
-
     inline File* gFile() const { return m_gFile; }
-    inline const Path& path() const { return m_path; }
-    inline const Paths& paths() const { return m_paths; }
     inline State state() const { return m_state; }
+
+    inline Path& path() { return m_path; }
+    inline Paths& paths() { return m_paths; }
+
+    Path path() const override { return m_path; }
+    Paths paths() const override { return m_paths; }
 
     Path line() const override { return m_path.size() == 2 ? m_path : Path(); }
     Path lineW() const override { return m_path.size() == 2 ? m_paths.front() : Path(); } // polygon
@@ -341,20 +344,20 @@ public:
     Path arc() const override { return {}; } // part of elipse
     Path arcW() const override { return {}; }
 
-    Path polygon() const override { return closed() ? m_path : Path(); }
+    Path polygon() const override { return m_state.type() == Region ? m_path : Path(); }
     Paths polygonWholes() const override { return m_paths; }
 
     Path hole() const override { return !positive() ? m_path : Path(); }
-    Paths holes() const override
-    {
-        if (!positive())
-            return { m_paths.first() };
-        else
-            return m_paths.mid(1);
-    }
+    Paths holes() const override { return !positive() ? Paths({ m_paths.first() }) : m_paths.mid(1); }
 
-    bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; } // not hole
-    bool closed() const override { return m_path.front() == m_path.back(); } // front == back
+    bool
+    positive() const override
+    {
+        return m_state.imgPolarity() == Gerber::Positive;
+    } // not hole
+    bool closed() const override { return m_path.size()
+            ? m_path.front() == m_path.back()
+            : m_paths.front().front() == m_paths.front().back(); } // front == back
 };
 
 struct StepRepeatStr {

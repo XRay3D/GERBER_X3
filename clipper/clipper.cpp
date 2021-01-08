@@ -489,11 +489,11 @@ int PointInPolygon(const IntPoint& pt, const Path& path)
 {
     //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
     int result = 0;
-    int cnt = path.size();
+    size_t cnt = path.size();
     if (cnt < 3)
         return 0;
     IntPoint ip = path[0];
-    for (int i = 1; i <= cnt; ++i) {
+    for (size_t i = 1; i <= cnt; ++i) {
         const IntPoint& ipNext = (i == cnt ? path[0] : path[i]);
         if (ipNext.Y == pt.Y) {
             if ((ipNext.X == pt.X) || (ip.Y == pt.Y && ((ipNext.X > pt.X) == (ip.X < pt.X))))
@@ -1632,7 +1632,7 @@ bool Clipper::ExecuteInternal()
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
-        ProgressCancel::setMax(m_Scanbeam.size());
+        ProgressCancel::setMax(static_cast<int>(m_Scanbeam.size()));
         ProgressCancel::setCurrent(0);
         while (PopScanbeam(topY) || LocalMinimaPending()) {
             if (m_cancel)
@@ -2822,7 +2822,7 @@ bool Clipper::ProcessIntersections(const cInt topY)
         return true;
     try {
         BuildIntersectList(topY);
-        int IlSize = m_IntersectList.size();
+        size_t IlSize = m_IntersectList.size();
         if (IlSize == 0)
             return true;
         if (IlSize == 1 || FixupIntersectionOrder())
@@ -2841,7 +2841,7 @@ bool Clipper::ProcessIntersections(const cInt topY)
 
 void Clipper::DisposeIntersectNodes()
 {
-    for (int i = 0; i < m_IntersectList.size(); ++i)
+    for (size_t i = 0; i < m_IntersectList.size(); ++i)
         delete m_IntersectList[i];
     m_IntersectList.clear();
 }
@@ -2896,7 +2896,7 @@ void Clipper::BuildIntersectList(const cInt topY)
 
 void Clipper::ProcessIntersectList()
 {
-    for (int i = 0; i < m_IntersectList.size(); ++i) {
+    for (size_t i = 0; i < m_IntersectList.size(); ++i) {
         IntersectNode* iNode = m_IntersectList[i];
         {
             IntersectEdges(iNode->Edge1, iNode->Edge2, iNode->Pt);
@@ -2927,10 +2927,10 @@ bool Clipper::FixupIntersectionOrder()
     //so to ensure this the order of intersections may need adjusting ...
     CopyAELToSEL();
     std::sort(m_IntersectList.begin(), m_IntersectList.end(), IntersectListSort);
-    int cnt = m_IntersectList.size();
-    for (int i = 0; i < cnt; ++i) {
+    size_t cnt = m_IntersectList.size();
+    for (size_t i = 0; i < cnt; ++i) {
         if (!EdgesAdjacent(*m_IntersectList[i])) {
-            int j = i + 1;
+            size_t j = i + 1;
             while (j < cnt && !EdgesAdjacent(*m_IntersectList[j]))
                 j++;
             if (j == cnt)
@@ -3728,7 +3728,7 @@ ClipperOffset::~ClipperOffset()
 
 void ClipperOffset::Clear()
 {
-    for (int i = 0; i < m_polyNodes.ChildCount(); ++i)
+    for (size_t i = 0; i < m_polyNodes.ChildCount(); ++i)
         delete m_polyNodes.Childs[i];
     m_polyNodes.Childs.clear();
     m_lowest.X = -1;
@@ -3768,11 +3768,11 @@ void ClipperOffset::AddPath(const Path& path, JoinType joinType, EndType endType
     if (endType != etClosedPolygon)
         return;
     if (m_lowest.X < 0)
-        m_lowest = IntPoint(m_polyNodes.ChildCount() - 1, k);
+        m_lowest = IntPoint(static_cast<cInt>(m_polyNodes.ChildCount() - 1), k);
     else {
         IntPoint ip = m_polyNodes.Childs[(int)m_lowest.X]->Contour[(int)m_lowest.Y];
         if (newNode->Contour[k].Y > ip.Y || (newNode->Contour[k].Y == ip.Y && newNode->Contour[k].X < ip.X))
-            m_lowest = IntPoint(m_polyNodes.ChildCount() - 1, k);
+            m_lowest = IntPoint(static_cast<cInt>(m_polyNodes.ChildCount() - 1), k);
     }
 }
 //------------------------------------------------------------------------------
@@ -3789,13 +3789,13 @@ void ClipperOffset::FixOrientations()
     //fixup orientations of all closed paths if the orientation of the
     //closed path with the lowermost vertex is wrong ...
     if (m_lowest.X >= 0 && !Orientation(m_polyNodes.Childs[(int)m_lowest.X]->Contour)) {
-        for (int i = 0; i < m_polyNodes.ChildCount(); ++i) {
+        for (size_t i = 0; i < m_polyNodes.ChildCount(); ++i) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if (node.m_endtype == etClosedPolygon || (node.m_endtype == etClosedLine && Orientation(node.Contour)))
                 ReversePath(node.Contour);
         }
     } else {
-        for (int i = 0; i < m_polyNodes.ChildCount(); ++i) {
+        for (size_t i = 0; i < m_polyNodes.ChildCount(); ++i) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if (node.m_endtype == etClosedLine && !Orientation(node.Contour))
                 ReversePath(node.Contour);
@@ -3860,7 +3860,7 @@ void ClipperOffset::Execute(PolyTree& solution, double delta)
             solution.Childs.reserve(outerNode->ChildCount());
             solution.Childs[0] = outerNode->Childs[0];
             solution.Childs[0]->Parent = outerNode->Parent;
-            for (int i = 1; i < outerNode->ChildCount(); ++i)
+            for (size_t i = 1; i < outerNode->ChildCount(); ++i)
                 solution.AddChild(*outerNode->Childs[i]);
         } else
             solution.Clear();
@@ -3876,7 +3876,7 @@ void ClipperOffset::DoOffset(double delta)
     //if Zero offset, just copy any CLOSED polygons to m_p and return ...
     if (NEAR_ZERO(delta)) {
         m_destPolys.reserve(m_polyNodes.ChildCount());
-        for (int i = 0; i < m_polyNodes.ChildCount(); i++) {
+        for (size_t i = 0; i < m_polyNodes.ChildCount(); i++) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if (node.m_endtype == etClosedPolygon)
                 m_destPolys.push_back(node.Contour);
@@ -3919,7 +3919,7 @@ void ClipperOffset::DoOffset(double delta)
         m_sin = -m_sin;
 
     m_destPolys.reserve(m_polyNodes.ChildCount() * 2);
-    for (int i = 0; i < m_polyNodes.ChildCount(); i++) {
+    for (size_t i = 0; i < m_polyNodes.ChildCount(); i++) {
         PolyNode& node = *m_polyNodes.Childs[i];
         m_srcPoly = node.Contour;
 
@@ -4315,7 +4315,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     //distance = proximity in units/pixels below which vertices
     //will be stripped. Default ~= sqrt(2).
 
-    int size = in_poly.size();
+    size_t size = in_poly.size();
 
     if (size == 0) {
         out_poly.clear();
@@ -4323,7 +4323,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     }
 
     OutPt* outPts = new OutPt[size];
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         outPts[i].Pt = in_poly[i];
         outPts[i].Next = &outPts[(i + 1) % size];
         outPts[i].Next->Prev = &outPts[i];
@@ -4352,7 +4352,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     if (size < 3)
         size = 0;
     out_poly.resize(size);
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         out_poly[i] = op->Pt;
         op = op->Next;
     }
@@ -4434,7 +4434,7 @@ void TranslatePath(const Path& input, Path& output, const IntPoint delta)
 {
     //precondition: input != output
     output.resize(input.size());
-    for (int i = 0; i < input.size(); ++i)
+    for (size_t i = 0; i < input.size(); ++i)
         output[i] = IntPoint(input[i].X + delta.X, input[i].Y + delta.Y);
 }
 //------------------------------------------------------------------------------
@@ -4442,7 +4442,7 @@ void TranslatePath(const Path& input, Path& output, const IntPoint delta)
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed)
 {
     Clipper c;
-    for (int i = 0; i < paths.size(); ++i) {
+    for (size_t i = 0; i < paths.size(); ++i) {
         Paths tmp;
         Minkowski(pattern, paths[i], tmp, true, pathIsClosed);
         c.AddPaths(tmp, ptSubject, true);
@@ -4479,7 +4479,7 @@ void AddPolyNodeToPaths(const PolyNode& polynode, NodeType nodetype, Paths& path
 
     if (!polynode.Contour.empty() && match)
         paths.push_back(polynode.Contour);
-    for (int i = 0; i < polynode.ChildCount(); ++i)
+    for (size_t i = 0; i < polynode.ChildCount(); ++i)
         AddPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
 }
 //------------------------------------------------------------------------------
@@ -4505,7 +4505,7 @@ void OpenPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
     paths.resize(0);
     paths.reserve(polytree.Total());
     //Open paths are top level only, so ...
-    for (int i = 0; i < polytree.ChildCount(); ++i)
+    for (size_t i = 0; i < polytree.ChildCount(); ++i)
         if (polytree.Childs[i]->IsOpen())
             paths.push_back(polytree.Childs[i]->Contour);
 }

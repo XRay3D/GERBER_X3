@@ -39,6 +39,17 @@ class FileInterface;
 class QFile;
 enum class FileType;
 
+#if __cplusplus > 201703L
+using FilesMap = std::map<int, std::shared_ptr<FileInterface>, std::greater<int>>;
+using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>, std::greater<int>> m_shapes;
+#else
+struct FilesMap : std::map<int, std::shared_ptr<FileInterface>, std::greater<int>> {
+    bool contains(int key) const { return find(key) != end(); }
+};
+struct ShapesMap : std::map<int, std::shared_ptr<Shapes::Shape>, std::greater<int>> {
+    bool contains(int key) const { return find(key) != end(); }
+};
+#endif
 class Project : public QObject {
     Q_OBJECT
 
@@ -181,8 +192,9 @@ signals:
 
 private:
     int m_ver;
-    std::map<int, std::shared_ptr<FileInterface>, std::greater<int>> m_files;
-    std::map<int, std::shared_ptr<Shapes::Shape>, std::greater<int>> m_shapes;
+
+    FilesMap m_files;
+    ShapesMap m_shapes;
     QMutex m_mutex;
     QString m_fileName;
     QString m_name;

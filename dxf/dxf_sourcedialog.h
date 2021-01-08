@@ -45,7 +45,7 @@ public:
     }
     ~Model() { }
 
-    int rowCount(const QModelIndex& = {}) const override { return lines.size(); }
+    int rowCount(const QModelIndex& = {}) const override { return static_cast<int>(lines.size()); }
     int columnCount(const QModelIndex& = {}) const override { return 3; }
     Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEnabled | Qt::ItemIsSelectable; }
 
