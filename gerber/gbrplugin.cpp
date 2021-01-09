@@ -344,12 +344,12 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     return giPeview;
 }
 
-class ThermalPreviewItem final : public ::ThermalPreviewItem {
+class ThermalPreviewItem final : public AbstractThermPrGi {
     const GraphicObject& grob;
 
 public:
     ThermalPreviewItem(const GraphicObject& go, Tool& tool)
-        : ::ThermalPreviewItem(tool)
+        : AbstractThermPrGi(tool)
         , grob(go)
     {
         for (QPolygonF polygon : grob.paths()) {
@@ -459,7 +459,15 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         return areaMin <= area && area <= areaMax;
     };
 
-    std::map<int, ThermalNode*> thermalNodes;
+#if __cplusplus > 201703L
+    using ThermalNodes = std::map<int, ThermalNode*>;
+#else
+    struct ThermalNodes : std::map<int, ThermalNode*> {
+        bool contains(int key) const { return find(key) != end(); }
+    };
+#endif
+
+    ThermalNodes thermalNodes;
     if (param.perture) {
         for (auto [dCode, aperture] : m_apertures) {
             if (aperture->isFlashed() && testArea(aperture->draw({}))) {

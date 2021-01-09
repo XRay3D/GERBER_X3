@@ -65,7 +65,7 @@ struct variant {
     V var;
     friend QDataStream& operator>>(QDataStream& stream, variant& v)
     {
-        size_t index;
+        uint8_t index;
         stream >> index;
         switch (index) {
         case 0:
@@ -84,7 +84,7 @@ struct variant {
 
     friend QDataStream& operator<<(QDataStream& stream, const variant& v)
     {
-        stream << v.index();
+        stream << uint8_t(v.index());
         std::visit([&stream](auto&& val) { stream << val; }, v.var);
         return stream;
     }

@@ -25,10 +25,10 @@
 #include <QStyleOptionGraphicsItem>
 
 #ifdef __GNUC__
-QTimer DataPathItem::timer;
+QTimer GiDataPath::timer;
 #endif
 
-DataPathItem::DataPathItem(const Path& path, /*Gerber::File*/ FileInterface* file)
+GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     : GraphicsItem(file)
     , m_path(path)
 {
@@ -45,21 +45,21 @@ DataPathItem::DataPathItem(const Path& path, /*Gerber::File*/ FileInterface* fil
     setFlag(ItemIsSelectable, true);
     setSelected(false);
     if (!timer.isActive()) {
-        timer.start(50);
-        connect(&timer, &QTimer ::timeout, [] { ++DataPathItem::d; });
+        //timer.start(50);
+        connect(&timer, &QTimer ::timeout, [] { ++GiDataPath::d; });
     }
 }
 
-QRectF DataPathItem::boundingRect() const
+QRectF GiDataPath::boundingRect() const
 {
+    if (App::scene())
+        return m_boundingRect;
     if (m_selectionShape.boundingRect().isEmpty())
         updateSelection();
     return m_selectionShape.boundingRect();
 }
 
-QRectF DataPathItem::boundingRect2() const { return m_boundingRect; }
-
-void DataPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
@@ -92,13 +92,13 @@ void DataPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->drawPolyline(m_path);
 }
 
-int DataPathItem::type() const { return static_cast<int>(GiType::DataPath); }
+int GiDataPath::type() const { return static_cast<int>(GiType::DataPath); }
 
-Paths DataPathItem::paths() const { return { m_path }; }
+Paths GiDataPath::paths() const { return { m_path }; }
 
-QPainterPath DataPathItem::shape() const { return m_selectionShape; }
+QPainterPath GiDataPath::shape() const { return m_selectionShape; }
 
-void DataPathItem::updateSelection() const
+void GiDataPath::updateSelection() const
 {
     const double scale = scaleFactor();
     if (m_selectionShape.boundingRect().isEmpty() || !qFuzzyCompare(m_scale, scale)) {
@@ -113,7 +113,7 @@ void DataPathItem::updateSelection() const
     }
 }
 
-void DataPathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
@@ -146,23 +146,23 @@ void DataPathItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     GraphicsItem::mouseReleaseEvent(event);
 }
 
-QVariant DataPathItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemVisibleChange && value.toBool()) {
         updateSelection();
     } else if (change == ItemSelectedChange && App::settings().animSelection()) {
         if (value.toBool()) {
             updateSelection();
-            connect(&timer, &QTimer::timeout, this, &DataPathItem::redraw);
+            connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
         } else {
-            disconnect(&timer, &QTimer::timeout, this, &DataPathItem::redraw);
+            disconnect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
             update();
         }
     }
     return value;
 }
 
-void DataPathItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+void GiDataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsItem::hoverEnterEvent(event);
     updateSelection();

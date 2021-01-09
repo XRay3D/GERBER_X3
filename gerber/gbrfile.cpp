@@ -169,28 +169,28 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
         if (!node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                path = node->Childs[var]->Contour;
+            for (size_t i = 0; i < node->ChildCount(); ++i) {
+                path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (int var = 0; var < node->ChildCount(); ++var) {
-            grouping(node->Childs[var], pathss, group);
+        for (size_t i = 0; i < node->ChildCount(); ++i) {
+            grouping(node->Childs[i], pathss, group);
         }
         break;
     case CopperGroup:
         if (node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                path = node->Childs[var]->Contour;
+            for (size_t i = 0; i < node->ChildCount(); ++i) {
+                path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (int var = 0; var < node->ChildCount(); ++var) {
-            grouping(node->Childs[var], pathss, group);
+        for (size_t i = 0; i < node->ChildCount(); ++i) {
+            grouping(node->Childs[i], pathss, group);
         }
         break;
     }
@@ -318,7 +318,7 @@ void File::createGi()
 {
     // fill copper
     for (Paths& paths : groupedPaths()) {
-        GraphicsItem* item = new DataSolidItem(paths, this);
+        GraphicsItem* item = new GiDataSolid(paths, this);
         m_itemGroups[Normal]->append(item);
     }
 
@@ -333,7 +333,7 @@ void File::createGi()
         auto contains = [&](const Path& path) -> bool {
             constexpr double k = 0.001 * uScale;
             for (const Path& chPath : checkList) { // find copy
-                int counter = 0;
+                size_t counter = 0;
                 if (chPath.size() == path.size()) {
                     for (const Point64& p1 : chPath) {
                         for (const Point64& p2 : path) {
@@ -359,17 +359,17 @@ void File::createGi()
                         path.append(path.first());
                         if (!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new GiDataPath(checkList.front(), this));
                         } else if (!contains(path)) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new DataPathItem(checkList.front(), this));
+                            m_itemGroups[ApPaths]->append(new GiDataPath(checkList.front(), this));
                         }
                     }
                 } else {
                     if (!Settings::skipDuplicates()) {
-                        m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new GiDataPath(go.path(), this));
                     } else if (!contains(go.path())) {
-                        m_itemGroups[ApPaths]->append(new DataPathItem(go.path(), this));
+                        m_itemGroups[ApPaths]->append(new GiDataPath(go.path(), this));
                         checkList.push_front(go.path());
                     }
                 }

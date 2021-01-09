@@ -26,7 +26,7 @@ msvc* {
     QMAKE_CXXFLAGS += /std:c++latest
     #DEFINES += LEAK_DETECTOR
     LIBS += -l$$_PRO_FILE_PWD_/../lib/clipper$$SUFFIX
-    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
+#    LIBS += -l$$_PRO_FILE_PWD_/../lib/gi$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/project$$SUFFIX
     LIBS += -l$$_PRO_FILE_PWD_/../lib/settings$$SUFFIX
 }
@@ -38,7 +38,7 @@ gcc* {
     }
     LIBS += "-L"$$_PRO_FILE_PWD_/../lib
     LIBS += -lclipper$$SUFFIX
-    LIBS += -lgi$$SUFFIX
+#    LIBS += -lgi$$SUFFIX
     LIBS += -lproject$$SUFFIX
     LIBS += -lsettings$$SUFFIX
 }

@@ -15,9 +15,8 @@
 *******************************************************************************/
 #include "scene.h"
 
-#include "datapathitem.h"
-#include "graphicsitem.h"
 #include "graphicsview.h"
+#include "graphicsitem.h"
 #include "project.h"
 #include "settings.h"
 
@@ -97,35 +96,16 @@ QRectF Scene::getSelectedBoundingRect()
     if (selectedItems.isEmpty())
         return {};
 
-    auto getRect = [](QGraphicsItem* gi) -> QRectF {
-        //        return static_cast<GiType>(gi->type()) == GiType::AperturePath
-        //            ? static_cast<AperturePathItem*>(gi)->boundingRect2()
-        //            : gi->boundingRect();
-        switch (static_cast<GiType>(gi->type())) {
-        case GiType::DataSolid:
-            return gi->boundingRect();
-        case GiType::Drill:
-            return gi->boundingRect();
-        case GiType::DataPath:
-            return static_cast<DataPathItem*>(gi)->boundingRect2();
-        default:
-            return {};
-        }
-    };
-
-    QRectF rect(getRect(selectedItems.takeFirst()));
+    m_boundingRect = true;
+    QRectF rect(selectedItems.takeFirst()->boundingRect());
     for (auto gi : selectedItems)
-        rect = rect.united(getRect(gi));
+        rect = rect.united(gi->boundingRect());
+    m_boundingRect = true;
 
     if (!rect.isEmpty())
         App::project()->setWorckRect(rect);
 
     return rect;
-}
-
-bool Scene::drawPdf()
-{
-    return m_drawPdf;
 }
 
 void Scene::setCross1(const QPointF& cross)
@@ -159,15 +139,15 @@ void Scene::drawRuller(QPainter* painter)
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  ∆X: %1 in\n"
-                                                       "  ∆Y: %2 in\n"
-                                                       "  ∆/: %3 in\n"
-                                                       "  Area: %4 in²\n"
-                                                       "  Angle: %5°"
-                                                     : "  ∆X: %1 mm\n"
-                                                       "  ∆Y: %2 mm\n"
-                                                       "  ∆/: %3 mm\n"
-                                                       "  Area: %4 mm²\n"
-                                                       "  Angle: %5°")
+                                                          "  ∆Y: %2 in\n"
+                                                          "  ∆/: %3 in\n"
+                                                          "  Area: %4 in²\n"
+                                                          "  Angle: %5°"
+                                                        : "  ∆X: %1 mm\n"
+                                                          "  ∆Y: %2 mm\n"
+                                                          "  ∆/: %3 mm\n"
+                                                          "  Area: %4 mm²\n"
+                                                          "  Angle: %5°")
                              .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')

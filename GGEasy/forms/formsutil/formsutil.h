@@ -26,7 +26,12 @@ class Creator;
 class GraphicsItem;
 class QProgressDialog;
 
-class FormsUtil : public QWidget {
+struct FormsUtilI {
+    virtual void createFile() = 0;
+    virtual void updateName() = 0;
+};
+
+class FormsUtil : public QWidget, protected FormsUtilI {
     Q_OBJECT
     friend class MainWindow;
 
@@ -39,9 +44,6 @@ signals:
     void createToolpath();
 
 protected:
-    virtual void createFile() = 0;
-    virtual void updateName() = 0;
-
     void fileHandler(GCode::File* file);
 
     // QObject interface

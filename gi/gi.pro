@@ -54,6 +54,7 @@ INCLUDEPATH += ../graphicsview
 INCLUDEPATH += ../filetree
 INCLUDEPATH += ../project
 INCLUDEPATH += ../tooldatabase
+INCLUDEPATH += ../thermal
 
 SOURCES += \
     bridgeitem.cpp \

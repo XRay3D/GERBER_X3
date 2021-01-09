@@ -97,28 +97,28 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
         if (!node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                path = node->Childs[var]->Contour;
+            for (size_t i = 0; i < node->ChildCount(); ++i) {
+                path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (int var = 0; var < node->ChildCount(); ++var) {
-            grouping(node->Childs[var], pathss, group);
+        for (size_t i = 0; i < node->ChildCount(); ++i) {
+            grouping(node->Childs[i], pathss, group);
         }
         break;
     case CopperGroup:
         if (node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                path = node->Childs[var]->Contour;
+            for (size_t i = 0; i < node->ChildCount(); ++i) {
+                path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (int var = 0; var < node->ChildCount(); ++var) {
-            grouping(node->Childs[var], pathss, group);
+        for (size_t i = 0; i < node->ChildCount(); ++i) {
+            grouping(node->Childs[i], pathss, group);
         }
         break;
     }
@@ -165,7 +165,7 @@ void File::createGi()
                     clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
                 if (go.path().size() > 1) {
-                    auto gItem = new DataPathItem(go.path(), this);
+                    auto gItem = new GiDataPath(go.path(), this);
                     if (go.entity()) {
                         gItem->setToolTip(QString("Line %1\n%2")
                                               .arg(go.entity()->data[0].line())
@@ -190,7 +190,7 @@ void File::createGi()
             }
 
             for (Paths& paths : layer->m_groupedPaths) {
-                auto gItem = new DataSolidItem(paths, this);
+                auto gItem = new GiDataSolid(paths, this);
                 gItem->setColorPtr(&layer->m_colorNorm);
                 igNorm->append(gItem);
             }

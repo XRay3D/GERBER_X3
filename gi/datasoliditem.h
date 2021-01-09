@@ -18,10 +18,10 @@ namespace Gerber {
 class File;
 }
 
-class DataSolidItem final : public GraphicsItem {
+class GiDataSolid final : public GraphicsItem {
 public:
-    explicit DataSolidItem(Paths& m_paths, FileInterface* file);
-    ~DataSolidItem() override;
+    explicit GiDataSolid(Paths& m_paths, FileInterface* file);
+    ~GiDataSolid() override;
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;

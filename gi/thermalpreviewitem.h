@@ -20,10 +20,10 @@
 #include <QVector>
 
 //class QParallelAnimationGroup;
-class ThermalNode;
+class ThermalNodeI;
 class Tool;
 
-class ThermalPreviewItem : public QGraphicsObject {
+class AbstractThermPrGi : public QGraphicsObject {
     Q_OBJECT
 
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)
@@ -46,9 +46,9 @@ signals:
     void selectionChanged(const QModelIndex& s, const QModelIndex& d);
 
 public:
-    explicit ThermalPreviewItem(Tool& tool);
+    explicit AbstractThermPrGi(Tool& tool);
 
-    ~ThermalPreviewItem() override;
+    ~AbstractThermPrGi() override;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -58,8 +58,8 @@ public:
     //////////////////////////////////////////
     int type() const override;
 
-    Paths bridge() const;
-    bool isValid() const;
+    Paths bridge() const { return m_bridge; }
+    virtual bool isValid() const;
 
     virtual Point64 pos() const = 0;
     virtual Paths paths() const = 0;
@@ -103,7 +103,7 @@ private:
 
     int colorState = Default;
 
-    inline static QVector<ThermalPreviewItem*> thpi;
+    inline static mvector<AbstractThermPrGi*> thpi;
 
     // QGraphicsItem interface
 protected:
@@ -123,7 +123,7 @@ protected:
     Paths cashedPath;
     Paths cashedFrame;
 
-    ThermalNode* m_node = nullptr;
+    ThermalNodeI* m_node = nullptr;
 
     double diameter;
     int isEmpty = -1;
