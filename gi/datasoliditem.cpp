@@ -23,7 +23,7 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-DataSolidItem::DataSolidItem(Paths& paths, FileInterface* file)
+GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
     : GraphicsItem(file)
     , m_paths(paths)
 {
@@ -37,13 +37,13 @@ DataSolidItem::DataSolidItem(Paths& paths, FileInterface* file)
     setFlag(ItemIsSelectable, true);
 }
 
-DataSolidItem::~DataSolidItem() { }
+GiDataSolid::~GiDataSolid() { }
 
-QRectF DataSolidItem::boundingRect() const { return m_shape.boundingRect(); }
+QRectF GiDataSolid::boundingRect() const { return m_shape.boundingRect(); }
 
-QPainterPath DataSolidItem::shape() const { return m_shape; }
+QPainterPath GiDataSolid::shape() const { return m_shape; }
 
-void DataSolidItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
@@ -64,9 +64,9 @@ void DataSolidItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     painter->strokePath(m_shape, m_pen);
 }
 
-int DataSolidItem::type() const { return static_cast<int>(GiType::DataSolid); }
+int GiDataSolid::type() const { return static_cast<int>(GiType::DataSolid); }
 
-void DataSolidItem::redraw()
+void GiDataSolid::redraw()
 {
     m_shape = QPainterPath();
     for (Path path : qAsConst(m_paths)) {
@@ -79,11 +79,11 @@ void DataSolidItem::redraw()
     //update();
 }
 
-Paths DataSolidItem::paths() const { return m_paths; }
+Paths GiDataSolid::paths() const { return m_paths; }
 
-Paths* DataSolidItem::rPaths() { return &m_paths; }
+Paths* GiDataSolid::rPaths() { return &m_paths; }
 
-void DataSolidItem::changeColor()
+void GiDataSolid::changeColor()
 {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));

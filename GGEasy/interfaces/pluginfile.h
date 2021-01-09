@@ -33,10 +33,10 @@ class FileModel;
 class FileTreeView;
 class QMenu;
 class ThParam2;
-class ThermalPreviewItem;
+class AbstractThermPrGi;
 
 using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
-using ThermalPreviewGiVec = mvector<std::shared_ptr<ThermalPreviewItem>>;
+using ThermalPreviewGiVec = mvector<std::shared_ptr<AbstractThermPrGi>>;
 
 class SettingsTabInterface : public QWidget {
 public:

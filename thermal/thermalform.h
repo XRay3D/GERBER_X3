@@ -17,7 +17,7 @@
 #include "thvars.h"
 
 class ThermalModel;
-class ThermalPreviewItem;
+class AbstractThermPrGi;
 class QCheckBox;
 class QItemSelection;
 
@@ -53,7 +53,7 @@ private:
 
     void createTPI(FileInterface* file);
 
-    mvector<std::shared_ptr<ThermalPreviewItem>> m_sourcePreview;
+    mvector<std::shared_ptr<AbstractThermPrGi>> m_sourcePreview;
 
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

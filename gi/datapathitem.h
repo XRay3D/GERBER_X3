@@ -20,7 +20,7 @@ namespace Gerber {
 class File;
 }
 
-class DataPathItem : public GraphicsItem {
+class GiDataPath : public GraphicsItem {
     QRectF m_boundingRect;
     int timerId = 0;
 #ifdef __GNUC__
@@ -32,11 +32,10 @@ class DataPathItem : public GraphicsItem {
     void redraw() override { update(); }
 
 public:
-    DataPathItem(const Path& path, FileInterface* file);
+    GiDataPath(const Path& path, FileInterface* file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
-    QRectF boundingRect2() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths() const override;

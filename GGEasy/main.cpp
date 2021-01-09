@@ -188,38 +188,6 @@ int main(int argc, char* argv[])
     //        return 1;
     //    } else {
     //    }
-    //    if (parser.positionalArguments().length()) {
-    //        QSplashScreen* splash = nullptr;
-    //        splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
-    //        splash->setAttribute(Qt::WA_DeleteOnClose);
-    //        splash->show();
-    //        mainWin = new MainWindow();
-
-    //        instance() = mainWin;
-    //        mainWin->setIconSize({ 24, 24 });
-    //        mainWin->show();
-    //        splash->finish(mainWin);
-    //        for (const QString& fileName : parser.positionalArguments()) {
-    //            //            if (fileName.endsWith("g2g")) {
-    //            //                MainWindow* mainWin = new MainWindow();
-    //            //                mainWin->setIconSize({ 24, 24 });
-    //            //                mainWin->show();
-    //            //                mainWin->loadFile(fileName);
-    //            //            } else
-    //            mainWin->loadFile(fileName);
-    //        }
-    //    } else {
-    //        QSplashScreen* splash = nullptr;
-    //        splash = new QSplashScreen(QPixmap(QLatin1String(":/256.png")));
-    //        splash->setAttribute(Qt::WA_DeleteOnClose);
-    //        splash->show();
-    //        mainWin = new MainWindow();
-
-    //        instance() = mainWin;
-    //        mainWin->setIconSize({ 24, 24 });
-    //        mainWin->show();
-    //        splash->finish(mainWin);
-    //    }
 
     SplashScreen* splash = new SplashScreen(QPixmap(QLatin1String(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);

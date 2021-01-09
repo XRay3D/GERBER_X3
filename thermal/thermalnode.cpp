@@ -16,7 +16,7 @@
 #include "thermalnode.h"
 #include "thermalmodel.h"
 
-ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, ThermalPreviewItem* item, ThermalModel* model)
+ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, ThermalModel* model)
     : container(false)
     , icon(icon)
     , name(name)
@@ -34,18 +34,20 @@ ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& 
     , icon(icon)
     , name(name)
     , par(par)
+    , m_item(nullptr)
     , model(model)
 {
 }
 
 ThermalNode::ThermalNode(ThermalModel* model)
-    : model(model)
+    : m_item(nullptr)
+    , model(model)
 {
 }
 
 ThermalNode::~ThermalNode() { childs.clear(); }
 
-ThermalNode* ThermalNode::child(int row) const { return childs.value(row).data(); }
+ThermalNode* ThermalNode::child(int row) const { return childs.at(row).get(); }
 
 ThermalNode* ThermalNode::parentItem() { return m_parent; }
 
@@ -55,7 +57,7 @@ int ThermalNode::row() const
 {
     if (m_parent)
         for (int i = 0, size = m_parent->childs.size(); i < size; ++i)
-            if (m_parent->childs[i] == this)
+            if (m_parent->childs[i].get() == this)
                 return i;
     return 0;
 }
@@ -63,10 +65,10 @@ int ThermalNode::row() const
 void ThermalNode::append(ThermalNode* item)
 {
     item->m_parent = this;
-    childs.append(QSharedPointer<ThermalNode>(item));
+    childs.emplace_back(std::shared_ptr<ThermalNode>(item));
 }
 
-void ThermalNode::remove(int row) { childs.removeAt(row); }
+void ThermalNode::remove(int row) { childs.remove(row); }
 
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
@@ -78,13 +80,13 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
             if (container && childItems.isEmpty())
                 childItems = m_parent->childs.mid(1);
             updateGuard = true;
-            for (auto node : childItems)
+            for (auto node : qAsConst(childItems))
                 node->setData(index, value, role);
-            model->dataChanged(childItems.first()->index(), childItems.last()->index(), { role });
+            emit model->dataChanged(childItems.first()->index(), childItems.last()->index(), { role });
             updateGuard = false;
         } else {
             if (!updateGuard)
-                model->dataChanged(m_parent->index(), m_parent->index(), { role });
+                emit model->dataChanged(m_parent->index(), m_parent->index(), { role });
             m_item->mouseDoubleClickEvent(nullptr);
         }
         return true;
@@ -99,17 +101,17 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
                 return false;
             case ThermalModel::GapAngle:
                 par.angle = value.toDouble();
-                for (auto node : childItems)
+                for (auto node : qAsConst(childItems))
                     node->setData(index, value, role);
                 return true;
             case ThermalModel::apThickness:
                 par.tickness = value.toDouble();
-                for (auto node : childItems)
+                for (auto node : qAsConst(childItems))
                     node->setData(index, value, role);
                 return true;
             case ThermalModel::GapCount:
                 par.count = value.toInt();
-                for (auto node : childItems)
+                for (auto node : qAsConst(childItems))
                     node->setData(index, value, role);
                 return true;
             }
@@ -210,7 +212,7 @@ ThParam ThermalNode::getParam() const { return par; }
 
 Point64 ThermalNode::pos() const { return m_pos; }
 
-ThermalPreviewItem* ThermalNode::item() const { return m_item; }
+AbstractThermPrGi* ThermalNode::item() const { return m_item; }
 
 bool ThermalNode::createFile() const { return m_checked && m_item; }
 

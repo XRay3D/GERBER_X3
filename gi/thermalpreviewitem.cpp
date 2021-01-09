@@ -34,7 +34,7 @@
 
 #include "leakdetector.h"
 
-ThermalPreviewItem::ThermalPreviewItem(Tool& tool)
+AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr(this)
     , pa1(this, "bodyColor")
     , pa2(this, "pathColor")
@@ -62,9 +62,9 @@ ThermalPreviewItem::ThermalPreviewItem(Tool& tool)
     m.unlock();
 }
 
-ThermalPreviewItem::~ThermalPreviewItem() { thpi.clear(); }
+AbstractThermPrGi::~AbstractThermPrGi() { thpi.clear(); }
 
-void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
+void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     if (m_pathColor.alpha()) {
         //        if (isEmpty > 0) {
@@ -108,17 +108,15 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
     painter->drawPath(sourcePath);
 }
 
-QRectF ThermalPreviewItem::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
+QRectF AbstractThermPrGi::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
 
-QPainterPath ThermalPreviewItem::shape() const { return sourcePath; }
+QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
-int ThermalPreviewItem::type() const { return static_cast<int>(GiType::PrThermal); }
+int AbstractThermPrGi::type() const { return static_cast<int>(GiType::PrThermal); }
 
-Paths ThermalPreviewItem::bridge() const { return m_bridge; }
+bool AbstractThermPrGi::isValid() const { return !previewPaths.isEmpty() && m_node->isChecked(); }
 
-bool ThermalPreviewItem::isValid() const { return !previewPaths.isEmpty() && m_node->isChecked(); }
-
-void ThermalPreviewItem::changeColor()
+void AbstractThermPrGi::changeColor()
 {
     pa1.setStartValue(m_bodyColor);
     if (colorState & Selected) {
@@ -143,7 +141,7 @@ void ThermalPreviewItem::changeColor()
     agr.start();
 }
 
-void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QMenu menu;
     if (m_node->isChecked())
@@ -167,7 +165,7 @@ void ThermalPreviewItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     menu.exec(event->screenPos());
 }
 
-void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+void AbstractThermPrGi::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event) {
         QGraphicsItem::mouseDoubleClickEvent(event);
@@ -177,21 +175,21 @@ void ThermalPreviewItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     changeColor();
 }
 
-void ThermalPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+void AbstractThermPrGi::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void ThermalPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+void AbstractThermPrGi::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant ThermalPreviewItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedChange) {
         if (value.toInt()) {

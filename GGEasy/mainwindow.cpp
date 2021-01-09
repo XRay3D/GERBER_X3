@@ -75,7 +75,8 @@ MainWindow::MainWindow(QWidget* parent)
             Pin::pins()[i]->setPos(pos[i]);
     });
     connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
-    GCodePropertiesForm(nullptr); // init default vars;
+    GCodePropertiesForm(nullptr);
+    // init default vars;
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
 
     { // load plugins
@@ -83,8 +84,17 @@ MainWindow::MainWindow(QWidget* parent)
         // Поиск всех файлов в папке "Plugins"
         QStringList listFiles;
         if (dir.exists())
+#ifdef __unix__
+#ifdef QT_DEBUG
+            listFiles = dir.entryList(QStringList("*d.so"), QDir::Files);
+#else
+            listFiles = dir.entryList(QStringList("*.so"), QDir::Files);
+#endif
+#elif _WIN32
             listFiles = dir.entryList(QStringList("*.dll"), QDir::Files);
-
+#else
+            static_assert(false, "Select OS");
+#endif
         // Проход по всем файлам
         for (QString str : listFiles) {
             QPluginLoader loader(dir.absolutePath() + "/" + str);

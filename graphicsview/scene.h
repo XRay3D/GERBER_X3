@@ -21,10 +21,14 @@ class Scene : public QGraphicsScene {
 public:
     explicit Scene(QObject* parent = nullptr);
     ~Scene() override;
+
     void RenderPdf();
+
     QRectF itemsBoundingRect();
     QRectF getSelectedBoundingRect();
-    bool drawPdf();
+
+    bool drawPdf() const { return m_drawPdf; }
+    bool boundingRect() const { return m_boundingRect; }
 
     void setCross1(const QPointF& cross);
     void setCross2(const QPointF& cross2);
@@ -33,6 +37,7 @@ public:
 private:
     bool m_drawPdf = false;
     bool m_drawRuller = false;
+    bool m_boundingRect = false;
     QPointF m_cross1;
     QPointF m_cross2;
     double m_scale = std::numeric_limits<double>::max();

@@ -18,6 +18,7 @@
 #include <QObject>
 #include <QStringList>
 #include <map>
+#include <memory>
 
 /*
 

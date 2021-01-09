@@ -16,9 +16,6 @@
 #include "thermalform.h"
 #include "ui_thermalform.h"
 
-//#include "../gcodepropertiesform.h"
-//#include "bridgeitem.h"
-//#include "gcode.h"
 #include "graphicsview.h"
 #include "myclipper.h"
 #include "project.h"
@@ -38,7 +35,6 @@
 #include <QMessageBox>
 #include <QPicture>
 #include <QTimer>
-//#include <QtConcurrent>
 
 #include "leakdetector.h"
 
@@ -218,7 +214,7 @@ void ThermalForm::createFile()
     m_tpc->setGcp(gpc);
     m_tpc->addPaths(wPaths);
     m_tpc->addSupportPaths(wBridgePaths);
-    createToolpath();
+    emit createToolpath();
 }
 
 void ThermalForm::updateName()
@@ -246,7 +242,6 @@ void ThermalForm::createTPI(FileInterface* file)
     model = new ThermalModel(ui->treeView);
     boardSide = file->side();
 
-
     ThParam2 tp2 {
         par,
         model,
@@ -261,7 +256,9 @@ void ThermalForm::createTPI(FileInterface* file)
 
     for (auto& item : m_sourcePreview) {
         App::scene()->addItem(item.get());
-        connect(item.get(), &ThermalPreviewItem::selectionChanged, this, &ThermalForm::setSelection);
+        // connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &ThermalForm::setSelection);
+        connect(item.get(), SIGNAL(selectionChanged(const QModelIndex&, const QModelIndex&)),
+            this, SLOT(setSelection(const QModelIndex&, const QModelIndex&)));
     }
     //    updateCreateButton();
 
@@ -273,7 +270,7 @@ void ThermalForm::createTPI(FileInterface* file)
 
 void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    for (auto index : selected.indexes()) {
+    for (const auto& index : selected.indexes()) {
         auto* node = static_cast<ThermalNode*>(index.internalPointer());
         auto* item = node->item();
         if (item)
@@ -284,7 +281,7 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
             }
         }
     }
-    for (auto index : deselected.indexes()) {
+    for (const auto& index : deselected.indexes()) {
         auto* node = static_cast<ThermalNode*>(index.internalPointer());
         auto* item = node->item();
         if (item)
