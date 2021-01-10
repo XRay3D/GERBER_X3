@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -41,10 +41,10 @@ std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<Fi
 QJsonObject Plugin::info() const
 {
     return QJsonObject {
-        { "Name", "GCode File Static" },
+        { "Name", "GCode" },
         { "Version", "1.0" },
-        { "Vendor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Info" }
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "GCode is a static plugin always included with GGEasy." }
     };
 }
 
@@ -216,8 +216,7 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
 
             /**/ verticalLayout1->addWidget(grbxSpindle);
         }
-        virtual ~Tab() override { qDebug(__FUNCTION__); }
-
+        virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override
         {
             settings.beginGroup("GCode");

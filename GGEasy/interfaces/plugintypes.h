@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -13,35 +13,38 @@
 *******************************************************************************/
 #pragma once
 
-#include "myclipper.h"
+#include <myclipper.h>
 
-struct GraphicObject {
-    GraphicObject() { }
-    virtual ~GraphicObject() { }
+struct AbstrGraphicObject {
+    AbstrGraphicObject() { }
+    virtual ~AbstrGraphicObject() { }
 
-    virtual Path line() const { return {}; }
-    virtual Path lineW() const { return {}; } // closed
+    virtual Path line() const = 0; //{ return {}; }
+    virtual Path lineW() const = 0; //{ return {}; } // closed
 
-    virtual Path polyLine() const { return {}; }
-    virtual Paths polyLineW() const { return {}; } // closed
+    virtual Path polyLine() const = 0; //{ return {}; }
+    virtual Paths polyLineW() const = 0; //{ return {}; } // closed
 
-    virtual Path elipse() const { return {}; } // circle
-    virtual Paths elipseW() const { return {}; }
+    virtual Path elipse() const = 0; //{ return {}; } // circle
+    virtual Paths elipseW() const = 0; //{ return {}; }
 
-    virtual Path arc() const { return {}; } // part of elipse
-    virtual Path arcW() const { return {}; }
+    virtual Path arc() const = 0; //{ return {}; } // part of elipse
+    virtual Path arcW() const = 0; //{ return {}; }
 
-    virtual Path polygon() const { return {}; }
-    virtual Paths polygonWholes() const { return {}; }
+    virtual Path polygon() const = 0; //{ return {}; }
+    virtual Paths polygonWholes() const = 0; //{ return {}; }
 
-    virtual Path hole() const { return {}; }
-    virtual Paths holes() const { return {}; }
+    virtual Path hole() const = 0; //{ return {}; }
+    virtual Paths holes() const = 0; //{ return {}; }
 
-    virtual bool positive() const { return {}; } // not hole
-    virtual bool closed() const { return {}; } // front == back
+    virtual bool positive() const = 0; //{ return {}; } // not hole
+    virtual bool closed() const = 0; //{ return {}; } // front == back
 
-    virtual Path path() const { return {}; }
-    virtual Paths paths() const { return {}; }
+    virtual const Path& path() const = 0; //{ return {}; }
+    virtual const Paths& paths() const = 0; //{ return {}; }
+
+    virtual Path& rPath() = 0;
+    virtual Paths& rPaths() = 0;
 };
 
 enum class FileType {

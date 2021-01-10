@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -17,7 +17,6 @@
 #include "ui_mainwindow.h"
 
 #include "aboutform.h"
-#include "app.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketoffsetform.h"
@@ -25,20 +24,18 @@
 #include "forms/profileform.h"
 #include "forms/voronoiform.h"
 #include "plugindialog.h"
-#include "project.h"
-#include "thermalform.h"
-
-#include "datasoliditem.h"
 #include "point.h"
-#include "project.h"
 #include "settingsdialog.h"
-#ifdef SH_
-#include "shheaders.h"
-#endif
 
-#include "tooldatabase.h"
-#include <QtPrintSupport>
+#include "project.h"
+#include <thermalform.h>
+#include <tooldatabase.h>
+
+#include <QPrintPreviewDialog>
+#include <QPrinter>
 #include <QtWidgets>
+
+#include "shcreator.h" //////////////
 
 #include "leakdetector.h"
 
@@ -67,52 +64,16 @@ MainWindow::MainWindow(QWidget* parent)
     new Pin();
     new Pin();
 
+    GCodePropertiesForm(); // init default vars;
+
     connect(m_project, &Project::homePosChanged, Marker::get(Marker::Home), qOverload<const QPointF&>(&Marker::setPos));
-    connect(m_project, &Project::homePosChanged, [](const QPointF& pos) { Marker::get(Marker::Home)->setPos(pos); });
-    connect(m_project, &Project::zeroPosChanged, [](const QPointF& pos) { Marker::get(Marker::Zero)->setPos(pos); });
-    connect(m_project, &Project::pinsPosChanged, [](QPointF pos[4]) {
-        for (int i = 0; i < 4; ++i)
-            Pin::pins()[i]->setPos(pos[i]);
-    });
+    connect(m_project, &Project::zeroPosChanged, Marker::get(Marker::Zero), qOverload<const QPointF&>(&Marker::setPos));
+    connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Pin::setPos));
     connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
-    GCodePropertiesForm(nullptr);
-    // init default vars;
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
 
-    { // load plugins
-        QDir dir(QApplication::applicationDirPath());
-        // Поиск всех файлов в папке "Plugins"
-        QStringList listFiles;
-        if (dir.exists())
-#ifdef __unix__
-#ifdef QT_DEBUG
-            listFiles = dir.entryList(QStringList("*d.so"), QDir::Files);
-#else
-            listFiles = dir.entryList(QStringList("*.so"), QDir::Files);
-#endif
-#elif _WIN32
-            listFiles = dir.entryList(QStringList("*.dll"), QDir::Files);
-#else
-            static_assert(false, "Select OS");
-#endif
-        // Проход по всем файлам
-        for (QString str : listFiles) {
-            QPluginLoader loader(dir.absolutePath() + "/" + str);
-            // Загрузка плагина
-            QObject* pobj = loader.instance();
-            qDebug() << __FUNCTION__ << str << pobj;
-            if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
-                parser->setupInterface(App::get());
-                PI pi {
-                    parser,
-                    pobj,
-                };
-                App::parserInterfaces().emplace(parser->type(), pi);
-            }
-        }
-    }
     // connect plugins
-    for (auto& [type, pair] : App::parserInterfaces()) {
+    for (auto& [type, pair] : App::fileInterfaces()) {
         auto& [parser, pobj] = pair;
         pobj->moveToThread(&parserThread);
         connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
@@ -123,11 +84,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     { // add dummy gcode plugin
         auto parser = new GCode::Plugin(this);
-        PI pi {
+        PIF pi {
             static_cast<FilePluginInterface*>(parser),
             static_cast<QObject*>(parser)
         };
-        App::parserInterfaces().emplace(parser->type(), pi);
+        App::fileInterfaces().emplace(parser->type(), pi);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -167,23 +128,25 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
-        //        int k = 100;
+        int k = 100;
 
-        //        QDir dir("D:/Gerber Test Files/MB1180_Gerber_Rev C");
-        //        QStringList listFiles;
-        //        if (dir.exists())
-        //            listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
-        //        for (QString str : listFiles) {
-        //            str = dir.path() + '/' + str;
-        //            qDebug() << __FUNCTION__ << str;
-        //            QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
-        //            break;
-        //        }
+        if (1) {
+            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
+            QStringList listFiles;
+            if (dir.exists())
+                listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
+            for (QString str : listFiles) {
+                str = dir.path() + '/' + str;
+                qDebug() << __FUNCTION__ << str;
+                QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
+                break;
+            }
+        }
+
         //        k = 300;
         //        QTimer::singleShot(++i * k, [this] { selectAll(); });
         //        QTimer::singleShot(++i * k, [this] { toolpathActions[GCode::Profile]->triggered(); });
         //        QTimer::singleShot(++i * k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
-
         // "D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"
         // "D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf"
         // "C:/Users/X-Ray/Documents/TopoR/Examples/Example_02/Placement.dxf"
@@ -196,9 +159,9 @@ MainWindow::MainWindow(QWidget* parent)
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
-
-        QTimer::singleShot(++i * 100, [this] { selectAll(); });
-        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Thermal]->triggered(); });
+        //        QTimer::singleShot(++i * 500, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-Edge_Cuts.gbr"); });
+        //        QTimer::singleShot(++i * 500, [this] { selectAll(); });
+        //        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Thermal]->triggered(); });
         //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
@@ -571,83 +534,85 @@ void MainWindow::createActionsToolPath()
 
 void MainWindow::createActionsGraphics()
 {
-#ifdef SH_
+
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     tb->setToolTip(tr("Graphics Items"));
     // tb->setEnabled(false);
     QAction* action = nullptr;
-    {
-        action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
-        action->setCheckable(true);
-        connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeR) : 0, checked ? action : nullptr);
-        });
-    }
+    //    {
+    //        action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
+    //        action->setCheckable(true);
+    //        connect(action, &QAction::triggered, [action](bool checked) {
+    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeR) : 0, checked ? action : nullptr);
+    //        });
+    //    }
     {
         action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
         action->setCheckable(true);
         connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeC) : 0, checked ? action : nullptr);
+            if (checked)
+                Shapes::Constructor::setType(static_cast<int>(GiType::ShapeC), action);
+            else
+                Shapes::Constructor::setType(0, nullptr);
         });
     }
-    {
-        action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
-        action->setCheckable(true);
-        connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeL) : 0, checked ? action : nullptr);
-        });
-    }
-    {
-        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
-        action->setCheckable(true);
-        connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeA) : 0, checked ? action : nullptr);
-        });
-    }
-    {
-        action = tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"));
-        action->setCheckable(true);
-        connect(action, &QAction::triggered, [action](bool checked) {
-            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeT) : 0, checked ? action : nullptr);
-        });
-    }
-    // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] {  ui->graphicsView->setPt(Line); });
-    // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] {  ui->graphicsView->setPt(ArcPT); });
-    // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] {  ui->graphicsView->setPt(Text); });
-    tb->addSeparator();
+    //    {
+    //        action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
+    //        action->setCheckable(true);
+    //        connect(action, &QAction::triggered, [action](bool checked) {
+    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeL) : 0, checked ? action : nullptr);
+    //        });
+    //    }
+    //    {
+    //        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
+    //        action->setCheckable(true);
+    //        connect(action, &QAction::triggered, [action](bool checked) {
+    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeA) : 0, checked ? action : nullptr);
+    //        });
+    //    }
+    //    {
+    //        action = tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"));
+    //        action->setCheckable(true);
+    //        connect(action, &QAction::triggered, [action](bool checked) {
+    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeT) : 0, checked ? action : nullptr);
+    //        });
+    //    }
+    //    // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] {  ui->graphicsView->setPt(Line); });
+    //    // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] {  ui->graphicsView->setPt(ArcPT); });
+    //    // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] {  ui->graphicsView->setPt(Text); });
+    //    tb->addSeparator();
 
-    auto ex = [](ClipType type) {
-        QList<QGraphicsItem*> si = App::scene()->selectedItems();
-        QList<GraphicsItem*> rmi;
-        for (QGraphicsItem* item : si) {
-            if (static_cast<GiType>(item->type()) == GiType::Gerber) {
-                DataSolidItem* gitem = static_cast<DataSolidItem*>(item);
-                Clipper clipper;
-                clipper.AddPaths(gitem->paths(), ptSubject, true);
-                for (QGraphicsItem* clipItem : si) {
-                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShapeC) {
-                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
-                    }
-                }
-                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-                if (gitem->rPaths()->isEmpty()) {
-                    rmi.push_back(gitem);
-                } else {
-                    ReversePaths(*gitem->rPaths());
-                    gitem->redraw();
-                }
-            }
-        }
-        for (GraphicsItem* item : rmi) {
-            delete item->file()->itemGroup()->takeAt(item->file()->itemGroup()->indexOf(item));
-        }
-    };
-    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
-    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
-    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
-    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
-#endif
+    //    auto ex = [](ClipType type) {
+    //        QList<QGraphicsItem*> si = App::scene()->selectedItems();
+    //        QList<GraphicsItem*> rmi;
+    //        for (QGraphicsItem* item : si) {
+    //            if (static_cast<GiType>(item->type()) == GiType::Gerber) {
+    //                DataSolidItem* gitem = static_cast<DataSolidItem*>(item);
+    //                Clipper clipper;
+    //                clipper.AddPaths(gitem->paths(), ptSubject, true);
+    //                for (QGraphicsItem* clipItem : si) {
+    //                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShapeC) {
+    //                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
+    //                    }
+    //                }
+    //                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+    //                if (gitem->rPaths()->isEmpty()) {
+    //                    rmi.push_back(gitem);
+    //                } else {
+    //                    ReversePaths(*gitem->rPaths());
+    //                    gitem->redraw();
+    //                }
+    //            }
+    //        }
+    //        for (GraphicsItem* item : rmi) {
+    //            delete item->file()->itemGroup()->takeAt(item->file()->itemGroup()->indexOf(item));
+    //        }
+    //    };
+    //    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
+    //    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
+    //    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
+    //    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
 }
 
 void MainWindow::saveGCodeFile(int id)
@@ -816,16 +781,21 @@ void MainWindow::printDialog()
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         pPrinter->setMargins({ 10, 10, 10, 10 });
         pPrinter->setPageSizeMM(size + QSizeF(pPrinter->margins().left + pPrinter->margins().right, pPrinter->margins().top + pPrinter->margins().bottom));
+#else
+            QMarginsF margins( 10, 10, 10, 10 );
+            pPrinter->setPageMargins(margins);
+            pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(),
+                                                          margins.top() + margins.bottom()),
+                                            QPageSize::Millimeter));
+#endif
         pPrinter->setResolution(4800);
 
         QPainter painter(pPrinter);
-#if QT_DEPRECATED_SINCE(5, 14)
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
-#else
         painter.setRenderHint(QPainter::Antialiasing);
-#endif
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
         App::scene()->render(&painter,
@@ -844,8 +814,8 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
         pd->setCancelButton(nullptr);
         pd->setLabelText(fileName);
         pd->setMaximum(max);
-        pd->setModal(true);
-        pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        //        pd->setModal(true);
+        //        pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
         m_progressDialogs[fileName] = pd;
     } else if (max == 1 && value == 1) {
@@ -878,7 +848,11 @@ void MainWindow::fileError(const QString& fileName, const QString& error)
 
         verticalLayout->addWidget(textBrowser);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         verticalLayout->setMargin(6);
+#else
+        verticalLayout->setContentsMargins(6, 6, 6, 6);
+#endif
         verticalLayout->setSpacing(6);
     }
     fileErrordialog->show();
@@ -1075,7 +1049,7 @@ void MainWindow::loadFile(const QString& fileName)
             return;
         }
         qDebug() << __FUNCTION__;
-        for (auto& [type, tuple] : App::parserInterfaces()) {
+        for (auto& [type, tuple] : App::fileInterfaces()) {
             auto& [parser, pobj] = tuple;
             qDebug() << __FUNCTION__ << pobj;
             if (parser->thisIsIt(fileName)) {
@@ -1105,8 +1079,8 @@ void MainWindow::open()
     if (files.isEmpty())
         return;
 
-    if (files.filter(QRegExp(".+g2g$")).size()) {
-        loadFile(files.at(files.indexOf(QRegExp(".+g2g$"))));
+    if (files.filter(QRegularExpression(".+g2g$")).size()) {
+        loadFile(files.at(files.indexOf(QRegularExpression(".+g2g$"))));
         return;
     } else {
         for (QString& fileName : files) {

@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -180,7 +180,7 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
     for (auto file : App::project()->files({ FileType::Gerber, FileType::Excellon }))
-        App::parserInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
+        App::fileInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
 
@@ -198,7 +198,7 @@ bool DrillForm::canToShow()
 
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
-        App::parserInterface(int(file->type()))->addToDrillForm(file, &cbx);
+        App::fileInterface(int(file->type()))->addToDrillForm(file, &cbx);
         if (cbx.count())
             return true;
     }
@@ -412,7 +412,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     }
 
     model = new DrillModel(this);
-    m_giPeview = App::parserInterface(int(file->type()))->createDrillPreviewGi(file, model->data());
+    m_giPeview = App::fileInterface(int(file->type()))->createDrillPreviewGi(file, model->data());
 
     for (auto& [key, val] : m_giPeview)
         for (auto& spGi : val)
@@ -568,7 +568,6 @@ void DrillForm::pickUpTool(const double k)
              isSlot,
              useForCalc,
              toolId] : model->data()) {
-        qDebug() << __FUNCTION__ << "S" << apertureId << diameter;
         const double drillDiameterMin = diameter * (1.0 - k);
         const double drillDiameterMax = diameter * (1.0 + k);
         if (!isSlot)
@@ -586,7 +585,6 @@ void DrillForm::pickUpTool(const double k)
                 if (tool.type() == Tool::EndMill
                     && drillDiameterMin <= tool.diameter()
                     && drillDiameterMax >= tool.diameter()) {
-                    qDebug() << __FUNCTION__ << "P" << diameter << tool.diameter();
                     model->setToolId(ctr, id);
                     updateToolsOnGi(apertureId);
                     break;

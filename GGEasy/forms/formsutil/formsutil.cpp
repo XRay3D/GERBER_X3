@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -34,25 +34,7 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
 #include "leakdetector.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-FormsUtil::FormsUtil(GCode::Creator *tps, QWidget *parent)
+FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
     , fileCount(1)
@@ -87,8 +69,9 @@ FormsUtil::~FormsUtil()
     thread.wait();
 }
 
-void FormsUtil::fileHandler(GCode::File *file)
+void FormsUtil::fileHandler(GCode::File* file)
 {
+    qDebug() << __FUNCTION__ << file;
     if (--fileCount == 0)
         cancel();
 
@@ -108,67 +91,67 @@ void FormsUtil::fileHandler(GCode::File *file)
     }
 }
 
-void FormsUtil::timerEvent(QTimerEvent *event)
+void FormsUtil::timerEvent(QTimerEvent* event)
 {
     if (event->timerId() == progressTimerId && progressDialog && m_tpc) {
         const auto [max, val] = m_tpc->getProgress();
-                progressDialog->setMaximum(max);
-                progressDialog->setValue(val);
+        progressDialog->setMaximum(max);
+        progressDialog->setValue(val);
 
-                progressDialog->setLabelText(m_tpc->msg);
-    }
-                if (event->timerId() == flikerTimerId) {
-            App::scene()->update();
-        }
-    }
-
-    void FormsUtil::addUsedGi(GraphicsItem *gi)
-    {
-        if (gi->file()) {
-            FileInterface const* file = gi->file();
-            if (file->type() == FileType::Gerber) {
-#ifdef GBR_
-                m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
-#endif
-            } else {
-                m_usedItems[{ file->id(), -1 }].push_back(gi->id());
-            }
-        }
-    }
-
-    void FormsUtil::cancel()
-    {
-        m_tpc->cancel();
-        stopProgress();
-    }
-
-    void FormsUtil::errorHandler(int)
-    {
-        stopProgress();
-        flikerTimerId = startTimer(32);
-        if (ErrorDialog(m_tpc->items, this).exec()) {
-            startProgress();
-            m_tpc->proceed();
-        } else {
-            m_tpc->cancel();
-        }
-        killTimer(flikerTimerId);
-        flikerTimerId = 0;
-    }
-
-    void FormsUtil::startProgress()
-    {
-        if (!fileCount)
-            fileCount = 1;
-        m_tpc->msg = m_fileName;
         progressDialog->setLabelText(m_tpc->msg);
-        progressTimerId = startTimer(100);
     }
+    if (event->timerId() == flikerTimerId) {
+        App::scene()->update();
+    }
+}
 
-    void FormsUtil::stopProgress()
-    {
-        killTimer(progressTimerId);
-        progressTimerId = 0;
-        progressDialog->reset();
-        progressDialog->hide();
+void FormsUtil::addUsedGi(GraphicsItem* gi)
+{
+    if (gi->file()) {
+        FileInterface const* file = gi->file();
+        if (file->type() == FileType::Gerber) {
+#ifdef GBR_
+            m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
+#endif
+        } else {
+            m_usedItems[{ file->id(), -1 }].push_back(gi->id());
+        }
     }
+}
+
+void FormsUtil::cancel()
+{
+    m_tpc->cancel();
+    stopProgress();
+}
+
+void FormsUtil::errorHandler(int)
+{
+    stopProgress();
+    flikerTimerId = startTimer(32);
+    if (ErrorDialog(m_tpc->items, this).exec()) {
+        startProgress();
+        m_tpc->proceed();
+    } else {
+        m_tpc->cancel();
+    }
+    killTimer(flikerTimerId);
+    flikerTimerId = 0;
+}
+
+void FormsUtil::startProgress()
+{
+    if (!fileCount)
+        fileCount = 1;
+    m_tpc->msg = m_fileName;
+    progressDialog->setLabelText(m_tpc->msg);
+    progressTimerId = startTimer(100);
+}
+
+void FormsUtil::stopProgress()
+{
+    killTimer(progressTimerId);
+    progressTimerId = 0;
+    progressDialog->reset();
+    progressDialog->hide();
+}

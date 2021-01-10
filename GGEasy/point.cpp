@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -436,7 +436,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
 int Pin::type() const { return static_cast<int>(GiType::MarkPin); }
 
-mvector <Pin*> Pin::pins() { return mvector { m_pins[0], m_pins[1], m_pins[2], m_pins[3] }; }
+mvector<Pin*> Pin::pins() { return mvector { m_pins[0], m_pins[1], m_pins[2], m_pins[3] }; }
 
 void Pin::setPinsPos(QPointF pos[])
 {
@@ -483,6 +483,12 @@ void Pin::resetPos(bool fl)
         m_pins[i]->setPos(pt[i]);
 
     App::project()->setPinsPos(pt);
+}
+
+void Pin::setPos(const QPointF pos[])
+{
+    for (int i = 0; i < 4; ++i)
+        m_pins[i]->setPos(pos[i]);
 }
 
 void Pin::updateToolTip()

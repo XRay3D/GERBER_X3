@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -16,11 +16,15 @@
 #include "../tooldatabase/tool.h"
 #include "app.h"
 #include "settings.h"
+#include "treeview.h"
 
 #include "forms/drillform/drillmodel.h"
 
+#include <QMenu>
+#include <QMessageBox>
 #include <QObject>
 #include <QWidget>
+
 #include <memory>
 
 class FileInterface;
@@ -72,7 +76,13 @@ public:
     [[nodiscard]] virtual QJsonObject info() const = 0;
 
     virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
-    virtual void createMainMenu([[maybe_unused]] QMenu& menu, [[maybe_unused]] FileTreeView* tv) {};
+    virtual void createMainMenu([[maybe_unused]] QMenu& menu, [[maybe_unused]] FileTreeView* tv)
+    {
+        menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close All Files"), [tv] {
+            if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                tv->closeFiles();
+        });
+    };
     virtual void setupInterface(App* a) = 0;
     virtual void updateFileModel([[maybe_unused]] FileInterface* file) {};
 

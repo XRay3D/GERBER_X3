@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -20,12 +20,18 @@
 class ErrorItem;
 class TableView;
 
-namespace Ui {
-class ErrorDialog;
-}
+class QVBoxLayout;
+class QDialogButtonBox;
 
 class ErrorDialog : public QDialog {
     Q_OBJECT
+
+    QDialogButtonBox* buttonBox;
+    QVBoxLayout* verticalLayout;
+
+    void setupUi(QDialog* ErrorDialog); // setupUi
+
+    void retranslateUi(QDialog* ErrorDialog); // retranslateUi
 
 public:
     explicit ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent = nullptr);
@@ -33,6 +39,5 @@ public:
 
 private:
     QWidget* lastWidget = nullptr;
-    Ui::ErrorDialog* ui;
     TableView* table;
 };

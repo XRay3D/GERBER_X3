@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -76,6 +76,7 @@ public:
     static double maxY() { return qMax(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
 
     static void resetPos(bool fl = true);
+    static void setPos(const QPointF pos[4]);
     void updateToolTip();
     void setPos(const QPointF& pos);
 

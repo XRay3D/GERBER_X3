@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -16,6 +16,7 @@
 #include "plugindialog.h"
 #include "app.h"
 #include "interfaces/pluginfile.h"
+#include "interfaces/shapepluginin.h"
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -35,23 +36,45 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     treeWidget->setAlternatingRowColors(true);
     treeWidget->setIconSize({ 24, 24 });
 
-    auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
-    QFont boldFont = interfaceItem->font(0);
-    boldFont.setBold(true);
-    interfaceItem->setFont(0, boldFont);
-    interfaceItem->setExpanded(true);
-    for (auto& [type, tuple] : App::parserInterfaces()) {
-        auto& [parser, pobj] = tuple;
-        auto json(parser->info());
-        auto featureItem = new QTreeWidgetItem(interfaceItem);
-        featureItem->setExpanded(true);
-        //                featureItem->setIcon(0, "featureIcon");
-        featureItem->setText(0, json.value("Name").toString());
-        featureItem->setText(1, json.value("Version").toString());
-        featureItem->setText(2, json.value("Vendor").toString());
-        featureItem->setToolTip(0, json.value("Info").toString());
-        featureItem->setToolTip(1, json.value("Info").toString());
-        featureItem->setToolTip(2, json.value("Info").toString());
+    {
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
+        QFont boldFont = interfaceItem->font(0);
+        boldFont.setBold(true);
+        interfaceItem->setFont(0, boldFont);
+        interfaceItem->setExpanded(true);
+        for (auto& [type, tuple] : App::fileInterfaces()) {
+            auto& [parser, pobj] = tuple;
+            auto json(parser->info());
+            auto featureItem = new QTreeWidgetItem(interfaceItem);
+            featureItem->setExpanded(true);
+            //                featureItem->setIcon(0, "featureIcon");
+            featureItem->setText(0, json.value("Name").toString());
+            featureItem->setText(1, json.value("Version").toString());
+            featureItem->setText(2, json.value("VendorAuthor").toString());
+            featureItem->setToolTip(0, json.value("Info").toString());
+            featureItem->setToolTip(1, json.value("Info").toString());
+            featureItem->setToolTip(2, json.value("Info").toString());
+        }
+    }
+    {
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, { "Shape Plugins", "", "" });
+        QFont boldFont = interfaceItem->font(0);
+        boldFont.setBold(true);
+        interfaceItem->setFont(0, boldFont);
+        interfaceItem->setExpanded(true);
+        for (auto& [type, tuple] : App::shapeInterfaces()) {
+            auto& [shape, pobj] = tuple;
+            auto json(shape->info());
+            auto featureItem = new QTreeWidgetItem(interfaceItem);
+            featureItem->setExpanded(true);
+            //                featureItem->setIcon(0, "featureIcon");
+            featureItem->setText(0, json.value("Name").toString());
+            featureItem->setText(1, json.value("Version").toString());
+            featureItem->setText(2, json.value("VendorAuthor").toString());
+            featureItem->setToolTip(0, json.value("Info").toString());
+            featureItem->setToolTip(1, json.value("Info").toString());
+            featureItem->setToolTip(2, json.value("Info").toString());
+        }
     }
 
     resize(600, 600);
