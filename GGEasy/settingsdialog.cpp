@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -18,7 +18,6 @@
 #include "graphicsview.h"
 #include "interfaces/pluginfile.h"
 
-#include <QGLWidget>
 #include <QtWidgets>
 #include <mainwindow.h>
 
@@ -66,7 +65,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     }
 
     connect(cbxFontSize, &QComboBox::currentTextChanged, [](const QString& fontSize) {
-        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + fontSize));
+        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression("font-size:\\s*\\d+"), "font-size: " + fontSize));
         QFont f;
         f.setPointSize(fontSize.toInt());
         qApp->setFont(f);
@@ -98,8 +97,8 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
 
-    tabs.reserve(App::parserInterfaces().size());
-    for (auto& [type, tuple] : App::parserInterfaces()) {
+    tabs.reserve(App::fileInterfaces().size());
+    for (auto& [type, tuple] : App::fileInterfaces()) {
         auto& [parser, pobj] = tuple;
         auto [tab, name] = parser->createSettingsTab(tabwMain);
         if (!tab)
@@ -111,7 +110,6 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     readSettings();
     readSettingsDialog();
-    qDebug() << __FUNCTION__ << "tab" << tab;
     if (tab > -1)
         tabwMain->setCurrentIndex(tab);
 }
@@ -172,9 +170,7 @@ void SettingsDialog::writeSettings()
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
-        App::graphicsView()->setViewport(chbxOpenGl->isChecked()
-                ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
-                : new QWidget);
+        App::graphicsView()->setOpenGL(chbxOpenGl->isChecked());
         App::graphicsView()->viewport()->setObjectName("viewport");
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxOpenGl);
@@ -219,18 +215,18 @@ void SettingsDialog::writeSettings()
 }
 
 void SettingsDialog::readSettingsDialog()
-{ /*SettingsDialog*/
+{
     settings.beginGroup("SettingsDialog");
     restoreGeometry(settings.value("geometry").toByteArray());
-    qDebug() << __FUNCTION__ << "index" << settings.setValue(tabwMain);
+    settings.getValue(tabwMain);
     settings.endGroup();
 }
 
 void SettingsDialog::writeSettingsDialog()
-{ /*SettingsDialog*/
+{
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
-    qDebug() << __FUNCTION__ << "index" << settings.setValue(tabwMain);
+    settings.setValue(tabwMain);
     settings.endGroup();
 }
 

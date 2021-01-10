@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -163,7 +163,7 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
         return QVariant();
     case Qt::TextAlignmentRole:
         if (orientation == Qt::Vertical)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return static_cast<int>(Qt::AlignRight) | static_cast<int>(Qt::AlignVCenter);
         return Qt::AlignCenter;
     default:
         return QVariant();

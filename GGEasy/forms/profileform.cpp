@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -176,7 +176,8 @@ void ProfileForm::createFile()
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    createToolpath();
+    fileCount = 1;
+    emit createToolpath();
 }
 
 void ProfileForm::updateName()
@@ -288,8 +289,8 @@ void ProfileForm::editFile(GCode::File* file)
         m_usedItems.clear();
         auto items { gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
 
-        auto i = items.constBegin();
-        while (i != items.constEnd()) {
+        auto i = items.cbegin();
+        while (i != items.cend()) {
 
             //            auto [_fileId, _] = i.key();
             //            Q_UNUSED(_)

@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -18,8 +18,10 @@
 #include "filemodel.h"
 
 #include <QAbstractItemModel>
+#include <QApplication>
 #include <QPainter>
 #include <QSharedPointer>
+#include <QStyle>
 #include <QVariant>
 
 class FileInterface;
@@ -33,6 +35,7 @@ class Shape;
 
 inline QPixmap decoration(QColor color, QChar chr = {})
 {
+    //    qDebug() << __FUNCTION__ << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     QPixmap pixmap(22, 22);
     pixmap.fill(Qt::transparent);
     QPainter p(&pixmap);

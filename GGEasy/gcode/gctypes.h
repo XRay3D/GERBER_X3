@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -13,14 +13,15 @@
 *******************************************************************************/
 #pragma once
 
-#include "../tooldatabase/tool.h"
+#include <tool.h>
 #include "datastream.h"
 
 #include "mvector.h"
 #include <QDebug>
 #include <QVariant>
+#include <variant>
 
-using UsedItems = QMap<std::pair<int, int>, std::vector<int>>;
+using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
 using V = std::variant<int, double, UsedItems>;
 
 namespace GCode {
@@ -100,11 +101,12 @@ struct variant {
         : var(val)
     {
     }
-    template <class T>
-    variant(T&& val)
-        : var(std::move(val))
-    {
-    }
+
+    //    template <class T>
+    //    variant(T&& val)
+    //        : var(std::move(val))
+    //    {
+    //    }
 
     size_t index() const { return var.index(); }
 
@@ -212,7 +214,7 @@ struct GCodeParams {
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type)
     {
-        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
+        //qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream >> type.tools;
         stream >> type.params;
@@ -222,7 +224,7 @@ struct GCodeParams {
 
     friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type)
     {
-        qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
+        //qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream << type.tools;
         stream << type.params;

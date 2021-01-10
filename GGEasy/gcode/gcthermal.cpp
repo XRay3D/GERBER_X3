@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -29,7 +29,6 @@ void ThermalCreator::create()
         App::project()->file(m_gcp.params[GCodeParams::FileId].toInt()),
         m_gcp.tools.first(),
         m_gcp.params[GCodeParams::Depth].toDouble());
-    emit fileReady(nullptr);
 }
 
 void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth)
@@ -38,13 +37,11 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
     { // create tool path
-        // execute offset
-        {
+        { // execute offset
             ClipperOffset offset;
             offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
             offset.Execute(m_returnPs, dOffset);
         }
-
         // fix direction
         if (m_gcp.side() == Outer && !m_gcp.convent())
             ReversePaths(m_returnPs);
@@ -58,7 +55,6 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
             emit fileReady(nullptr);
             return;
         }
-        //dbgPaths(m_returnPs, "tool path");
     }
 
     Paths framePaths;
@@ -68,12 +64,10 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         {
             ClipperOffset offset;
             for (auto go : graphicObjects) {
-                if (go->positive()) {
-                    offset.AddPaths(go->polyLineW(), jtMiter, etClosedPolygon);
-                }
+                if (go->positive())
+                    offset.AddPaths(go->polyLineW(), jtRound, etClosedPolygon);
             }
             offset.Execute(framePaths, dOffset - 0.005 * uScale);
-            //dbgPaths(framePaths, "Line", true);
             clipper.AddPaths(framePaths, ptSubject, true);
         }
         if (!m_gcp.params[GCodeParams::IgnoreCopper].toInt()) {
@@ -81,7 +75,7 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
             for (auto go : graphicObjects) {
                 //                if (go->closed()) {
                 //                    if (go->positive())
-                offset.AddPaths(go->polygonWholes(), jtMiter, etClosedPolygon);
+                offset.AddPaths(go->polygonWholes(), jtRound, etClosedPolygon);
                 //                    else {
                 //                        Paths paths(go->polygonWholes());
                 //                        ReversePaths(paths);
@@ -90,14 +84,11 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
                 //                }
             }
             offset.Execute(framePaths, dOffset - 0.005 * uScale);
-            //dbgPaths(framePaths, "Region", true);
             clipper.AddPaths(framePaths, ptClip, true);
         }
-        for (const Paths& paths : m_supportPss) {
+        for (const Paths& paths : m_supportPss)
             clipper.AddPaths(paths, ptClip, true);
-        }
         clipper.Execute(ctUnion, framePaths, pftEvenOdd);
-        //dbgPaths(framePaths, "framePaths", true);
     }
 
     { // Execute

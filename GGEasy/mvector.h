@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDebug>
 #include <algorithm>
 #include <vector>
 
@@ -50,13 +49,13 @@ struct mvector : std::vector<T> {
     inline const T& first() const noexcept { return V::front(); }
     inline const T& last() const noexcept { return V::back(); }
 
-    inline void push_back(const V& Val) { V::insert(V::end(), Val.begin(), Val.end()); }
-    inline void push_back(const T& Val) { V::emplace_back(Val); }
-    inline void push_back(T&& Val) { V::emplace_back(std::move(Val)); }
+    inline void push_back(T&& t) { V::emplace_back(std::move(t)); }
+    inline void push_back(const T& t) { V::emplace_back(t); }
+    inline void push_back(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
 
-    inline void append(const T& Val) { V::emplace_back(Val); }
-    inline void append(T&& Val) { V::emplace_back(std::move(Val)); }
-    inline void append(const V& Val) { V::insert(V::end(), Val.begin(), Val.end()); }
+    inline void append(T&& t) { V::emplace_back(std::move(t)); }
+    inline void append(const T& t) { V::emplace_back(t); }
+    inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
 
     //    template <class... _Valty>
     //    decltype(auto) emplace_back(_Valty&&... _Val)
@@ -107,21 +106,21 @@ struct mvector : std::vector<T> {
     //        return v;
     //    }
 
-    inline void prepend(const T& Val) { V::insert(V::begin(), 1, Val); }
-    inline void prepend(T&& Val) { V::insert(V::begin(), 1, std::move(Val)); }
+    inline void prepend(T&& t) { V::insert(V::begin(), 1, std::move(t)); }
+    inline void prepend(const T& t) { V::insert(V::begin(), 1, t); }
 
     T takeLast()
     {
-        T v(std::move(V::back()));
+        T rt(std::move(V::back()));
         V::erase(V::end() - 1);
-        return v;
+        return rt;
     }
 
     T takeFirst()
     {
-        T v(std::move(V::front()));
+        T rt(std::move(V::front()));
         V::erase(V::begin());
-        return v;
+        return rt;
     }
 
     friend inline mvector& operator<<(mvector& v, const T& t)
@@ -136,9 +135,9 @@ struct mvector : std::vector<T> {
         return v;
     }
 
-    inline auto indexOf(const T& p) const noexcept
+    inline auto indexOf(const T& t) const noexcept
     {
-        if (auto it = std::find(V::begin(), V::end(), p); it == V::end())
+        if (auto it = std::find(V::begin(), V::end(), t); it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);

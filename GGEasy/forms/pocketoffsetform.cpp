@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -81,7 +81,6 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
 
 PocketOffsetForm::~PocketOffsetForm()
 {
-
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
@@ -164,7 +163,7 @@ void PocketOffsetForm::createFile()
     GCode::GCodeParams gcp;
     for (const Tool& t : tool) {
         gcp.tools.push_back(t);
-        if (gcp.tools.size() == ui->sbxToolQty->value())
+        if (gcp.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 

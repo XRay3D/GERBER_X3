@@ -4,7 +4,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -19,7 +19,7 @@
 #include "plugintypes.h"
 
 #include "itemgroup.h"
-#include "myclipper.h"
+#include <myclipper.h>
 #include "splashscreen.h"
 
 #include "app.h"
@@ -69,7 +69,7 @@ class FileInterface {
         stream >> file.m_color;
         stream >> file.m_date;
         if (App::splashScreen())
-            App::splashScreen()->showMessage(QObject::tr("              Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignLeft, Qt::white);
+            App::splashScreen()->showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         bool visible;
         stream >> visible;
         file.createGi();
@@ -119,7 +119,7 @@ public:
 
     mvector<QString>& lines() { return m_lines; }
     const mvector<QString>& lines() const { return m_lines; }
-    virtual mvector<const GraphicObject*> graphicObjects() const { return {}; }
+    virtual mvector<const AbstrGraphicObject*> graphicObjects() const { return {}; }
 
     enum Group {
         CopperGroup,

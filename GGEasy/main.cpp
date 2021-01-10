@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -15,15 +15,19 @@
 *******************************************************************************/
 
 #include "mainwindow.h"
-#include "settingsdialog.h"
 #include "splashscreen.h"
-#include "tool.h"
 #include "version.h"
+
+#include "interfaces/shapepluginin.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
+#endif
+#include <QDir>
+#include <QPluginLoader>
 #include <QProxyStyle>
 #include <QSettings>
 #include <QTranslator>
@@ -122,33 +126,35 @@ int main(int argc, char* argv[])
 #ifdef LEAK_DETECTOR
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     //QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
     //QApplication::setAttribute(Qt::AA_Use96Dpi);
+#else
+    QApplication::setAttribute(Qt::AA_Use96Dpi);
+#endif
 
-    Q_INIT_RESOURCE(resources);
-
-    App a;
-    AppSettings s;
-    ToolHolder t;
+    //    Q_INIT_RESOURCE(resources);
+    QApplication::setApplicationName("GGEasy");
+    QApplication::setOrganizationName("settings" /*VER_COMPANYNAME_STR*/);
+    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
     QApplication app(argc, argv);
-    app.setStyle(new ProxyStyle);
 
-    app.setApplicationName("GGEasy");
-    app.setOrganizationName("settings" /*VER_COMPANYNAME_STR*/);
-    app.setApplicationVersion(VER_PRODUCTVERSION_STR);
+    QApplication::setStyle(new ProxyStyle);
+
+    App a;
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QGLFormat glf = QGLFormat::defaultFormat();
     glf.setSampleBuffers(true);
     glf.setSamples(16);
     QGLFormat::setDefaultFormat(glf);
-
+#endif
     initIcon(qApp->applicationDirPath());
 
     //    QSystemSemaphore semaphore("GGEasy_Semaphore", 1); // создаём семафор
@@ -194,6 +200,48 @@ int main(int argc, char* argv[])
     splash->show();
 
     {
+        /*
+        Platform        Valid suffixes
+        Windows         .dll, .DLL
+        Unix/Linux      .so
+        AIX             .a
+        HP-UX           .sl, .so (HP-UXi)
+        macOS and iOS	.dylib, .bundle, .so
+        */
+#ifdef __unix__
+#ifdef QT_DEBUG
+        listFiles = dir.entryList(QStringList("*d.so"), QDir::Files);
+#else
+        listFiles = dir.entryList(QStringList("*.so"), QDir::Files);
+#endif
+#elif _WIN32
+        const QString suffix("*.dll");
+#else
+        static_assert(false, "Select OS");
+#endif
+        // load plugins
+        QDir dir(QApplication::applicationDirPath() + "/plugins");
+        // Поиск всех файлов в папке "Plugins"
+        QStringList listFiles;
+        if (dir.exists()) {
+            listFiles = dir.entryList(QStringList(suffix), QDir::Files);
+            // Проход по всем файлам
+            for (const auto& str : listFiles) {
+                QPluginLoader loader(dir.absolutePath() + "/" + str);
+                // Загрузка плагина
+                QObject* pobj = loader.instance();
+                qDebug() << __FUNCTION__ << "\n    " << str << "\n    " << pobj;
+                if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
+                    parser->setupInterface(App::get());
+                    App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
+                }
+                if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser) {
+                    parser->setupInterface(App::get());
+                    App::shapeInterfaces().emplace(parser->type(), PIS { parser, pobj });
+                }
+            }
+        }
+
         QSettings settings;
         settings.beginGroup("MainWindow");
         QString locale(settings.value("locale").toString());

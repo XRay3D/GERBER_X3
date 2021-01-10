@@ -6,7 +6,7 @@
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
+* Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -29,6 +29,7 @@
 #include <QFile>
 #include <QPainter>
 #include <QTextStream>
+#include <QRegularExpression>
 
 #include "leakdetector.h"
 
@@ -492,7 +493,7 @@ void File::statFile()
         m_lines.push_back(formated({ g0(), z(0) })); // Z0 for visible in Candle
     } else {
         QString str(Settings::start()); //"G21 G17 G90"); //G17 XY plane
-        str.replace(QRegExp("S\\?"), formated({ speed(spindleSpeed()) }));
+        str.replace(QRegularExpression("S\\?"), formated({ speed(spindleSpeed()) }));
         m_lines.push_back(str);
         m_lines.push_back(formated({ g0(), z(App::project()->safeZ()) })); //HomeZ
     }
