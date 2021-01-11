@@ -24,20 +24,16 @@ class QVBoxLayout;
 class QDialogButtonBox;
 
 class ErrorDialog : public QDialog {
-    Q_OBJECT
-
+    //    Q_OBJECT
     QDialogButtonBox* buttonBox;
     QVBoxLayout* verticalLayout;
+    QWidget* lastWidget = nullptr;
+    TableView* table;
 
     void setupUi(QDialog* ErrorDialog); // setupUi
-
     void retranslateUi(QDialog* ErrorDialog); // retranslateUi
 
 public:
     explicit ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent = nullptr);
     ~ErrorDialog();
-
-private:
-    QWidget* lastWidget = nullptr;
-    TableView* table;
 };

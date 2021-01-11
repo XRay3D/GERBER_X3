@@ -1,10 +1,22 @@
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2021                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
 cmake_minimum_required(VERSION 3.14)
 
 project(GX3)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
@@ -19,7 +31,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "/std:c++latest")
+#    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "/std:c++latest")
 endif()
 
 
@@ -36,14 +48,10 @@ else()
     set(SUFFIX "${SUFFIX}_x32")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(SUFFIX "${SUFFIX}_d")
     message("${SUFFIX}")
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(SUFFIX "${SUFFIX}_d")
-    message("${SUFFIX}")
-endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
+endif()
 
 set(CMAKE_GX3_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin/plugins)

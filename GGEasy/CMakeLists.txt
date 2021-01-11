@@ -1,3 +1,16 @@
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2021                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
 cmake_minimum_required(VERSION 3.5)
 
 set(PROJECT_NAME "GGEasy")
@@ -38,14 +51,14 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     Core
     Gui
     LinguistTools
-    Widgets
     OpenGL
     PrintSupport
+    Widgets
     REQUIRED)
 
 set(TS_FILES
-    "${PROJECT_NAME}_en.ts"
-    "${PROJECT_NAME}_ru.ts"
+    "translations/${PROJECT_NAME}_en.ts"
+    "translations/${PROJECT_NAME}_ru.ts"
     )
 
 include_directories(${CMAKE_STATIC_LIBS_DIR})
@@ -124,12 +137,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::PrintSupport
+    Qt${QT_VERSION_MAJOR}::Widgets
     )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")

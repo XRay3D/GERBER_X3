@@ -188,7 +188,7 @@ void PocketOffsetForm::createFile()
     m_tpc->setGcp(gcp);
     m_tpc->addPaths(wPaths);
     m_tpc->addRawPaths(wRawPaths);
-    fileCount = gcp.tools.size(); //    ui->sbxToolQty->value();
+    fileCount = static_cast<int>(gcp.tools.size());
     createToolpath();
 }
 

@@ -1,3 +1,16 @@
+#/*******************************************************************************
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  01 February 2020                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2021                                          *
+#*                                                                              *
+#* License:                                                                     *
+#* Use, modification & distribution is subject to Boost Software License Ver 1. *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
+#*******************************************************************************/
 cmake_minimum_required(VERSION 3.14)
 
 project(shape LANGUAGES CXX)
@@ -15,8 +28,6 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 add_library(shape STATIC
     shape.cpp
     shape.h
-    shcreator.cpp
-    shcreator.h
     shhandler.cpp
     shhandler.h
     shheaders.h

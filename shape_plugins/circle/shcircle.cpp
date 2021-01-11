@@ -85,4 +85,49 @@ void Circle::setRadius(double radius)
     m_radius = radius;
     redraw();
 }
+////////////////////////////////////////////////////////////
+/// \brief PluginCircle::PluginCircle
+///
+PluginCircle::PluginCircle() { }
+
+PluginCircle::~PluginCircle() { }
+
+QObject* PluginCircle::getObject() { return this; }
+
+int PluginCircle::type() const { return static_cast<int>(GiType::ShapeC); }
+
+void PluginCircle::setupInterface(App* a) { app.set(a); }
+
+QJsonObject PluginCircle::info() const
+{
+    return QJsonObject {
+        { "Name", "Circle" },
+        { "Version", "1.0" },
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Circle" }
+    };
+}
+
+Shape* PluginCircle::createShape(const QPointF& point)
+{
+    return circle = new Circle(point, point + QPointF { 1, 1 });
+}
+
+bool PluginCircle::addShapePoint(const QPointF&)
+{
+    return false;
+}
+
+void PluginCircle::updateShape(const QPointF& point)
+{
+    if (circle)
+        circle->setPt(point);
+}
+
+void PluginCircle::finalizeShape()
+{
+    circle = nullptr;
+    emit actionUncheck();
+}
+
 }

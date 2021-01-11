@@ -15,35 +15,37 @@
 *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
-//#include "gi/bridgeitem.h"
-#include "mainwindow.h"
 #include "qdruler.h"
 #include "scene.h"
 #include "settings.h"
-//#include "shheaders.h"
+//#include "mainwindow.h"
+//#include "gi/bridgeitem.h"
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
+#include <QPropertyAnimation>
 #else
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
+
+#include <QDragEnterEvent>
+#include <QGridLayout>
+#include <QGuiApplication>
+#include <QMimeData>
 #include <QMouseEvent>
-#include <QSettings>
-#include <QTimer>
-#include <QTransform>
-#include <QtWidgets>
+#include <QPushButton>
+#include <QScreen>
+#include <QScrollBar>
 
 #include "leakdetector.h"
 
 constexpr double zoomFactor = 1.5;
-constexpr double zoomFactor2 = 1.7;
+constexpr double zoomFactorAnim = 1.7;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    if (App::m_app->m_graphicsView) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class GraphicsView more than 2 times!!!");
-        exit(1);
-    }
+    assert(!App::m_app->m_graphicsView); //      "You cannot create class GraphicsView more than 2 times!!!"
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
@@ -160,7 +162,7 @@ void GraphicsView::zoomIn()
         return;
 
     if (App::settings().guiSmoothScSh()) {
-        anim(this, "scale", getScale(), getScale() * zoomFactor2);
+        animate(this, "scale", getScale(), getScale() * zoomFactorAnim);
     } else {
         scale(zoomFactor, zoomFactor);
         updateRuler();
@@ -172,7 +174,7 @@ void GraphicsView::zoomOut()
     if (getScale() < 1.0)
         return;
     if (App::settings().guiSmoothScSh()) {
-        anim(this, "scale", getScale(), getScale() * (1.0 / zoomFactor2));
+        animate(this, "scale", getScale(), getScale() * (1.0 / zoomFactorAnim));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
         updateRuler();
@@ -190,7 +192,7 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders)
     //    if (r1 == r2)
     //        return;
     if (App::settings().guiSmoothScSh()) {
-        anim(this, "viewRect", getViewRect(), dstRect);
+        animate(this, "viewRect", getViewRect(), dstRect);
     } else {
         QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
         updateRuler();
@@ -264,7 +266,6 @@ QRectF GraphicsView::getViewRect()
 
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
-    constexpr int scbarScale = 3;
     const auto delta = event->angleDelta().y();
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
@@ -272,6 +273,13 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
 #else
     const auto pos = event->position().toPoint();
 #endif
+
+    static auto sbUpdate = [&delta, this, scale = 3](QScrollBar* sb) { // Warning if create more GraphicsView`s!!
+        if (App::settings().guiSmoothScSh())
+            animate(sb, "value", sb->value(), sb->value() - sb->pageStep() / (delta > 0 ? +scale : -scale));
+        else
+            sb->setValue(sb->value() - delta);
+    };
 
     switch (event->modifiers()) {
     case Qt::ControlModifier:
@@ -285,24 +293,12 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
         }
         break;
     case Qt::ShiftModifier:
-        if (!event->angleDelta().x()) {
-            auto scrollBar = QAbstractScrollArea::horizontalScrollBar();
-            if (App::settings().guiSmoothScSh()) {
-                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
-            } else {
-                scrollBar->setValue(scrollBar->value() - delta);
-            }
-        }
+        if (!event->angleDelta().x())
+            sbUpdate(QAbstractScrollArea::horizontalScrollBar());
         break;
     case Qt::NoModifier:
-        if (!event->angleDelta().x()) {
-            auto scrollBar = QAbstractScrollArea::verticalScrollBar();
-            if (App::settings().guiSmoothScSh()) {
-                anim(scrollBar, "value", scrollBar->value(), scrollBar->value() - scrollBar->pageStep() / (delta > 0 ? scbarScale : -scbarScale));
-            } else {
-                scrollBar->setValue(scrollBar->value() - delta);
-            }
-        }
+        if (!event->angleDelta().x())
+            sbUpdate(QAbstractScrollArea::verticalScrollBar());
         break;
     default:
         //QGraphicsView::wheelEvent(event);
@@ -380,8 +376,9 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         setInteractive(false);
         //Ruler
         m_scene->setDrawRuller(true);
-        m_scene->setCross2(mappedPos(event));
-        //        Shapes::Constructor::finalizeShape();
+        const QPointF point(mappedPos(event));
+        m_scene->setCross2(point);
+        emit mouseClickR(point);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
@@ -406,10 +403,10 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         m_scene->setDrawRuller(false);
-        //        Shapes::Constructor::finalizeShape();
+        emit mouseClickR(mappedPos(event));
     } else {
         QGraphicsView::mouseReleaseEvent(event);
-        //        Shapes::Constructor::addShapePoint(mappedPos(event));
+        emit mouseClickL(mappedPos(event));
     }
 }
 
@@ -418,13 +415,12 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
-    mouseMove(point);
-    //    Shapes::Constructor::updateShape(point);
+    emit mouseMove(point);
     QGraphicsView::mouseMoveEvent(event);
 }
 
 template <class T>
-void GraphicsView::anim(QObject* target, const QByteArray& propertyName, T begin, T end)
+void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end)
 {
     auto* animation = new QPropertyAnimation(target, propertyName);
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {

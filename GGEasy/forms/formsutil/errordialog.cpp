@@ -73,10 +73,7 @@ public:
         , items(items)
     {
     }
-    virtual ~ErrorModel()
-    {
-        qDeleteAll(items);
-    }
+    virtual ~ErrorModel() { qDeleteAll(items); }
 
     // QAbstractItemModel interface
 public:
