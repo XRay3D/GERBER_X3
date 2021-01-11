@@ -245,13 +245,13 @@ typedef struct _jcv_diagram {
  * If rect is null, an automatic bounding box is calculated, with an extra padding of 10 units
  * If rect is non null, all points will be culled against the bounding rect, and all edges will be clipped against it.
  */
-extern void jcv_diagram_generate(int num_points, const jcv_point* points, const jcv_rect* rect, jcv_diagram* diagram);
+extern void jcv_diagram_generate(size_t num_points, const jcv_point* points, const jcv_rect* rect, jcv_diagram* diagram);
 
 typedef void* (*FJCVAllocFn)(void* userctx, size_t size);
 typedef void (*FJCVFreeFn)(void* userctx, void* p);
 
 // Same as above, but allows the client to use a custom allocator
-extern void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* diagram);
+extern void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* diagram);
 
 // Uses free (or the registered custom free function)
 extern void jcv_diagram_free(jcv_diagram* diagram);

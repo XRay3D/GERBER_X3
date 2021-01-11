@@ -33,6 +33,7 @@
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QPropertyAnimation>
 #include <QPushButton>
 #include <QScreen>
 #include <QScrollBar>

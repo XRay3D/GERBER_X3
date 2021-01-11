@@ -44,6 +44,7 @@ add_library(common STATIC
 
 target_link_libraries(common PRIVATE
     filetree
+    shape
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

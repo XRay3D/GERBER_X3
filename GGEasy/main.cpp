@@ -227,10 +227,11 @@ int main(int argc, char* argv[])
             listFiles = dir.entryList(QStringList(suffix), QDir::Files);
             // Проход по всем файлам
             for (const auto& str : listFiles) {
+                splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 // Загрузка плагина
                 QObject* pobj = loader.instance();
-                qDebug() << __FUNCTION__ << "\n    " << str << "\n    " << pobj;
+                //qDebug() << __FUNCTION__ << "\n    " << str << "\n    " << pobj;
                 if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
                     parser->setupInterface(App::get());
                     App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
@@ -255,8 +256,6 @@ int main(int argc, char* argv[])
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
     mainWin.setIconSize({ 24, 24 });
-    mainWin.show();
-    splash->finish(&mainWin);
 
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");
@@ -264,6 +263,9 @@ int main(int argc, char* argv[])
     for (const QString& fileName : parser.positionalArguments()) {
         mainWin.loadFile(fileName);
     }
+
+    mainWin.show();
+    splash->finish(&mainWin);
 
     return app.exec();
 }

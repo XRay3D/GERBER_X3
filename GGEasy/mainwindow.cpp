@@ -46,8 +46,8 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2)
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , recentFiles(this, "recentFileList")
-    , recentProjects(this, "recentProjectsList")
+    , recentFiles(this, "recentFiles")
+    , recentProjects(this, "recentProjects")
     , m_project(new Project(this))
 {
     App::m_app->m_mainWindow = this;
@@ -230,7 +230,7 @@ void MainWindow::createActions()
     // toolpathToolBar
     createActionsToolPath();
     // grafica
-    createActionsGraphics();
+    createActionsShape();
     // helpMenu
     createActionsHelp();
 
@@ -536,7 +536,7 @@ void MainWindow::createActionsToolPath()
         action_->setCheckable(true);
 }
 
-void MainWindow::createActionsGraphics()
+void MainWindow::createActionsShape()
 {
 
     QToolBar* tb = addToolBar(tr("Graphics Items"));
@@ -544,17 +544,10 @@ void MainWindow::createActionsGraphics()
     tb->setToolTip(tr("Graphics Items"));
     // tb->setEnabled(false);
     QAction* action = nullptr;
-    //    {
-    //        action = tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
-    //        action->setCheckable(true);
-    //        connect(action, &QAction::triggered, [action](bool checked) {
-    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeR) : 0, checked ? action : nullptr);
-    //        });
-    //    }
 
     for (auto& [type, pair] : App::shapeInterfaces()) {
         auto& [shInt, pobj] = pair;
-        action = tb->addAction(QIcon::fromTheme("draw-ellipse"), shInt->info().value("Name").toString());
+        action = tb->addAction(shInt->icon(), shInt->info().value("Name").toString());
         action->setCheckable(true);
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
@@ -563,31 +556,7 @@ void MainWindow::createActionsGraphics()
         });
     }
 
-    //    {
-    //        action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
-    //        action->setCheckable(true);
-    //        connect(action, &QAction::triggered, [action](bool checked) {
-    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeL) : 0, checked ? action : nullptr);
-    //        });
-    //    }
-    //    {
-    //        action = tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
-    //        action->setCheckable(true);
-    //        connect(action, &QAction::triggered, [action](bool checked) {
-    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeA) : 0, checked ? action : nullptr);
-    //        });
-    //    }
-    //    {
-    //        action = tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"));
-    //        action->setCheckable(true);
-    //        connect(action, &QAction::triggered, [action](bool checked) {
-    //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeT) : 0, checked ? action : nullptr);
-    //        });
-    //    }
-    //    // tb->addAction(QIcon::fromTheme("draw-line"), tr("line"), [this] {  ui->graphicsView->setPt(Line); });
-    //    // tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"), [this] {  ui->graphicsView->setPt(ArcPT); });
-    //    // tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"), [this] {  ui->graphicsView->setPt(Text); });
-    //    tb->addSeparator();
+    tb->addSeparator();
 
     //    auto ex = [](ClipType type) {
     //        QList<QGraphicsItem*> si = App::scene()->selectedItems();

@@ -15,7 +15,6 @@
 *******************************************************************************/
 #include "shpolyline.h"
 #include "scene.h"
-#include "shcreator.h"
 #include "shhandler.h"
 #include <QIcon>
 
@@ -80,7 +79,7 @@ void PolyLine::updateOtherHandlers(Handler* handler)
                 QLineF(handler->pos(), h1->pos()).center());
         }
         handler->setHType(Handler::Corner);
-    } else if (handler->hType() == Handler::Corner && !Constructor::item) {
+    } else if (handler->hType() == Handler::Corner /*&& !Constructor::item*/) {
         int idx = handlers.indexOf(handler);
         if (handler != handlers[1]) {
             if (handlers.size() > 4
@@ -182,6 +181,57 @@ QPointF PolyLine::centroidFast()
     signedArea *= 0.5;
     centroid /= (6.0 * signedArea);
     return centroid;
+}
+
+////////////////////////////////////////////////////////////
+/// \brief Plugin::Plugin
+///
+Plugin::Plugin() { }
+
+Plugin::~Plugin() { }
+
+QObject* Plugin::getObject() { return this; }
+
+int Plugin::type() const { return static_cast<int>(GiType::ShapeL); }
+
+void Plugin::setupInterface(App* a) { app.set(a); }
+
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Poly Line" },
+        { "Version", "1.0" },
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Poly Line" }
+    };
+}
+
+QIcon Plugin::icon() const { return QIcon::fromTheme("draw-line"); }
+
+Shape* Plugin::createShape(const QPointF& point)
+{
+    return shape = new PolyLine(point, point);
+}
+
+bool Plugin::addShapePoint(const QPointF& point)
+{
+    if (shape->closed())
+        return false;
+    else
+        shape->addPt(point);
+    return true;
+}
+
+void Plugin::updateShape(const QPointF& point)
+{
+    if (shape)
+        shape->setPt(point);
+}
+
+void Plugin::finalizeShape()
+{
+    shape = nullptr;
+    emit actionUncheck();
 }
 
 }

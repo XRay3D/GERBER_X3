@@ -117,7 +117,7 @@ private:
     void createActionsHelp();
     void createActionsZoom();
     void createActionsToolPath();
-    void createActionsGraphics();
+    void createActionsShape();
     // save GCode
     void saveGCodeFile(int id);
     void saveGCodeFiles();

@@ -45,23 +45,24 @@ private:
     double m_radius;
 };
 
-class PluginCircle : public QObject, public ShapePluginInterface {
+class Plugin : public QObject, public ShapePluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "circle.json")
     Q_INTERFACES(ShapePluginInterface)
 
-    Circle* circle = nullptr;
+    Circle* shape = nullptr;
 
 public:
-    PluginCircle();
-    virtual ~PluginCircle() override;
+    Plugin();
+    virtual ~Plugin() override;
 
     // ShapePluginInterface interface
 public:
     QObject* getObject() override;
     int type() const override;
     void setupInterface(App* a) override;
-    QJsonObject info() const;
+    QJsonObject info() const override;
+    QIcon icon() const override;
     Shapes::Shape* createShape(const QPointF& point) override;
     bool addShapePoint(const QPointF& value) override;
     void updateShape(const QPointF& value) override;

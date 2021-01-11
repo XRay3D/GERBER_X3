@@ -338,7 +338,7 @@ void Tool::errorMessageBox(QWidget* parent) const
     QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr());
 }
 
-uint Tool::hash() const
+size_t Tool::hash() const
 {
     if (m_hash)
         return m_hash;

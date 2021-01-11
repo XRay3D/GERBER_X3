@@ -75,7 +75,7 @@ void DrillModel::setCreate(bool create)
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
-int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return m_data.size(); }
+int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(m_data.size()); }
 
 int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 

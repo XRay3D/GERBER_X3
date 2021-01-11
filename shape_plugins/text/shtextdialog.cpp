@@ -42,19 +42,19 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
 
     {
         QFont font;
-        font.fromString(shapeText.first()->d.font);
+        font.fromString(shapeText.first()->data.font);
         ui->cbxFont->setCurrentFont(font);
         ui->plainTextEdit->setFont(font);
         ui->chbxBold->setChecked(font.bold());
         ui->chbxItalic->setChecked(font.italic());
     }
 
-    ui->cbxSide->setCurrentIndex(static_cast<int>(shapeText.first()->d.side));
-    ui->plainTextEdit->setPlainText(shapeText.first()->d.text);
-    ui->dsbxAngle->setValue(shapeText.first()->d.angle);
-    ui->dsbxHeight->setValue(shapeText.first()->d.height);
+    ui->cbxSide->setCurrentIndex(static_cast<int>(shapeText.first()->data.side));
+    ui->plainTextEdit->setPlainText(shapeText.first()->data.text);
+    ui->dsbxAngle->setValue(shapeText.first()->data.angle);
+    ui->dsbxHeight->setValue(shapeText.first()->data.height);
 
-    switch (shapeText.first()->d.handleAlign) {
+    switch (shapeText.first()->data.handleAlign) {
     case Text::BotCenter:
         ui->rb_bc->setChecked(true);
         break;
@@ -110,7 +110,7 @@ void ShTextDialog::updateText()
 {
     QString text_(ui->plainTextEdit->toPlainText());
     for (auto text : shapeText) {
-        text->d.text = text_;
+        text->data.text = text_;
         text->redraw();
     }
 }
@@ -123,7 +123,7 @@ void ShTextDialog::updateFont()
     ui->plainTextEdit->setFont(font);
     QString strFont(font.toString());
     for (auto text : shapeText) {
-        text->d.font = strFont;
+        text->data.font = strFont;
         text->redraw();
     }
 }
@@ -131,7 +131,7 @@ void ShTextDialog::updateFont()
 void ShTextDialog::updateAngle()
 {
     for (auto text : shapeText) {
-        text->d.angle = ui->dsbxAngle->value();
+        text->data.angle = ui->dsbxAngle->value();
         text->redraw();
     }
 }
@@ -139,7 +139,7 @@ void ShTextDialog::updateAngle()
 void ShTextDialog::updateHeight()
 {
     for (auto text : shapeText) {
-        text->d.height = ui->dsbxHeight->value();
+        text->data.height = ui->dsbxHeight->value();
         text->redraw();
     }
 }
@@ -167,7 +167,7 @@ void ShTextDialog::updateCenterAlign()
         handleAlign = Text::TopRight;
     }
     for (auto text : shapeText) {
-        text->d.handleAlign = handleAlign;
+        text->data.handleAlign = handleAlign;
         text->redraw();
     }
 }
@@ -175,7 +175,7 @@ void ShTextDialog::updateCenterAlign()
 void ShTextDialog::updateSide()
 {
     for (auto text : shapeText) {
-        text->d.side = static_cast<Side>(ui->cbxSide->currentIndex());
+        text->data.side = static_cast<Side>(ui->cbxSide->currentIndex());
         text->redraw();
     }
 }

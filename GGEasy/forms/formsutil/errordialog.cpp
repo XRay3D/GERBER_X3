@@ -77,7 +77,7 @@ public:
 
     // QAbstractItemModel interface
 public:
-    int rowCount(const QModelIndex&) const override { return items.size(); }
+    int rowCount(const QModelIndex&) const override { return static_cast<int>(items.size()); }
     int columnCount(const QModelIndex&) const override { return 2; }
     QVariant data(const QModelIndex& index, int role) const override
     {

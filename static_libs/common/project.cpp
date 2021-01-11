@@ -17,10 +17,10 @@
 
 #include "filemodel.h"
 #include "interfaces/file.h"
+#include "interfaces/shapepluginin.h"
+#include "shape.h"
 
-#ifdef GBR_
-#include "shheaders.h"
-#endif
+#include <scene.h>
 
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -45,35 +45,24 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, [[maybe_unused]] const std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& sh)
 {
-    //    stream << *sh;
+    qDebug(__FUNCTION__);
+    stream << *sh;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, [[maybe_unused]] std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sh)
 {
+    qDebug(__FUNCTION__);
+    return stream;
     int type;
     stream >> type;
-    //    switch (static_cast<GiType>(type)) {
-    //    case GiType::ShapeC:
-    //        sh = std::shared_ptr<Shapes::Shape>>(new Shapes::Circle());
-    //        break;
-    //    case GiType::ShapeR:
-    //        sh = std::shared_ptr<Shapes::Shape>>(new Shapes::Rectangle());
-    //        break;
-    //    case GiType::ShapeL:
-    //        sh = std::shared_ptr<Shapes::Shape>>(new Shapes::PolyLine());
-    //        break;
-    //    case GiType::ShapeA:
-    //        sh = std::shared_ptr<Shapes::Shape>>(new Shapes::Arc());
-    //        break;
-    //    case GiType::ShapeT:
-    //        sh = std::shared_ptr<Shapes::Shape>>(new Shapes::Text());
-    //        break;
-    //    default:;
-    //    }
-    //    stream >> *sh;
+    if (App::shapeInterfaces().contains(type)) {
+        sh.reset(App::shapeInterface(type)->createShape({}));
+        stream >> *sh;
+        App::scene()->addItem(sh.get());
+    }
     return stream;
 }
 
@@ -332,7 +321,8 @@ Shapes::Shape* Project::shape(int id)
 
 int Project::addFile(FileInterface* file)
 {
-    m_isPinsPlaced = false; //QMutexLocker locker(&m_mutex);
+    //QMutexLocker locker(&m_mutex);
+    m_isPinsPlaced = false;
     file->createGi();
     file->setVisible(true);
     const int id = contains(file->name());
@@ -350,17 +340,20 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape([[maybe_unused]] Shapes::Shape* sh)
+int Project::addShape(Shapes::Shape* sh)
 {
-    return -1;
-    //    m_isPinsPlaced = false;
-    //    //QMutexLocker locker(&m_mutex);
-    //    sh->m_id = m_shapes.size() ? m_shapes.lastKey() + 1 : 0;
-    //    sh->setToolTip(QString::number(sh->m_id));
-    //    m_shapes.insert(sh->m_id, std::shared_ptr<Shapes::Shape>>(sh));
-    //    App::fileModel()->addShape(sh);
-    //    setChanged();
-    //    return sh->m_id;
+    //QMutexLocker locker(&m_mutex);
+    qDebug(__FUNCTION__);
+    m_isPinsPlaced = false;
+    const int newId = m_shapes.size()
+        ? (--m_shapes.end())->first + 1
+        : 0;
+    sh->m_id = newId;
+    sh->setToolTip(QString::number(newId));
+    m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(sh));
+    //App::fileModel()->addShape(sh);
+    setChanged();
+    return newId;
 }
 
 bool Project::contains(FileInterface* file)

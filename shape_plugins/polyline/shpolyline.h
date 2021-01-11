@@ -14,6 +14,9 @@
 #pragma once
 
 #include "shape.h"
+#include <QJsonObject>
+#include <graphicsitem.h>
+#include <interfaces/shapepluginin.h>
 
 namespace Shapes {
 class PolyLine final : public Shape {
@@ -40,5 +43,32 @@ protected:
 private:
     QPointF centroid();
     QPointF centroidFast(); //??????
+};
+
+class Plugin : public QObject, public ShapePluginInterface {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "polyline.json")
+    Q_INTERFACES(ShapePluginInterface)
+
+    PolyLine* shape = nullptr;
+
+public:
+    Plugin();
+    virtual ~Plugin() override;
+
+    // ShapePluginInterface interface
+public:
+    QObject* getObject() override;
+    int type() const override;
+    void setupInterface(App* a) override;
+    QJsonObject info() const override;
+    QIcon icon() const override;
+    Shapes::Shape* createShape(const QPointF& point) override;
+    bool addShapePoint(const QPointF& value) override;
+    void updateShape(const QPointF& value) override;
+    void finalizeShape() override;
+
+signals:
+    void actionUncheck(bool = false) override;
 };
 }

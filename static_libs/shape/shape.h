@@ -12,6 +12,7 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
 #include "graphicsitem.h"
 #include <QModelIndex>
 

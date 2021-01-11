@@ -103,7 +103,7 @@ public:
     QIcon icon() const;
     QString errorStr() const;
     void errorMessageBox(QWidget* parent = nullptr) const;
-    uint hash() const;
+    size_t hash() const;
 
     QPainterPath path(const QPointF& pt = {}) const;
     void updatePath(double depth = 0.0);

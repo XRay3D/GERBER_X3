@@ -133,7 +133,7 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 // read from project
 QDataStream& operator>>(QDataStream& stream, Shape& shape)
 {
-    App::scene()->addItem(&shape);
+//    App::scene()->addItem(&shape);
     bool visible;
     stream >> shape.m_id;
     stream >> visible;
