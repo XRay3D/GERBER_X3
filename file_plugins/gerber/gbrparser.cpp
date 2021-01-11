@@ -72,73 +72,65 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         if (file->lines().isEmpty())
             emit interface->fileError("", file->shortName() + "\n" + "Incorrect File!");
 
-        emit interface->fileProgress(file->shortName(), file->lines().size(), 0);
+        emit interface->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
         qDebug() << __FUNCTION__ << file->name();
 
         m_lineNum = 0;
 
         for (const QString& gerberLine : file->lines()) {
-
             m_currentGerbLine = gerberLine;
             ++m_lineNum;
             if (!(m_lineNum % 1000))
                 emit interface->fileProgress(file->shortName(), 0, m_lineNum);
-
-            if (parseGCode(gerberLine))
-                continue;
-
-            if (parseDCode(gerberLine))
-                continue;
-
-            if (parseStepRepeat(gerberLine))
-                continue;
-
-            if (parseApertureBlock(gerberLine))
-                continue;
-
-            if (parseAttributes(gerberLine))
-                continue;
-
-            if (parseImagePolarity(gerberLine))
-                continue;
-
-            if (parseApertureMacros(gerberLine))
-                continue;
-
-            // Aperture definitions %ADD...
-            if (parseAperture(gerberLine))
-                continue;
-
-            // Polarity change
-            // Example: %LPD*% or %LPC*%
-            // If polarity changes, creates geometry from current
-            // buffer, then adds or subtracts accordingly.
-            if (parseTransformations(gerberLine))
-                continue;
-
-            // Number format
-            // Example: %FSLAX24Y24*%
-            // TODO: This is ignoring most of the format-> Implement the rest.
-            if (parseFormat(gerberLine))
-                continue;
-
-            // Mode (IN/MM)
-            // Example: %MOIN*%
-            if (parseUnitMode(gerberLine))
-                continue;
-
-            if (parseEndOfFile(gerberLine))
-                continue;
-
-            // G01 - Linear interpolation plus flashes
-            // Operation code (D0x) missing is deprecated... oh well I will support it.
-            if (parseLineInterpolation(gerberLine))
-                continue;
-
-            // G02/G03 - Circular interpolation
-            // 2-clockwise, 3-counterclockwise
-            if (parseCircularInterpolation(gerberLine))
-                continue;
+            auto dummy = [](const QString& gLine) -> bool {
+                static const QRegularExpression regexp(QStringLiteral("^%(.{2})(.+)\\*%$"));
+                if (auto match(regexp.match(gLine)); match.hasMatch()) {
+                    qDebug() << "dummy" << gLine << match.capturedTexts();
+                    return true;
+                }
+                return false;
+            };
+            switch (gerberLine.front().toLatin1()) {
+            case '%':
+                if (parseAperture(gerberLine))
+                    continue;
+                if (parseApertureBlock(gerberLine))
+                    continue;
+                if (parseApertureMacros(gerberLine))
+                    continue;
+                if (parseAttributes(gerberLine))
+                    continue;
+                if (parseFormat(gerberLine))
+                    continue;
+                if (parseStepRepeat(gerberLine))
+                    continue;
+                if (parseTransformations(gerberLine))
+                    continue;
+                if (parseUnitMode(gerberLine))
+                    continue;
+                if (parseImagePolarity(gerberLine))
+                    continue;
+                if (parseLoadName(gerberLine))
+                    continue;
+                if (dummy(gerberLine))
+                    continue;
+            case 'D':
+            case 'G':
+                if (parseDCode(gerberLine))
+                    continue;
+                if (parseGCode(gerberLine))
+                    continue;
+            case 'M':
+                if (parseEndOfFile(gerberLine))
+                    continue;
+            case 'X':
+            case 'Y':
+            default:
+                if (parseLineInterpolation(gerberLine))
+                    continue;
+                if (parseCircularInterpolation(gerberLine))
+                    continue;
+            }
 
             // Line didn`t match any pattern. Warn user.
             qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
@@ -166,27 +158,22 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             emit interface->fileReady(file);
             emit interface->fileProgress(file->shortName(), 1, 1);
         }
-        m_currentGerbLine.clear();
-        m_apertureMacro.clear();
-        m_path.clear();
+        reset(""); // clear parser data
     } catch (const QString& errStr) {
         qWarning() << "exeption Q:" << errStr;
         emit interface->fileError("", file->shortName() + "\n" + errStr);
-        file->m_graphicObjects.clear();
         emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch (const char* errStr) {
         qWarning() << "exeption Q:" << errStr;
         emit interface->fileError("", file->shortName() + "\n" + errStr);
-        file->m_graphicObjects.clear();
         emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch (...) {
-        //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
-        //        qWarning() << "exeption S:" << errStr;
-        //        emit interface->  fileError("", m_file->shortName() + "\n" + errStr);
-        //        file->clear();
-        //        emit interface->  fileProgress(m_file->shortName(), 1, 1);
+        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
+        qWarning() << "exeption S:" << errStr;
+        emit interface->fileError("", file->shortName() + "\n" + errStr);
+        emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
     mutex.unlock();
@@ -427,8 +414,12 @@ void Parser::addPath()
 void Parser::addFlash()
 {
     m_state.setType(Aperture);
-    if (!file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].data() == nullptr)
-        throw GbrObj::tr("Aperture %1 not found!").arg(m_state.aperture());
+    if (!file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].data() == nullptr) {
+        QString str;
+        for (auto [ap, apPtr] : file->m_apertures)
+            str += QString::number(ap) + ", ";
+        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
+    }
 
     AbstractAperture* ap = file->m_apertures[m_state.aperture()].data();
     Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
@@ -465,20 +456,20 @@ void Parser::addFlash()
 
 void Parser::reset(const QString& fileName)
 {
-    m_currentGerbLine.clear();
-    m_apertureMacro.clear();
-    m_path.clear();
-    file = new File(fileName);
-    m_state = State(file->format());
+    if (!fileName.isEmpty())
+        file = new File(fileName);
+    aperFunctionMap.clear();
+    attAper = {};
+    components.clear();
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ WorkingType::Normal, 0 });
-    m_stepRepeat.reset();
+    m_apertureMacro.clear();
+    m_currentGerbLine.clear();
     m_goId = 0;
-    ///////////////
-    components.clear();
+    m_path.clear();
+    m_state = State(file->format());
+    m_stepRepeat.reset();
     refDes.clear();
-    attAper = {};
-    aperFunctionMap.clear();
 }
 
 void Parser::resetStep()
@@ -546,8 +537,12 @@ Path Parser::arc(Point64 p1, Point64 p2, Point64 center)
 Paths Parser::createLine()
 {
     Paths solution;
-    if (!file->m_apertures.contains(m_state.aperture()))
-        throw GbrObj::tr("Aperture %1 not found!").arg(m_state.aperture());
+    if (!file->m_apertures.contains(m_state.aperture())) {
+        QString str;
+        for (auto [ap, apPtr] : file->m_apertures)
+            str += QString::number(ap) + ", ";
+        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
+    }
 
     if (file->m_apertures[m_state.aperture()]->type() == Rectangle) {
         ApRectangle* rect = static_cast<ApRectangle*>(file->m_apertures[m_state.aperture()].data());
@@ -588,8 +583,6 @@ Paths Parser::createPolygon()
 
 bool Parser::parseAperture(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
@@ -654,8 +647,6 @@ bool Parser::parseAperture(const QString& gLine)
 
 bool Parser::parseApertureBlock(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^%ABD(\\d+)\\*%$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         m_abSrIdStack.push({ WorkingType::ApertureBlock, match.captured(1).toInt() });
@@ -673,8 +664,10 @@ bool Parser::parseApertureBlock(const QString& gLine)
 
 bool Parser::parseTransformations(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
+    // Polarity change
+    // Example: %LPD*% or %LPC*%
+    // If polarity changes, creates geometry from current
+    // buffer, then adds or subtracts accordingly.
     enum {
         trPolarity,
         trMirror,
@@ -716,8 +709,6 @@ bool Parser::parseTransformations(const QString& gLine)
 
 bool Parser::parseStepRepeat(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     /*
      *     <SR open>      = %SRX<Repeats>Y<Repeats>I<Step>J<Step>*%
      *     <SR close>     = %SR*%
@@ -740,14 +731,14 @@ bool Parser::parseStepRepeat(const QString& gLine)
             m_abSrIdStack.push({ WorkingType::StepRepeat, 0 });
         return true;
     }
-    {
-        static const QRegularExpression regexp("^%SR\\*%$");
-        if (regexp.match(gLine).hasMatch()) {
-            if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
-                closeStepRepeat();
-            return true;
-        }
+
+    static const QRegularExpression regexp2("^%SR\\*%$");
+    if (regexp2.match(gLine).hasMatch()) {
+        if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
+            closeStepRepeat();
+        return true;
     }
+
     return false;
 }
 
@@ -777,8 +768,6 @@ ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->m_aperture
 
 bool Parser::parseApertureMacros(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^%AM([^\\*]+)\\*([^%]+)?(%)?$"));
     // Start macro if(match, else not an AM, carry on.
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
@@ -792,8 +781,6 @@ bool Parser::parseApertureMacros(const QString& gLine)
 
 bool Parser::parseAttributes(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^%(T[FAOD])(\\.?)(.*)\\*%$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         switch (Attr::Command::value(match.captured(1))) {
@@ -890,6 +877,10 @@ bool Parser::parseAttributes(const QString& gLine)
 
 bool Parser::parseCircularInterpolation(const QString& gLine)
 {
+    // G02/G03 - Circular interpolation
+    // 2-clockwise, 3-counterclockwise
+    if (!(gLine.startsWith('G') || gLine.startsWith('X') || gLine.startsWith('Y')))
+        return false;
     static const QRegularExpression regexp(QStringLiteral("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$"));
 
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
@@ -1040,8 +1031,9 @@ bool Parser::parseEndOfFile(const QString& gLine)
 
 bool Parser::parseFormat(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
+    // Number format
+    // Example: %FSLAX24Y24*%
+    // TODO: This is ignoring most of the format-> Implement the rest.
     static const QVector<QChar> zeroOmissionModeList { 'L', 'T' };
     static const QVector<QChar> coordinateValuesNotationList { 'A', 'I' };
     static const QRegularExpression regexp(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
@@ -1094,8 +1086,6 @@ bool Parser::parseFormat(const QString& gLine)
 
 bool Parser::parseGCode(const QString& gLine)
 {
-    if (!gLine.startsWith('G'))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^G([0]?[0-9]{2})\\*$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         switch (match.captured(1).toInt()) {
@@ -1168,8 +1158,6 @@ bool Parser::parseGCode(const QString& gLine)
 
 bool Parser::parseImagePolarity(const QString& gLine)
 {
-    if (!gLine.startsWith("%"))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^%IP(POS|NEG)\\*%$"));
     static const QVector<QString> slImagePolarity { "POS", "NEG" };
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
@@ -1188,12 +1176,11 @@ bool Parser::parseImagePolarity(const QString& gLine)
 
 bool Parser::parseLineInterpolation(const QString& gLine)
 {
+    // G01 - Linear interpolation plus flashes
+    // Operation code (D0x) missing is deprecated... oh well I will support it.
     // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
     static const QRegularExpression regexp(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
-        //        qDebug() << __FUNCTION__;
-        //        qDebug() << '\t' << gLine;
-        //        qDebug() << '\t' << match.capturedTexts();
         parsePosition(gLine);
 
         Operation dcode = m_state.dCode();
@@ -1220,10 +1207,18 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     return false;
 }
 
+bool Parser::parseLoadName(const QString& gLine)
+{
+    static const QRegularExpression regexp(QStringLiteral("^%LN(.+)\\*%$"));
+    if (auto match(regexp.match(gLine)); match.hasMatch()) {
+        //qDebug() << __FUNCTION__ << gLine << match.capturedTexts();
+        return true;
+    }
+    return false;
+}
+
 bool Parser::parseDCode(const QString& gLine)
 {
-    if (!gLine.startsWith('D'))
-        return false;
     static const QRegularExpression regexp(QStringLiteral("^D0?([123])\\*$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         switch (match.captured(1).toInt()) {
@@ -1258,8 +1253,8 @@ bool Parser::parseDCode(const QString& gLine)
 
 bool Parser::parseUnitMode(const QString& gLine)
 {
-    if (!gLine.startsWith('%'))
-        return false;
+    // Mode (IN/MM)
+    // Example: %MOIN*%
     static const QRegularExpression regexp(QStringLiteral("^%MO(IN|MM)\\*%$"));
     static const QVector<QString> slUnitType { "IN", "MM" };
     if (auto match(regexp.match(gLine)); match.hasMatch()) {

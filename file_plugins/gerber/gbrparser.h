@@ -93,6 +93,7 @@ protected:
     bool parseGCode(const QString& gLine);
     bool parseImagePolarity(const QString& gLine);
     bool parseLineInterpolation(const QString& gLine);
+    bool parseLoadName(const QString& gLine);
     bool parseStepRepeat(const QString& gLine);
     bool parseTransformations(const QString& gLine);
     bool parseUnitMode(const QString& gLine);
@@ -102,5 +103,7 @@ protected:
 
     File* file = nullptr;
 };
+
+
 
 }

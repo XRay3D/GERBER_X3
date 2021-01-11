@@ -282,7 +282,7 @@ GCode::File* Creator::file() const { return m_file; }
 
 std::pair<int, int> Creator::getProgress()
 {
-    return { getMax(), getCurrent() };
+    return { static_cast<int>(getMax()), static_cast<int>(getCurrent()) };
 }
 
 void Creator::stacking(Paths& paths)

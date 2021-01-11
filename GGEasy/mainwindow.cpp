@@ -23,6 +23,7 @@
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
 #include "forms/voronoiform.h"
+#include "interfaces/shapepluginin.h"
 #include "plugindialog.h"
 #include "point.h"
 #include "settingsdialog.h"
@@ -34,8 +35,6 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
-
-#include "shcreator.h" //////////////
 
 #include "leakdetector.h"
 
@@ -95,6 +94,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
 
+    // Shapes::Constructor
+    connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePluginInterface::updateShape_);
+    connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePluginInterface::finalizeShape_);
+    connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePluginInterface::addShapePoint_);
+
     ui->treeView->setModel(new FileModel(ui->treeView));
 
     connect(ui->treeView, &FileTreeView::saveGCodeFile, this, &MainWindow::saveGCodeFile);
@@ -126,12 +130,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (0 || qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
         if (1) {
-            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
+            //            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
+            QDir dir("C:/Свалка/SSR_V4");
             QStringList listFiles;
             if (dir.exists())
                 listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
@@ -139,7 +144,6 @@ MainWindow::MainWindow(QWidget* parent)
                 str = dir.path() + '/' + str;
                 qDebug() << __FUNCTION__ << str;
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
-                break;
             }
         }
 
@@ -159,7 +163,7 @@ MainWindow::MainWindow(QWidget* parent)
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
-        //        QTimer::singleShot(++i * 500, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-Edge_Cuts.gbr"); });
+        //        QTimer::singleShot(++i * 500, [this] { loadFile("P:/ELEMER/SSR/SSR_V4/Board_outline.gbr"); });
         //        QTimer::singleShot(++i * 500, [this] { selectAll(); });
         //        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Thermal]->triggered(); });
         //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -547,16 +551,18 @@ void MainWindow::createActionsGraphics()
     //            Shapes::Constructor::setType(checked ? static_cast<int>(GiType::ShapeR) : 0, checked ? action : nullptr);
     //        });
     //    }
-    {
-        action = tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
+
+    for (auto& [type, pair] : App::shapeInterfaces()) {
+        auto& [shInt, pobj] = pair;
+        action = tb->addAction(QIcon::fromTheme("draw-ellipse"), shInt->info().value("Name").toString());
         action->setCheckable(true);
-        connect(action, &QAction::triggered, [action](bool checked) {
-            if (checked)
-                Shapes::Constructor::setType(static_cast<int>(GiType::ShapeC), action);
-            else
-                Shapes::Constructor::setType(0, nullptr);
+        connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
+        connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
+            checked ? ShapePluginInterface::setShapePI(shInt)
+                    : ShapePluginInterface::finalizeShape_();
         });
     }
+
     //    {
     //        action = tb->addAction(QIcon::fromTheme("draw-line"), tr("Line"));
     //        action->setCheckable(true);

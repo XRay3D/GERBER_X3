@@ -53,26 +53,21 @@ class PluginCircle : public QObject, public ShapePluginInterface {
     Circle* circle = nullptr;
 
 public:
-    PluginCircle() { }
-    virtual ~PluginCircle() override { }
+    PluginCircle();
+    virtual ~PluginCircle() override;
 
     // ShapePluginInterface interface
 public:
-    QObject* getObject() override { return this; }
-    int type() const override { return static_cast<int>(GiType::ShapeC); }
-    void setupInterface(App* a) override { app.set(a); }
-    QJsonObject info() const
-    {
-        return QJsonObject {
-            { "Name", "Circle" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Circle" }
-        };
-    }
-    Shapes::Shape* createShape(const QPointF& point) override { return circle = new Circle(point, point + QPointF { 1, 1 }); }
-    bool addShapePoint(const QPointF& value) override { return false; }
-    void updateShape(const QPointF& value) override { }
-    void finalizeShape() override { circle = nullptr; }
+    QObject* getObject() override;
+    int type() const override;
+    void setupInterface(App* a) override;
+    QJsonObject info() const;
+    Shapes::Shape* createShape(const QPointF& point) override;
+    bool addShapePoint(const QPointF& value) override;
+    void updateShape(const QPointF& value) override;
+    void finalizeShape() override;
+
+signals:
+    void actionUncheck(bool = false) override;
 };
 }

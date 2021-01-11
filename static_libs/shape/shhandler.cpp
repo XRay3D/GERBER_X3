@@ -14,11 +14,11 @@
 *                                                                              *
 *******************************************************************************/
 #include "shhandler.h"
+#include "app.h"
 #include "doublespinbox.h"
 #include "graphicsview.h"
 #include "scene.h"
-#include "app.h"
-#include "shcreator.h"
+
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -37,9 +37,9 @@ void drawPos(QPainter* painter, const QPointF& pt1)
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  X = %1 in\n"
-                                                            "  Y = %2 in\n"
-                                                          : "  X = %1 mm\n"
-                                                            "  Y = %2 mm\n")
+                                                          "  Y = %2 in\n"
+                                                        : "  X = %1 mm\n"
+                                                          "  Y = %2 mm\n")
                              .arg(pt1.x() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(pt1.y() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
 
@@ -97,7 +97,11 @@ Handler::Handler(Shape* shape, HType type)
     handlers.append(this);
 }
 
-Handler::~Handler() { handlers.removeOne(this); }
+Handler::~Handler()
+{
+    if (handlers.contains(this))
+        handlers.removeOne(this);
+}
 
 QRectF Handler::boundingRect() const { return rect(); }
 
@@ -131,7 +135,7 @@ void Handler::setPos(const QPointF& pos)
     if (m_hType == Center) {
         for (int i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.first());
-    } else if (!Constructor::item) { // прилипание
+    } else /*if (!Constructor::item) */{ // прилипание
         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
         const bool fl = shape->type() == int(GiType::ShapeL) && shape->handlers.size() > 3;
         for (Handler* h : handlers) {

@@ -39,7 +39,7 @@ public:
     double scaleFactor();
     QPointF mappedPos(QMouseEvent* event) const;
 
-    void setScale(double s)noexcept;
+    void setScale(double s) noexcept;
     double getScale() noexcept;
 
     void setOpenGL(bool useOpenGL);
@@ -50,6 +50,8 @@ public:
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
+    void mouseClickR(const QPointF&);
+    void mouseClickL(const QPointF&);
 
 private:
     QDRuler* hRuler;
@@ -58,7 +60,7 @@ private:
 
     void updateRuler();
     template <class T>
-    void anim(QObject* target, const QByteArray& propertyName, T begin, T end);
+    void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
 
     // QWidget interface
 protected:

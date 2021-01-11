@@ -19,9 +19,40 @@
 #include <app.h>
 
 class ShapePluginInterface {
+    static inline ShapePluginInterface* sp = nullptr;
+    static inline QGraphicsItem* item;
+
 public:
-    explicit ShapePluginInterface() { }
-    virtual ~ShapePluginInterface() { }
+    static void addShapePoint_(const QPointF& point)
+    {
+        if (sp) {
+            qDebug() << __FUNCTION__ << sp << sp;
+            if (!item)
+                item = sp->createShape(point);
+            else if (!sp->addShapePoint(point))
+                finalizeShape_();
+        }
+    }
+    static void updateShape_(const QPointF& point)
+    {
+        if (sp && item)
+            sp->updateShape(point);
+    }
+    static void finalizeShape_()
+    {
+        qDebug() << __FUNCTION__;
+        if (item)
+            item->setSelected(true);
+        if (sp)
+            sp->finalizeShape();
+        item = nullptr;
+        sp = nullptr;
+    }
+
+    static void setShapePI(ShapePluginInterface* sp_) { sp = sp_; }
+
+    explicit ShapePluginInterface() = default;
+    virtual ~ShapePluginInterface() = default;
     virtual QObject* getObject() = 0;
     virtual int type() const = 0;
     virtual Shapes::Shape* createShape(const QPointF& point) = 0;
@@ -51,7 +82,8 @@ public:
     virtual void setupInterface(App* a) = 0;
     //    virtual void updateFileModel([[maybe_unused]] FileInterface* file) {};
 
-    //    // signals:
+signals:
+    virtual void actionUncheck(bool = false) = 0;
     //    virtual void fileError(const QString& fileName, const QString& error) = 0;
     //    virtual void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning) {};
     //    virtual void fileProgress(const QString& fileName, int max, int value) = 0;
