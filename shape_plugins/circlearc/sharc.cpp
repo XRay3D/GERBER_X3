@@ -150,4 +150,56 @@ void Arc::setRadius(double radius)
     m_radius = radius;
     redraw();
 }
+
+////////////////////////////////////////////////////////////
+/// \brief Plugin::Plugin
+///
+Plugin::Plugin() { }
+
+Plugin::~Plugin() { }
+
+QObject* Plugin::getObject() { return this; }
+
+int Plugin::type() const { return static_cast<int>(GiType::ShapeA); }
+
+void Plugin::setupInterface(App* a) { app.set(a); }
+
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Circle Arc" },
+        { "Version", "1.0" },
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Circle Arc" }
+    };
+}
+
+QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
+
+Shape* Plugin::createShape(const QPointF& point)
+{
+    return shape = new Arc(point, point, point);
+}
+
+bool Plugin::addShapePoint(const QPointF&)
+{
+    return ctr++ ? ctr = 0, false : true;
+}
+
+void Plugin::updateShape(const QPointF& point)
+{
+    if (shape) {
+        if (!ctr)
+            shape->setPt(point);
+        else
+            shape->setPt2(point);
+    }
+}
+
+void Plugin::finalizeShape()
+{
+    shape = nullptr;
+    emit actionUncheck();
+}
+
 }

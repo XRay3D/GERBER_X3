@@ -27,7 +27,7 @@
 namespace Shapes {
 
 Text::Text(QPointF pt1)
-    : d(d_)
+    : data(lastUsed)
     , fileName(qApp->applicationDirPath() + "/XrSoft/Text.dat")
 {
     m_paths.resize(1);
@@ -37,11 +37,11 @@ Text::Text(QPointF pt1)
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
-        in >> d_;
+        in >> lastUsed;
     } else {
         qWarning("Couldn't open Text.dat file.");
     }
-    d = d_;
+    data = lastUsed;
     redraw();
 
     App::scene()->addItem(this);
@@ -52,19 +52,19 @@ void Text::redraw()
     QPainterPath painterPath;
 
     QFont font;
-    font.fromString(d.font);
+    font.fromString(data.font);
     font.setPixelSize(1000);
 
-    painterPath.addText(QPointF(), font, d.text);
+    painterPath.addText(QPointF(), font, data.text);
     auto bRect = painterPath.boundingRect();
 
     QFontMetrics fm(font);
     const auto capHeight = fm.capHeight();
-    const auto scale = d.height / capHeight;
+    const auto scale = data.height / capHeight;
 
     QPointF handlePt;
 
-    switch (d.handleAlign) {
+    switch (data.handleAlign) {
     case BotCenter:
         handlePt -= QPointF(bRect.width() * 0.5, 0);
         break;
@@ -101,7 +101,7 @@ void Text::redraw()
 #endif
     matrix.translate(-bRect.left() * scale, 0);
     matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
-    if (d.side == Bottom) {
+    if (data.side == Bottom) {
         matrix.translate((bRect.right() + bRect.left()) * scale, 0);
         matrix.scale(-scale, -scale);
     } else
@@ -120,7 +120,7 @@ void Text::redraw()
     }
     matrix.reset();
     matrix.translate(handlers.first()->pos().x(), handlers.first()->pos().y());
-    matrix.rotate(d.angle - 360);
+    matrix.rotate(data.angle - 360);
 
     m_paths.clear();
     m_shape = QPainterPath();
@@ -133,42 +133,42 @@ void Text::redraw()
     setPos({ 0, 0 });
 }
 
-QString Text::text() const { return d.text; }
+QString Text::text() const { return data.text; }
 
 void Text::setText(const QString& value)
 {
-    d.text = value;
+    data.text = value;
     redraw();
 }
 
-Side Text::side() const { return d.side; }
+Side Text::side() const { return data.side; }
 
 void Text::setSide(const Side& side)
 {
-    d.side = side;
+    data.side = side;
     redraw();
 }
 
-void Text::write(QDataStream& stream) const { stream << d; }
+void Text::write(QDataStream& stream) const { stream << data; }
 
-void Text::read(QDataStream& stream) { stream >> d; }
+void Text::read(QDataStream& stream) { stream >> data; }
 
-void Text::save() { dCopy = d; }
+void Text::save() { dataCopy = data; }
 
 void Text::restore()
 {
-    d = std::move(dCopy);
+    data = std::move(dataCopy);
     redraw();
 }
 
 void Text::ok()
 {
-    d_ = d;
+    lastUsed = data;
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly)) {
         QDataStream out(&file);
-        d_.text = QObject::tr("Text");
-        out << d_;
+        lastUsed.text = QObject::tr("Text");
+        out << lastUsed;
     } else {
         qWarning("Couldn't open Text.dat file.");
     }
@@ -209,4 +209,52 @@ QDataStream& operator>>(QDataStream& stream, Text::InternalData& d)
     stream >> d.side;
     return stream;
 }
+
+////////////////////////////////////////////////////////////
+/// \brief Plugin::Plugin
+///
+Plugin::Plugin() { }
+
+Plugin::~Plugin() { }
+
+QObject* Plugin::getObject() { return this; }
+
+int Plugin::type() const { return static_cast<int>(GiType::ShapeT); }
+
+void Plugin::setupInterface(App* a) { app.set(a); }
+
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Text" },
+        { "Version", "1.0" },
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Text" }
+    };
+}
+
+QIcon Plugin::icon() const { return QIcon::fromTheme("draw-text"); }
+
+Shape* Plugin::createShape(const QPointF& point)
+{
+    shape = new Text(point);
+    emit actionUncheck();
+    return shape;
+}
+
+bool Plugin::addShapePoint(const QPointF&)
+{
+    return false;
+}
+
+void Plugin::updateShape(const QPointF& point)
+{
+}
+
+void Plugin::finalizeShape()
+{
+    shape = nullptr;
+    emit actionUncheck();
+}
+
 }

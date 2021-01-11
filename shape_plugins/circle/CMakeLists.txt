@@ -44,9 +44,6 @@ target_link_libraries(circle PRIVATE
     graphicsview
     shape
     tooldatabase
-    )
-
-target_link_libraries(circle PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

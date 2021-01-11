@@ -86,19 +86,19 @@ void Circle::setRadius(double radius)
     redraw();
 }
 ////////////////////////////////////////////////////////////
-/// \brief PluginCircle::PluginCircle
+/// \brief Plugin::Plugin
 ///
-PluginCircle::PluginCircle() { }
+Plugin::Plugin() { }
 
-PluginCircle::~PluginCircle() { }
+Plugin::~Plugin() { }
 
-QObject* PluginCircle::getObject() { return this; }
+QObject* Plugin::getObject() { return this; }
 
-int PluginCircle::type() const { return static_cast<int>(GiType::ShapeC); }
+int Plugin::type() const { return static_cast<int>(GiType::ShapeC); }
 
-void PluginCircle::setupInterface(App* a) { app.set(a); }
+void Plugin::setupInterface(App* a) { app.set(a); }
 
-QJsonObject PluginCircle::info() const
+QJsonObject Plugin::info() const
 {
     return QJsonObject {
         { "Name", "Circle" },
@@ -108,25 +108,27 @@ QJsonObject PluginCircle::info() const
     };
 }
 
-Shape* PluginCircle::createShape(const QPointF& point)
+QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse"); }
+
+Shape* Plugin::createShape(const QPointF& point)
 {
-    return circle = new Circle(point, point + QPointF { 1, 1 });
+    return shape = point.isNull() ? new Circle() : new Circle(point, point);
 }
 
-bool PluginCircle::addShapePoint(const QPointF&)
+bool Plugin::addShapePoint(const QPointF&)
 {
     return false;
 }
 
-void PluginCircle::updateShape(const QPointF& point)
+void Plugin::updateShape(const QPointF& point)
 {
-    if (circle)
-        circle->setPt(point);
+    if (shape)
+        shape->setPt(point);
 }
 
-void PluginCircle::finalizeShape()
+void Plugin::finalizeShape()
 {
-    circle = nullptr;
+    shape = nullptr;
     emit actionUncheck();
 }
 

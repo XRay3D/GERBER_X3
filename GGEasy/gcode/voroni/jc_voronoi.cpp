@@ -931,7 +931,7 @@ static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv
     max->y = jcv_ceil(_max.y);
 }
 
-void jcv_diagram_generate(int num_points, const jcv_point* points, const jcv_rect* rect, jcv_diagram* d)
+void jcv_diagram_generate(size_t num_points, const jcv_point* points, const jcv_rect* rect, jcv_diagram* d)
 {
     jcv_diagram_generate_useralloc(num_points, points, rect, 0, jcv_alloc_fn, jcv_free_fn, d);
 }
@@ -941,12 +941,12 @@ typedef union _jcv_cast_align_struct {
     void** voidpp;
 } jcv_cast_align_struct;
 
-void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d)
+void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d)
 {
     if (d->internal)
         jcv_diagram_free(d);
 
-    int max_num_events = num_points * 2; // beachline can have max 2*n-5 parabolas
+    size_t max_num_events = num_points * 2; // beachline can have max 2*n-5 parabolas
     size_t sitessize = (size_t)num_points * sizeof(jcv_site);
     size_t memsize = 8u + (size_t)max_num_events * sizeof(void*) + sizeof(jcv_priorityqueue) + sitessize + sizeof(jcv_context_internal);
 

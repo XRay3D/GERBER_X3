@@ -102,4 +102,52 @@ void Rectangle::setPt(const QPointF& pt)
     updateOtherHandlers(handlers[Point3]);
     redraw();
 }
+
+////////////////////////////////////////////////////////////
+/// \brief Plugin::Plugin
+///
+Plugin::Plugin() { }
+
+Plugin::~Plugin() { }
+
+QObject* Plugin::getObject() { return this; }
+
+int Plugin::type() const { return static_cast<int>(GiType::ShapeR); }
+
+void Plugin::setupInterface(App* a) { app.set(a); }
+
+QJsonObject Plugin::info() const
+{
+    return QJsonObject {
+        { "Name", "Rectangle" },
+        { "Version", "1.0" },
+        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+        { "Info", "Rectangle" }
+    };
+}
+
+QIcon Plugin::icon() const { return QIcon::fromTheme("draw-rectangle"); }
+
+Shape* Plugin::createShape(const QPointF& point)
+{
+    return shape = new Rectangle(point, point);
+}
+
+bool Plugin::addShapePoint(const QPointF&)
+{
+    return false;
+}
+
+void Plugin::updateShape(const QPointF& point)
+{
+    if (shape)
+        shape->setPt(point);
+}
+
+void Plugin::finalizeShape()
+{
+    shape = nullptr;
+    emit actionUncheck();
+}
+
 }

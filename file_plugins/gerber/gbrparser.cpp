@@ -77,6 +77,8 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
         m_lineNum = 0;
 
+        //        std::map<int, int> rel;
+
         for (const QString& gerberLine : file->lines()) {
             m_currentGerbLine = gerberLine;
             ++m_lineNum;
@@ -92,28 +94,50 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             };
             switch (gerberLine.front().toLatin1()) {
             case '%':
-                if (parseAperture(gerberLine))
+                if (parseAttributes(gerberLine)) {
+                    //++rel[4];
                     continue;
-                if (parseApertureBlock(gerberLine))
+                }
+                if (parseAperture(gerberLine)) {
+                    //++rel[1];
                     continue;
-                if (parseApertureMacros(gerberLine))
+                }
+                if (parseApertureBlock(gerberLine)) {
+                    //++rel[2];
                     continue;
-                if (parseAttributes(gerberLine))
+                }
+                if (parseApertureMacros(gerberLine)) {
+                    //++rel[3];
                     continue;
-                if (parseFormat(gerberLine))
+                }
+                if (parseFormat(gerberLine)) {
+                    //++rel[5];
                     continue;
-                if (parseStepRepeat(gerberLine))
+                }
+                if (parseStepRepeat(gerberLine)) {
+                    //++rel[6];
                     continue;
-                if (parseTransformations(gerberLine))
+                }
+                if (parseTransformations(gerberLine)) {
+                    //++rel[7];
                     continue;
-                if (parseUnitMode(gerberLine))
+                }
+                if (parseUnitMode(gerberLine)) {
+                    //++rel[8];
                     continue;
-                if (parseImagePolarity(gerberLine))
+                }
+                if (parseImagePolarity(gerberLine)) {
+                    //++rel[9];
                     continue;
-                if (parseLoadName(gerberLine))
+                }
+                if (parseLoadName(gerberLine)) {
+                    //++rel[10];
                     continue;
-                if (dummy(gerberLine))
+                }
+                if (dummy(gerberLine)) {
+                    //++rel[11];
                     continue;
+                }
             case 'D':
             case 'G':
                 if (parseDCode(gerberLine))
@@ -136,6 +160,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
 
         } // End of file parsing
+
+        //        for (auto [key, val] : rel)
+        //            qDebug() << key << '\t' << val;
 
         if (file->m_graphicObjects.isEmpty()) {
             delete file;
