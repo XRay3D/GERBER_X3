@@ -138,7 +138,7 @@ void DepthForm::setupUi(QWidget* Form)
         dsbx = new DoubleSpinBox(Form);
         dsbx->setObjectName(QString::fromUtf8("dsbx"));
         dsbx->setDecimals(3);
-        dsbx->setMaximum(10.0);
+        dsbx->setMaximum(100.0);
         dsbx->setSingleStep(0.005);
         dsbx->setMinimumWidth(QFontMetrics(font()).boundingRect("10.000 mmm").width());
         horizontalLayout->addWidget(dsbx);

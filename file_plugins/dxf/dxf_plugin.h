@@ -35,11 +35,10 @@ public:
     bool thisIsIt(const QString& fileName) override;
     QObject* getObject() override;
     int type() const override;
-    NodeInterface* createNode(FileInterface* file) override;
+
     std::shared_ptr<FileInterface> createFile() override;
     QJsonObject info() const override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
-    void setupInterface(App*) override;
     void updateFileModel(FileInterface* file) override;
 
 public slots:

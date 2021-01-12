@@ -27,7 +27,7 @@ class Node : public NodeInterface {
     File* dxfFile() const;
 
 public:
-    explicit Node(int id);
+    explicit Node(int& id);
     ~Node() override = default;
 
     // NodeInterface interface

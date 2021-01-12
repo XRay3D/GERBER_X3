@@ -33,10 +33,9 @@ public:
     bool thisIsIt(const QString& fileName) override;
     QObject* getObject() override;
     int type() const override;
-    NodeInterface* createNode(FileInterface* file) override;
+
     std::shared_ptr<FileInterface> createFile() override;
     QJsonObject info() const override;
-    void setupInterface(App* a) override;
     //    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;

@@ -111,7 +111,6 @@ public:
 public:
     QObject* getObject() override;
     int type() const override;
-    void setupInterface(App* a) override;
     QJsonObject info() const override;
     QIcon icon() const override;
     Shape* createShape() override;

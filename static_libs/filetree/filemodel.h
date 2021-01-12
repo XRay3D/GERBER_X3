@@ -78,7 +78,7 @@ private:
     const QString mimeType;
 
     void addFile(FileInterface* file);
-    void addShape(Shapes::Shape* sh);
+    void addShape(Shapes::Shape* shape);
 };
 
 #include "app.h"

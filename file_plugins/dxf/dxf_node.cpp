@@ -187,10 +187,9 @@ protected:
 
 File* Node::dxfFile() const { return static_cast<File*>(file()); }
 
-Node::Node(int id)
+Node::Node(int& id)
     : NodeInterface(id)
 {
-    file()->addToScene();
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)

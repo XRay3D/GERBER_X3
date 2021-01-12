@@ -24,7 +24,7 @@ class Node : public NodeInterface {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
 
 public:
-    explicit Node(int id);
+    explicit Node(int& id);
     ~Node() override = default;
 
     // NodeInterface interface

@@ -33,7 +33,7 @@ private:
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
 
-    friend inline uint qHash(const Pair& tag, uint seed);
+    friend inline size_t qHash(const Pair& tag, uint seed);
 
     using Pairs = QSet<Pair>;
     using Pairss = mvector<Pairs>;

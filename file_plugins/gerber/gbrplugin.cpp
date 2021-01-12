@@ -144,8 +144,6 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::Gerber); }
 
-NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->id()); }
-
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
 QJsonObject Plugin::info() const
@@ -157,8 +155,6 @@ QJsonObject Plugin::info() const
         { "Info", "Opening GerberX3 files, with support for all kinds of aperture macros and components." },
     };
 }
-
-void Plugin::setupInterface(App* a) { app.set(a); }
 
 std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
 {

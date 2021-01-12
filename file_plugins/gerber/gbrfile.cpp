@@ -27,6 +27,7 @@
 #include <QSemaphore>
 #include <QThread>
 
+#include "gbrnode.h"
 #include "leakdetector.h"
 
 namespace Gerber {
@@ -119,7 +120,9 @@ QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
 }
 
 File::File(const QString& fileName)
+    : FileInterface()
 {
+    m_node = new Node(m_id);
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
     m_layerTypes = {

@@ -20,12 +20,12 @@
 *                                                                              *
 *******************************************************************************/
 
-#include <graphicsitem.h>
 #include "interfaces/file.h"
 #include "itemgroup.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
+#include <graphicsitem.h>
 
 GraphicsItem::GraphicsItem(FileInterface* file)
     : animation(this, "bodyColor")
@@ -76,12 +76,11 @@ void GraphicsItem::setVisible(bool visible)
     visibleA->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     visibleA->setStartValue(visible ? 0.0 : 1.0);
     visibleA->setEndValue(visible ? 1.0 : 0.0);
-    visibleA->start();
+    visibleA->start(QPropertyAnimation::DeleteWhenStopped);
     if (visible)
         QGraphicsObject::setVisible(visible);
     else
         connect(visibleA, &QAbstractAnimation::finished, [visible, this] { QGraphicsObject::setVisible(visible); });
-    QGraphicsObject::setVisible(visible);
 }
 
 const FileInterface* GraphicsItem::file() const { return m_file; }
