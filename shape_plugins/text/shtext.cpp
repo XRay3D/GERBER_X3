@@ -21,6 +21,8 @@
 #include <QIcon>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QTimer>
+#include <interfaces/file.h>
 
 #include "leakdetector.h"
 
@@ -46,6 +48,8 @@ Text::Text(QPointF pt1)
 
     App::scene()->addItem(this);
 }
+
+int Text::type() const { return static_cast<int>(GiType::ShText); }
 
 void Text::redraw()
 {
@@ -211,19 +215,19 @@ QDataStream& operator>>(QDataStream& stream, Text::InternalData& d)
 }
 
 ////////////////////////////////////////////////////////////
-/// \brief Plugin::Plugin
+/// \brief PluginText::PluginText
 ///
-Plugin::Plugin() { }
+PluginText::PluginText() { }
 
-Plugin::~Plugin() { }
+PluginText::~PluginText() { }
 
-QObject* Plugin::getObject() { return this; }
+QObject* PluginText::getObject() { return this; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShapeT); }
+int PluginText::type() const { return static_cast<int>(GiType::ShText); }
 
-void Plugin::setupInterface(App* a) { app.set(a); }
+void PluginText::setupInterface(App* a) { app.set(a); }
 
-QJsonObject Plugin::info() const
+QJsonObject PluginText::info() const
 {
     return QJsonObject {
         { "Name", "Text" },
@@ -233,25 +237,21 @@ QJsonObject Plugin::info() const
     };
 }
 
-QIcon Plugin::icon() const { return QIcon::fromTheme("draw-text"); }
+QIcon PluginText::icon() const { return QIcon::fromTheme("draw-text"); }
 
-Shape* Plugin::createShape(const QPointF& point)
+Shape* PluginText::createShape() { return new Text(); }
+
+Shape* PluginText::createShape(const QPointF& point)
 {
-    shape = new Text(point);
-    emit actionUncheck();
-    return shape;
+    QTimer::singleShot(100, [this] { emit actionUncheck(); });
+    return new Text(point);
 }
 
-bool Plugin::addShapePoint(const QPointF&)
-{
-    return false;
-}
+bool PluginText::addShapePoint(const QPointF&) { return false; }
 
-void Plugin::updateShape(const QPointF& point)
-{
-}
+void PluginText::updateShape(const QPointF&) { }
 
-void Plugin::finalizeShape()
+void PluginText::finalizeShape()
 {
     shape = nullptr;
     emit actionUncheck();

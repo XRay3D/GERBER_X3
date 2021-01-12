@@ -14,11 +14,11 @@
 *                                                                              *
 *******************************************************************************/
 #include "shape.h"
-#include "treeview.h"
 #include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
+#include "treeview.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -78,7 +78,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for (auto item : scene()->selectedItems()) {
-        if (static_cast<GiType>(item->type()) >= GiType::ShapeC) {
+        if (static_cast<GiType>(item->type()) >= GiType::ShCircle) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto h : shape->handlers) {
@@ -117,6 +117,7 @@ void Shape::updateOtherHandlers(Handler*) { }
 // write to project
 QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 {
+    qDebug() << __FUNCTION__ << "Shape F";
     stream << shape.type();
     stream << shape.m_id;
     stream << shape.isVisible();
@@ -133,7 +134,8 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 // read from project
 QDataStream& operator>>(QDataStream& stream, Shape& shape)
 {
-//    App::scene()->addItem(&shape);
+    qDebug() << __FUNCTION__ << "Shape F";
+    //    App::scene()->addItem(&shape);
     bool visible;
     stream >> shape.m_id;
     stream >> visible;

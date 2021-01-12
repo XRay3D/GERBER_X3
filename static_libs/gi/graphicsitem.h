@@ -41,11 +41,11 @@ enum class GiType {
 
     Error = QGraphicsItem::UserType + 400, // ThermalForm
 
-    ShapeC = QGraphicsItem::UserType + 500,
-    ShapeR,
-    ShapeL,
-    ShapeA,
-    ShapeT,
+    ShCircle = QGraphicsItem::UserType + 500,
+    ShRectangle,
+    ShPolyLine,
+    ShCirArc,
+    ShText,
 };
 
 class FileInterface;

@@ -55,6 +55,7 @@ public:
     virtual ~ShapePluginInterface() = default;
     virtual QObject* getObject() = 0;
     virtual int type() const = 0;
+    [[nodiscard]] virtual Shapes::Shape* createShape() = 0;
     [[nodiscard]] virtual Shapes::Shape* createShape(const QPointF& point) = 0;
     virtual bool addShapePoint(const QPointF& point) = 0;
     virtual void updateShape(const QPointF& point) = 0;

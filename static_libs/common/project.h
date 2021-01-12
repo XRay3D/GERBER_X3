@@ -128,7 +128,7 @@ public:
     Shapes::Shape* shape(int id);
 
     int addFile(FileInterface* file);
-    int addShape(Shapes::Shape* sh);
+    int addShape(Shapes::Shape* shape);
 
     bool contains(FileInterface* file);
     QString name();

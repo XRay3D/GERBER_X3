@@ -192,7 +192,7 @@ Plugin::~Plugin() { }
 
 QObject* Plugin::getObject() { return this; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShapeL); }
+int Plugin::type() const { return static_cast<int>(GiType::ShPolyLine); }
 
 void Plugin::setupInterface(App* a) { app.set(a); }
 
@@ -208,10 +208,9 @@ QJsonObject Plugin::info() const
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-line"); }
 
-Shape* Plugin::createShape(const QPointF& point)
-{
-    return shape = new PolyLine(point, point);
-}
+Shape* Plugin::createShape() { return shape = new PolyLine(); }
+
+Shape* Plugin::createShape(const QPointF& point) { return shape = new PolyLine(point, point); }
 
 bool Plugin::addShapePoint(const QPointF& point)
 {

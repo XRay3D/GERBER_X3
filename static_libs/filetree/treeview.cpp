@@ -241,7 +241,7 @@ void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
     //            //            // edit Shapes::Text
     //            //            mvector<Shapes::Text*> tx;
     //            //            for (auto& idx : selectedIndexes()) {
-    //            //                if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == int(GiType::ShapeT))
+    //            //                if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == int(GiType::ShText))
     //            //                    tx.push_back(static_cast<Shapes::Text*>(sh));
     //            //            }
     //            //            if (tx.size())

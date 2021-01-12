@@ -332,7 +332,7 @@ void DrillForm::on_pbCreate_clicked()
                 { // sort by distance
                     size_t counter = 0;
                     while (counter < path.size()) {
-                        int selector = 0;
+                        size_t selector = 0;
                         double length = std::numeric_limits<double>::max();
                         for (size_t i = counter, end = path.size(); i < end; ++i) {
                             double length2 = Length(point1, path[i]);
