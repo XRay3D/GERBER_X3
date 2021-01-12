@@ -112,7 +112,7 @@ Plugin::~Plugin() { }
 
 QObject* Plugin::getObject() { return this; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShapeR); }
+int Plugin::type() const { return static_cast<int>(GiType::ShRectangle); }
 
 void Plugin::setupInterface(App* a) { app.set(a); }
 
@@ -128,15 +128,11 @@ QJsonObject Plugin::info() const
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-Shape* Plugin::createShape(const QPointF& point)
-{
-    return shape = new Rectangle(point, point);
-}
+Shape* Plugin::createShape() { return shape = new Rectangle(); }
 
-bool Plugin::addShapePoint(const QPointF&)
-{
-    return false;
-}
+Shape* Plugin::createShape(const QPointF& point) { return shape = new Rectangle(point, point); }
+
+bool Plugin::addShapePoint(const QPointF&) { return false; }
 
 void Plugin::updateShape(const QPointF& point)
 {

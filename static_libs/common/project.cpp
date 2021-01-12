@@ -45,23 +45,22 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape)
 {
-    qDebug(__FUNCTION__);
-    stream << *sh;
+    qDebug() << __FUNCTION__ << "Shapes";
+    stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sh)
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape)
 {
-    qDebug(__FUNCTION__);
-    return stream;
+    qDebug() << __FUNCTION__ << "Shapes";
     int type;
     stream >> type;
     if (App::shapeInterfaces().contains(type)) {
-        sh.reset(App::shapeInterface(type)->createShape({}));
-        stream >> *sh;
-        App::scene()->addItem(sh.get());
+        shape.reset(App::shapeInterface(type)->createShape());
+        stream >> *shape;
+        App::scene()->addItem(shape.get());
     }
     return stream;
 }
@@ -81,12 +80,12 @@ Project::~Project() /*override*/ { App::m_app->m_project = nullptr; }
 bool Project::save(const QString& fileName)
 {
     QFile file(fileName);
+    if (!file.open(QFile::WriteOnly)) {
+        qDebug() << __FUNCTION__ << file.errorString();
+        return false;
+    }
+    QDataStream out(&file);
     try {
-        if (!file.open(QFile::WriteOnly)) {
-            qDebug() << __FUNCTION__ << file.errorString();
-            return false;
-        }
-        QDataStream out(&file);
         out << (m_ver = ProVer_5);
         switch (m_ver) {
         case ProVer_5:
@@ -120,6 +119,7 @@ bool Project::save(const QString& fileName)
         m_isModified = false;
         return true;
     } catch (...) {
+        qDebug() << __FUNCTION__ << out.status();
     }
     return false;
 }
@@ -127,17 +127,13 @@ bool Project::save(const QString& fileName)
 bool Project::open(const QString& fileName)
 {
     QFile file(fileName);
+    if (!file.open(QFile::ReadOnly)) {
+        qDebug() << __FUNCTION__ << file.errorString();
+        return false;
+    }
+    QDataStream in(&file);
     try {
-        if (!file.open(QFile::ReadOnly)) {
-            qDebug() << __FUNCTION__ << file.errorString();
-            return false;
-        }
-        qDebug() << __FUNCTION__ << &file;
-        QElapsedTimer t;
-        t.start();
-        QDataStream in(&file);
         in >> m_ver;
-
         switch (m_ver) {
         case ProVer_5:
             in >> m_isPinsPlaced;
@@ -185,6 +181,7 @@ bool Project::open(const QString& fileName)
     } catch (const std::exception& ex) {
         qDebug() << __FUNCTION__ << ex.what();
     } catch (...) {
+        qDebug() << __FUNCTION__ << in.status();
         qDebug() << __FUNCTION__ << errno;
     }
     return false;
@@ -321,6 +318,8 @@ Shapes::Shape* Project::shape(int id)
 
 int Project::addFile(FileInterface* file)
 {
+    if (!file)
+        return -1;
     //QMutexLocker locker(&m_mutex);
     m_isPinsPlaced = false;
     file->createGi();
@@ -340,17 +339,20 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape(Shapes::Shape* sh)
+int Project::addShape(Shapes::Shape* shape)
 {
+    qDebug() << __FUNCTION__ << "Shapes";
+    if (!shape)
+        return -1;
     //QMutexLocker locker(&m_mutex);
     qDebug(__FUNCTION__);
     m_isPinsPlaced = false;
     const int newId = m_shapes.size()
         ? (--m_shapes.end())->first + 1
         : 0;
-    sh->m_id = newId;
-    sh->setToolTip(QString::number(newId));
-    m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(sh));
+    shape->m_id = newId;
+    shape->setToolTip(QString::number(newId));
+    m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
     //App::fileModel()->addShape(sh);
     setChanged();
     return newId;

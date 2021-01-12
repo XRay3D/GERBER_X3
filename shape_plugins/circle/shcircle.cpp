@@ -94,7 +94,7 @@ Plugin::~Plugin() { }
 
 QObject* Plugin::getObject() { return this; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShapeC); }
+int Plugin::type() const { return static_cast<int>(GiType::ShCircle); }
 
 void Plugin::setupInterface(App* a) { app.set(a); }
 
@@ -110,9 +110,11 @@ QJsonObject Plugin::info() const
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
+Shape* Plugin::createShape() { return new Circle(); }
+
 Shape* Plugin::createShape(const QPointF& point)
 {
-    return shape = point.isNull() ? new Circle() : new Circle(point, point);
+    return shape = new Circle(point, point);
 }
 
 bool Plugin::addShapePoint(const QPointF&)

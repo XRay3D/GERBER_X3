@@ -35,6 +35,7 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
+#include <forward_list>
 
 #include "leakdetector.h"
 
@@ -130,7 +131,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (0 || qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
@@ -567,7 +568,7 @@ void MainWindow::createActionsShape()
     //                Clipper clipper;
     //                clipper.AddPaths(gitem->paths(), ptSubject, true);
     //                for (QGraphicsItem* clipItem : si) {
-    //                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShapeC) {
+    //                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle) {
     //                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
     //                    }
     //                }
@@ -623,20 +624,25 @@ void MainWindow::saveSelectedGCodeFiles()
             gcFiles.remove(i--);
     }
 
-    using Key = QPair<uint, Side>;
+    using Key = std::pair<size_t, Side>;
+    using GcFiles = QList<GCode::File*>;
 
-    QMap<Key, QList<GCode::File*>> mm;
+    std::map<Key, GcFiles> gcFilesMap;
     for (GCode::File* file : gcFiles)
-        mm[{ file->getTool().hash(), file->side() }].push_back(file);
+        gcFilesMap[{ file->getTool().hash(), file->side() }].append(file);
 
-    for (const Key& key : mm.keys()) {
-        QList<GCode::File*> files(mm.value(key));
+    for (const auto &[key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
-                if (!name.endsWith("tap"))
+                if (!name.endsWith("tap")) ////////////////////////////////////////////////////////////////////////////////////////////
                     name += QStringList({ "_TS", "_BS" })[file->side()];
-                name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+
+                name = QFileDialog::getSaveFileName(nullptr,
+                    QObject::tr("Save GCode file"),
+                    name,
+                    QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+
                 if (name.isEmpty())
                     return;
                 file->save(name);
@@ -644,9 +650,14 @@ void MainWindow::saveSelectedGCodeFiles()
             }
         } else {
             QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
-            if (!name.endsWith("tap"))
+            if (!name.endsWith("tap")) ////////////////////////////////////////////////////////////////////////////////////////////
                 name += QStringList({ "_TS", "_BS" })[files.first()->side()];
-            name = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save GCode file"), name, QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+
+            name = QFileDialog::getSaveFileName(nullptr,
+                QObject::tr("Save GCode file"),
+                name,
+                QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+
             if (name.isEmpty())
                 return;
             mvector<QString> sl;
@@ -678,7 +689,7 @@ void MainWindow::saveSelectedGCodeFiles()
         }
     }
 
-    if (mm.isEmpty())
+    if (gcFilesMap.empty())
         QMessageBox::information(nullptr, "", QObject::tr("No selected toolpath files."));
 }
 

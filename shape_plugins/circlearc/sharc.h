@@ -26,7 +26,7 @@ public:
     ~Arc();
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShapeA); }
+    int type() const override { return static_cast<int>(GiType::ShCirArc); }
     void redraw() override;
     // Shape interface
     QString name() const override;
@@ -70,6 +70,7 @@ public:
     void setupInterface(App* a) override;
     QJsonObject info() const override;
     QIcon icon() const override;
+    Shape* createShape() override;
     Shape* createShape(const QPointF& point) override;
     bool addShapePoint(const QPointF& value) override;
     void updateShape(const QPointF& value) override;

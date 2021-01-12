@@ -26,7 +26,7 @@ public:
     ~Rectangle();
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShapeR); }
+    int type() const override { return static_cast<int>(GiType::ShRectangle); }
     // GraphicsItem interface
     void redraw() override;
     // Shape interface
@@ -69,7 +69,8 @@ public:
     void setupInterface(App* a) override;
     QJsonObject info() const override;
     QIcon icon() const override;
-    Shapes::Shape* createShape(const QPointF& point) override;
+    Shape* createShape() override;
+    Shape* createShape(const QPointF& point) override;
     bool addShapePoint(const QPointF& value) override;
     void updateShape(const QPointF& value) override;
     void finalizeShape() override;

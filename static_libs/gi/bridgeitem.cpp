@@ -103,7 +103,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && gi->isSelected()) {
             if (auto type(static_cast<GiType>(item->type()));
-                type >= GiType::ShapeC || //
+                type >= GiType::ShCircle || //
                 type == GiType::Drill || //
                 type == GiType::DataSolid || //
                 type == GiType::DataPath) {

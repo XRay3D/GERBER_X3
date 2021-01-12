@@ -131,11 +131,11 @@ void ProfileForm::createFile()
             else
                 wRawPaths.push_back(gi->paths());
             break;
-        case GiType::ShapeC:
-        case GiType::ShapeR:
-        case GiType::ShapeL:
-        case GiType::ShapeA:
-        case GiType::ShapeT:
+        case GiType::ShCircle:
+        case GiType::ShRectangle:
+        case GiType::ShPolyLine:
+        case GiType::ShCirArc:
+        case GiType::ShText:
             wRawPaths.push_back(gi->paths());
             break;
         case GiType::Drill:

@@ -160,7 +160,7 @@ Plugin::~Plugin() { }
 
 QObject* Plugin::getObject() { return this; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShapeA); }
+int Plugin::type() const { return static_cast<int>(GiType::ShCirArc); }
 
 void Plugin::setupInterface(App* a) { app.set(a); }
 
@@ -176,15 +176,11 @@ QJsonObject Plugin::info() const
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-Shape* Plugin::createShape(const QPointF& point)
-{
-    return shape = new Arc(point, point, point);
-}
+Shape* Plugin::createShape() { return shape = new Arc(); }
 
-bool Plugin::addShapePoint(const QPointF&)
-{
-    return ctr++ ? ctr = 0, false : true;
-}
+Shape* Plugin::createShape(const QPointF& point) { return shape = new Arc(point, point, point); }
+
+bool Plugin::addShapePoint(const QPointF&) { return ctr++ ? ctr = 0, false : true; }
 
 void Plugin::updateShape(const QPointF& point)
 {

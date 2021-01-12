@@ -13,10 +13,10 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/file.h"
 #include "shape.h"
 #include <QJsonObject>
 #include <graphicsitem.h>
+#include <interfaces/plugintypes.h>
 #include <interfaces/shapepluginin.h>
 
 class ShTextDialog;
@@ -64,7 +64,7 @@ public:
     };
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShapeT); }
+    int type() const override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // Shape interface
 
@@ -96,7 +96,7 @@ private:
     void ok();
 };
 
-class Plugin : public QObject, public ShapePluginInterface {
+class PluginText : public QObject, public ShapePluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "text.json")
     Q_INTERFACES(ShapePluginInterface)
@@ -104,17 +104,18 @@ class Plugin : public QObject, public ShapePluginInterface {
     Text* shape = nullptr;
 
 public:
-    Plugin();
-    virtual ~Plugin() override;
+    PluginText();
+    virtual ~PluginText() override;
 
-    // ShapePluginInterface interface
+    // ShapePluginTextInterface interface
 public:
     QObject* getObject() override;
     int type() const override;
     void setupInterface(App* a) override;
     QJsonObject info() const override;
     QIcon icon() const override;
-    Shapes::Shape* createShape(const QPointF& point) override;
+    Shape* createShape() override;
+    Shape* createShape(const QPointF& point) override;
     bool addShapePoint(const QPointF& value) override;
     void updateShape(const QPointF& value) override;
     void finalizeShape() override;
@@ -122,4 +123,5 @@ public:
 signals:
     void actionUncheck(bool = false) override;
 };
+
 }

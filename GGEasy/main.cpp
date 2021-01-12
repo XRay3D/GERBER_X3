@@ -27,6 +27,7 @@
 #include <QGLWidget>
 #endif
 #include <QDir>
+#include <QElapsedTimer>
 #include <QPluginLoader>
 #include <QProxyStyle>
 #include <QSettings>
@@ -221,17 +222,14 @@ int main(int argc, char* argv[])
 #endif
         // load plugins
         QDir dir(QApplication::applicationDirPath() + "/plugins");
-        // Поиск всех файлов в папке "Plugins"
-        QStringList listFiles;
-        if (dir.exists()) {
-            listFiles = dir.entryList(QStringList(suffix), QDir::Files);
-            // Проход по всем файлам
-            for (const auto& str : listFiles) {
+        if (dir.exists()) { // Поиск всех файлов в папке "plugins"
+            QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
+            QElapsedTimer t;
+            for (const auto& str : listFiles) { // Проход по всем файлам
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+                t.start();
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
-                // Загрузка плагина
-                QObject* pobj = loader.instance();
-                //qDebug() << __FUNCTION__ << "\n    " << str << "\n    " << pobj;
+                QObject* pobj = loader.instance(); // Загрузка плагина
                 if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
                     parser->setupInterface(App::get());
                     App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
@@ -240,6 +238,7 @@ int main(int argc, char* argv[])
                     parser->setupInterface(App::get());
                     App::shapeInterfaces().emplace(parser->type(), PIS { parser, pobj });
                 }
+                qDebug() << __FUNCTION__ << pobj << (t.nsecsElapsed() / 1000000.0) << "ms";
             }
         }
 
