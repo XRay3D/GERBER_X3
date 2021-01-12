@@ -31,6 +31,7 @@
 
 #include "datapathitem.h"
 #include "datasoliditem.h"
+#include "dxf_node.h"
 #include "gcpathitem.h"
 #include "settings.h"
 
@@ -40,7 +41,9 @@
 namespace Dxf {
 
 File::File()
+    : FileInterface()
 {
+    m_node = new Node(m_id);
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },

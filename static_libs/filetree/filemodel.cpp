@@ -14,37 +14,25 @@
 *                                                                              *
 *******************************************************************************/
 #include "filemodel.h"
-#ifdef DXF_
-#include "dxf_file.h"
-#include "dxf_node.h"
-#include "dxf_types.h"
-#include "tables/dxf_layer.h"
-#endif
-
 #include "foldernode.h"
-
-//#include "project.h"
-#ifdef SH_
-#include "shheaders.h"
-#endif
-
 #include "interfaces/file.h"
 #include "interfaces/pluginfile.h"
-
-#include "leakdetector.h"
+#include "shheaders.h"
 
 #include <QTimer>
+
+#include "leakdetector.h"
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem", -1))
     , mimeType(QStringLiteral("application/GCodeItem"))
 {
-    rootItem->push_back(new FolderNode(tr("Gerber Files"), int(FileType::Gerber)));
-    rootItem->push_back(new FolderNode(tr("Excellon"), int(FileType::Excellon)));
-    rootItem->push_back(new FolderNode(tr("Tool Paths"), int(FileType::GCode)));
-    rootItem->push_back(new FolderNode(tr("Dxf Files"), int(FileType::Dxf)));
-    rootItem->push_back(new FolderNode(tr("Shapes"), int(FileType::Shapes)));
+    rootItem->addNode(new FolderNode(tr("Gerber Files"), int(FileType::Gerber)));
+    rootItem->addNode(new FolderNode(tr("Excellon"), int(FileType::Excellon)));
+    rootItem->addNode(new FolderNode(tr("Tool Paths"), int(FileType::GCode)));
+    rootItem->addNode(new FolderNode(tr("Dxf Files"), int(FileType::Dxf)));
+    rootItem->addNode(new FolderNode(tr("Shapes"), int(FileType::Shapes)));
     App::m_app->m_fileModel = this;
 }
 
@@ -63,37 +51,35 @@ void FileModel::addFile(FileInterface* file)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
 
-    NodeInterface* newItem = nullptr;
+    NodeInterface* newItem;
     beginInsertRows(index, rowCount, rowCount);
-    item->push_back(newItem = App::fileInterface(type)->createNode(file));
+    item->addNode(newItem = file->node());
     endInsertRows();
-    if (newItem == nullptr)
-        return;
+
+    assert(newItem);
+
     QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
     file->setFileIndex(selectIndex);
     App::fileInterface(type)->updateFileModel(file);
     emit select(selectIndex);
 }
 
-void FileModel::addShape(Shapes::Shape* sh)
+void FileModel::addShape(Shapes::Shape* shape)
 {
-    if (sh == nullptr)
+    if (!shape)
         return;
-#ifdef SH_
-    NodeInterface* item(rootItem->child(static_cast<int>(FileModel::Shapes)));
-    QModelIndex index = createIndex(0, 0, item);
-    int rowCount = item->childCount();
-
-    beginInsertRows(index, rowCount, rowCount);
-    auto node = new Shapes::Node(sh->id());
-    item->push_back(node);
-    endInsertRows();
-    QModelIndex selectIndex = createIndex(rowCount, 0, node);
-    qDebug() << __FUNCTION__ << selectIndex;
-    sh->setFileIndex(selectIndex);
-    emit select(selectIndex);
-    emit select(createIndex(rowCount, 0, node));
-#endif
+    //    NodeInterface* item(rootItem->child(static_cast<int>(FileModel::Shapes)));
+    //    QModelIndex index = createIndex(0, 0, item);
+    //    int rowCount = item->childCount();
+    //    beginInsertRows(index, rowCount, rowCount);
+    //    auto node = new Shapes::Node(sh->id());
+    //    item->addNode(node);
+    //    endInsertRows();
+    //    QModelIndex selectIndex = createIndex(rowCount, 0, node);
+    //    qDebug() << __FUNCTION__ << selectIndex;
+    //    sh->setFileIndex(selectIndex);
+    //    emit select(selectIndex);
+    //    emit select(createIndex(rowCount, 0, node));
 }
 
 void FileModel::closeProject()

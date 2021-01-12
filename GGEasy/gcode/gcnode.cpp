@@ -32,10 +32,9 @@
 #include "leakdetector.h"
 
 namespace GCode {
-Node::Node(int id)
+Node::Node(int& id)
     : NodeInterface(id)
 {
-    file()->itemGroup()->addToScene();
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)

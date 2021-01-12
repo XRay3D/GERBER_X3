@@ -17,6 +17,7 @@
 
 #include "drillitem.h"
 
+#include "exnode.h"
 #include "leakdetector.h"
 
 namespace Excellon {
@@ -50,8 +51,10 @@ QDataStream& operator<<(QDataStream& s, const Tools& c)
 }
 
 File::File()
-    : m_format(this)
+    : FileInterface()
+    , m_format(this)
 {
+    m_node = new Node(m_id);
 }
 
 File::~File() { }

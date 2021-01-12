@@ -55,7 +55,7 @@ inline QPixmap decoration(QColor color, QChar chr = {})
 
 class NodeInterface {
 public:
-    explicit NodeInterface(int id, int type = 0)
+    explicit NodeInterface(const int& id, int type = 0)
         : m_id(id)
         , m_type(type)
         , sideStrList(QObject::tr("Top|Bottom").split('|'))
@@ -94,7 +94,7 @@ public:
         return 0;
     }
 
-    void push_back(NodeInterface* item)
+    void addNode(NodeInterface* item)
     {
         item->m_parentItem = this;
         childItems.push_back(QSharedPointer<NodeInterface>(item));
@@ -118,7 +118,7 @@ public:
     QModelIndex index(int column = 0) const { return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this)); }
 
 protected:
-    const int m_id;
+    const int& m_id;
     const int m_type;
 
     const QStringList sideStrList;

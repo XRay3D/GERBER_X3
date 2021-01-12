@@ -21,7 +21,7 @@ class GcPathItem;
 
 namespace GCode {
 
-class File : public FileInterface, private GCUtils {
+class File : private GCUtils, public FileInterface {
     friend class ::GcPathItem;
     friend class ::MainWindow;
 

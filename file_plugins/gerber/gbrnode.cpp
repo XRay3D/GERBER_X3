@@ -36,13 +36,10 @@ namespace Gerber {
 
 QTimer Node::m_decorationTimer;
 
-Node::Node(int id)
+Node::Node(int& id)
     : NodeInterface(id)
 {
-    file()->addToScene();
     connect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
-    m_decorationTimer.setSingleShot(true);
-    m_decorationTimer.start(100);
 }
 
 Node::~Node() { m_decorationTimer.start(10); }
@@ -108,6 +105,8 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return file()->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
+            if (file()->color() == QColor())
+                m_decorationTimer.start(500);
             switch (file()->itemsType()) {
             case File::ApPaths:
                 return decoration(file()->color(), 'A');
@@ -154,12 +153,14 @@ QVariant Node::data(const QModelIndex& index, int role) const
 
 QTimer* Node::decorationTimer() { return &m_decorationTimer; }
 
-void Node::repaint()
+void Node::repaint() const
 {
+    if (!m_parentItem)
+        return;
     const int count = m_parentItem->childCount();
     const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row() : 0);
     file()->setColor(QColor::fromHsv(k, 255, 255, 150));
-    emit App::fileModel()->dataChanged(this->index(0), this->index(0), { Qt::DecorationRole });
+    emit App::fileModel()->dataChanged(index(0), index(0), { Qt::DecorationRole });
 }
 
 void Node::menu(QMenu& menu, FileTreeView* tv) const

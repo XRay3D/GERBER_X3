@@ -34,8 +34,6 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::GCode); }
 
-NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->id()); }
-
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
 QJsonObject Plugin::info() const
@@ -47,8 +45,6 @@ QJsonObject Plugin::info() const
         { "Info", "GCode is a static plugin always included with GGEasy." }
     };
 }
-
-void Plugin::setupInterface(App*) { }
 
 void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)
 {

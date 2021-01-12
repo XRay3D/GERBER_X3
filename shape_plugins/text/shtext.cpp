@@ -225,8 +225,6 @@ QObject* PluginText::getObject() { return this; }
 
 int PluginText::type() const { return static_cast<int>(GiType::ShText); }
 
-void PluginText::setupInterface(App* a) { app.set(a); }
-
 QJsonObject PluginText::info() const
 {
     return QJsonObject {

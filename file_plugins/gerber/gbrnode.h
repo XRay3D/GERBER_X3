@@ -24,10 +24,9 @@ class Node : public QObject, public NodeInterface {
     Q_OBJECT
 
 public:
-    explicit Node(int id);
+    explicit Node(int& id);
     ~Node() override;
 
-public:
     // NodeInterface interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -38,7 +37,7 @@ public:
 
 private:
     static QTimer m_decorationTimer;
-    void repaint();
+    void repaint() const;
     Qt::CheckState m_current = Qt::Unchecked;
 };
 }

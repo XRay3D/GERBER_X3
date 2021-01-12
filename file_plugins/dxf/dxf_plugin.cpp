@@ -186,8 +186,6 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::Dxf); }
 
-NodeInterface* Plugin::createNode(FileInterface* file) { return new Node(file->id()); }
-
 std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
 
 QJsonObject Plugin::info() const
@@ -199,8 +197,6 @@ QJsonObject Plugin::info() const
         { "Info", "Opening DXF Files" }
     };
 }
-
-void Plugin::setupInterface(App* a) { app.set(a); }
 
 std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
 {
@@ -321,7 +317,7 @@ void Plugin::updateFileModel(FileInterface* file)
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
         qDebug() << __FUNCTION__ << name << layer;
-        fm->getItem(index)->push_back(new Dxf::NodeLayer(name, layer));
+        fm->getItem(index)->addNode(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
 }

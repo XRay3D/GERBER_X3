@@ -323,6 +323,7 @@ int Project::addFile(FileInterface* file)
     //QMutexLocker locker(&m_mutex);
     m_isPinsPlaced = false;
     file->createGi();
+    file->addToScene();
     file->setVisible(true);
     const int id = contains(file->name());
     if (id != -1) {
@@ -353,7 +354,7 @@ int Project::addShape(Shapes::Shape* shape)
     shape->m_id = newId;
     shape->setToolTip(QString::number(newId));
     m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
-    //App::fileModel()->addShape(sh);
+    App::fileModel()->addShape(shape);
     setChanged();
     return newId;
 }

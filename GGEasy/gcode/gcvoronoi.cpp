@@ -175,14 +175,14 @@ int iterate_primary_edges3(const voronoi_diagram<double>& vd)
     return result;
 }
 #endif
-inline uint qHash(const Point64& key, uint /*seed*/ = 0)
+inline size_t qHash(const Point64& key, uint /*seed*/ = 0)
 {
     return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point64)));
 }
 
 namespace GCode {
 
-inline uint qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0)
+inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0)
 {
     return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y);
 }

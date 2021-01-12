@@ -14,14 +14,14 @@
 *                                                                              *
 *******************************************************************************/
 #include "shnode.h"
-#include "treeview.h"
 #include "graphicsitem.h"
+#include "treeview.h"
 //#include "shtext.h"
 //#include "shtextdialog.h"
 #include <QMenu>
 
 namespace Shapes {
-Node::Node(int id)
+Node::Node(int& id)
     : NodeInterface(id, 1)
 {
     //    shape()->setNode(this);

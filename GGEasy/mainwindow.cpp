@@ -131,13 +131,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (1 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
-        if (1) {
-            //            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
-            QDir dir("C:/Свалка/SSR_V4");
+        if (0) {
+            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
+            //QDir dir("C:/Свалка/SSR_V4");
             QStringList listFiles;
             if (dir.exists())
                 listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
@@ -631,7 +631,7 @@ void MainWindow::saveSelectedGCodeFiles()
     for (GCode::File* file : gcFiles)
         gcFilesMap[{ file->getTool().hash(), file->side() }].append(file);
 
-    for (const auto &[key, files] : gcFilesMap) {
+    for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::GCUtils::getLastDir().append(file->shortName()));

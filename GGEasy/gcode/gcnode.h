@@ -19,7 +19,7 @@ namespace GCode {
 class Node : public NodeInterface {
 
 public:
-    explicit Node(int id);
+    explicit Node(int& id);
     ~Node() override = default;
 
     // NodeInterface interface

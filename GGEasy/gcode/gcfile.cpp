@@ -22,14 +22,15 @@
 #include "settings.h"
 
 #include "gcdrillitem.h"
+#include "gcnode.h"
 #include "gcpathitem.h"
 #include "graphicsview.h"
 
 #include <QDir>
 #include <QFile>
 #include <QPainter>
-#include <QTextStream>
 #include <QRegularExpression>
+#include <QTextStream>
 
 #include "leakdetector.h"
 
@@ -37,15 +38,19 @@ namespace GCode {
 
 File::File()
     : GCUtils(m_gcp)
+    , FileInterface()
 {
+    m_node = new Node(m_id);
 }
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
     : GCUtils(m_gcp)
+    , FileInterface()
     , m_pocketPaths(pocketPaths)
     , m_toolPathss(toolPathss)
     , m_gcp(gcp)
 {
+    m_node = new Node(m_id);
     if (gcp.tools.front().diameter()) {
 
         initSave();
@@ -670,7 +675,7 @@ void File::createGiLaser()
             m_g0path.push_back(m_toolPathss.front()[i]);
     }
     if (m_toolPathss.size() > 1) {
-        paths.insert(paths.end(),m_toolPathss[1].begin(),m_toolPathss[1].end());
+        paths.insert(paths.end(), m_toolPathss[1].begin(), m_toolPathss[1].end());
         m_g0path.push_back({ m_toolPathss[0].back().back(), m_toolPathss[1].front().front() });
         for (size_t i = 0; i < m_toolPathss[1].size() - 1; ++i)
             m_g0path.push_back({ m_toolPathss[1][i].back(), m_toolPathss[1][i + 1].front() });

@@ -19,7 +19,7 @@ namespace Shapes {
 class Node : public NodeInterface {
 
 public:
-    explicit Node(int id);
+    explicit Node(int& id);
     ~Node() override = default;
 
     // AbstractNode interface

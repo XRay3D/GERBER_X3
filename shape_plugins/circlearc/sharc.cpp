@@ -162,8 +162,6 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShCirArc); }
 
-void Plugin::setupInterface(App* a) { app.set(a); }
-
 QJsonObject Plugin::info() const
 {
     return QJsonObject {

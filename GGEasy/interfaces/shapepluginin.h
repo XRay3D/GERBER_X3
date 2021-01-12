@@ -69,7 +69,6 @@ public:
     //                tv->closeFiles();
     //        });
     //    };
-    virtual void setupInterface(App* a) = 0;
 
 signals:
     virtual void actionUncheck(bool = false) = 0;

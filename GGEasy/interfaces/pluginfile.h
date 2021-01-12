@@ -70,7 +70,6 @@ public:
         [[maybe_unused]] FileInterface* file,
         [[maybe_unused]] const ThParam2& param,
         [[maybe_unused]] Tool& tool) { return {}; };
-    [[nodiscard]] virtual NodeInterface* createNode(FileInterface* file) = 0;
     [[nodiscard]] virtual SettingsTab createSettingsTab([[maybe_unused]] QWidget* parent) { return { nullptr, "" }; };
     [[nodiscard]] virtual std::shared_ptr<FileInterface> createFile() = 0;
     [[nodiscard]] virtual QJsonObject info() const = 0;
@@ -83,7 +82,6 @@ public:
                 tv->closeFiles();
         });
     };
-    virtual void setupInterface(App* a) = 0;
     virtual void updateFileModel([[maybe_unused]] FileInterface* file) {};
 
     // signals:

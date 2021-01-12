@@ -27,12 +27,10 @@ public:
     bool thisIsIt(const QString& fileName) override;
     int type() const override;
 
-    NodeInterface* createNode(FileInterface* file) override;
     SettingsTab createSettingsTab(QWidget* parent) override;
     std::shared_ptr<FileInterface> createFile() override;
     QJsonObject info() const override;
     void createMainMenu(QMenu& menu, FileTreeView* tv) override;
-    void setupInterface(App* a) override;
 
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;

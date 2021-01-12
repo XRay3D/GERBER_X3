@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QSharedMemory>
 #include <map>
 
 class DrillForm;
@@ -36,8 +37,8 @@ class SplashScreen;
 using PIF = std::tuple<FilePluginInterface*, QObject*>;
 using PIS = std::tuple<ShapePluginInterface*, QObject*>;
 #if __cplusplus > 201709L
-using FileInterfacesMap = std::map<int, PI>;
-using ShapeInterfacesMap = std::map<int, PI>;
+using FileInterfacesMap = std::map<int, PIF>;
+using ShapeInterfacesMap = std::map<int, PIS>;
 #else
 struct FileInterfacesMap : std::map<int, PIF> {
     bool contains(int key) const { return find(key) != end(); }
@@ -77,20 +78,27 @@ class App {
     AppSettings m_appSettings;
     ToolHolder m_toolHolder;
 
-public:
-    explicit App()
-    {
-        if (!m_app)
-            m_app = this;
-    }
     App(const App&) = delete;
     App(App&&) = delete;
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
+    QSharedMemory sm { "AppSettings" };
+
+public:
+    explicit App()
+    {
+        if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
+            m_app = *reinterpret_cast<App**>(sm.data()) = this;
+            qDebug() << __FUNCTION__ << "create" << m_app;
+        } else if (sm.attach(QSharedMemory::ReadOnly)) {
+            m_app = *reinterpret_cast<App**>(sm.data());
+            qDebug() << __FUNCTION__ << "attach" << m_app;
+        } else {
+            qDebug() << __FUNCTION__ << m_app << sm.errorString();
+        }
+    }
     ~App() { }
 
-    static App* get() { return m_app; }
-    static void set(App* app) { m_app = app; }
     static DrillForm* drillForm() { return m_app->m_drillForm; }
     static FileModel* fileModel() { return m_app->m_fileModel; }
     static GCodePropertiesForm* gCodePropertiesForm() { return m_app->m_gCodePropertiesForm; }

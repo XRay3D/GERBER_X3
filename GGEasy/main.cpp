@@ -230,14 +230,10 @@ int main(int argc, char* argv[])
                 t.start();
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
-                if (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser) {
-                    parser->setupInterface(App::get());
+                if /**/ (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser)
                     App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
-                }
-                if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser) {
-                    parser->setupInterface(App::get());
+                else if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser)
                     App::shapeInterfaces().emplace(parser->type(), PIS { parser, pobj });
-                }
                 qDebug() << __FUNCTION__ << pobj << (t.nsecsElapsed() / 1000000.0) << "ms";
             }
         }

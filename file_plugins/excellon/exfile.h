@@ -36,9 +36,6 @@ public:
     Format format() const;
     void setFormat(const Format& value);
 
-protected:
-    Paths merge() const override;
-
     // FileInterface interface
 public:
     void createGi() override;
@@ -46,5 +43,6 @@ public:
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
+    Paths merge() const override;
 };
 } // namespace Excellon

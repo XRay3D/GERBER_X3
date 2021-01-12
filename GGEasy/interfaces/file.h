@@ -19,8 +19,8 @@
 #include "plugintypes.h"
 
 #include "itemgroup.h"
-#include <myclipper.h>
 #include "splashscreen.h"
+#include <myclipper.h>
 
 #include "app.h"
 
@@ -32,6 +32,8 @@
 #include "leakdetector.h"
 
 using LayerTypes = std::vector<LayerType>;
+
+class NodeInterface;
 
 class FileInterface {
 
@@ -152,27 +154,27 @@ public:
     QModelIndex fileIndex() const { return m_fileIndex; }
     void setFileIndex(const QModelIndex& index) { m_fileIndex = index; }
 
+    NodeInterface* node() const { return m_node; }
+
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
-
-    int m_id = -1;
-    int m_itemsType = -1;
     virtual Paths merge() const = 0;
 
-    mvector<ItemGroup*> m_itemGroups;
-    QString m_name;
-    mvector<QString> m_lines;
-    mutable Paths m_mergedPaths;
-    Pathss m_groupedPaths;
-    mutable bool m_visible = false;
-
-    QModelIndex m_fileIndex;
     LayerTypes m_layerTypes;
-
-    Side m_side = Top;
+    NodeInterface* m_node;
+    Pathss m_groupedPaths;
     QColor m_color;
     QDateTime m_date;
+    QModelIndex m_fileIndex;
+    QString m_name;
+    Side m_side = Top;
+    int m_id = -1;
+    int m_itemsType = -1;
+    mutable Paths m_mergedPaths;
+    mutable bool m_visible = false;
+    mvector<ItemGroup*> m_itemGroups;
+    mvector<QString> m_lines;
 };
 
 #define FileInterface_iid "ru.xray3d.XrSoft.GGEasy.FileInterface"
