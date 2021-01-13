@@ -23,7 +23,7 @@ class Handler final : public QGraphicsItem {
     friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
 
 public:
-    enum HType {
+    enum HType : int {
         Adder,
         Center,
         Corner,

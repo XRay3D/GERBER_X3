@@ -23,8 +23,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
@@ -39,13 +39,42 @@ set(CMAKE_AUTORCC ON)
 # endif()
 #endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(SUFFIX "_clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(SUFFIX "_gnu")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(SUFFIX "_intel")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(SUFFIX "_msvc")
+endif()
+
+#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+if(CMAKE_CL_64)
+    set(SUFFIX "${SUFFIX}_x64")
+else()
+    set(SUFFIX "${SUFFIX}_x32")
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(SUFFIX "${SUFFIX}_d")
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    set(SUFFIX "${SUFFIX}_r")
+elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    set(SUFFIX "${SUFFIX}_rm")
+elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    set(SUFFIX "${SUFFIX}_rd")
+endif()
+
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}")
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin")
 
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     Concurrent
     Core
@@ -55,13 +84,30 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     PrintSupport
     Widgets
     REQUIRED)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
+endif()
 
 set(TS_FILES
-    "translations/${PROJECT_NAME}_en.ts"
-    "translations/${PROJECT_NAME}_ru.ts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/translations/${PROJECT_NAME}_en.ts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/translations/${PROJECT_NAME}_ru.ts"
     )
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
+#include_directories(${CMAKE_STATIC_LIBS_DIR})
+
+include_directories (
+    ../static_libs/clipper
+    ../static_libs/common
+    ../static_libs/filetree
+    ../static_libs/gerber
+    ../static_libs/gi
+    ../static_libs/graphicsview
+    ../static_libs/shape
+    ../static_libs/thermal
+    ../static_libs/tooldatabase
+    )
+
+link_directories(../libs${SUFFIX})
 
 add_subdirectory(forms)
 add_subdirectory(forms/drillform)
@@ -141,11 +187,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
     )
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
 
-add_custom_command (
-    OUTPUT ${TS_FILES}
-    COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
+#add_custom_command (
+#    OUTPUT ${TS_FILES}
+#    COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
+#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#    )

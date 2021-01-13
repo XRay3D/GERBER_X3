@@ -39,9 +39,10 @@ Circle::Circle(QPointF center, QPointF pt)
     redraw();
 
     App::scene()->addItem(this);
+    qDebug(__FUNCTION__);
 }
 
-Circle::~Circle() { }
+Circle::~Circle() { qDebug(__FUNCTION__); }
 
 void Circle::redraw()
 {
@@ -78,10 +79,7 @@ void Circle::setPt(const QPointF& pt)
     redraw();
 }
 
-double Circle::radius() const
-{
-    return m_radius;
-}
+double Circle::radius() const { return m_radius; }
 
 void Circle::setRadius(double radius)
 {

@@ -51,4 +51,4 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(graphicsview PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
-target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)
+#target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)

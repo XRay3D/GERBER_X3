@@ -210,11 +210,15 @@ void Project::deleteFile(int id)
 void Project::deleteShape(int id)
 {
     QMutexLocker locker(&m_mutex);
-    if (m_shapes.contains(id)) {
-        m_shapes.erase(id);
-        setChanged();
-    } else
-        qWarning() << "Error id" << id << "Shape not found";
+    try {
+        if (m_shapes.contains(id)) {
+            m_shapes.erase(id);
+            setChanged();
+        } else
+            qWarning() << "Error id" << id << "Shape not found";
+    } catch (const std::exception& ex) {
+        qWarning() << __FUNCTION__ << ex.what();
+    }
 }
 
 int Project::size() { return int(m_files.size() + m_shapes.size()); }
