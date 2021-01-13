@@ -25,17 +25,13 @@ namespace Shapes {
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 {
     m_paths.resize(1);
-    handlers = {
-        new Handler(this, Handler::Center),
-        new Handler(this),
-        new Handler(this),
-        new Handler(this),
-        new Handler(this),
-        //        new Handler(this, Handler::Adder),
-        //        new Handler(this, Handler::Adder),
-        //        new Handler(this, Handler::Adder),
-        //        new Handler(this, Handler::Adder)
-    };
+    handlers.reserve(PtCount);
+
+    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
+    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handler>(this));
 
     handlers[Point1]->setPos(pt1);
     handlers[Point3]->setPos(pt2);
@@ -99,7 +95,7 @@ void Rectangle::updateOtherHandlers(Handler* handler)
 void Rectangle::setPt(const QPointF& pt)
 {
     handlers[Point3]->setPos(pt);
-    updateOtherHandlers(handlers[Point3]);
+    updateOtherHandlers(handlers[Point3].get());
     redraw();
 }
 

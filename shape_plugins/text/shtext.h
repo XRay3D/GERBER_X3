@@ -78,16 +78,20 @@ public:
 
     Side side() const;
     void setSide(const Side& side);
-
+    // NodeInterface interface
+    //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
+    //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
+    //    QVariant data(const QModelIndex& index, int role) const override { }
+    //    void menu(QMenu& menu, FileTreeView* tv) const override { }
 protected:
     // Shape interface
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
 private:
-    InternalData data;
-    InternalData dataCopy;
-    inline static InternalData lastUsed;
+    InternalData iData;
+    InternalData iDataCopy;
+    inline static InternalData lastUsedIData;
 
     const QString fileName;
 

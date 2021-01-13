@@ -22,7 +22,6 @@ set(CMAKE_AUTORCC ON)
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
 add_library(shape STATIC

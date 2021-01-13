@@ -29,21 +29,23 @@
 namespace Shapes {
 
 Text::Text(QPointF pt1)
-    : data(lastUsed)
+    : iData(lastUsedIData)
     , fileName(qApp->applicationDirPath() + "/XrSoft/Text.dat")
 {
     m_paths.resize(1);
-    handlers = { new Handler(this, Handler::Center) };
+
+    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
+
     handlers.first()->setPos(pt1);
 
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
-        in >> lastUsed;
+        in >> lastUsedIData;
     } else {
         qWarning("Couldn't open Text.dat file.");
     }
-    data = lastUsed;
+    iData = lastUsedIData;
     redraw();
 
     App::scene()->addItem(this);
@@ -56,19 +58,19 @@ void Text::redraw()
     QPainterPath painterPath;
 
     QFont font;
-    font.fromString(data.font);
+    font.fromString(iData.font);
     font.setPixelSize(1000);
 
-    painterPath.addText(QPointF(), font, data.text);
+    painterPath.addText(QPointF(), font, iData.text);
     auto bRect = painterPath.boundingRect();
 
     QFontMetrics fm(font);
     const auto capHeight = fm.capHeight();
-    const auto scale = data.height / capHeight;
+    const auto scale = iData.height / capHeight;
 
     QPointF handlePt;
 
-    switch (data.handleAlign) {
+    switch (iData.handleAlign) {
     case BotCenter:
         handlePt -= QPointF(bRect.width() * 0.5, 0);
         break;
@@ -105,7 +107,7 @@ void Text::redraw()
 #endif
     matrix.translate(-bRect.left() * scale, 0);
     matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
-    if (data.side == Bottom) {
+    if (iData.side == Bottom) {
         matrix.translate((bRect.right() + bRect.left()) * scale, 0);
         matrix.scale(-scale, -scale);
     } else
@@ -124,7 +126,7 @@ void Text::redraw()
     }
     matrix.reset();
     matrix.translate(handlers.first()->pos().x(), handlers.first()->pos().y());
-    matrix.rotate(data.angle - 360);
+    matrix.rotate(iData.angle - 360);
 
     m_paths.clear();
     m_shape = QPainterPath();
@@ -137,42 +139,42 @@ void Text::redraw()
     setPos({ 0, 0 });
 }
 
-QString Text::text() const { return data.text; }
+QString Text::text() const { return iData.text; }
 
 void Text::setText(const QString& value)
 {
-    data.text = value;
+    iData.text = value;
     redraw();
 }
 
-Side Text::side() const { return data.side; }
+Side Text::side() const { return iData.side; }
 
 void Text::setSide(const Side& side)
 {
-    data.side = side;
+    iData.side = side;
     redraw();
 }
 
-void Text::write(QDataStream& stream) const { stream << data; }
+void Text::write(QDataStream& stream) const { stream << iData; }
 
-void Text::read(QDataStream& stream) { stream >> data; }
+void Text::read(QDataStream& stream) { stream >> iData; }
 
-void Text::save() { dataCopy = data; }
+void Text::save() { iDataCopy = iData; }
 
 void Text::restore()
 {
-    data = std::move(dataCopy);
+    iData = std::move(iDataCopy);
     redraw();
 }
 
 void Text::ok()
 {
-    lastUsed = data;
+    lastUsedIData = iData;
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly)) {
         QDataStream out(&file);
-        lastUsed.text = QObject::tr("Text");
-        out << lastUsed;
+        lastUsedIData.text = QObject::tr("Text");
+        out << lastUsedIData;
     } else {
         qWarning("Couldn't open Text.dat file.");
     }

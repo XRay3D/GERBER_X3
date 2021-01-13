@@ -123,7 +123,7 @@ protected:
     QColor m_bodyColor;
     QColor m_pathColor;
 
-    int m_id = -1;
+    int m_giId = -1;
     double scaleFactor() const;
     enum ColorState {
         Default,

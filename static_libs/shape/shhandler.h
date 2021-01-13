@@ -40,7 +40,7 @@ public:
     QRectF rect() const;
 
 private:
-    Shape* shape;
+    Shape* const shape;
     HType m_hType;
     QVector<QPointF> pt;
     QPointF lastPos;

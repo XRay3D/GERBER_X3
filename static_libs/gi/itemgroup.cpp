@@ -24,8 +24,8 @@ ItemGroup::~ItemGroup()
 
 void ItemGroup::append(GraphicsItem* item)
 {
-    item->m_id = mvector::size() ? mvector::last()->m_id + 1 : 0;
-    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->m_id));
+    item->m_giId = mvector::size() ? mvector::last()->m_giId + 1 : 0;
+    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->m_giId));
     item->setVisible(m_visible);
     item->itemGroup = this;
     mvector::push_back(item);

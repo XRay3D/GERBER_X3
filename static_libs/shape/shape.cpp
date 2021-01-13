@@ -19,6 +19,7 @@
 #include "shhandler.h"
 #include "shnode.h"
 #include "treeview.h"
+
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -30,18 +31,17 @@ namespace Shapes {
 
 Shape::Shape()
     : GraphicsItem(nullptr)
+    , NodeInterface(m_giId, 1)
 {
     m_paths.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
     setAcceptHoverEvents(true);
     setVisible(true);
-    //    setZValue(std::numeric_limits<double>::max());
+    //setZValue(std::numeric_limits<double>::max());
 }
 
-Shape::~Shape() { qDeleteAll(handlers); }
-
-void Shape::setNode(Node* node) { m_node = node; }
+Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
 {
@@ -81,7 +81,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
         if (static_cast<GiType>(item->type()) >= GiType::ShCircle) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
-            for (auto h : shape->handlers) {
+            for (auto& h : shape->handlers) {
                 hInitPos[shape].append(h->pos());
             }
         }
@@ -90,19 +90,19 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
 
 void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
-    QMenu menu;
-    m_node->menu(menu, App::fileTreeView());
-    menu.exec(event->screenPos());
+    QMenu menu_;
+    menu(menu_, App::fileTreeView());
+    menu_.exec(event->screenPos());
 }
 
 QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedChange) {
         const bool selected = value.toInt();
-        for (Handler* item : handlers)
+        for (auto& item : handlers)
             item->setVisible(selected);
-        if (m_index.isValid()) {
-            App::fileTreeView()->selectionModel()->select(m_index, (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows);
+        if (index().isValid()) {
+            App::fileTreeView()->selectionModel()->select(index(), (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows);
         }
     }
     return GraphicsItem::itemChange(change, value);
@@ -119,11 +119,11 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 {
     qDebug() << __FUNCTION__ << "Shape F";
     stream << shape.type();
-    stream << shape.m_id;
+    stream << shape.m_giId;
     stream << shape.isVisible();
     {
         stream << shape.handlers.size();
-        for (Handler* item : shape.handlers) {
+        for (auto& item : shape.handlers) {
             stream << item->QGraphicsItem::pos();
             stream << item->m_hType;
         }
@@ -137,10 +137,10 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
     qDebug() << __FUNCTION__ << "Shape F";
     //    App::scene()->addItem(&shape);
     bool visible;
-    stream >> shape.m_id;
+    stream >> shape.m_giId;
     stream >> visible;
     shape.QGraphicsItem::setVisible(visible);
-    shape.setToolTip(QString::number(shape.m_id));
+    shape.setToolTip(QString::number(shape.m_giId));
     {
         int size;
         stream >> size;
@@ -150,10 +150,9 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
             int type;
             stream >> pos;
             stream >> type;
-            Handler* item = new Handler(&shape, static_cast<Handler::HType>(type));
-            item->QGraphicsItem::setPos(pos);
-            item->setVisible(false);
-            shape.handlers.append(item);
+            shape.handlers.emplace_back(std::make_unique<Handler>(&shape, static_cast<Handler::HType>(type)));
+            shape.handlers.back()->QGraphicsItem::setPos(pos);
+            shape.handlers.back()->setVisible(false);
         }
     }
     shape.read(stream);
@@ -182,6 +181,58 @@ void Shape::changeColor()
 
     animation.setEndValue(m_bodyColor);
     animation.start();
+}
+
+bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (Column(index.column()) == Column::NameColorVisible && role == Qt::CheckStateRole) {
+        setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        return true;
+    }
+    return false;
+}
+
+QVariant Shape::data(const QModelIndex& index, int role) const
+{
+    switch (Column(index.column())) {
+    case Column::NameColorVisible:
+        switch (role) {
+        case Qt::DisplayRole:
+            return QString("%1 (%2)")
+                .arg(name())
+                .arg(m_giId);
+        case Qt::CheckStateRole:
+            return isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole:
+            return icon();
+        case Qt::UserRole:
+            return m_id;
+        default:
+            return QVariant();
+        }
+    default:
+        return QVariant();
+    }
+}
+
+Qt::ItemFlags Shape::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
+    switch (Column(index.column())) {
+    case Column::NameColorVisible:
+        return itemFlag | Qt::ItemIsUserCheckable;
+    case Column::SideType:
+        return itemFlag;
+    default:
+        return itemFlag;
+    }
+}
+
+void Shape::menu(QMenu& menu, FileTreeView* /*tv*/) const
+{
+    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
+        App::fileModel()->removeRow(row(), index().parent());
+    });
 }
 
 }
