@@ -16,27 +16,43 @@ cmake_minimum_required(VERSION 3.14)
 project(text LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_PLUGINS_DIR})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_PLUGINS_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_PLUGINS_DIR})
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
+endif()
+
+include_directories(
+    ../../GGEasy
+    ../../static_libs/clipper
+    ../../static_libs/common
+    ../../static_libs/filetree
+    ../../static_libs/gerber
+    ../../static_libs/gi
+    ../../static_libs/graphicsview
+    ../../static_libs/shape
+    ../../static_libs/thermal
+    ../../static_libs/tooldatabase
+    )
+
+link_directories(../../libs${SUFFIX})
 
 add_library(text SHARED
-    text.json
     shtext.cpp
     shtext.h
     shtextdialog.cpp
     shtextdialog.h
     shtextdialog.ui
+    text.json
     )
 
 target_link_libraries(text PRIVATE
@@ -50,6 +66,10 @@ target_link_libraries(text PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::OpenGL
     )
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    target_link_libraries(text PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+endif()
 
 target_compile_definitions(text PRIVATE TEXT_LIBRARY)

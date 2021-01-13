@@ -39,9 +39,10 @@ Shape::Shape()
     setAcceptHoverEvents(true);
     setVisible(true);
     //setZValue(std::numeric_limits<double>::max());
+    qDebug(__FUNCTION__);
 }
 
-Shape::~Shape() { }
+Shape::~Shape() { qDebug(__FUNCTION__); }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
 {
@@ -121,13 +122,13 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
     stream << shape.type();
     stream << shape.m_giId;
     stream << shape.isVisible();
-    {
-        stream << shape.handlers.size();
-        for (auto& item : shape.handlers) {
-            stream << item->QGraphicsItem::pos();
-            stream << item->m_hType;
-        }
+
+    stream << qint32(shape.handlers.size());
+    for (const auto& item : shape.handlers) {
+        stream << item->pos();
+        stream << item->m_hType;
     }
+
     shape.write(stream);
     return stream;
 }
@@ -142,7 +143,7 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
     shape.QGraphicsItem::setVisible(visible);
     shape.setToolTip(QString::number(shape.m_giId));
     {
-        int size;
+        qint32 size;
         stream >> size;
         shape.handlers.reserve(size);
         while (size--) {
