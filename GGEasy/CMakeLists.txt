@@ -134,9 +134,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     thermal
     tooldatabase
     shape
-    )
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
@@ -147,3 +144,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
 
+add_custom_command (
+    OUTPUT ${TS_FILES}
+    COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )

@@ -40,12 +40,13 @@ public:
         Point2,
         Point3,
         Point4,
-        Center1,
-        Center2,
-        Center3,
-        Center4,
+        PtCount
     };
-
+    // NodeInterface interface
+    //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
+    //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
+    //    QVariant data(const QModelIndex& index, int role) const override { }
+    //    void menu(QMenu& menu, FileTreeView* tv) const override { }
 protected:
     // Shape interface
     void updateOtherHandlers(Handler* sh) override;

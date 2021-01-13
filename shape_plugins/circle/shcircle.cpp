@@ -27,7 +27,12 @@ Circle::Circle(QPointF center, QPointF pt)
     : m_radius(QLineF(center, pt).length())
 {
     m_paths.resize(1);
-    handlers = { new Handler(this, Handler::Center), new Handler(this) };
+
+    handlers.reserve(PtCount);
+
+    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
+    handlers.emplace_back(std::make_unique<Handler>(this));
+
     handlers[Center]->setPos(center);
     handlers[Point1]->setPos(pt);
 
@@ -85,6 +90,7 @@ void Circle::setRadius(double radius)
     m_radius = radius;
     redraw();
 }
+
 ////////////////////////////////////////////////////////////
 /// \brief Plugin::Plugin
 ///

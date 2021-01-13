@@ -15,13 +15,15 @@
 
 #include "graphicsitem.h"
 #include <QModelIndex>
+#include <interfaces/node.h>
+#include <memory>
 
 namespace Shapes {
 
 class Handler;
 class Node;
 
-class Shape : public GraphicsItem {
+class Shape : public GraphicsItem, public NodeInterface {
     friend class Handler;
     friend class Constructor;
     friend QDataStream& operator<<(QDataStream& stream, const Shape& shape);
@@ -41,17 +43,8 @@ public:
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
 
-    void setNode(Node* node);
-
-    QModelIndex index() const { return m_index; }
-    void setFileIndex(const QModelIndex& index) { m_index = index; }
-
-private:
-    Node* m_node = nullptr;
-    QModelIndex m_index;
-
 protected:
-    mutable QVector<Handler*> handlers;
+    mutable mvector<std::unique_ptr<Handler>> handlers;
     Paths m_paths;
 
     std::map<Shape*, QVector<QPointF>> hInitPos; // групповое перемещение
@@ -68,5 +61,12 @@ protected:
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
     virtual void updateOtherHandlers(Handler* handler);
+
+    // NodeInterface interface
+public:
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    void menu(QMenu &menu, FileTreeView *tv) const override;
 };
 }

@@ -68,18 +68,16 @@ void FileModel::addShape(Shapes::Shape* shape)
 {
     if (!shape)
         return;
-    //    NodeInterface* item(rootItem->child(static_cast<int>(FileModel::Shapes)));
-    //    QModelIndex index = createIndex(0, 0, item);
-    //    int rowCount = item->childCount();
-    //    beginInsertRows(index, rowCount, rowCount);
-    //    auto node = new Shapes::Node(sh->id());
-    //    item->addNode(node);
-    //    endInsertRows();
-    //    QModelIndex selectIndex = createIndex(rowCount, 0, node);
-    //    qDebug() << __FUNCTION__ << selectIndex;
-    //    sh->setFileIndex(selectIndex);
-    //    emit select(selectIndex);
-    //    emit select(createIndex(rowCount, 0, node));
+    NodeInterface* item(rootItem->child(static_cast<int>(FileModel::Shapes)));
+    QModelIndex index = createIndex(0, 0, item);
+    int rowCount = item->childCount();
+    beginInsertRows(index, rowCount, rowCount);
+    item->addNode(shape);
+    endInsertRows();
+    QModelIndex selectIndex = createIndex(rowCount, 0, shape);
+    qDebug() << __FUNCTION__ << selectIndex;
+    emit select(selectIndex);
+    emit select(createIndex(rowCount, 0, shape));
 }
 
 void FileModel::closeProject()

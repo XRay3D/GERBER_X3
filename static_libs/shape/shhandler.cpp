@@ -94,13 +94,15 @@ Handler::Handler(Shape* shape, HType type)
         break;
     }
     App::scene()->addItem(this);
-    handlers.append(this);
+    //    handlers.append(this);
+    qDebug(__FUNCTION__);
 }
 
 Handler::~Handler()
 {
-    if (handlers.size() && handlers.contains(this))
-        handlers.removeOne(this);
+    qDebug(__FUNCTION__);
+    //    if (handlers.size() && handlers.contains(this))
+    //        handlers.removeOne(this);
 }
 
 QRectF Handler::boundingRect() const { return rect(); }
@@ -170,7 +172,7 @@ void Handler::savePos()
     if (m_hType != Center)
         return;
     pt.clear();
-    for (Handler* item : shape->handlers)
+    for (auto& item : shape->handlers)
         pt.append(item->pos());
 }
 

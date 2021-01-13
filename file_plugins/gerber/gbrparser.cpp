@@ -197,10 +197,10 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch (...) {
-        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
-        qWarning() << "exeption S:" << errStr;
-        emit interface->fileError("", file->shortName() + "\n" + errStr);
-        emit interface->fileProgress(file->shortName(), 1, 1);
+        //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
+        //        qWarning() << "exeption S:" << errStr;
+        //        emit interface->fileError("", file->shortName() + "\n" + errStr);
+        //        emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
     mutex.unlock();

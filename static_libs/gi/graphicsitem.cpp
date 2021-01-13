@@ -85,7 +85,7 @@ void GraphicsItem::setVisible(bool visible)
 
 const FileInterface* GraphicsItem::file() const { return m_file; }
 
-int GraphicsItem::id() const { return m_id; }
+int GraphicsItem::id() const { return m_giId; }
 
 void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
