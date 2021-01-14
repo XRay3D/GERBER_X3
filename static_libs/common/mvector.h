@@ -72,6 +72,15 @@ struct mvector : std::vector<T> {
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
+    bool removeOne(const T& t)
+    {
+        auto it = std::find(V::begin(), V::end(), t);
+        if (it == V::end())
+            return false;
+        V::erase(it);
+        return true;
+    }
+
     mvector mid(size_t idx, size_t len = 0) const
     {
         mvector v;
@@ -154,6 +163,25 @@ struct mvector : std::vector<T> {
             return std::distance(V::begin(), it);
     }
 
+    inline T takeAt(const T& t) noexcept
+    {
+        auto it = std::find(V::begin(), V::end(), t);
+        if (it == V::end())
+            return {};
+        T r(std::move(*it));
+        V::erase(it);
+        return r;
+    }
+
+    inline T takeAt(size_t idx) noexcept
+    {
+        if (V::begin() + idx >= V::end())
+            return {};
+        T r(std::move(*(V::begin() + idx)));
+        V::erase(it);
+        return r;
+    }
+
     //    template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
     //    inline auto indexOf(P* t) const noexcept
     //    {
@@ -163,7 +191,8 @@ struct mvector : std::vector<T> {
     //            return std::distance(V::begin(), it);
     //    }
 
-    inline bool contains(const T& t) const noexcept
+    inline bool
+    contains(const T& t) const noexcept
     {
         return std::find(V::begin(), V::end(), t) != V::end();
     }

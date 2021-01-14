@@ -42,9 +42,8 @@ public:
 private:
     Shape* const shape;
     HType m_hType;
-    QVector<QPointF> pt;
+    mvector<QPointF> pt;
     QPointF lastPos;
-    inline static QVector<Handler*> handlers;
     void savePos();
 
     // QGraphicsItem interface

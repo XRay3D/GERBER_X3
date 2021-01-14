@@ -162,14 +162,14 @@ QPointF PolyLine::centroidFast()
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area
-    QPolygonF vertices;
+    mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
         if (h->hType() == Handler::Corner)
             vertices.append(h->pos());
     }
     // For all vertices except last
-    int i = 0;
+    size_t i = 0;
     for (; i < vertices.size() - 1; ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[i + 1]);

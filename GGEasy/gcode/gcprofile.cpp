@@ -34,7 +34,6 @@ void ProfileCreator::create()
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
-    
 
     m_toolDiameter = tool.getDiameter(depth);
 
@@ -100,7 +99,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     }
     // create Bridges
     if (bridgeItems.size()) {
-        for (int index = 0; index < m_returnPs.size(); ++index) {
+        for (size_t index = 0; index < m_returnPs.size(); ++index) {
             const Path& path = m_returnPs.at(index);
             QList<QPair<BridgeItem*, Point64>> biStack;
             for (BridgeItem* bi : bridgeItems) {
@@ -140,13 +139,76 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         }
     }
 
-    sortB(m_returnPs);
-    if (m_returnPs.size() != 0)
-        m_returnPss.push_back(m_returnPs);
-    sortBE(m_returnPss);
+    PolyTree polyTree;
+    {
+        Clipper clipper;
+        clipper.AddPaths(m_returnPs, ptSubject, true);
+        IntRect r(clipper.GetBounds());
+        int k = uScale;
+        Path outer = {
+            { r.left - k, r.bottom + k },
+            { r.right + k, r.bottom + k },
+            { r.right + k, r.top - k },
+            { r.left - k, r.top - k }
+        };
+        clipper.AddPath(outer, ptSubject, true);
+        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+        m_returnPs.clear();
+    }
+
+    m_returnPss.resize(1);
+    PolyTreeToPaths(polyTree, m_returnPss.front());
+
+    m_returnPss.front().takeFirst();
+
+    for (auto& path : m_returnPss.front())
+        path.append(path.first());
+
+    {
+        Paths& paths = m_returnPss.front();
+        for (size_t i = 0, j = 0, k = 0; i < paths.size(); ++i) {
+            if (!i) {
+                double d = std::numeric_limits<double>::max();
+                size_t ctr1 = 0, ctr2 = 0;
+                for (auto pt1 : paths[i - 1]) {
+                    for (auto pt2 : paths[i]) {
+                        if (auto tmp = pt1.distTo(pt2); d > tmp) {
+                            d = tmp;
+                            j = ctr1;
+                            k = ctr2;
+                        }
+                        ++ctr2;
+                    }
+                    ++ctr1;
+                }
+                std::rotate(paths[i - 1].begin(), paths[i - 1].end(), paths[i - 1].begin() + j);
+                std::rotate(paths[i - 0].begin(), paths[i - 0].end(), paths[i - 0].begin() + k);
+            } else {
+                double d = std::numeric_limits<double>::max();
+                size_t ctr2 = 0;
+                auto pt1 = paths[i - 1][j];
+                for (auto pt2 : paths[i]) {
+                    if (auto tmp = pt1.distTo(pt2); d > tmp) {
+                        d = tmp;
+                        k = ctr2;
+                    }
+                    ++ctr2;
+                }
+                std::rotate(paths[i - 0].begin(), paths[i - 0].end(), paths[i - 0].begin() + k);
+                j = k;
+            }
+        }
+    }
+
+    //    sortB(m_returnPs);
+    //    if (m_returnPs.size() != 0)
+    //        m_returnPss.push_back(m_returnPs);
+    //    sortBE(m_returnPss);
+
     if (m_returnPss.isEmpty()) {
         emit fileReady(nullptr);
     } else {
+        //std::reverse(m_returnPss.begin(), m_returnPss.end());
         m_gcp.gcType = Profile;
         m_file = new File(m_returnPss, m_gcp);
         m_file->setFileName(tool.nameEnc());
@@ -157,7 +219,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 void ProfileCreator::strip()
 {
     const double dOffset = m_toolDiameter * uScale * 0.5;
-    for (int i = 0; i < m_workingRawPs.size(); ++i) {
+    for (size_t i = 0; i < m_workingRawPs.size(); ++i) {
         auto& p = m_workingRawPs[i];
         if (p.size() == 2) {
             double l = Length(p.first(), p.last());

@@ -60,10 +60,6 @@ DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
 {
-    if (App::m_app->m_drillForm) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class DrillForm more than 2 times!!!");
-        exit(1);
-    }
     ui->setupUi(this);
     {
         ui->toolTable->setIconSize(QSize(IconSize, IconSize));
@@ -147,12 +143,13 @@ DrillForm::DrillForm(QWidget* parent)
 
     parent->setWindowTitle(ui->label->text());
 
-    App::m_app->m_drillForm = this;
+    App::setDrillForm(this);
 }
 
 DrillForm::~DrillForm()
 {
-    App::m_app->m_drillForm = nullptr;
+    App::setDrillForm(nullptr);
+
     MySettings settings;
     settings.beginGroup("DrillForm");
     settings.setValue(ui->rbClimb);

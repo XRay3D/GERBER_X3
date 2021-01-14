@@ -39,9 +39,9 @@ include_directories(
     ../../static_libs/gerber
     ../../static_libs/gi
     ../../static_libs/graphicsview
-    ../../static_libs/shape
     ../../static_libs/thermal
     ../../static_libs/tooldatabase
+    ../shape
     )
 
 link_directories(../../libs${SUFFIX})

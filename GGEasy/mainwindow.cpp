@@ -35,6 +35,7 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
+#include <datasoliditem.h>
 #include <forward_list>
 
 #include "leakdetector.h"
@@ -51,7 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     , recentProjects(this, "recentProjects")
     , m_project(new Project(this))
 {
-    App::m_app->m_mainWindow = this;
+    App::setMainWindow(this);
 
     ui->setupUi(this);
 
@@ -175,7 +176,7 @@ MainWindow::~MainWindow()
 {
     parserThread.quit();
     parserThread.wait();
-    App::m_app->m_mainWindow = nullptr;
+    App::setMainWindow(nullptr);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -539,11 +540,13 @@ void MainWindow::createActionsToolPath()
 
 void MainWindow::createActionsShape()
 {
+    if (App::shapeInterfaces().empty())
+        return;
 
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     tb->setToolTip(tr("Graphics Items"));
-    // tb->setEnabled(false);
+
     QAction* action = nullptr;
 
     for (auto& [type, pair] : App::shapeInterfaces()) {
@@ -552,43 +555,44 @@ void MainWindow::createActionsShape()
         action->setCheckable(true);
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
-            checked ? ShapePluginInterface::setShapePI(shInt)
+            checked ? ShapePluginInterface::finalizeShape_(),
+                ShapePluginInterface::setShapePI(shInt)
                     : ShapePluginInterface::finalizeShape_();
         });
     }
 
     tb->addSeparator();
 
-    //    auto ex = [](ClipType type) {
-    //        QList<QGraphicsItem*> si = App::scene()->selectedItems();
-    //        QList<GraphicsItem*> rmi;
-    //        for (QGraphicsItem* item : si) {
-    //            if (static_cast<GiType>(item->type()) == GiType::Gerber) {
-    //                DataSolidItem* gitem = static_cast<DataSolidItem*>(item);
-    //                Clipper clipper;
-    //                clipper.AddPaths(gitem->paths(), ptSubject, true);
-    //                for (QGraphicsItem* clipItem : si) {
-    //                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle) {
-    //                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
-    //                    }
-    //                }
-    //                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-    //                if (gitem->rPaths()->isEmpty()) {
-    //                    rmi.push_back(gitem);
-    //                } else {
-    //                    ReversePaths(*gitem->rPaths());
-    //                    gitem->redraw();
-    //                }
-    //            }
-    //        }
-    //        for (GraphicsItem* item : rmi) {
-    //            delete item->file()->itemGroup()->takeAt(item->file()->itemGroup()->indexOf(item));
-    //        }
-    //    };
-    //    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
-    //    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
-    //    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
-    //    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
+    auto ex = [](ClipType type) {
+        QList<QGraphicsItem*> si = App::scene()->selectedItems();
+        QList<GraphicsItem*> rmi;
+        for (QGraphicsItem* item : si) {
+            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+                auto gitem = static_cast<GiDataSolid*>(item);
+                Clipper clipper;
+                clipper.AddPaths(gitem->paths(), ptSubject, true);
+                for (QGraphicsItem* clipItem : si) {
+                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle) {
+                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
+                    }
+                }
+                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+                if (gitem->rPaths()->isEmpty()) {
+                    rmi.push_back(gitem);
+                } else {
+                    ReversePaths(*gitem->rPaths());
+                    gitem->redraw();
+                }
+            }
+        }
+        for (GraphicsItem* item : rmi) {
+            delete item->file()->itemGroup()->takeAt(item);
+        }
+    };
+    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
+    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
+    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
+    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
 }
 
 void MainWindow::saveGCodeFile(int id)

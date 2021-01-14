@@ -20,8 +20,11 @@ public:
     SplashScreen(const QPixmap& pixmap, Qt::WindowFlags f = Qt::WindowFlags())
         : QSplashScreen(pixmap, f)
     {
-        App::m_app->m_splashScreen = this;
+        App::setSplashScreen(this);
         setObjectName("SplashScreen");
     }
-    virtual ~SplashScreen() { App::m_app->m_splashScreen = nullptr; }
+    virtual ~SplashScreen()
+    {
+        App::setSplashScreen(nullptr);
+    }
 };

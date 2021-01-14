@@ -46,7 +46,6 @@ constexpr double zoomFactorAnim = 1.7;
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    assert(!App::m_app->m_graphicsView); //      "You cannot create class GraphicsView more than 2 times!!!"
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
@@ -111,10 +110,13 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
-    App::m_app->m_graphicsView = this;
+    App::setGraphicsView(this);
 }
 
-GraphicsView::~GraphicsView() { App::m_app->m_graphicsView = nullptr; }
+GraphicsView::~GraphicsView()
+{
+    App::setGraphicsView(nullptr);
+}
 
 void GraphicsView::setScene(QGraphicsScene* Scene)
 {

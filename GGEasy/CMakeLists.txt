@@ -88,21 +88,21 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-set(TS_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/translations/${PROJECT_NAME}_en.ts"
-    "${CMAKE_CURRENT_SOURCE_DIR}/translations/${PROJECT_NAME}_ru.ts"
-    )
+#set(TS_FILES
+#    "translations/${PROJECT_NAME}_en.ts"
+#    "translations/${PROJECT_NAME}_ru.ts"
+#    )
 
 #include_directories(${CMAKE_STATIC_LIBS_DIR})
 
 include_directories (
+    ../shape_plugins/shape
     ../static_libs/clipper
     ../static_libs/common
     ../static_libs/filetree
     ../static_libs/gerber
     ../static_libs/gi
     ../static_libs/graphicsview
-    ../static_libs/shape
     ../static_libs/thermal
     ../static_libs/tooldatabase
     )
@@ -143,7 +143,6 @@ set(HEADERS
     ${HEADERS}
     aboutform.h
     mainwindow.h
-    mvector.h
     openingdialog.h
     plugindialog.h
     point.h

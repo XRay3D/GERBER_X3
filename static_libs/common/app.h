@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QSharedMemory>
 #include <map>
+#include <mvector.h>
 
 class DrillForm;
 class FileModel;
@@ -33,6 +34,11 @@ class Project;
 class Scene;
 class ShapePluginInterface;
 class SplashScreen;
+namespace Shapes {
+class Handler;
+}
+
+using Handlers = mvector<Shapes::Handler*>;
 
 using PIF = std::tuple<FilePluginInterface*, QObject*>;
 using PIS = std::tuple<ShapePluginInterface*, QObject*>;
@@ -48,17 +54,6 @@ struct ShapeInterfacesMap : std::map<int, PIS> {
 };
 #endif
 class App {
-    friend class DrillForm;
-    friend class FileModel;
-    friend class GCodePropertiesForm;
-    friend class GraphicsView;
-    friend class LayoutFrames;
-    friend class MainWindow;
-    friend class Project;
-    friend class Scene;
-    friend class SplashScreen;
-    friend class FileTreeView;
-
     inline static App* m_app = nullptr;
 
     DrillForm* m_drillForm = nullptr;
@@ -77,11 +72,13 @@ class App {
 
     AppSettings m_appSettings;
     ToolHolder m_toolHolder;
+    Handlers m_handlers;
 
     App(const App&) = delete;
     App(App&&) = delete;
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
+
     QSharedMemory sm { "AppSettings" };
 
 public:
@@ -110,6 +107,67 @@ public:
     static SplashScreen* splashScreen() { return m_app->m_splashScreen; }
     static FileTreeView* fileTreeView() { return m_app->m_fileTreeView; }
 
+    static void setDrillForm(DrillForm* drillForm)
+    {
+        (m_app->m_drillForm && drillForm)
+            ? exit(-1)
+            : (m_app->m_drillForm = drillForm, void());
+    }
+    static void setFileModel(FileModel* fileModel)
+    {
+        (m_app->m_fileModel && fileModel)
+            ? exit(-2)
+            : (m_app->m_fileModel = fileModel, void());
+    }
+    static void setFileTreeView(FileTreeView* fileTreeView)
+    {
+        (m_app->m_fileTreeView && fileTreeView)
+            ? exit(-3)
+            : (m_app->m_fileTreeView = fileTreeView, void());
+    }
+    static void setGCodePropertiesForm(GCodePropertiesForm* gCodePropertiesForm)
+    {
+        (m_app->m_gCodePropertiesForm && gCodePropertiesForm)
+            ? exit(-4)
+            : (m_app->m_gCodePropertiesForm = gCodePropertiesForm, void());
+    }
+    static void setGraphicsView(GraphicsView* graphicsView)
+    {
+        (m_app->m_graphicsView && graphicsView)
+            ? exit(-5)
+            : (m_app->m_graphicsView = graphicsView, void());
+    }
+    static void setLayoutFrames(LayoutFrames* layoutFrames)
+    {
+        (m_app->m_layoutFrames && layoutFrames)
+            ? exit(-6)
+            : (m_app->m_layoutFrames = layoutFrames, void());
+    }
+    static void setMainWindow(MainWindow* mainWindow)
+    {
+        (m_app->m_mainWindow && mainWindow)
+            ? exit(-7)
+            : (m_app->m_mainWindow = mainWindow, void());
+    }
+    static void setProject(Project* project)
+    {
+        (m_app->m_project && project)
+            ? exit(-8)
+            : (m_app->m_project = project, void());
+    }
+    static void setScene(Scene* scene)
+    {
+        (m_app->m_scene && scene)
+            ? exit(-9)
+            : (m_app->m_scene = scene, void());
+    }
+    static void setSplashScreen(SplashScreen* splashScreen)
+    {
+        (m_app->m_splashScreen && splashScreen)
+            ? exit(-10)
+            : (m_app->m_splashScreen = splashScreen, void());
+    }
+
     static FilePluginInterface* fileInterface(int type) { return m_app->m_fileInterfaces.contains(type)
             ? std::get<FilePluginInterface*>(m_app->m_fileInterfaces[type])
             : nullptr; }
@@ -119,6 +177,7 @@ public:
             ? std::get<ShapePluginInterface*>(m_app->m_shapeInterfaces[type])
             : nullptr; }
     static ShapeInterfacesMap& shapeInterfaces() { return m_app->m_shapeInterfaces; }
+    static Handlers& shapeHandlers() { return m_app->m_handlers; }
 
     static AppSettings& settings() { return m_app->m_appSettings; }
     static ToolHolder& toolHolder() { return m_app->m_toolHolder; }

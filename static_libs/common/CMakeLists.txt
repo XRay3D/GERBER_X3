@@ -27,19 +27,20 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 add_library(common STATIC
     app.h
+    colorselector.cpp
     colorselector.h
+    colorselector.ui
     datastream.h
+    depthform.cpp
     depthform.h
+    doublespinbox.cpp
     doublespinbox.h
     leakdetector.h
-    settings.h
-    colorselector.cpp
-    depthform.cpp
-    doublespinbox.cpp
-    settings.cpp
-    project.h
+    mvector.h
     project.cpp
-    colorselector.ui
+    project.h
+    settings.cpp
+    settings.h
     )
 
 target_link_libraries(common PRIVATE

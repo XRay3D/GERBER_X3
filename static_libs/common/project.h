@@ -40,13 +40,13 @@ class QFile;
 enum class FileType;
 
 #if __cplusplus > 201709L
-using FilesMap = std::map<int, std::shared_ptr<FileInterface> /*, std::greater<int>*/>;
-using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape> /*, std::greater<int>*/>;
+using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
+using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
 #else
-struct FilesMap : std::map<int, std::shared_ptr<FileInterface> /*, std::greater<int>*/> {
+struct FilesMap : std::map<int, std::shared_ptr<FileInterface>> {
     bool contains(int key) const { return find(key) != end(); }
 };
-struct ShapesMap : std::map<int, std::shared_ptr<Shapes::Shape> /*, std::greater<int>*/> {
+struct ShapesMap : std::map<int, std::shared_ptr<Shapes::Shape>> {
     bool contains(int key) const { return find(key) != end(); }
 };
 #endif
@@ -127,8 +127,8 @@ public:
 
     Shapes::Shape* shape(int id);
 
-    int addFile(FileInterface* file);
-    int addShape(Shapes::Shape* shape);
+    int addFile(FileInterface* const file);
+    int addShape(Shapes::Shape* const shape);
 
     bool contains(FileInterface* file);
     QString name();

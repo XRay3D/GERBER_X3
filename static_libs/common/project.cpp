@@ -39,7 +39,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     int type;
     stream >> type;
     if (App::fileInterfaces().contains(type)) {
-        file = App::fileInterface(type)->createFile();
+        file.reset(App::fileInterface(type)->createFile());
         stream >> *file;
     }
     return stream;
@@ -47,14 +47,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape)
 {
-    qDebug() << __FUNCTION__ << "Shapes";
     stream << *shape;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape)
 {
-    qDebug() << __FUNCTION__ << "Shapes";
     int type;
     stream >> type;
     if (App::shapeInterfaces().contains(type)) {
@@ -68,14 +66,13 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
 Project::Project(QObject* parent)
     : QObject(parent)
 {
-    if (App::m_app->m_project) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class Project more than 2 times!!!");
-        exit(1);
-    }
-    App::m_app->m_project = this;
+    App::setProject(this);
 }
 
-Project::~Project() /*override*/ { App::m_app->m_project = nullptr; }
+Project::~Project()
+{
+    App::setProject(nullptr);
+}
 
 bool Project::save(const QString& fileName)
 {
@@ -344,7 +341,7 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape(Shapes::Shape* shape)
+int Project::addShape(Shapes::Shape* const shape)
 {
     qDebug() << __FUNCTION__ << "Shapes";
     if (!shape)
@@ -357,7 +354,8 @@ int Project::addShape(Shapes::Shape* shape)
         : 0;
     shape->m_giId = newId;
     shape->setToolTip(QString::number(newId));
-    m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
+    //m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
+    m_shapes.emplace(newId, shape);
     App::fileModel()->addShape(shape);
     setChanged();
     return newId;

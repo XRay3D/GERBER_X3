@@ -31,7 +31,7 @@ namespace Shapes {
 
 Shape::Shape()
     : GraphicsItem(nullptr)
-    , NodeInterface(m_giId, 1)
+    , m_node(new Node(this, m_giId))
 {
     m_paths.resize(1);
     changeColor();
@@ -66,7 +66,7 @@ void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // группово�
     QGraphicsItem::mouseMoveEvent(event);
     const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
     for (auto& [shape, hPos] : hInitPos) {
-        for (int i = 0, e = hPos.size(); i < e; ++i)
+        for (size_t i = 0, e = hPos.size(); i < e; ++i)
             shape->handlers[i]->QGraphicsItem::setPos(hPos[i] + dp);
         shape->redraw();
     }
@@ -102,8 +102,11 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
         const bool selected = value.toInt();
         for (auto& item : handlers)
             item->setVisible(selected);
-        if (index().isValid()) {
-            App::fileTreeView()->selectionModel()->select(index(), (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows);
+        if (m_node->index().isValid()) {
+            App::fileTreeView()->selectionModel()->select(m_node->index(),
+                (selected ? QItemSelectionModel::Select
+                          : QItemSelectionModel::Deselect)
+                    | QItemSelectionModel::Rows);
         }
     }
     return GraphicsItem::itemChange(change, value);
@@ -152,6 +155,7 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
             stream >> pos;
             stream >> type;
             shape.handlers.emplace_back(std::make_unique<Handler>(&shape, static_cast<Handler::HType>(type)));
+            //shape.handlers.emplace_back(new Handler(&shape, static_cast<Handler::HType>(type)));
             shape.handlers.back()->QGraphicsItem::setPos(pos);
             shape.handlers.back()->setVisible(false);
         }
@@ -184,30 +188,53 @@ void Shape::changeColor()
     animation.start();
 }
 
+Node* Shape::node() const
+{
+    return m_node;
+}
+
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (Column(index.column()) == Column::NameColorVisible && role == Qt::CheckStateRole) {
-        setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        return true;
+    qDebug(__FUNCTION__);
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
+        switch (role) {
+        //case Qt::DisplayRole:
+        //    return QString("%1 (%2)").arg(name()).arg(m_giId);
+        case Qt::CheckStateRole:
+            setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            return true;
+        //case Qt::DecorationRole:
+        //    return icon();
+        case Node::IdRole:
+            m_giId = value.toInt();
+            return true;
+        case Node::SelectRole:
+            setSelected(value.toBool());
+            return true;
+        default:
+            return false;
+        }
+    default:
+        return false;
     }
-    return false;
 }
 
 QVariant Shape::data(const QModelIndex& index, int role) const
 {
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
-            return QString("%1 (%2)")
-                .arg(name())
-                .arg(m_giId);
+            return QString("%1 (%2)").arg(name()).arg(m_giId);
         case Qt::CheckStateRole:
             return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return icon();
-        case Qt::UserRole:
-            return m_id;
+        case Node::IdRole:
+            return m_giId;
+        case Node::SelectRole:
+            return isSelected();
         default:
             return QVariant();
         }
@@ -219,10 +246,10 @@ QVariant Shape::data(const QModelIndex& index, int role) const
 Qt::ItemFlags Shape::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Column::SideType:
+    case NodeColumn::SideType:
         return itemFlag;
     default:
         return itemFlag;
@@ -232,7 +259,7 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const
 void Shape::menu(QMenu& menu, FileTreeView* /*tv*/) const
 {
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        App::fileModel()->removeRow(row(), index().parent());
+        App::fileModel()->removeRow(m_node->row(), m_node->index().parent());
     });
 }
 

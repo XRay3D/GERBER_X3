@@ -33,13 +33,13 @@ FileModel::FileModel(QObject* parent)
     rootItem->addNode(new FolderNode(tr("Tool Paths"), int(FileType::GCode)));
     rootItem->addNode(new FolderNode(tr("Dxf Files"), int(FileType::Dxf)));
     rootItem->addNode(new FolderNode(tr("Shapes"), int(FileType::Shapes)));
-    App::m_app->m_fileModel = this;
+    App::setFileModel(this);
 }
 
 FileModel::~FileModel()
 {
     delete rootItem;
-    App::m_app->m_fileModel = nullptr;
+    App::setFileModel(nullptr);
 }
 
 void FileModel::addFile(FileInterface* file)
@@ -72,7 +72,7 @@ void FileModel::addShape(Shapes::Shape* shape)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->addNode(shape);
+    item->addNode(shape->node());
     endInsertRows();
     QModelIndex selectIndex = createIndex(rowCount, 0, shape);
     qDebug() << __FUNCTION__ << selectIndex;
@@ -173,7 +173,7 @@ bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 
 int FileModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return int(NodeInterface::Column::Count);
+    return int(NodeInterface::NodeColumn::Count);
 }
 
 int FileModel::rowCount(const QModelIndex& parent) const

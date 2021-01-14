@@ -511,14 +511,15 @@ LayoutFrames::LayoutFrames()
     : QGraphicsObject(nullptr)
 {
     setZValue(-std::numeric_limits<double>::max());
-    App::m_app->m_layoutFrames = this;
     App::scene()->addItem(this);
     setFlag(ItemIsSelectable, false);
+
+    App::setLayoutFrames(this);
 }
 
 LayoutFrames::~LayoutFrames()
 {
-    App::m_app->m_layoutFrames = nullptr;
+    App::setLayoutFrames(nullptr);
 }
 
 int LayoutFrames::type() const

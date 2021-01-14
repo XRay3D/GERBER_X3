@@ -71,7 +71,7 @@ public:
         [[maybe_unused]] const ThParam2& param,
         [[maybe_unused]] Tool& tool) { return {}; };
     [[nodiscard]] virtual SettingsTab createSettingsTab([[maybe_unused]] QWidget* parent) { return { nullptr, "" }; };
-    [[nodiscard]] virtual std::shared_ptr<FileInterface> createFile() = 0;
+    [[nodiscard]] virtual FileInterface* createFile() = 0;
     [[nodiscard]] virtual QJsonObject info() const = 0;
 
     virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};

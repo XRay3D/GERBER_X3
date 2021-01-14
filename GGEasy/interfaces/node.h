@@ -14,7 +14,6 @@
 #pragma once
 
 #include "project.h"
-
 #include "filemodel.h"
 
 #include <QAbstractItemModel>
@@ -32,6 +31,18 @@ class QMenu;
 namespace Shapes {
 class Shape;
 }
+
+enum class NodeColumn : int {
+    NameColorVisible,
+    SideType,
+    ItemsType,
+    Count
+};
+
+enum class NodeR : int {
+    IdRole = Qt::UserRole,
+    SelectRole
+};
 
 inline QPixmap decoration(QColor color, QChar chr = {})
 {
@@ -55,6 +66,10 @@ inline QPixmap decoration(QColor color, QChar chr = {})
 
 class NodeInterface {
 public:
+    enum Role : int {
+        IdRole = Qt::UserRole,
+        SelectRole
+    };
     explicit NodeInterface(const int& id, int type = 0)
         : m_id(id)
         , m_type(type)
@@ -64,9 +79,9 @@ public:
     virtual ~NodeInterface()
     {
         if (m_id > -1 && m_type > -1) {
-            if (m_type)
+            if (m_type) {
                 App::project()->deleteShape(m_id);
-            else
+            } else
                 App::project()->deleteFile(m_id);
         }
         childItems.clear();
@@ -106,7 +121,7 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu& menu, FileTreeView* tv) const = 0;
 
-    enum class Column {
+    enum class NodeColumn {
         NameColorVisible,
         SideType,
         ItemsType,
@@ -116,12 +131,12 @@ public:
     NodeInterface(const NodeInterface&) = delete;
     NodeInterface& operator=(const NodeInterface&) = delete;
     QModelIndex index(int column = 0) const { return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this)); }
+    const QStringList sideStrList;
 
 protected:
     const int& m_id;
     const int m_type;
 
-    const QStringList sideStrList;
     NodeInterface* m_parentItem = nullptr;
     QList<QSharedPointer<NodeInterface>> childItems;
     inline FileInterface* file() const { return App::project()->file(m_id); }
