@@ -4464,9 +4464,11 @@ void MinkowskiDiff(const Path& poly1, const Path& poly2, Paths& solution)
 }
 //------------------------------------------------------------------------------
 
-enum NodeType { ntAny,
+enum NodeType {
+    ntAny,
     ntOpen,
-    ntClosed };
+    ntClosed
+};
 
 void AddPolyNodeToPaths(const PolyNode& polynode, NodeType nodetype, Paths& paths)
 {

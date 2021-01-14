@@ -4,7 +4,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
+* Date      :  14 January 2021                                                 *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -14,7 +14,6 @@
 *                                                                              *
 *******************************************************************************/
 #include "gcpathitem.h"
-
 
 #include "gcode/gcode.h"
 
@@ -106,34 +105,21 @@ void GcPathItem::updateArrows()
         for (const QPolygonF& path : m_shape.toSubpathPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
-                double length = 20 * scaleFactor();
+                double length = 30 * scaleFactor();
                 if (line.length() < length && i)
                     continue;
                 if (length > 0.5)
                     length = 0.5;
                 const double angle = line.angle();
                 line.setLength(length);
-                line.setAngle(angle + 8);
+                line.setAngle(angle + 10);
                 m_arrows.moveTo(line.p1());
                 m_arrows.lineTo(line.p2());
                 //painter->drawLine(line);
-                line.setAngle(angle - 8);
+                line.setAngle(angle - 10);
                 m_arrows.moveTo(line.p1());
                 m_arrows.lineTo(line.p2());
                 //painter->drawLine(line);
-
-                //                    if (0) {
-                //                        painter->save();
-                //                        const QString text = "   " + QString::number(i);
-                //                        const QRectF textRect = QFontMetricsF(painter->font()).boundingRect(QRectF(), Qt::AlignLeft, text);
-                //                        const double k = 1.0 / GraphicsView ::123->matrix().m11();
-                //                        painter->translate(path[i]);
-                //                        painter->scale(k, -k);
-                //                        //painter->setBrush(QColor(127, 127, 127, 255));
-                //                        //painter->drawRect(textRect);
-                //                        painter->drawText(textRect, Qt::AlignLeft, text);
-                //                        painter->restore();
-                //                    }
             }
         }
     }
