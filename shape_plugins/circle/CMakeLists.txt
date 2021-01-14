@@ -32,16 +32,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 endif()
 
 include_directories(
+    ../../GGEasy
     ../../static_libs/clipper
     ../../static_libs/common
     ../../static_libs/filetree
     ../../static_libs/gerber
     ../../static_libs/gi
     ../../static_libs/graphicsview
-    ../../static_libs/shape
     ../../static_libs/thermal
     ../../static_libs/tooldatabase
-    ../../GGEasy
+    ../shape
     )
 
 link_directories(../../libs${SUFFIX})

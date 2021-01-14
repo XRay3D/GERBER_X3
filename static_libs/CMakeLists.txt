@@ -62,10 +62,10 @@ include_directories(
     ../static_libs/gerber
     ../static_libs/gi
     ../static_libs/graphicsview
-    ../static_libs/shape
     ../static_libs/thermal
     ../static_libs/tooldatabase
     ../static_libs/tooldatabase
+    ../shape_plugins/shape
     )
 
 link_directories(../libs${SUFFIX})
@@ -78,4 +78,3 @@ add_subdirectory(graphicsview)
 add_subdirectory(common)
 add_subdirectory(thermal)
 add_subdirectory(tooldatabase)
-add_subdirectory(shape)

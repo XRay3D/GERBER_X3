@@ -94,15 +94,14 @@ Handler::Handler(Shape* shape, HType type)
         break;
     }
     App::scene()->addItem(this);
-    //    handlers.append(this);
+    App::shapeHandlers().emplace_back(this);
     qDebug(__FUNCTION__);
 }
 
 Handler::~Handler()
 {
     qDebug(__FUNCTION__);
-    //    if (handlers.size() && handlers.contains(this))
-    //        handlers.removeOne(this);
+    App::shapeHandlers().removeOne(this);
 }
 
 QRectF Handler::boundingRect() const { return rect(); }
@@ -135,12 +134,12 @@ void Handler::setPos(const QPointF& pos)
 {
     QGraphicsItem::setPos(pos);
     if (m_hType == Center) {
-        for (int i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
+        for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.first());
     } else /*if (!Constructor::item) */ { // прилипание
         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
-        for (Handler* h : handlers) {
+        for (Handler* h : App::shapeHandlers()) {
             if (h != this && //
                 (h->shape != shape || (fl && h->hType() != Adder)) && //
                 h->shape->isVisible() && //

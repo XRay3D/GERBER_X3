@@ -27,10 +27,6 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm)
 {
-    if (App::m_app->m_gCodePropertiesForm) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class GCodePropertiesForm more than 2 times!!!");
-        exit(1);
-    }
     ui->setupUi(this);
 
     connect(ui->dsbxClearence, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
@@ -121,12 +117,12 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
         button->setIconSize({ 16, 16 });
     }
 
-    App::m_app->m_gCodePropertiesForm = this;
+    App::setGCodePropertiesForm(this);
 }
 
 GCodePropertiesForm::~GCodePropertiesForm()
 {
-    App::m_app->m_gCodePropertiesForm = nullptr;
+    App::setGCodePropertiesForm(nullptr);
 
     if (Marker::get(Marker::Home))
         Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));

@@ -14,9 +14,12 @@
 *                                                                              *
 *******************************************************************************/
 #include "shtext.h"
+
 #include "scene.h"
 #include "shhandler.h"
+#include "shnode.h"
 #include "shtextdialog.h"
+
 #include <QApplication>
 #include <QIcon>
 #include <QPainter>
@@ -29,8 +32,7 @@
 namespace Shapes {
 
 Text::Text(QPointF pt1)
-    : iData(lastUsedIData)
-    , fileName(qApp->applicationDirPath() + "/XrSoft/Text.dat")
+    : iData(loadIData())
 {
     m_paths.resize(1);
 
@@ -38,14 +40,6 @@ Text::Text(QPointF pt1)
 
     handlers.first()->setPos(pt1);
 
-    QFile file(fileName);
-    if (file.open(QIODevice::ReadOnly)) {
-        QDataStream in(&file);
-        in >> lastUsedIData;
-    } else {
-        qWarning("Couldn't open Text.dat file.");
-    }
-    iData = lastUsedIData;
     redraw();
 
     App::scene()->addItem(this);
@@ -155,9 +149,110 @@ void Text::setSide(const Side& side)
     redraw();
 }
 
+bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
+        switch (role) {
+        case Qt::CheckStateRole:
+            setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            return true;
+        case Qt::EditRole:
+            setText(value.toString());
+            return true;
+        }
+        break;
+    case NodeColumn::SideType:
+        if (role == Qt::EditRole) {
+            setSide(static_cast<Side>(value.toBool()));
+            return true;
+        }
+        break;
+    default:
+        break;
+    }
+    return Shape::setData(index, value, role);
+}
+
+Qt::ItemFlags Text::flags(const QModelIndex& index) const
+{
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
+        return Shape::flags(index) | Qt::ItemIsEditable;
+    case NodeColumn::SideType:
+        return Shape::flags(index) | Qt::ItemIsEditable;
+    default:
+        return Shape::flags(index);
+    }
+}
+
+QVariant Text::data(const QModelIndex& index, int role) const
+{
+    switch (NodeColumn(index.column())) {
+    case NodeColumn::NameColorVisible:
+        switch (role) {
+        case Qt::DisplayRole:
+            return QString("%1 (%2, %3)")
+                .arg(name())
+                .arg(m_giId)
+                .arg(text());
+        case Qt::EditRole:
+            return text();
+        default:
+            return Shape::data(index, role);
+        }
+    case NodeColumn::SideType:
+        switch (role) {
+        case Qt::DisplayRole:
+        case Qt::ToolTipRole:
+            return m_node->sideStrList[side()];
+        case Qt::EditRole:
+            return static_cast<bool>(side());
+        default:
+            return Shape::data(index, role);
+        }
+    default:
+        return Shape::data(index, role);
+    }
+}
+
+void Text::menu(QMenu& menu, FileTreeView* tv) const
+{
+    Shape::menu(menu, tv);
+    menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
+        ShTextDialog dlg({ const_cast<Text*>(this) }, tv);
+        dlg.exec();
+    });
+}
+
 void Text::write(QDataStream& stream) const { stream << iData; }
 
 void Text::read(QDataStream& stream) { stream >> iData; }
+
+void Text::saveIData()
+{
+    QSettings settings;
+    settings.beginGroup("ShapeText");
+    settings.setValue("font", lastUsedIData.font);
+    settings.setValue("text", lastUsedIData.text);
+    settings.setValue("side", lastUsedIData.side);
+    settings.setValue("angle", lastUsedIData.angle);
+    settings.setValue("height", lastUsedIData.height);
+    settings.setValue("handleAlign", lastUsedIData.handleAlign);
+}
+
+Text::InternalData Text::loadIData()
+{
+    QSettings settings;
+    settings.beginGroup("ShapeText");
+    lastUsedIData.font = settings.value("font").toString();
+    lastUsedIData.text = settings.value("text").toString();
+    lastUsedIData.side = static_cast<Side>(settings.value("side").toInt());
+    lastUsedIData.angle = settings.value("angle").toDouble();
+    lastUsedIData.height = settings.value("height").toDouble();
+    lastUsedIData.handleAlign = settings.value("handleAlign").toInt();
+    return lastUsedIData;
+}
 
 void Text::save() { iDataCopy = iData; }
 
@@ -170,14 +265,7 @@ void Text::restore()
 void Text::ok()
 {
     lastUsedIData = iData;
-    QFile file(fileName);
-    if (file.open(QIODevice::WriteOnly)) {
-        QDataStream out(&file);
-        lastUsedIData.text = QObject::tr("Text");
-        out << lastUsedIData;
-    } else {
-        qWarning("Couldn't open Text.dat file.");
-    }
+    saveIData();
 }
 
 void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -256,5 +344,4 @@ void PluginText::finalizeShape()
     shape = nullptr;
     emit actionUncheck();
 }
-
 }

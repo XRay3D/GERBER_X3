@@ -22,7 +22,23 @@ set(CMAKE_AUTORCC ON)
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+
+include_directories(
+    ../../GGEasy
+    ../../static_libs/clipper
+    ../../static_libs/common
+    ../../static_libs/filetree
+    ../../static_libs/gerber
+    ../../static_libs/gi
+    ../../static_libs/graphicsview
+    ../../static_libs/thermal
+    ../../static_libs/tooldatabase
+    ../../static_libs/tooldatabase
+    )
+
+link_directories(../../libs${SUFFIX})
 
 add_library(shape STATIC
     shape.cpp

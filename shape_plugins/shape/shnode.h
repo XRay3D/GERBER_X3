@@ -13,31 +13,20 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/pluginfile.h"
+#include "interfaces/node.h"
 
-#include <QObject>
+namespace Shapes {
+class Node : public NodeInterface {
+    Shape* shape;
 
-namespace GCode {
-
-class Plugin : public QObject, public FilePluginInterface {
-    Q_OBJECT
 public:
-    explicit Plugin(QObject* parent = nullptr);
-    QObject* getObject() override;
-    bool thisIsIt(const QString& fileName) override;
-    int type() const override;
+    explicit Node(Shape* shape, int& id);
+    ~Node() override = default;
 
-    SettingsTab createSettingsTab(QWidget* parent) override;
-    FileInterface* createFile() override;
-    QJsonObject info() const override;
-    void createMainMenu(QMenu& menu, FileTreeView* tv) override;
-
-public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
-
-signals:
-    void fileError(const QString& fileName, const QString& error) override;
-    void fileProgress(const QString& fileName, int max, int value) override;
-    void fileReady(FileInterface* file) override;
+    // AbstractNode interface
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    void menu(QMenu& menu, FileTreeView* tv) const override;
 };
 }

@@ -42,11 +42,11 @@ public:
         PtCount
     };
 
-    // NodeInterface interface
-    //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
-    //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
-    //    QVariant data(const QModelIndex& index, int role) const override { }
-    //    void menu(QMenu& menu, FileTreeView* tv) const override { }
+    // Shape interface
+    //        bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
+    //        Qt::ItemFlags flags(const QModelIndex& index) const override { }
+    //        QVariant data(const QModelIndex& index, int role) const override { }
+    //        void menu(QMenu& menu, FileTreeView* tv) const override { }
 
 private:
     double m_radius;

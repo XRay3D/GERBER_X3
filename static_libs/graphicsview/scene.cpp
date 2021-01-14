@@ -15,10 +15,10 @@
 *******************************************************************************/
 #include "scene.h"
 
-#include <graphicsitem.h>
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
+#include <graphicsitem.h>
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -40,14 +40,13 @@
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
-    if (App::m_app->m_scene) {
-        QMessageBox::critical(nullptr, "Err", "You cannot create class Scene more than 2 times!!!");
-        exit(1);
-    }
-    App::m_app->m_scene = this;
+    App::setScene(this);
 }
 
-Scene::~Scene() { App::m_app->m_scene = nullptr; }
+Scene::~Scene()
+{
+    App::setScene(nullptr);
+}
 
 void Scene::RenderPdf()
 {
@@ -207,7 +206,7 @@ void Scene::drawRuller(QPainter* painter)
     painter->translate(pt);
     painter->scale(scaleFactor, -scaleFactor);
     int i = 0;
-    for (const QString &txt : text.split('\n')) {
+    for (const QString& txt : text.split('\n')) {
         QPainterPath path;
         path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * ++i), font, txt);
         painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));

@@ -22,7 +22,7 @@
 
 #include "settings.h"
 
-#include "interfaces/file.h"
+//#include "interfaces/file.h"
 #include "interfaces/node.h"
 #include "mainwindow.h"
 #include "radiodelegate.h"
@@ -46,12 +46,12 @@ FileTreeView::FileTreeView(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
-    App::m_app->m_fileTreeView = this;
+    App::setFileTreeView(this);
 }
 
 FileTreeView::~FileTreeView()
 {
-    App::m_app->m_fileTreeView = nullptr;
+    App::setFileTreeView(nullptr);
 }
 
 void FileTreeView::updateTree()
@@ -91,41 +91,39 @@ void FileTreeView::on_doubleClicked(const QModelIndex& index)
 
 void FileTreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
-        QModelIndex& index = selected.indexes().first();
+    if (!selected.indexes().isEmpty()) {
+        auto index = selected.indexes().first();
         const int row = index.parent().row();
         switch (row) {
         case FileModel::GerberFiles:
         case FileModel::DrillFiles:
-        case FileModel::ToolPath: {
-            const int id = index.data(Qt::UserRole).toInt();
-            FileInterface* file = App::project()->file(id);
-            file->itemGroup()->setZValue(id);
-        } break;
+        case FileModel::ToolPath:
+            //            const int id = index.data(Qt::UserRole).toInt();
+            //            FileInterface* file = App::project()->file(id);
+            //            file->itemGroup()->setZValue(id);
+            m_model->setData(index, true, NodeInterface::SelectRole);
+            break;
         case FileModel::Shapes:
-            //            for (auto& index : selected.indexes()) {
-            //                const int id = index.data(Qt::UserRole).toInt();
-            //                App::project()->aShape(id)->setSelected(true);
-            //            }
+            for (auto& index : selected.indexes())
+                m_model->setData(index, true, NodeInterface::SelectRole);
             break;
         }
     }
     if (!deselected.indexes().isEmpty()) {
-        QModelIndex& index = deselected.indexes().first();
+        auto index = deselected.indexes().first();
         const int row = index.parent().row();
         switch (row) {
         case FileModel::GerberFiles:
         case FileModel::DrillFiles:
-        case FileModel::ToolPath: {
-            const int id = index.data(Qt::UserRole).toInt();
-            FileInterface* file = App::project()->file(id);
-            file->itemGroup()->setZValue(-id);
-        } break;
+        case FileModel::ToolPath:
+            //            const int id = index.data(Qt::UserRole).toInt();
+            //            FileInterface* file = App::project()->file(id);
+            //            file->itemGroup()->setZValue(-id);
+            m_model->setData(index, false, NodeInterface::SelectRole);
+            break;
         case FileModel::Shapes:
-            //            for (auto& index : deselected.indexes()) {
-            //                const int id = index.data(Qt::UserRole).toInt();
-            //                App::project()->aShape(id)->setSelected(false);
-            //            }
+            for (auto& index : selected.indexes())
+                m_model->setData(index, false, NodeInterface::SelectRole);
             break;
         }
     }
@@ -164,12 +162,12 @@ void FileTreeView::setModel(QAbstractItemModel* model)
     connect(m_model, &FileModel::rowsInserted, this, &FileTreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &FileTreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &FileTreeView::updateTree);
-//    connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
-//        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
-//    });
-#ifndef QT_DEBUG
+    //    connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
+    //        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+    //    });
+    //#ifndef QT_DEBUG
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::onSelectionChanged);
-#endif
+    //#endif
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileTreeView::updateTree);
     connect(this, &FileTreeView::doubleClicked, this, &FileTreeView::on_doubleClicked);
 
@@ -220,7 +218,7 @@ void FileTreeView::contextMenuEvent(QContextMenuEvent* event)
     m_childCount = static_cast<NodeInterface*>(m_menuIndex.internalPointer())->childCount();
     const int type = m_menuIndex.data(Qt::UserRole + 0).toInt();
     const bool isFolder = m_menuIndex.data(Qt::UserRole + 1).toInt() == -1;
-    if (isFolder && m_childCount) {
+    if (isFolder && m_childCount && App::fileInterfaces().contains(type)) {
         App::fileInterface(type)->createMainMenu(menu, this);
     } else {
         reinterpret_cast<NodeInterface*>(m_menuIndex.internalId())->menu(menu, this);

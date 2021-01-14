@@ -34,7 +34,7 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::GCode); }
 
-std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
+FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const
 {

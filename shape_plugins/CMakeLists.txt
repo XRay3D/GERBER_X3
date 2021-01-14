@@ -48,9 +48,17 @@ endif()
 
 set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin/plugins")
 
+set(STATIC_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+
+add_subdirectory(shape)
+
 add_subdirectory(circle)
-#add_subdirectory(circlearc)
-#add_subdirectory(polyline)
-#add_subdirectory(rectangle)
-#add_subdirectory(text)
+add_subdirectory(circlearc)
+add_subdirectory(polyline)
+add_subdirectory(rectangle)
+add_subdirectory(text)
 

@@ -73,9 +73,6 @@ public:
 signals:
     virtual void actionUncheck(bool = false) = 0;
 
-    // slots:
-    //    virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
-
 protected:
     App app;
     enum { IconSize = 24 };

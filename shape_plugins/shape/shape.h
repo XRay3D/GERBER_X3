@@ -21,11 +21,11 @@
 namespace Shapes {
 
 class Handler;
-class Node;
 
-class Shape : public GraphicsItem, public NodeInterface {
+class Shape : public GraphicsItem {
+    friend class Node;
     friend class Handler;
-    friend class Constructor;
+
     friend QDataStream& operator<<(QDataStream& stream, const Shape& shape);
     friend QDataStream& operator>>(QDataStream& stream, Shape& shape);
 
@@ -43,11 +43,13 @@ public:
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
 
+    Node* node() const;
+
 protected:
     mutable mvector<std::unique_ptr<Handler>> handlers;
     Paths m_paths;
-
-    std::map<Shape*, QVector<QPointF>> hInitPos; // групповое перемещение
+    Node* m_node;
+    std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos; // групповое перемещение
 
     // QGraphicsItem interface
@@ -62,11 +64,9 @@ protected:
     virtual void read(QDataStream& stream);
     virtual void updateOtherHandlers(Handler* handler);
 
-    // NodeInterface interface
-public:
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    void menu(QMenu &menu, FileTreeView *tv) const override;
+    virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+    virtual QVariant data(const QModelIndex& index, int role) const;
+    virtual void menu(QMenu& menu, FileTreeView* tv) const;
 };
 }

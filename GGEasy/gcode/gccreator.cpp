@@ -604,7 +604,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 
 //void Creator:://PROG .3setProgMax(int progressMax)
 //{
-//    //        if (App::m_app->m_creator != nullptr)
+//    //        if (App::set_creator != nullptr)
 //    //PROG  m_progressMax += progressMax;
 //}
 
@@ -624,7 +624,7 @@ void Creator::setGcp(const GCodeParams& gcp)
 //    //            m_cancel = false;
 //    //            throw cancelException("canceled by user");
 //    //        }
-//    if (App::m_app->m_creator != nullptr)
+//    if (App::set_creator != nullptr)
 //        if (//PROG  m_progressMax < ++//PROG m_progressVal) {
 //            if (//PROG  m_progressMax == 0)
 //                //PROG  m_progressMax = 100;
