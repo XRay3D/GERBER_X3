@@ -4,7 +4,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
+* Date      :  14 January 2021                                                 *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -31,6 +31,8 @@ void ProfileCreator::create()
 {
     createProfile(m_gcp.tools.first(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
+
+GCodeType ProfileCreator::type() { return Profile; }
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
@@ -157,48 +159,14 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     }
 
     m_returnPss.resize(1);
-    PolyTreeToPaths(polyTree, m_returnPss.front());
+    polyTreeToPaths(polyTree, m_returnPss.front());
 
     m_returnPss.front().takeFirst();
 
+    reorder();
+
     for (auto& path : m_returnPss.front())
         path.append(path.first());
-
-    {
-        Paths& paths = m_returnPss.front();
-        for (size_t i = 0, j = 0, k = 0; i < paths.size(); ++i) {
-            if (!i) {
-                double d = std::numeric_limits<double>::max();
-                size_t ctr1 = 0, ctr2 = 0;
-                for (auto pt1 : paths[i - 1]) {
-                    for (auto pt2 : paths[i]) {
-                        if (auto tmp = pt1.distTo(pt2); d > tmp) {
-                            d = tmp;
-                            j = ctr1;
-                            k = ctr2;
-                        }
-                        ++ctr2;
-                    }
-                    ++ctr1;
-                }
-                std::rotate(paths[i - 1].begin(), paths[i - 1].end(), paths[i - 1].begin() + j);
-                std::rotate(paths[i - 0].begin(), paths[i - 0].end(), paths[i - 0].begin() + k);
-            } else {
-                double d = std::numeric_limits<double>::max();
-                size_t ctr2 = 0;
-                auto pt1 = paths[i - 1][j];
-                for (auto pt2 : paths[i]) {
-                    if (auto tmp = pt1.distTo(pt2); d > tmp) {
-                        d = tmp;
-                        k = ctr2;
-                    }
-                    ++ctr2;
-                }
-                std::rotate(paths[i - 0].begin(), paths[i - 0].end(), paths[i - 0].begin() + k);
-                j = k;
-            }
-        }
-    }
 
     //    sortB(m_returnPs);
     //    if (m_returnPs.size() != 0)
@@ -261,5 +229,84 @@ void ProfileCreator::strip()
             }
         }
     }
+}
+
+void ProfileCreator::reorder()
+{
+    Paths& paths = m_returnPss.front();
+    std::reverse(paths.begin(), paths.end());
+    int ctr1 = 0, ctr2 = 0, j = 0, k = 0;
+    for (size_t i = 1; i < paths.size(); ++i) {
+        Path& path1 = paths[i - 1];
+        Path& path2 = paths[i];
+        if (i == 1) {
+            double d = std::numeric_limits<double>::max();
+            ctr1 = 0;
+            for (auto pt1 : path1) {
+                ctr2 = 0;
+                for (auto pt2 : path2) {
+                    if (auto tmp = pt1.distTo(pt2); d > tmp) {
+                        d = tmp;
+                        j = ctr1;
+                        k = ctr2;
+                    }
+                    ++ctr2;
+                }
+                ++ctr1;
+            }
+            std::rotate(path1.begin(), path1.begin() + j, path1.end());
+            std::rotate(path2.begin(), path2.begin() + k, path2.end());
+        } else {
+            double d = std::numeric_limits<double>::max();
+            auto pt1 = path1.front();
+            ctr2 = 0;
+            for (auto pt2 : path2) {
+                if (auto tmp = pt1.distTo(pt2); d > tmp) {
+                    d = tmp;
+                    k = ctr2;
+                }
+                ++ctr2;
+            }
+            std::rotate(path2.begin(), path2.begin() + k, path2.end());
+        }
+    }
+}
+
+void ProfileCreator::addPolyNodeToPaths(const PolyNode& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
+{
+    bool match = true;
+    if (nodetype == ntClosed)
+        match = !polynode.IsOpen();
+    else if (nodetype == ntOpen)
+        return;
+
+    if (!polynode.Contour.empty() && match)
+        paths.push_back(polynode.Contour);
+    for (size_t i = 0; i < polynode.ChildCount(); ++i)
+        addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
+}
+
+void ProfileCreator::polyTreeToPaths(const PolyTree& polytree, Paths& paths)
+{
+    paths.resize(0);
+    paths.reserve(polytree.Total());
+    addPolyNodeToPaths(polytree, ntAny, paths);
+}
+
+void ProfileCreator::closedPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
+{
+    paths.resize(0);
+    paths.reserve(polytree.Total());
+    addPolyNodeToPaths(polytree, ntClosed, paths);
+}
+
+void ProfileCreator::openPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
+{
+    paths.resize(0);
+    paths.reserve(polytree.Total());
+    //Open paths are top level only, so ...
+    for (size_t i = 0; i < polytree.ChildCount(); ++i)
+        if (polytree.Childs[i]->IsOpen())
+            paths.push_back(polytree.Childs[i]->Contour);
 }
 }

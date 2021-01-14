@@ -178,7 +178,7 @@ struct mvector : std::vector<T> {
         if (V::begin() + idx >= V::end())
             return {};
         T r(std::move(*(V::begin() + idx)));
-        V::erase(it);
+        V::erase(V::begin() + idx);
         return r;
     }
 
