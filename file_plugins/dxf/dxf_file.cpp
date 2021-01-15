@@ -43,7 +43,7 @@ namespace Dxf {
 File::File()
     : FileInterface()
 {
-    m_node = new Node(m_id);
+    m_node = new Node(this, m_id);
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },

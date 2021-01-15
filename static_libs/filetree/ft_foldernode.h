@@ -13,19 +13,23 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/node.h"
+#include "ft_node.h"
 
-class FolderNode : public NodeInterface {
+namespace FileTree {
+
+class FolderNode : public FileTree::Node {
     QString name;
     Qt::CheckState m_checkState = Qt::Checked;
 
 public:
-    explicit FolderNode(const QString& name, int type);
+    explicit FolderNode(const QString& name, int& type);
     ~FolderNode() override = default;
 
-    // NodeInterface interface
+    // FileTree::Node interface
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    void menu(QMenu& menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, View* tv) const override;
 };
+
+}

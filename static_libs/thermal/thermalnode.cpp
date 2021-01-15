@@ -51,14 +51,14 @@ ThermalNode* ThermalNode::child(int row) const { return childs.at(row).get(); }
 
 ThermalNode* ThermalNode::parentItem() { return m_parent; }
 
-int ThermalNode::childCount() const { return childs.count(); }
+int ThermalNode::childCount() const { return static_cast<int>(childs.count()); }
 
 int ThermalNode::row() const
 {
     if (m_parent)
-        for (int i = 0, size = m_parent->childs.size(); i < size; ++i)
+        for (size_t i = 0, size = m_parent->childs.size(); i < size; ++i)
             if (m_parent->childs[i].get() == this)
-                return i;
+                return static_cast<int>(i);
     return 0;
 }
 

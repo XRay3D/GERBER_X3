@@ -21,7 +21,7 @@
 #include "point.h"
 #include "project.h"
 //#include "errno.h"
-//#include "filemodel.h"
+//#include "ft_model.h"
 //#include "forms/bridgeitem.h"
 //#include "gccreator.h"
 //#include "gcvoronoi.h"
@@ -192,7 +192,7 @@ void Creator::addRawPaths(Paths rawPaths)
     for (size_t i = 0; i < rawPaths.size(); ++i) {
         Point64& pf = rawPaths[i].front();
         Point64& pl = rawPaths[i].back();
-        if (rawPaths[i].size() > 3 && (pf == pl || Length(pf, pl) < glueLen)) {
+        if (rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < glueLen)) {
             clipper.AddPath(rawPaths[i], ptSubject, true);
             rawPaths.erase(rawPaths.begin() + i--);
         }
@@ -203,7 +203,7 @@ void Creator::addRawPaths(Paths rawPaths)
     for (Path& path : rawPaths) {
         Point64& pf = path.front();
         Point64& pl = path.back();
-        if (path.size() > 3 && (pf == pl || Length(pf, pl) < glueLen))
+        if (path.size() > 3 && (pf == pl || pf.distTo(pl) < glueLen))
             clipper.AddPath(path, ptSubject, true);
         else
             m_workingRawPs.push_back(path);
@@ -307,6 +307,7 @@ void Creator::stacking(Paths& paths)
     m_returnPss.clear();
     /***********************************************************************************************/
     t.start();
+
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
         QList<std::iterator_traits<Path::iterator>::difference_type> list;
         list.push_back(idx.first);
@@ -314,7 +315,7 @@ void Creator::stacking(Paths& paths)
             double d = std::numeric_limits<double>::max();
             Point64 pt;
             for (const Point64& pts : paths[i - 1]) {
-                double l = Length(pts, paths[i][index]);
+                double l = pts.distTo(paths[i][index]);
                 if (d >= l) {
                     d = l;
                     pt = pts;
@@ -331,6 +332,7 @@ void Creator::stacking(Paths& paths)
         std::rotate(path.begin(), path.begin() + idx.second, path.end());
         return true;
     };
+
     using Worck = std::pair<PolyNode*, bool>;
     std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
         auto [node, newPaths] = w;
@@ -350,7 +352,7 @@ void Creator::stacking(Paths& paths)
                     const Point64& ptd = m_returnPss.back().back()[id];
                     for (size_t is = 0; is < path.size(); ++is) {
                         const Point64& pts = path[is];
-                        const double l = Length(ptd, pts);
+                        const double l = ptd.distTo(pts);
                         if (d >= l) {
                             d = l;
                             idx.first = id;
@@ -450,17 +452,17 @@ void Creator::mergeSegments(Paths& paths, double glue)
                 Point64& pil = paths[i].back();
                 Point64& pjf = paths[j].front();
                 Point64& pjl = paths[j].back();
-                if (Length(pil, pjf) < glue) {
+                if (pil.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                if (Length(pif, pjl) < glue) {
+                if (pif.distTo(pjl) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (Length(pil, pjl) < glue) {
+                if (pil.distTo(pjl) < glue) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
@@ -640,7 +642,7 @@ Paths& Creator::sortB(Paths& src)
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = Length(startPt, src[secondIdx].front());
+            const double length = startPt.distTo(src[secondIdx].front());
             if (destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
@@ -662,8 +664,8 @@ Paths& Creator::sortBE(Paths& src)
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
         for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = Length(startPt, src[secondIdx].front());
-            const double lenLast = Length(startPt, src[secondIdx].back());
+            const double lenFirst = startPt.distTo(src[secondIdx].front());
+            const double lenLast = startPt.distTo(src[secondIdx].back());
             if (lenFirst < lenLast) {
                 if (destLen > lenFirst) {
                     destLen = lenFirst;
@@ -702,7 +704,7 @@ Pathss& Creator::sortB(Pathss& src)
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = Length(startPt, src[secondIdx].front().front());
+            const double length = startPt.distTo(src[secondIdx].front().front());
             if (destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
@@ -724,8 +726,8 @@ Pathss& Creator::sortBE(Pathss& src)
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
         for (size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = Length(startPt, src[secondIdx].front().front());
-            const double lenLast = Length(startPt, src[secondIdx].back().back());
+            const double lenFirst = startPt.distTo(src[secondIdx].front().front());
+            const double lenLast = startPt.distTo(src[secondIdx].back().back());
             if (lenFirst < lenLast) {
                 if (destLen > lenFirst) {
                     destLen = lenFirst;

@@ -17,14 +17,15 @@
 
 #include "shape.h"
 
+#include "ft_view.h"
 #include "graphicsitem.h"
-#include "treeview.h"
 
 #include <QMenu>
 
 namespace Shapes {
+
 Node::Node(Shape* shape, int& id)
-    : NodeInterface(id, 1)
+    : FileTree::Node(id, FileTree::Shape)
     , shape(shape)
 {
     //    shape()->setNode(this);
@@ -33,8 +34,8 @@ Node::Node(Shape* shape, int& id)
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     return shape->setData(index, value, role);
-    //    switch (Column(index.column())) {
-    //    case Column::NameColorVisible:
+    //    switch (FileTree::Column(index.column())) {
+    //    case FileTree::Column::NameColorVisible:
     //        switch (role) {
     //        case Qt::CheckStateRole:
     //            shape()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -45,7 +46,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     //            return true;
     //        }
     //        return false;
-    //    case Column::SideType:
+    //    case FileTree::Column::SideType:
     //        if (auto text = dynamic_cast<Text*>(shape()); text && role == Qt::EditRole) {
     //            text->setSide(static_cast<Side>(value.toBool()));
     //            return true;
@@ -58,8 +59,8 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     return shape->data(index, role);
-    //    switch (Column(index.column())) {
-    //    case Column::NameColorVisible:
+    //    switch (FileTree::Column(index.column())) {
+    //    case FileTree::Column::NameColorVisible:
     //        switch (role) {
     //        case Qt::DisplayRole:
     //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
@@ -77,7 +78,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     //            return shape()->isVisible() ? Qt::Checked : Qt::Unchecked;
     //        case Qt::DecorationRole:
     //            return shape()->icon();
-    //        case Qt::UserRole:
+    //        case FileTree::Id:
     //            return m_id;
     //        case Qt::EditRole:
     //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
@@ -86,7 +87,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     //        default:
     //            return QVariant();
     //        }
-    //    case Column::SideType:
+    //    case FileTree::Column::SideType:
     //        if (auto text = dynamic_cast<Text*>(shape()); text) {
     //            switch (role) {
     //            case Qt::DisplayRole:
@@ -107,13 +108,13 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     return shape->flags(index);
     //    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    //    switch (Column(index.column())) {
-    //    case Column::NameColorVisible:
+    //    switch (FileTree::Column(index.column())) {
+    //    case FileTree::Column::NameColorVisible:
     //        return itemFlag | Qt::ItemIsUserCheckable
     //            | (static_cast<GiType>(shape()->type()) == GiType::ShText
     //                    ? Qt::ItemIsEditable
     //                    : Qt::NoItemFlags);
-    //    case Column::SideType:
+    //    case FileTree::Column::SideType:
     //        return itemFlag
     //            | (static_cast<GiType>(shape()->type()) == GiType::ShText
     //                    ? Qt::ItemIsEditable
@@ -123,7 +124,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     //    }
 }
 
-void Node::menu(QMenu& menu, FileTreeView* tv) const
+void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
     shape->menu(menu, tv);
     //    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
@@ -136,4 +137,5 @@ void Node::menu(QMenu& menu, FileTreeView* tv) const
     //        });
     //    }
 }
+
 }

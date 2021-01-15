@@ -13,10 +13,10 @@
 *******************************************************************************/
 #include "gcplugin.h"
 
+#include "ft_view.h"
 #include "gcfile.h"
 #include "gcnode.h"
 #include "interfaces/file.h"
-#include "treeview.h"
 
 #include <QMessageBox>
 #include <QtWidgets>
@@ -34,6 +34,8 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::GCode); }
 
+QString Plugin::folderName() const { return tr("Tool Paths"); }
+
 FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const
@@ -46,14 +48,14 @@ QJsonObject Plugin::info() const
     };
 }
 
-void Plugin::createMainMenu(QMenu& menu, FileTreeView* tv)
+void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv)
 {
     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
         if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
     });
     menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
-        tv, &FileTreeView::saveSelectedGCodeFiles);
+        tv, &FileTree::View::saveSelectedGCodeFiles);
 }
 
 SettingsTab Plugin::createSettingsTab(QWidget* parent)

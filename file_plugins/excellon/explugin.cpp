@@ -22,8 +22,8 @@
 #include "doublespinbox.h"
 #include "drillitem.h"
 #include "drillpreviewgi.h"
+#include "ft_view.h"
 #include "interfaces/file.h"
-#include "treeview.h"
 
 #include <QtWidgets>
 
@@ -93,7 +93,9 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::Excellon); }
 
-std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
+QString Plugin::folderName() const { return tr("Excellon"); }
+
+FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const
 {

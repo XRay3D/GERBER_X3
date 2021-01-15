@@ -16,18 +16,27 @@
 #include <QAbstractItemModel>
 
 class FileInterface;
-class NodeInterface;
 
 namespace Shapes {
 class Shape;
 }
+class Project;
 
-class FileModel : public QAbstractItemModel {
+namespace FileTree {
+
+class Node;
+
+class Model : public QAbstractItemModel {
     Q_OBJECT
-    NodeInterface* rootItem;
-    friend class Project;
-    friend class NodeInterface;
-
+    Node* rootItem;
+    struct Pair {
+        Node* node;
+        int type;
+    };
+    std::map<int, Pair> mapNode;
+    friend class ::Project;
+    friend class Node;
+    int rotId = -1;
 signals:
     void updateActions();
     void select(const QModelIndex&);
@@ -42,8 +51,8 @@ public:
         NodeCount,
     };
 
-    explicit FileModel(QObject* parent = nullptr);
-    ~FileModel() override;
+    explicit Model(QObject* parent = nullptr);
+    ~Model() override;
 
     void closeProject();
 
@@ -72,7 +81,7 @@ public:
     //    Qt::DropActions supportedDragActions() const override;
     //    Qt::DropActions supportedDropActions() const override;
     //    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
-    NodeInterface* getItem(const QModelIndex& index) const;
+    Node* getItem(const QModelIndex& index) const;
 
 private:
     const QString mimeType;
@@ -80,5 +89,5 @@ private:
     void addFile(FileInterface* file);
     void addShape(Shapes::Shape* shape);
 };
-
+}
 #include "app.h"

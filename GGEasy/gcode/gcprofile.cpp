@@ -93,6 +93,8 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         return;
     }
 
+    reorder();
+
     // find Bridges
     mvector<BridgeItem*> bridgeItems;
     for (QGraphicsItem* item : App::scene()->items()) {
@@ -141,36 +143,10 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
         }
     }
 
-    PolyTree polyTree;
-    {
-        Clipper clipper;
-        clipper.AddPaths(m_returnPs, ptSubject, true);
-        IntRect r(clipper.GetBounds());
-        int k = uScale;
-        Path outer = {
-            { r.left - k, r.bottom + k },
-            { r.right + k, r.bottom + k },
-            { r.right + k, r.top - k },
-            { r.left - k, r.top - k }
-        };
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-        m_returnPs.clear();
-    }
-
-    m_returnPss.resize(1);
-    polyTreeToPaths(polyTree, m_returnPss.front());
-
-    m_returnPss.front().takeFirst();
-
-    reorder();
-
-    for (auto& path : m_returnPss.front())
-        path.append(path.first());
+    //    for (auto& path : m_returnPss.front())
+    //        path.append(path.first());
 
     //    sortB(m_returnPs);
-    //    if (m_returnPs.size() != 0)
-    //        m_returnPss.push_back(m_returnPs);
     //    sortBE(m_returnPss);
 
     if (m_returnPss.isEmpty()) {
@@ -190,7 +166,7 @@ void ProfileCreator::strip()
     for (size_t i = 0; i < m_workingRawPs.size(); ++i) {
         auto& p = m_workingRawPs[i];
         if (p.size() == 2) {
-            double l = Length(p.first(), p.last());
+            double l = p.first().distTo(p.last());
             if (l <= m_toolDiameter * uScale) {
                 m_workingRawPs.remove(i--);
                 continue;
@@ -233,12 +209,32 @@ void ProfileCreator::strip()
 
 void ProfileCreator::reorder()
 {
-    Paths& paths = m_returnPss.front();
-    std::reverse(paths.begin(), paths.end());
+    PolyTree polyTree;
+    {
+        Clipper clipper;
+        clipper.AddPaths(m_returnPs, ptSubject);
+        IntRect r(clipper.GetBounds());
+        int k = uScale;
+        Path outer = {
+            { r.left - k, r.bottom + k },
+            { r.right + k, r.bottom + k },
+            { r.right + k, r.top - k },
+            { r.left - k, r.top - k }
+        };
+        clipper.AddPath(outer, ptSubject, true);
+        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+        m_returnPs.clear();
+    }
+
+    polyTreeToPaths(polyTree, m_returnPs);
+    m_returnPs.takeFirst();
+
+    std::reverse(m_returnPs.begin(), m_returnPs.end());
+
     int ctr1 = 0, ctr2 = 0, j = 0, k = 0;
-    for (size_t i = 1; i < paths.size(); ++i) {
-        Path& path1 = paths[i - 1];
-        Path& path2 = paths[i];
+    for (size_t i = 1; i < m_returnPs.size(); ++i) {
+        Path& path1 = m_returnPs[i - 1];
+        Path& path2 = m_returnPs[i];
         if (i == 1) {
             double d = std::numeric_limits<double>::max();
             ctr1 = 0;
@@ -270,6 +266,12 @@ void ProfileCreator::reorder()
             std::rotate(path2.begin(), path2.begin() + k, path2.end());
         }
     }
+
+    m_returnPss.resize(m_returnPs.size());
+    for (size_t i = 0; i < m_returnPs.size(); ++i) {
+        m_returnPs[i].emplace_back(m_returnPs[i].front());
+        m_returnPss[i].emplace_back(std::move(m_returnPs[i]));
+    }
 }
 
 void ProfileCreator::addPolyNodeToPaths(const PolyNode& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
@@ -282,14 +284,80 @@ void ProfileCreator::addPolyNodeToPaths(const PolyNode& polynode, ProfileCreator
 
     if (!polynode.Contour.empty() && match)
         paths.push_back(polynode.Contour);
-    for (size_t i = 0; i < polynode.ChildCount(); ++i)
+
+    //    int ctr1 = 0, ctr2 = 0, j = 0, k = 0;
+    //    for (size_t i = 1; i < polynode.ChildCount(); ++i) {
+    //        Path& path1 = polynode.Childs[i - 1]->Contour;
+    //        Path& path2 = polynode.Childs[i]->Contour;
+    //        if (i == 1) {
+    //            double d = std::numeric_limits<double>::max();
+    //            ctr1 = 0;
+    //            for (auto pt1 : path1) {
+    //                ctr2 = 0;
+    //                for (auto pt2 : path2) {
+    //                    if (auto tmp = pt1.distTo(pt2); d > tmp) {
+    //                        d = tmp;
+    //                        j = ctr1;
+    //                        k = ctr2;
+    //                    }
+    //                    ++ctr2;
+    //                }
+    //                ++ctr1;
+    //            }
+    //            std::rotate(path1.begin(), path1.begin() + j, path1.end());
+    //            std::rotate(path2.begin(), path2.begin() + k, path2.end());
+    //        } else {
+    //            double d = std::numeric_limits<double>::max();
+    //            auto pt1 = path1.front();
+    //            ctr2 = 0;
+    //            for (auto pt2 : path2) {
+    //                if (auto tmp = pt1.distTo(pt2); d > tmp) {
+    //                    d = tmp;
+    //                    k = ctr2;
+    //                }
+    //                ++ctr2;
+    //            }
+    //            std::rotate(path2.begin(), path2.begin() + k, path2.end());
+    //        }
+    //    }
+
+    for (size_t i = 0; i < polynode.ChildCount(); ++i) {
         addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
+    }
 }
 
-void ProfileCreator::polyTreeToPaths(const PolyTree& polytree, Paths& paths)
+struct Sorter {
+    PolyNode* node;
+    int nest;
+    bool operator<(Sorter s) { return nest < s.nest; }
+};
+
+int ProfileCreator::sortPolyNodeByNesting(PolyNode& polynode)
+{
+    ++nestCtr;
+
+    std::vector<Sorter> sort(polynode.ChildCount());
+
+    for (size_t i = 0; i < polynode.ChildCount(); ++i) {
+        sort[i].nest = -nestCtr;
+        sort[i].nest += sortPolyNodeByNesting(*polynode.Childs[i]);
+        sort[i].node = polynode.Childs[i];
+    }
+
+    std::sort(sort.begin(), sort.end());
+
+    for (size_t i = 0; i < polynode.ChildCount(); ++i)
+        polynode.Childs[i] = sort[i].node;
+
+    return nestCtr;
+}
+
+void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& paths)
 {
     paths.resize(0);
     paths.reserve(polytree.Total());
+    nestCtr = 0;
+    sortPolyNodeByNesting(polytree);
     addPolyNodeToPaths(polytree, ntAny, paths);
 }
 

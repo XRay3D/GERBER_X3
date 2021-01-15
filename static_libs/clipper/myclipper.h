@@ -44,8 +44,6 @@ using Pathss = mvector /*mvector*/<Paths>;
 //QPolygonF toQPolygon(const Path& p);
 //mvector<QPolygonF> toQPolygons(const Paths& p);
 using Point64 = IntPoint;
-double Angle(const Point64& pt1, const Point64& pt2);
-double Length(const Point64& pt1, const Point64& pt2);
 double Perimeter(const Path& path);
 
 //IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)

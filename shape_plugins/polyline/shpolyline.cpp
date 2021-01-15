@@ -69,44 +69,44 @@ QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
 
 void PolyLine::updateOtherHandlers(Handler* handler)
 {
-    //    if (handler->hType() == Handler::Adder) {
-    //        int idx = handlers.indexOf(handler);
-    //        Handler* h;
-    //        {
-    //            Handler* h1 = handlers[idx + 1];
-    //            handlers.insert(idx + 1, h = handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
-    //            h->QGraphicsItem::setPos(
-    //                QLineF(handler->pos(), h1->pos()).center());
-    //        }
-    //        {
-    //            Handler* h1 = handlers[idx];
-    //            handlers.insert(idx, h = handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
-    //            h->QGraphicsItem::setPos(
-    //                QLineF(handler->pos(), h1->pos()).center());
-    //        }
-    //        handler->setHType(Handler::Corner);
-    //    } else if (handler->hType() == Handler::Corner /*&& !Constructor::item*/) {
-    //        int idx = handlers.indexOf(handler);
-    //        if (handler != handlers[1]) {
-    //            if (handlers.size() > 4
-    //                && handler->pos() == handlers[idx - 2]->pos() /*QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5*/) {
-    //                delete handlers.takeAt(idx - 1);
-    //                delete handlers.takeAt(idx - 2);
-    //                idx -= 2;
-    //            } else {
-    //                handlers[idx - 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx - 2]->pos()).center());
-    //            }
-    //        }
-    //        if (handler != handlers.last()) {
-    //            if (handlers.size() > 4
-    //                && handler->pos() == handlers[idx + 2]->pos() /*QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5*/) {
-    //                delete handlers.takeAt(idx + 1);
-    //                delete handlers.takeAt(idx + 1);
-    //            } else {
-    //                handlers[idx + 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx + 2]->pos()).center());
-    //            }
-    //        }
-    //    }
+    if (handler->hType() == Handler::Adder) {
+        int idx = handlers.indexOf(handler);
+        Handler* h;
+        {
+            Handler* h1 = handlers[idx + 1].get();
+            handlers.insert(handlers.begin() + idx + 1, std::make_unique<Handler>(this, Handler::Adder));
+            h = handlers[idx + 1].get();
+            h->QGraphicsItem::setPos(QLineF(handler->pos(), h1->pos()).center());
+        }
+        {
+            Handler* h1 = handlers[idx].get();
+            handlers.insert(handlers.begin() + idx, std::make_unique<Handler>(this, Handler::Adder));
+            h = handlers[idx].get();
+            h->QGraphicsItem::setPos(QLineF(handler->pos(), h1->pos()).center());
+        }
+        handler->setHType(Handler::Corner);
+    } else if (handler->hType() == Handler::Corner /*&& !Constructor::item*/) {
+        int idx = handlers.indexOf(handler);
+        if (handler != handlers[1].get()) {
+            if (handlers.size() > 4
+                && handler->pos() == handlers[idx - 2]->pos() /*QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5*/) {
+                handlers.takeAt(idx - 1);
+                handlers.takeAt(idx - 2);
+                idx -= 2;
+            } else {
+                handlers[idx - 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx - 2]->pos()).center());
+            }
+        }
+        if (handler != handlers.last().get()) {
+            if (handlers.size() > 4
+                && handler->pos() == handlers[idx + 2]->pos() /*QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5*/) {
+                handlers.takeAt(idx + 1);
+                handlers.takeAt(idx + 1);
+            } else {
+                handlers[idx + 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx + 2]->pos()).center());
+            }
+        }
+    }
 }
 
 void PolyLine::setPt(const QPointF& pt)
@@ -118,14 +118,15 @@ void PolyLine::setPt(const QPointF& pt)
 
 void PolyLine::addPt(const QPointF& pt)
 {
-    //    Handler* h1 = handlers.last();
-    //    Handler* h2;
-    //    handlers.append(h2 = handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
-    //    handlers.last()->QGraphicsItem::setPos(pt);
+    Handler* h1 = handlers.back().get();
+    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
 
-    //    handlers.append(handlers.emplace_back(std::make_unique<Handler>(this));
-    //    handlers.last()->QGraphicsItem::setPos(pt);
-    //    h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
+    Handler* h2 = handlers.back().get();
+    handlers.last()->QGraphicsItem::setPos(pt);
+
+    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.back()->QGraphicsItem::setPos(pt);
+    h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
 
     redraw();
 }

@@ -19,7 +19,7 @@
 #include "componentitem.h"
 #include "datapathitem.h"
 #include "datasoliditem.h"
-#include "interfaces/node.h"
+#include "ft_node.h"
 #include "project.h"
 #include "settings.h"
 
@@ -93,36 +93,38 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& a
 
 QDataStream& operator>>(QDataStream& s, ApertureMap& c)
 {
-    c.clear();
-    quint32 n;
-    s >> n;
-    for (quint32 i = 0; i < n; ++i) {
-        ApertureMap::key_type key;
-        ApertureMap::mapped_type val;
-        s >> key;
-        s >> val;
-        if (s.status() != QDataStream::Ok) {
-            c.clear();
-            break;
-        }
-        c.emplace(key, val);
-    }
+    //    c.clear();
+    //    quint32 n;
+    //    s >> n;
+    //    for (quint32 i = 0; i < n; ++i) {
+    //        ApertureMap::key_type key;
+    //        ApertureMap::mapped_type val;
+    //        s >> key;
+    //        s >> val;
+    //        if (s.status() != QDataStream::Ok) {
+    //            c.clear();
+    //            break;
+    //        }
+    //        c.emplace(key, val);
+    //    }
+    s >> c.map();
     return s;
 }
 
 QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
 {
-    s << quint32(c.size());
-    for (auto& [key, val] : c) {
-        s << key << val;
-    }
+    //    s << quint32(c.size());
+    //    for (auto& [key, val] : c) {
+    //        s << key << val;
+    //    }
+    s << c.map();
     return s;
 }
 
 File::File(const QString& fileName)
     : FileInterface()
 {
-    m_node = new Node(m_id);
+    m_node = new Node(this, m_id);
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
     m_layerTypes = {

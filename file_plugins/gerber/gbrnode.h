@@ -13,31 +13,32 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrfile.h"
-
-#include "interfaces/node.h"
+#include "ft_node.h"
 
 #include <QObject>
 
 namespace Gerber {
-class Node : public QObject, public NodeInterface {
+
+class File;
+
+class Node : public QObject, public FileTree::Node {
     Q_OBJECT
 
-public:
-    explicit Node(int& id);
-    ~Node() override;
-
-    // NodeInterface interface
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-    QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTreeView* tv) const override;
-
-    static QTimer* decorationTimer();
-
-private:
     static QTimer m_decorationTimer;
     void repaint() const;
     Qt::CheckState m_current = Qt::Unchecked;
+    File* const file;
+
+public:
+    explicit Node(File* file, int& id);
+    ~Node() override;
+
+    // FileTree::Node interface
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    void menu(QMenu& menu, FileTree::View* tv) const override;
+
+    static QTimer* decorationTimer();
 };
 }

@@ -12,39 +12,26 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "filemodel.h"
-#include <QTreeView>
 
-class FileTreeView : public QTreeView {
+#include <QStyledItemDelegate>
+
+namespace FileTree {
+
+class TextDelegate : public QStyledItemDelegate {
     Q_OBJECT
-    friend class MainWindow;
+
+    mutable QRect m_rect;
 
 public:
-    explicit FileTreeView(QWidget* parent = nullptr);
-    ~FileTreeView() override;
-    void hideOther();
-    void closeFile();
-    void closeFiles();
-    void setModel(QAbstractItemModel* model) override;
+    TextDelegate(QObject* parent = nullptr);
+    ~TextDelegate() override = default;
 
-signals:
-    void saveGCodeFile(int id);
-    void saveGCodeFiles();
-    void saveSelectedGCodeFiles();
-
-private:
-    void updateTree();
-    void updateIcons();
-    FileModel* m_model;
-
-    void on_doubleClicked(const QModelIndex& index);
-    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-    int m_childCount = 0;
-    QModelIndex m_menuIndex;
-    void showExcellonDialog();
-
-protected:
-    void contextMenuEvent(QContextMenuEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseDoubleClickEvent(QMouseEvent* event) override;
+public:
+    // QAbstractItemDelegate interface
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void emitCommitData();
 };
+
+}

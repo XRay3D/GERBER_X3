@@ -13,30 +13,11 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include <myclipper.h>
 #include "app.h"
 #include "qmath.h"
 #include <QElapsedTimer>
 #include <QLineF>
-
-double Angle(const Point64& pt1, const Point64& pt2)
-{
-    const double dx = pt2.X - pt1.X;
-    const double dy = pt2.Y - pt1.Y;
-    const double theta = atan2(-dy, dx) * 360.0 / M_2PI;
-    const double theta_normalized = theta < 0 ? theta + 360 : theta;
-    if (qFuzzyCompare(theta_normalized, double(360)))
-        return 0.0;
-    else
-        return theta_normalized;
-}
-
-double Length(const Point64& pt1, const Point64& pt2)
-{
-    double x = pt2.X - pt1.X;
-    double y = pt2.Y - pt1.Y;
-    return sqrt(x * x + y * y);
-}
+#include <myclipper.h>
 
 //static inline bool qt_is_finite(double d)
 //{
@@ -89,8 +70,8 @@ void RotatePath(Path& poligon, double angle, const Point64& center)
 {
     const bool fl = Area(poligon) < 0;
     for (Point64& pt : poligon) {
-        const double dAangle = qDegreesToRadians(angle - Angle(center, pt));
-        const double length = Length(center, pt);
+        const double dAangle = qDegreesToRadians(angle - pt.angleTo(center));
+        const double length = pt.distTo(center);
         pt = Point64(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;

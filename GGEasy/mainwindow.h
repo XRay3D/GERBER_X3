@@ -40,7 +40,7 @@ class MainWindow;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-    //    friend void FileTreeView::on_doubleClicked(const QModelIndex&);
+    //    friend void FileTree::View::on_doubleClicked(const QModelIndex&);
     friend class Recent;
     friend class Project;
 

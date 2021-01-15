@@ -12,21 +12,24 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include "interfaces/node.h"
-#include <QGraphicsItemGroup>
+
+#include "ft_node.h"
 
 namespace GCode {
-class Node : public NodeInterface {
+
+class File;
+
+class Node : public FileTree::Node {
+    File* const file;
 
 public:
-    explicit Node(int& id);
+    explicit Node(File* file, int& id);
     ~Node() override = default;
 
-    // NodeInterface interface
+    // FileTree::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    // NodeInterface interface
-    void menu(QMenu& menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTree::View* tv) const override;
 };
 }

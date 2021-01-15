@@ -325,20 +325,20 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
                     paths.remove(j--);
                     break;
                 } else if (dist != 0.0) {
-                    /*  */ if (Length(paths[i].back(), paths[j].back()) < dist) {
+                    /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
                         ReversePath(paths[j]);
                         paths[i].push_back(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (Length(paths[i].back(), paths[j].first()) < dist) {
+                    } else if (paths[i].back().distTo(paths[j].first()) < dist) {
                         paths[i].push_back(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (Length(paths[i].first(), paths[j].back()) < dist) {
+                    } else if (paths[i].first().distTo(paths[j].back()) < dist) {
                         paths[j].push_back(paths[i].mid(1));
                         paths.remove(i--);
                         break;
-                    } else if (Length(paths[i].first(), paths[j].first()) < dist) {
+                    } else if (paths[i].first().distTo(paths[j].first()) < dist) {
                         ReversePath(paths[j]);
                         paths[j].push_back(paths[i].mid(1));
                         paths.remove(i--);
@@ -362,8 +362,8 @@ void VoronoiCreator::clean(Path& path)
     }
     const double kAngle = 1; //0.2;
     for (size_t i = 1; i < path.size() - 1; ++i) {
-        const double a1 = Angle(path[i - 1], path[i]);
-        const double a2 = Angle(path[i], path[i + 1]);
+        const double a1 = path[i - 1].angleTo(path[i]);
+        const double a2 = path[i].angleTo(path[i + 1]);
         if (abs(a1 - a2) < kAngle) {
             path.remove(i--);
         }
@@ -545,7 +545,7 @@ void VoronoiCreator::jcVoronoi()
     mergePaths(m_returnPs, 0.005 * uScale);
     m_returnPs.push_back(toPath(frame));
     for (size_t i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
-        if (m_returnPs[i].size() < 4 && Length(m_returnPs[i].first(), m_returnPs[i].back()) < tolerance * 0.5 * uScale)
+        if (m_returnPs[i].size() < 4 && m_returnPs[i].first().distTo(m_returnPs[i].back()) < tolerance * 0.5 * uScale)
             m_returnPs.remove(i--);
     }
 }

@@ -13,8 +13,12 @@
 *******************************************************************************/
 #pragma once
 
+#include <QMenu>
+#include <QMessageBox>
 #include <QObject>
+
 #include <app.h>
+#include <ft_view.h>
 #include <project.h>
 #include <shape.h>
 
@@ -61,14 +65,16 @@ public:
     virtual void updateShape(const QPointF& point) = 0;
     virtual void finalizeShape() = 0;
     [[nodiscard]] virtual QJsonObject info() const = 0;
-    [[nodiscard]] virtual QIcon icon() const = 0; //    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
-    //    virtual void createMainMenu([[maybe_unused]] QMenu& menu, [[maybe_unused]] FileTreeView* tv)
-    //    {
-    //        menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close All Files"), [tv] {
-    //            if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //                tv->closeFiles();
-    //        });
-    //    };
+    [[nodiscard]] virtual QIcon icon() const = 0;
+    //    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
+    void createMainMenu(QMenu& menu, FileTree::View* tv)
+    {
+        menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete All Shapes"), [tv] {
+            if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                tv->closeFiles();
+        });
+    };
+    QString folderName() { return QObject::tr("Shapes"); };
 
 signals:
     virtual void actionUncheck(bool = false) = 0;

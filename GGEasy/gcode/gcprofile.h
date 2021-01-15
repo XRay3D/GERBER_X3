@@ -32,11 +32,13 @@ private:
     void reorder();
 
     void addPolyNodeToPaths(const PolyNode& polynode, NodeType nodetype, Paths& paths);
+
+    int nestCtr;
+
+    int sortPolyNodeByNesting(PolyNode& polynode);
     //------------------------------------------------------------------------------
-    void polyTreeToPaths(const PolyTree& polytree, Paths& paths);
-    //-----------------------------------------------------------------------------
+    void polyTreeToPaths(PolyTree& polytree, Paths& paths);
     void closedPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
-    //------------------------------------------------------------------------------
     void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 
 protected:

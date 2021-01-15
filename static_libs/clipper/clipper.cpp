@@ -209,7 +209,7 @@ size_t PolyNode::ChildCount() const
 
 void PolyNode::AddChild(PolyNode& child)
 {
-    unsigned cnt = (unsigned)Childs.size();
+    auto cnt = Childs.size();
     Childs.push_back(&child);
     child.Parent = this;
     child.Index = cnt;

@@ -85,8 +85,8 @@ void AbstractAperture::transform(Path& poligon, const State& state)
         if (state.mirroring() & Y_Mirroring)
             pt.Y = -pt.Y;
         if (state.rotating() != 0.0 || state.scaling() != 1.0) {
-            const double tmpAangle = qDegreesToRadians(state.rotating() - Angle(Point64(), pt));
-            const double length = Length(Point64(), pt) * state.scaling();
+            const double tmpAangle = qDegreesToRadians(state.rotating() - Point64().angleTo(pt));
+            const double length = Point64().distTo(pt) * state.scaling();
             pt = Point64(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
         }
     }
@@ -694,8 +694,8 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         static_cast<cInt>(0.5 * start.X + 0.5 * end.X),
         static_cast<cInt>(0.5 * start.Y + 0.5 * end.Y));
 
-    Path polygon = RectanglePath(Length(start, end), mod[Width] * uScale);
-    double angle = Angle(start, end);
+    Path polygon = RectanglePath(start.distTo(end), mod[Width] * uScale);
+    double angle = start.angleTo(end);
     RotatePath(polygon, angle);
     TranslatePath(polygon, center);
 

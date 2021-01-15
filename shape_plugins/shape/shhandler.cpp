@@ -95,12 +95,10 @@ Handler::Handler(Shape* shape, HType type)
     }
     App::scene()->addItem(this);
     App::shapeHandlers().emplace_back(this);
-    qDebug(__FUNCTION__);
 }
 
 Handler::~Handler()
 {
-    qDebug(__FUNCTION__);
     App::shapeHandlers().removeOne(this);
 }
 

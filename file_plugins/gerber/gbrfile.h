@@ -75,12 +75,12 @@ private:
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;
 
-    // NodeInterface interface
+    // FileTree::Node interface
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
-    // NodeInterface interface
+    // FileTree::Node interface
 public:
     void createGi() override;
     const QList<Component>& components() const;

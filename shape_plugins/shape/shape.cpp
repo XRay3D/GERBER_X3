@@ -14,11 +14,11 @@
 *                                                                              *
 *******************************************************************************/
 #include "shape.h"
+#include "ft_view.h"
 #include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
-#include "treeview.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
@@ -39,10 +39,9 @@ Shape::Shape()
     setAcceptHoverEvents(true);
     setVisible(true);
     //setZValue(std::numeric_limits<double>::max());
-    qDebug(__FUNCTION__);
 }
 
-Shape::~Shape() { qDebug(__FUNCTION__); }
+Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
 {
@@ -121,7 +120,6 @@ void Shape::updateOtherHandlers(Handler*) { }
 // write to project
 QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 {
-    qDebug() << __FUNCTION__ << "Shape F";
     stream << shape.type();
     stream << shape.m_giId;
     stream << shape.isVisible();
@@ -138,10 +136,10 @@ QDataStream& operator<<(QDataStream& stream, const Shape& shape)
 // read from project
 QDataStream& operator>>(QDataStream& stream, Shape& shape)
 {
-    qDebug() << __FUNCTION__ << "Shape F";
     //    App::scene()->addItem(&shape);
     bool visible;
     stream >> shape.m_giId;
+    shape.setZValue(shape.m_giId);
     stream >> visible;
     shape.QGraphicsItem::setVisible(visible);
     shape.setToolTip(QString::number(shape.m_giId));
@@ -196,8 +194,8 @@ Node* Shape::node() const
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     qDebug(__FUNCTION__);
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         //case Qt::DisplayRole:
         //    return QString("%1 (%2)").arg(name()).arg(m_giId);
@@ -206,10 +204,10 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
             return true;
         //case Qt::DecorationRole:
         //    return icon();
-        case Node::IdRole:
+        case FileTree::Id:
             m_giId = value.toInt();
             return true;
-        case Node::SelectRole:
+        case FileTree::Select:
             setSelected(value.toBool());
             return true;
         default:
@@ -222,8 +220,8 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
 
 QVariant Shape::data(const QModelIndex& index, int role) const
 {
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return QString("%1 (%2)").arg(name()).arg(m_giId);
@@ -231,9 +229,9 @@ QVariant Shape::data(const QModelIndex& index, int role) const
             return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return icon();
-        case Node::IdRole:
+        case FileTree::Id:
             return m_giId;
-        case Node::SelectRole:
+        case FileTree::Select:
             return isSelected();
         default:
             return QVariant();
@@ -246,17 +244,17 @@ QVariant Shape::data(const QModelIndex& index, int role) const
 Qt::ItemFlags Shape::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case NodeColumn::SideType:
+    case FileTree::Column::SideType:
         return itemFlag;
     default:
         return itemFlag;
     }
 }
 
-void Shape::menu(QMenu& menu, FileTreeView* /*tv*/) const
+void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
 {
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         App::fileModel()->removeRow(m_node->row(), m_node->index().parent());

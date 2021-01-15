@@ -20,8 +20,8 @@
 #include "tables/dxf_layer.h"
 #include "tables/dxf_layermodel.h"
 
+#include "ft_view.h"
 #include "scene.h"
-#include "treeview.h"
 
 #include <QColorDialog>
 #include <QIcon>
@@ -185,39 +185,38 @@ protected:
     }
 };
 
-File* Node::dxfFile() const { return static_cast<File*>(file()); }
-
-Node::Node(int& id)
-    : NodeInterface(id)
+Node::Node(File* file, int& id)
+    : FileTree::Node(id, FileTree::File)
+    , file(file)
 {
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
-            file()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            emit App::fileModel()->dataChanged(childItems.first()->index(index.column()), childItems.last()->index(index.column()), { role });
+            file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            emit App::fileModel()->dataChanged(childs.first()->index(index.column()), childs.last()->index(index.column()), { role });
             return true;
         default:
             return false;
         }
-    case Column::SideType:
+    case FileTree::Column::SideType:
         switch (role) {
         case Qt::EditRole:
-            file()->setSide(static_cast<Side>(value.toBool()));
+            file->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
         }
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType:
         switch (role) {
         case Qt::EditRole:
             qDebug() << __FUNCTION__ << role << value;
-            dxfFile()->setItemType(value.toInt());
-            emit App::fileModel()->dataChanged(childItems.first()->index(index.column()), childItems.last()->index(index.column()), { role });
+            file->setItemType(value.toInt());
+            emit App::fileModel()->dataChanged(childs.first()->index(index.column()), childs.last()->index(index.column()), { role });
             return true;
         default:
             return false;
@@ -230,12 +229,12 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Column::SideType:
+    case FileTree::Column::SideType:
         return itemFlag | Qt::ItemIsEditable;
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -244,43 +243,43 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 QVariant Node::data(const QModelIndex& index, int role) const
 {
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
-            return file()->shortName();
+            return file->shortName();
         case Qt::ToolTipRole:
-            return file()->shortName() + "\n" + file()->name();
+            return file->shortName() + "\n" + file->name();
         case Qt::CheckStateRole:
-            return file()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return file->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return QIcon::fromTheme("crosshairs");
-        case Qt::UserRole:
+        case FileTree::Id:
             return m_id;
         default:
             return QVariant();
         }
-    case Column::SideType:
+    case FileTree::Column::SideType:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return sideStrList[file()->side()];
+            return sideStrList[file->side()];
         case Qt::EditRole:
-            return static_cast<bool>(file()->side());
-        case Qt::UserRole:
+            return static_cast<bool>(file->side());
+        case FileTree::Id:
             return m_id;
         default:
             return QVariant();
         }
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
-            return file()->displayedTypes().at(int(dxfFile()->itemsType())).shortActName();
+            return file->displayedTypes().at(int(file->itemsType())).shortActName();
         case Qt::ToolTipRole:
-            return file()->displayedTypes().at(int(dxfFile()->itemsType())).actToolTip;
+            return file->displayedTypes().at(int(file->itemsType())).actToolTip;
         case Qt::EditRole:
-            return file()->displayedTypes().at(int(dxfFile()->itemsType())).id;
-        case Qt::UserRole:
+            return file->displayedTypes().at(int(file->itemsType())).id;
+        case FileTree::Id:
             return m_id;
         default:
             return QVariant();
@@ -291,9 +290,9 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Node::menu(QMenu& menu, FileTreeView* tv) const
+void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
-    menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTreeView::hideOther);
+    menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
         auto dialog = new SourceDialog(m_id, tv);
         dialog->exec();
@@ -314,17 +313,17 @@ void Node::menu(QMenu& menu, FileTreeView* tv) const
     menu.addSeparator();
     if (layer)
         menu.addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
-            auto dialog = new Dialog(static_cast<File*>(file()), layer, tv);
+            auto dialog = new Dialog(static_cast<File*>(file), layer, tv);
             dialog->show();
         });
     if (header)
         menu.addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
-            auto tw = new TreeWidget(static_cast<File*>(file()), header, tv);
+            auto tw = new TreeWidget(static_cast<File*>(file), header, tv);
             tw->show();
         });
 
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTreeView::closeFile);
+    menu.addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
 ///////////////////////////////////
@@ -332,7 +331,7 @@ void Node::menu(QMenu& menu, FileTreeView* tv) const
 ///// \param id
 /////
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
-    : NodeInterface(-1, -1)
+    : FileTree::Node(0, FileTree::SubFile)
     , name(name)
     , layer(layer)
 {
@@ -340,19 +339,19 @@ NodeLayer::NodeLayer(const QString& name, Layer* layer)
 
 bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         if (role == Qt::CheckStateRole) {
             bool visible = value.value<Qt::CheckState>() == Qt::Checked;
             layer->setVisible(visible);
             layer->file()->m_layersVisible[name] = visible;
             if (visible) {
                 layer->file()->m_visible = visible;
-                emit App::fileModel()->dataChanged(m_parentItem->index(index.column()), m_parentItem->index(index.column()), { role });
+                emit App::fileModel()->dataChanged(m_parent->index(index.column()), m_parent->index(index.column()), { role });
             }
         }
         return true;
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType:
         if (role == Qt::EditRole)
             layer->setItemsType(value.toInt() ? ItemsType::Paths : ItemsType::Normal);
         return true;
@@ -364,10 +363,10 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
 Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; //| Qt::ItemIsSelectable;
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -376,8 +375,8 @@ Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
 
 QVariant NodeLayer::data(const QModelIndex& index, int role) const
 {
-    switch (Column(index.column())) {
-    case Column::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -386,31 +385,34 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
             return layer->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return decoration(layer->color());
-        case Qt::UserRole:
+        case FileTree::Id:
             return m_id;
         default:
             return QVariant();
         }
-    case Column::ItemsType:
+    case FileTree::Column::ItemsType: {
+        auto file(layer->file());
+        int type(static_cast<int>(layer->itemsType()));
         switch (role) {
         case Qt::DisplayRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).shortActName();
+            return file->displayedTypes().at(type).shortActName();
         case Qt::ToolTipRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).actToolTip;
+            return file->displayedTypes().at(type).actToolTip;
         case Qt::EditRole:
-            return layer->file()->displayedTypes().at(int(layer->itemsType())).id;
-        case Qt::UserRole:
-            return layer->file()->id();
+            return file->displayedTypes().at(type).id;
+        case FileTree::Id:
+            return file->id();
         default:
             return QVariant();
         }
+    }
     default:
         return QVariant();
     }
     return QVariant();
 }
 
-void NodeLayer::menu(QMenu& menu, FileTreeView* tv) const
+void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const
 {
     menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);

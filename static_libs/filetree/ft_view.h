@@ -12,21 +12,45 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include <QStyledItemDelegate>
 
-class TextDelegate : public QStyledItemDelegate {
+#include "ft_model.h"
+
+#include <QTreeView>
+
+namespace FileTree {
+
+class View : public QTreeView {
     Q_OBJECT
-
-    mutable QRect m_rect;
-
-public:
-    TextDelegate(QObject* parent = nullptr);
-    ~TextDelegate() override = default;
+    friend class MainWindow;
 
 public:
-    // QAbstractItemDelegate interface
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
-    void emitCommitData();
+    explicit View(QWidget* parent = nullptr);
+    ~View() override;
+    void hideOther();
+    void closeFile();
+    void closeFiles();
+    void setModel(QAbstractItemModel* model) override;
+
+signals:
+    void saveGCodeFile(int id);
+    void saveGCodeFiles();
+    void saveSelectedGCodeFiles();
+
+private:
+    void updateTree();
+    void updateIcons();
+    Model* m_model;
+
+    void on_doubleClicked(const QModelIndex& index);
+    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    int m_childCount = 0;
+    QModelIndex m_menuIndex;
+    void showExcellonDialog();
+
+protected:
+    void contextMenuEvent(QContextMenuEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
 };
+
+}

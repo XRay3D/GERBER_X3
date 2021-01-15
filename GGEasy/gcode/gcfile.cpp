@@ -40,7 +40,7 @@ File::File()
     : GCUtils(m_gcp)
     , FileInterface()
 {
-    m_node = new Node(m_id);
+    m_node = new Node(this, m_id);
 }
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
@@ -50,7 +50,7 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , m_toolPathss(toolPathss)
     , m_gcp(gcp)
 {
-    m_node = new Node(m_id);
+    m_node = new Node(this, m_id);
     if (gcp.tools.front().diameter()) {
 
         initSave();

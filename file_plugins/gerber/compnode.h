@@ -59,7 +59,7 @@ protected:
     //    const QStringList tbStrList;
     ComponentsNode* m_parentItem = nullptr;
     QList<QSharedPointer<ComponentsNode>> childItems;
-    //    inline NodeInterface* file() const { return App::project()->file(m_id); }
+    //    inline FileTree::Node* file() const { return App::project()->file(m_id); }
     //    inline Shapes::Shape* shape() const { return App::project()->aShape(m_id); }
     //Qt::CheckState m_checkState = Qt::Checked;
 };

@@ -14,7 +14,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "dxf_layermodel.h"
-#include "interfaces/node.h"
+#include "ft_node.h"
 #include "dxf_file.h"
 #include "dxf_layer.h"
 #include "itemgroup.h"
