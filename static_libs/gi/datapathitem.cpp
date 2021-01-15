@@ -121,16 +121,16 @@ void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
                 continue;
             const Point64& first = item->paths().front().front();
             const Point64& last = item->paths().front().back();
-            if (Length(dest, first) < glueLen) {
+            if (dest.distTo(first) < glueLen) {
                 dest = last;
                 item->setSelected(true);
-                if (Length(init, dest) < glueLen)
+                if (init.distTo(dest) < glueLen)
                     break;
                 i = -1;
-            } else if (Length(dest, last) < glueLen) {
+            } else if (dest.distTo(last) < glueLen) {
                 dest = first;
                 item->setSelected(true);
-                if (Length(init, dest) < glueLen)
+                if (init.distTo(dest) < glueLen)
                     break;
                 i = -1;
             }

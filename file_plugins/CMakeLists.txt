@@ -22,26 +22,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(SUFFIX "_gnu")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
-        #        "-std=c++20"
-        "-std=c++2a"
-        #        "-std=gnu++20"
-        )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
-    #    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "/std:c++latest")
 endif()
 
-
 #if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-#    ...
-#endif()
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-#    ...
-#endif()
-
 if(CMAKE_CL_64)
     set(SUFFIX "${SUFFIX}_x64")
 else()
@@ -50,10 +38,15 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(SUFFIX "${SUFFIX}_d")
-    message("${SUFFIX}")
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    set(SUFFIX "${SUFFIX}_r")
+elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    set(SUFFIX "${SUFFIX}_rm")
+elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    set(SUFFIX "${SUFFIX}_rd")
 endif()
 
-
+set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin/plugins")
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 include_directories (
@@ -68,7 +61,7 @@ include_directories (
     ../static_libs/thermal
     ../static_libs/tooldatabase
     ../static_libs/tooldatabase
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libs_${SUFFIX}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}
     )
 
 add_subdirectory(dxf)

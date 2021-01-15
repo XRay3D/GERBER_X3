@@ -12,13 +12,16 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
 #include <QStyledItemDelegate>
 
-class TypeDelegate : public QStyledItemDelegate {
+namespace FileTree {
+
+class SideDelegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
-    TypeDelegate(QObject* parent = nullptr);
-    ~TypeDelegate() override = default;
+    SideDelegate(QObject* parent = nullptr);
+    ~SideDelegate() override = default;
 
 public:
     // QAbstractItemDelegate interface
@@ -27,3 +30,5 @@ public:
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
     void emitCommitData();
 };
+
+}

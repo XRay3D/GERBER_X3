@@ -13,24 +13,26 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/node.h"
+#include "ft_node.h"
 
 class ExcellonDialog;
 
 namespace Excellon {
+
 class File;
 
-class Node : public NodeInterface {
+class Node : public FileTree::Node {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
+    File* const file;
 
 public:
-    explicit Node(int& id);
+    explicit Node(File* file, int& id);
     ~Node() override = default;
 
-    // NodeInterface interface
+    // FileTree::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTree::View* tv) const override;
 };
 }

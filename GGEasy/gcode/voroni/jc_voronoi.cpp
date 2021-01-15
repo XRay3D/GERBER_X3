@@ -984,11 +984,13 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
     tmp.charp = mem;
     internal->eventmem = tmp.voidpp;
 
+#pragma warning(push)
+#pragma warning(disable: 4267) // possible loss of data
     jcv_pq_create(internal->eventqueue, max_num_events, (void**)internal->eventmem);
 
     jcv_site* sites = internal->sites;
 
-    for (int i = 0; i < num_points; ++i) {
+    for (size_t i = 0; i < num_points; ++i) {
         sites[i].p = points[i];
         sites[i].edges = 0;
         sites[i].index = i;
@@ -997,7 +999,7 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
     qsort(sites, (size_t)num_points, sizeof(jcv_site), jcv_point_cmp);
 
     int offset = 0;
-    for (int i = 0; i < num_points; i++) {
+    for (size_t i = 0; i < num_points; i++) {
         const jcv_site* s = &sites[i];
         // Remove duplicates, to avoid anomalies
         if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -1036,6 +1038,8 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
     internal->numsites = num_points;
     internal->numsites_sqrt = (int)(JCV_SQRT((jcv_real)num_points));
     internal->currentsite = 0;
+
+#pragma warning(pop)
 
     internal->bottomsite = jcv_nextsite(internal);
 

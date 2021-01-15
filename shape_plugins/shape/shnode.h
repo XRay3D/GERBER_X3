@@ -13,10 +13,13 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/node.h"
+#include "ft_node.h"
 
 namespace Shapes {
-class Node : public NodeInterface {
+
+class Shape;
+
+class Node : public FileTree::Node {
     Shape* shape;
 
 public:
@@ -27,6 +30,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-    void menu(QMenu& menu, FileTreeView* tv) const override;
+    void menu(QMenu& menu, FileTree::View* tv) const override;
 };
+
 }

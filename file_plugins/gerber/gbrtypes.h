@@ -14,8 +14,8 @@
 #pragma once
 #include "datastream.h"
 #include "interfaces/plugintypes.h"
-#include <myclipper.h>
 #include <QDebug>
+#include <myclipper.h>
 
 #define DEPRECATED
 
@@ -34,10 +34,10 @@ class AbstractAperture;
 using ApertureMap = std::map<int, QSharedPointer<AbstractAperture>>;
 #else
 struct ApertureMap : std::map<int, QSharedPointer<AbstractAperture>> {
-    bool contains(int key) const
-    {
-        return find(key) != end();
-    }
+    using M = std::map<int, QSharedPointer<AbstractAperture>>;
+    bool contains(int key) const { return find(key) != end(); }
+    M& map() { return *this; }
+    const M& map() const { return *this; }
 };
 #endif
 

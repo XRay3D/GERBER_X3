@@ -13,41 +13,43 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "sidedelegate.h"
-#include <QComboBox>
+#include "ft_textdelegate.h"
+
+#include <QLineEdit>
 
 #include "leakdetector.h"
 
-SideDelegate::SideDelegate(QObject* parent)
+namespace FileTree {
+
+TextDelegate::TextDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }
 
-QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
+QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
-    auto* comboBox = new QComboBox(parent);
-    comboBox->addItems(tr("Top|Bottom").split('|'));
-    comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
-    comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
-    connect(comboBox, qOverload<int>(&QComboBox::activated), this, &SideDelegate::emitCommitData);
-    return comboBox;
+    auto* le = new QLineEdit(parent);
+    m_rect = option.rect;
+    connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
+    return le;
 }
 
-void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
-        return;
-    comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());
-    comboBox->showPopup();
+    auto* le = qobject_cast<QLineEdit*>(editor);
+    le->setGeometry(m_rect);
+    le->setText(index.data(Qt::EditRole).toString());
 }
 
-void SideDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
-        return;
-    model->setData(index, bool(comboBox->currentIndex()));
+    auto* le = qobject_cast<QLineEdit*>(editor);
+    model->setData(index, le->text());
 }
 
-void SideDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+void TextDelegate::emitCommitData()
+{
+    emit commitData(qobject_cast<QWidget*>(sender()));
+}
+
+}

@@ -101,11 +101,11 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePluginInterface::finalizeShape_);
     connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePluginInterface::addShapePoint_);
 
-    ui->treeView->setModel(new FileModel(ui->treeView));
+    ui->treeView->setModel(new FileTree::Model(ui->treeView));
 
-    connect(ui->treeView, &FileTreeView::saveGCodeFile, this, &MainWindow::saveGCodeFile);
-    connect(ui->treeView, &FileTreeView::saveGCodeFiles, this, &MainWindow::saveGCodeFiles);
-    connect(ui->treeView, &FileTreeView::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
+    connect(ui->treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui->treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles);
+    connect(ui->treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
         setStyleSheet("QGroupBox, .QFrame {"
@@ -166,9 +166,9 @@ MainWindow::MainWindow(QWidget* parent)
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
         //        QTimer::singleShot(++i * 500, [this] { loadFile("P:/ELEMER/SSR/SSR_V4/Board_outline.gbr"); });
-        //        QTimer::singleShot(++i * 500, [this] { selectAll(); });
-        //        QTimer::singleShot(++i * 100, [this] { toolpathActions[GCode::Thermal]->triggered(); });
-        //QTimer::singleShot(++i * 100, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        QTimer::singleShot(++i * 200, [this] { selectAll(); });
+        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
 
@@ -406,7 +406,9 @@ void MainWindow::createActionsService()
         serviceMenu->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
-            r.setSize({ 1280, 720 });
+            r.setSize({ 1920, 1080 });
+            r.setTopLeft({ 1920, 0 });
+            r.setBottomRight({ 1920, 1080 });
             setGeometry(r);
         }));
     }

@@ -40,7 +40,7 @@ public:
     //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
     //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
     //    QVariant data(const QModelIndex& index, int role) const override { }
-    //    void menu(QMenu& menu, FileTreeView* tv) const override { }
+    //    void menu(QMenu& menu, FileTree::View* tv) const override { }
 protected:
     // Shape interface
     void updateOtherHandlers(Handler* handler) override;

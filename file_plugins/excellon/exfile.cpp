@@ -54,7 +54,7 @@ File::File()
     : FileInterface()
     , m_format(this)
 {
-    m_node = new Excellon::Node(m_id);
+    m_node = new Node(this, m_id);
 }
 
 File::~File() { }

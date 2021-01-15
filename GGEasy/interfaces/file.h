@@ -33,7 +33,9 @@
 
 using LayerTypes = std::vector<LayerType>;
 
-class NodeInterface;
+namespace FileTree {
+class Node;
+}
 
 class FileInterface {
 
@@ -154,7 +156,7 @@ public:
     QModelIndex fileIndex() const { return m_fileIndex; }
     void setFileIndex(const QModelIndex& index) { m_fileIndex = index; }
 
-    NodeInterface* node() const { return m_node; }
+    FileTree::Node* node() const { return m_node; }
 
 protected:
     virtual void write(QDataStream& stream) const = 0;
@@ -162,7 +164,7 @@ protected:
     virtual Paths merge() const = 0;
 
     LayerTypes m_layerTypes;
-    NodeInterface* m_node;
+    FileTree::Node* m_node;
     Pathss m_groupedPaths;
     QColor m_color;
     QDateTime m_date;

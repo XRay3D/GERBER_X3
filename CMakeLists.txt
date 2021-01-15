@@ -22,7 +22,7 @@ add_subdirectory(static_libs)
 add_subdirectory(GGEasy)
 
 # plugins file
-#add_subdirectory(file_plugins)
+add_subdirectory(file_plugins)
 
 # plugins shape
 add_subdirectory(shape_plugins)

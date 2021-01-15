@@ -33,8 +33,9 @@ public:
     bool thisIsIt(const QString& fileName) override;
     QObject* getObject() override;
     int type() const override;
+    QString folderName() const override;
 
-    std::shared_ptr<FileInterface> createFile() override;
+    FileInterface* createFile() override;
     QJsonObject info() const override;
     //    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;

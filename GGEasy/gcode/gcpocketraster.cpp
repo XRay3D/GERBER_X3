@@ -91,7 +91,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
             clipper.AddPaths(src, ptClip, true);
             const IntRect r(clipper.GetBounds());
             clipper.Clear();
-            const cInt size = static_cast<cInt>(Length({ r.left, r.top }, { r.right, r.bottom }));
+            const cInt size = static_cast<cInt>(IntPoint(r.left, r.top).distTo({ r.right, r.bottom }));
             const cInt end = static_cast<cInt>(r.bottom + (size - (r.bottom - r.top)) * 0.5);
             const cInt start = static_cast<cInt>(r.top - (size - (r.bottom - r.top)) * 0.5);
             const cInt left = static_cast<cInt>(r.left - (size - (r.right - r.left)) * 0.5);
@@ -197,7 +197,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                 }
             } else {
                 for (cInt var = start, flag = 0; var < end; flag = (flag ? 0 : 1), var += m_stepOver) {
-                    map.push_back(Worck{ { left, right, var, flag } });
+                    map.push_back(Worck { { left, right, var, flag } });
                 }
             }
             if (/* DISABLES CODE */ (0)) {

@@ -151,8 +151,8 @@ void Text::setSide(const Side& side)
 
 bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -162,7 +162,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
             return true;
         }
         break;
-    case NodeColumn::SideType:
+    case FileTree::Column::SideType:
         if (role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -176,10 +176,10 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
 
 Qt::ItemFlags Text::flags(const QModelIndex& index) const
 {
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return Shape::flags(index) | Qt::ItemIsEditable;
-    case NodeColumn::SideType:
+    case FileTree::Column::SideType:
         return Shape::flags(index) | Qt::ItemIsEditable;
     default:
         return Shape::flags(index);
@@ -188,8 +188,8 @@ Qt::ItemFlags Text::flags(const QModelIndex& index) const
 
 QVariant Text::data(const QModelIndex& index, int role) const
 {
-    switch (NodeColumn(index.column())) {
-    case NodeColumn::NameColorVisible:
+    switch (FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
@@ -201,7 +201,7 @@ QVariant Text::data(const QModelIndex& index, int role) const
         default:
             return Shape::data(index, role);
         }
-    case NodeColumn::SideType:
+    case FileTree::Column::SideType:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -216,7 +216,7 @@ QVariant Text::data(const QModelIndex& index, int role) const
     }
 }
 
-void Text::menu(QMenu& menu, FileTreeView* tv) const
+void Text::menu(QMenu& menu, FileTree::View* tv) const
 {
     Shape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
@@ -246,11 +246,11 @@ Text::InternalData Text::loadIData()
     QSettings settings;
     settings.beginGroup("ShapeText");
     lastUsedIData.font = settings.value("font").toString();
-    lastUsedIData.text = settings.value("text").toString();
-    lastUsedIData.side = static_cast<Side>(settings.value("side").toInt());
-    lastUsedIData.angle = settings.value("angle").toDouble();
-    lastUsedIData.height = settings.value("height").toDouble();
-    lastUsedIData.handleAlign = settings.value("handleAlign").toInt();
+    lastUsedIData.text = settings.value("text", QObject::tr("Text")).toString();
+    lastUsedIData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
+    lastUsedIData.angle = settings.value("angle", 0.0).toDouble();
+    lastUsedIData.height = settings.value("height", 10.0).toDouble();
+    lastUsedIData.handleAlign = settings.value("handleAlign", BotLeft).toInt();
     return lastUsedIData;
 }
 

@@ -15,13 +15,15 @@
 *******************************************************************************/
 #include "gbrplugin.h"
 
+#include "gbraperture.h"
+#include "gbrfile.h"
 #include "gbrnode.h"
 
 #include "doublespinbox.h"
 #include "drillpreviewgi.h"
+#include "ft_view.h"
 #include "settings.h"
 #include "tool.h"
-#include "treeview.h"
 
 #include <thermalmodel.h>
 #include <thermalnode.h>
@@ -50,14 +52,14 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
 {
     if (type_ != type())
         return nullptr;
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    QFile file_(fileName);
+    if (!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
-    QTextStream in(&file);
+    QTextStream in(&file_);
     in.setAutoDetectUnicode(true);
     parseLines(in.readAll(), fileName);
-    return Parser::file;
+    return file;
 }
 
 QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const
@@ -144,7 +146,9 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::Gerber); }
 
-std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
+QString Plugin::folderName() const { return tr("Gerber Files"); }
+
+FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const
 {
@@ -481,7 +485,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
             if (go.state().type() == PrimitiveType::Line
                 && go.state().imgPolarity() == Positive
                 && (go.path().size() == 2 || (go.path().size() == 5 && go.path().first() == go.path().last()))
-                && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
+                && go.path().first().distTo(go.path().last()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
                 && testArea(go.paths())) {
                 map.push_back({ &go, thermalNodes[Line], tr("Line"), ctr++ });
             }

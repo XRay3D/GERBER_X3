@@ -15,7 +15,7 @@
 *******************************************************************************/
 #include <project.h>
 
-#include "filemodel.h"
+#include "ft_model.h"
 #include "interfaces/file.h"
 #include "interfaces/shapepluginin.h"
 #include "shape.h"
@@ -41,6 +41,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     if (App::fileInterfaces().contains(type)) {
         file.reset(App::fileInterface(type)->createFile());
         stream >> *file;
+        file->addToScene();
     }
     return stream;
 }

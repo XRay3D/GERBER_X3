@@ -15,7 +15,7 @@
 
 #include "graphicsitem.h"
 #include <QModelIndex>
-#include <interfaces/node.h>
+#include <ft_node.h>
 #include <memory>
 
 namespace Shapes {
@@ -67,6 +67,6 @@ protected:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role) const;
-    virtual void menu(QMenu& menu, FileTreeView* tv) const;
+    virtual void menu(QMenu& menu, FileTree::View* tv) const;
 };
 }

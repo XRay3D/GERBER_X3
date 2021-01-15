@@ -155,9 +155,21 @@ struct mvector : std::vector<T> {
     }
 
     template <class P, std::enable_if_t<std::is_base_of_v<T, std::unique_ptr<P>>, int> = 0>
+    inline auto indexOf(const P* t) const noexcept
+    {
+        using CP = const P;
+        auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
+        if (it == V::end())
+            return std::distance(V::begin() + 1, V::begin());
+        else
+            return std::distance(V::begin(), it);
+    }
+
+    template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
     inline auto indexOf(P* t) const noexcept
     {
-        if (auto it = std::find(V::begin(), V::end(), std::unique_ptr<P, std::function<void(P*)>>(t, [](P*) {})); it == V::end())
+        auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
+        if (it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);

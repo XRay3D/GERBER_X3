@@ -26,21 +26,23 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 add_library(filetree STATIC
-    filemodel.h
-    foldernode.h
-    radiodelegate.h
-    sidedelegate.h
-    textdelegate.h
-    treeview.h
-    typedelegate.h
-    filemodel.cpp
-    foldernode.cpp
-    radiodelegate.cpp
-    sidedelegate.cpp
-    textdelegate.cpp
-    treeview.cpp
-    typedelegate.cpp
-)
+    ft_foldernode.cpp
+    ft_foldernode.h
+    ft_model.cpp
+    ft_model.h
+    ft_node.cpp
+    ft_node.h
+    ft_radiodelegate.cpp
+    ft_radiodelegate.h
+    ft_sidedelegate.cpp
+    ft_sidedelegate.h
+    ft_textdelegate.cpp
+    ft_textdelegate.h
+    ft_typedelegate.cpp
+    ft_typedelegate.h
+    ft_view.cpp
+    ft_view.h
+    )
 
 target_link_libraries(filetree PRIVATE
     gi

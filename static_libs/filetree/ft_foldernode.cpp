@@ -13,40 +13,63 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "textdelegate.h"
-#include <QDebug>
-#include <QLineEdit>
+#include "ft_foldernode.h"
 
-#include "leakdetector.h"
+#include <QIcon>
 
-////////////////////////////////////////////////////////////
-/// \brief TextDelegate::TextDelegate
-/// \param parent
-///
-TextDelegate::TextDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
+namespace FileTree {
+
+FolderNode::FolderNode(const QString& name, int &id)
+    : FileTree::Node(id, Folder)
+    , name(name)
 {
 }
 
-QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
+QVariant FolderNode::data(const QModelIndex& index, int role) const
 {
-    auto* le = new QLineEdit(parent);
-    m_rect = option.rect;
-    connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
-    return le;
+    if (!index.column()) {
+        switch (role) {
+        case Qt::DisplayRole:
+            return name;
+        case Qt::DecorationRole:
+            return QIcon::fromTheme("folder");
+        default:
+            break;
+        }
+    }
+    switch (role) {
+    case Role::Id:
+        return m_id;
+    case Role::NodeType:
+        return Folder;
+    case Role::ContentType:
+        return childs.size() ? childs.front()->type : Type::Null;
+    default:
+        return QVariant();
+    }
 }
 
-void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const
 {
-    auto* le = qobject_cast<QLineEdit*>(editor);
-    le->setGeometry(m_rect);
-    le->setText(index.data(Qt::EditRole).toString());
+    return Qt::ItemIsEnabled /*| Qt::ItemIsDropEnabled*/;
 }
 
-void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    auto* le = qobject_cast<QLineEdit*>(editor);
-    model->setData(index, le->text());
+    if (index.column())
+        return false;
+
+    switch (role) {
+    case Qt::CheckStateRole:
+        m_checkState = value.value<Qt::CheckState>();
+        return true;
+    default:
+        return false;
+    }
 }
 
-void TextDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) const
+{
+}
+
+}

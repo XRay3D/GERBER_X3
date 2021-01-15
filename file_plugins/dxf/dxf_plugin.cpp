@@ -27,7 +27,7 @@
 
 #include "tables/dxf_layer.h"
 
-#include "treeview.h"
+#include "ft_view.h"
 
 #include <QtWidgets>
 
@@ -186,7 +186,9 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return int(FileType::Dxf); }
 
-std::shared_ptr<FileInterface> Plugin::createFile() { return std::make_shared<File>(); }
+QString Plugin::folderName() const { return tr("Dxf Files"); }
+
+FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const
 {
@@ -317,7 +319,7 @@ void Plugin::updateFileModel(FileInterface* file)
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
         qDebug() << __FUNCTION__ << name << layer;
-        fm->getItem(index)->addNode(new Dxf::NodeLayer(name, layer));
+        fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
 }
