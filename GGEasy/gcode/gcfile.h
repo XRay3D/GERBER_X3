@@ -31,6 +31,7 @@ public:
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
+    QIcon icon() const { return m_icon; }
 
 private:
     ////////////////////////////////////////
@@ -54,6 +55,7 @@ private:
     void createGiProfile();
     void createGiRaster();
     void createGiLaser();
+    QIcon m_icon;
     //////////////
     void saveDrill(const QPointF& offset);
 
@@ -76,6 +78,8 @@ protected:
 
 public:
     void createGi() override;
+    void initFrom(FileInterface* file) override { }
+    FileTree::Node *node() override;
 
     mvector<QString> gCodeText() const;
     Tool getTool() const;

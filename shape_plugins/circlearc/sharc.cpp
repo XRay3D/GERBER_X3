@@ -66,19 +66,19 @@ void Arc::redraw()
     if (angle < 0.0)
         angle = M_2PI + angle;
 
-    Path& path = m_paths.first();
+    Path& path = m_paths.front();
     path.clear();
     path.reserve(intSteps);
 
     for (int i = 0; i < intSteps; i++) {
         const double theta = stepAngle * i;
         if (theta > angle) {
-            path.append(Point64(
+            path.push_back(Point64(
                 static_cast<cInt>(radius * cos(angle2)) + center.X,
                 static_cast<cInt>(radius * sin(angle2)) + center.Y));
             break;
         }
-        path.append(Point64(
+        path.push_back(Point64(
             static_cast<cInt>(radius * cos(angle1 + theta)) + center.X,
             static_cast<cInt>(radius * sin(angle1 + theta)) + center.Y));
     }

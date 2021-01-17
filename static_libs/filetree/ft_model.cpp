@@ -27,9 +27,11 @@
 
 namespace FileTree {
 
+using TreeItem = Node;
+
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new FolderNode("rootItem", rotId))
+    , rootItem(new FolderNode("rootItem", new int(-1)))
     , mimeType(QStringLiteral("application/GCodeItem"))
 {
     App::setFileModel(this);
@@ -53,24 +55,19 @@ void Model::addFile(FileInterface* file)
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
-        rootItem->addChild(mapNode[type].node = new FolderNode(App::fileInterface(type)->folderName(), mapNode[type].type));
+        rootItem->addChild(mapNode[type].node = new FolderNode(App::fileInterface(type)->folderName(), new int(mapNode[type].type)));
         endInsertRows();
     }
 
-    FileTree::Node* item(mapNode[type].node);
+    Node* item(mapNode[type].node);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
-    FileTree::Node* newItem;
     beginInsertRows(index, rowCount, rowCount);
-    mapNode[type].node->addChild(newItem = file->node());
+    mapNode[type].node->addChild(file->node());
     endInsertRows();
 
-    assert(newItem);
-
-    QModelIndex selectIndex = createIndex(rowCount, 0, newItem);
-    file->setFileIndex(selectIndex);
     App::fileInterface(type)->updateFileModel(file);
-    emit select(selectIndex);
+    emit select(createIndex(rowCount, 0, file->node()));
 }
 
 void Model::addShape(Shapes::Shape* shape)
@@ -86,25 +83,23 @@ void Model::addShape(Shapes::Shape* shape)
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
         auto si = std::get<0>(App::shapeInterfaces().begin()->second);
-        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), mapNode[type].type));
+        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), new int(mapNode[type].type)));
         endInsertRows();
     }
 
-    FileTree::Node* item(mapNode[type].node);
+    Node* item(mapNode[type].node);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
     item->addChild(shape->node());
     endInsertRows();
-    QModelIndex selectIndex = createIndex(rowCount, 0, shape);
-    qDebug() << __FUNCTION__ << selectIndex;
-    emit select(selectIndex);
-    emit select(createIndex(rowCount, 0, shape));
+
+    emit select(createIndex(rowCount, 0, shape->node()));
 }
 
 void Model::closeProject()
 {
-    FileTree::Node* item;
+    Node* item;
     for (int i = 0; i < rootItem->childCount(); ++i) {
         item = rootItem->child(i);
         QModelIndex index = createIndex(i, 0, item);
@@ -120,37 +115,55 @@ void Model::closeProject()
 
 QModelIndex Model::index(int row, int column, const QModelIndex& parent) const
 {
-    FileTree::Node* childItem = getItem(parent)->child(row);
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    TreeItem* parentItem;
+
+    parentItem = !parent.isValid()
+        ? rootItem
+        : static_cast<TreeItem*>(parent.internalPointer());
+
+    TreeItem* childItem = parentItem->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
+    //    Node* childItem = getItem(parent)->child(row);
+    //    if (childItem)
+    //        return createIndex(row, column, childItem);
+    //    return QModelIndex();
 }
 
 QModelIndex Model::parent(const QModelIndex& index) const
 {
+    //    if (!index.isValid())
+    //        return QModelIndex();
+    //    TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
+    //    TreeItem* parentItem = childItem->parent();
+    //    if (parentItem == rootItem)
+    //        return QModelIndex();
+    //    return createIndex(parentItem->row(), 0, parentItem);
+
     if (!index.isValid())
         return QModelIndex();
-    FileTree::Node* parentItem = getItem(index)->parent();
+    Node* parentItem = getItem(index)->parent();
     if (parentItem == rootItem)
         return QModelIndex();
-    return createIndex(parentItem->row(), 0, parentItem);
+    return createIndex(parentItem->row(), /*index.column()*/ 0, parentItem);
 }
 
 QVariant Model::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-
-    FileTree::Node* item = getItem(index);
-
-    return item->data(index, role);
+    return getItem(index)->data(index, role);
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     bool ok = getItem(index)->setData(index, value, role);
-    //    if (ok)
-    //        App::project()->setChanged();
+    if (ok)
+        App::project()->setChanged();
     return ok;
 }
 
@@ -172,6 +185,9 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const
 {
+    //    if (!index.isValid())
+    //        return Qt::NoItemFlags;
+    //    return QAbstractItemModel::flags(index);
     if (!index.isValid())
         return Qt::NoItemFlags;
     return getItem(index)->flags(index);
@@ -179,9 +195,9 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const
 
 bool Model::removeRows(int row, int count, const QModelIndex& parent)
 {
-    FileTree::Node* item = nullptr;
+    Node* item = nullptr;
     if (parent.isValid())
-        item = static_cast<FileTree::Node*>(parent.internalPointer());
+        item = static_cast<Node*>(parent.internalPointer());
     else
         return false;
 
@@ -200,9 +216,18 @@ int Model::columnCount(const QModelIndex& /*parent*/) const
 
 int Model::rowCount(const QModelIndex& parent) const
 {
+    TreeItem* parentItem;
     if (parent.column() > 0)
         return 0;
-    return getItem(parent)->childCount();
+
+    parentItem = !parent.isValid()
+        ? rootItem
+        : static_cast<TreeItem*>(parent.internalPointer());
+
+    return parentItem->childCount();
+    //    if (parent.column() > 0)
+    //        return 0;
+    //    return getItem(parent)->childCount();
 }
 
 //QStringList FileModel::mimeTypes() const
@@ -282,16 +307,16 @@ int Model::rowCount(const QModelIndex& parent) const
 //    //    //    }
 
 //    //    for (QString& item : list) {
-//    //        FileTree::Node* copyItem = reinterpret_cast<FileTree::Node*>(item.toLongLong());
-//    //        FileTree::Node* parentItem = static_cast<FileTree::Node*>(parent.internalPointer());
+//    //        Node* copyItem = reinterpret_cast<Node*>(item.toLongLong());
+//    //        Node* parentItem = static_cast<Node*>(parent.internalPointer());
 //    //        if (copyItem) {
 //    //            if (!parentItem)
 //    //                parentItem = rootItem;
 //    //            insertRows(beginRow, list.size(), parent);
 //    //            if (parentItem->childCount() > beginRow)
-//    //                parentItem->setChild(beginRow, new FileTree::Node(*copyItem));
+//    //                parentItem->setChild(beginRow, new Node(*copyItem));
 //    //            else
-//    //                parentItem->setChild(parentItem->childCount() - 1, new FileTree::Node(*copyItem));
+//    //                parentItem->setChild(parentItem->childCount() - 1, new Node(*copyItem));
 //    //        }
 //    //        ++beginRow;
 //    //    }
@@ -312,8 +337,8 @@ int Model::rowCount(const QModelIndex& parent) const
 //{
 //    return false;
 //    //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-//    //    FileTree::Node* srcItem = static_cast<FileTree::Node*>(sourceParent.internalPointer());
-//    //    FileTree::Node* dstItem = static_cast<FileTree::Node*>(destinationParent.internalPointer());
+//    //    Node* srcItem = static_cast<Node*>(sourceParent.internalPointer());
+//    //    Node* dstItem = static_cast<Node*>(destinationParent.internalPointer());
 //    //    if (!srcItem)
 //    //        srcItem = rootItem;
 //    //    if (!dstItem)
@@ -328,7 +353,7 @@ int Model::rowCount(const QModelIndex& parent) const
 Node* Model::getItem(const QModelIndex& index) const
 {
     if (index.isValid()) {
-        auto* item = static_cast<FileTree::Node*>(index.internalPointer());
+        auto* item = static_cast<Node*>(index.internalPointer());
         if (item)
             return item;
     }

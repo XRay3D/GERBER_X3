@@ -47,7 +47,7 @@ Paths offset(const Path& path, double offset, bool fl = false)
     cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
 
     for (Path& tmpPath : tmpPpaths)
-        tmpPath.push_back(tmpPath.first());
+        tmpPath.push_back(tmpPath.front());
 
     return tmpPpaths;
 }
@@ -228,12 +228,12 @@ void DrillForm::on_pbCreate_clicked()
                 for (auto& item : m_giPeview[apertureId]) {
                     if (static_cast<GiType>(item->type()) == GiType::PrSlot) {
                         if (item->fit(ui->dsbxDepth->value())) {
-                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter())) {
+                            for (Path& path : offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter())) {
                                 pathsMap[usedToolId].paths.push_back(path);
                             }
                             model->setCreate(row, false);
                         } else {
-                            pathsMap[usedToolId].paths.push_back(item->paths().first());
+                            pathsMap[usedToolId].paths.push_back(item->paths().front());
                             model->setCreate(row, false);
                         }
                     }
@@ -252,7 +252,7 @@ void DrillForm::on_pbCreate_clicked()
                     indexes += ",";
                 indexes += QString::number(id);
             }
-            if (!pathsMap[usedToolId].paths.isEmpty()) {
+            if (!pathsMap[usedToolId].paths.empty()) {
                 GCode::File* gcode = new GCode::File({ pathsMap[usedToolId].paths }, { App::toolHolder().tool(usedToolId), ui->dsbxDepth->value(), GCode::Profile });
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes);
                 gcode->setSide(file->side());
@@ -282,12 +282,12 @@ void DrillForm::on_pbCreate_clicked()
                             switch (m_side) {
                             case GCode::On:
                             case GCode::Outer:
-                                pathsMap[toolId].paths.push_back(item->paths());
+                                pathsMap[toolId].paths.append(item->paths());
                                 model->setCreate(row, false);
                                 break;
                             case GCode::Inner:
                                 if (item->fit(ui->dsbxDepth->value())) {
-                                    pathsMap[toolId].paths.push_back(item->paths());
+                                    pathsMap[toolId].paths.append(item->paths());
                                     model->setCreate(row, false);
                                 }
                                 break;
@@ -296,7 +296,7 @@ void DrillForm::on_pbCreate_clicked()
                         break;
                     case GCode::Pocket:
                         if (App::toolHolder().tool(toolId).type() != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
-                            pathsMap[toolId].paths.push_back(item->paths());
+                            pathsMap[toolId].paths.append(item->paths());
                             model->setCreate(row, false);
                         }
                         break;
@@ -323,7 +323,7 @@ void DrillForm::on_pbCreate_clicked()
                 indexes += QString::number(id);
             }
 
-            if (!pathsMap[toolId].drillPath.isEmpty()) {
+            if (!pathsMap[toolId].drillPath.empty()) {
                 Path& path = pathsMap[toolId].drillPath;
                 Point64 point1((Marker::get(Marker::Home)->pos()));
                 { // sort by distance
@@ -347,7 +347,7 @@ void DrillForm::on_pbCreate_clicked()
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
             }
-            if (!pathsMap[toolId].paths.isEmpty()) {
+            if (!pathsMap[toolId].paths.empty()) {
                 Clipper clipper;
                 clipper.AddPaths(pathsMap[toolId].paths, ptSubject, true);
                 clipper.Execute(ctUnion, pathsMap[toolId].paths, pftPositive);

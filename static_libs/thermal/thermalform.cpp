@@ -200,14 +200,14 @@ void ThermalForm::createFile()
     for (auto& item : m_sourcePreview) {
         if (item->isValid()) {
             wPaths.append(item->paths());
-            wBridgePaths.append(item->bridge());
+            wBridgePaths.push_back(item->bridge());
         }
     }
 
     GCode::GCodeParams gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
-    gpc.tools.append(tool);
+    gpc.tools.push_back(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();

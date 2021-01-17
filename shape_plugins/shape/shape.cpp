@@ -31,7 +31,7 @@ namespace Shapes {
 
 Shape::Shape()
     : GraphicsItem(nullptr)
-    , m_node(new Node(this, m_giId))
+    , m_node(new Node(this, &m_giId))
 {
     m_paths.resize(1);
     changeColor();
@@ -82,7 +82,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto& h : shape->handlers) {
-                hInitPos[shape].append(h->pos());
+                hInitPos[shape].push_back(h->pos());
             }
         }
     }
@@ -193,7 +193,6 @@ Node* Shape::node() const
 
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    qDebug(__FUNCTION__);
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -247,7 +246,7 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         return itemFlag;
     default:
         return itemFlag;
@@ -259,6 +258,9 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         App::fileModel()->removeRow(m_node->row(), m_node->index().parent());
     });
+    auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
+    action->setChecked(isVisible());
+    action->setCheckable(true);
 }
 
 }

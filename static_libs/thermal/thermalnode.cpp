@@ -51,7 +51,7 @@ ThermalNode* ThermalNode::child(int row) const { return childs.at(row).get(); }
 
 ThermalNode* ThermalNode::parentItem() { return m_parent; }
 
-int ThermalNode::childCount() const { return static_cast<int>(childs.count()); }
+int ThermalNode::childCount() const { return static_cast<int>(childs.size()); }
 
 int ThermalNode::row() const
 {
@@ -77,12 +77,12 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
         m_checked = (value.value<Qt::CheckState>() == Qt::Checked);
         if (container) {
             auto childItems(this->childs);
-            if (container && childItems.isEmpty())
+            if (container && childItems.empty())
                 childItems = m_parent->childs.mid(1);
             updateGuard = true;
             for (auto node : qAsConst(childItems))
                 node->setData(index, value, role);
-            emit model->dataChanged(childItems.first()->index(), childItems.last()->index(), { role });
+            emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), { role });
             updateGuard = false;
         } else {
             if (!updateGuard)
@@ -93,7 +93,7 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
     } else if (role == Qt::EditRole) {
         if (container) {
             auto childItems(this->childs);
-            if (container && childItems.isEmpty())
+            if (container && childItems.empty())
                 childItems = m_parent->childs.mid(1);
             switch (index.column()) {
             case ThermalModel::Name:
@@ -170,7 +170,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
         if (index.column())
             return {};
         if (container) {
-            if (childs.isEmpty())
+            if (childs.empty())
                 return m_checked ? Qt::Checked : Qt::Unchecked;
             int val = 0;
             for (auto node : childs) {

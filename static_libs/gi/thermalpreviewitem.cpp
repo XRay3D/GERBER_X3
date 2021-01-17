@@ -58,7 +58,7 @@ AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
 
     static QMutex m;
     m.lock();
-    thpi.append(this);
+    thpi.push_back(this);
     m.unlock();
 }
 
@@ -114,7 +114,7 @@ QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
 int AbstractThermPrGi::type() const { return static_cast<int>(GiType::PrThermal); }
 
-bool AbstractThermPrGi::isValid() const { return !previewPaths.isEmpty() && m_node->isChecked(); }
+bool AbstractThermPrGi::isValid() const { return !previewPaths.empty() && m_node->isChecked(); }
 
 void AbstractThermPrGi::changeColor()
 {
@@ -124,7 +124,7 @@ void AbstractThermPrGi::changeColor()
                 ? colors[(int)Colors::SelectedHovered]
                 : colors[(int)Colors::Selected]));
     } else {
-        if (colorState & Used && !previewPaths.isEmpty()) {
+        if (colorState & Used && !previewPaths.empty()) {
             pa1.setEndValue(QColor((colorState & Hovered)
                     ? colors[(int)Colors::UsedHovered]
                     : colors[(int)Colors::Used]));

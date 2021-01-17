@@ -12,9 +12,11 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
 #include "gccreator.h"
 
 namespace GCode {
+
 class ProfileCreator : public Creator {
 public:
     ProfileCreator();
@@ -22,7 +24,7 @@ public:
 
 private:
     void createProfile(const Tool& tool, const double depth);
-    void strip();
+    void trimmingOpenPaths(Paths& paths);
 
     enum NodeType {
         ntAny,
@@ -31,14 +33,16 @@ private:
     };
     void reorder();
 
-    void addPolyNodeToPaths(const PolyNode& polynode, NodeType nodetype, Paths& paths);
+    void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
 
-    int nestCtr;
+    IntPoint from;
 
-    int sortPolyNodeByNesting(PolyNode& polynode);
+    void reduceDistance(IntPoint& from, Path& to);
+    void reduceDistance2(IntPoint& from, std::vector<PolyNode*> to);
+
     //------------------------------------------------------------------------------
     void polyTreeToPaths(PolyTree& polytree, Paths& paths);
-    void closedPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
+    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
     void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 
 protected:

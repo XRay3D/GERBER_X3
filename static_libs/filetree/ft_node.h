@@ -48,9 +48,9 @@ namespace FileTree {
 
 class View;
 
-enum class Column : int {
+enum Column : int {
     NameColorVisible,
-    SideType,
+    Side,
     ItemsType,
     Count
 };
@@ -77,7 +77,7 @@ class Node {
     Node(const Node&) = delete;
 
 public:
-    explicit Node(const int& id, Type type);
+    explicit Node(int* id, Type type);
     virtual ~Node();
 
     Node* child(int row) const;
@@ -101,8 +101,10 @@ public:
     const QStringList sideStrList;
     const Type type;
 
+    void setId(int* id);
+
 protected:
-    const int& m_id;
+    int* m_id;
 
     Node* m_parent = nullptr;
     mvector<std::unique_ptr<Node>> childs;

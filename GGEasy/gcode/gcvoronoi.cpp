@@ -194,7 +194,7 @@ void VoronoiCreator::create()
 
 void VoronoiCreator::createVoronoi()
 {
-    const auto& tool = m_gcp.tools.first();
+    const auto& tool = m_gcp.tools.front();
     const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
     const auto width = m_gcp.params[GCodeParams::Width].toDouble();
 
@@ -276,14 +276,14 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
         m_workingRawPs = tmpPaths1;
         Paths tmpPaths;
         do {
-            tmpPaths.push_back(tmpPaths1);
+            tmpPaths.append(tmpPaths1);
             offset.Clear();
             offset.AddPaths(tmpPaths1, jtMiter, etClosedPolygon);
             offset.Execute(tmpPaths1, -m_stepOver);
         } while (tmpPaths1.size());
         m_returnPs = tmpPaths;
     }
-    if (m_returnPs.isEmpty()) {
+    if (m_returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
@@ -306,41 +306,41 @@ void VoronoiCreator::mergePaths(Paths& paths, const double dist)
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                else if (paths[i].first() == paths[j].first()) {
+                else if (paths[i].front() == paths[j].front()) {
                     ReversePath(paths[j]);
-                    paths[j].push_back(paths[i].mid(1));
+                    paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
                 } else if (paths[i].back() == paths[j].back()) {
                     ReversePath(paths[j]);
-                    paths[i].push_back(paths[j].mid(1));
+                    paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
-                } else if (paths[i].first() == paths[j].back()) {
-                    paths[j].push_back(paths[i].mid(1));
+                } else if (paths[i].front() == paths[j].back()) {
+                    paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                } else if (paths[j].first() == paths[i].back()) {
-                    paths[i].push_back(paths[j].mid(1));
+                } else if (paths[j].front() == paths[i].back()) {
+                    paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
                 } else if (dist != 0.0) {
                     /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
                         ReversePath(paths[j]);
-                        paths[i].push_back(paths[j].mid(1));
+                        paths[i].append(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (paths[i].back().distTo(paths[j].first()) < dist) {
-                        paths[i].push_back(paths[j].mid(1));
+                    } else if (paths[i].back().distTo(paths[j].front()) < dist) {
+                        paths[i].append(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (paths[i].first().distTo(paths[j].back()) < dist) {
-                        paths[j].push_back(paths[i].mid(1));
+                    } else if (paths[i].front().distTo(paths[j].back()) < dist) {
+                        paths[j].append(paths[i].mid(1));
                         paths.remove(i--);
                         break;
-                    } else if (paths[i].first().distTo(paths[j].first()) < dist) {
+                    } else if (paths[i].front().distTo(paths[j].front()) < dist) {
                         ReversePath(paths[j]);
-                        paths[j].push_back(paths[i].mid(1));
+                        paths[j].append(paths[i].mid(1));
                         paths.remove(i--);
                         break;
                     }
@@ -481,25 +481,25 @@ void VoronoiCreator::jcVoronoi()
     //PROG //PROG .3setProgMaxAndVal(7, 1); // progress
     for (const Paths& paths : m_groupedPss) {
         for (const Path& path : paths) {
-            Point64 tmp(path.first());
+            Point64 tmp(path.front());
             for (const Point64& point : path) {
                 condei(tmp, point);
                 points.push_back({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
                 tmp = point;
             }
-            condei(tmp, path.first());
+            condei(tmp, path.front());
         }
         ++id;
     }
     //PROG //PROG .3setProgMaxAndVal(7, 2); // progress
     for (const Path& path : m_workingRawPs) {
-        Point64 tmp(path.first());
+        Point64 tmp(path.front());
         for (const Point64& point : path) {
             condei(tmp, point);
             points.push_back({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
             tmp = point;
         }
-        condei(tmp, path.first());
+        condei(tmp, path.front());
         ++id;
     }
 
@@ -518,7 +518,7 @@ void VoronoiCreator::jcVoronoi()
             { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
         };
         jcv_diagram diagram;
-        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+        jcv_diagram_generate(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toIntPoint = [](const jcv_edge* edge, int num) -> const Point64 {
             return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
         };
@@ -539,13 +539,13 @@ void VoronoiCreator::jcVoronoi()
     }
 
     for (const Pairs& edge : edges) {
-        m_returnPs.push_back(toPath(edge));
+        m_returnPs.append(toPath(edge));
         //PROG //PROG .3setProgMaxAndVal(edges.size(), m_returnPs.size()); // progress
     }
     mergePaths(m_returnPs, 0.005 * uScale);
-    m_returnPs.push_back(toPath(frame));
+    m_returnPs.append(toPath(frame));
     for (size_t i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
-        if (m_returnPs[i].size() < 4 && m_returnPs[i].first().distTo(m_returnPs[i].back()) < tolerance * 0.5 * uScale)
+        if (m_returnPs[i].size() < 4 && m_returnPs[i].front().distTo(m_returnPs[i].back()) < tolerance * 0.5 * uScale)
             m_returnPs.remove(i--);
     }
 }

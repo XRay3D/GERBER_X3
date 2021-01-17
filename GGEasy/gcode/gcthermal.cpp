@@ -27,7 +27,7 @@ void ThermalCreator::create()
 {
     createThermal(
         App::project()->file(m_gcp.params[GCodeParams::FileId].toInt()),
-        m_gcp.tools.first(),
+        m_gcp.tools.front(),
         m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
@@ -49,9 +49,9 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
             ReversePaths(m_returnPs);
 
         for (Path& path : m_returnPs)
-            path.push_back(path.first());
+            path.push_back(path.front());
 
-        if (m_returnPs.isEmpty()) {
+        if (m_returnPs.empty()) {
             emit fileReady(nullptr);
             return;
         }
@@ -102,7 +102,7 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
     if (m_returnPs.size())
         m_returnPss.push_back(sortB(m_returnPs));
 
-    if (m_returnPss.isEmpty()) {
+    if (m_returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
         m_gcp.gcType = Thermal;

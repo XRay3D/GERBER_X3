@@ -38,7 +38,7 @@ Text::Text(QPointF pt1)
 
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
 
-    handlers.first()->setPos(pt1);
+    handlers.front()->setPos(pt1);
 
     redraw();
 
@@ -119,14 +119,14 @@ void Text::redraw()
         painterPath = std::move(tmpPainterPath);
     }
     matrix.reset();
-    matrix.translate(handlers.first()->pos().x(), handlers.first()->pos().y());
+    matrix.translate(handlers.front()->pos().x(), handlers.front()->pos().y());
     matrix.rotate(iData.angle - 360);
 
     m_paths.clear();
     m_shape = QPainterPath();
 
     for (auto& sp : painterPath.toSubpathPolygons(matrix)) {
-        m_paths.append(sp);
+        m_paths.push_back(sp);
         m_shape.addPolygon(sp);
     }
     setPos({ 1, 1 }); //костыли    //update();
@@ -162,7 +162,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
             return true;
         }
         break;
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         if (role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -179,7 +179,7 @@ Qt::ItemFlags Text::flags(const QModelIndex& index) const
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return Shape::flags(index) | Qt::ItemIsEditable;
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         return Shape::flags(index) | Qt::ItemIsEditable;
     default:
         return Shape::flags(index);
@@ -201,7 +201,7 @@ QVariant Text::data(const QModelIndex& index, int role) const
         default:
             return Shape::data(index, role);
         }
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:

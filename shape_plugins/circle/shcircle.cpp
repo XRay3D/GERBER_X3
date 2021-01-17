@@ -39,10 +39,9 @@ Circle::Circle(QPointF center, QPointF pt)
     redraw();
 
     App::scene()->addItem(this);
-    qDebug(__FUNCTION__);
 }
 
-Circle::~Circle() { qDebug(__FUNCTION__); }
+Circle::~Circle() { }
 
 void Circle::redraw()
 {
@@ -51,15 +50,15 @@ void Circle::redraw()
     const cInt radius = static_cast<cInt>(m_radius * uScale);
     const Point64 center((handlers[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
-    Path& path = m_paths.first();
+    Path& path = m_paths.front();
     path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        path.append(Point64(
+        path.push_back(Point64(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }
-    path.append(path.first());
+    path.push_back(path.front());
     m_shape = QPainterPath();
     m_shape.addPolygon(path);
     m_rect = m_shape.boundingRect();

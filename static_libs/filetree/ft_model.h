@@ -36,7 +36,7 @@ class Model : public QAbstractItemModel {
     std::map<int, Pair> mapNode;
     friend class ::Project;
     friend class Node;
-    int rotId = -1;
+
 signals:
     void updateActions();
     void select(const QModelIndex&);

@@ -24,7 +24,7 @@
 
 namespace Shapes {
 
-Node::Node(Shape* shape, int& id)
+Node::Node(Shape* shape, int* id)
     : FileTree::Node(id, FileTree::Shape)
     , shape(shape)
 {
@@ -79,7 +79,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     //        case Qt::DecorationRole:
     //            return shape()->icon();
     //        case FileTree::Id:
-    //            return m_id;
+    //            return *m_id;
     //        case Qt::EditRole:
     //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
     //                return static_cast<Text*>(shape())->text();

@@ -29,7 +29,8 @@
 #include "leakdetector.h"
 
 namespace Excellon {
-Node::Node(File* file, int& id)
+
+Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
     , file(file)
 {
@@ -46,7 +47,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         default:
             return false;
         }
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
@@ -65,7 +66,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -88,11 +89,11 @@ QVariant Node::data(const QModelIndex& index, int role) const
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
             case FileTree::Id:
-                return m_id;
+                return *m_id;
             default:
                 return QVariant();
             }
-        case FileTree::Column::SideType:
+        case FileTree::Column::Side:
             switch (role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
@@ -100,7 +101,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
             case Qt::EditRole:
                 return static_cast<bool>(file->side());
             case FileTree::Id:
-                return m_id;
+                return *m_id;
             default:
                 return QVariant();
             }
@@ -143,4 +144,5 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
+
 }

@@ -8,67 +8,29 @@
 template <class T>
 struct mvector : std::vector<T> {
     using V = std::vector<T>;
-    mvector(size_t size = 0)
-        : std::vector<T>(size)
-    {
-    }
-    mvector(size_t size, const T& t)
-        : std::vector<T>(size, t)
-    {
-    }
-    mvector(const mvector<T>& v)
-        : std::vector<T>(v)
-    {
-    }
-    mvector(mvector<T>&& v)
-        : std::vector<T>(v)
-    {
-    }
-
-    mvector(const std::initializer_list<T>& v)
-        : std::vector<T>(v)
-    {
-    }
-
-    mvector& operator=(const mvector<T>& v)
+    using M = mvector<T>;
+    // clang-format off
+    mvector() {}
+    mvector(size_t size) : V(size) {}
+    mvector(size_t size, const T& t) : V(size, t) {}
+    mvector(const V& v) : V(v) {}
+    mvector(V&& v) : V(std::move(v)) {}
+    mvector(const M& v) : V(v) {}
+    mvector(M&& v) : V(std::move(v)) {}
+    mvector(const std::initializer_list<T>& v) : V(v) {}
+    // clang-format On
+    mvector& operator=(const M& v)
     {
         V::operator=(v);
         return *this;
     }
-    mvector& operator=(mvector<T>&& v)
+    mvector& operator=(M&& v)
     {
         V::operator=(std::move(v));
         return *this;
     }
 
-    inline bool isEmpty() const noexcept { return V::empty(); }
-
-    inline size_t count() const noexcept { return V::size(); }
-
-    inline T& first() noexcept { return V::front(); }
-    inline T& last() noexcept { return V::back(); }
-
-    inline const T& first() const noexcept { return V::front(); }
-    inline const T& last() const noexcept { return V::back(); }
-
-    inline void push_back(T&& t) { V::emplace_back(std::move(t)); }
-    inline void push_back(const T& t) { V::emplace_back(t); }
-    inline void push_back(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
-
-    inline void append(T&& t) { V::emplace_back(std::move(t)); }
-    inline void append(const T& t) { V::emplace_back(t); }
     inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
-
-    //    template <class... _Valty>
-    //    decltype(auto) emplace_back(_Valty&&... _Val)
-    //    {
-    //        return V::template emplace_back<_Valty...>(_Val...);
-    //    }
-    //    template <class... _Valty>
-    //    decltype(auto) emplace_back(_Valty&... _Val)
-    //    {
-    //        return V::template emplace_back<_Valty...>(_Val...);
-    //    }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 

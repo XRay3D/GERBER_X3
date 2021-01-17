@@ -20,6 +20,7 @@
 
 #include "itemgroup.h"
 #include "splashscreen.h"
+#include <ft_node.h>
 #include <myclipper.h>
 
 #include "app.h"
@@ -32,10 +33,6 @@
 #include "leakdetector.h"
 
 using LayerTypes = std::vector<LayerType>;
-
-namespace FileTree {
-class Node;
-}
 
 class FileInterface {
 
@@ -130,7 +127,12 @@ public:
         CutoffGroup,
     };
 
-    virtual void initFrom(FileInterface* file) { setFileIndex(file->fileIndex()); };
+    virtual void initFrom(FileInterface* file)
+    {
+        m_id = file->id();
+        m_node = file->node();
+        m_node->setId(&m_id);
+    }
 
     virtual FileType type() const = 0;
     const LayerTypes& displayedTypes() const { return m_layerTypes; }
@@ -153,10 +155,7 @@ public:
     int id() const { return m_id; }
     void setId(int id) { m_id = id; }
 
-    QModelIndex fileIndex() const { return m_fileIndex; }
-    void setFileIndex(const QModelIndex& index) { m_fileIndex = index; }
-
-    FileTree::Node* node() const { return m_node; }
+    virtual FileTree::Node* node() = 0;
 
 protected:
     virtual void write(QDataStream& stream) const = 0;
@@ -164,11 +163,10 @@ protected:
     virtual Paths merge() const = 0;
 
     LayerTypes m_layerTypes;
-    FileTree::Node* m_node;
+    FileTree::Node* m_node = nullptr;
     Pathss m_groupedPaths;
     QColor m_color;
     QDateTime m_date;
-    QModelIndex m_fileIndex;
     QString m_name;
     Side m_side = Top;
     int m_id = -1;

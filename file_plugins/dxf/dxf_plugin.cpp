@@ -60,18 +60,18 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     auto getCode = [&in, &codes, &line, this] {
         // Code
         QString strCode(in.readLine());
-        file->lines().append(strCode);
+        file->lines().push_back(strCode);
         bool ok;
         auto code(strCode.toInt(&ok));
         if (!ok)
             throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
-        file->lines().append(strValue);
+        file->lines().push_back(strValue);
         int multi = 0;
         while (strValue.endsWith("\\P")) {
-            file->lines().append(in.readLine());
-            strValue.append("\n" + file->lines().last());
+            file->lines().push_back(in.readLine());
+            strValue.append("\n" + file->lines().back());
             ++multi;
         }
         codes.emplace_back(code, strValue, line);
@@ -298,7 +298,7 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
 void Plugin::updateFileModel(FileInterface* file)
 {
     const auto fm = App::fileModel();
-    const QModelIndex& fileIndex(file->fileIndex());
+    const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
     qDebug() << __FUNCTION__ << (index == fileIndex);
     // clean before insert new layers

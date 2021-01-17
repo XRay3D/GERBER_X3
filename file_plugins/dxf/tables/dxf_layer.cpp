@@ -126,9 +126,9 @@ void Layer::setItemsType(ItemsType itemsType)
         return;
     m_itemsType = itemsType;
     if (itemGroupNorm && itemGroupPath) {
-        if (itemGroupNorm->isEmpty())
+        if (itemGroupNorm->empty())
             m_itemsType = ItemsType::Paths;
-        else if (itemGroupPath->isEmpty())
+        else if (itemGroupPath->empty())
             m_itemsType = ItemsType::Normal;
 
         if (m_itemsType == ItemsType::Normal) {

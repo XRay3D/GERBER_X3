@@ -51,6 +51,7 @@ public:
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(FileInterface* file) override;
+    FileTree::Node *node() override;
 
     FileType type() const override { return FileType::Gerber; }
 

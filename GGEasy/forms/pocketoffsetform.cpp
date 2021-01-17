@@ -135,19 +135,19 @@ void PocketOffsetForm::createFile()
                 }
             }
             if (static_cast<GiType>(item->type()) == GiType::DataSolid)
-                wPaths.push_back(gi->paths());
+                wPaths.append(gi->paths());
             else
-                wRawPaths.push_back(gi->paths());
+                wRawPaths.append(gi->paths());
             break;
         case GiType::ShCircle:
         case GiType::ShRectangle:
         case GiType::ShPolyLine:
         case GiType::ShCirArc:
         case GiType::ShText:
-            wRawPaths.push_back(gi->paths());
+            wRawPaths.append(gi->paths());
             break;
         case GiType::Drill:
-            wPaths.push_back(gi->paths());
+            wPaths.append(gi->paths());
             break;
         default:
             break;
@@ -155,7 +155,7 @@ void PocketOffsetForm::createFile()
         addUsedGi(gi);
     }
 
-    if (wRawPaths.isEmpty() && wPaths.isEmpty()) {
+    if (wRawPaths.empty() && wPaths.empty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }

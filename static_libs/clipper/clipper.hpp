@@ -233,6 +233,12 @@ struct IntPoint {
         double y = pt2.Y - Y;
         return sqrt(x * x + y * y);
     }
+    double distToSq(const IntPoint& pt2) const noexcept
+    {
+        double x = pt2.X - X;
+        double y = pt2.Y - Y;
+        return (x * x + y * y);
+    }
 };
 //------------------------------------------------------------------------------
 
@@ -240,33 +246,27 @@ struct IntPoint {
 //typedef mvector /*mvector*/<Path> Paths;
 
 struct Path : mvector<IntPoint> {
-    Path(size_t size = 0)
-        : mvector<IntPoint>(size)
+    using MV = mvector<IntPoint>;
+    // clang-format off
+    Path() {}
+    Path(size_t size) : MV(size) {}
+    Path(size_t size, const IntPoint& t) : MV(size, t) {}
+    Path(const MV& v) : MV(v) {}
+    Path(MV&& v) : MV(std::move(v)) {}
+    Path(const Path& v) : MV(v) {}
+    Path(Path&& v) : MV(std::move(v)) {}
+    Path(const std::initializer_list<IntPoint>& v) : MV(v) {}
+    // clang-format On
+    Path& operator=(const Path& v)
     {
+        MV::operator=(v);
+        return *this;
     }
-    Path(size_t size, const IntPoint& t)
-        : mvector<IntPoint>(size, t)
+    Path& operator=(Path&& v)
     {
+        MV::operator=(std::move(v));
+        return *this;
     }
-    //    Path(const IntPoint& t)
-    //        : mvector<IntPoint>(1, t)
-    //    {
-    //    }
-    //    Path(IntPoint&& t)
-    //        : mvector<IntPoint>(1, t)
-    //    {
-    //    }
-    Path(const mvector<IntPoint>& v)
-        : mvector<IntPoint>(v)
-    {
-    }
-
-    Path(const std::initializer_list<IntPoint>& v)
-        : mvector<IntPoint>(v)
-    {
-    }
-
-    Path(const Path& v) = default;
 
     Path(const QPolygonF& v)
     {
@@ -288,27 +288,27 @@ struct Path : mvector<IntPoint> {
 };
 
 struct Paths : mvector<Path> {
-    Paths(size_t size = 0)
-        : mvector<Path>(size)
+    using MV = mvector<Path>;
+    // clang-format off
+    Paths() {}
+    Paths(size_t size) : MV(size) {}
+    Paths(size_t size, const Path& t) : MV(size, t) {}
+    Paths(const MV& v) : MV(v) {}
+    Paths(MV&& v) : MV(std::move(v)) {}
+    Paths(const Paths& v) : MV(v) {}
+    Paths(Paths&& v) : MV(std::move(v)) {}
+    Paths(const std::initializer_list<Path>& v) : MV(v) {}
+    // clang-format On
+    Paths& operator=(const Paths& v)
     {
+        MV::operator=(v);
+        return *this;
     }
-    Paths(size_t size, const Path& t)
-        : mvector<Path>(size, t)
+    Paths& operator=(Paths&& v)
     {
+        MV::operator=(std::move(v));
+        return *this;
     }
-    Paths(const mvector<Path>& v)
-        : mvector<Path>(v)
-    {
-    }
-    Paths(mvector<Path>&& v)
-        : mvector<Path>(std::move(v))
-    {
-    }
-    Paths(const std::initializer_list<Path>& v)
-        : mvector<Path>(v)
-    {
-    }
-    Paths(const Paths& v) = default;
 
     operator mvector<QPolygonF>() const
     {
