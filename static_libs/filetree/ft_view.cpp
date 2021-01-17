@@ -229,36 +229,6 @@ void View::contextMenuEvent(QContextMenuEvent* event)
         reinterpret_cast<Node*>(m_menuIndex.internalId())->menu(menu, this);
     }
 
-    //    switch (m_menuIndex.parent().row()) {
-    //    case -1:
-    //        if (m_menuIndex.row() == FileModel::ToolPath && m_childCount) {
-    //            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [m_childCount, this] {
-    //                if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //                    m_model->removeRows(0, m_childCount, m_menuIndex);
-    //            });
-    //            menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), [] { App::project()->saveSelectedToolpaths(); });
-    //        } else if (m_menuIndex.row() == FileModel::Shapes && m_childCount) {
-    //            menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Objects"), [m_childCount, this] {
-    //                if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //                    m_model->removeRows(0, m_childCount, m_menuIndex);
-    //            });
-    //            //            // edit Shapes::Text
-    //            //            mvector<Shapes::Text*> tx;
-    //            //            for (auto& idx : selectedIndexes()) {
-    //            //                if (auto sh = App::project()->aShape(idx.data(Qt::UserRole).toInt()); sh->type() == int(GiType::ShText))
-    //            //                    tx.push_back(static_cast<Shapes::Text*>(sh));
-    //            //            }
-    //            //            if (tx.size())
-    //            //                menu.addAction(QIcon::fromTheme("draw-text"), tr("&Edit Selected Texts"), [tx] {
-    //            //                    ShTextDialog dlg(tx, App::mainWindow());
-    //            //                    dlg.exec();
-    //            //                });
-    //        }
-    //        break;
-    //    default:
-    //        break;
-    //    }
-
     if (!menu.isEmpty())
         menu.exec(mapToGlobal(event->pos() + QPoint(0, menu.actionGeometry(menu.actions().first()).height())));
 }
@@ -266,16 +236,16 @@ void View::contextMenuEvent(QContextMenuEvent* event)
 void View::mousePressEvent(QMouseEvent* event)
 {
     QTreeView::mousePressEvent(event);
-    //    if (event->button() == Qt::LeftButton) {
-    //        QModelIndex index = indexAt(event->pos());
-    //        if (index.isValid()) {
-    //            if (index.column() == 0) {
-    //                if (event->pos().x() > visualRect(index).left() + 44)
-    //                    edit(index);
-    //            } else
-    //                edit(index);
-    //        }
-    //    }
+    if (event->button() == Qt::LeftButton) {
+        QModelIndex index = indexAt(event->pos());
+        if (index.isValid()) {
+            if (index.column() == 0) {
+                if (event->pos().x() > visualRect(index).left() + 44)
+                    edit(index);
+            } else
+                edit(index);
+        }
+    }
 }
 
 void View::mouseDoubleClickEvent(QMouseEvent* event)

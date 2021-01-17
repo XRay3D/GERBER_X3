@@ -232,14 +232,6 @@ bool File::flashedApertures() const
     return false;
 }
 
-void File::addToScene() const
-{
-    for (const auto var : m_itemGroups) {
-        var->addToScene();
-        var->setZValue(-m_id);
-    }
-}
-
 void File::setColor(const QColor& color)
 {
     m_color = color;

@@ -18,7 +18,8 @@ struct mvector : std::vector<T> {
     mvector(const M& v) : V(v) {}
     mvector(M&& v) : V(std::move(v)) {}
     mvector(const std::initializer_list<T>& v) : V(v) {}
-    // clang-format On
+    // clang-format on
+
     mvector& operator=(const M& v)
     {
         V::operator=(v);

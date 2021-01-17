@@ -185,11 +185,10 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const
 {
-    //    if (!index.isValid())
-    //        return Qt::NoItemFlags;
-    //    return QAbstractItemModel::flags(index);
-    if (!index.isValid())
+    if (!index.isValid()) {
+        qDebug() << __FUNCTION__ << index;
         return Qt::NoItemFlags;
+    }
     return getItem(index)->flags(index);
 }
 

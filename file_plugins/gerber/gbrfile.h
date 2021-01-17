@@ -55,7 +55,6 @@ public:
 
     FileType type() const override { return FileType::Gerber; }
 
-    void addToScene() const;
     void setColor(const QColor& color) override;
     mvector<const AbstrGraphicObject*> graphicObjects() const override;
 

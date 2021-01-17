@@ -992,17 +992,6 @@ void MainWindow::createDockWidget(int type)
 
     m_dockWidget->pop();
     m_dockWidget->push(dwContent);
-
-    //    if (m_dockWidget->widget()) {
-    //        //if(dynamic_cast<>(m_dockWidget->widget()))
-    //        if (m_dockWidget->widget()->objectName() == "ErrorDialog") {
-    //            m_dockWidget->widget()->close();
-    //            QTimer::singleShot(10, [widget = m_dockWidget->widget()] { delete widget; });
-    //        } else
-    //            delete m_dockWidget->widget();
-    //    }
-    //    m_dockWidget->setWidget(dwContent);
-
     m_dockWidget->show();
 }
 

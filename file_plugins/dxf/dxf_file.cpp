@@ -47,6 +47,7 @@ File::File()
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
         { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
+        { int(ItemsType::Both), DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.") },
     };
 }
 
@@ -130,9 +131,6 @@ void File::initFrom(FileInterface* file)
 {
     FileInterface::initFrom(file);
     static_cast<Node*>(m_node)->file = this;
-
-    for (auto ig : itemGroups())
-        ig->addToScene();
 }
 
 FileTree::Node* File::node()

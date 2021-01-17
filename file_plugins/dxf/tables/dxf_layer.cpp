@@ -99,21 +99,29 @@ void Layer::setVisible(bool visible)
 {
     m_visible = visible;
     if (itemGroupNorm && itemGroupPath) {
-        if (m_itemsType == ItemsType::Normal) {
+        switch (m_itemsType) {
+        case ItemsType::Null:
+        case ItemsType::Normal:
             itemGroupNorm->setVisible(m_visible);
             itemGroupPath->setVisible(false);
-        } else {
+            break;
+        case ItemsType::Paths:
             itemGroupNorm->setVisible(false);
             itemGroupPath->setVisible(m_visible);
+            break;
+        case ItemsType::Both:
+            itemGroupNorm->setVisible(m_visible);
+            itemGroupPath->setVisible(m_visible);
+            break;
         }
     }
 }
 
 ItemGroup* Layer::itemGroup() const
 {
-    return m_itemsType == ItemsType::Normal
-        ? itemGroupNorm
-        : itemGroupPath;
+    return m_itemsType == ItemsType::Paths
+        ? itemGroupPath
+        : itemGroupNorm;
 }
 
 bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
@@ -122,6 +130,7 @@ ItemsType Layer::itemsType() const { return m_itemsType; }
 
 void Layer::setItemsType(ItemsType itemsType)
 {
+    qDebug() << __FUNCTION__ << int(itemsType);
     if (m_itemsType == itemsType)
         return;
     m_itemsType = itemsType;
@@ -130,13 +139,22 @@ void Layer::setItemsType(ItemsType itemsType)
             m_itemsType = ItemsType::Paths;
         else if (itemGroupPath->empty())
             m_itemsType = ItemsType::Normal;
-
-        if (m_itemsType == ItemsType::Normal) {
+        qDebug() << __FUNCTION__ << int(itemsType);
+        switch (m_itemsType) {
+        case ItemsType::Null:
+        case ItemsType::Normal:
             itemGroupNorm->setVisible(m_visible);
             itemGroupPath->setVisible(false);
-        } else {
+            break;
+        case ItemsType::Paths:
             itemGroupNorm->setVisible(false);
             itemGroupPath->setVisible(m_visible);
+            break;
+        case ItemsType::Both:
+            qDebug() << __FUNCTION__ << "Both";
+            itemGroupNorm->setVisible(m_visible);
+            itemGroupPath->setVisible(m_visible);
+            break;
         }
     }
 }

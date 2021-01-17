@@ -34,6 +34,7 @@ enum class ItemsType {
     Null = -1,
     Normal,
     Paths,
+    Both
 };
 
 class Color : public QColor {

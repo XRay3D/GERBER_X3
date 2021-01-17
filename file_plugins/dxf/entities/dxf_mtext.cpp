@@ -246,7 +246,7 @@ GraphicObject MText::toGo() const
     m2.scale(0.001, 0.001);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
-        paths.append(poly);
+        paths.push_back(poly);
 #else
     QTransform m;
     m.scale(1000 * scaleX, -1000 * scaleY);
