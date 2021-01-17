@@ -32,7 +32,7 @@
 
 namespace GCode {
 
-Node::Node(File* file, int& id)
+Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
     , file(file)
 {
@@ -40,8 +40,9 @@ Node::Node(File* file, int& id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+
     switch (index.column()) {
-    case 0:
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -49,20 +50,20 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         case Qt::EditRole:
             file->setFileName(value.toString());
             return true;
-            //            if (auto text = dynamic_cast<Text*>(shape()); text)
-            //                text->setText(value.toString());
-        default:
-            return false;
+        default:;
         }
-    case 1:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
-        default:
-            return false;
+        default:;
         }
     default:
+        if (role == FileTree::Select) {
+            file->itemGroup()->setZValue((value.toBool() ? +(*m_id + 1) : -(*m_id + 1)) * 1000);
+            return true;
+        }
         return false;
     }
 }
@@ -70,7 +71,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 QVariant Node::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
-    case 0:
+    case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             if (file->shortName().endsWith(Settings::fileExtension()))
@@ -84,28 +85,13 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            switch (static_cast<int>(file->gtype())) {
-            case GCode::Profile:
-                return QIcon::fromTheme("profile-path");
-            case GCode::Pocket:
-                return QIcon::fromTheme("pocket-path");
-            case GCode::Voronoi:
-                return QIcon::fromTheme("voronoi-path");
-            case GCode::Thermal:
-                return QIcon::fromTheme("thermal-path");
-            case GCode::Drill:
-                return QIcon::fromTheme("drill-path");
-            case GCode::Raster:
-            case GCode::LaserHLDI:
-                return QIcon::fromTheme("raster-path");
-            }
-            return QIcon();
+            return file->icon();
         case FileTree::Id:
-            return m_id;
+            return *m_id;
         default:
             return QVariant();
         }
-    case 1:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -124,12 +110,12 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
-    case 0:
-        if (file->shortName().contains(Settings::fileExtension()))
+    case FileTree::Column::NameColorVisible:
+        if (file->shortName().endsWith(Settings::fileExtension()))
             return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
-    case 1: {
-        if (file->shortName().contains(Settings::fileExtension()))
+    case FileTree::Column::Side: {
+        if (file->shortName().endsWith(Settings::fileExtension()))
             return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }
@@ -140,7 +126,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
-        emit tv->saveGCodeFile(m_id);
+        emit tv->saveGCodeFile(*m_id);
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),

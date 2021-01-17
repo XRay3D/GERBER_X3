@@ -49,17 +49,17 @@ void Rectangle::redraw()
     Point64 p1(handlers[Point1]->pos());
     Point64 p2(handlers[Point3]->pos());
 
-    m_paths.first() = {
+    m_paths.front() = {
         Point64 { p1.X, p1.Y },
         Point64 { p2.X, p1.Y },
         Point64 { p2.X, p2.Y },
         Point64 { p1.X, p2.Y },
         Point64 { p1.X, p1.Y },
     };
-    if (Area(m_paths.first()) < 0)
-        ReversePath(m_paths.first());
+    if (Area(m_paths.front()) < 0)
+        ReversePath(m_paths.front());
     m_shape = QPainterPath();
-    m_shape.addPolygon(m_paths.first());
+    m_shape.addPolygon(m_paths.front());
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }

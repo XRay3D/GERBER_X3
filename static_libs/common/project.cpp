@@ -28,6 +28,8 @@
 #include <QLabel>
 #include <QMessageBox>
 
+const int isadfsdfg = qRegisterMetaType<FileInterface*>("FileInterface*");
+
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<FileInterface>& file)
 {
     stream << *file;
@@ -67,6 +69,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
 Project::Project(QObject* parent)
     : QObject(parent)
 {
+    connect(this, &Project ::addFileDbg, this, &Project ::addFile, Qt::QueuedConnection);
     App::setProject(this);
 }
 
@@ -274,7 +277,6 @@ int Project::contains(const QString& name)
 bool Project::reload(int id, FileInterface* file)
 {
     if (m_files.contains(id)) {
-        file->setId(id);
         file->initFrom(m_files[id].get());
         m_files[id].reset(file);
         App::fileInterface(int(file->type()))->updateFileModel(file);
@@ -320,9 +322,9 @@ Shapes::Shape* Project::shape(int id)
 
 int Project::addFile(FileInterface* file)
 {
+    //QMutexLocker locker(&m_mutex);
     if (!file)
         return -1;
-    //QMutexLocker locker(&m_mutex);
     m_isPinsPlaced = false;
     file->createGi();
     file->addToScene();
@@ -337,8 +339,8 @@ int Project::addFile(FileInterface* file)
         file->setId(newId);
         m_files.emplace(newId, file);
         App::fileModel()->addFile(file);
+        setChanged();
     }
-    setChanged();
     return file->id();
 }
 
@@ -355,6 +357,7 @@ int Project::addShape(Shapes::Shape* const shape)
         : 0;
     shape->m_giId = newId;
     shape->setToolTip(QString::number(newId));
+    shape->setZValue(newId);
     //m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
     m_shapes.emplace(newId, shape);
     App::fileModel()->addShape(shape);

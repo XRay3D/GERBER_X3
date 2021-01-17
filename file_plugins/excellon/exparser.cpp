@@ -47,7 +47,7 @@ FileInterface* Parser::parseFile(const QString& fileName)
 
     QString line;
     while (in.readLineInto(&line)) {
-        file->lines().append(line);
+        file->lines().push_back(line);
         try {
             if (line == "%")
                 continue;

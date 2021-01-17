@@ -40,7 +40,6 @@ File::File()
     : GCUtils(m_gcp)
     , FileInterface()
 {
-    m_node = new Node(this, m_id);
 }
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
@@ -50,7 +49,6 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , m_toolPathss(toolPathss)
     , m_gcp(gcp)
 {
-    m_node = new Node(this, m_id);
     if (gcp.tools.front().diameter()) {
 
         initSave();
@@ -183,7 +181,7 @@ void File::saveMillingProfile(const QPointF& offset)
                     for (size_t k = 0; k < depths.size(); ++k) {
                         m_lines.push_back(formated({ g1(), z(depths[k]), feed(plungeRate()) }));
                         auto sp(savePath(path, spindleSpeed()));
-                        m_lines.push_back(sp);
+                        m_lines.append(sp);
                         //                    bool skip = true;
                         //                    for (QPointF& point : path) {
                         //                        if (skip)
@@ -198,7 +196,7 @@ void File::saveMillingProfile(const QPointF& offset)
                     startPath(path.front());
                     m_lines.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
                     auto sp(savePath(path, spindleSpeed()));
-                    m_lines.push_back(sp);
+                    m_lines.append(sp);
                     //                    bool skip = true;
                     //                    for (QPointF& point : path) {
                     //                        if (skip)
@@ -223,7 +221,7 @@ void File::saveLaserProfile(const QPointF& offset)
         for (auto& path : paths) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.push_back(sp);
+            m_lines.append(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -249,7 +247,7 @@ void File::saveMillingRaster(const QPointF& offset)
                 startPath(path.front());
                 m_lines.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
                 auto sp(savePath(path, spindleSpeed()));
-                m_lines.push_back(sp);
+                m_lines.append(sp);
                 //                bool skip = true;
                 //                for (QPointF& point : path) {
                 //                    if (skip)
@@ -276,7 +274,7 @@ void File::saveLaserHLDI(const QPointF& offset)
     for (QPolygonF& path : pathss.front()) {
         if (i++ % 2) {
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.push_back(sp);
+            m_lines.append(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -286,7 +284,7 @@ void File::saveLaserHLDI(const QPointF& offset)
             //            }
         } else {
             auto sp(savePath(path, 0));
-            m_lines.push_back(sp);
+            m_lines.append(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -301,7 +299,7 @@ void File::saveLaserHLDI(const QPointF& offset)
         for (QPolygonF& path : pathss.back()) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
-            m_lines.push_back(sp);
+            m_lines.append(sp);
             //            bool skip = true;
             //            for (QPointF& point : path) {
             //                if (skip)
@@ -764,6 +762,37 @@ void File::createGi()
     default:
         break;
     }
+
+    switch (m_gcp.gcType) {
+    case GCode::Profile:
+        m_icon = QIcon::fromTheme("profile-path");
+        break;
+    case GCode::Pocket:
+        m_icon = QIcon::fromTheme("pocket-path");
+        break;
+    case GCode::Voronoi:
+        m_icon = QIcon::fromTheme("voronoi-path");
+        break;
+    case GCode::Thermal:
+        m_icon = QIcon::fromTheme("thermal-path");
+        break;
+    case GCode::Drill:
+        m_icon = QIcon::fromTheme("drill-path");
+        break;
+    case GCode::Raster:
+    case GCode::LaserHLDI:
+        m_icon = QIcon::fromTheme("raster-path");
+        break;
+    default:
+        break;
+    }
+
     itemGroup()->setVisible(true);
 }
+
+FileTree::Node* File::node()
+{
+    return m_node ? m_node : m_node = new Node(this, &m_id);
+}
+
 }

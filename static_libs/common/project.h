@@ -189,6 +189,8 @@ signals:
     void pinsPosChanged(QPointF*);
     void worckRectChanged(const QRectF&);
     void layoutFrameUpdate(bool = false);
+    // need for debuging
+    void addFileDbg(FileInterface* file);
 
 private:
     int m_ver;

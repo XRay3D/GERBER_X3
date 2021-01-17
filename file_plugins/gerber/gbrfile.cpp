@@ -124,7 +124,6 @@ QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
 File::File(const QString& fileName)
     : FileInterface()
 {
-    m_node = new Node(this, m_id);
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
     m_layerTypes = {
@@ -203,7 +202,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
-    if (m_groupedPaths.isEmpty()) {
+    if (m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -259,7 +258,10 @@ mvector<const AbstrGraphicObject*> File::graphicObjects() const
 
 void File::initFrom(FileInterface* file)
 {
-    file->setColor(file->color());
+    FileInterface::initFrom(file);
+    static_cast<Node*>(m_node)->file = this;
+
+    setColor(file->color());
     // Normal
     itemGroup(Gerber::File::Normal)->setBrushColor(file->itemGroup(Gerber::File::Normal)->brushColor());
     itemGroup(Gerber::File::Normal)->addToScene();
@@ -271,7 +273,12 @@ void File::initFrom(FileInterface* file)
     // Components
     itemGroup(Gerber::File::Components)->addToScene();
     itemGroup(Gerber::File::Components)->setZValue(-id());
-    setFileIndex(file->fileIndex());
+    setItemType(file->itemsType());
+}
+
+FileTree::Node* File::node()
+{
+    return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
 void File::setItemType(int type)
@@ -324,14 +331,14 @@ void File::createGi()
     if (1) { // fill copper
         for (Paths& paths : groupedPaths()) {
             GraphicsItem* item = new GiDataSolid(paths, this);
-            m_itemGroups[Normal]->append(item);
+            m_itemGroups[Normal]->push_back(item);
         }
         m_itemGroups[Normal]->shrink_to_fit();
     }
     if (1) { // add components
         for (const Component& c : qAsConst(m_components)) {
             if (!c.referencePoint.isNull())
-                m_itemGroups[Components]->append(new ComponentItem(c, this));
+                m_itemGroups[Components]->push_back(new ComponentItem(c, this));
         }
         m_itemGroups[Components]->shrink_to_fit();
     }
@@ -357,25 +364,25 @@ void File::createGi()
         };
 
         for (const GraphicObject& go : m_graphicObjects) {
-            if (!go.path().isEmpty()) {
-                if (Settings::simplifyRegions() && go.path().first() == go.path().last()) {
+            if (!go.path().empty()) {
+                if (Settings::simplifyRegions() && go.path().front() == go.path().back()) {
                     Paths paths;
                     SimplifyPolygon(go.path(), paths);
                     for (Path& path : paths) {
-                        path.append(path.first());
+                        path.push_back(path.front());
                         if (!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new GiDataPath(checkList.front(), this));
+                            m_itemGroups[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
                         } else if (!contains(path)) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->append(new GiDataPath(checkList.front(), this));
+                            m_itemGroups[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
                         }
                     }
                 } else {
                     if (!Settings::skipDuplicates()) {
-                        m_itemGroups[ApPaths]->append(new GiDataPath(go.path(), this));
+                        m_itemGroups[ApPaths]->push_back(new GiDataPath(go.path(), this));
                     } else if (!contains(go.path())) {
-                        m_itemGroups[ApPaths]->append(new GiDataPath(go.path(), this));
+                        m_itemGroups[ApPaths]->push_back(new GiDataPath(go.path(), this));
                         checkList.push_front(go.path());
                     }
                 }

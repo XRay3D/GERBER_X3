@@ -43,7 +43,6 @@ namespace Dxf {
 File::File()
     : FileInterface()
 {
-    m_node = new Node(this, m_id);
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
@@ -70,7 +69,7 @@ int File::itemsType() const { return m_itemsType; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
-    if (m_groupedPaths.isEmpty()) {
+    if (m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -129,9 +128,16 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 void File::initFrom(FileInterface* file)
 {
-    setFileIndex(file->fileIndex());
+    FileInterface::initFrom(file);
+    static_cast<Node*>(m_node)->file = this;
+
     for (auto ig : itemGroups())
         ig->addToScene();
+}
+
+FileTree::Node* File::node()
+{
+    return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
 Layer* File::layer(const QString& name)
@@ -148,23 +154,23 @@ FileType File::type() const { return FileType::Dxf; }
 
 void File::createGi()
 {
-    ItemGroup* igNorm = m_itemGroups.last();
+    ItemGroup* igNorm = m_itemGroups.back();
     ItemGroup* igPath = new ItemGroup;
-    m_itemGroups.append(igPath);
+    m_itemGroups.push_back(igPath);
 
     int i = 0;
 
     for (auto& [name, layer] : m_layers) {
         if (layer->m_graphicObjects.size()) {
             if (i++) {
-                m_itemGroups.append(igNorm = new ItemGroup);
-                m_itemGroups.append(igPath = new ItemGroup);
+                m_itemGroups.push_back(igNorm = new ItemGroup);
+                m_itemGroups.push_back(igPath = new ItemGroup);
             }
 
             Clipper clipper; // Clipper
 
             for (auto& go : layer->m_graphicObjects) {
-                if (layer->m_groupedPaths.isEmpty() && go.paths().size())
+                if (layer->m_groupedPaths.empty() && go.paths().size())
                     clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
                 if (go.path().size() > 1) {
@@ -175,11 +181,11 @@ void File::createGi()
                                               .arg(go.entity()->name()));
                     }
                     gItem->setPenColorPtr(&layer->m_colorPath);
-                    igPath->append(gItem);
+                    igPath->push_back(gItem);
                 }
             }
 
-            if (layer->m_groupedPaths.isEmpty()) {
+            if (layer->m_groupedPaths.empty()) {
                 clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
                 //                dbgPaths(m_mergedPaths, "m_mergedPaths", true);
                 layer->m_groupedPaths = std::move(groupedPaths());
@@ -191,7 +197,7 @@ void File::createGi()
             for (Paths& paths : layer->m_groupedPaths) {
                 auto gItem = new GiDataSolid(paths, this);
                 gItem->setColorPtr(&layer->m_colorNorm);
-                igNorm->append(gItem);
+                igNorm->push_back(gItem);
             }
 
             igNorm->shrink_to_fit();

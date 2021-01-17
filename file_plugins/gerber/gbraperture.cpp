@@ -31,7 +31,7 @@ Paths AbstractAperture::draw(const State& state, bool fl)
 {
     if (state.dCode() == D03 && state.imgPolarity() == Positive && fl)
         m_isFlashed = true;
-    if (m_paths.isEmpty())
+    if (m_paths.empty())
         draw();
 
     Paths tmpPpaths(m_paths);
@@ -56,7 +56,7 @@ Paths AbstractAperture::draw(const State& state, bool fl)
 
 double AbstractAperture::apertureSize()
 {
-    if (m_paths.isEmpty())
+    if (m_paths.empty())
         draw();
     return m_size;
 }
@@ -453,7 +453,7 @@ void ApMacro::draw()
                 clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
         }
     } else
-        m_paths.append(items.first().second);
+        m_paths.push_back(items.first().second);
 
     //    {
     //        Clipper clipper;

@@ -13,10 +13,10 @@
 *******************************************************************************/
 #pragma once
 #include "gctypes.h"
-#include <myclipper.h>
 #include <QMutex>
 #include <QObject>
 #include <QWaitCondition>
+#include <myclipper.h>
 //#include <QThread>
 //#include <QThreadPool>
 //#include <QtConcurrent>
@@ -137,6 +137,7 @@ protected:
     bool pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret = nullptr);
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
+    void sortPolyNodeByNesting(PolyNode& polynode, bool beSort = false);
 
     virtual void create() = 0;
     virtual GCodeType type() = 0;

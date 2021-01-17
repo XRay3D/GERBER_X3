@@ -185,7 +185,7 @@ protected:
     }
 };
 
-Node::Node(File* file, int& id)
+Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
     , file(file)
 {
@@ -198,12 +198,12 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         switch (role) {
         case Qt::CheckStateRole:
             file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            emit App::fileModel()->dataChanged(childs.first()->index(index.column()), childs.last()->index(index.column()), { role });
+            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
         default:
             return false;
         }
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
@@ -216,7 +216,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         case Qt::EditRole:
             qDebug() << __FUNCTION__ << role << value;
             file->setItemType(value.toInt());
-            emit App::fileModel()->dataChanged(childs.first()->index(index.column()), childs.last()->index(index.column()), { role });
+            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
         default:
             return false;
@@ -232,7 +232,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         return itemFlag | Qt::ItemIsEditable;
     case FileTree::Column::ItemsType:
         return itemFlag | Qt::ItemIsEditable;
@@ -255,11 +255,11 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             return QIcon::fromTheme("crosshairs");
         case FileTree::Id:
-            return m_id;
+            return *m_id;
         default:
             return QVariant();
         }
-    case FileTree::Column::SideType:
+    case FileTree::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -267,7 +267,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::EditRole:
             return static_cast<bool>(file->side());
         case FileTree::Id:
-            return m_id;
+            return *m_id;
         default:
             return QVariant();
         }
@@ -280,7 +280,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
         case Qt::EditRole:
             return file->displayedTypes().at(int(file->itemsType())).id;
         case FileTree::Id:
-            return m_id;
+            return *m_id;
         default:
             return QVariant();
         }
@@ -294,7 +294,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
-        auto dialog = new SourceDialog(m_id, tv);
+        auto dialog = new SourceDialog(*m_id, tv);
         dialog->exec();
         delete dialog;
     });
@@ -329,9 +329,8 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
 ///////////////////////////////////
 ///// \brief Node::NodeLayer
 ///// \param id
-/////
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
-    : FileTree::Node(0, FileTree::SubFile)
+    : FileTree::Node(nullptr, FileTree::SubFile)
     , name(name)
     , layer(layer)
 {
@@ -386,7 +385,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             return decoration(layer->color());
         case FileTree::Id:
-            return m_id;
+            return *m_id;
         default:
             return QVariant();
         }

@@ -211,7 +211,7 @@ private:
     QPainterPath drawSlot() const
     {
         QPainterPath painterPath;
-        for (Path& path : offset(hole->item->paths().first(), hole->state.currentToolDiameter()))
+        for (Path& path : offset(hole->item->paths().front(), hole->state.currentToolDiameter()))
             painterPath.addPolygon(path);
         return painterPath;
     }
@@ -224,7 +224,7 @@ private:
         Paths tmpPpaths;
         cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
         for (Path& path : tmpPpaths)
-            path.append(path.first());
+            path.push_back(path.front());
         return tmpPpaths;
     }
 
@@ -247,15 +247,15 @@ public:
                 Paths tmpPpath;
 
                 ClipperOffset offset;
-                offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
+                offset.AddPath(hole->item->paths().front(), jtRound, etOpenRound);
                 offset.Execute(tmpPpath, diameter * 0.5 * uScale);
 
                 for (Path& path : tmpPpath) {
-                    path.push_back(path.first());
+                    path.push_back(path.front());
                     m_toolPath.addPolygon(path);
                 }
 
-                Path path(hole->item->paths().first());
+                Path path(hole->item->paths().front());
 
                 if (path.size()) {
                     for (Point64& pt : path) {
@@ -264,7 +264,7 @@ public:
                         m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
                         m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
                     }
-                    m_toolPath.moveTo(path.first());
+                    m_toolPath.moveTo(path.front());
                     for (Point64& pt : path) {
                         m_toolPath.lineTo(pt);
                     }

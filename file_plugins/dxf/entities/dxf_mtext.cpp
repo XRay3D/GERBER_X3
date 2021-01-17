@@ -262,7 +262,7 @@ GraphicObject MText::toGo() const
     m2.scale(0.001, 0.001);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
-        paths.append(poly);
+        paths.push_back(poly);
 #endif
     return { sp->file, this, {}, paths };
 }

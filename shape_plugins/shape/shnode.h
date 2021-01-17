@@ -17,13 +17,12 @@
 
 namespace Shapes {
 
-class Shape;
-
 class Node : public FileTree::Node {
+    friend class Shape;
     Shape* shape;
 
 public:
-    explicit Node(Shape* shape, int& id);
+    explicit Node(Shape* shape, int* id);
     ~Node() override = default;
 
     // AbstractNode interface

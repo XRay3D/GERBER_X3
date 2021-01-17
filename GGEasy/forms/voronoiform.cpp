@@ -99,7 +99,7 @@ void VoronoiForm::createFile()
                         return;
                 }
             }
-            wPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
         case GiType::DataPath:
             //RawItem* gi = static_cast<RawItem*>(item);
@@ -113,7 +113,7 @@ void VoronoiForm::createFile()
                         return;
                 }
             }
-            wRawPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
+            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
             //        case DrillItemType:
             //            //            if (static_cast<DrillItem*>(item)->isSlot())
@@ -127,7 +127,7 @@ void VoronoiForm::createFile()
         addUsedGi(gi);
     }
 
-    if (wPaths.isEmpty() && wRawPaths.isEmpty()) {
+    if (wPaths.empty() && wRawPaths.empty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }

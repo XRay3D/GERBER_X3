@@ -22,8 +22,8 @@ class FolderNode : public FileTree::Node {
     Qt::CheckState m_checkState = Qt::Checked;
 
 public:
-    explicit FolderNode(const QString& name, int& type);
-    ~FolderNode() override = default;
+    explicit FolderNode(const QString& name, int* type);
+    ~FolderNode() override;
 
     // FileTree::Node interface
     QVariant data(const QModelIndex& index, int role) const override;

@@ -88,10 +88,10 @@ public:
     {
         if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
             m_app = *reinterpret_cast<App**>(sm.data()) = this;
-            qDebug() << __FUNCTION__ << "create" << m_app;
+            // qDebug() << __FUNCTION__ << "create" << m_app;
         } else if (sm.attach(QSharedMemory::ReadOnly)) {
             m_app = *reinterpret_cast<App**>(sm.data());
-            qDebug() << __FUNCTION__ << "attach" << m_app;
+            // qDebug() << __FUNCTION__ << "attach" << m_app;
         } else {
             qDebug() << __FUNCTION__ << m_app << sm.errorString();
         }

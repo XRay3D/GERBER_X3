@@ -30,12 +30,8 @@
 class FileInterface;
 
 class AbstractDrillPrGI;
-class App;
-class AppSettings;
-class FileModel;
-class QMenu;
-class ThParam2;
 class AbstractThermPrGi;
+class ThParam2;
 
 using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
 using ThermalPreviewGiVec = mvector<std::shared_ptr<AbstractThermPrGi>>;

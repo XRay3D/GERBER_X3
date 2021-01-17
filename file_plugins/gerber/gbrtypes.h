@@ -348,7 +348,7 @@ public:
     Paths polygonWholes() const override { return m_paths; }
 
     Path hole() const override { return !positive() ? m_path : Path(); }
-    Paths holes() const override { return !positive() ? Paths({ m_paths.first() }) : m_paths.mid(1); }
+    Paths holes() const override { return !positive() ? Paths({ m_paths.front() }) : m_paths.mid(1); }
 
     bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; } // not hole
     bool closed() const override { return m_path.size()

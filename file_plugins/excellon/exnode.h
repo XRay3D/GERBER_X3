@@ -19,14 +19,13 @@ class ExcellonDialog;
 
 namespace Excellon {
 
-class File;
-
 class Node : public FileTree::Node {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
-    File* const file;
+    friend class File;
+    File* file;
 
 public:
-    explicit Node(File* file, int& id);
+    explicit Node(File* file, int* id);
     ~Node() override = default;
 
     // FileTree::Node interface

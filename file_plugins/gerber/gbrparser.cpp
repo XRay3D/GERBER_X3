@@ -69,7 +69,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
         file->lines() = cleanAndFormatFile(gerberLines);
         file->m_graphicObjects.reserve(file->lines().size());
-        if (file->lines().isEmpty())
+        if (file->lines().empty())
             emit interface->fileError("", file->shortName() + "\n" + "Incorrect File!");
 
         emit interface->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
@@ -164,7 +164,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         //        for (auto [key, val] : rel)
         //            qDebug() << key << '\t' << val;
 
-        if (file->m_graphicObjects.isEmpty()) {
+        if (file->m_graphicObjects.empty()) {
             delete file;
         } else {
 
@@ -406,7 +406,7 @@ void Parser::addPath()
         m_state.setType(Region);
         switch (m_abSrIdStack.top().workingType) {
         case WorkingType::Normal:
-            file->m_graphicObjects.append(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
+            file->m_graphicObjects.push_back(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
             break;
         case WorkingType::StepRepeat:
             m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
@@ -420,7 +420,7 @@ void Parser::addPath()
         m_state.setType(Line);
         switch (m_abSrIdStack.top().workingType) {
         case WorkingType::Normal:
-            file->m_graphicObjects.append(GraphicObject(m_goId++, m_state, createLine(), file, m_path));
+            file->m_graphicObjects.push_back(GraphicObject(m_goId++, m_state, createLine(), file, m_path));
             break;
         case WorkingType::StepRepeat:
             m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), file, m_path));
@@ -456,7 +456,7 @@ void Parser::addFlash()
 
     switch (m_abSrIdStack.top().workingType) {
     case WorkingType::Normal:
-        file->m_graphicObjects.append(GraphicObject(m_goId++, m_state, paths, file));
+        file->m_graphicObjects.push_back(GraphicObject(m_goId++, m_state, paths, file));
         break;
     case WorkingType::StepRepeat:
         m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, file));
@@ -783,7 +783,7 @@ void Parser::closeStepRepeat()
                 TranslatePath(path, pt);
                 auto state = go.state();
                 state.setCurPos({ state.curPos().X + pt.X, state.curPos().Y + pt.Y });
-                file->m_graphicObjects.append(GraphicObject(m_goId++, state, paths, go.gFile(), path));
+                file->m_graphicObjects.push_back(GraphicObject(m_goId++, state, paths, go.gFile(), path));
             }
         }
     }
@@ -1001,7 +1001,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             // Точной конечной точкой является указанная (x, y). Заменить.
             m_state.curPos() = IntPoint { x, y };
             if (arcPolygon.size())
-                arcPolygon.last() = m_state.curPos();
+                arcPolygon.back() = m_state.curPos();
             else
                 arcPolygon.push_back(m_state.curPos());
         } break;
@@ -1024,7 +1024,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                     // Replace with exact values
                     m_state.setCurPos({ x, y });
                     if (arcPolygon.size())
-                        arcPolygon.last() = m_state.curPos();
+                        arcPolygon.back() = m_state.curPos();
                     else
                         arcPolygon.push_back(m_state.curPos());
                     valid = true;

@@ -54,7 +54,6 @@ File::File()
     : FileInterface()
     , m_format(this)
 {
-    m_node = new Node(this, m_id);
 }
 
 File::~File() { }
@@ -100,7 +99,7 @@ Tools File::tools() const
 
 Paths Excellon::File::merge() const
 {
-    for (GraphicsItem* item : *m_itemGroups.last())
+    for (GraphicsItem* item : *m_itemGroups.back())
         m_mergedPaths.append(item->paths());
     return m_mergedPaths;
 }
@@ -129,9 +128,20 @@ void File::createGi()
     for (Hole& hole : *this) {
         DrillItem* item = new DrillItem(&hole, this);
         hole.item = item;
-        itemGroup()->append(item);
+        itemGroup()->push_back(item);
     }
     itemGroup()->setVisible(true);
+}
+
+void File::initFrom(FileInterface* file)
+{
+    FileInterface::initFrom(file);
+    static_cast<Node*>(m_node)->file = this;
+}
+
+FileTree::Node* File::node()
+{
+    return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
 } //  namespace Excellon

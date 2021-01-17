@@ -41,9 +41,9 @@ ThermalModel::~ThermalModel() { delete rootItem; }
 
 ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name, const ThParam& par)
 {
-    m_data.append(new ThermalNode(icon, name, par, this));
-    rootItem->append(m_data.last());
-    return m_data.last();
+    m_data.push_back(new ThermalNode(icon, name, par, this));
+    rootItem->append(m_data.back());
+    return m_data.back();
 }
 
 int ThermalModel::rowCount(const QModelIndex& parent) const
@@ -130,7 +130,7 @@ bool ThermalModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-ThParam ThermalModel::thParam() { return m_data.first()->getPar(); }
+ThParam ThermalModel::thParam() { return m_data.front()->getPar(); }
 
 ThermalNode* ThermalModel::getItem(const QModelIndex& index) const
 {

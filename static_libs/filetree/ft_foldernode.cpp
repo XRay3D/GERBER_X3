@@ -19,11 +19,13 @@
 
 namespace FileTree {
 
-FolderNode::FolderNode(const QString& name, int &id)
+FolderNode::FolderNode(const QString& name, int* id)
     : FileTree::Node(id, Folder)
     , name(name)
 {
 }
+
+FolderNode::~FolderNode() { delete m_id; }
 
 QVariant FolderNode::data(const QModelIndex& index, int role) const
 {
@@ -39,7 +41,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
     }
     switch (role) {
     case Role::Id:
-        return m_id;
+        return *m_id;
     case Role::NodeType:
         return Folder;
     case Role::ContentType:

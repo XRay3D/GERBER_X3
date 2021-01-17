@@ -164,12 +164,11 @@ void View::setModel(QAbstractItemModel* model)
     connect(m_model, &Model::rowsInserted, this, &View::updateTree);
     connect(m_model, &Model::rowsRemoved, this, &View::updateTree);
     connect(m_model, &Model::updateActions, this, &View::updateTree);
-    //    connect(m_model, &FileModel::select, [this](const QModelIndex& index) {
-    //        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
-    //    });
-    //#ifndef QT_DEBUG
+    connect(m_model, &Model::select, [this](const QModelIndex& index) {
+        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+    });
+
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &View::onSelectionChanged);
-    //#endif
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &View::updateTree);
     connect(this, &View::doubleClicked, this, &View::on_doubleClicked);
 

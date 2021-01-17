@@ -161,14 +161,14 @@ void DrillItem::create()
     if (!m_hole) {
         //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
         auto p = CirclePath(m_diameter * uScale);
-        p.append(p.first());
+        p.push_back(p.front());
         m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
     } else if (m_hole->state.path.isEmpty()) {
         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
         auto p = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-        p.append(p.first());
+        p.push_back(p.front());
         m_shape.addPolygon(p);
         m_rect = m_shape.boundingRect();
     } else {
@@ -178,7 +178,7 @@ void DrillItem::create()
         offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
         offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
         for (Path& path : tmpPpath) {
-            path.append(path.first());
+            path.push_back(path.front());
             m_shape.addPolygon(path);
         }
         m_rect = m_shape.boundingRect();

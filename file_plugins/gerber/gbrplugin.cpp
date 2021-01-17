@@ -353,7 +353,7 @@ public:
     Paths paths() const override { return grob.paths(); }
     void redraw() override
     {
-        if (double d = tool.getDiameter(tool.depth()); cashedPath.isEmpty() || !qFuzzyCompare(diameter, d)) {
+        if (double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
             diameter = d;
             ClipperOffset offset;
             offset.AddPaths(grob.paths(), jtRound, etClosedPolygon);
@@ -362,7 +362,7 @@ public:
             offset.AddPaths(cashedPath, jtMiter, etClosedLine);
             offset.Execute(cashedFrame, diameter * uScale * 0.1); // frame
             for (Path& path : cashedPath)
-                path.append(path.first());
+                path.push_back(path.front());
         }
         if (qFuzzyIsNull(m_node->tickness()) && m_node->count()) {
             m_bridge.clear();
@@ -383,7 +383,7 @@ public:
                     jtSquare, etOpenButt);
                 Paths paths;
                 offset.Execute(paths, (m_node->tickness() + diameter) * uScale * 0.5);
-                clipper.AddPath(paths.first(), ptClip, true);
+                clipper.AddPath(paths.front(), ptClip, true);
             }
             clipper.Execute(ctIntersection, m_bridge, pftPositive);
         }
@@ -400,9 +400,9 @@ public:
                 painterPath.lineTo(pt);
         }
         if (isEmpty == -1)
-            isEmpty = previewPaths.isEmpty();
-        if (static_cast<bool>(isEmpty) != previewPaths.isEmpty()) {
-            isEmpty = previewPaths.isEmpty();
+            isEmpty = previewPaths.empty();
+        if (static_cast<bool>(isEmpty) != previewPaths.empty()) {
+            isEmpty = previewPaths.empty();
             changeColor();
         }
         update();
@@ -433,7 +433,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         //connect(item, &ThermalPreviewItem::selectionChanged, this, &ThermalForm::setSelection);
         item->setToolTip(name);
         QMutexLocker lock(&m);
-        m_sourcePreview.append(item);
+        m_sourcePreview.push_back(item);
         node->append(new ThermalNode(drawRegionIcon(*go), name, param.par, go->state().curPos(), item.get(), param.model));
     };
 
@@ -484,8 +484,8 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         for (const GraphicObject& go : gbrFile->m_graphicObjects) {
             if (go.state().type() == PrimitiveType::Line
                 && go.state().imgPolarity() == Positive
-                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().first() == go.path().last()))
-                && go.path().first().distTo(go.path().last()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
+                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
+                && go.path().front().distTo(go.path().back()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
                 && testArea(go.paths())) {
                 map.push_back({ &go, thermalNodes[Line], tr("Line"), ctr++ });
             }
@@ -499,7 +499,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
             if (go.state().type() == PrimitiveType::Region
                 && go.state().imgPolarity() == Positive
                 && testArea(go.paths())) {
-                gos.append(&go);
+                gos.push_back(&go);
             }
         }
         std::sort(gos.begin(), gos.end(), [](const GraphicObject* go1, const GraphicObject* go2) {

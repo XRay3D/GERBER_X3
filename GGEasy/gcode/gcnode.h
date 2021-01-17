@@ -17,13 +17,12 @@
 
 namespace GCode {
 
-class File;
-
 class Node : public FileTree::Node {
+    friend class File;
     File* const file;
 
 public:
-    explicit Node(File* file, int& id);
+    explicit Node(File* file, int* id);
     ~Node() override = default;
 
     // FileTree::Node interface

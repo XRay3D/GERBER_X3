@@ -35,6 +35,7 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
+#include <bridgeitem.h>
 #include <datasoliditem.h>
 #include <forward_list>
 
@@ -100,6 +101,10 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePluginInterface::updateShape_);
     connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePluginInterface::finalizeShape_);
     connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePluginInterface::addShapePoint_);
+    // status bar
+    connect(ui->graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
+        ui->statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
+    });
 
     ui->treeView->setModel(new FileTree::Model(ui->treeView));
 
@@ -132,7 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (1 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
@@ -165,8 +170,23 @@ MainWindow::MainWindow(QWidget* parent)
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
-        //        QTimer::singleShot(++i * 500, [this] { loadFile("P:/ELEMER/SSR/SSR_V4/Board_outline.gbr"); });
+        //        QTimer::singleShot(++i * 500, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-Edge_Cuts.gbr"); });
+
         QTimer::singleShot(++i * 200, [this] { selectAll(); });
+
+        QTimer::singleShot(++i * 200, [] {
+            static double l = 2;
+            static double d = 2;
+            static BridgeItem* bp;
+            static GCode::SideOfMilling s = GCode::On;
+
+            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
+            bp->setPos(16, 7);
+            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
+            bp->setPos(30, 7);
+            bp = nullptr;
+        });
+
         QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
         QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
@@ -579,7 +599,7 @@ void MainWindow::createActionsShape()
                     }
                 }
                 clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-                if (gitem->rPaths()->isEmpty()) {
+                if (gitem->rPaths()->empty()) {
                     rmi.push_back(gitem);
                 } else {
                     ReversePaths(*gitem->rPaths());
@@ -677,7 +697,7 @@ void MainWindow::saveSelectedGCodeFiles()
                 file->genGcodeAndTile();
                 if (i == (files.size() - 1))
                     file->endFile();
-                sl.push_back(file->gCodeText());
+                sl.append(file->gCodeText());
             }
             QFile file(name);
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -1016,11 +1036,15 @@ void MainWindow::translate(const QString& locale)
     const QString qtTr("qtbase_" + locale + ".qm");
     const QString appTr(qApp->applicationDisplayName() + "_" + locale + ".qm");
 
-    qDebug() << __FUNCTION__ << qtTranslator.load(qtTr, trFolder);
-    qDebug() << __FUNCTION__ << appTranslator.load(appTr, trFolder);
+    if (qtTranslator.load(qtTr, trFolder))
+        qApp->installTranslator(&qtTranslator);
+    else
+        qDebug() << __FUNCTION__ << "err qtTranslator";
 
-    qApp->installTranslator(&qtTranslator);
-    qApp->installTranslator(&appTranslator);
+    if (appTranslator.load(appTr, trFolder))
+        qApp->installTranslator(&appTranslator);
+    else
+        qDebug() << __FUNCTION__ << "err appTranslator";
 }
 
 void MainWindow::loadFile(const QString& fileName)

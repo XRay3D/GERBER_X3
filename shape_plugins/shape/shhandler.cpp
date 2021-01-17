@@ -133,7 +133,7 @@ void Handler::setPos(const QPointF& pos)
     QGraphicsItem::setPos(pos);
     if (m_hType == Center) {
         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.first());
+            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
     } else /*if (!Constructor::item) */ { // прилипание
         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
@@ -170,7 +170,7 @@ void Handler::savePos()
         return;
     pt.clear();
     for (auto& item : shape->handlers)
-        pt.append(item->pos());
+        pt.push_back(item->pos());
 }
 
 void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)

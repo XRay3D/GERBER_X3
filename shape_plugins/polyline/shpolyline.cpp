@@ -42,11 +42,11 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2)
 
 void PolyLine::redraw()
 {
-    Path& path = m_paths.first();
+    Path& path = m_paths.front();
     path.clear();
     for (size_t i = 1, e = handlers.size(); i < e; ++i) {
         if (handlers[i]->hType() == Handler::Corner)
-            path.append((handlers[i]->pos()));
+            path.push_back((handlers[i]->pos()));
     }
     m_shape = QPainterPath();
     m_shape.addPolygon(path);
@@ -97,7 +97,7 @@ void PolyLine::updateOtherHandlers(Handler* handler)
                 handlers[idx - 1]->QGraphicsItem::setPos(QLineF(handler->pos(), handlers[idx - 2]->pos()).center());
             }
         }
-        if (handler != handlers.last().get()) {
+        if (handler != handlers.back().get()) {
             if (handlers.size() > 4
                 && handler->pos() == handlers[idx + 2]->pos() /*QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5*/) {
                 handlers.takeAt(idx + 1);
@@ -112,7 +112,7 @@ void PolyLine::updateOtherHandlers(Handler* handler)
 void PolyLine::setPt(const QPointF& pt)
 {
     handlers[handlers.size() - 2]->QGraphicsItem::setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
-    handlers.last()->Handler::setPos(pt);
+    handlers.back()->Handler::setPos(pt);
     redraw();
 }
 
@@ -122,7 +122,7 @@ void PolyLine::addPt(const QPointF& pt)
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
 
     Handler* h2 = handlers.back().get();
-    handlers.last()->QGraphicsItem::setPos(pt);
+    handlers.back()->QGraphicsItem::setPos(pt);
 
     handlers.emplace_back(std::make_unique<Handler>(this));
     handlers.back()->QGraphicsItem::setPos(pt);
@@ -131,7 +131,7 @@ void PolyLine::addPt(const QPointF& pt)
     redraw();
 }
 
-bool PolyLine::closed() { return handlers[1]->pos() == handlers.last()->pos(); }
+bool PolyLine::closed() { return handlers[1]->pos() == handlers.back()->pos(); }
 
 QPointF PolyLine::centroid()
 {
@@ -167,7 +167,7 @@ QPointF PolyLine::centroidFast()
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
         if (h->hType() == Handler::Corner)
-            vertices.append(h->pos());
+            vertices.push_back(h->pos());
     }
     // For all vertices except last
     size_t i = 0;

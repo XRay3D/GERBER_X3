@@ -19,18 +19,17 @@
 
 namespace Gerber {
 
-class File;
-
 class Node : public QObject, public FileTree::Node {
+    friend class File;
     Q_OBJECT
 
     static QTimer m_decorationTimer;
     void repaint() const;
     Qt::CheckState m_current = Qt::Unchecked;
-    File* const file;
+    File* file;
 
 public:
-    explicit Node(File* file, int& id);
+    explicit Node(File* file, int* id);
     ~Node() override;
 
     // FileTree::Node interface
@@ -38,7 +37,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) const override;
-
     static QTimer* decorationTimer();
 };
 }

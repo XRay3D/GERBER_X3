@@ -17,17 +17,16 @@
 
 namespace Dxf {
 
-class File;
 class Layer;
 
 class Node : public FileTree::Node {
     mutable bool header = true;
     mutable bool layer = true;
-
-    File* const file;
+    friend class File;
+    File* file;
 
 public:
-    explicit Node(File* file, int& id);
+    explicit Node(File* file, int* id);
     ~Node() override = default;
 
     // FileTree::Node interface

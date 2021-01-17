@@ -127,19 +127,19 @@ void ProfileForm::createFile()
                 }
             }
             if (static_cast<GiType>(sItem->type()) == GiType::DataSolid)
-                wPaths.push_back(gi->paths());
+                wPaths.append(gi->paths());
             else
-                wRawPaths.push_back(gi->paths());
+                wRawPaths.append(gi->paths());
             break;
         case GiType::ShCircle:
         case GiType::ShRectangle:
         case GiType::ShPolyLine:
         case GiType::ShCirArc:
         case GiType::ShText:
-            wRawPaths.push_back(gi->paths());
+            wRawPaths.append(gi->paths());
             break;
         case GiType::Drill:
-            wPaths.push_back(gi->paths());
+            wPaths.append(gi->paths());
             break;
         default:
             break;
@@ -147,7 +147,7 @@ void ProfileForm::createFile()
         addUsedGi(gi);
     }
 
-    if (wRawPaths.isEmpty() && wPaths.isEmpty()) {
+    if (wRawPaths.empty() && wPaths.empty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
@@ -260,7 +260,7 @@ void ProfileForm::editFile(GCode::File* file)
     { // GUI
         side = gcp.side();
         direction = static_cast<GCode::Direction>(gcp.convent());
-        ui->toolHolder->setTool(gcp.tools.first());
+        ui->toolHolder->setTool(gcp.tools.front());
         ui->dsbxDepth->setValue(gcp.params[GCode::GCodeParams::Depth].toDouble());
 
         switch (side) {
