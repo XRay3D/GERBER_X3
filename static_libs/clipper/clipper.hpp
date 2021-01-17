@@ -256,7 +256,15 @@ struct Path : mvector<IntPoint> {
     Path(const Path& v) : MV(v) {}
     Path(Path&& v) : MV(std::move(v)) {}
     Path(const std::initializer_list<IntPoint>& v) : MV(v) {}
-    // clang-format On
+    // clang-format on
+    Path(const QPolygonF& v)
+    {
+        MV::reserve(v.size());
+        for (auto& pt : v) {
+            MV::push_back(pt);
+        }
+    }
+
     Path& operator=(const Path& v)
     {
         MV::operator=(v);
@@ -266,14 +274,6 @@ struct Path : mvector<IntPoint> {
     {
         MV::operator=(std::move(v));
         return *this;
-    }
-
-    Path(const QPolygonF& v)
-    {
-        reserve(v.size());
-        for (auto& pt : v) {
-            push_back(pt);
-        }
     }
 
     operator QPolygonF() const
@@ -298,7 +298,8 @@ struct Paths : mvector<Path> {
     Paths(const Paths& v) : MV(v) {}
     Paths(Paths&& v) : MV(std::move(v)) {}
     Paths(const std::initializer_list<Path>& v) : MV(v) {}
-    // clang-format On
+    // clang-format on
+
     Paths& operator=(const Paths& v)
     {
         MV::operator=(v);

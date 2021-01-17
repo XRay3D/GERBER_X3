@@ -573,26 +573,28 @@ void Creator::sortPolyNodeByNesting(PolyNode& polynode, bool beSort)
             while (idx.size() < idx.capacity()) {
                 qDebug() << "idx" << idx.size();
                 for (auto& [dist, idxses] : minimumDistancesRev) {
-                    if (!idxses.size())
-                        continue;
+                    if (!idxses.size()) {
+                        minimumDistancesRev.extract(dist);
+                        break;
+                    }
                     int ctr = 0;
-                    for (auto [first, second] : idxses) {
-                        if (!idx.size() && !first) {
-                            if (set.insert(second).second) {
-                                idx.push_back(second);
+                    for (auto [_first, _second] : idxses) {
+                        if (!idx.size() && !_first) {
+                            if (set.insert(_second).second) {
+                                idx.push_back(_second);
                                 idxses.erase(idxses.begin() + ctr);
                                 ctr = 0;
                                 break;
                             }
-                        } else if (idx.size() && std::min(first, second)) {
-                            if (first == static_cast<int>(idx.back()) && set.insert(second).second) {
-                                idx.push_back(second);
+                        } else if (idx.size() && std::min(_first, _second)) {
+                            if (_first == static_cast<int>(idx.back()) && set.insert(_second).second) {
+                                idx.push_back(_second);
                                 idxses.erase(idxses.begin() + ctr);
                                 ctr = 0;
                                 break;
                             }
-                            if (second == static_cast<int>(idx.back()) && set.insert(first).second) {
-                                idx.push_back(first);
+                            if (_second == static_cast<int>(idx.back()) && set.insert(_first).second) {
+                                idx.push_back(_first);
                                 idxses.erase(idxses.begin() + ctr);
                                 ctr = 0;
                                 break;

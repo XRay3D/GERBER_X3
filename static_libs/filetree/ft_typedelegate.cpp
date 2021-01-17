@@ -33,7 +33,7 @@ QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
 {
     qDebug() << __FUNCTION__;
     auto comboBox = new QComboBox(parent);
-    connect(comboBox, qOverload<int>(&QComboBox::activated), this, &TypeDelegate::emitCommitData);
+    connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &TypeDelegate::emitCommitData);
     return comboBox;
 }
 

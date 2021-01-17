@@ -195,32 +195,26 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
-        case Qt::CheckStateRole:
+        if (role == Qt::CheckStateRole) {
             file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
-        default:
-            return false;
         }
+        return false;
     case FileTree::Column::Side:
-        switch (role) {
-        case Qt::EditRole:
+        if (role == Qt::EditRole) {
             file->setSide(static_cast<Side>(value.toBool()));
+            //emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
-        default:
-            return false;
         }
+        return false;
     case FileTree::Column::ItemsType:
-        switch (role) {
-        case Qt::EditRole:
-            qDebug() << __FUNCTION__ << role << value;
+        if (role == Qt::EditRole) {
             file->setItemType(value.toInt());
             emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
-        default:
-            return false;
         }
+        return false;
     default:
         return false;
     }
@@ -254,11 +248,8 @@ QVariant Node::data(const QModelIndex& index, int role) const
             return file->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return QIcon::fromTheme("crosshairs");
-        case FileTree::Id:
-            return *m_id;
-        default:
-            return QVariant();
         }
+        break;
     case FileTree::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
@@ -266,11 +257,8 @@ QVariant Node::data(const QModelIndex& index, int role) const
             return sideStrList[file->side()];
         case Qt::EditRole:
             return static_cast<bool>(file->side());
-        case FileTree::Id:
-            return *m_id;
-        default:
-            return QVariant();
         }
+        break;
     case FileTree::Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
@@ -279,11 +267,14 @@ QVariant Node::data(const QModelIndex& index, int role) const
             return file->displayedTypes().at(int(file->itemsType())).actToolTip;
         case Qt::EditRole:
             return file->displayedTypes().at(int(file->itemsType())).id;
-        case FileTree::Id:
-            return *m_id;
-        default:
-            return QVariant();
         }
+        break;
+    default:
+        break;
+    }
+    switch (role) {
+    case FileTree::Id:
+        return *m_id;
     default:
         return QVariant();
     }
@@ -352,7 +343,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
         return true;
     case FileTree::Column::ItemsType:
         if (role == Qt::EditRole)
-            layer->setItemsType(value.toInt() ? ItemsType::Paths : ItemsType::Normal);
+            layer->setItemsType(static_cast<ItemsType>(value.toInt()));
         return true;
     default:
         return false;

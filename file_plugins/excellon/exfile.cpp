@@ -136,12 +136,12 @@ void File::createGi()
 void File::initFrom(FileInterface* file)
 {
     FileInterface::initFrom(file);
-    static_cast<Node*>(m_node)->file = this;
+    static_cast<Excellon::Node*>(m_node)->file = this;
 }
 
 FileTree::Node* File::node()
 {
-    return m_node ? m_node : m_node = new Node(this, &m_id);
+    return m_node ? m_node : m_node = new Excellon::Node(this, &m_id);
 }
 
 } //  namespace Excellon
