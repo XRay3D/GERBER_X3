@@ -43,9 +43,9 @@ protected:
     void reset(const QString& fileName);
     void resetStep();
 
-    Point64 parsePosition(const QString& xyStr);
-    Path arc(const Point64& center, double radius, double start, double stop);
-    Path arc(Point64 p1, Point64 p2, Point64 center);
+    IntPoint parsePosition(const QString& xyStr);
+    Path arc(const IntPoint& center, double radius, double start, double stop);
+    Path arc(IntPoint p1, IntPoint p2, IntPoint center);
 
     Paths createLine();
     Paths createPolygon();

@@ -219,7 +219,7 @@ class State {
     RegionMode m_region = Off;
     int m_aperture = 0;
     int m_lineNum = 0;
-    Point64 m_curPos;
+    IntPoint m_curPos;
     Mirroring m_mirroring = NoMirroring;
     double m_scaling = 1.0;
     double m_rotating = 0.0;
@@ -236,7 +236,7 @@ public:
         , m_region(Off)
         , m_aperture(0)
         , m_lineNum(0)
-        , m_curPos(Point64())
+        , m_curPos(IntPoint())
         , m_mirroring(NoMirroring)
         , m_scaling(1.0)
         , m_rotating(0.0)
@@ -269,9 +269,9 @@ public:
     inline int aperture() const { return m_aperture; }
     inline void setAperture(int aperture) { m_aperture = aperture; }
 
-    inline Point64& curPos() { return m_curPos; }
-    inline Point64 curPos() const { return m_curPos; }
-    inline void setCurPos(const Point64& curPos) { m_curPos = curPos; }
+    inline IntPoint& curPos() { return m_curPos; }
+    inline IntPoint curPos() const { return m_curPos; }
+    inline void setCurPos(const IntPoint& curPos) { m_curPos = curPos; }
 
     inline Mirroring mirroring() const { return m_mirroring; }
     inline void setMirroring(Mirroring mirroring) { m_mirroring = mirroring; }

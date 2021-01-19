@@ -46,15 +46,15 @@ Rectangle::~Rectangle() { }
 void Rectangle::redraw()
 {
     handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
-    Point64 p1(handlers[Point1]->pos());
-    Point64 p2(handlers[Point3]->pos());
+    IntPoint p1(handlers[Point1]->pos());
+    IntPoint p2(handlers[Point3]->pos());
 
     m_paths.front() = {
-        Point64 { p1.X, p1.Y },
-        Point64 { p2.X, p1.Y },
-        Point64 { p2.X, p2.Y },
-        Point64 { p1.X, p2.Y },
-        Point64 { p1.X, p1.Y },
+        IntPoint { p1.X, p1.Y },
+        IntPoint { p2.X, p1.Y },
+        IntPoint { p2.X, p2.Y },
+        IntPoint { p1.X, p2.Y },
+        IntPoint { p1.X, p1.Y },
     };
     if (Area(m_paths.front()) < 0)
         ReversePath(m_paths.front());

@@ -134,10 +134,11 @@ signals:
 protected:
     bool createability(bool side);
 
-    bool pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret = nullptr);
+    bool pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr);
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
+    void markPolyNodeByNesting(PolyNode& polynode);
     void sortPolyNodeByNesting(PolyNode& polynode);
     void sortPolyNodeByDistances(PolyNode& polynode);
 

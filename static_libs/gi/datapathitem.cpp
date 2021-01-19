@@ -113,14 +113,14 @@ void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
         const double glueLen = App::project()->glue() * uScale;
-        Point64 dest(m_path.back());
-        Point64 init(m_path.front());
+        IntPoint dest(m_path.back());
+        IntPoint init(m_path.front());
         for (size_t i = 0; i < itemGroup->size(); ++i) {
             auto item = itemGroup->at(i);
             if (item->isSelected())
                 continue;
-            const Point64& first = item->paths().front().front();
-            const Point64& last = item->paths().front().back();
+            const IntPoint& first = item->paths().front().front();
+            const IntPoint& last = item->paths().front().back();
             if (dest.distTo(first) < glueLen) {
                 dest = last;
                 item->setSelected(true);

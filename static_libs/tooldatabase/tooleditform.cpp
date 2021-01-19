@@ -271,7 +271,9 @@ void ToolEditForm::valueChangedSlot(double value)
         break;
     case Tool::OneTurnCut:
         m_tool.setOneTurnCut(value);
-        ui->dsbxOneTurnCutPercent->setValue(value / (m_tool.diameter() * 0.01));
+        ui->dsbxOneTurnCutPercent->setValue(m_tool.diameter() > 0.0
+                ? value / (m_tool.diameter() * 0.01)
+                : 0);
         if (ui->chbxFeedRate->isChecked())
             ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         if (ui->chbxPlungeRate->isChecked())
@@ -292,7 +294,9 @@ void ToolEditForm::valueChangedSlot(double value)
         break;
     case Tool::Stepover:
         m_tool.setStepover(value);
-        ui->dsbxStepoverPercent->setValue(value / (m_tool.diameter() * 0.01));
+        ui->dsbxStepoverPercent->setValue(m_tool.diameter() > 0.0
+                ? value / (m_tool.diameter() * 0.01)
+                : 0);
         break;
     case Tool::OneTurnCutPercent:
         ui->dsbxOneTurnCut->setValue(value * (m_tool.diameter() * 0.01));

@@ -13,8 +13,8 @@
 *******************************************************************************/
 #pragma once
 
-#include <tool.h>
 #include "datastream.h"
+#include <tool.h>
 
 #include "mvector.h"
 #include <QDebug>
@@ -261,6 +261,8 @@ protected:
     static inline bool m_info { true };
     static inline bool m_sameFolder { true };
 
+    static inline int m_profileSort = 0;
+
 public:
     static QString fileExtension() { return m_fileExtension; }
     static QString format() { return m_format; }
@@ -278,6 +280,8 @@ public:
 
     static bool info() { return m_info; }
     static bool sameFolder() { return m_sameFolder; }
+
+    static int profileSort() { return m_profileSort; }
 };
 
 }

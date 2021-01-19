@@ -74,9 +74,10 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
     reorder();
 
-    if (m_gcp.side() == On) {
-        if (m_workingRawPs.size())
-            m_returnPss.push_back(m_workingRawPs);
+    if (m_gcp.side() == On && m_workingRawPs.size()) {
+        m_returnPss.reserve(m_returnPss.size() + m_workingRawPs.size());
+        for (auto&& path : m_workingRawPs)
+            m_returnPss.push_back({ std::move(path) });
     }
 
     // find Bridges
@@ -88,45 +89,66 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
     // create Bridges
     if (bridgeItems.size()) {
         for (auto& m_returnPs : m_returnPss) {
-            for (size_t index = 0; index < m_returnPs.size(); ++index) {
-                const Path& path = m_returnPs.at(index);
-                QList<QPair<BridgeItem*, Point64>> biStack;
-                for (BridgeItem* bi : bridgeItems) {
-                    Point64 pt;
-                    if (pointOnPolygon(bi->getPath(), path, &pt))
-                        biStack.push_back({ bi, pt });
-                }
-                if (!biStack.isEmpty()) {
-                    Paths paths;
-                    // create frame
-                    {
-                        ClipperOffset offset;
-                        offset.AddPath(path, jtMiter, etClosedLine);
-                        offset.Execute(paths, +m_toolDiameter * uScale * 0.1);
+            const Path& path = m_returnPs.front();
+            std::vector<std::pair<BridgeItem*, IntPoint>> biStack;
+            biStack.reserve(bridgeItems.size());
+            IntPoint pt;
+            for (BridgeItem* bi : bridgeItems) {
+                if (pointOnPolygon(bi->getPath(), path, &pt))
+                    biStack.emplace_back(bi, pt);
+            }
+            if (!biStack.empty()) {
+                Paths paths;
+                // create frame
+                {
+                    ClipperOffset offset;
+                    offset.AddPath(path, jtMiter, etClosedLine);
+                    offset.Execute(paths, +m_toolDiameter * uScale * 0.1);
 
-                        Clipper clipper;
-                        clipper.AddPaths(paths, ptSubject, true);
-                        for (const QPair<BridgeItem*, Point64>& bip : biStack) {
-                            clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
-                        }
-                        clipper.Execute(ctIntersection, paths, pftPositive);
+                    Clipper clipper;
+                    clipper.AddPaths(paths, ptSubject, true);
+                    for (const QPair<BridgeItem*, IntPoint>& bip : biStack) {
+                        clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
                     }
-                    // cut toolPath
-                    {
-                        Clipper clipper;
-                        clipper.AddPath(path, ptSubject, false);
-                        clipper.AddPaths(paths, ptClip, true);
-                        PolyTree polytree;
-                        clipper.Execute(ctDifference, polytree, pftPositive);
-                        PolyTreeToPaths(polytree, paths);
-                    }
-                    // merge result toolPaths
-                    mergeSegments(paths);
-                    m_returnPs.remove(index);
-                    sortBE(paths);
-                    m_returnPs.insert(m_returnPs.begin() + index, paths.begin(), paths.end());
-                    index += paths.size();
+                    clipper.Execute(ctIntersection, paths, pftPositive);
                 }
+                // cut toolPath
+                {
+                    Clipper clipper;
+                    clipper.AddPath(path, ptSubject, false);
+                    clipper.AddPaths(paths, ptClip, true);
+                    PolyTree polytree;
+                    clipper.Execute(ctDifference, polytree, pftPositive);
+                    PolyTreeToPaths(polytree, paths);
+                }
+                // merge result toolPaths
+                mergeSegments(paths);
+                sortBE(paths);
+
+                auto check = [&paths, &path] {
+                    for (size_t i = 0, end = path.size() - 1; i < end; ++i) {
+                        auto srcPt(path[i]);
+                        for (const auto& rPath : paths) {
+                            for (size_t j = 0, rEnd = rPath.size() - 1; j < rEnd; ++j) {
+                                if (srcPt == rPath[j]) {
+                                    if (path[i + 1] == rPath[j + 1]) {
+                                        return false;
+                                    } else if (j && path[i + 1] == rPath[j - 1]) {
+                                        return true;
+                                    } else if (j && i && path[i - 1] == rPath[j - 1]) {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false; // ???
+                };
+
+                if (check())
+                    ReversePaths(paths);
+
+                std::swap(m_returnPs, paths);
             }
         }
     }
@@ -251,10 +273,14 @@ void ProfileCreator::reorder()
     //        }
     //    }
 
-    m_returnPss.resize(m_returnPs.size());
-    for (size_t i = 0; i < m_returnPs.size(); ++i) {
-        m_returnPs[i].push_back(m_returnPs[i].front());
-        m_returnPss[i].emplace_back(std::move(m_returnPs[i]));
+    m_returnPss.reserve(m_returnPs.size());
+    //    for (size_t i = 0; i < m_returnPs.size(); ++i) {
+    //        m_returnPs[i].push_back(m_returnPs[i].front());
+    //        m_returnPss[i].emplace_back(std::move(m_returnPs[i]));
+    //    }
+    for (auto&& path : m_returnPs) {
+        path.push_back(path.front());
+        m_returnPss.push_back({ path });
     }
 }
 
@@ -297,17 +323,17 @@ void ProfileCreator::reduceDistance2(IntPoint& from, std::vector<PolyNode*> to)
 
 void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
 {
-    rpaths.resize(0);
+    rpaths.clear();
     rpaths.reserve(polytree.Total());
 
-    sortPolyNodeByNesting(polytree);
-    //sortPolyNodeByDistances(polytree);
-    //from = IntPoint {};
+    std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths;
 
-    std::map<int, Paths> pathsMap;
+    if (!Settings::profileSort()) { //Grouping by nesting
 
-    std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths =
-        [&addPolyNodeToPaths, &pathsMap](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
+        markPolyNodeByNesting(polytree);
+
+        std::map<int, Paths> pathsMap;
+        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
             bool match = true;
             if (nodetype == ntClosed)
                 match = !polynode.IsOpen();
@@ -315,21 +341,51 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
                 return;
 
             if (!polynode.Contour.empty() && match)
-                pathsMap[polynode.Nesting].push_back(std::move(polynode.Contour));
+                pathsMap[polynode.Nesting].emplace_back(std::move(polynode.Contour));
 
-            for (size_t i = 0; i < polynode.ChildCount(); ++i)
-                addPolyNodeToPaths(*polynode.Childs[i], nodetype);
+            for (auto node : polynode.Childs)
+                addPolyNodeToPaths(*node, nodetype);
         };
+        addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
 
-    addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
+        pathsMap.extract(pathsMap.begin());
 
-    (--pathsMap.end())->second.takeFirst();
+        for (auto& [nest, paths] : pathsMap) {
+            qDebug() << __FUNCTION__ << "nest" << nest << paths.size();
+            if (paths.size() > 1)
+                sortBE(paths);
+            rpaths.append(paths);
+        }
+    } else { //Grouping by nesting depth
+        sortPolyNodeByNesting(polytree);
+        IntPoint from = App::settings().mkrZeroOffset();
+        std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths =
+            [&addPolyNodeToPaths, &rpaths, &from, this](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
+                bool match = true;
+                if (nodetype == ntClosed)
+                    match = !polynode.IsOpen();
+                else if (nodetype == ntOpen)
+                    return;
 
-    for (auto& [nest, paths] : pathsMap) {
-        if (paths.size() > 1)
-            sortBE(paths);
-        dbgPaths(paths, QString("Nesting %1").arg(nest));
-        rpaths.append(paths);
+                if (!polynode.Contour.empty() && match && polynode.Nesting > 2) {
+                    reduceDistance(from, polynode.Contour);
+                    rpaths.emplace_back(std::move(polynode.Contour));
+                }
+
+                //                std::map<int, std::vector<PolyNode*>, std::greater<>> map;
+                //                for (auto node : polynode.Childs)
+                //                    map[node->Nesting].emplace_back(node);
+                //                size_t i = polynode.ChildCount();
+                //                for (auto& [nest, nodes] : map) {
+                //                    for (auto node : nodes)
+                //                        polynode.Childs[--i] = node;
+                //                }
+
+                for (auto node : polynode.Childs)
+                    addPolyNodeToPaths(*node, nodetype);
+            };
+
+        addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
     }
 }
 
@@ -349,5 +405,4 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
 //        if (polytree.Childs[i]->IsOpen())
 //            paths.push_back(polytree.Childs[i]->Contour);
 //}
-
 }

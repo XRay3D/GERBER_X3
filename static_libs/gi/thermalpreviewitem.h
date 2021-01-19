@@ -61,7 +61,7 @@ public:
     Paths bridge() const { return m_bridge; }
     virtual bool isValid() const;
 
-    virtual Point64 pos() const = 0;
+    virtual IntPoint pos() const = 0;
     virtual Paths paths() const = 0;
     virtual void redraw() = 0;
 

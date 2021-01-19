@@ -325,7 +325,7 @@ void DrillForm::on_pbCreate_clicked()
 
             if (!pathsMap[toolId].drillPath.empty()) {
                 Path& path = pathsMap[toolId].drillPath;
-                Point64 point1((Marker::get(Marker::Home)->pos()));
+                IntPoint point1((Marker::get(Marker::Home)->pos()));
                 { // sort by distance
                     size_t counter = 0;
                     while (counter < path.size()) {

@@ -526,7 +526,7 @@ mvector<QString> File::gCodeText() const { return m_lines; }
 void File::createGiDrill()
 {
     GraphicsItem* item;
-    for (const Point64& point : m_toolPathss.front().front()) {
+    for (const IntPoint& point : m_toolPathss.front().front()) {
         item = new DrillItem(m_gcp.getTool().diameter(), this);
         item->setPos(point);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));

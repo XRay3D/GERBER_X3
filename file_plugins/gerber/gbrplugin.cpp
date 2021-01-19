@@ -287,7 +287,7 @@ public:
 
         changeColor();
     }
-    Point64 pos() const override { return gbrObj->state().curPos(); }
+    IntPoint pos() const override { return gbrObj->state().curPos(); }
     Paths paths() const override { return gbrObj->paths(); }
     bool fit(double depth) override
     {
@@ -349,7 +349,7 @@ public:
             sourcePath.addPolygon(polygon);
         }
     }
-    Point64 pos() const override { return grob.state().curPos(); }
+    IntPoint pos() const override { return grob.state().curPos(); }
     Paths paths() const override { return grob.paths(); }
     void redraw() override
     {
@@ -370,14 +370,14 @@ public:
             Clipper clipper;
             clipper.AddPaths(cashedFrame, ptSubject, true);
             const auto rect(sourcePath.boundingRect());
-            const Point64& center(rect.center());
+            const IntPoint& center(rect.center());
             const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
             const auto fp(sourcePath.toFillPolygons());
             for (int i = 0; i < m_node->count(); ++i) { // Gaps
                 ClipperOffset offset;
                 double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
                 offset.AddPath({ center,
-                                   Point64(
+                                   IntPoint(
                                        static_cast<cInt>((cos(angle) * radius) + center.X),
                                        static_cast<cInt>((sin(angle) * radius) + center.Y)) },
                     jtSquare, etOpenButt);

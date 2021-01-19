@@ -49,7 +49,7 @@ public:
     int toolId() const;
 
     virtual void updateTool() = 0;
-    virtual Point64 pos() const = 0;
+    virtual IntPoint pos() const = 0;
     virtual Paths paths() const = 0;
     virtual bool fit(double depth) = 0;
 

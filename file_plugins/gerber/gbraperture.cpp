@@ -41,7 +41,7 @@ Paths AbstractAperture::draw(const State& state, bool fl)
             ReversePath(path);
 
         if (m_format->unitMode == Inches && type() == Macro) {
-            for (Point64& pt : path)
+            for (IntPoint& pt : path)
                 pt *= 25.4;
         }
 
@@ -78,16 +78,16 @@ Path AbstractAperture::drawDrill(const State& state)
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
     bool fl = Area(poligon) < 0;
-    for (Point64& pt : poligon) {
+    for (IntPoint& pt : poligon) {
 
         if (state.mirroring() & X_Mirroring)
             pt.X = -pt.X;
         if (state.mirroring() & Y_Mirroring)
             pt.Y = -pt.Y;
         if (state.rotating() != 0.0 || state.scaling() != 1.0) {
-            const double tmpAangle = qDegreesToRadians(state.rotating() - Point64().angleTo(pt));
-            const double length = Point64().distTo(pt) * state.scaling();
-            pt = Point64(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
+            const double tmpAangle = qDegreesToRadians(state.rotating() - IntPoint().angleTo(pt));
+            const double length = IntPoint().distTo(pt) * state.scaling();
+            pt = IntPoint(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
         }
     }
 
@@ -238,12 +238,12 @@ void ApObround::draw()
         m_paths.push_back(CirclePath(w));
     } else {
         if (w > h) {
-            clipper.AddPath(CirclePath(h, Point64(-(w - h) / 2, 0)), ptClip, true);
-            clipper.AddPath(CirclePath(h, Point64((w - h) / 2, 0)), ptClip, true);
+            clipper.AddPath(CirclePath(h, IntPoint(-(w - h) / 2, 0)), ptClip, true);
+            clipper.AddPath(CirclePath(h, IntPoint((w - h) / 2, 0)), ptClip, true);
             clipper.AddPath(RectanglePath(w - h, h), ptClip, true);
         } else if (w < h) {
-            clipper.AddPath(CirclePath(w, Point64(0, -(h - w) / 2)), ptClip, true);
-            clipper.AddPath(CirclePath(w, Point64(0, (h - w) / 2)), ptClip, true);
+            clipper.AddPath(CirclePath(w, IntPoint(0, -(h - w) / 2)), ptClip, true);
+            clipper.AddPath(CirclePath(w, IntPoint(0, (h - w) / 2)), ptClip, true);
             clipper.AddPath(RectanglePath(w, h - w), ptClip, true);
         }
         clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
@@ -304,7 +304,7 @@ void ApPolygon::draw()
     const double step = 360.0 / m_verticesCount;
     const double diam = this->m_diam * uScale;
     for (int i = 0; i < m_verticesCount; ++i) {
-        poligon.push_back(Point64(
+        poligon.push_back(IntPoint(
             static_cast<cInt>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<cInt>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     }
@@ -491,7 +491,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
         RotationAngle
     };
 
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -512,7 +512,7 @@ Path ApMacro::drawCircle(const QList<double>& mod)
         RotationAngle
     };
 
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -544,7 +544,7 @@ void ApMacro::drawMoire(const QList<double>& mod)
     const cInt ct = static_cast<cInt>(mod[CrossThickness] * uScale);
     const cInt cl = static_cast<cInt>(mod[CrossLength] * uScale);
 
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -588,7 +588,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
 
     Path polygon;
     for (int j = 0; j < int(num); ++j)
-        polygon.push_back(Point64(
+        polygon.push_back(IntPoint(
             static_cast<cInt>(mod[X + j * 2] * uScale),
             static_cast<cInt>(mod[Y + j * 2] * uScale)));
 
@@ -613,14 +613,14 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
         throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
     const cInt diameter = static_cast<cInt>(mod[Diameter] * uScale * 0.5);
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
     Path polygon;
     for (int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
-        polygon.push_back(Point64(
+        polygon.push_back(IntPoint(
             static_cast<cInt>(qCos(angle) * diameter),
             static_cast<cInt>(qSin(angle) * diameter)));
     }
@@ -651,7 +651,7 @@ void ApMacro::drawThermal(const QList<double>& mod)
     const cInt inner = static_cast<cInt>(mod[InnerDiameter] * uScale);
     const cInt gap = static_cast<cInt>(mod[GapThickness] * uScale);
 
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(mod[CenterX] * uScale),
         static_cast<cInt>(mod[CenterY] * uScale));
 
@@ -684,13 +684,13 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         RotationAngle,
     };
 
-    const Point64 start(
+    const IntPoint start(
         static_cast<cInt>(mod[StartX] * uScale),
         static_cast<cInt>(mod[StartY] * uScale));
-    const Point64 end(
+    const IntPoint end(
         static_cast<cInt>(mod[EndX] * uScale),
         static_cast<cInt>(mod[EndY] * uScale));
-    const Point64 center(
+    const IntPoint center(
         static_cast<cInt>(0.5 * start.X + 0.5 * end.X),
         static_cast<cInt>(0.5 * start.Y + 0.5 * end.Y));
 
