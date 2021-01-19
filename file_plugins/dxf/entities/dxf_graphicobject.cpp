@@ -34,12 +34,12 @@ void GraphicObject::setRotation(double rotationAngle)
 void GraphicObject::setScale(double scaleX, double scaleY)
 {
     m_scaleX = scaleX, m_scaleY = scaleY;
-    auto scale = [](Path& path, double sx, double sy, const Point64& center = {}) {
+    auto scale = [](Path& path, double sx, double sy, const IntPoint& center = {}) {
         const bool fl = Area(path) < 0;
-        for (Point64& pt : path) {
+        for (IntPoint& pt : path) {
             const double dAangle = (M_PI * 2) - center.angleRadTo(pt);
             const double length = center.distTo(pt);
-            pt = Point64(static_cast<cInt>(cos(dAangle) * length * sx), static_cast<cInt>(sin(dAangle) * length * sy));
+            pt = IntPoint(static_cast<cInt>(cos(dAangle) * length * sx), static_cast<cInt>(sin(dAangle) * length * sy));
             pt.X += center.X;
             pt.Y += center.Y;
         }

@@ -209,10 +209,10 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
         IntRect r(clipper.GetBounds());
         int k = /*uScale*/ 1;
         Path outer = {
-            Point64(r.left - k, r.bottom + k),
-            Point64(r.right + k, r.bottom + k),
-            Point64(r.right + k, r.top - k),
-            Point64(r.left - k, r.top - k)
+            IntPoint(r.left - k, r.bottom + k),
+            IntPoint(r.right + k, r.bottom + k),
+            IntPoint(r.right + k, r.top - k),
+            IntPoint(r.left - k, r.top - k)
         };
         if (fl)
             ReversePath(outer);
@@ -340,8 +340,8 @@ void File::createGi()
             for (const Path& chPath : checkList) { // find copy
                 size_t counter = 0;
                 if (chPath.size() == path.size()) {
-                    for (const Point64& p1 : chPath) {
-                        for (const Point64& p2 : path) {
+                    for (const IntPoint& p1 : chPath) {
+                        for (const IntPoint& p2 : path) {
                             if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
                                 ++counter;
                                 break;

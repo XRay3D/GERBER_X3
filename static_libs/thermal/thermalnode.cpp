@@ -16,7 +16,7 @@
 #include "thermalnode.h"
 #include "thermalmodel.h"
 
-ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, ThermalModel* model)
+ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, ThermalModel* model)
     : container(false)
     , icon(icon)
     , name(name)
@@ -210,7 +210,7 @@ int ThermalNode::count() const { return par.count; }
 
 ThParam ThermalNode::getParam() const { return par; }
 
-Point64 ThermalNode::pos() const { return m_pos; }
+IntPoint ThermalNode::pos() const { return m_pos; }
 
 AbstractThermPrGi* ThermalNode::item() const { return m_item; }
 

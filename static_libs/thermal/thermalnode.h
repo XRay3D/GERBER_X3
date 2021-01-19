@@ -39,7 +39,7 @@ public:
 
 class __declspec(dllexport) ThermalNode final : public ThermalNodeI {
 public:
-    explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, ThermalModel* model);
+    explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, ThermalModel* model);
     explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, ThermalModel* model);
     explicit ThermalNode(ThermalModel* model);
 
@@ -66,7 +66,7 @@ public:
     int count() const override;
     ThParam getParam() const;
 
-    Point64 pos() const;
+    IntPoint pos() const;
     AbstractThermPrGi* item() const;
     bool createFile() const;
     void disable() override;
@@ -84,7 +84,7 @@ private:
     const bool container = false;
     const QIcon icon;
     const QString name;
-    const Point64 m_pos;
+    const IntPoint m_pos;
 
     ThParam par;
 

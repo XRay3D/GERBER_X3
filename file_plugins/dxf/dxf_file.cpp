@@ -77,10 +77,10 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
         IntRect r(clipper.GetBounds());
         int k = /*uScale*/ 1;
         Path outer = {
-            Point64(r.left - k, r.bottom + k),
-            Point64(r.right + k, r.bottom + k),
-            Point64(r.right + k, r.top - k),
-            Point64(r.left - k, r.top - k)
+            IntPoint(r.left - k, r.bottom + k),
+            IntPoint(r.right + k, r.bottom + k),
+            IntPoint(r.right + k, r.top - k),
+            IntPoint(r.left - k, r.top - k)
         };
         if (fl)
             ReversePath(outer);

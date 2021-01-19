@@ -63,6 +63,7 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxInfo;
         QCheckBox* chbxSameGFolder;
+        QComboBox* cbxProfileSort;
         QLineEdit* leFileExtension;
         QLineEdit* leFormat;
         QLineEdit* leLaserCPC;
@@ -158,6 +159,28 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
                 tabwStart->addTab(tabLaser, QString());
                 tabwStart->setTabText(tabwStart->indexOf(tabLaser), QApplication::translate("SettingsDialog", "Laser", nullptr));
             }
+            { // Tab Profile
+                auto tabProfile = new QWidget();
+                tabProfile->setObjectName(QString::fromUtf8("tabProfile"));
+                auto verticalLayoutPS = new QVBoxLayout(tabProfile);
+                verticalLayoutPS->setObjectName(QString::fromUtf8("verticalLayoutPS"));
+                verticalLayoutPS->setContentsMargins(6, 6, 6, 6);
+
+                auto lblProfileSort = new QLabel(tabProfile);
+                lblProfileSort->setObjectName(QString::fromUtf8("lblProfileSort"));
+                lblProfileSort->setText(QApplication::translate("SettingsDialog", "Milling sequence:", nullptr));
+                verticalLayoutPS->addWidget(lblProfileSort);
+                cbxProfileSort = new QComboBox(tabProfile);
+                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
+                cbxProfileSort->addItem("Grouping by nesting");
+                cbxProfileSort->addItem("Grouping by nesting depth");
+                verticalLayoutPS->addWidget(cbxProfileSort);
+
+                verticalLayoutPS->addStretch();
+
+                tabwStart->addTab(tabProfile, QString());
+                tabwStart->setTabText(tabwStart->indexOf(tabProfile), QApplication::translate("SettingsDialog", "Profile", nullptr));
+            }
             /**/ verticalLayout1->addWidget(tabwStart);
 
             auto lblFormat = new QLabel(this);
@@ -232,6 +255,8 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
 
             m_laserEnd = settings.getValue(pteLaserEnd, m_laserEnd);
             m_laserStart = settings.getValue(pteLaserStart, m_laserStart);
+
+            m_profileSort = settings.getValue(cbxProfileSort, m_profileSort);
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override
@@ -251,6 +276,8 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
 
             m_laserStart = settings.setValue(pteLaserStart);
             m_laserEnd = settings.setValue(pteLaserEnd);
+
+            m_profileSort = settings.setValue(cbxProfileSort);
             settings.endGroup();
         }
     };

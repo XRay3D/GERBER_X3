@@ -27,8 +27,8 @@ protected:
 
 private:
     struct Pair {
-        Point64 first;
-        Point64 second;
+        IntPoint first;
+        IntPoint second;
         int id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
@@ -39,7 +39,7 @@ private:
     using Pairss = mvector<Pairs>;
     struct OrdPath {
         int count = 1;
-        Point64 Pt;
+        IntPoint Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;

@@ -43,7 +43,7 @@ using Pathss = mvector /*mvector*/<Paths>;
 
 //QPolygonF toQPolygon(const Path& p);
 //mvector<QPolygonF> toQPolygons(const Paths& p);
-using Point64 = IntPoint;
+//using IntPoint = IntPoint;
 double Perimeter(const Path& path);
 
 //IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)
@@ -51,7 +51,7 @@ double Perimeter(const Path& path);
 //    return IntPoint(int((qint64(pt1.X) + pt2.X) / 2), int((qint64(pt1.Y) + pt2.Y) / 2));
 //}
 
-Path CirclePath(double diametr, const Point64& center = Point64());
-Path RectanglePath(double width, double height, const Point64& center = Point64());
-void RotatePath(Path& poligon, double angle, const Point64& center = Point64());
-void TranslatePath(Path& path, const Point64& pos);
+Path CirclePath(double diametr, const IntPoint& center = IntPoint());
+Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
+void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
+void TranslatePath(Path& path, const IntPoint& pos);

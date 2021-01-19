@@ -33,7 +33,7 @@
 //#endif
 //}
 
-Path CirclePath(double diametr, const Point64& center)
+Path CirclePath(double diametr, const IntPoint& center)
 {
     if (diametr == 0.0)
         return Path();
@@ -42,23 +42,23 @@ Path CirclePath(double diametr, const Point64& center)
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = Point64(
+        poligon[i] = IntPoint(
             static_cast<cInt>(cos(i * 2 * M_PI / intSteps) * radius) + center.X,
             static_cast<cInt>(sin(i * 2 * M_PI / intSteps) * radius) + center.Y);
     }
     return poligon;
 }
 
-Path RectanglePath(double width, double height, const Point64& center)
+Path RectanglePath(double width, double height, const IntPoint& center)
 {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
     Path poligon {
-        Point64(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
-        Point64(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        Point64(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        Point64(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
+        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
+        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
+        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
+        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
     };
     if (Area(poligon) < 0.0)
         ReversePath(poligon);
@@ -66,13 +66,13 @@ Path RectanglePath(double width, double height, const Point64& center)
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const Point64& center)
+void RotatePath(Path& poligon, double angle, const IntPoint& center)
 {
     const bool fl = Area(poligon) < 0;
-    for (Point64& pt : poligon) {
+    for (IntPoint& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - pt.angleTo(center));
         const double length = pt.distTo(center);
-        pt = Point64(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
+        pt = IntPoint(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;
     }
@@ -80,7 +80,7 @@ void RotatePath(Path& poligon, double angle, const Point64& center)
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const Point64& pos)
+void TranslatePath(Path& path, const IntPoint& pos)
 {
     if (pos.X == 0 && pos.Y == 0)
         return;

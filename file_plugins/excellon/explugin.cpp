@@ -258,14 +258,14 @@ public:
                 Path path(hole->item->paths().front());
 
                 if (path.size()) {
-                    for (Point64& pt : path) {
+                    for (IntPoint& pt : path) {
                         m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
                         m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
                         m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
                         m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
                     }
                     m_toolPath.moveTo(path.front());
-                    for (Point64& pt : path) {
+                    for (IntPoint& pt : path) {
                         m_toolPath.lineTo(pt);
                     }
                 }
@@ -277,7 +277,7 @@ public:
 
         changeColor();
     }
-    Point64 pos() const override { return hole->state.offsetedPos(); }
+    IntPoint pos() const override { return hole->state.offsetedPos(); }
     Paths paths() const override
     {
         if (m_type == GiType::PrSlot)

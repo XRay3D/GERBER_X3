@@ -96,7 +96,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
             const cInt start = static_cast<cInt>(r.top - (size - (r.bottom - r.top)) * 0.5);
             const cInt left = static_cast<cInt>(r.left - (size - (r.right - r.left)) * 0.5);
             const cInt right = static_cast<cInt>(r.right + (size - (r.right - r.left)) * 0.5);
-            const Point64 center(static_cast<cInt>(0.5 * (r.left + r.right)), static_cast<cInt>(0.5 * (r.top + r.bottom)));
+            const IntPoint center(static_cast<cInt>(0.5 * (r.left + r.right)), static_cast<cInt>(0.5 * (r.top + r.bottom)));
 
             Paths acc;
             using Worck = mvector<std::tuple<cInt, cInt, cInt, cInt>>;
@@ -298,7 +298,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         rect = c.GetBounds();
     }
 
-    const Point64 center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
+    const IntPoint center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
 
     Paths laserPath(profilePaths);
 
@@ -372,9 +372,9 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 
     auto format = [&reverse](Path& src) -> Path& {
         if (reverse)
-            std::sort(src.begin(), src.end(), [](const Point64& p1, const Point64& p2) -> bool { return p1.X > p2.X; });
+            std::sort(src.begin(), src.end(), [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1.X > p2.X; });
         else
-            std::sort(src.begin(), src.end(), [](const Point64& p1, const Point64& p2) -> bool { return p1.X < p2.X; });
+            std::sort(src.begin(), src.end(), [](const IntPoint& p1, const IntPoint& p2) -> bool { return p1.X < p2.X; });
         return src;
     };
 

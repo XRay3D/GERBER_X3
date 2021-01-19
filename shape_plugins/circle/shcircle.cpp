@@ -48,13 +48,13 @@ void Circle::redraw()
     m_radius = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = App::settings().clpCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
-    const Point64 center((handlers[Center]->pos()));
+    const IntPoint center((handlers[Center]->pos()));
     const double delta_angle = (2.0 * M_PI) / intSteps;
     Path& path = m_paths.front();
     path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        path.push_back(Point64(
+        path.push_back(IntPoint(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }

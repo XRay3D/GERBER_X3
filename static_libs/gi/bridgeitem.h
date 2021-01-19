@@ -43,7 +43,7 @@ public:
 
     void update();
 
-    Point64 getPoint(const int side) const;
+    IntPoint getPoint(const int side) const;
     QLineF getPath() const;
 
     void setOk(bool ok);

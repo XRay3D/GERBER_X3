@@ -155,7 +155,7 @@ void BridgeItem::update()
     QGraphicsItem::update();
 }
 
-Point64 BridgeItem::getPoint(const int side) const
+IntPoint BridgeItem::getPoint(const int side) const
 {
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
@@ -169,7 +169,7 @@ Point64 BridgeItem::getPoint(const int side) const
         l2.setAngle(m_angle);
         return (l2.p2());
     }
-    return Point64();
+    return IntPoint();
 }
 
 QLineF BridgeItem::getPath() const
