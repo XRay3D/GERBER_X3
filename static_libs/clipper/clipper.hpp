@@ -384,6 +384,7 @@ public:
     bool IsHole() const;
     bool IsOpen() const;
     size_t ChildCount() const;
+    int Nesting = 0;
 
 private:
     //PolyNode& operator =(PolyNode& other);

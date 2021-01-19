@@ -208,7 +208,7 @@ void ProfileCreator::reorder()
     }
 
     polyTreeToPaths(polyTree, m_returnPs);
-    m_returnPs.takeFirst();
+    //    m_returnPs.takeFirst();
 
     std::reverse(m_returnPs.begin(), m_returnPs.end());
 
@@ -253,27 +253,28 @@ void ProfileCreator::reorder()
 
     m_returnPss.resize(m_returnPs.size());
     for (size_t i = 0; i < m_returnPs.size(); ++i) {
+        m_returnPs[i].push_back(m_returnPs[i].front());
         m_returnPss[i].emplace_back(std::move(m_returnPs[i]));
     }
 }
 
-void ProfileCreator::addPolyNodeToPaths(PolyNode& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
-{
-    bool match = true;
-    if (nodetype == ntClosed)
-        match = !polynode.IsOpen();
-    else if (nodetype == ntOpen)
-        return;
+//void ProfileCreator::addPolyNodeToPaths(PolyNode& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
+//{
+//    bool match = true;
+//    if (nodetype == ntClosed)
+//        match = !polynode.IsOpen();
+//    else if (nodetype == ntOpen)
+//        return;
 
-    if (!polynode.Contour.empty() && match) {
-        reduceDistance(from, polynode.Contour);
-        polynode.Contour.push_back(polynode.Contour.front());
-        paths.push_back(std::move(polynode.Contour));
-    }
+//    if (!polynode.Contour.empty() && match) {
+//        reduceDistance(from, polynode.Contour);
+//        polynode.Contour.push_back(polynode.Contour.front());
+//        paths.push_back(std::move(polynode.Contour));
+//    }
 
-    for (size_t i = 0; i < polynode.ChildCount(); ++i)
-        addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
-}
+//    for (size_t i = 0; i < polynode.ChildCount(); ++i)
+//        addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
+//}
 
 void ProfileCreator::reduceDistance(IntPoint& from, Path& to)
 {
@@ -294,29 +295,59 @@ void ProfileCreator::reduceDistance2(IntPoint& from, std::vector<PolyNode*> to)
 {
 }
 
-void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& paths)
+void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
 {
-    paths.resize(0);
-    paths.reserve(polytree.Total());
-    sortPolyNodeByNesting(polytree, true);
-    from = IntPoint {};
-    addPolyNodeToPaths(polytree, ntAny, paths);
+    rpaths.resize(0);
+    rpaths.reserve(polytree.Total());
+
+    sortPolyNodeByNesting(polytree);
+    //sortPolyNodeByDistances(polytree);
+    //from = IntPoint {};
+
+    std::map<int, Paths> pathsMap;
+
+    std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths =
+        [&addPolyNodeToPaths, &pathsMap](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
+            bool match = true;
+            if (nodetype == ntClosed)
+                match = !polynode.IsOpen();
+            else if (nodetype == ntOpen)
+                return;
+
+            if (!polynode.Contour.empty() && match)
+                pathsMap[polynode.Nesting].push_back(std::move(polynode.Contour));
+
+            for (size_t i = 0; i < polynode.ChildCount(); ++i)
+                addPolyNodeToPaths(*polynode.Childs[i], nodetype);
+        };
+
+    addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
+
+    (--pathsMap.end())->second.takeFirst();
+
+    for (auto& [nest, paths] : pathsMap) {
+        if (paths.size() > 1)
+            sortBE(paths);
+        dbgPaths(paths, QString("Nesting %1").arg(nest));
+        rpaths.append(paths);
+    }
 }
 
-void ProfileCreator::closedPathsFromPolyTree(PolyTree& polytree, Paths& paths)
-{
-    paths.resize(0);
-    paths.reserve(polytree.Total());
-    addPolyNodeToPaths(polytree, ntClosed, paths);
-}
+//void ProfileCreator::closedPathsFromPolyTree(PolyTree& polytree, Paths& paths)
+//{
+//    paths.resize(0);
+//    paths.reserve(polytree.Total());
+//    addPolyNodeToPaths(polytree, ntClosed, paths);
+//}
 
-void ProfileCreator::openPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
-{
-    paths.resize(0);
-    paths.reserve(polytree.Total());
-    //Open paths are top level only, so ...
-    for (size_t i = 0; i < polytree.ChildCount(); ++i)
-        if (polytree.Childs[i]->IsOpen())
-            paths.push_back(polytree.Childs[i]->Contour);
-}
+//void ProfileCreator::openPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
+//{
+//    paths.resize(0);
+//    paths.reserve(polytree.Total());
+//    //Open paths are top level only, so ...
+//    for (size_t i = 0; i < polytree.ChildCount(); ++i)
+//        if (polytree.Childs[i]->IsOpen())
+//            paths.push_back(polytree.Childs[i]->Contour);
+//}
+
 }

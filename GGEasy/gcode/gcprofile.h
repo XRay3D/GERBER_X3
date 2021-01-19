@@ -33,7 +33,7 @@ private:
     };
     void reorder();
 
-    void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
+    //void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
 
     IntPoint from;
 
@@ -41,9 +41,9 @@ private:
     void reduceDistance2(IntPoint& from, std::vector<PolyNode*> to);
 
     //------------------------------------------------------------------------------
-    void polyTreeToPaths(PolyTree& polytree, Paths& paths);
-    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
-    void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
+    void polyTreeToPaths(PolyTree& polytree, Paths& rpaths);
+    //    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
+    //    void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 
 protected:
     void create() override; // Creator interface

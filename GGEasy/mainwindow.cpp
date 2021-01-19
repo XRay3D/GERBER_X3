@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (1 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
@@ -174,18 +174,18 @@ MainWindow::MainWindow(QWidget* parent)
 
         QTimer::singleShot(++i * 200, [this] { selectAll(); });
 
-        QTimer::singleShot(++i * 200, [] {
-            static double l = 2;
-            static double d = 2;
-            static BridgeItem* bp;
-            static GCode::SideOfMilling s = GCode::On;
+        //        QTimer::singleShot(++i * 200, [] {
+        //            static double l = 2;
+        //            static double d = 2;
+        //            static BridgeItem* bp;
+        //            static GCode::SideOfMilling s = GCode::On;
 
-            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
-            bp->setPos(16, 7);
-            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
-            bp->setPos(30, 7);
-            bp = nullptr;
-        });
+        //            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
+        //            bp->setPos(16, 7);
+        //            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
+        //            bp->setPos(30, 7);
+        //            bp = nullptr;
+        //        });
 
         QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
         QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
