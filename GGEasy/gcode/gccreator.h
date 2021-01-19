@@ -137,7 +137,9 @@ protected:
     bool pointOnPolygon(const QLineF& l2, const Path& path, Point64* ret = nullptr);
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
-    void sortPolyNodeByNesting(PolyNode& polynode, bool beSort = false);
+
+    void sortPolyNodeByNesting(PolyNode& polynode);
+    void sortPolyNodeByDistances(PolyNode& polynode);
 
     virtual void create() = 0;
     virtual GCodeType type() = 0;

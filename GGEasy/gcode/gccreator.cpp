@@ -477,17 +477,21 @@ void Creator::mergeSegments(Paths& paths, double glue)
     } while (size != paths.size());
 }
 
-void Creator::sortPolyNodeByNesting(PolyNode& polynode, bool beSort)
+void Creator::sortPolyNodeByNesting(PolyNode& polynode)
 {
-    int nestCtr = 0;
-    if (!beSort) {
-        std::function<int(PolyNode&)> sorter = [&sorter, &nestCtr](PolyNode& polynode) {
+    int nestCtr = -2;
+    std::function<int(PolyNode&)> sorter;
+    if (0)
+        sorter = [&sorter, &nestCtr](PolyNode& polynode) {
             ++nestCtr;
-            if (polynode.ChildCount() == 0) {
-                return nestCtr--;
-            } else if (polynode.ChildCount() == 1) {
-                return std::max(nestCtr--, sorter(*polynode.Childs.front()));
-            } else {
+            switch (polynode.ChildCount()) {
+            case 0:
+                polynode.Nesting = nestCtr;
+                break;
+            case 1:
+                polynode.Nesting = nestCtr;
+                break;
+            default:
                 std::map<int, std::vector<PolyNode*>, std::greater<>> map;
                 for (auto node : polynode.Childs)
                     map[sorter(*node)].emplace_back(node);
@@ -496,173 +500,178 @@ void Creator::sortPolyNodeByNesting(PolyNode& polynode, bool beSort)
                     for (auto node : nodes)
                         polynode.Childs[--i] = node;
                 }
-                return std::max(nestCtr--, map.begin()->first);
+                polynode.Nesting = nestCtr;
             }
+            --nestCtr;
+            return polynode.Nesting;
         };
-        sorter(polynode);
-    } else {
-
-        auto searchMinimumDistances = [/*this*/](Paths& paths) {
-            std::vector<jcv_point> points;
-
-            size_t id = 0;
-            for (const Path& path : paths)
-                id += path.size();
-            points.reserve(id);
-            id = 0;
-
-            for (const Path& path : paths) {
-                for (const auto& point : path)
-                    points.push_back({
-                        //
-                        static_cast<jcv_real>(point.X),
-                        static_cast<jcv_real>(point.Y),
-                        static_cast<int>(id) //
-                    });
-                ++id;
-            }
-
-            Clipper clipper;
-            clipper.AddPaths(paths, ptClip, true);
-            const IntRect r(clipper.GetBounds());
-
-            using Key = std::pair<int, int>;
-            using Md = std::map<Key, double>;
-            using Mdr = std::map<double, std::vector<Key>>;
-            Md minimumDistances;
-
-            //            Paths dbg;
-            {
-                const cInt fo = uScale;
-                jcv_rect bounding_box = {
-                    { static_cast<jcv_real>(r.left - fo), static_cast<jcv_real>(r.top - fo) },
-                    { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
-                };
-                jcv_diagram diagram;
-                jcv_diagram_generate(points.size(), points.data(), &bounding_box, nullptr, &diagram);
-                const jcv_edge* edge = jcv_diagram_get_edges(&diagram);
-                while (edge) {
-                    if (edge->sites[0] && edge->sites[1]) {
-                        auto p1 = edge->sites[0]->p;
-                        auto p2 = edge->sites[1]->p;
-                        if (p1.id != p2.id) {
-                            //                            dbg.push_back({ IntPoint(edge->pos[0].x, edge->pos[0].y), IntPoint(edge->pos[1].x, edge->pos[1].y) });
-                            Key key { std::min(p1.id, p2.id), std::max(p1.id, p2.id) };
-                            double distance = QLineF(QPointF(p1.x, p1.y), QPointF(p2.x, p2.y)).length();
-                            if (auto& md = minimumDistances[key]; md == 0.0)
-                                md = distance;
-                            else if (md > distance)
-                                md = distance;
-                        }
-                    }
-                    edge = jcv_diagram_get_next_edge(edge);
-                }
-                jcv_diagram_free(&diagram);
-            }
-
-            //            mergeSegments(dbg, uScale * 0.1);
-            //            dbgPaths(dbg, "searchMinimumDistances");
-
-            Mdr minimumDistancesRev;
-            for (auto [key, val] : minimumDistances)
-                minimumDistancesRev[val].emplace_back(key);
-
-            std::vector<size_t> idx;
-            std::set<int> set;
-            idx.reserve(paths.size() - 1);
-            while (idx.size() < idx.capacity()) {
-                qDebug() << "idx" << idx.size();
-                for (auto& [dist, idxses] : minimumDistancesRev) {
-                    if (!idxses.size()) {
-                        minimumDistancesRev.extract(dist);
-                        break;
-                    }
-                    int ctr = 0;
-                    for (auto [_first, _second] : idxses) {
-                        if (!idx.size() && !_first) {
-                            if (set.insert(_second).second) {
-                                idx.push_back(_second);
-                                idxses.erase(idxses.begin() + ctr);
-                                ctr = 0;
-                                break;
-                            }
-                        } else if (idx.size() && std::min(_first, _second)) {
-                            if (_first == static_cast<int>(idx.back()) && set.insert(_second).second) {
-                                idx.push_back(_second);
-                                idxses.erase(idxses.begin() + ctr);
-                                ctr = 0;
-                                break;
-                            }
-                            if (_second == static_cast<int>(idx.back()) && set.insert(_first).second) {
-                                idx.push_back(_first);
-                                idxses.erase(idxses.begin() + ctr);
-                                ctr = 0;
-                                break;
-                            }
-                        }
-                        ++ctr;
-                    }
-                    if (!ctr)
-                        break;
-                }
-            }
-            return idx;
-        };
-
-        bool stage = false;
-        std::function<int(PolyNode&)> sorter = [&sorter, &searchMinimumDistances, &nestCtr, &stage](PolyNode& polynode) {
+    else
+        sorter = [&sorter, &nestCtr](PolyNode& polynode) {
             ++nestCtr;
-            qDebug() << "nestCtr" << nestCtr;
-            if (polynode.ChildCount() == 0) {
-                return nestCtr--;
-            } else if (polynode.ChildCount() == 1) {
-                return std::max(nestCtr--, sorter(*polynode.Childs.front()));
-            } else {
-                std::map<int, std::vector<PolyNode*>, std::greater<>> nMap;
-
+            switch (polynode.ChildCount()) {
+            case 0:
+                return polynode.Nesting = nestCtr--;
+            case 1:
+                return polynode.Nesting = std::max(nestCtr--, sorter(*polynode.Childs.front()));
+            default:
+                std::map<int, std::vector<PolyNode*>, std::greater<>> map;
                 for (auto node : polynode.Childs)
-                    nMap[sorter(*node)].emplace_back(node);
-
+                    map[sorter(*node)].emplace_back(node);
                 size_t i = polynode.ChildCount();
-
-                if (stage && i > 1 && nMap.size() == 1 && polynode.Parent) {
-                    for (auto& [nest, nodes] : nMap) {
-                        Paths paths;
-                        paths.reserve(nodes.size() + 1);
-                        paths.emplace_back(polynode.Parent->Childs.back()->Contour);
-                        for (auto& node : nodes)
-                            paths.emplace_back(node->Contour);
-                        for (auto idx : searchMinimumDistances(paths))
-                            polynode.Childs[--i] = nodes[idx - 1];
-                    }
-                } else {
-                    for (auto& [nest, nodes] : nMap) {
-                        if (nodes.size() > 1) {
-                            Paths paths;
-                            paths.reserve(nodes.size() + 1);
-                            if (i == polynode.ChildCount()) {
-                                paths.emplace_back(polynode.Contour);
-                                for (auto& node : nodes)
-                                    paths.emplace_back(node->Contour);
-                            } else {
-                                paths.emplace_back(polynode.Childs[i]->Contour);
-                                for (auto& node : nodes)
-                                    paths.emplace_back(node->Contour);
-                            }
-                            for (auto idx : searchMinimumDistances(paths))
-                                polynode.Childs[--i] = nodes[idx - 1];
-                        } else
-                            for (auto node : nodes)
-                                polynode.Childs[--i] = node;
-                    }
+                for (auto& [nest, nodes] : map) {
+                    for (auto node : nodes)
+                        polynode.Childs[--i] = node;
                 }
-                return std::max(nestCtr--, nMap.begin()->first);
+                return polynode.Nesting = std::max(nestCtr--, map.begin()->first);
             }
         };
-        sorter(polynode);
-        stage = true;
-        sorter(polynode);
-    }
+    sorter(polynode);
+}
+
+void Creator::sortPolyNodeByDistances(PolyNode& /*polynode*/)
+{
+    //    } else {
+
+    //        auto searchMinimumDistances = [this](Paths& paths) -> std::vector<size_t> {
+    //            if (paths.size() == 2)
+    //                return { 1 };
+
+    //            size_t id = 0;
+    //            for (const Path& path : paths)
+    //                id += path.size();
+
+    //            std::vector<jcv_point> points;
+    //            points.reserve(id);
+    //            id = 0;
+
+    //            for (const Path& path : paths) {
+    //                for (const auto& point : path)
+    //                    points.push_back({ //
+    //                        static_cast<jcv_real>(point.X),
+    //                        static_cast<jcv_real>(point.Y),
+    //                        static_cast<int>(id) });
+    //                ++id;
+    //            }
+
+    //            Clipper clipper;
+    //            clipper.AddPaths(paths, ptClip, true);
+    //            const IntRect r(clipper.GetBounds());
+
+    //            struct Key {
+    //                int id1;
+    //                int id2;
+    //                bool operator<(Key key) const { return std::tuple(id1, id2) < std::tuple(key.id1, key.id2); }
+    //            };
+
+    //            using MinDist = std::map<Key, double>;
+    //            using MinDistRev = std::map<double, std::vector<Key>>;
+    //            MinDist mdMap;
+
+    //            Paths dbg;
+    //            {
+    //                const cInt fo = uScale;
+    //                jcv_rect bounding_box = {
+    //                    { static_cast<jcv_real>(r.left - fo), static_cast<jcv_real>(r.top - fo) },
+    //                    { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
+    //                };
+    //                jcv_diagram diagram;
+    //                jcv_diagram_generate(points.size(), points.data(), &bounding_box, nullptr, &diagram);
+    //                const jcv_edge* edge = jcv_diagram_get_edges(&diagram);
+    //                while (edge) {
+    //                    if (edge->sites[0] && edge->sites[1]) {
+    //                        auto p1 = edge->sites[0]->p;
+    //                        auto p2 = edge->sites[1]->p;
+    //                        if (p1.id != p2.id) {
+    //                            dbg.push_back({ IntPoint(edge->pos[0].x, edge->pos[0].y), IntPoint(edge->pos[1].x, edge->pos[1].y) });
+    //                            Key key { std::min(p1.id, p2.id), std::max(p1.id, p2.id) };
+    //                            double distance = QLineF(QPointF(p1.x, p1.y), QPointF(p2.x, p2.y)).length();
+    //                            if (auto& md = mdMap[key]; md == 0.0)
+    //                                md = distance;
+    //                            else if (md > distance)
+    //                                md = distance;
+    //                        }
+    //                    }
+    //                    edge = jcv_diagram_get_next_edge(edge);
+    //                }
+    //                jcv_diagram_free(&diagram);
+    //            }
+
+    //            mergeSegments(dbg);
+    //            dbgPaths(dbg, "MinDist");
+
+    //            std::vector<size_t> idx;
+    //            idx.reserve(paths.size() - 1);
+    //            std::set<int> set;
+    //            MinDistRev mdRev;
+    //            for (auto [key, val] : mdMap) {
+    //                mdRev[val].emplace_back(key);
+    //            }
+    //            for (auto [dist, keys] : mdRev) {
+    //                for (auto [id1, id2] : keys) {
+    //                    if (set.insert(id2).second)
+    //                        idx.emplace_back(id2);
+    //                }
+    //            }
+    //            //            for (size_t i = 1; i < id; ++i)
+    //            //                idx.emplace_back(i);
+
+    //            return idx;
+    //        };
+
+    //        bool stage = false;
+    //        std::function<int(PolyNode&)> sorter = [&sorter, &searchMinimumDistances, &nestCtr, &stage](PolyNode& polynode) {
+    //            ++nestCtr;
+    //            qDebug() << "nestCtr" << nestCtr;
+    //            if (polynode.ChildCount() == 0) {
+    //                return nestCtr--;
+    //            } else if (polynode.ChildCount() == 1) {
+    //                return std::max(nestCtr--, sorter(*polynode.Childs.front()));
+    //            } else {
+    //                std::map<int, std::vector<PolyNode*>, std::greater<>> nMap;
+
+    //                for (auto node : polynode.Childs)
+    //                    nMap[sorter(*node)].emplace_back(node);
+
+    //                size_t i = polynode.ChildCount();
+
+    //                if (stage && i > 1 && nMap.size() == 1 && polynode.Parent) {
+    //                    for (auto& [nest, nodes] : nMap) {
+    //                        Paths paths;
+    //                        paths.reserve(nodes.size() + 1);
+    //                        paths.emplace_back(polynode.Parent->Childs.back()->Contour);
+    //                        for (auto& node : nodes)
+    //                            paths.emplace_back(node->Contour);
+    //                        for (auto idx : searchMinimumDistances(paths))
+    //                            polynode.Childs[--i] = nodes[idx - 1];
+    //                    }
+    //                } else {
+    //                    for (auto& [nest, nodes] : nMap) {
+    //                        //                        if (nodes.size() > 1) {
+    //                        //                            Paths paths;
+    //                        //                            paths.reserve(nodes.size() + 1);
+    //                        //                            if (i == polynode.ChildCount()) {
+    //                        //                                paths.emplace_back(polynode.Contour);
+    //                        //                                for (auto& node : nodes)
+    //                        //                                    paths.emplace_back(node->Contour);
+    //                        //                            } else {
+    //                        //                                paths.emplace_back(polynode.Childs[i]->Contour);
+    //                        //                                for (auto& node : nodes)
+    //                        //                                    paths.emplace_back(node->Contour);
+    //                        //                            }
+    //                        //                            for (auto idx : searchMinimumDistances(paths))
+    //                        //                                polynode.Childs[--i] = nodes[idx - 1];
+    //                        //                        } else
+    //                        for (auto node : nodes)
+    //                            polynode.Childs[--i] = node;
+    //                    }
+    //                }
+    //                return std::max(nestCtr--, nMap.begin()->first);
+    //            }
+    //        };
+    //        sorter(polynode);
+    //        //        stage = true;
+    //        //        sorter(polynode);
+    //    }
 }
 
 void Creator::isContinueCalc()
