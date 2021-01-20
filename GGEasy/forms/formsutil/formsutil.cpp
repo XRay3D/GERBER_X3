@@ -83,9 +83,10 @@ void FormsUtil::fileHandler(GCode::File* file)
     file->setFileName(m_fileName + "_" + file->name());
     file->setSide(boardSide);
     if (fileId > -1) {
-        App::project()->reload(fileId, file);
-        m_editMode = false;
-        fileId = -1;
+        exit(-123456);
+        //        App::project()->reload(fileId, file);
+        //        m_editMode = false;
+        //        fileId = -1;
     } else {
         App::project()->addFile(file);
     }

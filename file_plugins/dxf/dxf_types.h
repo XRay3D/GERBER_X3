@@ -55,7 +55,7 @@ struct Style;
 
 using GraphicObjects = std::vector<GraphicObject>;
 
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
 using Blocks = std::map<QString, Block*>;
 using HeaderData = std::map<QString, std::map<int, QVariant>>;
 using Layers = std::map<QString, Layer*>;

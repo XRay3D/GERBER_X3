@@ -91,6 +91,8 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& a
     return stream;
 }
 
+#if _MSVC_LANG >= 201705L
+#else
 QDataStream& operator>>(QDataStream& s, ApertureMap& c)
 {
     //    c.clear();
@@ -120,6 +122,7 @@ QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
     s << c.map();
     return s;
 }
+#endif
 
 File::File(const QString& fileName)
     : FileInterface()
