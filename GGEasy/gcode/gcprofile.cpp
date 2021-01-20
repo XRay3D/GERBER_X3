@@ -107,7 +107,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth)
 
                     Clipper clipper;
                     clipper.AddPaths(paths, ptSubject, true);
-                    for (const QPair<BridgeItem*, IntPoint>& bip : biStack) {
+                    for (const auto& bip : biStack) {
                         clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
                     }
                     clipper.Execute(ctIntersection, paths, pftPositive);

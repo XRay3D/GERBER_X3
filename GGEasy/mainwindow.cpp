@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (1 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
@@ -170,9 +170,11 @@ MainWindow::MainWindow(QWidget* parent)
         //        for (int j = 0; j < 50; ++j) {
         //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
         //        }
-        //        QTimer::singleShot(++i * 500, [this] { loadFile("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-Edge_Cuts.gbr"); });
+        QTimer::singleShot(++i * 500, [this] {
+            loadFile("C:/Junk_Yard/PRO/GBR/Test Files/STM32 GBR/en.nucleo-32pins_gerber/MB1180_Gerber_Rev C/drill drawing through round holes.exc");
+        });
 
-        QTimer::singleShot(++i * 200, [this] { selectAll(); });
+        //        QTimer::singleShot(++i * 200, [this] { selectAll(); });
 
         //        QTimer::singleShot(++i * 200, [] {
         //            static double l = 2;
@@ -187,8 +189,8 @@ MainWindow::MainWindow(QWidget* parent)
         //            bp = nullptr;
         //        });
 
-        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
-        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        //QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Drill]->triggered(); });
+        //        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
 

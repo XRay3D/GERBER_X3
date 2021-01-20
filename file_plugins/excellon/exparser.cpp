@@ -101,13 +101,15 @@ bool Parser::parseComment(const QString& line)
 {
     const QRegularExpression regexComment("^;(.*)$");
     if (auto match = regexComment.match(line); match.hasMatch()) {
-        const QRegularExpression regexFormat(".*FORMAT.*([0-9]).([0-9]).*" /*, Qt::CaseInsensitive*/);
+        const QRegularExpression regexFormat(".*FORMAT.*(\\d{1}).(\\d{1}).*" /*, Qt::CaseInsensitive*/);
         if (auto matchFormat = regexFormat.match(match.captured(1)); matchFormat.hasMatch()) {
+            qDebug() << __FUNCTION__ << "regexFormat" << matchFormat.capturedTexts();
             file->m_format.integer = matchFormat.captured(1).toInt();
             file->m_format.decimal = matchFormat.captured(2).toInt();
         }
         const QRegularExpression regexTool("\\s*Holesize\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*" /*, Qt::CaseInsensitive*/);
-        if (auto matchTool = regexTool.match(match.captured(1)); match.hasMatch()) {
+        if (auto matchTool = regexTool.match(match.captured(1)); matchTool.hasMatch()) {
+            qDebug() << __FUNCTION__ << "regexTool" << matchTool.capturedTexts();
             const int tCode = static_cast<int>(matchTool.captured(1).toDouble());
             file->m_tools[tCode] = matchTool.captured(2).toDouble() * 0.0254 * (1.0 / 25.4);
             m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
@@ -220,19 +222,16 @@ bool Parser::parseTCode(const QString& line)
                                    "(?:([CFS])(\\d*\\.?\\d+))?"
                                    "(?:([CFS])(\\d*\\.?\\d+))?"
                                    ".*$");
-    //const QRegularExpression regex("^T([0]?[0-9]{1})(?:C(\\d*\\.?\\d+))?.*$");
     if (auto match = regex.match(line); match.hasMatch()) {
         const QStringList capturedTexts(match.capturedTexts());
         const int index = capturedTexts.indexOf("C");
-
-        m_state.tCode = match.captured(1).toInt();
-        if (index > 0) {
-            //            const double k =file->format.unitMode ? 1.0 : 25.4;
-            file->m_tools[m_state.tCode] = match.captured(index + 1).toDouble() /* * k*/;
-            //            m_state.currentToolDiameter =file->m_tools[m_state.tCode];
-        } /*else
-            m_state.currentToolDiameter =file->m_tools[m_state.tCode];*/
-        return true;
+        bool ok;
+        if (const auto tCode = match.captured(1).toInt(&ok); ok) {
+            m_state.tCode = tCode;
+            if (index > 0)
+                file->m_tools[m_state.tCode] = match.captured(index + 1).toDouble();
+            return true;
+        }
     }
     return false;
 }
