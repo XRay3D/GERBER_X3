@@ -264,7 +264,7 @@ QString Project::fileNames()
 
 int Project::contains(const QString& name)
 {
-    QMutexLocker locker(&m_mutex);
+    //QMutexLocker locker(&m_mutex);
     for (const auto& [id, sp] : m_files) {
         FileInterface* item = sp.get();
         if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
@@ -322,7 +322,7 @@ Shapes::Shape* Project::shape(int id)
 
 int Project::addFile(FileInterface* file)
 {
-    //QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&m_mutex);
     if (!file)
         return -1;
     m_isPinsPlaced = false;
@@ -330,7 +330,7 @@ int Project::addFile(FileInterface* file)
     file->addToScene();
     file->setVisible(true);
     const int id = contains(file->name());
-    if (id != -1) {
+    if (id != -1 && m_files[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {
         const int newId = m_files.size()
@@ -346,10 +346,9 @@ int Project::addFile(FileInterface* file)
 
 int Project::addShape(Shapes::Shape* const shape)
 {
-    qDebug() << __FUNCTION__ << "Shapes";
+    QMutexLocker locker(&m_mutex);
     if (!shape)
         return -1;
-    //QMutexLocker locker(&m_mutex);
     qDebug(__FUNCTION__);
     m_isPinsPlaced = false;
     const int newId = m_shapes.size()
