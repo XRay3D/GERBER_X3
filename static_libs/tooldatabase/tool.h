@@ -133,7 +133,7 @@ private:
     bool m_autoName;
 };
 
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
 using Tools = std::map<int, Tool, std::greater<int>>;
 #else
 struct Tools : std::map<int, Tool, std::greater<int>> {

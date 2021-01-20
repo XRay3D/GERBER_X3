@@ -30,7 +30,7 @@ public:
 
 class AbstractAperture;
 
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
 using ApertureMap = std::map<int, QSharedPointer<AbstractAperture>>;
 #else
 struct ApertureMap : std::map<int, QSharedPointer<AbstractAperture>> {

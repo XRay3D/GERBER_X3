@@ -39,7 +39,7 @@ class FileInterface;
 class QFile;
 enum class FileType;
 
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
 using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
 #else
@@ -57,26 +57,7 @@ public:
     explicit Project(QObject* parent = nullptr);
     ~Project();
 
-    bool save(const QString& fileName);
-    bool open(const QString& fileName);
-    void close();
-
-    int ver() const;
-
-    void deleteFile(int id);
-    void deleteShape(int id);
-    int size();
-
-    bool isModified();
-    void setModified(bool fl);
-
-    // BoundingRect
-    QRectF getBoundingRect();
-
-    QString fileNames();
-    int contains(const QString& name);
-    bool reload(int id, FileInterface* file);
-    ////////////////////////////////////////////////////
+    // FileInterface
     template <typename T = FileInterface>
     T* file(int id)
     {
@@ -84,17 +65,6 @@ public:
         if (m_files.contains(id))
             return static_cast<T*>(m_files[id].get());
         return nullptr;
-    }
-
-    template <typename T>
-    bool replaceFile(int id, T* file)
-    {
-        QMutexLocker locker(&m_mutex);
-        if (m_files.contains(id)) {
-            m_files[id] = std::shared_ptr(file);
-            return true;
-        }
-        return false;
     }
 
     template <typename T = FileInterface>
@@ -122,15 +92,31 @@ public:
         return count;
     }
 
+    int addFile(FileInterface* const file);
+    bool contains(FileInterface* file);
     mvector<FileInterface*> files(FileType type);
     mvector<FileInterface*> files(const mvector<FileType> types);
+    void deleteFile(int id);
+    QString fileNames();
+    int contains(const QString& name);
 
-    Shapes::Shape* shape(int id);
-
-    int addFile(FileInterface* const file);
+    // Shape
     int addShape(Shapes::Shape* const shape);
+    Shapes::Shape* shape(int id);
+    void deleteShape(int id);
 
-    bool contains(FileInterface* file);
+    // Project
+    bool save(const QString& fileName);
+    bool open(const QString& fileName);
+    void close();
+
+    int ver() const;
+
+    int size();
+
+    bool isModified();
+    void setModified(bool fl);
+
     QString name();
     void setName(const QString& name);
     void setChanged();
@@ -139,6 +125,9 @@ public:
     bool isUntitled();
     bool isPinsPlaced() const;
     void setUntitled(bool value);
+
+    // Bounding Rect
+    QRectF getBoundingRect();
 
     double spaceX() const;
     void setSpaceX(double value);
@@ -193,6 +182,8 @@ signals:
     void addFileDbg(FileInterface* file);
 
 private:
+    bool reload(int id, FileInterface* file);
+
     int m_ver;
 
     FilesMap m_files;

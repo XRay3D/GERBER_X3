@@ -44,7 +44,7 @@ using Handlers = mvector<Shapes::Handler*>;
 
 using PIF = std::tuple<FilePluginInterface*, QObject*>;
 using PIS = std::tuple<ShapePluginInterface*, QObject*>;
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
 using FileInterfacesMap = std::map<int, PIF>;
 using ShapeInterfacesMap = std::map<int, PIS>;
 #else

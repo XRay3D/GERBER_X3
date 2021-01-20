@@ -451,7 +451,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         return areaMin <= area && area <= areaMax;
     };
 
-#if __cplusplus > 201709L
+#if _MSVC_LANG >= 201705L
     using ThermalNodes = std::map<int, ThermalNode*>;
 #else
     struct ThermalNodes : std::map<int, ThermalNode*> {
