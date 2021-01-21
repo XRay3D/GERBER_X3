@@ -639,13 +639,12 @@ bool Parser::parseAperture(const QString& gLine)
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
             apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
-            //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
             apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
-            //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
+
             break;
         case Polygon:
             if (paramList.length() > 2)
@@ -653,15 +652,13 @@ bool Parser::parseAperture(const QString& gLine)
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
             apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format()));
-            //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format())));
             break;
         case Macro:
         default:
-            QMap<QString, double> macroCoeff;
+            std::map<QString, double> macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
-                macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
+                macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
             apertures.emplace(aperture, std::make_shared<ApMacro>(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format()));
-            //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format())));
             break;
         }
         if (attAper.m_function)
@@ -677,7 +674,6 @@ bool Parser::parseApertureBlock(const QString& gLine)
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         m_abSrIdStack.push({ WorkingType::ApertureBlock, match.captured(1).toInt() });
         file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
-        //file->m_apertures.insert(m_abSrIdStack.top().apertureBlockId, QSharedPointer<AbstractAperture>(new ApBlock(file->format())));
         return true;
     }
     if (gLine == "%AB*%") {
