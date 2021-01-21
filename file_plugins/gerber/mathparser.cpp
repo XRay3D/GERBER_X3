@@ -21,8 +21,8 @@
 #include <QDebug>
 #include <QtMath>
 
-MathParser::MathParser(QMap<QString, double>& variables)
-    : variables(&variables)
+MathParser::MathParser(std::map<QString, double>* variables)
+    : variables(variables)
 {
 }
 
@@ -32,7 +32,7 @@ double MathParser::getVariable(QString variableName)
         qWarning() << "Error: Try get unexists variable '" + variableName + "'";
         return 0.0;
     }
-    return variables->value(variableName, 0.0);
+    return variables->at(variableName);
 }
 
 double MathParser::parse(const QString& s)

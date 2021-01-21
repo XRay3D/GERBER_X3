@@ -33,12 +33,12 @@ public:
 
 class MathParser {
 public:
-    MathParser(QMap<QString, double>& variables);
+    MathParser(std::map<QString, double> *variables);
     double getVariable(QString variableName);
     double parse(const QString& s = "");
 
 private:
-    QMap<QString, double>* variables;
+    std::map<QString, double>* variables;
     Result plusMinus(QString s);
     Result bracket(QString s);
     Result functionVariable(QString s);

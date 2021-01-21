@@ -389,7 +389,7 @@ void ApPolygon::draw()
 /// \param coefficients
 /// \param format
 ///
-ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const std::map<QString, double>& coefficients, const Format* format)
     : AbstractAperture(format)
     , m_macro(macro)
     , m_modifiers(modifiers)
@@ -438,7 +438,7 @@ void ApMacro::draw()
         CenterLine = 21,
     };
 
-    QMap<QString, double> macroCoefficients { m_coefficients };
+    std::map<QString, double> macroCoefficients { m_coefficients };
     QVector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
@@ -452,12 +452,12 @@ void ApMacro::draw()
 
             if (var.contains('=')) {
                 QList<QString> stringList = var.split('=');
-                macroCoefficients[stringList.first()] = MathParser(macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
+                macroCoefficients[stringList.first()] = MathParser(&macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
             } else {
                 for (QString& var2 : var.split(',')) {
                     mod.push_back(var2.contains('$')
-                            ? MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
+                            ? MathParser(&macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
                             : var2.toDouble());
                 }
             }
