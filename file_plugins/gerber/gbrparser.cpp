@@ -441,14 +441,14 @@ void Parser::addPath()
 void Parser::addFlash()
 {
     m_state.setType(Aperture);
-    if (!file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].data() == nullptr) {
+    if (!file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].get() == nullptr) {
         QString str;
         for (auto [ap, apPtr] : file->m_apertures)
             str += QString::number(ap) + ", ";
         throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
     }
 
-    AbstractAperture* ap = file->m_apertures[m_state.aperture()].data();
+    AbstractAperture* ap = file->m_apertures[m_state.aperture()].get();
     Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->withHole())
@@ -572,7 +572,7 @@ Paths Parser::createLine()
     }
 
     if (file->m_apertures[m_state.aperture()]->type() == Rectangle) {
-        ApRectangle* rect = static_cast<ApRectangle*>(file->m_apertures[m_state.aperture()].data());
+        auto rect = std::static_pointer_cast<ApRectangle>(file->m_apertures[m_state.aperture()]);
         if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
             throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
         double size = rect->m_width * uScale * 0.5 * m_state.scaling();
@@ -633,18 +633,18 @@ bool Parser::parseAperture(const QString& gLine)
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, file->format()));
+            apertures[aperture] = std::make_shared<ApCircle>(toDouble(paramList[0]), hole, file->format());
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            apertures.emplace(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
+            apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
             //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            apertures.emplace(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
+            apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
             //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format())));
             break;
         case Polygon:
@@ -652,16 +652,15 @@ bool Parser::parseAperture(const QString& gLine)
                 rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            apertures.emplace(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format())));
+            apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format()));
             //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format())));
             break;
         case Macro:
         default:
             QMap<QString, double> macroCoeff;
-            for (int i = 0; i < paramList.size(); ++i) {
+            for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
-            }
-            apertures.emplace(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format())));
+            apertures.emplace(aperture, std::make_shared<ApMacro>(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format()));
             //apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format())));
             break;
         }
@@ -677,7 +676,7 @@ bool Parser::parseApertureBlock(const QString& gLine)
     static const QRegularExpression regexp(QStringLiteral("^%ABD(\\d+)\\*%$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
         m_abSrIdStack.push({ WorkingType::ApertureBlock, match.captured(1).toInt() });
-        file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, QSharedPointer<AbstractAperture>(new ApBlock(file->format())));
+        file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
         //file->m_apertures.insert(m_abSrIdStack.top().apertureBlockId, QSharedPointer<AbstractAperture>(new ApBlock(file->format())));
         return true;
     }
@@ -791,7 +790,7 @@ void Parser::closeStepRepeat()
     m_abSrIdStack.pop();
 }
 
-ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->m_apertures[id].data()); }
+ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->m_apertures[id].get()); }
 
 bool Parser::parseApertureMacros(const QString& gLine)
 {

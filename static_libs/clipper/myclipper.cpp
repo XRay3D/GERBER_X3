@@ -70,8 +70,8 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center)
 {
     const bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
-        const double dAangle = qDegreesToRadians(angle - pt.angleTo(center));
-        const double length = pt.distTo(center);
+        const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
+        const double length = center.distTo(pt);
         pt = IntPoint(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;

@@ -141,9 +141,8 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (0) {
-            QDir dir("D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb");
-            //QDir dir("C:/Свалка/SSR_V4");
+        if (1) {
+            QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
             QStringList listFiles;
             if (dir.exists())
                 listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);

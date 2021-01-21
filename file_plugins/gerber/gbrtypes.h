@@ -31,10 +31,10 @@ public:
 class AbstractAperture;
 
 #if _MSVC_LANG >= 201705L
-using ApertureMap = std::map<int, QSharedPointer<AbstractAperture>>;
+using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
 #else
-struct ApertureMap : std::map<int, QSharedPointer<AbstractAperture>> {
-    using M = std::map<int, QSharedPointer<AbstractAperture>>;
+struct ApertureMap : std::map<int, std::shared_ptr<AbstractAperture>> {
+    using M = std::map<int, std::shared_ptr<AbstractAperture>>;
     bool contains(int key) const { return find(key) != end(); }
     M& map() { return *this; }
     const M& map() const { return *this; }

@@ -32,8 +32,6 @@
 
 namespace Gerber {
 
-static Format* crutch;
-
 Path GraphicObject::elipse() const { return m_state.dCode() == D03
             && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
         ? m_path
@@ -63,66 +61,6 @@ QDebug operator<<(QDebug debug, const State& state)
                     << ')';
     return debug;
 }
-
-QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& aperture)
-{
-    int type;
-    stream >> type;
-    switch (type) {
-    case Circle:
-        aperture = QSharedPointer<AbstractAperture>(new ApCircle(stream, crutch));
-        break;
-    case Rectangle:
-        aperture = QSharedPointer<AbstractAperture>(new ApRectangle(stream, crutch));
-        break;
-    case Obround:
-        aperture = QSharedPointer<AbstractAperture>(new ApObround(stream, crutch));
-        break;
-    case Polygon:
-        aperture = QSharedPointer<AbstractAperture>(new ApPolygon(stream, crutch));
-        break;
-    case Macro:
-        aperture = QSharedPointer<AbstractAperture>(new ApMacro(stream, crutch));
-        break;
-    case Block:
-        aperture = QSharedPointer<AbstractAperture>(new ApBlock(stream, crutch));
-        break;
-    }
-    return stream;
-}
-
-#if _MSVC_LANG >= 201705L
-#else
-QDataStream& operator>>(QDataStream& s, ApertureMap& c)
-{
-    //    c.clear();
-    //    quint32 n;
-    //    s >> n;
-    //    for (quint32 i = 0; i < n; ++i) {
-    //        ApertureMap::key_type key;
-    //        ApertureMap::mapped_type val;
-    //        s >> key;
-    //        s >> val;
-    //        if (s.status() != QDataStream::Ok) {
-    //            c.clear();
-    //            break;
-    //        }
-    //        c.emplace(key, val);
-    //    }
-    s >> c.map();
-    return s;
-}
-
-QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
-{
-    //    s << quint32(c.size());
-    //    for (auto& [key, val] : c) {
-    //        s << key << val;
-    //    }
-    s << c.map();
-    return s;
-}
-#endif
 
 File::File(const QString& fileName)
     : FileInterface()

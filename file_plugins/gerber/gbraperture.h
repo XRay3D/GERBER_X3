@@ -38,12 +38,8 @@ class ApRectangle;
 
 class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)
-    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& aperture)
-    {
-        stream << aperture->type();
-        aperture->write(stream);
-        return stream;
-    }
+    friend QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture);
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
 
 public:
     AbstractAperture(const Format* m_format);
@@ -208,6 +204,18 @@ private:
     QString m_macro;
     QList<QString> m_modifiers;
     QMap<QString, double> m_coefficients;
+
+    double Angle(const IntPoint& pt1, const IntPoint& pt2)
+    {
+        const double dx = pt2.X - pt1.X;
+        const double dy = pt2.Y - pt1.Y;
+        const double theta = atan2(-dy, dx) * 360.0 / M_2PI;
+        const double theta_normalized = theta < 0 ? theta + 360 : theta;
+        if (qFuzzyCompare(theta_normalized, double(360)))
+            return 0.0;
+        else
+            return theta_normalized;
+    }
 
     Path drawCenterLine(const QList<double>& mod);
     Path drawCircle(const QList<double>& mod);
