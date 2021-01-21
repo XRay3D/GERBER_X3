@@ -206,7 +206,6 @@ struct IntPoint {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
         const double theta = atan2(-dy, dx) * 360.0 / (M_PI * 2);
-        return theta;
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
         if (qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;

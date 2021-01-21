@@ -327,7 +327,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
                 drillDiameter = aperture->apertureSize();
             }
 
-            data.emplace_back(std::move(name), drawApertureIcon(aperture.data()), apDCode, drillDiameter);
+            data.emplace_back(std::move(name), drawApertureIcon(aperture.get()), apDCode, drillDiameter);
             for (const GraphicObject* go : cacheApertures[apDCode])
                 giPeview[apDCode].push_back(std::make_shared<DrillPrGI>(go, apDCode, data.back()));
         }
@@ -463,7 +463,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
     if (param.perture) {
         for (auto [dCode, aperture] : m_apertures) {
             if (aperture->isFlashed() && testArea(aperture->draw({}))) {
-                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.data()), aperture->name(), param.par);
+                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), aperture->name(), param.par);
             }
         }
         for (auto [dCode, aperture] : m_apertures) {

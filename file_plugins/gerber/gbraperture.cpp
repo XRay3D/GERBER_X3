@@ -14,11 +14,79 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbraperture.h"
+#include "gbrfile.h"
 #include "mathparser.h"
 #include <QDebug>
 #include <QLineF>
 
 namespace Gerber {
+
+#if _MSVC_LANG >= 201705L
+#else
+QDataStream& operator>>(QDataStream& s, ApertureMap& c)
+{
+    //    c.clear();
+    //    quint32 n;
+    //    s >> n;
+    //    for (quint32 i = 0; i < n; ++i) {
+    //        ApertureMap::key_type key;
+    //        ApertureMap::mapped_type val;
+    //        s >> key;
+    //        s >> val;
+    //        if (s.status() != QDataStream::Ok) {
+    //            c.clear();
+    //            break;
+    //        }
+    //        c.emplace(key, val);
+    //    }
+    s >> c.map();
+    return s;
+}
+
+QDataStream& operator<<(QDataStream& s, const ApertureMap& c)
+{
+    //    s << quint32(c.size());
+    //    for (auto& [key, val] : c) {
+    //        s << key << val;
+    //    }
+    s << c.map();
+    return s;
+}
+#endif
+
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture)
+{
+    stream << aperture->type();
+    aperture->write(stream);
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture)
+{
+    int type;
+    stream >> type;
+    switch (type) {
+    case Circle:
+        aperture = std::make_shared<ApCircle>(stream, File::crutch);
+        break;
+    case Rectangle:
+        aperture = std::make_shared<ApRectangle>(stream, File::crutch);
+        break;
+    case Obround:
+        aperture = std::make_shared<ApObround>(stream, File::crutch);
+        break;
+    case Polygon:
+        aperture = std::make_shared<ApPolygon>(stream, File::crutch);
+        break;
+    case Macro:
+        aperture = std::make_shared<ApMacro>(stream, File::crutch);
+        break;
+    case Block:
+        aperture = std::make_shared<ApBlock>(stream, File::crutch);
+        break;
+    }
+    return stream;
+}
 
 AbstractAperture::AbstractAperture(const Format* format)
     : m_format(format)
@@ -394,6 +462,8 @@ void ApMacro::draw()
                 }
             }
 
+            qDebug() << mod;
+
             if (mod.size() < 2)
                 continue;
 
@@ -454,22 +524,6 @@ void ApMacro::draw()
         }
     } else
         m_paths.push_back(items.first().second);
-
-    //    {
-    //        Clipper clipper;
-    //        clipper.AddPaths(m_paths, ptSubject, true);
-    //        IntRect r(clipper.GetBounds());
-    //        int k = uScale ;
-    //        Path outer {
-    //            IntPoint(r.left - k, r.bottom + k),
-    //            IntPoint(r.right + k, r.bottom + k),
-    //            IntPoint(r.right + k, r.top - k),
-    //            IntPoint(r.left - k, r.top - k)
-    //        };
-    //        clipper.AddPath(outer, ptClip, true);
-    //        clipper.Execute(ctXor, m_paths, pftEvenOdd);
-    //        m_paths.takeFirst();
-    //    }
 
     ClipperBase clipperBase;
     clipperBase.AddPaths(m_paths, ptSubject, true);

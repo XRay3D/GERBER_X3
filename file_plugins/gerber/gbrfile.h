@@ -27,6 +27,7 @@ namespace Gerber {
 class File : public FileInterface {
     friend class Parser;
     friend class Plugin;
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
 
 public:
     explicit File(const QString& name = "");
@@ -51,7 +52,7 @@ public:
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(FileInterface* file) override;
-    FileTree::Node *node() override;
+    FileTree::Node* node() override;
 
     FileType type() const override { return FileType::Gerber; }
 
@@ -74,6 +75,7 @@ private:
 
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;
+    static inline Format* crutch;
 
     // FileTree::Node interface
 protected:
