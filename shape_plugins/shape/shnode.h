@@ -17,6 +17,8 @@
 
 namespace Shapes {
 
+class Shape;
+
 class Node : public FileTree::Node {
     friend class Shape;
     Shape* shape;

@@ -17,6 +17,8 @@
 
 namespace GCode {
 
+class File;
+
 class Node : public FileTree::Node {
     friend class File;
     File* const file;
@@ -31,4 +33,5 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) const override;
 };
+
 }

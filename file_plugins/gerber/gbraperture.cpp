@@ -389,7 +389,7 @@ void ApPolygon::draw()
 /// \param coefficients
 /// \param format
 ///
-ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const std::map<QString, double>& coefficients, const Format* format)
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const Format* format)
     : AbstractAperture(format)
     , m_macro(macro)
     , m_modifiers(modifiers)
@@ -438,7 +438,7 @@ void ApMacro::draw()
         CenterLine = 21,
     };
 
-    std::map<QString, double> macroCoefficients { m_coefficients };
+    VarMap macroCoefficients { m_coefficients };
     QVector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {

@@ -654,7 +654,7 @@ bool Parser::parseAperture(const QString& gLine)
             break;
         case Macro:
         default:
-            std::map<QString, double> macroCoeff;
+            VarMap macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
             apertures.emplace(aperture, std::make_shared<ApMacro>(apType, m_apertureMacro[apType].split('*'), macroCoeff, file->format()));

@@ -185,7 +185,7 @@ private:
 ///
 class ApMacro final : public AbstractAperture {
 public:
-    ApMacro(const QString& macro, const QList<QString>& modifiers, const std::map<QString, double>& coefficients, const Format* format);
+    ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const Format* format);
     ApMacro(QDataStream& stream, const Format* format)
         : AbstractAperture(format)
     {
@@ -203,7 +203,7 @@ protected:
 private:
     QString m_macro;
     QList<QString> m_modifiers;
-    std::map<QString, double> m_coefficients;
+    VarMap m_coefficients;
 
     double Angle(const IntPoint& pt1, const IntPoint& pt2)
     {

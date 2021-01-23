@@ -13,8 +13,6 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#pragma once
-
 #include "ft_node.h"
 #include "ft_model.h"
 

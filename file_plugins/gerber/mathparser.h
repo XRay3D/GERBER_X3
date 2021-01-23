@@ -17,6 +17,8 @@
  */
 #pragma once
 
+#include "gbrtypes.h"
+
 #include <QMap>
 #include <QObject>
 
@@ -33,12 +35,12 @@ public:
 
 class MathParser {
 public:
-    MathParser(std::map<QString, double> *variables);
+    MathParser(Gerber::VarMap* variables);
     double getVariable(QString variableName);
     double parse(const QString& s = "");
 
 private:
-    std::map<QString, double>* variables;
+    Gerber::VarMap* variables;
     Result plusMinus(QString s);
     Result bracket(QString s);
     Result functionVariable(QString s);

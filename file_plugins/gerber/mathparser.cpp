@@ -19,9 +19,9 @@
  */
 #include "mathparser.h"
 #include <QDebug>
-#include <QtMath>
+#include <cmath>
 
-MathParser::MathParser(std::map<QString, double>* variables)
+MathParser::MathParser(Gerber::VarMap* variables)
     : variables(variables)
 {
 }
@@ -169,18 +169,18 @@ Result MathParser::num(QString s) //throws Exception
 
 Result MathParser::processFunction(QString func, Result r)
 {
-    enum {
+    enum class Func {
         sin,
         cos,
         tan
     };
-    switch (QString("sin,cos,tan").split(',').indexOf(func)) {
-    case sin:
-        return Result(qSin(r.acc), r.rest);
-    case cos:
-        return Result(qCos(r.acc), r.rest);
-    case tan:
-        return Result(qTan(r.acc), r.rest);
+    switch (Func(QString("sin,cos,tan").split(',').indexOf(func))) {
+    case Func::sin:
+        return Result(sin(r.acc), r.rest);
+    case Func::cos:
+        return Result(cos(r.acc), r.rest);
+    case Func::tan:
+        return Result(tan(r.acc), r.rest);
     default:
         qWarning() << "function '" + func + "' is not defined";
         break;

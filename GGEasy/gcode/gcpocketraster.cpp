@@ -366,7 +366,7 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 #ifndef __GNUC__
     std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().Y > p2.front().Y; });
 #else
-    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.first().Y > p2.first().Y; });
+    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().Y > p2.front().Y; });
 #endif
     bool reverse {};
 

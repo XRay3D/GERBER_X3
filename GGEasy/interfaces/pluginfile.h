@@ -67,7 +67,7 @@ public:
         [[maybe_unused]] Tool& tool) { return {}; };
     [[nodiscard]] virtual SettingsTab createSettingsTab(
         [[maybe_unused]] QWidget* parent) { return { nullptr, "" }; };
-    [[nodiscard("must be saved to the project")]] virtual FileInterface* createFile() = 0;
+    [[nodiscard]] virtual FileInterface* createFile() = 0;
     virtual QJsonObject info() const = 0;
 
     virtual void addToDrillForm(
