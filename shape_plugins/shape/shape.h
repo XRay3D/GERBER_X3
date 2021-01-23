@@ -21,6 +21,7 @@
 namespace Shapes {
 
 class Handler;
+class Node;
 
 class Shape : public GraphicsItem {
     friend class Node;

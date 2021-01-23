@@ -19,7 +19,10 @@
 
 namespace Gerber {
 
-class Node : public QObject, public FileTree::Node {
+class File;
+
+class Node : public QObject,
+             public FileTree::Node {
     friend class File;
     Q_OBJECT
 
@@ -39,4 +42,5 @@ public:
     void menu(QMenu& menu, FileTree::View* tv) const override;
     static QTimer* decorationTimer();
 };
+
 }

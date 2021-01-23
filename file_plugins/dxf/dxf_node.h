@@ -18,6 +18,7 @@
 namespace Dxf {
 
 class Layer;
+class File;
 
 class Node : public FileTree::Node {
     mutable bool header = true;

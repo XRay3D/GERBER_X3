@@ -19,6 +19,8 @@ class ExcellonDialog;
 
 namespace Excellon {
 
+class File;
+
 class Node : public FileTree::Node {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
     friend class File;
@@ -34,4 +36,5 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) const override;
 };
+
 }
