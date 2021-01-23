@@ -21,30 +21,15 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-
-
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
-
-include_directories(
-    ../../GGEasy
-    ../../static_libs/clipper
-    ../../static_libs/common
-    ../../static_libs/filetree
-    ../../static_libs/gerber
-    ../../static_libs/gi
-    ../../static_libs/graphicsview
-    ../../static_libs/thermal
-    ../../static_libs/tooldatabase
-    ../shape
-    )
-
-link_directories(../../libs${SUFFIX})
 
 add_library(text SHARED
     shtext.cpp
@@ -55,6 +40,7 @@ add_library(text SHARED
     text.json
     )
 
+link_directories(../../libs${SUFFIX})
 target_link_libraries(text PRIVATE
     clipper
     common
@@ -68,6 +54,7 @@ target_link_libraries(text PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::OpenGL
     )
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(text PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()

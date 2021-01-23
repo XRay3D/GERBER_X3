@@ -37,7 +37,7 @@ public:
     virtual int count() const = 0;
 };
 
-class __declspec(dllexport) ThermalNode final : public ThermalNodeI {
+class ThermalNode final : public ThermalNodeI {
 public:
     explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, ThermalModel* model);
     explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, ThermalModel* model);

@@ -14,9 +14,9 @@
 *                                                                              *
 *******************************************************************************/
 #include "dxf_layermodel.h"
-#include "ft_node.h"
 #include "dxf_file.h"
 #include "dxf_layer.h"
+#include "ft_node.h"
 #include "itemgroup.h"
 
 #include <QComboBox>
@@ -70,7 +70,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
             if (layers.at(names[index.row()])->itemGroup())
-                return layers.at(names[index.row()])->itemGroup()->size();
+                return static_cast<int>(layers.at(names[index.row()])->itemGroup()->size());
             return DxfObj::tr("Empty layer");
         case Qt::TextAlignmentRole:
             return Qt::AlignCenter;
@@ -80,7 +80,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
             if (layers.at(names[index.row()])->itemGroup()) {
-                static const QString ar[] {DxfObj::tr("Solid"),DxfObj::tr("Paths") };
+                static const QString ar[] { DxfObj::tr("Solid"), DxfObj::tr("Paths") };
                 return ar[static_cast<int>(layers.at(names[index.row()])->itemsType())];
             }
             return DxfObj::tr("Empty layer");
@@ -175,7 +175,7 @@ ItemsTypeDelegate::ItemsTypeDelegate(QObject* parent)
 QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
 {
     auto* comboBox = new QComboBox(parent);
-    comboBox->addItems({DxfObj::tr("Solid"),DxfObj::tr("Paths") });
+    comboBox->addItems({ DxfObj::tr("Solid"), DxfObj::tr("Paths") });
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
     connect(comboBox, qOverload<int>(&QComboBox::activated), this, &ItemsTypeDelegate::emitCommitData);
