@@ -739,9 +739,7 @@ Paths& Creator::sortBE(Paths& src)
 
 Pathss& Creator::sortB(Pathss& src)
 {
-    IntPoint startPt(
-        (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
-
+    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t i = 0; i < src.size(); ++i) {
         if (src[i].empty())
             src.erase(src.begin() + i--);
@@ -765,8 +763,7 @@ Pathss& Creator::sortB(Pathss& src)
 
 Pathss& Creator::sortBE(Pathss& src)
 {
-    IntPoint startPt(
-        (Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

@@ -195,7 +195,8 @@ struct GCodeParams {
         Bridges, // need for Profile
         BridgeLen, // need for Profile
         NotTile,
-        Strip,
+        Trimming,
+        CornerTrimming,
         IgnoreCopper // need for Thermal
     };
 

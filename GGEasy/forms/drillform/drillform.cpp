@@ -176,7 +176,7 @@ void DrillForm::updateFiles()
 #endif
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({ FileType::Gerber, FileType::Excellon }))
+    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber }))
         App::fileInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);

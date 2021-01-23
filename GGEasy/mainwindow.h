@@ -141,7 +141,6 @@ private:
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent* event) override;
-    void contextMenuEvent(QContextMenuEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void changeEvent(QEvent* event) override;
 };
