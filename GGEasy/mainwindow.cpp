@@ -297,6 +297,16 @@ void MainWindow::createActionsFile()
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);
+    // Close project
+    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+    m_closeAllAct->setShortcuts(QKeySequence::Close);
+    m_closeAllAct->setStatusTip(tr("Close project"));
+    // m_closeAllAct->setEnabled(false);
+    fileToolBar->addAction(m_closeAllAct);
+
+    fileMenu->addSeparator();
+    fileToolBar->addSeparator();
+
     // Save Selected Tool Paths
     action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
         this, &MainWindow::saveSelectedGCodeFiles);
@@ -312,12 +322,6 @@ void MainWindow::createActionsFile()
 
     recentFiles.createMenu(fileMenu, tr("Recent Files..."));
     recentProjects.createMenu(fileMenu, tr("Recent Projects..."));
-
-    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
-    m_closeAllAct->setShortcuts(QKeySequence::Close);
-    m_closeAllAct->setStatusTip(tr("Close project"));
-    // m_closeAllAct->setEnabled(false);
-    fileToolBar->addAction(m_closeAllAct);
 
     fileMenu->addSeparator();
     action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
@@ -640,8 +644,10 @@ void MainWindow::customContextMenuForToolBar(const QPoint& pos)
         return;
     QMenu menu;
     for (auto actFromTb : toolBar->actions()) {
-        if (actFromTb->isSeparator())
+        if (actFromTb->isSeparator()) {
+            menu.addSeparator();
             continue;
+        }
         auto action = menu.addAction(actFromTb->icon(), actFromTb->text(), [actFromTb](bool checked) { actFromTb->setVisible(checked); });
         action->setCheckable(true);
         action->setChecked(actFromTb->isVisible());
@@ -768,7 +774,7 @@ void MainWindow::readSettings()
     lastPath = settings.value("lastPath").toString();
     if (qApp->applicationDirPath().contains("GERBER_X3/bin"))
         loadFile(settings.value("project").toString());
-    // toolBar actions visible
+    //r
     for (auto toolBar : findChildren<QToolBar*>()) {
         settings.beginReadArray(toolBar->objectName());
         int ctr = 0;
