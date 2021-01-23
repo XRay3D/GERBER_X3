@@ -137,11 +137,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
-        if (1) {
+        if (0) {
             QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
             QStringList listFiles;
             if (dir.exists())
@@ -153,43 +153,9 @@ MainWindow::MainWindow(QWidget* parent)
             }
         }
 
-        //        k = 300;
-        //        QTimer::singleShot(++i * k, [this] { selectAll(); });
-        //        QTimer::singleShot(++i * k, [this] { toolpathActions[GCode::Profile]->triggered(); });
-        //        QTimer::singleShot(++i * k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
-        // "D:/Gerber Test Files/Ucamco/2019 12 08 KiCad X3 sample - dvk-mx8m-bsb/dvk-mx8m-bsb-pnp_bottom.gbr"
-        // "D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf"
-        // "C:/Users/X-Ray/Documents/TopoR/Examples/Example_02/Placement.dxf"
-        // "D:\\Gerber Test Files\\DXF\\ELEMER\\МАН2_МСИС_V2_.DXF"
-        // "D:/Gerber Test Files/DXF/misc01.dxf"
-        // "D:/ELECTROSTATIC_AMP_A.dxf"
-        // "D:/T/ELECTROSTATIC_AMP_A_TOP.dxf"
-        // "D:/Gerber Test Files/DXF/Complete-Lib-E.dxf"
-        // "D:/T/1mm 30x15x20 V2 trans.dxf" //
-        //        for (int j = 0; j < 50; ++j) {
-        //            QTimer::singleShot(++i * 100, [this] { serviceMenu->actions()[4]->triggered(); });
-        //        }
-        QTimer::singleShot(++i * 500, [this] {
-            loadFile("C:/Junk_Yard/PRO/GBR/Test Files/STM32 GBR/en.nucleo-32pins_gerber/MB1180_Gerber_Rev C/drill drawing through round holes.exc");
-        });
-
-        //        QTimer::singleShot(++i * 200, [this] { selectAll(); });
-
-        //        QTimer::singleShot(++i * 200, [] {
-        //            static double l = 2;
-        //            static double d = 2;
-        //            static BridgeItem* bp;
-        //            static GCode::SideOfMilling s = GCode::On;
-
-        //            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
-        //            bp->setPos(16, 7);
-        //            App::scene()->addItem(bp = new BridgeItem(l, d, s, bp));
-        //            bp->setPos(30, 7);
-        //            bp = nullptr;
-        //        });
-
-        //QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Drill]->triggered(); });
-        //        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        QTimer::singleShot(++i * 200, [this] { selectAll(); });
+        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
 
@@ -436,9 +402,9 @@ void MainWindow::createActionsService()
         serviceMenu->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
-            r.setSize({ 1920, 1080 });
-            r.setTopLeft({ 1920, 0 });
-            r.setBottomRight({ 1920, 1080 });
+            r.setSize({ 1280, 720 });
+            //            r.setTopLeft({ 1920, 0 });
+            //            r.setBottomRight({ 1920, 1080 });
             setGeometry(r);
         }));
     }
@@ -1046,12 +1012,6 @@ void MainWindow::createDockWidget(int type)
     m_dockWidget->pop();
     m_dockWidget->push(dwContent);
     m_dockWidget->show();
-}
-
-void MainWindow::contextMenuEvent(QContextMenuEvent* event)
-{
-    qDebug();
-    QMainWindow::contextMenuEvent(event);
 }
 
 QMenu* MainWindow::createPopupMenu()

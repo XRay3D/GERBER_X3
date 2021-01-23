@@ -26,22 +26,20 @@ private:
     void createProfile(const Tool& tool, const double depth);
     void trimmingOpenPaths(Paths& paths);
 
+    IntPoint from;
+
+    void cornerTrimming();
+    void makeBridges();
+
+    void reorder();
+    void reduceDistance(IntPoint& from, Path& to);
     enum NodeType {
         ntAny,
         ntOpen,
         ntClosed
     };
-    void reorder();
-
-    //void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
-
-    IntPoint from;
-
-    void reduceDistance(IntPoint& from, Path& to);
-    void reduceDistance2(IntPoint& from, std::vector<PolyNode*> to);
-
-    //------------------------------------------------------------------------------
     void polyTreeToPaths(PolyTree& polytree, Paths& rpaths);
+    //    void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
     //    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
     //    void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 

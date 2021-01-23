@@ -588,7 +588,7 @@ void LayoutFrames::updateRect(bool fl)
 
                 {
                     const double mid = rect.height() / 2;
-                    const double len = std::min(rect.height() / 10, spaceX);
+                    const double len = rect.height() / 20;
 
                     path.moveTo(rect.topLeft() + QPointF(0, mid - len));
                     path.lineTo(rect.topLeft() + QPointF(0, mid + len));
@@ -605,7 +605,7 @@ void LayoutFrames::updateRect(bool fl)
 
                 {
                     const double mid = rect.width() / 2;
-                    const double len = std::min(rect.width() / 10, spaceY);
+                    const double len = rect.width() / 20;
 
                     path.moveTo(rect.bottomLeft() + QPointF(mid - len, 0));
                     path.lineTo(rect.bottomLeft() + QPointF(mid + len, 0));

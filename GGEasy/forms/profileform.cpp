@@ -55,7 +55,8 @@ ProfileForm::ProfileForm(QWidget* parent)
     settings.getValue(ui->rbInside);
     settings.getValue(ui->rbOn);
     settings.getValue(ui->rbOutside);
-    settings.getValue(ui->cbxStrip);
+    settings.getValue(ui->cbxTrimming);
+    settings.getValue(ui->cbxCornerTrimming);
     settings.endGroup();
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
@@ -88,7 +89,8 @@ ProfileForm::~ProfileForm()
     settings.setValue(ui->rbInside);
     settings.setValue(ui->rbOn);
     settings.setValue(ui->rbOutside);
-    settings.setValue(ui->cbxStrip);
+    settings.setValue(ui->cbxTrimming);
+    settings.setValue(ui->cbxCornerTrimming);
     settings.endGroup();
 
     for (QGraphicsItem* giItem : App::scene()->items()) {
@@ -157,8 +159,10 @@ void ProfileForm::createFile()
     gcp.setSide(side);
     gcp.tools.push_back(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    if (ui->cbxStrip->isEnabled())
-        gcp.params[GCode::GCodeParams::Strip] = ui->cbxStrip->isChecked();
+    if (ui->cbxTrimming->isEnabled())
+        gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked();
+    if (ui->cbxCornerTrimming->isEnabled())
+        gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxCornerTrimming->isChecked();
     gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
 
     {
@@ -229,13 +233,16 @@ void ProfileForm::rb_clicked()
 {
     if (ui->rbOn->isChecked()) {
         side = GCode::On;
-        ui->cbxStrip->setEnabled(true);
+        ui->cbxTrimming->setEnabled(true);
+        ui->cbxCornerTrimming->setEnabled(false);
     } else if (ui->rbOutside->isChecked()) {
         side = GCode::Outer;
-        ui->cbxStrip->setEnabled(false);
+        ui->cbxTrimming->setEnabled(false);
+        ui->cbxCornerTrimming->setEnabled(true);
     } else if (ui->rbInside->isChecked()) {
         side = GCode::Inner;
-        ui->cbxStrip->setEnabled(false);
+        ui->cbxTrimming->setEnabled(false);
+        ui->cbxCornerTrimming->setEnabled(true);
     }
 
     if (ui->rbClimb->isChecked())
