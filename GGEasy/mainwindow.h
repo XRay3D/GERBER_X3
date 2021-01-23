@@ -118,6 +118,9 @@ private:
     void createActionsZoom();
     void createActionsToolPath();
     void createActionsShape();
+
+    void customContextMenuForToolBar(const QPoint &pos);
+
     // save GCode
     void saveGCodeFile(int id);
     void saveGCodeFiles();
@@ -131,7 +134,6 @@ private:
 
     void editGcFile(GCode::File* file);
 
-public:
 private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
