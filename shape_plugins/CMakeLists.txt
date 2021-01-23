@@ -14,8 +14,8 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(Shape_Plugins)
-
-#set(CMAKE_CXX_STANDARD 17)
+set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -54,6 +54,20 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 
 add_subdirectory(shape)
+
+include_directories(
+    ../GGEasy
+    ../static_libs/clipper
+    ../static_libs/common
+    ../static_libs/filetree
+    ../static_libs/gerber
+    ../static_libs/gi
+    ../static_libs/graphicsview
+    ../static_libs/thermal
+    ../static_libs/tooldatabase
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}
+    shape
+    )
 
 add_subdirectory(circle)
 add_subdirectory(circlearc)

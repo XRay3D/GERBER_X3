@@ -18,8 +18,6 @@
 #include "qdruler.h"
 #include "scene.h"
 #include "settings.h"
-//#include "mainwindow.h"
-//#include "gi/bridgeitem.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
@@ -37,6 +35,7 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QScrollBar>
+#include <cmath>
 
 #include "leakdetector.h"
 

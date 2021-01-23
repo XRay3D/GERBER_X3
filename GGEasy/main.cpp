@@ -178,9 +178,9 @@ int main(int argc, char** argv)
         */
 #ifdef __unix__
 #ifdef QT_DEBUG
-        listFiles = dir.entryList(QStringList("*d.so"), QDir::Files);
+        const QString suffix("*.so");
 #else
-        listFiles = dir.entryList(QStringList("*.so"), QDir::Files);
+        const QString suffix("*.so");
 #endif
 #elif _WIN32
         const QString suffix("*.dll");
