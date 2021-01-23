@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         int i = 0;
         int k = 100;
 
@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget* parent)
                 listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
-                qDebug() << __FUNCTION__ << str;
+                qDebug() << str;
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
             }
         }
@@ -266,9 +266,11 @@ void MainWindow::createActionsFile()
     fileMenu->setObjectName(QStringLiteral("fileMenu"));
 
     fileToolBar = addToolBar(tr("File"));
-    fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
     fileToolBar->setToolTip(tr("File"));
+
+    fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(fileToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     // New
     QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"),
@@ -393,6 +395,9 @@ void MainWindow::createActionsService()
     toolpathToolBar->setObjectName("tbService");
     toolpathToolBar->setToolTip(tr("Service"));
 
+    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
+
     //toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     {
@@ -461,6 +466,10 @@ void MainWindow::createActionsZoom()
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     zoomToolBar->setToolTip(tr("Zoom ToolBar"));
+
+    zoomToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(zoomToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
+
     // Fit best
     auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
@@ -493,6 +502,9 @@ void MainWindow::createActionsToolPath()
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
     toolpathToolBar->setToolTip(tr("Toolpath"));
+
+    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
@@ -566,15 +578,18 @@ void MainWindow::createActionsShape()
     if (App::shapeInterfaces().empty())
         return;
 
-    QToolBar* tb = addToolBar(tr("Graphics Items"));
-    tb->setObjectName("GraphicsItemsToolBar");
-    tb->setToolTip(tr("Graphics Items"));
+    QToolBar* toolBar = addToolBar(tr("Graphics Items"));
+    toolBar->setObjectName("GraphicsItemsToolBar");
+    toolBar->setToolTip(tr("Graphics Items"));
+
+    toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     QAction* action = nullptr;
 
     for (auto& [type, pair] : App::shapeInterfaces()) {
         auto& [shInt, pobj] = pair;
-        action = tb->addAction(shInt->icon(), shInt->info().value("Name").toString());
+        action = toolBar->addAction(shInt->icon(), shInt->info().value("Name").toString());
         action->setCheckable(true);
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
@@ -584,7 +599,7 @@ void MainWindow::createActionsShape()
         });
     }
 
-    tb->addSeparator();
+    toolBar->addSeparator();
 
     auto ex = [](ClipType type) {
         QList<QGraphicsItem*> si = App::scene()->selectedItems();
@@ -612,15 +627,31 @@ void MainWindow::createActionsShape()
             delete item->file()->itemGroup()->takeAt(item);
         }
     };
-    tb->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
-    tb->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
-    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
-    tb->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
+    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
+    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
+    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
+    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
+}
+
+void MainWindow::customContextMenuForToolBar(const QPoint& pos)
+{
+    auto toolBar = qobject_cast<QToolBar*>(sender());
+    if (!toolBar)
+        return;
+    QMenu menu;
+    for (auto actFromTb : toolBar->actions()) {
+        if (actFromTb->isSeparator())
+            continue;
+        auto action = menu.addAction(actFromTb->icon(), actFromTb->text(), [actFromTb](bool checked) { actFromTb->setVisible(checked); });
+        action->setCheckable(true);
+        action->setChecked(actFromTb->isVisible());
+    }
+    menu.exec(toolBar->mapToGlobal(pos));
 }
 
 void MainWindow::saveGCodeFile(int id)
 {
-    qDebug() << __FUNCTION__;
+    qDebug();
     if (m_project->pinsPlacedMessage())
         return;
     auto* file = m_project->file<GCode::File>(id);
@@ -636,12 +667,12 @@ void MainWindow::saveGCodeFile(int id)
 
 void MainWindow::saveGCodeFiles()
 {
-    qDebug() << __FUNCTION__;
+    qDebug();
 }
 
 void MainWindow::saveSelectedGCodeFiles()
 {
-    qDebug() << __FUNCTION__;
+    qDebug();
     if (m_project->pinsPlacedMessage())
         return;
 
@@ -735,8 +766,17 @@ void MainWindow::readSettings()
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
     lastPath = settings.value("lastPath").toString();
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) {
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin"))
         loadFile(settings.value("project").toString());
+    // toolBar actions visible
+    for (auto toolBar : findChildren<QToolBar*>()) {
+        settings.beginReadArray(toolBar->objectName());
+        int ctr = 0;
+        for (auto action : toolBar->actions()) {
+            settings.setArrayIndex(ctr++);
+            action->setVisible(settings.value("actionIsVisible", true).toBool());
+        }
+        settings.endArray();
     }
     settings.endGroup();
 }
@@ -749,6 +789,16 @@ void MainWindow::writeSettings()
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("project", m_project->name());
+    // toolBar actions visible
+    for (auto toolBar : findChildren<QToolBar*>()) {
+        settings.beginWriteArray(toolBar->objectName());
+        int ctr = 0;
+        for (auto action : toolBar->actions()) {
+            settings.setArrayIndex(ctr++);
+            settings.setValue("actionIsVisible", action->isVisible());
+        }
+        settings.endArray();
+    }
     settings.endGroup();
 }
 
@@ -777,7 +827,7 @@ void MainWindow::selectAll()
 
 void MainWindow::deSelectAll()
 {
-    qDebug() << __FUNCTION__;
+    qDebug();
     for (QGraphicsItem* item : App::scene()->items())
         if (item->isVisible())
             item->setSelected(false);
@@ -882,10 +932,7 @@ void MainWindow::resetToolPathsActions()
         action->setChecked(false);
 }
 
-void MainWindow::documentWasModified()
-{
-    setWindowModified(m_project->isModified());
-}
+void MainWindow::documentWasModified() { setWindowModified(m_project->isModified()); }
 
 bool MainWindow::maybeSave()
 {
@@ -962,7 +1009,6 @@ void MainWindow::setCurrentFile(const QString& fileName)
 
 void MainWindow::addFileToPro(FileInterface* file)
 {
-    qDebug() << __FUNCTION__ << file;
     if (m_project->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
@@ -998,6 +1044,7 @@ void MainWindow::createDockWidget(int type)
 
 void MainWindow::contextMenuEvent(QContextMenuEvent* event)
 {
+    qDebug();
     QMainWindow::contextMenuEvent(event);
 }
 
@@ -1007,9 +1054,13 @@ QMenu* MainWindow::createPopupMenu()
     menu->removeAction(m_dockWidget->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
     menu->removeAction(ui->treeDockWidget->toggleViewAction());
+
     menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
     menu->addAction(tr("Icon size = 48"), [this]() { setIconSize(QSize(48, 48)); });
     menu->addAction(tr("Icon size = 72"), [this]() { setIconSize(QSize(72, 72)); });
+
+    qDebug() << menu->parent();
+
     return menu;
 }
 
@@ -1029,12 +1080,12 @@ void MainWindow::translate(const QString& locale)
     if (qtTranslator.load(qtTr, trFolder))
         qApp->installTranslator(&qtTranslator);
     else
-        qDebug() << __FUNCTION__ << "err qtTranslator";
+        qDebug() << "err qtTranslator";
 
     if (appTranslator.load(appTr, trFolder))
         qApp->installTranslator(&appTranslator);
     else
-        qDebug() << __FUNCTION__ << "err appTranslator";
+        qDebug() << "err appTranslator";
 }
 
 void MainWindow::loadFile(const QString& fileName)
@@ -1047,6 +1098,7 @@ void MainWindow::loadFile(const QString& fileName)
             m_project->open(fileName);
             setCurrentFile(fileName);
             QTimer::singleShot(100, Qt::CoarseTimer, ui->graphicsView, &GraphicsView::zoomFit);
+            return;
         }
     } else {
         if (m_project->contains(fileName) != -1
@@ -1054,25 +1106,15 @@ void MainWindow::loadFile(const QString& fileName)
                 == QMessageBox::Cancel) {
             return;
         }
-        qDebug() << __FUNCTION__;
         for (auto& [type, tuple] : App::fileInterfaces()) {
             auto& [parser, pobj] = tuple;
-            qDebug() << __FUNCTION__ << pobj;
             if (parser->thisIsIt(fileName)) {
-                qDebug() << __FUNCTION__;
                 emit parseFile(fileName, int(type));
-                //emit /**/ (this->*parseSignal[int(type)])(fileName);
                 return;
             }
         }
     }
-
-    /* else if (excellonParser->isDrillFile(fileName)) {
-            emit parseExcellonFile(fileName);
-        } else if (dxfParser->isDxfFile(fileName)) {
-            emit parseDxfFile(fileName);
-        } else
-            emit parseGerberFile(fileName);*/
+    qDebug() << fileName;
 }
 
 void MainWindow::open()
