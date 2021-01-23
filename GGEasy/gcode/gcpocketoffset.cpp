@@ -149,7 +149,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
 
     setMax(getMax() / (m_stepOver * 2)); /////////////////////////
 
-    qDebug() << __FUNCTION__ << "getMax" << getMax();
+    qDebug() << "getMax" << getMax();
     for (Paths paths : m_groupedPss) {
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, jtRound, etClosedPolygon);
@@ -168,7 +168,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
         } while (paths.size());
         m_returnPs.append(offsetPaths);
     }
-    qDebug() << __FUNCTION__ << "getCurrent" << getCurrent();
+    qDebug() << "getCurrent" << getCurrent();
     if (m_returnPs.empty()) {
         emit fileReady(nullptr);
         return;

@@ -30,7 +30,7 @@ public:
     static void addShapePoint_(const QPointF& point)
     {
         if (sp) {
-            qDebug() << __FUNCTION__ << sp << sp;
+            qDebug() << sp << sp;
             if (!item) {
                 App::project()->addShape(item = sp->createShape(point));
             } else if (!sp->addShapePoint(point))
@@ -44,7 +44,7 @@ public:
     }
     static void finalizeShape_()
     {
-        qDebug() << __FUNCTION__;
+        qDebug();
         if (item)
             item->setSelected(true);
         if (sp)

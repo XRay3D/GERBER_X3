@@ -67,7 +67,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     case FileTree::Column::ItemsType:
         switch (role) {
         case Qt::EditRole:
-            qDebug() << __FUNCTION__ << role << value;
+            qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
             emit App::fileModel()->dataChanged(this->index(), this->index(), { Qt::DecorationRole });
             return true;

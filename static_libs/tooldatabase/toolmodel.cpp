@@ -240,7 +240,7 @@ void ToolModel::exportTools()
 {
     QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
     if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << __FUNCTION__ << file.errorString();
+        qDebug() << file.errorString();
         return;
     }
 
@@ -307,7 +307,7 @@ void ToolModel::importTools()
         } else
 #endif
         {
-            qDebug() << __FUNCTION__ << file.errorString();
+            qDebug() << file.errorString();
             return;
         }
     }

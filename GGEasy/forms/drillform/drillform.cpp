@@ -549,7 +549,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
 void DrillForm::updateToolsOnGi(int apToolId)
 {
-    qDebug() << __FUNCTION__ << apToolId;
+    qDebug() << apToolId;
     for (auto& item : m_giPeview[apToolId])
         item->updateTool();
 }

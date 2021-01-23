@@ -32,7 +32,6 @@
 #include <QProxyStyle>
 #include <QSettings>
 #include <QSystemSemaphore>
-#include <QTranslator>
 
 #include "leakdetector.h"
 
@@ -65,8 +64,33 @@ public:
 void initIcon(const QString& path);
 void translation(QApplication* app);
 
-int main(int argc, char* argv[])
+void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    QByteArray localMsg = msg.toLocal8Bit();
+    const char* file = context.file ? context.file : "";
+    const char* function = context.function ? context.function : "";
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "Debug: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "Info: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    }
+}
+
+int main(int argc, char** argv)
+{
+    qInstallMessageHandler(myMessageOutput);
 
 #ifdef LEAK_DETECTOR
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -177,7 +201,7 @@ int main(int argc, char* argv[])
                     App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
                 else if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser)
                     App::shapeInterfaces().emplace(parser->type(), PIS { parser, pobj });
-                qDebug() << __FUNCTION__ << pobj << (t.nsecsElapsed() / 1000000.0) << "ms";
+                qDebug() << pobj << (t.nsecsElapsed() / 1000000.0) << "ms";
             }
         }
 

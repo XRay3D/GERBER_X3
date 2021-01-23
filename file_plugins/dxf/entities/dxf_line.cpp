@@ -77,7 +77,7 @@ void Line::parse(CodeData& code)
         }
         code = sp->nextCode();
     } while (code.code() != 0);
-    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data.size();
     //    qDebug() << data;
 }
 

@@ -543,7 +543,7 @@ bool Creator::createability(bool side)
     for (size_t pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {
         srcPaths.append(m_groupedPss[pIdx]);
     }
-    qDebug() << __FUNCTION__ << "insert" << t.elapsed();
+    qDebug() << "insert" << t.elapsed();
 
     Paths frPaths;
     {
@@ -556,7 +556,7 @@ bool Creator::createability(bool side)
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, r + 100);
     }
-    qDebug() << __FUNCTION__ << "offset" << t.elapsed();
+    qDebug() << "offset" << t.elapsed();
     if (side == CopperPaths)
         ReversePaths(srcPaths);
     {
@@ -565,7 +565,7 @@ bool Creator::createability(bool side)
         clipper.AddPaths(srcPaths, ptSubject);
         clipper.Execute(ctDifference, frPaths, pftPositive);
     }
-    qDebug() << __FUNCTION__ << "clipper1" << t.elapsed();
+    qDebug() << "clipper1" << t.elapsed();
     QString last(msg);
     if (!frPaths.empty()) {
         PolyTree polyTree;
@@ -579,7 +579,7 @@ bool Creator::createability(bool side)
             clipper.AddPath(outer, ptSubject, true);
             clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         }
-        qDebug() << __FUNCTION__ << "clipper2" << t.elapsed();
+        qDebug() << "clipper2" << t.elapsed();
 
         auto test = [&srcPaths, side](PolyNode* node) -> bool {
             if (node->ChildCount() > 0) {
@@ -635,7 +635,7 @@ bool Creator::createability(bool side)
         };
         creator(polyTree.GetFirst(), 0);
     }
-    qDebug() << __FUNCTION__ << "creator" << t.elapsed();
+    qDebug() << "creator" << t.elapsed();
     msg = last;
     if (!items.empty())
         isContinueCalc();

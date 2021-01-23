@@ -462,8 +462,6 @@ void ApMacro::draw()
                 }
             }
 
-            qDebug() << mod;
-
             if (mod.size() < 2)
                 continue;
 
@@ -506,7 +504,7 @@ void ApMacro::draw()
         }
     } catch (...) {
         qWarning() << "Macro draw error";
-        throw;
+        throw QString("Macro draw error");
     }
 
     if (items.size() > 1) {

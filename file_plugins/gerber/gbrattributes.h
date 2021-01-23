@@ -205,6 +205,8 @@ namespace Attr { //Attributes
 
         void parse(const QStringList& list);
         std::shared_ptr<AbstrAperFunc> m_function;
+        QStringList m_drillTolerance;
+        QStringList m_flashText;
     };
 
     //    struct AperFunction {

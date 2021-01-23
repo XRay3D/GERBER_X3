@@ -83,11 +83,7 @@ public:
         : m_itemGroups(1, new ItemGroup)
     {
     }
-    virtual ~FileInterface()
-    {
-        qDebug() << __FUNCTION__;
-        qDeleteAll(m_itemGroups);
-    }
+    virtual ~FileInterface() { qDeleteAll(m_itemGroups); }
 
     QString shortName() const { return QFileInfo(m_name).fileName(); }
     QString name() const { return m_name; }

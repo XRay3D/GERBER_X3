@@ -163,7 +163,7 @@ void ThermalForm::updateFiles()
 
     for (auto file : App::project()->files(FileType::Gerber))
         App::fileInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
-    qDebug() << __FUNCTION__ << ui->cbxFile->count();
+    qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);

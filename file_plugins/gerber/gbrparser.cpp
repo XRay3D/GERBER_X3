@@ -73,7 +73,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             emit interface->fileError("", file->shortName() + "\n" + "Incorrect File!");
 
         emit interface->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
-        qDebug() << __FUNCTION__ << file->name();
 
         m_lineNum = 0;
 
@@ -877,7 +876,7 @@ bool Parser::parseAttributes(const QString& gLine)
                 }
                 break;
             default:
-                qDebug() << __FUNCTION__ << gLine << match.capturedTexts();
+                qDebug() << gLine << match.capturedTexts();
             }
         } break;
         case Attr::Command::TD:
@@ -1233,7 +1232,7 @@ bool Parser::parseLoadName(const QString& gLine)
 {
     static const QRegularExpression regexp(QStringLiteral("^%LN(.+)\\*%$"));
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
-        //qDebug() << __FUNCTION__ << gLine << match.capturedTexts();
+        //qDebug() << gLine << match.capturedTexts();
         return true;
     }
     return false;
