@@ -123,7 +123,7 @@ struct variant {
         //            if(index())
         //            return std::get<int>(*this);
         //        } catch (const std::exception& e) {
-        //            //qDebug() << __FUNCTION__ << e.what();
+        //            //qDebug() << e.what();
         //            return {};
         //        }
     }
@@ -140,7 +140,7 @@ struct variant {
         //        try {
         //            return std::get<int>(*this);
         //        } catch (const std::exception& e) {
-        //            //qDebug() << __FUNCTION__ <<
+        //            //qDebug() <<
         //            e.what();
         //            return {};
         //        }
@@ -158,7 +158,7 @@ struct variant {
         //        try {
         //            return std::get<double>(*this);
         //        } catch (const std::exception& e) {
-        //            //qDebug() << __FUNCTION__ << e.what();
+        //            //qDebug() << e.what();
         //            return {};
         //        }
     }

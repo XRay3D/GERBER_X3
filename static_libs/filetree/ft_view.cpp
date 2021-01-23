@@ -212,7 +212,7 @@ void View::showExcellonDialog() { }
 void View::contextMenuEvent(QContextMenuEvent* event)
 {
     m_menuIndex = indexAt(event->pos());
-    qDebug() << __FUNCTION__ << m_menuIndex;
+    qDebug() << m_menuIndex;
     if (!m_menuIndex.isValid())
         return;
     QMenu menu(this);

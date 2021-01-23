@@ -63,32 +63,32 @@ public:
             if constexpr /**/ (std::is_same_v<Fr, To>) {
                 return arg;
             } else if constexpr (std::is_same_v<To, QString> && std::is_integral_v<Fr>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 return T::number(arg);
             } else if constexpr (std::is_same_v<To, QString> && std::is_floating_point_v<Fr>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 return T::number(arg);
             } else if constexpr (std::is_same_v<Fr, QString> && std::is_integral_v<To>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 val = T(arg.toLongLong(&ok));
             } else if constexpr (std::is_same_v<Fr, QString> && std::is_floating_point_v<To>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 val = T(arg.toDouble(&ok));
             } else if constexpr (std::is_integral_v<To>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 return T(arg);
             } else if constexpr (std::is_floating_point_v<To>) {
-                qDebug() << __FUNCTION__
+                qDebug()
                          << "\n\tFr" << typeid(Fr).name()
                          << "\n\tTo" << typeid(To).name();
                 return T(arg);

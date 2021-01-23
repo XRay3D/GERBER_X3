@@ -82,7 +82,7 @@ bool Project::save(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly)) {
-        qDebug() << __FUNCTION__ << file.errorString();
+        qDebug() << file.errorString();
         return false;
     }
     QDataStream out(&file);
@@ -120,7 +120,7 @@ bool Project::save(const QString& fileName)
         m_isModified = false;
         return true;
     } catch (...) {
-        qDebug() << __FUNCTION__ << out.status();
+        qDebug() << out.status();
     }
     return false;
 }
@@ -129,7 +129,7 @@ bool Project::open(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
-        qDebug() << __FUNCTION__ << file.errorString();
+        qDebug() << file.errorString();
         return false;
     }
     QDataStream in(&file);
@@ -178,12 +178,12 @@ bool Project::open(const QString& fileName)
 
         return true;
     } catch (const QString& ex) {
-        qDebug() << __FUNCTION__ << ex;
+        qDebug() << ex;
     } catch (const std::exception& ex) {
-        qDebug() << __FUNCTION__ << ex.what();
+        qDebug() << ex.what();
     } catch (...) {
-        qDebug() << __FUNCTION__ << in.status();
-        qDebug() << __FUNCTION__ << errno;
+        qDebug() << in.status();
+        qDebug() << errno;
     }
     return false;
 }
@@ -218,7 +218,7 @@ void Project::deleteShape(int id)
         } else
             qWarning() << "Error id" << id << "Shape not found";
     } catch (const std::exception& ex) {
-        qWarning() << __FUNCTION__ << ex.what();
+        qWarning() << ex.what();
     }
 }
 

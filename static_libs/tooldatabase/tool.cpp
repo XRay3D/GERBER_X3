@@ -418,7 +418,7 @@ void ToolHolder::readTools()
         } else
 #endif
         {
-            qDebug() << __FUNCTION__ << file.errorString();
+            qDebug() << file.errorString();
             return;
         }
     }

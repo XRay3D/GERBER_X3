@@ -118,7 +118,7 @@ extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 GraphicObject MText::toGo() const
 {
-    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data.size();
     //    for (auto& code : data)
     //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
@@ -131,7 +131,7 @@ GraphicObject MText::toGo() const
     QString text(textString);
     text.replace("\\P", "\n");
     QStringList list(text.split('\n'));
-    qDebug() << __FUNCTION__ << list;
+    qDebug() << list;
     QFont font;
     QPointF offset;
     QSizeF size;
@@ -156,7 +156,7 @@ GraphicObject MText::toGo() const
             if (style->textGenerationFlag & Style::MirroredInY)
                 scaleY = -scaleY;
         }
-        qDebug() << __FUNCTION__ << fmf;
+        qDebug() << fmf;
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -171,9 +171,9 @@ GraphicObject MText::toGo() const
         height = fmf.height();
         size = fmf.size(0, text);
         scaleX = scaleY = nominalTextHeight / fmf.height();
-        qDebug() << __FUNCTION__ << fmf;
+        qDebug() << fmf;
     }
-    qDebug() << __FUNCTION__ << size << height << (size.height() / height) << ascent;
+    qDebug() << size << height << (size.height() / height) << ascent;
 
     switch (attachmentPoint) {
     case TopLeft: //      вверху слева

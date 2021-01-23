@@ -351,7 +351,7 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
         pathsMap.extract(pathsMap.begin());
 
         for (auto& [nest, paths] : pathsMap) {
-            qDebug() << __FUNCTION__ << "nest" << nest << paths.size();
+            qDebug() << "nest" << nest << paths.size();
             if (paths.size() > 1)
                 sortBE(paths);
             rpaths.append(paths);

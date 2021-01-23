@@ -133,12 +133,10 @@ bool Plugin::thisIsIt(const QString& fileName)
         QString line;
         while (in.readLineInto(&line)) {
             if (line.startsWith('%') && match.match(line).hasMatch()) {
-                qDebug() << __FUNCTION__ << true;
                 return true;
             }
         }
     }
-    qDebug() << __FUNCTION__ << false;
     return false;
 }
 

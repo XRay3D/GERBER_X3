@@ -300,7 +300,7 @@ void Plugin::updateFileModel(FileInterface* file)
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
-    qDebug() << __FUNCTION__ << (index == fileIndex);
+    qDebug() << (index == fileIndex);
     // clean before insert new layers
     if (int count = fm->getItem(fileIndex)->childCount(); count) {
         fm->beginRemoveRows_(index, 0, count - 1);
@@ -312,13 +312,13 @@ void Plugin::updateFileModel(FileInterface* file)
     }
     Dxf::Layers layers;
     for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
-        qDebug() << __FUNCTION__ << name << layer;
+        qDebug() << name << layer;
         if (!layer->isEmpty())
             layers[name] = layer;
     }
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
-        qDebug() << __FUNCTION__ << name << layer;
+        qDebug() << name << layer;
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();

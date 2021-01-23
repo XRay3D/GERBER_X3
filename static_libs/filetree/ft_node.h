@@ -26,7 +26,7 @@ class QMenu;
 
 inline QPixmap decoration(QColor color, QChar chr = {})
 {
-    //    qDebug() << __FUNCTION__ << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+    //    qDebug() << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     QPixmap pixmap(22, 22);
     pixmap.fill(Qt::transparent);
     QPainter p(&pixmap);

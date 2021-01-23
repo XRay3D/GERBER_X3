@@ -103,13 +103,13 @@ bool Parser::parseComment(const QString& line)
     if (auto match = regexComment.match(line); match.hasMatch()) {
         const QRegularExpression regexFormat(".*FORMAT.*(\\d{1}).(\\d{1}).*" /*, Qt::CaseInsensitive*/);
         if (auto matchFormat = regexFormat.match(match.captured(1)); matchFormat.hasMatch()) {
-            qDebug() << __FUNCTION__ << "regexFormat" << matchFormat.capturedTexts();
+            qDebug() << "regexFormat" << matchFormat.capturedTexts();
             file->m_format.integer = matchFormat.captured(1).toInt();
             file->m_format.decimal = matchFormat.captured(2).toInt();
         }
         const QRegularExpression regexTool("\\s*Holesize\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*" /*, Qt::CaseInsensitive*/);
         if (auto matchTool = regexTool.match(match.captured(1)); matchTool.hasMatch()) {
-            qDebug() << __FUNCTION__ << "regexTool" << matchTool.capturedTexts();
+            qDebug() << "regexTool" << matchTool.capturedTexts();
             const int tCode = static_cast<int>(matchTool.captured(1).toDouble());
             file->m_tools[tCode] = matchTool.captured(2).toDouble() * 0.0254 * (1.0 / 25.4);
             m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();

@@ -1,17 +1,17 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
-*                                                                              *
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2021                                          *
-*                                                                              *
-* License:                                                                     *
+*          *
+* Author    :  Damir Bakiev *
+* Version   :  na           *
+* Date      :  01 February 2020              *
+* Website   :  na           *
+* Copyright :  Damir Bakiev 2016-2021        *
+*          *
+* License: *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
+* http://www.boost.org/LICENSE_1_0.txt       *
+*          *
 *******************************************************************************/
 #include "gbrattributes.h"
 #include "gbrattraperfunction.h"
@@ -21,25 +21,25 @@ namespace Gerber::Attr {
 
 File::StdAttr File::toStdAttr(const QString& key)
 {
-    return StdAttr(
+    return static_cast<StdAttr>(
         staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
 File::ePart File::toPart(const QString& key)
 {
-    return ePart(
+    return static_cast<ePart>(
         staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
 }
 
 File::eFilePolarity File::toFilePolarityValue(const QString& key)
 {
-    return eFilePolarity(
+    return static_cast<eFilePolarity>(
         staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data()));
 }
 
 File::Function File::toFunction(const QString& key)
 {
-    return Function(
+    return static_cast<Function>(
         staticMetaObject.enumerator(3).keyToValue(key.toLocal8Bit().data()));
 }
 
@@ -153,7 +153,7 @@ void File::parse(const QStringList& list)
         break;
     default:;
         custom[list.first()] = list.mid(1);
-        //qDebug() << __FUNCTION__ << "custom" << custom;
+        //qDebug() << "custom" << custom;
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -165,19 +165,19 @@ int Aperture::value(const QString& key) { return staticMetaObject.enumerator(0).
 
 Aperture::StdAttr Aperture::toStdAttr(const QString& key)
 {
-    return StdAttr(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
+    return static_cast<StdAttr>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
 Aperture::Function Aperture::toFunction(const QString& key)
 {
-    return Function(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
+    return static_cast<Function>(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
 }
 
 void Aperture::parse(const QStringList& list)
 {
     switch (toStdAttr(list.first())) {
     case StdAttr::AperFunction:
-        //qDebug() << __FUNCTION__ << list;
+        //qDebug() << list;
         if (m_function)
             m_function.reset();
         switch (const auto function = toFunction(list[1]); function) {
@@ -281,43 +281,43 @@ void Aperture::parse(const QStringList& list)
         break;
     case StdAttr::DrillTolerance:
         /*
-                 * <plus tolerance>,<minus tolerance>
-                 * %TA.DrillTolerance,0.01,0.005*%
-                 */
-        qDebug() << __FUNCTION__ << list;
+        * <plus tolerance>,<minus tolerance>
+        * %TA.DrillTolerance,0.01,0.005*%
+        */
+        m_drillTolerance = list;
         break;
     case StdAttr::FlashText:
         /*
-                 * <Text>,(B|C),[(R|M)],[<Font>],[Size],[<Comment>]
-                 * <text>
-                 * Текстовая строка, представленная изображением апертуры.
-                 * (B|C)
-                 * Указывает, представлен ли текст штрих-кодом - B - или символами - C.
-                 * (R|M)
-                 * Указывает, доступен ли текст для чтения или отображается влево-вправо. Необязательный.
-                 * <Font>
-                 * Название шрифта. Контент не стандартизирован. Необязательный.
-                 * <Size>
-                 * Размер шрифта. Контент не стандартизирован. Необязательный.
-                 * <Comments>
-                 * Любая дополнительная информация, которую вы хотите добавить. Необязательный.
-                 * Examples:
-                 * %TA.FlashText,L1,C,R,Courier,10,Layer number (L1 is top)*%
-                 * Text: L1
-                 * B|C: Characters,
-                 * (R|M): Readable
-                 * Font: Courier
-                 * Size: 10
-                 * Comment: Layer number (L1 is top)
-                 * %TA.FlashText,XZ12ADF,B,,Code128,,Project identifier *%
-                 * Text: XZ12ADF
-                 * B|C: Barcode
-                 * (R|M) Not specified
-                 * Font: Code128
-                 * Size: Not specified
-                 * Comment: Project identifier
-                 */
-        qDebug() << __FUNCTION__ << list;
+        * <Text>,(B|C),[(R|M)],[<Font>],[Size],[<Comment>]
+        * <text>
+        * Текстовая строка, представленная изображением апертуры.
+        * (B|C)
+        * Указывает, представлен ли текст штрих-кодом - B - или символами - C.
+        * (R|M)
+        * Указывает, доступен ли текст для чтения или отображается влево-вправо. Необязательный.
+        * <Font>
+        * Название шрифта. Контент не стандартизирован. Необязательный.
+        * <Size>
+        * Размер шрифта. Контент не стандартизирован. Необязательный.
+        * <Comments>
+        * Любая дополнительная информация, которую вы хотите добавить. Необязательный.
+        * Examples:
+        * %TA.FlashText,L1,C,R,Courier,10,Layer number (L1 is top)*%
+        * Text: L1
+        * B|C: Characters,
+        * (R|M): Readable
+        * Font: Courier
+        * Size: 10
+        * Comment: Layer number (L1 is top)
+        * %TA.FlashText,XZ12ADF,B,,Code128,,Project identifier *%
+        * Text: XZ12ADF
+        * B|C: Barcode
+        * (R|M) Not specified
+        * Font: Code128
+        * Size: Not specified
+        * Comment: Project identifier
+        */
+        qDebug() << (m_flashText = list);
         break;
     }
 }

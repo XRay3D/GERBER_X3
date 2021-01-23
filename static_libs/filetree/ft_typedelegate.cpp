@@ -31,7 +31,7 @@ TypeDelegate::TypeDelegate(QObject* parent)
 
 QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
 {
-    qDebug() << __FUNCTION__;
+    qDebug();
     auto comboBox = new QComboBox(parent);
     connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &TypeDelegate::emitCommitData);
     return comboBox;
@@ -39,7 +39,7 @@ QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
 
 void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-    qDebug() << __FUNCTION__ << App::project()->file(index.data(Qt::UserRole).toInt())->name();
+    qDebug() << App::project()->file(index.data(Qt::UserRole).toInt())->name();
     auto comboBox = qobject_cast<QComboBox*>(editor);
     comboBox->clear();
     int ctr = 0;
@@ -49,7 +49,7 @@ void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
         comboBox->addItem(name, id);
         comboBox->setItemData(ctr, comboBox->size(), Qt::SizeHintRole);
         comboBox->setItemData(ctr, name + '\n' + toolTip, Qt::ToolTipRole);
-        qDebug() << __FUNCTION__ << ctr << name << id;
+        qDebug() << ctr << name << id;
         ++ctr;
     }
     comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());

@@ -71,7 +71,7 @@ FormsUtil::~FormsUtil()
 
 void FormsUtil::fileHandler(GCode::File* file)
 {
-    qDebug() << __FUNCTION__ << file;
+    qDebug() << file;
     if (--fileCount == 0)
         cancel();
 

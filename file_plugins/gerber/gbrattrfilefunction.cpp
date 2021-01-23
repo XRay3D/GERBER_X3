@@ -35,10 +35,10 @@ Copper::Copper(File::Function function, const QStringList& list)
     , side(toSide(list.value(1)))
     , type(toType(list.value(2)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << layer
-             << "\n\t" << side
-             << "\n\t" << type;
+    //    qDebug()
+    //        << "\n\t" << layer
+    //        << "\n\t" << side
+    //        << "\n\t" << type;
 }
 /////////////////////////////////////////////////////
 /// \brief Plated::Plated
@@ -52,11 +52,11 @@ Plated::Plated(File::Function function, const QStringList& list)
     , type(toType(list.value(2)))
     , label(toLabel(list.value(3)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << layerFrom
-             << "\n\t" << layerTo
-             << "\n\t" << type
-             << "\n\t" << label;
+    //    qDebug()
+    //        << "\n\t" << layerFrom
+    //        << "\n\t" << layerTo
+    //        << "\n\t" << type
+    //        << "\n\t" << label;
 }
 /////////////////////////////////////////////////////
 /// \brief NonPlated::NonPlated
@@ -70,11 +70,11 @@ NonPlated::NonPlated(File::Function function, const QStringList& list)
     , type(toType(list.value(2)))
     , label(toLabel(list.value(3)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << layerFrom
-             << "\n\t" << layerTo
-             << "\n\t" << type
-             << "\n\t" << label;
+    //    qDebug()
+    //        << "\n\t" << layerFrom
+    //        << "\n\t" << layerTo
+    //        << "\n\t" << type
+    //        << "\n\t" << label;
 }
 /////////////////////////////////////////////////////
 /// \brief Legend::Legend
@@ -86,9 +86,9 @@ Legend::Legend(File::Function function, const QStringList& list)
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << side
-             << "\n\t" << index;
+    //    qDebug()
+    //        << "\n\t" << side
+    //        << "\n\t" << index;
 }
 /////////////////////////////////////////////////////
 /// \brief Soldermask::Soldermask
@@ -101,10 +101,10 @@ Mask::Mask(File::Function function, const QStringList& list)
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
     , type(toType(function))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << side
-             << "\n\t" << index
-             << "\n\t" << type;
+    //    qDebug()
+    //        << "\n\t" << side
+    //        << "\n\t" << index
+    //        << "\n\t" << type;
 }
 /////////////////////////////////////////////////////
 /// \brief Profile::Profile
@@ -115,8 +115,8 @@ Profile::Profile(File::Function function, const QStringList& list)
     : AbstrFileFunc(function)
     , plated(toEdgePlated(list.value(0)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << plated;
+    //    qDebug()
+    //        << "\n\t" << plated;
 }
 /////////////////////////////////////////////////////
 /// \brief Paste::Paste
@@ -127,8 +127,8 @@ Paste::Paste(File::Function function, const QStringList& list)
     : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << side;
+    //    qDebug()
+    //        << "\n\t" << side;
 }
 /////////////////////////////////////////////////////
 /// \brief AssemblyDrawing::AssemblyDrawing
@@ -139,8 +139,8 @@ AssemblyDrawing::AssemblyDrawing(File::Function function, const QStringList& lis
     : AbstrFileFunc(function)
     , side(toSide(list.value(0)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << side;
+    //    qDebug()
+    //        << "\n\t" << side;
 }
 /////////////////////////////////////////////////////
 /// \brief Component::Component
@@ -152,9 +152,9 @@ Component::Component(File::Function function, const QStringList& list)
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1)))
 {
-    qDebug() << __FUNCTION__
-             << "\n\t" << layer
-             << "\n\t" << side;
+    //    qDebug()
+    //        << "\n\t" << layer
+    //        << "\n\t" << side;
 }
 
 }

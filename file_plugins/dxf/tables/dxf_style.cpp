@@ -78,7 +78,7 @@ void Style::parse(CodeData& code)
                 }
             }
             if (font.family() != code) {
-                qDebug() << __FUNCTION__ << font.family();
+                qDebug() << font.family();
                 font.setFamily(Settings::defaultFont());
             }
             break;
@@ -87,7 +87,7 @@ void Style::parse(CodeData& code)
         }
         code = sp->nextCode();
     } while (code.code() != 0);
-    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data.size();
     //    for (auto& code : data)
     //        qDebug() << "\t" << code;
 }

@@ -115,7 +115,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm)
 
 GraphicObject Text::toGo() const
 {
-    //    qDebug() << __FUNCTION__ << data.size();
+    //    qDebug() << data.size();
     //    for (auto& code : data)
     //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
@@ -139,7 +139,7 @@ GraphicObject Text::toGo() const
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();
         size = fmf.size(0, text);
-        qDebug() << __FUNCTION__ << fmf;
+        qDebug() << fmf;
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -152,9 +152,9 @@ GraphicObject Text::toGo() const
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();
         size = fmf.size(0, text);
-        qDebug() << __FUNCTION__ << fmf;
+        qDebug() << fmf;
     }
-    qDebug() << __FUNCTION__ << scaleX << scaleY;
+    qDebug() << scaleX << scaleY;
     switch (horizontalJustType) {
     case Left: // 0
         offset.rx();
