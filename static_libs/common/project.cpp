@@ -196,6 +196,8 @@ void Project::close()
     setSpaceX(0.0);
     setSpaceY(0.0);
     m_isPinsPlaced = false;
+    m_isModified = false;
+    emit changed();
 }
 
 void Project::deleteFile(int id)
