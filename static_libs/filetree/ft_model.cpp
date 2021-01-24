@@ -55,7 +55,7 @@ void Model::addFile(FileInterface* file)
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
-        rootItem->addChild(mapNode[type].node = new FolderNode(App::fileInterface(type)->folderName(), new int(mapNode[type].type)));
+        rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), new int(mapNode[type].type)));
         endInsertRows();
     }
 
@@ -66,7 +66,7 @@ void Model::addFile(FileInterface* file)
     mapNode[type].node->addChild(file->node());
     endInsertRows();
 
-    App::fileInterface(type)->updateFileModel(file);
+    App::filePlugin(type)->updateFileModel(file);
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
@@ -82,7 +82,7 @@ void Model::addShape(Shapes::Shape* shape)
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
-        auto si = std::get<0>(App::shapeInterfaces().begin()->second);
+        auto si = std::get<0>(App::shapePlugins().begin()->second);
         rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), new int(mapNode[type].type)));
         endInsertRows();
     }

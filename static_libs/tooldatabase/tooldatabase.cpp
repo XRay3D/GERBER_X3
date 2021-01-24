@@ -56,7 +56,7 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
                 m_tool = item->tool();
                 accept();
             } else {
-                QMessageBox ::information(this, tr("Invalid tool"), item->tool().errorStr());
+                QMessageBox::information(this, tr("Invalid tool"), item->tool().errorStr());
             }
         }
     });

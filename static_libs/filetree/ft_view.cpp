@@ -221,9 +221,9 @@ void View::contextMenuEvent(QContextMenuEvent* event)
         const int type = m_menuIndex.data(Role::Id).toInt();
         const int cType = m_menuIndex.data(Role::ContentType).toInt();
         if (cType == Type::File) {
-            App::fileInterface(type)->createMainMenu(menu, this);
+            App::filePlugin(type)->createMainMenu(menu, this);
         } else if (cType == Type::Shape) {
-            std::get<0>(App::shapeInterfaces().begin()->second)->createMainMenu(menu, this);
+            std::get<0>(App::shapePlugins().begin()->second)->createMainMenu(menu, this);
         }
     } else {
         reinterpret_cast<Node*>(m_menuIndex.internalId())->menu(menu, this);

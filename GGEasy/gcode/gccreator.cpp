@@ -515,10 +515,6 @@ void Creator::sortPolyNodeByNesting(PolyNode& polynode)
     sorter(polynode);
 }
 
-void Creator::sortPolyNodeByDistances(PolyNode& /*polynode*/)
-{
-}
-
 void Creator::isContinueCalc()
 {
     emit errorOccurred();

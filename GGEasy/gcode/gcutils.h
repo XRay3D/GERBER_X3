@@ -22,7 +22,7 @@ class Project;
 namespace GCode {
 
 class GCUtils {
-    friend class ::Project;
+    friend class::Project;
 
 public:
     GCUtils(const GCodeParams& gcp);

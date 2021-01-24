@@ -46,7 +46,7 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     setSelected(false);
     if (!timer.isActive()) {
         timer.start(50);
-        connect(&timer, &QTimer ::timeout, [] { ++GiDataPath::d; });
+        connect(&timer, &QTimer::timeout, [] { ++GiDataPath::d; });
     }
 }
 

@@ -145,7 +145,7 @@ QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int ro
             return names[section];
         }
     }
-    return QAbstractTableModel ::headerData(section, orientation, role);
+    return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const

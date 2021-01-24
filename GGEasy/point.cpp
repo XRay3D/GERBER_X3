@@ -86,7 +86,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         return;
 
     QColor c(m_type == Home ? App::settings().guiColor(GuiColors::Home) : App::settings().guiColor(GuiColors::Zero));
-    if (option->state & QStyle ::State_MouseOver)
+    if (option->state & QStyle::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
@@ -264,7 +264,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
         return;
 
     QColor c(App::settings().guiColor(GuiColors::Pin));
-    if (option->state & QStyle ::State_MouseOver)
+    if (option->state & QStyle::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));

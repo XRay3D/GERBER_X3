@@ -18,12 +18,14 @@
 #include "ft_model.h"
 #include "interfaces/file.h"
 #include "interfaces/shapepluginin.h"
+#include "mainwindow.h"
 #include "shape.h"
 
 #include <scene.h>
 
 #include <QElapsedTimer>
 #include <QFileDialog>
+#include <QFileSystemWatcher>
 #include <QIcon>
 #include <QLabel>
 #include <QMessageBox>
@@ -40,10 +42,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
 {
     int type;
     stream >> type;
-    if (App::fileInterfaces().contains(type)) {
-        file.reset(App::fileInterface(type)->createFile());
+    if (App::filePlugins().contains(type)) {
+        file.reset(App::filePlugin(type)->createFile());
         stream >> *file;
         file->addToScene();
+        App::project()->watcher->addPath(file->name());
+        App::project()->watcher->addPath(QFileInfo(file->name()).absoluteFilePath());
     }
     return stream;
 }
@@ -58,8 +62,8 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
 {
     int type;
     stream >> type;
-    if (App::shapeInterfaces().contains(type)) {
-        shape.reset(App::shapeInterface(type)->createShape());
+    if (App::shapePlugins().contains(type)) {
+        shape.reset(App::shapePlugin(type)->createShape());
         stream >> *shape;
         App::scene()->addItem(shape.get());
     }
@@ -68,8 +72,23 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
 
 Project::Project(QObject* parent)
     : QObject(parent)
+    , watcher(new QFileSystemWatcher(this))
 {
-    connect(this, &Project ::addFileDbg, this, &Project ::addFile, Qt::QueuedConnection);
+    connect(watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
+        const int id = m_files[contains(path)]->id();
+        if (id > -1
+            && QFileInfo(path).exists()
+            && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\n"
+                                                     "Reload it into the project?")
+                                                      .arg(QFileInfo(path).fileName()),
+                   QMessageBox::Ok, QMessageBox::Cancel)
+                == QMessageBox::Ok) {
+            m_reloadFile = true;
+            emit parseFile(path, static_cast<int>(m_files[id]->type()));
+        }
+    });
+
+    connect(this, &Project::addFileDbg, this, &Project::addFile, Qt::QueuedConnection);
     App::setProject(this);
 }
 
@@ -88,36 +107,31 @@ bool Project::save(const QString& fileName)
     QDataStream out(&file);
     try {
         out << (m_ver = ProVer_5);
-        switch (m_ver) {
-        case ProVer_5:
-            out << m_isPinsPlaced;
-            [[fallthrough]];
-        case ProVer_4:
-            [[fallthrough]];
-        case ProVer_3:
-            out << m_spacingX;
-            out << m_spacingY;
-            out << m_stepsX;
-            out << m_stepsY;
-            [[fallthrough]];
-        case ProVer_2:
-            out << m_home;
-            out << m_zero;
-            for (auto& pt : m_pins)
-                out << pt;
-            out << m_worckRect;
-            out << m_safeZ;
-            out << m_boardThickness;
-            out << m_copperThickness;
-            out << m_clearence;
-            out << m_plunge;
-            out << m_glue;
-            [[fallthrough]];
-        case ProVer_1:;
-        }
+        // ProVer_5:
+        out << m_isPinsPlaced;
+        // ProVer_4:
+        // ProVer_3:
+        out << m_spacingX;
+        out << m_spacingY;
+        out << m_stepsX;
+        out << m_stepsY;
+        // ProVer_2:
+        out << m_home;
+        out << m_zero;
+        for (auto& pt : m_pins)
+            out << pt;
+        out << m_worckRect;
+        out << m_safeZ;
+        out << m_boardThickness;
+        out << m_copperThickness;
+        out << m_clearence;
+        out << m_plunge;
+        out << m_glue;
+        // ProVer_1:;
         out << m_files;
         out << m_shapes;
         m_isModified = false;
+        emit changed();
         return true;
     } catch (...) {
         qDebug() << out.status();
@@ -165,17 +179,16 @@ bool Project::open(const QString& fileName)
             in >> m_glue;
             [[fallthrough]];
         case ProVer_1:;
+            in >> m_files;
+            for (const auto& [id, filePtr] : m_files)
+                App::fileModel()->addFile(filePtr.get());
+
+            in >> m_shapes;
+            for (const auto& [id, shPtr] : m_shapes)
+                App::fileModel()->addShape(shPtr.get());
+
+            m_isModified = false;
         }
-        in >> m_files;
-        for (const auto& [id, filePtr] : m_files)
-            App::fileModel()->addFile(filePtr.get());
-
-        in >> m_shapes;
-        for (const auto& [id, shPtr] : m_shapes)
-            App::fileModel()->addShape(shPtr.get());
-
-        m_isModified = false;
-
         return true;
     } catch (const QString& ex) {
         qDebug() << ex;
@@ -204,6 +217,7 @@ void Project::deleteFile(int id)
 {
     QMutexLocker locker(&m_mutex);
     if (m_files.contains(id)) {
+        watcher->removePath(m_files[id]->name());
         m_files.erase(id);
         setChanged();
     } else
@@ -267,6 +281,8 @@ QString Project::fileNames()
 int Project::contains(const QString& name)
 {
     //QMutexLocker locker(&m_mutex);
+    if (m_reloadFile)
+        return -1;
     for (const auto& [id, sp] : m_files) {
         FileInterface* item = sp.get();
         if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
@@ -281,7 +297,7 @@ bool Project::reload(int id, FileInterface* file)
     if (m_files.contains(id)) {
         file->initFrom(m_files[id].get());
         m_files[id].reset(file);
-        App::fileInterface(int(file->type()))->updateFileModel(file);
+        App::filePlugin(int(file->type()))->updateFileModel(file);
         setChanged();
         return true;
     }
@@ -328,11 +344,12 @@ int Project::addFile(FileInterface* file)
     if (!file)
         return -1;
     m_isPinsPlaced = false;
+    m_reloadFile = false;
     file->createGi();
     file->addToScene();
     file->setVisible(true);
     const int id = contains(file->name());
-    if (id != -1 && m_files[id]->type() == file->type()) {
+    if (id > -1 && m_files[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {
         const int newId = m_files.size()
@@ -343,6 +360,7 @@ int Project::addFile(FileInterface* file)
         App::fileModel()->addFile(file);
         setChanged();
     }
+    App::project()->watcher->addPath(file->name());
     return file->id();
 }
 

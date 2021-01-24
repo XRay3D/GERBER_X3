@@ -86,8 +86,7 @@ private:
     Project* m_project;
     bool openFlag;
 
-    QMap<int, QAction*> toolpathActions;
-
+    std::map<int, QAction*> toolpathActions;
     QMap<QString, QProgressDialog*> m_progressDialogs;
 
     void open();
@@ -97,7 +96,7 @@ private:
     void about();
     bool closeProject();
     template <class T>
-    void createDockWidget(/*QWidget* dwContent,*/ int type);
+    void createDockWidget(int type);
 
     void initWidgets();
 
@@ -119,7 +118,7 @@ private:
     void createActionsToolPath();
     void createActionsShape();
 
-    void customContextMenuForToolBar(const QPoint &pos);
+    void customContextMenuForToolBar(const QPoint& pos);
 
     // save GCode
     void saveGCodeFile(int id);

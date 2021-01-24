@@ -177,7 +177,7 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
     for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber }))
-        App::fileInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
+        App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
 
@@ -195,7 +195,7 @@ bool DrillForm::canToShow()
 
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
-        App::fileInterface(int(file->type()))->addToDrillForm(file, &cbx);
+        App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
         if (cbx.count())
             return true;
     }
@@ -409,7 +409,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     }
 
     model = new DrillModel(this);
-    m_giPeview = App::fileInterface(int(file->type()))->createDrillPreviewGi(file, model->data());
+    m_giPeview = App::filePlugin(int(file->type()))->createDrillPreviewGi(file, model->data());
 
     for (auto& [key, val] : m_giPeview)
         for (auto& spGi : val)

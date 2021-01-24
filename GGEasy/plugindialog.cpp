@@ -42,7 +42,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         boldFont.setBold(true);
         interfaceItem->setFont(0, boldFont);
         interfaceItem->setExpanded(true);
-        for (auto& [type, tuple] : App::fileInterfaces()) {
+        for (auto& [type, tuple] : App::filePlugins()) {
             auto& [parser, pobj] = tuple;
             auto json(parser->info());
             auto featureItem = new QTreeWidgetItem(interfaceItem);
@@ -62,7 +62,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         boldFont.setBold(true);
         interfaceItem->setFont(0, boldFont);
         interfaceItem->setExpanded(true);
-        for (auto& [type, tuple] : App::shapeInterfaces()) {
+        for (auto& [type, tuple] : App::shapePlugins()) {
             auto& [shape, pobj] = tuple;
             auto json(shape->info());
             auto featureItem = new QTreeWidgetItem(interfaceItem);
