@@ -41,9 +41,16 @@ private:
     void rb_clicked();
     BridgeItem* brItem = nullptr;
 
+    enum Trimming {
+        Line = 1,
+        Corner = 2,
+    };
+    int m_trimming = 0;
+
 protected:
     // QWidget interface
-    void resizeEvent(QResizeEvent* event) override;
+    void
+    resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     // FormsUtil interface
     void createFile() override;

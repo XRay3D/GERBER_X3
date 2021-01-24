@@ -140,7 +140,6 @@ protected:
 
     void markPolyNodeByNesting(PolyNode& polynode);
     void sortPolyNodeByNesting(PolyNode& polynode);
-    void sortPolyNodeByDistances(PolyNode& polynode);
 
     virtual void create() = 0;
     virtual GCodeType type() = 0;

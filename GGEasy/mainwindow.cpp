@@ -75,13 +75,14 @@ MainWindow::MainWindow(QWidget* parent)
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
 
     // connect plugins
-    for (auto& [type, pair] : App::fileInterfaces()) {
+    for (auto& [type, pair] : App::filePlugins()) {
         auto& [parser, pobj] = pair;
         pobj->moveToThread(&parserThread);
         connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
         connect(pobj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
         connect(pobj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
         connect(this, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        connect(m_project, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
     }
 
     { // add dummy gcode plugin
@@ -90,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent)
             static_cast<FilePluginInterface*>(parser),
             static_cast<QObject*>(parser)
         };
-        App::fileInterfaces().emplace(parser->type(), pi);
+        App::filePlugins().emplace(parser->type(), pi);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -238,50 +239,51 @@ void MainWindow::createActionsFile()
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(fileToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    // New
-    QAction* action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"),
-        this, &MainWindow::newFile);
-    action->setShortcuts(QKeySequence::New);
-    action->setStatusTip(tr("Create a new file"));
-    fileToolBar->addAction(action);
-
-    // Open
-    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."),
-        this, &MainWindow::open);
-    action->setShortcuts(QKeySequence::Open);
-    action->setStatusTip(tr("Open an existing file"));
-    fileToolBar->addAction(action);
-    // Save
-    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"),
-        this, &MainWindow::save);
-    action->setShortcuts(QKeySequence::Save);
-    action->setStatusTip(tr("Save the document to disk"));
-    fileToolBar->addAction(action);
-    // Save As
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."),
-        this, &MainWindow::saveAs);
-    action->setShortcuts(QKeySequence::SaveAs);
-    action->setStatusTip(tr("Save the document under a new name"));
-    fileToolBar->addAction(action);
-    // Close project
-    m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
-    m_closeAllAct->setShortcuts(QKeySequence::Close);
-    m_closeAllAct->setStatusTip(tr("Close project"));
-    // m_closeAllAct->setEnabled(false);
-    fileToolBar->addAction(m_closeAllAct);
+    { // New
+        auto action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+        action->setShortcuts(QKeySequence::New);
+        action->setStatusTip(tr("Create a new file"));
+        fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+    }
+    { // Open
+        auto action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+        action->setShortcuts(QKeySequence::Open);
+        action->setStatusTip(tr("Open an existing file"));
+        fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    }
+    { // Save
+        auto action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+        action->setShortcuts(QKeySequence::Save);
+        action->setStatusTip(tr("Save the document to disk"));
+        fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    }
+    { // Save As
+        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+        action->setShortcuts(QKeySequence::SaveAs);
+        action->setStatusTip(tr("Save the document under a new name"));
+        fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    }
+    { // Close project
+        m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+        m_closeAllAct->setShortcuts(QKeySequence::Close);
+        m_closeAllAct->setStatusTip(tr("Close project"));
+        // m_closeAllAct->setEnabled(false);
+        fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
+    }
 
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
-    // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
-        this, &MainWindow::saveSelectedGCodeFiles);
-    action->setStatusTip(tr("Save selected toolpaths"));
-    fileToolBar->addAction(action);
-    // Export PDF
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
-    action->setStatusTip(tr("Export to PDF file"));
-    fileToolBar->addAction(action);
+    { // Save Selected Tool Paths
+        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+        action->setStatusTip(tr("Save selected toolpaths"));
+        fileToolBar->addAction(action);
+    }
+    { // Export PDF
+        auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
+        action->setStatusTip(tr("Export to PDF file"));
+        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
+    }
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -290,24 +292,24 @@ void MainWindow::createActionsFile()
     recentProjects.createMenu(fileMenu, tr("Recent Projects..."));
 
     fileMenu->addSeparator();
-    action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
-    action->setShortcuts(QKeySequence::Print);
-    action->setStatusTip(tr("Print"));
+    {
+        auto action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
+        action->setShortcuts(QKeySequence::Print);
+        action->setStatusTip(tr("Print"));
+    }
     fileMenu->addSeparator();
-
-    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
-    action->setShortcuts(QKeySequence::Quit);
-    action->setStatusTip(tr("Exit the application"));
+    {
+        auto action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+        action->setShortcuts(QKeySequence::Quit);
+        action->setStatusTip(tr("Exit the application"));
+    }
 }
 
 void MainWindow::createActionsEdit()
 {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->setObjectName(QStringLiteral("editMenu"));
-    QAction* action = editMenu->addAction(QIcon::fromTheme("edit-select-all"),
-        tr("Select all"),
-        this,
-        &MainWindow::selectAll);
+    auto action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
     auto dsaShortcut = new QShortcut(this); // Инициализируем объект
@@ -315,75 +317,40 @@ void MainWindow::createActionsEdit()
     connect(dsaShortcut, &QShortcut::activated, this, &MainWindow::deSelectAll); // цепляем обработчик нажатия клавиши
 
     editMenu->addSeparator();
+
     action = editMenu->addAction(tr("Undo"));
     action->setEnabled(false);
     action->setShortcut(QKeySequence::Undo);
+
     action = editMenu->addAction(tr("Redo"));
     action->setEnabled(false);
     action->setShortcut(QKeySequence::Redo);
-
-    //    QToolBar* toolBar = addToolBar(tr("Selection"));
-    //    toolBar->setObjectName(QStringLiteral("s"));
-    // s->setMovable(false);
-    //    QAction* action = toolBar->addAction(QIcon::fromTheme("edit-select-all"),
-    //        tr("Select all"),
-    //        this,
-    //        &MainWindow::selectAll);
-    //    action->setShortcut(QKeySequence::SelectAll);
-
-    // action = toolBar->addAction(QIcon::fromTheme("document-close"), tr("Redo"), this, &MainWindow::redo);
-    // action->setShortcut(QKeySequence::Redo);
-    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [this]() {
-    // QList<QGraphicsItem*> list;
-    // for (QGraphicsItem* item : MyApp::scene()->123->items())
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // list << item;
-    // if (list.size() && QMessageBox::question(this,
-    // "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-    // for (QGraphicsItem* item : list)
-    // if (item->isSelected() && item->type() != DrillItemType)
-    // delete item;
-    // MyApp::scene()->123->setSceneRect(MyApp::scene()->123->itemsBoundingRect());
-    // MyApp::scene()->123->update();
-    // MainWindow::123->zero()->resetPos();
-    // MainWindow::123->home()->resetPos();
-    // Pin::shtifts()[0]->resetPos();
-    // }
-    // });
-    // action->setShortcut(QKeySequence::Delete);
 }
 
 void MainWindow::createActionsService()
 {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    QAction* action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] {
-        SettingsDialog(this).exec();
-    });
-    action->setStatusTip(tr("Show the application's settings box"));
 
     toolpathToolBar = addToolBar(tr("Service"));
     toolpathToolBar->setObjectName("tbService");
     toolpathToolBar->setToolTip(tr("Service"));
 
-    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
-
+    // Settings
+    auto action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
+    action->setStatusTip(tr("Show the application's settings box"));
+    // Separator
     //toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
-    {
-        action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] {
-            createDockWidget<GCodePropertiesForm>(/*new GCodePropertiesForm(dockWidget),*/ GCode::GCodeProperties);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+G"));
-        serviceMenu->addAction(action);
-        toolpathActions[GCode::GCodeProperties] = action;
-    }
-
-    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] {
-        ToolDatabase tdb(this, {});
-        tdb.exec();
-    }));
+    // G-Code Properties
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] { createDockWidget<GCodePropertiesForm>(GCode::GCodeProperties); }));
+    action->setShortcut(QKeySequence("Ctrl+Shift+G"));
+    toolpathActions.emplace(GCode::GCodeProperties, action);
+    // Tool Base
+    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
+    // Separator
+    serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
+    //Autoplace All Refpoints
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
             Pin::resetPos(false);
@@ -392,19 +359,19 @@ void MainWindow::createActionsService()
         }
         ui->graphicsView->zoomFit();
     }));
-
+    // Separator
     serviceMenu->addSeparator();
     toolpathToolBar->addSeparator();
+    // Snap to grid
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { App::settings().setSnap(checked); }));
     action->setCheckable(true);
-
+    // Resize
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
         serviceMenu->addSeparator();
+        toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
             r.setSize({ 1280, 720 });
-            //            r.setTopLeft({ 1920, 0 });
-            //            r.setBottomRight({ 1920, 1080 });
             setGeometry(r);
         }));
     }
@@ -413,19 +380,16 @@ void MainWindow::createActionsService()
 void MainWindow::createActionsHelp()
 {
     helpMenu = menuBar()->addMenu(tr("&Help"));
-    QAction* action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
+    // About
+    auto action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
     action->setStatusTip(tr("Show the application's About box"));
-
+    // About Qt
     action = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
     action->setStatusTip(tr("Show the Qt library's About box"));
-
+    // Separator
     helpMenu->addSeparator();
-
-    action = helpMenu->addAction(tr("About &Plugins…"), [this] {
-        DialogAboutPlugins(this).exec();
-        //        PluginDialog dialog(qApp->applicationDirPath(), {}, this);
-        //        dialog.exec();
-    });
+    // About Plugins
+    action = helpMenu->addAction(tr("About &Plugins…"), [this] { DialogAboutPlugins(this).exec(); });
     action->setStatusTip(tr("Show loaded plugins…"));
 }
 
@@ -433,6 +397,7 @@ void MainWindow::createActionsZoom()
 {
     auto vievMenu = menuBar()->addMenu(tr("&Viev"));
     vievMenu->setObjectName("vievMenu");
+
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     zoomToolBar->setToolTip(tr("Zoom ToolBar"));
@@ -440,29 +405,40 @@ void MainWindow::createActionsZoom()
     zoomToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(zoomToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    // Fit best
-    auto action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
-    action->setShortcut(QKeySequence::FullScreen);
-    vievMenu->addAction(action);
-    // 100%
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
-    action->setShortcut(tr("Ctrl+0"));
-    vievMenu->addAction(action);
-    // Zoom in
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
-    action->setShortcut(QKeySequence::ZoomIn);
-    vievMenu->addAction(action);
-    // Zoom out
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
-    action->setShortcut(QKeySequence::ZoomOut);
-    vievMenu->addAction(action);
-    // Separator
-    zoomToolBar->addSeparator();
-    vievMenu->addSeparator();
-    // Zoom to selected
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
-    action->setShortcut(QKeySequence("F12"));
-    vievMenu->addAction(action);
+    { // Fit best
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
+        action->setShortcut(QKeySequence::FullScreen);
+        vievMenu->addAction(action);
+    }
+    { // 100%
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
+        action->setShortcut(tr("Ctrl+0"));
+        vievMenu->addAction(action);
+    }
+    { // Zoom in
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
+        action->setShortcut(QKeySequence::ZoomIn);
+        vievMenu->addAction(action);
+    }
+    { // Zoom out
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
+        action->setShortcut(QKeySequence::ZoomOut);
+        vievMenu->addAction(action);
+    }
+    { // Separator
+        zoomToolBar->addSeparator();
+        vievMenu->addSeparator();
+    }
+    { // Zoom to selected
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
+        action->setShortcut(QKeySequence("F12"));
+        vievMenu->addAction(action);
+    }
 }
 
 void MainWindow::createActionsToolPath()
@@ -473,79 +449,61 @@ void MainWindow::createActionsToolPath()
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
     toolpathToolBar->setToolTip(tr("Toolpath"));
 
-    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
+    //    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    //    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
-    {
-        toolpathActions[GCode::Profile] = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] {
-            createDockWidget<ProfileForm>(GCode::Profile); //createDockWidget(new ProfileForm(dockWidget), GCode::Profile);
-            toolpathActions[GCode::Profile]->setChecked(true);
-        });
-        toolpathActions[GCode::Profile]->setShortcut(QKeySequence("Ctrl+Shift+F"));
-        menu->addAction(toolpathActions[GCode::Profile]);
-    }
+    // Profile
+    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(GCode::Profile); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Profile, action);
 
-    {
-        toolpathActions[GCode::Pocket] = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] {
-            createDockWidget<PocketOffsetForm>(GCode::Pocket); //createDockWidget(new PocketOffsetForm(dockWidget), GCode::Pocket);
-            toolpathActions[GCode::Pocket]->setChecked(true);
-        });
-        toolpathActions[GCode::Pocket]->setShortcut(QKeySequence("Ctrl+Shift+P"));
-        menu->addAction(toolpathActions[GCode::Pocket]);
-    }
+    // Pocket
+    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(GCode::Pocket); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+P"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Pocket, action);
 
-    {
-        toolpathActions[GCode::Raster] = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { ////////////////
-            createDockWidget<PocketRasterForm>(GCode::Raster); //createDockWidget(new PocketRasterForm(dockWidget), GCode::Raster);
-            toolpathActions[GCode::Raster]->setChecked(true);
-        });
-        toolpathActions[GCode::Raster]->setShortcut(QKeySequence("Ctrl+Shift+R"));
-        menu->addAction(toolpathActions[GCode::Raster]);
-    }
+    // Pocket Raster
+    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(GCode::Raster); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+R"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Raster, action);
 
-    {
-        toolpathActions[GCode::Voronoi] = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] {
-            createDockWidget<VoronoiForm>(GCode::Voronoi); //createDockWidget(new VoronoiForm(dockWidget), GCode::Voronoi);
-            toolpathActions[GCode::Voronoi]->setChecked(true);
-        });
-        toolpathActions[GCode::Voronoi]->setShortcut(QKeySequence("Ctrl+Shift+V"));
-        menu->addAction(toolpathActions[GCode::Voronoi]);
-    }
+    // Voronoi
+    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(GCode::Voronoi); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+V"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Voronoi, action);
 
-    {
-        toolpathActions[GCode::Thermal] = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
-            if (ThermalForm::canToShow()) {
-                createDockWidget<ThermalForm>(GCode::Thermal); //createDockWidget(new ThermalForm(dockWidget), GCode::Thermal);
-                toolpathActions[GCode::Thermal]->setChecked(true);
-            } else
-                toolpathActions[GCode::Thermal]->setChecked(false);
-        });
-        toolpathActions[GCode::Thermal]->setShortcut(QKeySequence("Ctrl+Shift+T"));
-        menu->addAction(toolpathActions[GCode::Thermal]);
-    }
+    // Thermal Insulation
+    action = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
+        ThermalForm::canToShow() ? createDockWidget<ThermalForm>(GCode::Thermal)
+                                 : toolpathActions[GCode::Thermal]->setChecked(false);
+    });
+    action->setShortcut(QKeySequence("Ctrl+Shift+T"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Thermal, action);
 
-    {
-        toolpathActions[GCode::Drill] = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
-            if (DrillForm::canToShow()) {
-                createDockWidget<DrillForm>(GCode::Drill); //createDockWidget(new DrillForm(dockWidget), GCode::Drill);
-                toolpathActions[GCode::Drill]->setChecked(true);
-            } else
-                toolpathActions[GCode::Drill]->setChecked(false);
-        });
-        toolpathActions[GCode::Drill]->setShortcut(QKeySequence("Ctrl+Shift+D"));
-        menu->addAction(toolpathActions[GCode::Drill]);
-    }
+    // Drilling
+    action = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
+        DrillForm::canToShow() ? createDockWidget<DrillForm>(GCode::Drill)
+                               : toolpathActions[GCode::Drill]->setChecked(false);
+    });
+    action->setShortcut(QKeySequence("Ctrl+Shift+D"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Drill, action);
 
-    for (QAction* action_ : toolpathActions)
-        action_->setCheckable(true);
+    for (auto [key, action] : toolpathActions)
+        action->setCheckable(true);
 }
 
 void MainWindow::createActionsShape()
 {
-    if (App::shapeInterfaces().empty())
+    if (App::shapePlugins().empty())
         return;
 
     QToolBar* toolBar = addToolBar(tr("Graphics Items"));
@@ -555,11 +513,9 @@ void MainWindow::createActionsShape()
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    QAction* action = nullptr;
-
-    for (auto& [type, pair] : App::shapeInterfaces()) {
+    for (auto& [type, pair] : App::shapePlugins()) {
         auto& [shInt, pobj] = pair;
-        action = toolBar->addAction(shInt->icon(), shInt->info().value("Name").toString());
+        auto action = toolBar->addAction(shInt->icon(), shInt->info().value("Name").toString());
         action->setCheckable(true);
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
@@ -571,36 +527,37 @@ void MainWindow::createActionsShape()
 
     toolBar->addSeparator();
 
-    auto ex = [](ClipType type) {
-        QList<QGraphicsItem*> si = App::scene()->selectedItems();
+    auto executor = [](ClipType type) {
+        auto selectedItems(App::scene()->selectedItems());
+        Paths clipPaths;
+        for (QGraphicsItem* clipItem : selectedItems) {
+            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
+        }
+
         QList<GraphicsItem*> rmi;
-        for (QGraphicsItem* item : si) {
+        for (QGraphicsItem* item : selectedItems) {
             if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
                 auto gitem = static_cast<GiDataSolid*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
-                for (QGraphicsItem* clipItem : si) {
-                    if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle) {
-                        clipper.AddPaths(static_cast<GraphicsItem*>(clipItem)->paths(), ptClip, true);
-                    }
-                }
+                clipper.AddPaths(clipPaths, ptClip, true);
                 clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
                 if (gitem->rPaths()->empty()) {
                     rmi.push_back(gitem);
                 } else {
-                    ReversePaths(*gitem->rPaths());
+                    ReversePaths(*gitem->rPaths()); //??
                     gitem->redraw();
                 }
             }
         }
-        for (GraphicsItem* item : rmi) {
+        for (GraphicsItem* item : rmi)
             delete item->file()->itemGroup()->takeAt(item);
-        }
     };
-    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [ex] { ex(ctUnion); });
-    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [ex] { ex(ctDifference); });
-    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [ex] { ex(ctXor); });
-    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [ex] { ex(ctIntersection); });
+    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ctUnion); });
+    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ctDifference); });
+    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [executor] { executor(ctXor); });
+    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [executor] { executor(ctIntersection); });
 }
 
 void MainWindow::customContextMenuForToolBar(const QPoint& pos)
@@ -900,7 +857,7 @@ void MainWindow::fileError(const QString& fileName, const QString& error)
 
 void MainWindow::resetToolPathsActions()
 {
-    for (QAction* action : toolpathActions)
+    for (auto [key, action] : toolpathActions)
         action->setChecked(false);
 }
 
@@ -998,15 +955,15 @@ QString MainWindow::strippedName(const QString& fullFileName)
 template <class T>
 void MainWindow::createDockWidget(int type)
 {
+    toolpathActions[type]->setChecked(true);
     if (dynamic_cast<T*>(m_dockWidget->widget()))
         return;
 
     auto dwContent = new T(m_dockWidget);
     dwContent->setObjectName(typeid(T).name());
 
-    for (QAction* action : qAsConst(toolpathActions))
+    for (auto [key, action] : qAsConst(toolpathActions))
         action->setChecked(false);
-
     toolpathActions[type]->setChecked(true);
 
     m_dockWidget->pop();
@@ -1067,12 +1024,15 @@ void MainWindow::loadFile(const QString& fileName)
             return;
         }
     } else {
-        if (m_project->contains(fileName) != -1
-            && QMessageBox::warning(this, tr("Warning"), QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+        if (m_project->contains(fileName) > -1
+            && QMessageBox::warning(this,
+                   tr("Warning"),
+                   QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()),
+                   QMessageBox::Ok | QMessageBox::Cancel)
                 == QMessageBox::Cancel) {
             return;
         }
-        for (auto& [type, tuple] : App::fileInterfaces()) {
+        for (auto& [type, tuple] : App::filePlugins()) {
             auto& [parser, pobj] = tuple;
             if (parser->thisIsIt(fileName)) {
                 emit parseFile(fileName, int(type));

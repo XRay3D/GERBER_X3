@@ -34,7 +34,7 @@ ToolSelectorForm::ToolSelectorForm(QWidget* parent)
         qApp->applicationDirPath()
         + "/settings/"
         + parent->objectName() + QString::number(counter)
-        + ".dat"
+        + ".json"
     }
 {
     setupUi(this);
@@ -83,17 +83,10 @@ void ToolSelectorForm::updateForm()
 void ToolSelectorForm::readTool()
 {
     QFile file(m_toolFileName);
-    if (file.open(QIODevice::ReadOnly)) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
-#else
-        QJsonDocument loadDoc(QJsonDocument::fromJson(file.readAll()));
-#endif
-        QJsonObject json = loadDoc.object();
-        m_tool.read(json);
-    } else {
+    if (file.open(QIODevice::ReadOnly))
+        m_tool.read(QJsonDocument::fromJson(file.readAll()).object());
+    else
         qWarning("Couldn't open tools file.");
-    }
     updateForm();
 }
 
@@ -103,12 +96,7 @@ void ToolSelectorForm::writeTool() const
     if (file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
         m_tool.write(json);
-        QJsonDocument saveDoc(json);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        file.write(saveDoc.toBinaryData());
-#else
-        file.write(saveDoc.toJson());
-#endif
+        file.write(QJsonDocument(json).toJson());
     } else {
         qWarning("Couldn't open tools file.");
     }
@@ -143,7 +131,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
 
         QFont font;
         font.setBold(true);
-//        font.setWeight(75);
+        //        font.setWeight(75);
         m_label->setFont(font);
 
         QFontMetrics fm(font);

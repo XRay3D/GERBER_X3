@@ -79,7 +79,7 @@ protected:
 public:
     void createGi() override;
     void initFrom(FileInterface* file) override { }
-    FileTree::Node *node() override;
+    FileTree::Node* node() override;
 
     mvector<QString> gCodeText() const;
     Tool getTool() const;

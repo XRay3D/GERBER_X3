@@ -162,7 +162,7 @@ void ThermalForm::updateFiles()
     ui->cbxFile->clear();
 
     for (auto file : App::project()->files(FileType::Gerber))
-        App::fileInterface(int(file->type()))->addToDrillForm(file, ui->cbxFile);
+        App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -176,7 +176,7 @@ bool ThermalForm::canToShow()
 {
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
-        App::fileInterface(int(file->type()))->addToDrillForm(file, &cbx);
+        App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
         if (cbx.count())
             return true;
     }
@@ -253,11 +253,11 @@ void ThermalForm::createTPI(FileInterface* file)
         ui->dsbxAreaMin->value() * uScale * uScale
     };
 
-    m_sourcePreview = App::fileInterface(int(file->type()))->createThermalPreviewGi(file, tp2, tool);
+    m_sourcePreview = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2, tool);
 
     for (auto& item : m_sourcePreview) {
         App::scene()->addItem(item.get());
-        connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &ThermalForm ::setSelection);
+        connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &ThermalForm::setSelection);
     }
 
     ui->treeView->setModel(model);

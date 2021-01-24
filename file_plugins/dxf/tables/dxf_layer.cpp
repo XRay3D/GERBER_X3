@@ -130,7 +130,6 @@ ItemsType Layer::itemsType() const { return m_itemsType; }
 
 void Layer::setItemsType(ItemsType itemsType)
 {
-    qDebug() << int(itemsType);
     if (m_itemsType == itemsType)
         return;
     m_itemsType = itemsType;
@@ -139,7 +138,6 @@ void Layer::setItemsType(ItemsType itemsType)
             m_itemsType = ItemsType::Paths;
         else if (itemGroupPath->empty())
             m_itemsType = ItemsType::Normal;
-        qDebug() << int(itemsType);
         switch (m_itemsType) {
         case ItemsType::Null:
         case ItemsType::Normal:
@@ -151,7 +149,6 @@ void Layer::setItemsType(ItemsType itemsType)
             itemGroupPath->setVisible(m_visible);
             break;
         case ItemsType::Both:
-            qDebug() << "Both";
             itemGroupNorm->setVisible(m_visible);
             itemGroupPath->setVisible(m_visible);
             break;

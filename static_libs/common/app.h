@@ -69,32 +69,29 @@ class App {
     Scene* m_scene = nullptr;
     SplashScreen* m_splashScreen = nullptr;
 
-    FileInterfacesMap m_fileInterfaces;
-    ShapeInterfacesMap m_shapeInterfaces;
+    FileInterfacesMap m_filePlugins;
+    ShapeInterfacesMap m_shapePlugin;
 
     AppSettings m_appSettings;
     ToolHolder m_toolHolder;
     Handlers m_handlers;
 
-    App(const App&) = delete;
-    App(App&&) = delete;
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
+    App(App&&) = delete;
+    App(const App&) = delete;
 
     QSharedMemory sm { "AppSettings" };
 
 public:
     explicit App()
     {
-        if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
+        if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite))
             m_app = *reinterpret_cast<App**>(sm.data()) = this;
-            // qDebug() << "create" << m_app;
-        } else if (sm.attach(QSharedMemory::ReadOnly)) {
+        else if (sm.attach(QSharedMemory::ReadOnly))
             m_app = *reinterpret_cast<App**>(sm.data());
-            // qDebug() << "attach" << m_app;
-        } else {
+        else
             qDebug() << m_app << sm.errorString();
-        }
     }
     ~App() { }
 
@@ -120,21 +117,20 @@ public:
     static void setScene(Scene* scene) { (m_app->m_scene && scene) ? exit(-9) : (m_app->m_scene = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (m_app->m_splashScreen && splashScreen) ? exit(-10) : (m_app->m_splashScreen = splashScreen, void()); }
 
-    static FilePluginInterface* fileInterface(int type)
+    static FilePluginInterface* filePlugin(int type)
     {
-        return m_app->m_fileInterfaces.contains(type)
-            ? std::get<FilePluginInterface*>(m_app->m_fileInterfaces[type])
-            : nullptr;
+        return m_app->m_filePlugins.contains(type) ? std::get<FilePluginInterface*>(m_app->m_filePlugins[type])
+                                                   : nullptr;
     }
-    static FileInterfacesMap& fileInterfaces() { return m_app->m_fileInterfaces; }
+    static FileInterfacesMap& filePlugins() { return m_app->m_filePlugins; }
 
-    static ShapePluginInterface* shapeInterface(int type)
+    static ShapePluginInterface* shapePlugin(int type)
     {
-        return m_app->m_shapeInterfaces.contains(type)
-            ? std::get<ShapePluginInterface*>(m_app->m_shapeInterfaces[type])
-            : nullptr;
+        return m_app->m_shapePlugin.contains(type) ? std::get<ShapePluginInterface*>(m_app->m_shapePlugin[type])
+                                                   : nullptr;
     }
-    static ShapeInterfacesMap& shapeInterfaces() { return m_app->m_shapeInterfaces; }
+    static ShapeInterfacesMap& shapePlugins() { return m_app->m_shapePlugin; }
+
     static Handlers& shapeHandlers() { return m_app->m_handlers; }
 
     static AppSettings& settings() { return m_app->m_appSettings; }

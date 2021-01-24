@@ -1,15 +1,15 @@
 #/*******************************************************************************
-#*                                                                              *
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  14 January 2021                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2021                                          *
-#*                                                                              *
-#* License:                                                                     *
+#*   *
+#* Author : Damir Bakiev  *
+#* Version : na  *
+#* Date : 14 January 2021  *
+#* Website : na  *
+#* Copyright : Damir Bakiev 2016-2021  *
+#*   *
+#* License:   *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*                                                                              *
+#* http://www.boost.org/LICENSE_1_0.txt  *
+#*   *
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.5)
 
@@ -84,14 +84,15 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     PrintSupport
     Widgets
     REQUIRED)
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
 #set(TS_FILES
-#    "translations/${PROJECT_NAME}_en.ts"
-#    "translations/${PROJECT_NAME}_ru.ts"
-#    )
+# "translations/${PROJECT_NAME}_en.ts"
+# "translations/${PROJECT_NAME}_ru.ts"
+# )
 
 #include_directories(${CMAKE_STATIC_LIBS_DIR})
 
@@ -170,6 +171,13 @@ add_executable(${PROJECT_NAME}
     ${APP_ICON_RESOURCE_WINDOWS}
     )
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
+    LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
+    LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    )
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     filetree
@@ -186,14 +194,54 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
     )
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
 
+###########################
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::PrintSupport> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGLWidgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        )
+endif()
+
+
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+# set(SUFFIX "_clang")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+# set(SUFFIX "_gnu")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+# set(SUFFIX "_intel")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+# set(SUFFIX "_msvc")
+#endif()
+
+##if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+##if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+#if(CMAKE_CL_64)
+# set(SUFFIX "${SUFFIX}_x64")
+#else()
+# set(SUFFIX "${SUFFIX}_x32")
+#endif()
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+# "C:/Qt/5.12.10/mingw73_64/plugins/platforms"
+# "$<TARGET_FILE_DIR::${PROJECT_NAME}>/platforms"
+# )
+
 #add_custom_command (
-#    OUTPUT ${TS_FILES}
-#    COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
-#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#    )
+# OUTPUT ${TS_FILES}
+# COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
+# WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+# )

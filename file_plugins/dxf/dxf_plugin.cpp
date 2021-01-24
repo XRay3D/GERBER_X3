@@ -300,7 +300,6 @@ void Plugin::updateFileModel(FileInterface* file)
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
-    qDebug() << (index == fileIndex);
     // clean before insert new layers
     if (int count = fm->getItem(fileIndex)->childCount(); count) {
         fm->beginRemoveRows_(index, 0, count - 1);

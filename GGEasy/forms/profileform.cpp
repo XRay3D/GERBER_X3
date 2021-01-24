@@ -56,10 +56,8 @@ ProfileForm::ProfileForm(QWidget* parent)
     settings.getValue(ui->rbOn);
     settings.getValue(ui->rbOutside);
     settings.getValue(ui->cbxTrimming);
-    settings.getValue(ui->cbxCornerTrimming);
+    settings.getValue(varName(m_trimming), 0);
     settings.endGroup();
-
-    // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
 
     rb_clicked();
 
@@ -76,11 +74,18 @@ ProfileForm::ProfileForm(QWidget* parent)
 
     connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
     connect(ui->pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
+    connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
+        if (side == GCode::On)
+            checked ? m_trimming |= Trimming::Line
+                    : m_trimming &= ~Trimming::Line;
+        else
+            checked ? m_trimming |= Trimming::Corner
+                    : m_trimming &= ~Trimming::Corner;
+    });
 }
 
 ProfileForm::~ProfileForm()
 {
-
     MySettings settings;
     settings.beginGroup("ProfileForm");
     settings.setValue(ui->dsbxBridgeLenght);
@@ -90,7 +95,7 @@ ProfileForm::~ProfileForm()
     settings.setValue(ui->rbOn);
     settings.setValue(ui->rbOutside);
     settings.setValue(ui->cbxTrimming);
-    settings.setValue(ui->cbxCornerTrimming);
+    settings.setValue(varName(m_trimming));
     settings.endGroup();
 
     for (QGraphicsItem* giItem : App::scene()->items()) {
@@ -159,10 +164,8 @@ void ProfileForm::createFile()
     gcp.setSide(side);
     gcp.tools.push_back(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    if (ui->cbxTrimming->isEnabled())
-        gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked();
-    if (ui->cbxCornerTrimming->isEnabled())
-        gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxCornerTrimming->isChecked();
+    (side == GCode::On) ? gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked()
+                        : gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
     gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
 
     {
@@ -233,16 +236,16 @@ void ProfileForm::rb_clicked()
 {
     if (ui->rbOn->isChecked()) {
         side = GCode::On;
-        ui->cbxTrimming->setEnabled(true);
-        ui->cbxCornerTrimming->setEnabled(false);
+        ui->cbxTrimming->setText(tr("Trimming"));
+        ui->cbxTrimming->setChecked(m_trimming & Trimming::Line);
     } else if (ui->rbOutside->isChecked()) {
         side = GCode::Outer;
-        ui->cbxTrimming->setEnabled(false);
-        ui->cbxCornerTrimming->setEnabled(true);
+        ui->cbxTrimming->setText(tr("Corner Trimming"));
+        ui->cbxTrimming->setChecked(m_trimming & Trimming::Corner);
     } else if (ui->rbInside->isChecked()) {
         side = GCode::Inner;
-        ui->cbxTrimming->setEnabled(false);
-        ui->cbxCornerTrimming->setEnabled(true);
+        ui->cbxTrimming->setText(tr("Corner Trimming"));
+        ui->cbxTrimming->setChecked(m_trimming & Trimming::Corner);
     }
 
     if (ui->rbClimb->isChecked())

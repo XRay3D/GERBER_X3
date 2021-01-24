@@ -64,37 +64,127 @@ public:
 void initIcon(const QString& path);
 void translation(QApplication* app);
 
+#define ATTRIBUTES_OFF() "\033[m"
+
+#define SET_FOREGROUND_COLOR(R, G, B) "\033[38;2" \
+                                      ";" #R      \
+                                      ";" #G      \
+                                      ";" #B "m"
+
+#define SET_BACKGROUND_COLOR(R, G, B) "\033[48;2" \
+                                      ";" #R      \
+                                      ";" #G      \
+                                      ";" #B "m"
+
+//    ANSI escape color codes :
+#define BG_BLACK() "\033[40m"
+#define BG_BLUE() "\033[44m"
+#define BG_CYAN() "\033[46m"
+#define BG_GREEN() "\033[42m"
+#define BG_MAGENTA() "\033[45m"
+#define BG_RED() "\033[41m"
+#define BG_WHITE() "\033[47m"
+#define BG_YELLOW() "\033[43m"
+#define FG_BLACK() "\033[30m"
+#define FG_BLUE() "\033[34m"
+#define FG_CYAN() "\033[36m"
+#define FG_GREEN() "\033[32m"
+#define FG_MAGENTA() "\033[35m"
+#define FG_RED() "\033[31m"
+#define FG_WHITE() "\033[37m"
+#define FG_YELLOW() "\033[33m"
+
+#define BG_BRIGHT_BLACK() "\033[100m"
+#define BG_BRIGHT_BLUE() "\033[104m"
+#define BG_BRIGHT_CYAN() "\033[106m"
+#define BG_BRIGHT_GREEN() "\033[102m"
+#define BG_BRIGHT_MAGENTA() "\033[105m"
+#define BG_BRIGHT_RED() "\033[101m"
+#define BG_BRIGHT_WHITE() "\033[107m"
+#define BG_BRIGHT_YELLOW() "\033[103m"
+#define FG_BRIGHT_BLACK() "\033[90m"
+#define FG_BRIGHT_BLUE() "\033[94m"
+#define FG_BRIGHT_CYAN() "\033[96m"
+#define FG_BRIGHT_GREEN() "\033[92m"
+#define FG_BRIGHT_MAGENTA() "\033[95m"
+#define FG_BRIGHT_RED() "\033[91m"
+#define FG_BRIGHT_WHITE() "\033[97m"
+#define FG_BRIGHT_YELLOW() "\033[93m"
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    //    ANSI escape color codes :
+    //    Name            FG  BG
+    //    Black           30  40
+    //    Red             31  41
+    //    Green           32  42
+    //    Yellow          33  43
+    //    Blue            34  44
+    //    Magenta         35  45
+    //    Cyan            36  46
+    //    White           37  47
+    //    Bright Black    90  100
+    //    Bright Red      91  101
+    //    Bright Green    92  102
+    //    Bright Yellow   93  103
+    //    Bright Blue     94  104
+    //    Bright Magenta  95  105
+    //    Bright Cyan     96  106
+    //    Bright White    97  107
+
     QByteArray localMsg = msg.toLocal8Bit();
     const char* file = context.file ? context.file : "";
     const char* function = context.function ? context.function : "";
     switch (type) {
     case QtDebugMsg:
-        fprintf(stderr, "Debug: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        fprintf(stderr, SET_BACKGROUND_COLOR(127, 255, 255) FG_BLACK() "Debug" ATTRIBUTES_OFF() ": %s" //
+            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+            localMsg.constData(), file, context.line, function);
         break;
     case QtInfoMsg:
-        fprintf(stderr, "Info: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 255, 0) FG_BLACK() "Info" ATTRIBUTES_OFF() ": %s" //
+            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+            localMsg.constData(), file, context.line, function);
         break;
     case QtWarningMsg:
-        fprintf(stderr, "Warning: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 255) FG_BLACK() "Warning" ATTRIBUTES_OFF() ": %s" //
+            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+            localMsg.constData(), file, context.line, function);
         break;
     case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() "Critical" ATTRIBUTES_OFF() ": %s" //
+            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+            localMsg.constData(), file, context.line, function);
         break;
     case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() "Fatal" ATTRIBUTES_OFF() ": %s" //
+            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+            localMsg.constData(), file, context.line, function);
         break;
     }
 }
 
+#ifdef Q_OS_WIN
+#include <qt_windows.h>
+#endif
+
 int main(int argc, char** argv)
 {
+
+#ifdef Q_OS_WIN
+    HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+#endif
+
     qInstallMessageHandler(myMessageOutput);
 
 #ifdef LEAK_DETECTOR
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -198,9 +288,9 @@ int main(int argc, char** argv)
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
                 if /**/ (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser)
-                    App::fileInterfaces().emplace(parser->type(), PIF { parser, pobj });
+                    App::filePlugins().emplace(parser->type(), PIF { parser, pobj });
                 else if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser)
-                    App::shapeInterfaces().emplace(parser->type(), PIS { parser, pobj });
+                    App::shapePlugins().emplace(parser->type(), PIS { parser, pobj });
                 qDebug() << pobj << (t.nsecsElapsed() / 1000000.0) << "ms";
             }
         }

@@ -37,6 +37,7 @@ class Shape;
 
 class FileInterface;
 class QFile;
+class QFileSystemWatcher;
 enum class FileType;
 
 #if _MSVC_LANG >= 201705L
@@ -52,6 +53,7 @@ struct ShapesMap : std::map<int, std::shared_ptr<Shapes::Shape>> {
 #endif
 class Project : public QObject {
     Q_OBJECT
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file);
 
 public:
     explicit Project(QObject* parent = nullptr);
@@ -180,9 +182,15 @@ signals:
     void layoutFrameUpdate(bool = false);
     // need for debuging
     void addFileDbg(FileInterface* file);
+    // File Watcher
+    void parseFile(const QString& filename, int type);
 
 private:
     bool reload(int id, FileInterface* file);
+
+    // File Watcher
+    QFileSystemWatcher* watcher;
+    bool m_reloadFile = false;
 
     int m_ver;
 

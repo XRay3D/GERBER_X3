@@ -35,10 +35,10 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     ui->cbxSide->addItems(QObject::tr("Top|Bottom").split('|'));
 
     ui->cbxFont->setFontFilters(
-        QFontComboBox ::ScalableFonts
+        QFontComboBox::ScalableFonts
         //        | QFontComboBox::NonScalableFonts
-        | QFontComboBox ::MonospacedFonts
-        | QFontComboBox ::ProportionalFonts);
+        | QFontComboBox::MonospacedFonts
+        | QFontComboBox::ProportionalFonts);
 
     {
         QFont font;
