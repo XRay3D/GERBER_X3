@@ -361,8 +361,9 @@ void DrillForm::on_pbCreate_clicked()
                     gcp.tools.push_back(App::toolHolder().tool(toolId));
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
                     GCode::ProfileCreator tpc;
+                    tpc.setGcp(gcp);
                     tpc.addPaths(pathsMap[toolId].paths);
-                    tpc.createGc(gcp);
+                    tpc.createGc();
                     gcode = tpc.file();
                 } break;
                 case GCode::Pocket: {
@@ -377,7 +378,7 @@ void DrillForm::on_pbCreate_clicked()
                     GCode::PocketCreator tpc;
                     tpc.setGcp(gcp);
                     tpc.addPaths(pathsMap[toolId].paths);
-                    tpc.createGc(gcp);
+                    tpc.createGc();
                     gcode = tpc.file();
                 } break;
                 default:
