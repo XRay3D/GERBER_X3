@@ -109,10 +109,8 @@ public:
     /*static*/ Pathss& sortBE(Pathss& src);
 
     void createGc();
-    void createGc(const GCodeParams& gcp);
 
     void cancel();
-
     void proceed();
 
     GCodeParams getGcp() const;

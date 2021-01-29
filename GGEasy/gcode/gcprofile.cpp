@@ -35,63 +35,58 @@ GCodeType ProfileCreator::type() { return Profile; }
 
 void ProfileCreator::createProfile(const Tool& tool, const double depth)
 {
+    do {
 
-    m_toolDiameter = tool.getDiameter(depth);
+        m_toolDiameter = tool.getDiameter(depth);
 
-    const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
-    if (m_gcp.side() == On) {
-        if (m_gcp.params[GCodeParams::Trimming].toBool())
-            trimmingOpenPaths(m_workingRawPs);
-
-        m_returnPs = m_workingPs;
-
-        for (Path& path : m_returnPs)
-            path.push_back(path.front());
-
-    } else {
-        if (!m_workingPs.empty()) {
-            ClipperOffset offset;
-            for (Paths& paths : groupedPaths(CopperPaths))
-                offset.AddPaths(paths, jtRound, etClosedPolygon);
-            offset.Execute(m_returnPs, dOffset);
+        if (m_gcp.side() == On) {
+            if (m_gcp.params[GCodeParams::Trimming].toBool())
+                trimmingOpenPaths(m_workingRawPs);
+            m_returnPs = m_workingPs;
+        } else {
+            if (!m_workingPs.empty()) {
+                ClipperOffset offset;
+                for (Paths& paths : groupedPaths(CopperPaths))
+                    offset.AddPaths(paths, jtRound, etClosedPolygon);
+                offset.Execute(m_returnPs, dOffset);
+            }
+            if (!m_workingRawPs.empty()) {
+                ClipperOffset offset;
+                offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
+                offset.Execute(m_workingRawPs, dOffset);
+                if (!m_workingRawPs.empty())
+                    m_returnPs.append(m_workingRawPs);
+            }
         }
 
-        if (!m_workingRawPs.empty()) {
-            ClipperOffset offset;
-            offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
-            offset.Execute(m_workingRawPs, dOffset);
-            if (!m_workingRawPs.empty())
-                m_returnPs.append(m_workingRawPs);
+        if (m_returnPs.empty() && m_workingRawPs.empty())
+            break;
+
+        reorder();
+
+        if (m_gcp.side() == On && m_workingRawPs.size()) {
+            m_returnPss.reserve(m_returnPss.size() + m_workingRawPs.size());
+            for (auto&& path : m_workingRawPs)
+                m_returnPss.push_back({ std::move(path) });
         }
-    }
 
-    if (m_returnPs.empty()) {
-        emit fileReady(nullptr);
-        return;
-    }
+        makeBridges();
 
-    reorder();
+        if (m_gcp.params.contains(GCodeParams::CornerTrimming) && m_gcp.params[GCodeParams::CornerTrimming].toInt())
+            cornerTrimming();
 
-    if (m_gcp.side() == On && m_workingRawPs.size()) {
-        m_returnPss.reserve(m_returnPss.size() + m_workingRawPs.size());
-        for (auto&& path : m_workingRawPs)
-            m_returnPss.push_back({ std::move(path) });
-    }
+        if (m_returnPss.empty())
+            break;
 
-    makeBridges();
-
-    if (m_gcp.params.contains(GCodeParams::CornerTrimming) && m_gcp.params[GCodeParams::CornerTrimming].toInt())
-        cornerTrimming();
-
-    if (m_returnPss.empty()) {
-        emit fileReady(nullptr);
-    } else {
         m_gcp.gcType = Profile;
         m_file = new File(m_returnPss, m_gcp);
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
-    }
+        return;
+    } while (0);
+    emit fileReady(nullptr);
 }
 
 void ProfileCreator::trimmingOpenPaths(Paths& paths)

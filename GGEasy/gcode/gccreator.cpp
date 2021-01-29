@@ -262,12 +262,6 @@ void Creator::createGc()
     }
 }
 
-void Creator::createGc(const GCodeParams& gcp)
-{
-    m_gcp = gcp;
-    createGc();
-}
-
 void Creator::cancel() // direct connection!!
 {
     qDebug(__FUNCTION__);
