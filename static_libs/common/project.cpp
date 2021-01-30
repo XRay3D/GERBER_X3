@@ -47,7 +47,6 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
         stream >> *file;
         file->addToScene();
         App::project()->watcher->addPath(file->name());
-        App::project()->watcher->addPath(QFileInfo(file->name()).absoluteFilePath());
     }
     return stream;
 }
@@ -359,8 +358,8 @@ int Project::addFile(FileInterface* file)
         m_files.emplace(newId, file);
         App::fileModel()->addFile(file);
         setChanged();
+        watcher->addPath(file->name());
     }
-    App::project()->watcher->addPath(file->name());
     return file->id();
 }
 

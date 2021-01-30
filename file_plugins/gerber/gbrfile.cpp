@@ -167,7 +167,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
 bool File::flashedApertures() const
 {
     for (auto [_, aperture] : m_apertures) {
-        if (aperture->isFlashed())
+        if (aperture->flashed())
             return true;
     }
     return false;
@@ -324,10 +324,15 @@ void File::createGi()
         m_itemGroups[ApPaths]->shrink_to_fit();
     }
 
+    bool zeroLine = false;
+    for (auto& [dCode, ap] : m_apertures)
+        if (zeroLine = ap->minSize() && ap->used(); zeroLine)
+            break;
+
     if (m_itemsType == NullType) {
-        if (m_itemGroups[Components]->size())
+        if /**/ (m_itemGroups[Components]->size())
             m_itemsType = Components;
-        else if (m_itemGroups[Normal]->size())
+        else if (m_itemGroups[Normal]->size() && !zeroLine)
             m_itemsType = Normal;
         else
             m_itemsType = ApPaths;

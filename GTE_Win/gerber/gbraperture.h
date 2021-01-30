@@ -41,7 +41,7 @@ public:
     virtual ~AbstractAperture();
 
     bool isDrilled() const { return m_drillDiam != 0.0; }
-    bool isFlashed() const { return m_isFlashed; }
+    bool flashed() const { return m_isFlashed; }
 
     double drillDiameter() const;
     double apertureSize();
