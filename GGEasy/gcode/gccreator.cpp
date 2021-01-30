@@ -443,13 +443,15 @@ void Creator::mergeSegments(Paths& paths, double glue)
     do {
         size = paths.size();
         for (size_t i = 0; i < paths.size(); ++i) {
+            if (i >= paths.size())
+                break;
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                IntPoint& pif = paths[i].front();
-                IntPoint& pil = paths[i].back();
-                IntPoint& pjf = paths[j].front();
-                IntPoint& pjl = paths[j].back();
+                IntPoint pif = paths[i].front();
+                IntPoint pil = paths[i].back();
+                IntPoint pjf = paths[j].front();
+                IntPoint pjl = paths[j].back();
                 if (pil.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
