@@ -45,8 +45,8 @@ public:
     AbstractAperture(const Format* m_format);
     virtual ~AbstractAperture();
 
-    bool withHole() const { return m_drillDiam != 0.0; }
-    bool isFlashed() const { return m_isFlashed; }
+    bool withHole() const noexcept { return m_drillDiam != 0.0; }
+    bool flashed() const noexcept { return m_isFlashed; }
 
     double drillDiameter() const { return m_drillDiam; }
     double apertureSize();
@@ -57,12 +57,16 @@ public:
     virtual QString name() const = 0;
     virtual ApertureType type() const = 0;
 
-    double minSize() const { return m_size; }
+    double minSize() const noexcept { return m_size; }
 
     virtual bool fit(double toolDiam) const = 0;
 
+    bool used() const noexcept { return m_isUsed; }
+    void setUsed(bool isUsed = true) noexcept { m_isUsed = isUsed; }
+
 protected:
     bool m_isFlashed = false;
+    bool m_isUsed = false;
     double m_drillDiam = 0.0;
     double m_size = 0.0;
 

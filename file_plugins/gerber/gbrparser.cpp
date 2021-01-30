@@ -448,6 +448,7 @@ void Parser::addFlash()
     }
 
     AbstractAperture* ap = file->m_apertures[m_state.aperture()].get();
+    ap->setUsed();
     Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->withHole())
@@ -562,6 +563,8 @@ Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center)
 
 Paths Parser::createLine()
 {
+    if (file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].get())
+        file->m_apertures[m_state.aperture()].get()->setUsed();
     Paths solution;
     if (!file->m_apertures.contains(m_state.aperture())) {
         QString str;
@@ -832,7 +835,6 @@ bool Parser::parseAttributes(const QString& gLine)
             //                case Attr::Aperture::DrillTolerance:
             //                case Attr::Aperture::FlashText:
             //                default:
-
             //                    ;
             //                }
             //                //apertureAttributesStrings.append(matchAttr.cap(2));

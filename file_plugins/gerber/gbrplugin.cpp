@@ -302,7 +302,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     uint count = 0;
     for (auto [dCode, aperture] : *m_apertures) {
         (void)dCode;
-        if (aperture->isFlashed())
+        if (aperture->flashed())
             ++count;
     }
 
@@ -315,7 +315,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
 
     data.reserve(count); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
     for (auto [apDCode, aperture] : *m_apertures) {
-        if (aperture && aperture->isFlashed()) {
+        if (aperture && aperture->flashed()) {
             double drillDiameter = 0;
             QString name(aperture->name());
             if (aperture->withHole()) {
@@ -460,12 +460,12 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
     ThermalNodes thermalNodes;
     if (param.perture) {
         for (auto [dCode, aperture] : m_apertures) {
-            if (aperture->isFlashed() && testArea(aperture->draw({}))) {
+            if (aperture->flashed() && testArea(aperture->draw({}))) {
                 thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), aperture->name(), param.par);
             }
         }
         for (auto [dCode, aperture] : m_apertures) {
-            if (aperture->isFlashed()) {
+            if (aperture->flashed()) {
                 for (const GraphicObject& go : gbrFile->m_graphicObjects) {
                     if (thermalNodes.contains(dCode)
                         && go.state().dCode() == D03
