@@ -407,29 +407,28 @@ void Creator::mergeSegments(Paths& paths, double glue)
     do {
         size = paths.size();
         for (size_t i = 0; i < paths.size(); ++i) {
+            if (i >= paths.size())
+                break;
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
-                if (i >= paths.size() || j >= paths.size()) {
-                    i = -1;
-                    j = 0;
+                if (i >= paths.size())
                     break;
-                }
-                IntPoint& pif = paths[i].front();
-                IntPoint& pil = paths[i].back();
-                IntPoint& pjf = paths[j].front();
-                IntPoint& pjl = paths[j].back();
-                if (pil == pjf) {
+                IntPoint pif = paths[i].front();
+                IntPoint pib = paths[i].back();
+                IntPoint pjf = paths[j].front();
+                IntPoint pjb = paths[j].back();
+                if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                if (pif == pjl) {
+                if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (pil == pjl) {
+                if (pib == pjb) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
@@ -448,21 +447,23 @@ void Creator::mergeSegments(Paths& paths, double glue)
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;
+                if (i >= paths.size())
+                    break;
                 IntPoint pif = paths[i].front();
-                IntPoint pil = paths[i].back();
+                IntPoint pib = paths[i].back();
                 IntPoint pjf = paths[j].front();
-                IntPoint pjl = paths[j].back();
-                if (pil.distTo(pjf) < glue) {
+                IntPoint pjb = paths[j].back();
+                if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                if (pif.distTo(pjl) < glue) {
+                if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (pil.distTo(pjl) < glue) {
+                if (pib.distTo(pjb) < glue) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
