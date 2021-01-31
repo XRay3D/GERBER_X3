@@ -34,8 +34,4 @@ public:
     // GraphicsItem interface
     Paths paths() const override;
     void changeColor() override { }
-
-protected:
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };

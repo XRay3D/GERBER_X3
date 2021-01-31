@@ -35,34 +35,9 @@ ComponentsNode::ComponentsNode(const Gerber::Component& component)
 {
 }
 
-//ComponentsNode::ComponentsNode(int id, int type)
-//    : m_id(id)
-//    , m_type(type)
-//    , tbStrList(GbrObj::tr("Top|Bottom").split('|'))
-//{
-//    //    if (MainWindow::closeAllAct()) {
-//    //        MainWindow::closeAllAct()->setEnabled(true);
-//    //        MainWindow::exportPdfAct()->setEnabled(true);
-//    //    }
-//}
-
 ComponentsNode::~ComponentsNode()
 {
-    //    if (MainWindow::closeAllAct()) {
-    //        MainWindow::closeAllAct()->setEnabled(Project::isEmpty());
-    //        MainWindow::exportPdfAct()->setEnabled(Project::isEmpty());
-    //    }
-    //    if (m_id != -1) {
-    //        QGraphicsScene* scene = App::project()->file(m_id)->itemGroup()->first()->scene();
-    //        if (scene) {
-    //            scene->setSceneRect(scene->itemsBoundingRect());
-    //            scene->update();
-    //        }
-    //        if (m_type)
-    //            App::project()->deleteShape(m_id);
-    //        else
-    //            App::project()->deleteFile(m_id);
-    //    }
+
     childItems.clear();
 }
 
@@ -132,18 +107,6 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
 Qt::ItemFlags ComponentsNode::flags(const QModelIndex& /*index*/) const
 {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled /*| Qt::ItemNeverHasChildren*/ | Qt::ItemIsSelectable;
-    //    if (name.isEmpty())
-    //        return itemFlag | Qt::ItemNeverHasChildren;
-    //    switch (index.column()) {
-    //        //    case Name_:
-    //        //        return itemFlag | Qt::ItemIsUserCheckable;
-    //        //    case Layer_:
-    //        //        return itemFlag | Qt::ItemIsEditable;
-    //        //    case Other_:
-    //        //        return itemFlag | Qt::ItemIsUserCheckable;
-    //        //    default:
-    //        return itemFlag;
-    //    }
     return itemFlag;
 }
 

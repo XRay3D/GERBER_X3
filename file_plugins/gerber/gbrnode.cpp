@@ -213,8 +213,11 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
         //        new GCH(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
+        QString s;
+        s.reserve(1000000);
         for (const QString& str : file->lines())
-            textBrowser->append(str);
+            s += str + '\n';
+        textBrowser->append(s);
         dialog->exec();
         delete dialog;
     });

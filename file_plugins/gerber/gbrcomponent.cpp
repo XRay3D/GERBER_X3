@@ -16,8 +16,6 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-Gerber::Component::Component() { }
-
 bool Gerber::Component::setMountType(const QString& key)
 {
     int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());

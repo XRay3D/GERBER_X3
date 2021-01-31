@@ -414,15 +414,15 @@ void Creator::mergeSegments(Paths& paths, double glue)
                     continue;
                 if (i >= paths.size())
                     break;
-                IntPoint pif = paths[i].front();
                 IntPoint pib = paths[i].back();
                 IntPoint pjf = paths[j].front();
-                IntPoint pjb = paths[j].back();
                 if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
+                IntPoint pif = paths[i].front();
+                IntPoint pjb = paths[j].back();
                 if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -449,15 +449,15 @@ void Creator::mergeSegments(Paths& paths, double glue)
                     continue;
                 if (i >= paths.size())
                     break;
-                IntPoint pif = paths[i].front();
                 IntPoint pib = paths[i].back();
                 IntPoint pjf = paths[j].front();
-                IntPoint pjb = paths[j].back();
                 if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
+                IntPoint pif = paths[i].front();
+                IntPoint pjb = paths[j].back();
                 if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);

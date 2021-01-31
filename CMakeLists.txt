@@ -20,6 +20,9 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)
 
+include_directories(magic_get/)
+include_directories(magic_get/include/)
+
 # static lib
 add_subdirectory(static_libs)
 
