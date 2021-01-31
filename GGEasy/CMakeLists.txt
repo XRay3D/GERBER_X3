@@ -169,6 +169,7 @@ add_executable(${PROJECT_NAME}
     ${UI}
     ${RESOURCES}
     ${APP_ICON_RESOURCE_WINDOWS}
+    ${MAGIC_GET}
     )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

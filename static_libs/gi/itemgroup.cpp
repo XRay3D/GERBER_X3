@@ -46,10 +46,10 @@ void ItemGroup::setSelected(const mvector<int>& ids)
         item->setSelected(ids.contains(item->id()));
 }
 
-void ItemGroup::addToScene()
+void ItemGroup::addToScene(QGraphicsScene* scene)
 {
     for (auto item : *this)
-        App::scene()->addItem(item);
+        (scene ? scene : App::scene())->addItem(item);
 }
 
 void ItemGroup::setBrushColor(const QColor& color)

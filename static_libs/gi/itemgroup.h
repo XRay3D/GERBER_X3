@@ -22,7 +22,7 @@ public:
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);
     bool isVisible() { return m_visible; }
-    void addToScene();
+    void addToScene(QGraphicsScene* scene = nullptr);
     QColor brushColor() const { return m_brushColor; }
     QPen pen() const { return m_pen; }
     void setBrushColor(const QColor& color);

@@ -75,6 +75,7 @@ class App {
     AppSettings m_appSettings;
     ToolHolder m_toolHolder;
     Handlers m_handlers;
+    QSettings m_s;
 
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
@@ -135,4 +136,5 @@ public:
 
     static AppSettings& settings() { return m_app->m_appSettings; }
     static ToolHolder& toolHolder() { return m_app->m_toolHolder; }
+    static QSettings* qSettings() { return &m_app->m_s; }
 };

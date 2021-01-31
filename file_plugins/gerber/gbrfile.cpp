@@ -326,7 +326,7 @@ void File::createGi()
 
     bool zeroLine = false;
     for (auto& [dCode, ap] : m_apertures)
-        if (zeroLine = ap->minSize() && ap->used(); zeroLine)
+        if (zeroLine = (qFuzzyIsNull(ap->minSize()) && ap->used()); zeroLine)
             break;
 
     if (m_itemsType == NullType) {

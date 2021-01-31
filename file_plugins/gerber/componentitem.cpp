@@ -19,6 +19,10 @@
 #include "interfaces/file.h"
 
 #include <QPainter>
+#include <QTimer>
+#include <future>
+
+QTimer t;
 
 ComponentItem::ComponentItem(const Gerber::Component& component, FileInterface* file)
     : GraphicsItem(file)
@@ -29,6 +33,32 @@ ComponentItem::ComponentItem(const Gerber::Component& component, FileInterface* 
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolTip(m_component.toolTip());
+    t.setSingleShot(true);
+    //    connect(&t, &QTimer::timeout, [this] {
+    //        std::future<int> f2 = std::async(std::launch::async, [this] {
+    //            qDebug() << __FUNCTION__;
+    //            QFont font;
+    //            font.setPixelSize(20);
+    //            {
+    //                const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, m_component.refdes);
+    //                pt = m_shape.boundingRect().center();
+    //                pt.rx() -= textRect.width() * m_scale * 0.5;
+    //                pt.ry() += textRect.height() * m_scale * 0.5;
+    //                pathRefDes = QPainterPath();
+    //                pathRefDes.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 2), font, m_component.refdes);
+    //            }
+    //            int i = 0;
+    //            for (auto [number, description, pos] : m_component.pins) {
+    //                QString text(description + '(' + number + ')');
+    //                QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
+    //                pathPins[i].second.rx() = pos.x() - textRect.width() * m_scale * 0.5;
+    //                pathPins[i].second.ry() = pos.y() + textRect.height() * m_scale * 0.5;
+    //                pathPins[i].first = QPainterPath();
+    //                pathPins[i++].first.addText(textRect.topLeft() + QPointF(textRect.left(), 0 /*textRect.height()*/), font, text);
+    //            }
+    //            return 0;
+    //        });
+    //    });
 }
 
 QRectF ComponentItem::boundingRect() const
@@ -40,27 +70,69 @@ QPainterPath ComponentItem::shape() const
 {
     if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor())) {
         m_scale = App::graphicsView()->scaleFactor();
-        QFont font;
-        font.setPixelSize(20);
-        {
-            const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, m_component.refdes);
-            pt = m_shape.boundingRect().center();
-            pt.rx() -= textRect.width() * m_scale * 0.5;
-            pt.ry() += textRect.height() * m_scale * 0.5;
-            pathRefDes = QPainterPath();
-            pathRefDes.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, m_component.refdes);
-        }
-        int i = 0;
-        for (auto [number, description, pos] : m_component.pins) {
-            QString text { number + (description.isEmpty() ? "" : '_' + description) };
-            QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
-            pathPins[i].second.rx() = pos.x() - textRect.width() * m_scale * 0.5;
-            pathPins[i].second.ry() = pos.y() + textRect.height() * m_scale * 0.5;
-            pathPins[i].first = QPainterPath();
-            pathPins[i++].first.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, text);
-        }
+        //        t.start(100);
+        //        auto f2 = std::async(std::launch::async, [this] {
+        //            qDebug() << __FUNCTION__;
+        //            QFont font;
+        //            font.setPixelSize(20);
+        //            {
+        //                const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, m_component.refdes);
+        //                pt = m_shape.boundingRect().center();
+        //                pt.rx() -= textRect.width() * m_scale * 0.5;
+        //                pt.ry() += textRect.height() * m_scale * 0.5;
+        //                pathRefDes = QPainterPath();
+        //                pathRefDes.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, m_component.refdes);
+        //            }
+        //            int i = 0;
+        //            for (auto [number, description, pos] : m_component.pins) {
+        //                QString text { number + (description.isEmpty() ? "" : '_' + description) };
+        //                QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
+        //                pathPins[i].second.rx() = pos.x() - textRect.width() * m_scale * 0.5;
+        //                pathPins[i].second.ry() = pos.y() + textRect.height() * m_scale * 0.5;
+        //                pathPins[i].first = QPainterPath();
+        //                pathPins[i++].first.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, text);
+        //            }
+        //        });
+        //        f2.wait();
+        //        f2.get();
+        //        QFont font;
+        //        font.setPixelSize(20);
+        //        {
+        //            const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, m_component.refdes);
+        //            pt = m_shape.boundingRect().center();
+        //            pt.rx() -= textRect.width() * m_scale * 0.5;
+        //            pt.ry() += textRect.height() * m_scale * 0.5;
+        //            pathRefDes = QPainterPath();
+        //            pathRefDes.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, m_component.refdes);
+        //        }
+        //        int i = 0;
+        //        for (auto [number, description, pos] : m_component.pins) {
+        //            QString text { number + (description.isEmpty() ? "" : '_' + description) };
+        //            QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
+        //            pathPins[i].second.rx() = pos.x() - textRect.width() * m_scale * 0.5;
+        //            pathPins[i].second.ry() = pos.y() + textRect.height() * m_scale * 0.5;
+        //            pathPins[i].first = QPainterPath();
+        //            pathPins[i++].first.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, text);
+        //        }
     }
     return m_shape;
+}
+
+void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale)
+{
+    painter->save();
+    static QFont f("Consolas");
+    f.setPixelSize(20);
+    f.setBold(true);
+    const QRectF textRect = QFontMetricsF(f).boundingRect(QRectF(), Qt::AlignLeft, str);
+    pt.rx() -= textRect.width() * scale * 0.5;
+    pt.ry() += textRect.height() * scale * 0.5;
+    painter->translate(pt);
+    painter->scale(scale, -scale);
+    painter->setPen(color);
+    painter->setFont(f);
+    painter->drawText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 2), str);
+    painter->restore();
 }
 
 void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
@@ -83,7 +155,6 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     painter->drawRect(
         { m_component.referencePoint + QPointF { k, k },
             m_component.referencePoint - QPointF { k, k } });
-
     if (m_scale < 0.05) {
         const double size = m_scale * 20; //m_scale > 0.05 ? 1./10 / m_scale : 10;
         for (auto [number, description, pos] : m_component.pins) {
@@ -92,11 +163,11 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(c, 2 * m_scale, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             painter->drawLine(
-                pos + QPointF { size, size },
-                pos - QPointF { size, size });
+                pos + QPointF { +size, +size },
+                pos - QPointF { +size, +size });
             painter->drawLine(
-                pos + QPointF { -size, size },
-                pos - QPointF { -size, size });
+                pos + QPointF { -size, +size },
+                pos - QPointF { -size, +size });
         }
         for (auto [path, pos] : pathPins) {
             painter->save();
@@ -111,27 +182,14 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             painter->restore();
         }
     }
-    painter->save();
-    painter->translate(pt);
-    painter->scale(m_scale, -m_scale);
-    painter->setPen(QPen(Qt::black, 4.0, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
-    painter->setBrush(Qt::NoBrush);
-    painter->drawPath(pathRefDes);
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(Qt::red);
-    painter->drawPath(pathRefDes);
-    painter->restore();
+
+    drawText(painter, m_component.refdes, Qt::red, m_shape.boundingRect().center(), m_scale);
+    if (m_scale < 0.05)
+        for (auto [number, description, pos] : m_component.pins)
+            drawText(painter, QString(description + '(' + number + ')'), App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF, pos + QPointF(0, m_scale * 60), m_scale);
 }
 
-void ComponentItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+Paths ComponentItem::paths() const
 {
-
-    QGraphicsItem::mouseMoveEvent(event);
+    return {};
 }
-
-void ComponentItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mouseDoubleClickEvent(event);
-}
-
-Paths ComponentItem::paths() const { return {}; }

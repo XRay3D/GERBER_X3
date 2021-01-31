@@ -16,11 +16,13 @@
 
 namespace Gerber {
 
-class Component;
+struct Component;
 
 class ComponentsNode {
-    ComponentsNode(const ComponentsNode&) = delete;
+    ComponentsNode& operator=(ComponentsNode&&) = delete;
     ComponentsNode& operator=(const ComponentsNode&) = delete;
+    ComponentsNode(ComponentsNode&&) = delete;
+    ComponentsNode(const ComponentsNode&) = delete;
 
     const Gerber::Component& component;
     const QString name;
@@ -44,24 +46,10 @@ public:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role) const;
-    //    virtual void menu(QMenu* menu, TreeView* tv) const = 0;
-
-    //    enum {
-    //        Name,
-    //        Layer,
-    //        Other
-    //    };
 
 protected:
-    //    const int m_id;
-    //    const int m_type;
-
-    //    const QStringList tbStrList;
     ComponentsNode* m_parentItem = nullptr;
     QList<QSharedPointer<ComponentsNode>> childItems;
-    //    inline FileTree::Node* file() const { return App::project()->file(m_id); }
-    //    inline Shapes::Shape* shape() const { return App::project()->aShape(m_id); }
-    //Qt::CheckState m_checkState = Qt::Checked;
 };
 
 }

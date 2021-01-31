@@ -96,9 +96,7 @@ QVariant ComponentsModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-
     ComponentsNode* item = getItem(index);
-
     return item->data(index, role);
 }
 

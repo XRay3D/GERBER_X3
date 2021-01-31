@@ -64,6 +64,7 @@ private:
 
     // QWidget interface
 protected:
+
     void keyPressEvent(QKeyEvent* event) override
     {
         //    if (event->key() == Qt::Key_Backspace) {

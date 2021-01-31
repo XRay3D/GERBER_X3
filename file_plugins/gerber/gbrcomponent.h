@@ -24,10 +24,9 @@
 
 namespace Gerber {
 
-class Component {
+struct Component {
     Q_GADGET
 public:
-    Component();
     enum MountType {
         TH,
         SMD,
