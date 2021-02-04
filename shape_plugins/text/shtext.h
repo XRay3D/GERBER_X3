@@ -52,6 +52,7 @@ public:
             , side(Top)
             , angle(0.0)
             , height(10.0)
+            , xy(0.0)
             , handleAlign(BotLeft)
         {
         }
@@ -60,6 +61,7 @@ public:
         Side side;
         double angle;
         double height;
+        double xy;
         int handleAlign;
     };
 

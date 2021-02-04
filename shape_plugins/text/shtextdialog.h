@@ -38,6 +38,7 @@ private:
     void updateFont();
     void updateAngle();
     void updateHeight();
+    void updateXY();
     void updateCenterAlign();
     void updateSide();
 
