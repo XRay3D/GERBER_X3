@@ -61,6 +61,7 @@ void Text::redraw()
     QFontMetrics fm(font);
     const auto capHeight = fm.capHeight();
     const auto scale = iData.height / capHeight;
+    const auto xyScale = 100.0 / iData.xy;
 
     QPointF handlePt;
 
@@ -103,9 +104,14 @@ void Text::redraw()
     matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
     if (iData.side == Bottom) {
         matrix.translate((bRect.right() + bRect.left()) * scale, 0);
+        //        matrix.scale(
+        //            -scale * iData.xy > 0.0 ? 1 * iData.xy : 1,
+        //            -scale * iData.xy < 0.0 ? 1 / iData.xy : 1);
         matrix.scale(-scale, -scale);
-    } else
-        matrix.scale(scale, -scale);
+    } else {
+        // matrix.scale(+scale * xyScale, -scale);
+        matrix.scale(+scale, -scale);
+    }
     {
         QPainterPath tmpPainterPath;
         for (auto& polygon : painterPath.toSubpathPolygons()) { // text to polygons
@@ -238,6 +244,7 @@ void Text::saveIData()
     settings.setValue("side", lastUsedIData.side);
     settings.setValue("angle", lastUsedIData.angle);
     settings.setValue("height", lastUsedIData.height);
+    settings.setValue("xy", lastUsedIData.xy);
     settings.setValue("handleAlign", lastUsedIData.handleAlign);
 }
 
@@ -250,6 +257,7 @@ Text::InternalData Text::loadIData()
     lastUsedIData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
     lastUsedIData.angle = settings.value("angle", 0.0).toDouble();
     lastUsedIData.height = settings.value("height", 10.0).toDouble();
+    lastUsedIData.xy = settings.value("xy", 10.0).toDouble();
     lastUsedIData.handleAlign = settings.value("handleAlign", BotLeft).toInt();
     return lastUsedIData;
 }
@@ -288,6 +296,7 @@ QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d)
     stream << d.font;
     stream << d.angle;
     stream << d.height;
+    stream << d.xy;
     stream << d.handleAlign;
     stream << d.side;
     return stream;
@@ -299,6 +308,7 @@ QDataStream& operator>>(QDataStream& stream, Text::InternalData& d)
     stream >> d.font;
     stream >> d.angle;
     stream >> d.height;
+    stream >> d.xy;
     stream >> d.handleAlign;
     stream >> d.side;
     return stream;

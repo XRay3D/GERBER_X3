@@ -29,16 +29,21 @@
 
 GraphicsItem::GraphicsItem(FileInterface* file)
     : animation(this, "bodyColor")
+    , visibleA(this, "opacity")
     , m_file(file)
     , m_pen(QPen(Qt::white, 0.0))
     , m_colorPtr(file ? &file->color() : nullptr)
     , m_color(Qt::white)
     , m_bodyColor(m_colorPtr ? *m_colorPtr : m_color)
     , m_pathColor(Qt::transparent)
+
 {
     animation.setDuration(100);
     animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     connect(this, &GraphicsItem::colorChanged, [this] { update(); });
+    visibleA.setDuration(100);
+    visibleA.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    connect(&visibleA, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleA.currentValue() > 0.9); });
     QGraphicsItem::setVisible(false);
 }
 
@@ -71,16 +76,15 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor)
 
 void GraphicsItem::setVisible(bool visible)
 {
-    auto visibleA = new QPropertyAnimation(this, "opacity");
-    visibleA->setDuration(100);
-    visibleA->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    visibleA->setStartValue(visible ? 0.0 : 1.0);
-    visibleA->setEndValue(visible ? 1.0 : 0.0);
-    visibleA->start(QPropertyAnimation::DeleteWhenStopped);
-    if (visible)
+    if (visible == isVisible())
+        return;
+    visibleA.setStartValue(visible ? 0.0 : 1.0);
+    visibleA.setEndValue(visible ? 1.0 : 0.0);
+    visibleA.start();
+    if (visible) {
+        setOpacity(0.0);
         QGraphicsObject::setVisible(visible);
-    else
-        connect(visibleA, &QAbstractAnimation::finished, [visible, this] { QGraphicsObject::setVisible(visible); });
+    }
 }
 
 const FileInterface* GraphicsItem::file() const { return m_file; }
