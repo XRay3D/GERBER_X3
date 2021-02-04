@@ -40,7 +40,12 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     offset.Execute(tmpPaths, 0.01 * uScale);
     for (const Path& tmpPath : qAsConst(tmpPaths))
         m_selectionShape.addPolygon(tmpPath);
-    m_boundingRect = m_selectionShape.boundingRect();
+    {
+        Clipper clipper;
+        clipper.AddPath(path, ptClip);
+        auto [rl, rt, rr, rb] = clipper.GetBounds();
+        m_boundingRect = QRectF(rl * dScale, rt * dScale, (rr - rl) * dScale, (rb - rt) * dScale);
+    }
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
