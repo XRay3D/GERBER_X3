@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (0) {
+        if (1) {
             QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
             QStringList listFiles;
             if (dir.exists())

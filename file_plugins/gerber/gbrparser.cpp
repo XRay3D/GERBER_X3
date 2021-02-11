@@ -22,10 +22,13 @@
 
 #include "interfaces/pluginfile.h"
 
-#include "leakdetector.h"
-
 #include <QElapsedTimer>
 #include <QMutex>
+
+#include <charconv>
+#include <ctre.hpp> //
+
+#include "leakdetector.h"
 
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
@@ -51,6 +54,35 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 *The GTP file isn’t necessary for the PCB fabrication, because it is used to create a stencil(if your design had SMD parts).
 */
 namespace Gerber {
+
+QDebug operator<<(QDebug debug, const std::string_view& sw)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << QByteArray(sw.data(), sw.size());
+    return debug;
+}
+
+template <typename T>
+int toInt(T&& m)
+{
+    int result {};
+    auto str = m.to_view();
+    if (auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result); ec == std::errc {}) {
+    } else
+        throw QString::fromLocal8Bit(str.data(), str.size());
+    return result;
+}
+
+template <typename T>
+double toDouble(T&& m)
+{
+    double result {};
+    auto str = m.to_view();
+    if (auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result); ec == std::errc {}) {
+    } else
+        throw QString::fromLocal8Bit(str.data(), str.size());
+    return result;
+}
 
 Parser::Parser(FilePluginInterface* interface)
     : interface(interface)
@@ -615,7 +647,10 @@ bool Parser::parseAperture(const QString& gLine)
     static const QRegularExpression regexp(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     if (auto match(regexp.match(gLine)); match.hasMatch()) {
-
+        auto s { gLine.toStdString() };
+        auto [whole, a, b, c] = ctre::match<"^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*),?(.*)\\*%$">(s);
+        qDebug() << whole.to_view() << a.to_view() << b.to_view() << c.to_view();
+        qDebug() << match.capturedTexts();
         int aperture = match.captured(1).toInt();
         const QString apType = match.captured(2);
         const QString apParameters = match.captured(3);
@@ -672,9 +707,15 @@ bool Parser::parseAperture(const QString& gLine)
 
 bool Parser::parseApertureBlock(const QString& gLine)
 {
-    static const QRegularExpression regexp(QStringLiteral("^%ABD(\\d+)\\*%$"));
-    if (auto match(regexp.match(gLine)); match.hasMatch()) {
-        m_abSrIdStack.push({ WorkingType::ApertureBlock, match.captured(1).toInt() });
+    //    static const QRegularExpression regexp(QStringLiteral("^%ABD(\\d+)\\*%$"));
+    //    if (auto match(regexp.match(gLine)); match.hasMatch()) {
+    //        m_abSrIdStack.push({ WorkingType::ApertureBlock, match.captured(1).toInt() });
+    //        file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
+    //        return true;
+    //    }
+    auto stdStr { gLine.toStdString() };
+    if (auto match { ctre::match<"^%ABD(\\d+)\\*%$">(stdStr) }) {
+        m_abSrIdStack.push({ WorkingType::ApertureBlock, toInt(match.get<1>()) });
         file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
         return true;
     }

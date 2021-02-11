@@ -22,6 +22,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(magic_get/)
 include_directories(magic_get/include/)
+include_directories(compile-time-regular-expressions/single-header/)
 
 # static lib
 add_subdirectory(static_libs)
