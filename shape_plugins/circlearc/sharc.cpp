@@ -70,7 +70,7 @@ void Arc::redraw()
     path.clear();
     path.reserve(intSteps);
 
-    for (int i = 0; i < intSteps; i++) {
+    for (int i = 0; i <= intSteps; i++) {
         const double theta = stepAngle * i;
         if (theta > angle) {
             path.push_back(IntPoint(

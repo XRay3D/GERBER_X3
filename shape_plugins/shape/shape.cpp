@@ -107,6 +107,8 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
                           : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
         }
+    } else if (change == ItemVisibleChange) {
+        emit App::fileModel()->dataChanged(m_node->index(), m_node->index(), { Qt::CheckStateRole });
     }
     return GraphicsItem::itemChange(change, value);
 }
@@ -141,7 +143,7 @@ QDataStream& operator>>(QDataStream& stream, Shape& shape)
     stream >> shape.m_giId;
     shape.setZValue(shape.m_giId);
     stream >> visible;
-    shape.QGraphicsItem::setVisible(visible);
+    shape.setVisible(visible);
     shape.setToolTip(QString::number(shape.m_giId));
     {
         qint32 size;
@@ -259,8 +261,9 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
         App::fileModel()->removeRow(m_node->row(), m_node->index().parent());
     });
     auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
-    action->setChecked(isVisible());
     action->setCheckable(true);
+    action->setChecked(isVisible());
+    //    action->connect(action, &QAction::toggled );
 }
 
 }

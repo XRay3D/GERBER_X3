@@ -53,6 +53,7 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     ui->plainTextEdit->setPlainText(shapeText.first()->iData.text);
     ui->dsbxAngle->setValue(shapeText.first()->iData.angle);
     ui->dsbxHeight->setValue(shapeText.first()->iData.height);
+    ui->dsbxXY->setValue(shapeText.first()->iData.xy);
 
     switch (shapeText.first()->iData.handleAlign) {
     case Text::BotCenter:
@@ -87,6 +88,7 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     connect(ui->plainTextEdit, &QPlainTextEdit::textChanged, this, &ShTextDialog::updateText);
     connect(ui->dsbxAngle, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateAngle);
     connect(ui->dsbxHeight, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateHeight);
+    connect(ui->dsbxXY, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateXY);
     connect(ui->cbxFont, qOverload<const QFont&>(&QFontComboBox::currentFontChanged), [this](const QFont&) { updateFont(); });
     connect(ui->cbxSide, qOverload<int>(&QComboBox::currentIndexChanged), this, &ShTextDialog::updateSide);
 
@@ -140,6 +142,14 @@ void ShTextDialog::updateHeight()
 {
     for (auto text : shapeText) {
         text->iData.height = ui->dsbxHeight->value();
+        text->redraw();
+    }
+}
+
+void ShTextDialog::updateXY()
+{
+    for (auto text : shapeText) {
+        text->iData.xy = ui->dsbxXY->value();
         text->redraw();
     }
 }
