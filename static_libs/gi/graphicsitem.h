@@ -107,6 +107,7 @@ public:
 
 protected:
     QPropertyAnimation animation;
+    QPropertyAnimation visibleA;
 
     QRectF m_rect;
 
