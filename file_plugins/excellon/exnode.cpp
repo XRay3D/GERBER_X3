@@ -17,7 +17,7 @@
 
 #include "excellondialog.h"
 #include "exfile.h"
-
+#include "exh.h"
 #include "forms/drillform/drillform.h"
 #include "ft_view.h"
 
@@ -122,8 +122,8 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
         QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        textBrowser->setFont(QFont("Consolas"));
-        //        /*auto gch =*/new GCH(textBrowser->document());
+        textBrowser->setFont(QFont("JetBrains Mono"));
+        new SyntaxHighlighter(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
         for (const QString& str : file->lines())

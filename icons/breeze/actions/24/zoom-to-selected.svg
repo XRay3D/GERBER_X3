@@ -49,7 +49,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
   </defs>
@@ -59,28 +59,28 @@
      class="ColorScheme-Text"
      id="path4" />
   <rect
-     style="fill:#4d4d4d;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
      id="rect817"
      width="3"
      height="3"
      x="7"
      y="14" />
   <rect
-     style="fill:#4d4d4d;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
      id="rect819"
      width="3"
      height="3"
      x="7"
      y="7" />
   <rect
-     style="fill:#4d4d4d;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
      id="rect821"
      width="3"
      height="3"
      x="14"
      y="7" />
   <rect
-     style="fill:#4d4d4d;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
      id="rect823"
      width="3"
      height="3"

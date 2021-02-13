@@ -58,7 +58,7 @@
        inkscape:collect="always"
        id="linearGradient978">
       <stop
-         style="stop-color:#4d4d4d;stop-opacity:1"
+         style="stop-color:#c0c0c0;stop-opacity:1"
          offset="0"
          id="stop974" />
       <stop
@@ -70,7 +70,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
     <linearGradient
@@ -90,7 +90,7 @@
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccccc" />
   <path
-     style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     style="fill:none;stroke:#c0c0c0;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      d="M 7.5,5.5 V 8 L 11,19.5 h 2 L 16.5,8 V 5.5"
      id="path898"
      inkscape:connector-curvature="0"

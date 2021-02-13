@@ -59,7 +59,7 @@
      inkscape:groupmode="layer"
      inkscape:label="Layer 1">
     <circle
-       style="fill:#4d4d4d;stroke-width:0.264583;fill-opacity:0.5"
+       style="fill:#c0c0c0;stroke-width:0.264583;fill-opacity:0.5"
        id="path24-3"
        cx="-15.742708"
        cy="287.07809"
@@ -68,7 +68,7 @@
     <path
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        d="M 37.5 8 A 7.4999998 7.4999998 0 0 0 30.015625 15 L 15 15 L 15 60 L 60 60 L 60 44.982422 A 7.4999998 7.4999998 0 0 0 67 37.5 A 7.4999998 7.4999998 0 0 0 60 30.015625 L 60 15 L 44.982422 15 A 7.4999998 7.4999998 0 0 0 37.5 8 z M 16 16 L 30.017578 16 A 7.4999998 7.4999998 0 0 0 37.5 23 A 7.4999998 7.4999998 0 0 0 44.984375 16 L 59 16 L 59 30.017578 A 7.4999998 7.4999998 0 0 0 52 37.5 A 7.4999998 7.4999998 0 0 0 59 44.984375 L 59 59 L 16 59 L 16 16 z M 59.5 31 A 6.5 6.5 0 0 1 66 37.5 A 6.5 6.5 0 0 1 59.5 44 A 6.5 6.5 0 0 1 53 37.5 A 6.5 6.5 0 0 1 59.5 31 z "
-       style="stroke-width:0.989072;fill:#4d4d4d;fill-opacity:1"
+       style="stroke-width:0.989072;fill:#c0c0c0;fill-opacity:1"
        id="rect14" />
     <circle
        transform="scale(-1,1)"

@@ -8,7 +8,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="prof_in_climb.svg"
-   inkscape:version="1.0beta1 (fe3e306, 2019-09-17)"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
    id="svg8"
    version="1.1"
    viewBox="0 0 19.84375 19.843751"
@@ -21,8 +21,8 @@
      inkscape:window-maximized="0"
      inkscape:window-y="0"
      inkscape:window-x="802"
-     inkscape:window-height="1042"
-     inkscape:window-width="1102"
+     inkscape:window-height="1362"
+     inkscape:window-width="1662"
      showguides="false"
      units="px"
      showgrid="true"
@@ -61,24 +61,24 @@
     <path
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        d="M 15 15 L 15 60 L 60 60 L 60 15 L 15 15 z M 16 16 L 59 16 L 59 59 L 16 59 L 16 16 z "
-       style="stroke-width:0.989072"
+       style="stroke-width:0.989;fill:#c0c0c0;fill-opacity:1;stroke:none;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect14" />
     <path
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        d="M 51.462891 30 A 7.4999998 7.4999998 0 0 0 44 37.5 A 7.4999998 7.4999998 0 0 0 51.5 45 A 7.4999998 7.4999998 0 0 0 59 37.5 A 7.4999998 7.4999998 0 0 0 51.5 30 A 7.4999998 7.4999998 0 0 0 51.462891 30 z M 51.5 31 A 6.5 6.5 0 0 1 58 37.5 A 6.5 6.5 0 0 1 51.5 44 A 6.5 6.5 0 0 1 45 37.5 A 6.5 6.5 0 0 1 51.5 31 z "
-       style="fill:#000000;stroke-width:0.999999"
+       style="fill:#c0c0c0;stroke-width:0.999999;fill-opacity:1"
        id="path18" />
     <path
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        d="M 37.5 16 A 7.4999998 7.4999998 0 0 0 30 23.5 A 7.4999998 7.4999998 0 0 0 37.5 31 A 7.4999998 7.4999998 0 0 0 45 23.5 A 7.4999998 7.4999998 0 0 0 37.5 16 z M 37.5 17 A 6.5 6.5 0 0 1 44 23.5 A 6.5 6.5 0 0 1 37.5 30 A 6.5 6.5 0 0 1 31 23.5 A 6.5 6.5 0 0 1 37.5 17 z "
-       style="fill:#000000;stroke-width:0.999999"
+       style="fill:#c0c0c0;stroke-width:0.999999;fill-opacity:1"
        id="path22" />
     <circle
        r="1.7197917"
        cy="287.07809"
        cx="13.626042"
        id="path841"
-       style="fill:#4d4d4d;fill-opacity:0.501961;fill-rule:evenodd;stroke:none;stroke-width:0.1" />
+       style="fill:#c0c0c0;fill-opacity:0.501961;fill-rule:evenodd;stroke:none;stroke-width:0.1" />
     <circle
        style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.1"
        id="path841-9"

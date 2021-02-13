@@ -16,10 +16,6 @@
 #include "exparser.h"
 #include "exfile.h"
 
-#include "app.h"
-#include "interfaces/file.h"
-#include "interfaces/pluginfile.h"
-
 #include <ctre.hpp>
 
 #include <QFile>
@@ -27,10 +23,11 @@
 
 #include "leakdetector.h"
 
-//struct QRegularExpression {
-//};
+namespace Excellon {
 
-using namespace Excellon;
+struct QRegularExpression {
+    QRegularExpression() { }
+};
 
 Parser::Parser(FilePluginInterface* const interface)
     : interface(interface)
@@ -104,19 +101,20 @@ FileInterface* Parser::parseFile(const QString& fileName)
 
 bool Parser::parseComment(const QString& line)
 {
-    const QRegularExpression regexComment("^;(.*)$");
-    if (auto match = regexComment.match(line); match.hasMatch()) {
-        const QRegularExpression regexFormat(".*FORMAT.*(\\d{1}).(\\d{1}).*" /*, Qt::CaseInsensitive*/);
-        if (auto matchFormat = regexFormat.match(match.captured(1)); matchFormat.hasMatch()) {
-            qDebug() << "regexFormat" << matchFormat.capturedTexts();
-            file->m_format.integer = matchFormat.captured(1).toInt();
-            file->m_format.decimal = matchFormat.captured(2).toInt();
+    static constexpr auto regexComment = ctll::fixed_string("^;(.*)$");
+    static constexpr auto regexFormat = ctll::fixed_string(".*[FORMATformat].*(\\d{1}).(\\d{1}).*");
+    static constexpr auto regexTool = ctll::fixed_string("\\s*[HOLESIZEholesize]\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
+    if (auto [match, comment] = ctre::match<regexComment>(line); match) {
+        if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
+            qDebug() << "regexFormat" << matchFormat.data();
+            file->m_format.integer = integer;
+            file->m_format.decimal = decimal;
         }
-        const QRegularExpression regexTool("\\s*Holesize\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*" /*, Qt::CaseInsensitive*/);
-        if (auto matchTool = regexTool.match(match.captured(1)); matchTool.hasMatch()) {
-            qDebug() << "regexTool" << matchTool.capturedTexts();
-            const int tCode = static_cast<int>(matchTool.captured(1).toDouble());
-            file->m_tools[tCode] = matchTool.captured(2).toDouble() * 0.0254 * (1.0 / 25.4);
+        if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
+            qDebug() << "regexTool" << matchTool.data();
+            const int tCode = static_cast<int>(tool.toDouble());
+            file->m_tools[tCode] = diam;
+            file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
             m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
         }
         return true;
@@ -126,9 +124,9 @@ bool Parser::parseComment(const QString& line)
 
 bool Parser::parseGCode(const QString& line)
 {
-    const QRegularExpression regex("^G([0]?[0-9]{2}).*$");
-    if (auto match = regex.match(line); match.hasMatch()) {
-        switch (match.captured(1).toInt()) {
+    static constexpr auto regex = ctll::fixed_string("^G([0]?[0-9]{2}).*$");
+    if (auto [whole, c1] = ctre::match<regex>(line); whole) {
+        switch (c1.toInt()) {
         case G00:
             m_state.gCode = G00;
             m_state.wm = RouteMode;
@@ -163,9 +161,9 @@ bool Parser::parseGCode(const QString& line)
 
 bool Parser::parseMCode(const QString& line)
 {
-    const QRegularExpression regex("^M([0]?[0-9]{2})$");
-    if (auto match = regex.match(line); match.hasMatch()) {
-        switch (match.captured(1).toInt()) {
+    static constexpr auto regex = ctll::fixed_string("^M([0]?[0-9]{2})$");
+    if (auto [whole, c1] = ctre::match<regex>(line); whole) {
+        switch (c1.toInt()) {
         case M00: {
             auto tools = file->m_tools;
             QList<int> keys;
@@ -222,19 +220,16 @@ bool Parser::parseMCode(const QString& line)
 
 bool Parser::parseTCode(const QString& line)
 {
-    const QRegularExpression regex("^T([0-9]{1,2})"
-                                   "(?:([CFS])(\\d*\\.?\\d+))?"
-                                   "(?:([CFS])(\\d*\\.?\\d+))?"
-                                   "(?:([CFS])(\\d*\\.?\\d+))?"
-                                   ".*$");
-    if (auto match = regex.match(line); match.hasMatch()) {
-        const QStringList capturedTexts(match.capturedTexts());
-        const int index = capturedTexts.indexOf("C");
-        bool ok;
-        if (const auto tCode = match.captured(1).toInt(&ok); ok) {
-            m_state.tCode = tCode;
-            if (index > 0)
-                file->m_tools[m_state.tCode] = match.captured(index + 1).toDouble();
+    static constexpr auto regex = ctll::fixed_string("^T([0-9]{1,2})"
+                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                     ".*$");
+    static constexpr auto regex2 = ctll::fixed_string("^.+C(\\d*\\.?\\d+).*$");
+    if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(line); whole) {
+        m_state.tCode = tool;
+        if (auto [whole, diam] = *ctre::range<regex2>(line).begin(); whole) {
+            file->m_tools[m_state.tCode] = diam;
             return true;
         }
     }
@@ -243,32 +238,33 @@ bool Parser::parseTCode(const QString& line)
 
 bool Parser::parsePos(const QString& line)
 {
-    enum {
-        G = 1,
-        X,
-        Y,
-        A
-    };
 
-    QRegularExpression regex("^(?:G(\\d+))?"
-                             "(?:X([+-]?\\d*\\.?\\d*))?"
-                             "(?:Y([+-]?\\d*\\.?\\d*))?"
-                             "(?:A([+-]?\\d*\\.?\\d*))?"
-                             ".*$");
+    //    enum {
+    //        G = 1,
+    //        X,
+    //        Y,
+    //        A
+    //    };
 
-    if (auto match = regex.match(line); match.hasMatch()) {
-        if (match.captured(X).isEmpty() && match.captured(Y).isEmpty())
+    static constexpr auto regex = ctll::fixed_string("^(?:G(\\d+))?"
+                                                     "(?:X([\\+\\-]?\\d*\\.?\\d*))?"
+                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d*))?"
+                                                     "(?:A([\\+\\-]?\\d*\\.?\\d*))?"
+                                                     ".*$");
+
+    if (auto [whole, G, X, Y, A] = ctre::match<regex>(line); whole) {
+        if (!X.size() && !Y.size())
             return false;
 
-        if (!match.captured(X).isEmpty())
-            m_state.rawPos.X = match.captured(X);
-        if (!match.captured(Y).isEmpty())
-            m_state.rawPos.Y = match.captured(Y);
-        if (!match.captured(A).isEmpty())
-            m_state.rawPos.A = match.captured(A);
+        if (X.size())
+            m_state.rawPos.X = X.toString();
+        if (Y.size())
+            m_state.rawPos.Y = Y.toString();
+        if (A.size())
+            m_state.rawPos.A = A.toString();
 
-        parseNumber(match.captured(X), m_state.pos.rx());
-        parseNumber(match.captured(Y), m_state.pos.ry());
+        parseNumber(X, m_state.pos.rx());
+        parseNumber(Y, m_state.pos.ry());
 
         switch (m_state.wm) {
         case DrillMode:
@@ -296,46 +292,43 @@ bool Parser::parsePos(const QString& line)
 
 bool Parser::parseSlot(const QString& line)
 {
-
-    enum {
-        X1 = 1,
-        Y1,
-        X2,
-        Y2
-    };
-
-    QRegularExpression regex(
-        "^(?:X([+-]?\\d*\\.?\\d+))?"
-        "(?:Y([+-]?\\d*\\.?\\d+))?"
-        "G85"
-        "(?:X([+-]?\\d*\\.?\\d+))?"
-        "(?:Y([+-]?\\d*\\.?\\d+))?"
-        ".*$");
-    if (auto match = regex.match(line); match.hasMatch()) {
+    //    enum {
+    //        X1 = 1,
+    //        Y1,
+    //        X2,
+    //        Y2
+    //    };
+    static constexpr auto regex = ctll::fixed_string("^(?:X([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     "G85"
+                                                     "(?:X([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     ".*$");
+    if (auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(line); whole) {
         m_state.gCode = G85;
         m_state.path.clear();
         m_state.rawPosList.clear();
         {
-            if (!match.captured(X1).isEmpty())
-                m_state.rawPos.X = match.captured(X1);
-            parseNumber(match.captured(X1), m_state.pos.rx());
+            if (X1.size())
+                m_state.rawPos.X = X1.toString();
+            parseNumber(X1, m_state.pos.rx());
 
-            if (!match.captured(Y1).isEmpty())
-                m_state.rawPos.Y = match.captured(Y1);
-            parseNumber(match.captured(Y1), m_state.pos.ry());
+            if (Y1.size())
+                m_state.rawPos.Y = Y1.toString();
+            parseNumber(Y1, m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
         }
 
         {
-            if (!match.captured(X2).isEmpty())
-                m_state.rawPos.X = match.captured(X2);
-            parseNumber(match.captured(X2), m_state.pos.rx());
+            if (X2.size())
+                m_state.rawPos.X = X2.toString();
+            parseNumber(X2, m_state.pos.rx());
 
-            if (!match.captured(Y2).isEmpty())
-                m_state.rawPos.Y = match.captured(Y2);
-            parseNumber(match.captured(Y2), m_state.pos.ry());
+            if (Y2.size())
+                m_state.rawPos.Y = Y2.toString();
+            parseNumber(Y2, m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
@@ -352,16 +345,15 @@ bool Parser::parseSlot(const QString& line)
 
 bool Parser::parseRepeat(const QString& line)
 {
-
-    QRegularExpression regex("^R(\\d+)"
-                             "(?:X([+-]?\\d*\\.?\\d+))?"
-                             "(?:Y([+-]?\\d*\\.?\\d+))?"
-                             "$");
-    if (auto match = regex.match(line); match.hasMatch()) {
-        int count = match.captured(1).toInt();
+    static constexpr auto regex = ctll::fixed_string("^R(\\d+)"
+                                                     "(?:X([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
+                                                     "$");
+    if (auto [whole, c1, c2, c3] = ctre::match<regex>(line); whole) {
+        int count = c1;
         QPointF p;
-        parseNumber(match.captured(2), p.rx());
-        parseNumber(match.captured(3), p.ry());
+        parseNumber(c2, p.rx());
+        parseNumber(c3, p.ry());
         for (int i = 0; i < count; ++i) {
             m_state.pos += p;
             file->append(Hole(m_state, file));
@@ -375,9 +367,9 @@ bool Parser::parseFormat(const QString& line)
 {
     static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
-    static const QRegularExpression regex("^(METRIC|INCH).*(LZ|TZ)?$");
-    if (auto match = regex.match(line); match.hasMatch()) {
-        switch (unitMode.indexOf(match.captured(1))) {
+    static constexpr auto regex = ctll::fixed_string("^(METRIC|INCH).*(LZ|TZ)?$");
+    if (auto [whole, c1, c2] = ctre::match<regex>(line); whole) {
+        switch (unitMode.indexOf(c1)) {
         case Inches:
             file->m_format.unitMode = Inches;
             break;
@@ -387,7 +379,7 @@ bool Parser::parseFormat(const QString& line)
         default:
             break;
         }
-        switch (zeroMode.indexOf(match.captured(2))) {
+        switch (zeroMode.indexOf(c2)) {
         case LeadingZeros:
             file->m_format.zeroMode = LeadingZeros;
             break;
@@ -399,13 +391,12 @@ bool Parser::parseFormat(const QString& line)
         }
         return true;
     }
-    static const QRegularExpression regex2("^(FMAT).*(2)?$");
-    if (auto match = regex2.match(line); match.hasMatch()) {
+    static constexpr auto regex2 = ctll::fixed_string("^(FMAT).*(2)?$");
+    if (auto [whole, c1, c2] = ctre::match<regex2>(line); whole) {
         file->m_format.unitMode = Inches;
         file->m_format.zeroMode = LeadingZeros;
         return true;
     }
-
     return false;
 }
 
@@ -474,7 +465,6 @@ void Parser::circularRout()
 
 QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center)
 {
-
     double radius = sqrt(pow((center.x() - p1.x()), 2) + pow((center.y() - p1.y()), 2));
     double start = atan2(p1.y() - center.y(), p1.x() - center.x());
     double stop = atan2(p2.y() - center.y(), p2.x() - center.x());
@@ -537,4 +527,6 @@ double Parser::parseNumber(QString Str, const State& state)
         return val;
     }
     return val;
+}
+
 }

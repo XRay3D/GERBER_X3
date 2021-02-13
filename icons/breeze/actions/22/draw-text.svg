@@ -56,7 +56,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
   </defs>
@@ -76,5 +76,5 @@
      sodipodi:nodetypes="ccccccccc"
      id="path28"
      d="m 6,6 v 2 h 4 v 8 h 2 V 8 h 4 V 6 H 6"
-     style="fill:#4d4d4d;fill-opacity:1;stroke:none" />
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none" />
 </svg>

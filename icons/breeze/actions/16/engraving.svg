@@ -58,11 +58,11 @@
        inkscape:collect="always"
        id="linearGradient863">
       <stop
-         style="stop-color:#4d4d4d;stop-opacity:1;"
+         style="stop-color:#c0c0c0;stop-opacity:1;"
          offset="0"
          id="stop859" />
       <stop
-         style="stop-color:#4d4d4d;stop-opacity:0;"
+         style="stop-color:#c0c0c0;stop-opacity:0;"
          offset="1"
          id="stop861" />
     </linearGradient>
@@ -70,7 +70,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
     <linearGradient
@@ -84,7 +84,7 @@
        gradientUnits="userSpaceOnUse" />
   </defs>
   <path
-     style="fill:none;stroke:#4d4d4d;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     style="fill:none;stroke:#c0c0c0;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      d="M 3.5,2 V 4 L 7,13.5 H 8.8220339 L 12.5,4 V 2"
      id="path819"
      inkscape:connector-curvature="0"

@@ -76,8 +76,8 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor)
 
 void GraphicsItem::setVisible(bool visible)
 {
-    if (visible == isVisible() && (visible && opacity() < 1.0))
-        return;
+    //    if (visible == isVisible() && (visible && opacity() < 1.0))
+    //        return;
     visibleA.setStartValue(visible ? 0.0 : 1.0);
     visibleA.setEndValue(visible ? 1.0 : 0.0);
     visibleA.start();

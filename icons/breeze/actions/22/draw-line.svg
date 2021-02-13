@@ -56,12 +56,12 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
   </defs>
   <path
-     style="fill:#4d4d4d;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.05;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:#c0c0c0;stroke-width:1.05;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
      d="M 4,18 18,4"
      id="path837"
      inkscape:connector-curvature="0"

@@ -138,6 +138,7 @@ set(SOURCE
     point.cpp
     recent.cpp
     settingsdialog.cpp
+    style.cpp
     )
 
 set(HEADERS
@@ -150,6 +151,7 @@ set(HEADERS
     recent.h
     settingsdialog.h
     splashscreen.h
+    style.h
     version.h
     )
 
@@ -160,7 +162,6 @@ set(UI
     mainwindow.ui
     settingsdialog.ui
     )
-
 
 add_executable(${PROJECT_NAME}
     ${TS_FILES}
