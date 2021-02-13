@@ -59,13 +59,13 @@
      d="M 13 3.2597656 L 13 4.2949219 A 7 7 0 0 1 17.701172 9 L 18.734375 9 A 8 8 0 0 0 13 3.2597656 z M 9 3.265625 A 8 8 0 0 0 3.2675781 9 L 4.2949219 9 A 7 7 0 0 1 9 4.2988281 L 9 3.265625 z M 3.265625 13 A 8 8 0 0 0 9 18.740234 L 9 17.705078 A 7 7 0 0 1 4.2988281 13 L 3.265625 13 z M 17.705078 13 A 7 7 0 0 1 13 17.701172 L 13 18.734375 A 8 8 0 0 0 18.732422 13 L 17.705078 13 z "
      id="path831" />
   <circle
-     style="fill:#4d4d4d;fill-opacity:0.50196078;stroke:none;stroke-width:4.85538626"
+     style="fill:#c0c0c0;fill-opacity:0.50196078;stroke:none;stroke-width:4.85538626"
      id="path833"
      cx="11"
      cy="11"
      r="5" />
   <path
-     style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:5.6571331"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none;stroke-width:5.6571331"
      d="M 11 5 A 6 6 0 0 0 5 11 A 6 6 0 0 0 11 17 A 6 6 0 0 0 17 11 A 6 6 0 0 0 11 5 z M 11 6 A 5 5 0 0 1 16 11 A 5 5 0 0 1 11 16 A 5 5 0 0 1 6 11 A 5 5 0 0 1 11 6 z "
      id="path835" />
 </svg>

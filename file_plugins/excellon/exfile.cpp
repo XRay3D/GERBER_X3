@@ -78,13 +78,11 @@ void File::setFormat(const Format& value)
 
 double File::tool(int t) const
 {
-    double tool = 0.0;
     if (m_tools.contains(t)) {
-        tool = m_tools.at(t);
-        if (m_format.unitMode == Inches)
-            tool *= 25.4;
+        return m_format.unitMode == Inches ? m_tools.at(t) * 25.4
+                                           : m_tools.at(t);
     }
-    return tool;
+    return {};
 }
 
 Tools File::tools() const
@@ -136,6 +134,7 @@ void File::createGi()
 void File::initFrom(FileInterface* file)
 {
     FileInterface::initFrom(file);
+    setFormat(static_cast<File*>(file)->format());
     static_cast<Excellon::Node*>(m_node)->file = this;
 }
 

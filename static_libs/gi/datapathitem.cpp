@@ -41,12 +41,15 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     for (const Path& tmpPath : qAsConst(tmpPaths))
         m_selectionShape.addPolygon(tmpPath);
     {
-        //        auto [min, max] = std::ranges::minmax(path);
-        //        m_boundingRect = QRectF(rl * dScale, rt * dScale, (rr - rl) * dScale, (rb - rt) * dScale)
-        Clipper clipper;
-        clipper.AddPath(path, ptClip);
-        auto [rl, rt, rr, rb] = clipper.GetBounds();
-        m_boundingRect = QRectF(rl * dScale, rt * dScale, (rr - rl) * dScale, (rb - rt) * dScale);
+        IntPoint min { std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max() };
+        IntPoint max { std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min() };
+        for (auto pt : path) {
+            min.X = std::min(min.X, pt.X);
+            min.Y = std::min(min.Y, pt.Y);
+            max.X = std::max(max.X, pt.X);
+            max.Y = std::max(max.Y, pt.Y);
+        }
+        m_boundingRect = QRectF(min.X * dScale, min.Y * dScale, (max.X - min.X) * dScale, (max.Y - min.Y) * dScale);
     }
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);

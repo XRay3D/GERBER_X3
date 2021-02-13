@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
         setStyleSheet("QGroupBox, .QFrame {"
-                      "background-color: white;"
+                      //"background-color: white;"
                       "border: 1px solid gray; }"
                       "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
                       "QGroupBox::title {"
@@ -143,11 +143,12 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if (1) {
-            QDir dir("D:/Gerber Test Files/CopperCAM/");
-            //QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
+            //QDir dir("D:/Gerber Test Files/CopperCAM/");
+            QDir dir("D:/Gerber Test Files/Ucamco/20191107_ciaa_acc/ciaa_acc");
+            //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList { "*.gbr", "*.exl" }, QDir::Files);
+                listFiles = dir.entryList(QStringList { "*.exc", "*.gbr" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;
@@ -156,7 +157,7 @@ MainWindow::MainWindow(QWidget* parent)
         }
 
         //        QTimer::singleShot(++i * 200, [this] { selectAll(); });
-        //        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
+        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
         //        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }

@@ -45,6 +45,20 @@ enum WorkMode {
     RouteMode,
 };
 
+/*
+FMAT 1      FMAT 2  Explanation
+G81         G05     turn on drill mode.
+M02         M00     End of Program
+M24         M01     End of Pattern
+M26         M02     Repeat Pattern Offset (this is followed by a #X#Y to indicate the number of repeats in X and Y
+M01         M06     Optional Stop
+M27         M08     End of Step and Repeat
+M00         M09     Stop for Inspection
+M26X#Y#M21  M02X#Y#M80
+M26X#Y#M22  M02X#Y#M90
+R#M26       R#M22
+*/
+
 enum MCode {
     M_NULL = -1,
     M00 = 0, //  End of Program - No Rewind (X#Y#)

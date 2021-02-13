@@ -56,7 +56,7 @@
        id="current-color-scheme"
        type="text/css">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
   </defs>
@@ -66,7 +66,7 @@
     <path
        transform="translate(421.71,531.79)"
        d="M 3.6484375 3.8828125 A 6 6 0 0 0 2 8 A 6 6 0 0 0 8 14 A 6 6 0 0 0 14 8 L 13 8 A 5 5 0 0 1 8 13 A 5 5 0 0 1 3 8 A 5 5 0 0 1 4.4179688 4.5195312 L 3.6484375 3.8828125 z "
-       style="fill:#4d4d4d;fill-opacity:1;stroke:none"
+       style="fill:#c0c0c0;fill-opacity:1;stroke:none"
        id="path4" />
     <circle
        r="1"

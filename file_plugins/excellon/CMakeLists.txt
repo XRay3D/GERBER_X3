@@ -36,6 +36,7 @@ add_library(excellon SHARED
     excellon.h
     excellondialog.h
     exfile.h
+    exh.h
     exnode.h
     exparser.h
     explugin.h
@@ -44,6 +45,7 @@ add_library(excellon SHARED
     excellondialog.cpp
     exfile.cpp
     exformatstate.cpp
+    exh.cpp
     exnode.cpp
     exparser.cpp
     explugin.cpp

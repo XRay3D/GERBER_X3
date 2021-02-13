@@ -2994,11 +2994,11 @@ template <size_t Id, typename Name = void> struct captured_content {
         }
         template<class = std::enable_if_t<std::is_same_v<char_type, char8_t>>>
         constexpr CTRE_FORCE_INLINE /*explicit*/ operator QByteArray() const {
-            return QByteArray(data(), size());
+            return toByteArray();
         }
         template<class  = std::enable_if_t<std::is_same_v<char_type, char16_t>>>
         constexpr CTRE_FORCE_INLINE /*explicit*/ operator QString() const {
-            return QString(reinterpret_cast<const QChar*>(data()), size());
+            return toString();
         }
 
         constexpr int toInt(bool* fl = nullptr) const noexcept {
@@ -3032,11 +3032,13 @@ template <size_t Id, typename Name = void> struct captured_content {
         }
         template<class = std::enable_if_t<std::is_same_v<char_type, char8_t>>>
         constexpr QByteArray toByteArray() const {
-            return QByteArray(data(), size());
+            return _matched ? QByteArray(data(), size())
+                            : QByteArray{};
         }
         template<class  = std::enable_if_t<std::is_same_v<char_type, char16_t>>>
         constexpr QString toString() const {
-            return QString(reinterpret_cast<const QChar*>(data()), size());
+            return _matched ? QString(reinterpret_cast<const QChar*>(data()), size())
+                            : QString{};
         }
 
 		constexpr CTRE_FORCE_INLINE const auto * data_unsafe() const noexcept {

@@ -23,6 +23,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QStyleFactory>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
 #endif
@@ -34,6 +35,7 @@
 #include <QSystemSemaphore>
 
 #include "leakdetector.h"
+#include "style.h"
 
 class ProxyStyle : public QProxyStyle {
     //Q_OBJECT
@@ -199,9 +201,53 @@ int main(int argc, char** argv)
     QApplication::setOrganizationName("settings" /*VER_COMPANYNAME_STR*/);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
+    //    QApplication::setStyle(new Style);
+
     QApplication app(argc, argv);
 
-    // QApplication::setStyle(new ProxyStyle(QApplication::style()));
+    //#ifdef Q_OS_WIN
+    //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
+    //    if (settings.value("AppsUseLightTheme") == 0) {
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    QPalette darkPalette;
+
+    const QColor darkColor = QColor(50, 50, 50);
+    const QColor disabledColor = QColor(127, 127, 127);
+    const QColor linkColor = QColor(61, 174, 233);
+    const QColor highlightColor = QColor(218, 68, 83);
+    const QColor windowTextColor = QColor(220, 220, 220);
+    const QColor baseColor = QColor(30, 30, 30);
+
+    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
+    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
+
+    darkPalette.setColor(QPalette::Text, windowTextColor);
+    darkPalette.setColor(QPalette::ToolTipText, windowTextColor);
+    darkPalette.setColor(QPalette::WindowText, windowTextColor);
+    darkPalette.setColor(QPalette::ButtonText, windowTextColor);
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+
+    darkPalette.setColor(QPalette::Link, linkColor);
+    darkPalette.setColor(QPalette::LinkVisited, highlightColor);
+
+    darkPalette.setColor(QPalette::AlternateBase, darkColor);
+    darkPalette.setColor(QPalette::Base, baseColor);
+    darkPalette.setColor(QPalette::Button, darkColor);
+
+    darkPalette.setColor(QPalette::Highlight, highlightColor);
+
+    darkPalette.setColor(QPalette::ToolTipBase, windowTextColor);
+    darkPalette.setColor(QPalette::Window, darkColor);
+
+    qApp->setPalette(darkPalette);
+    //        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    //    }
+    //#endif
+
+    //    QApplication::setStyle(new ProxyStyle(QApplication::style()));
 
     App a;
 

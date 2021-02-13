@@ -64,7 +64,7 @@
     <path
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        d="M 15 15 L 15 60 L 60 60 L 60 15 L 15 15 z M 16 16 L 59 16 L 59 59 L 16 59 L 16 16 z "
-       style="stroke-width:0.989072;fill:#4d4d4d;fill-opacity:1"
+       style="stroke-width:0.989072;fill:#c0c0c0;fill-opacity:1"
        id="rect14" />
     <path
        sodipodi:nodetypes="ccccccccccccccccc"
@@ -85,7 +85,7 @@
        cy="283.3739"
        cx="-9.9218178"
        id="path22"
-       style="fill:#4d4d4d;stroke-width:0.26458335;fill-opacity:1" />
+       style="fill:#c0c0c0;stroke-width:0.26458335;fill-opacity:1" />
     <circle
        transform="scale(-1,1)"
        r="1.7197917"

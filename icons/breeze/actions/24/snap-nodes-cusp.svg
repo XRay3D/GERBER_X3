@@ -58,7 +58,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       .ColorScheme-Highlight {
         color:#3daee9;
@@ -66,11 +66,11 @@
       </style>
   </defs>
   <path
-     style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none;stroke-opacity:1"
      d="M 7 7 L 7 17 L 17 17 L 17 7 L 7 7 z M 8 8 L 16 8 L 16 16 L 8 16 L 8 8 z "
      id="rect892" />
   <rect
-     style="fill:#4d4d4d;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:0.50196081;stroke:none;stroke-opacity:1"
      id="rect897"
      width="8"
      height="8"

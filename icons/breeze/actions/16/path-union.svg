@@ -55,37 +55,37 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       </style>
   </defs>
   <path
-     style="color:#4d4d4d;fill:currentColor;fill-opacity:0.5;stroke:none;stroke-width:1.00341225"
+     style="color:#c0c0c0;fill:currentColor;fill-opacity:0.5;stroke:none;stroke-width:1.00341225"
      d="M 9.4999993,2.972656 A 3.5000002,3.523926 0 0 0 5.9999991,6.496582 3.5000002,3.523926 0 0 0 6.0390622,7 H 3 v 6.041016 H 8.9999998 V 9.9792116 a 3.5000002,3.523926 0 0 0 0.5,0.0413 A 3.5000002,3.523926 0 0 0 13,6.496586 3.5000002,3.523926 0 0 0 9.4999998,2.97266 Z"
      id="path6"
      inkscape:connector-curvature="0" />
   <path
-     style="color:#4d4d4d;fill:currentColor;fill-opacity:1;stroke:none"
+     style="color:#c0c0c0;fill:currentColor;fill-opacity:1;stroke:none"
      d="M 9.5039062 2 A 4.5 4.5 0 0 0 5.0371094 6 L 2 6 L 2 14 L 10 14 L 10 10.970703 A 4.5 4.5 0 0 0 14.003906 6.5 A 4.5 4.5 0 0 0 9.5039062 2 z M 9.5 3 A 3.5 3.5 0 0 1 13 6.5 A 3.5 3.5 0 0 1 9.5 10 A 3.5 3.5 0 0 1 9 9.9589844 L 9 13 L 3 13 L 3 7 L 6.0390625 7 A 3.5 3.5 0 0 1 6 6.5 A 3.5 3.5 0 0 1 9.5 3 z "
      id="path906" />
   <path
-     style="color:#4d4d4d;fill:currentColor;fill-opacity:1;stroke:none"
+     style="color:#c0c0c0;fill:currentColor;fill-opacity:1;stroke:none"
      d="M 8,7 V 6 H 6.999999 v 1 z"
      id="path927" />
   <path
-     style="color:#4d4d4d;fill:currentColor;fill-opacity:1;stroke:none"
+     style="color:#c0c0c0;fill:currentColor;fill-opacity:1;stroke:none"
      d="M 10,7 V 6 H 9 v 1 z"
      id="path925" />
   <path
-     style="color:#4d4d4d;fill:currentColor;fill-opacity:1;stroke:none"
+     style="color:#c0c0c0;fill:currentColor;fill-opacity:1;stroke:none"
      d="M 10,9 V 8 H 9 v 1 z"
      id="path923" />
   <path
-     style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348"
+     style="fill:#c0c0c0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348"
      d="M 6.2871089,7.8789056 5.314453,8.1386712 A 4.4999998,4.4999995 0 0 0 5.986328,9.3046866 L 6.701172,8.5917962 A 3.4999998,3.4999996 0 0 1 6.2871089,7.8789056 Z"
      id="path4691" />
   <path
-     style="fill:#4d4d4d;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348"
+     style="fill:#c0c0c0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.00427348"
      d="M 7.408203,9.2988272 6.697266,10.009765 a 4.4999998,4.4999995 0 0 0 1.164062,0.675781 L 8.1210937,9.7128897 A 3.4999998,3.4999996 0 0 1 7.408203,9.2988272 Z"
      id="path931" />
 </svg>

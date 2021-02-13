@@ -57,7 +57,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#4d4d4d;
+        color:#c0c0c0;
       }
       .ColorScheme-Highlight {
         color:#3daee9;
@@ -65,7 +65,7 @@
       </style>
   </defs>
   <path
-     style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-opacity:1"
+     style="fill:#c0c0c0;fill-opacity:1;stroke:none;stroke-opacity:1"
      d="M 20,4 V 20 H 4 V 4 Z M 19,5 H 5 v 14 h 14 z"
      id="rect823"
      inkscape:connector-curvature="0" />
