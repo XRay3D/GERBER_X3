@@ -40,6 +40,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
         QFont boldFont = interfaceItem->font(0);
         boldFont.setBold(true);
+        interfaceItem->setIcon(0, decoration(Qt::lightGray, 'F'));
         interfaceItem->setFont(0, boldFont);
         interfaceItem->setExpanded(true);
         for (auto& [type, tuple] : App::filePlugins()) {
@@ -47,7 +48,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
             auto json(parser->info());
             auto featureItem = new QTreeWidgetItem(interfaceItem);
             featureItem->setExpanded(true);
-            //                featureItem->setIcon(0, "featureIcon");
+            featureItem->setIcon(0, decoration(Qt::lightGray, json.value("Name").toString()[0]));
             featureItem->setText(0, json.value("Name").toString());
             featureItem->setText(1, json.value("Version").toString());
             featureItem->setText(2, json.value("VendorAuthor").toString());
@@ -60,6 +61,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         auto interfaceItem = new QTreeWidgetItem(treeWidget, { "Shape Plugins", "", "" });
         QFont boldFont = interfaceItem->font(0);
         boldFont.setBold(true);
+        interfaceItem->setIcon(0, decoration(Qt::lightGray, 'S'));
         interfaceItem->setFont(0, boldFont);
         interfaceItem->setExpanded(true);
         for (auto& [type, tuple] : App::shapePlugins()) {
@@ -67,7 +69,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
             auto json(shape->info());
             auto featureItem = new QTreeWidgetItem(interfaceItem);
             featureItem->setExpanded(true);
-            //                featureItem->setIcon(0, "featureIcon");
+            featureItem->setIcon(0, shape->icon());
             featureItem->setText(0, json.value("Name").toString());
             featureItem->setText(1, json.value("Version").toString());
             featureItem->setText(2, json.value("VendorAuthor").toString());
