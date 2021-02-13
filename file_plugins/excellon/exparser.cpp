@@ -18,12 +18,17 @@
 
 #include "app.h"
 #include "interfaces/file.h"
+#include "interfaces/pluginfile.h"
+
+#include <ctre.hpp>
 
 #include <QFile>
-#include <QRegularExpression>
 #include <cmath>
 
 #include "leakdetector.h"
+
+//struct QRegularExpression {
+//};
 
 using namespace Excellon;
 

@@ -39,7 +39,7 @@ void GCH::highlightBlock(const QString& text)
     using namespace std::string_view_literals;
     static constexpr auto pattern = ctll::fixed_string("([GXYZFSM])([\\+\\-]?\\d+\\.?\\d*)");
     auto data = reinterpret_cast<const char16_t*>(text.data());
-    for (auto m : ctre::range<pattern>(data)) {
+    for (auto m : ctre::range<pattern>(text)) {
         static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
         myClassFormat.setForeground(color[key.indexOf(*m.data())]);
         setFormat(std::distance(data, m.data()), m.size(), myClassFormat);

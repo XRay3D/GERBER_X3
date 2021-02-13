@@ -130,14 +130,11 @@ bool Plugin::thisIsIt(const QString& fileName)
 {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
+        static constexpr auto pattern = ctll::fixed_string("%FS[LTD]?[AI]X\\d{2}Y\\d{2}\\*");
         QTextStream in(&file);
         QString line;
         while (in.readLineInto(&line)) {
-            using namespace ctre::literals;
-            if (auto m = ctre::match<"^%(FS[LTD]?[AI]X\\d{2}Y\\d{2})\\*%$">(line.toStdString()))
-                return true;
-            static const QRegularExpression match(QStringLiteral("%FS[LTD]?[AI]X\\d{2}Y\\d{2}\\*%"));
-            if (line.startsWith('%') && match.match(line).hasMatch())
+            if (*ctre::range<pattern>(line).begin())
                 return true;
         }
     }

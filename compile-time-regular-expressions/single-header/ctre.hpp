@@ -4723,45 +4723,45 @@ template <typename RE, typename Method, typename Modifier> struct regular_expres
 	constexpr CTRE_FORCE_INLINE static auto exec() noexcept {
 		return Method::template exec();
 	}
-	template <typename IteratorBegin, typename IteratorEnd> constexpr CTRE_FORCE_INLINE static auto exec(IteratorBegin begin, IteratorEnd end) noexcept {
-		return Method::template exec<Modifier>(begin, end, RE{});
-	}
-	static constexpr CTRE_FORCE_INLINE auto exec(const char * s) noexcept {
-		return Method::template exec<Modifier>(s, zero_terminated_string_end_iterator(), RE{});
-	}
-	static constexpr CTRE_FORCE_INLINE auto exec(const wchar_t * s) noexcept {
-		return Method::template exec<Modifier>(s, zero_terminated_string_end_iterator(), RE{});
-	}
-	static constexpr CTRE_FORCE_INLINE auto exec(std::string_view sv) noexcept {
-		return exec(sv.begin(), sv.end());
-	}
-	static constexpr CTRE_FORCE_INLINE auto exec(std::wstring_view sv) noexcept {
-		return exec(sv.begin(), sv.end());
-	}
-#if __cpp_char8_t >= 201811
-	static constexpr CTRE_FORCE_INLINE auto exec(std::u8string_view sv) noexcept {
-		return exec_with_result_iterator<const char8_t *>(utf8_range(sv).begin(), utf8_range(sv).end());
-	}
-#endif
-	static constexpr CTRE_FORCE_INLINE auto exec(std::u16string_view sv) noexcept {
-		return exec(sv.begin(), sv.end());
-	}
-	static constexpr CTRE_FORCE_INLINE auto exec(std::u32string_view sv) noexcept {
-		return exec(sv.begin(), sv.end());
-	}
+    template <typename IteratorBegin, typename IteratorEnd> constexpr CTRE_FORCE_INLINE static auto exec(IteratorBegin begin, IteratorEnd end) noexcept {
+        return Method::template exec<Modifier>(begin, end, RE{});
+    }
+//	static constexpr CTRE_FORCE_INLINE auto exec(const char * s) noexcept {
+//		return Method::template exec<Modifier>(s, zero_terminated_string_end_iterator(), RE{});
+//	}
+//	static constexpr CTRE_FORCE_INLINE auto exec(const wchar_t * s) noexcept {
+//		return Method::template exec<Modifier>(s, zero_terminated_string_end_iterator(), RE{});
+//	}
+//	static constexpr CTRE_FORCE_INLINE auto exec(std::string_view sv) noexcept {
+//		return exec(sv.begin(), sv.end());
+//	}
+//	static constexpr CTRE_FORCE_INLINE auto exec(std::wstring_view sv) noexcept {
+//		return exec(sv.begin(), sv.end());
+//	}
+//#if __cpp_char8_t >= 201811
+//	static constexpr CTRE_FORCE_INLINE auto exec(std::u8string_view sv) noexcept {
+//		return exec_with_result_iterator<const char8_t *>(utf8_range(sv).begin(), utf8_range(sv).end());
+//	}
+//#endif
+    static constexpr CTRE_FORCE_INLINE auto exec(std::u16string_view sv) noexcept {
+        return exec(sv.begin(), sv.end());
+    }
+//	static constexpr CTRE_FORCE_INLINE auto exec(std::u32string_view sv) noexcept {
+//		return exec(sv.begin(), sv.end());
+//	}
     //xr
-    static constexpr CTRE_FORCE_INLINE auto exec(const QByteArray& ba) noexcept {
+    static constexpr CTRE_FORCE_INLINE auto exec(const QByteArray &ba) noexcept {
         std::u8string_view sv { reinterpret_cast<const char8_t*>(ba.data()), static_cast<size_t>(ba.size()) };
         return exec_with_result_iterator<const char8_t*>(utf8_range(sv).begin(), utf8_range(sv).end());
     }
-    static constexpr CTRE_FORCE_INLINE auto exec(const QString& str) noexcept {
+    static constexpr CTRE_FORCE_INLINE auto exec(QStringView str) noexcept {
         std::u16string_view sv { reinterpret_cast<const char16_t*>(str.data()), static_cast<size_t>(str.size()) };
         return exec(sv);
     }
 
-    template <typename Range, typename = typename std::enable_if<RangeLikeType<Range>::value>::type> static constexpr CTRE_FORCE_INLINE auto exec(Range && range) noexcept {
-        return exec(std::begin(range), std::end(range));
-	}
+//  template <typename Range, typename = typename std::enable_if<RangeLikeType<Range>::value>::type> static constexpr CTRE_FORCE_INLINE auto exec(Range && range) noexcept {
+//        return exec(std::begin(range), std::end(range));
+//	}
 	
 	// another api
 	template <typename... Args> CTRE_FORCE_INLINE constexpr auto operator()(Args && ... args) const noexcept {
@@ -4774,7 +4774,7 @@ template <typename RE, typename Method, typename Modifier> struct regular_expres
 	// for compatibility with _ctre literal
 	template <typename... Args> static constexpr CTRE_FORCE_INLINE auto match(Args && ... args) noexcept {
 		return regular_expression<RE, match_method, singleline>::exec(std::forward<Args>(args)...);
-	}
+    }
 	template <typename... Args> static constexpr CTRE_FORCE_INLINE auto search(Args && ... args) noexcept {
 		return regular_expression<RE, search_method, singleline>::exec(std::forward<Args>(args)...);
 	}

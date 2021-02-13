@@ -22,8 +22,6 @@
 
 #include <QMenu>
 #include <QMessageBox>
-#include <QObject>
-#include <QWidget>
 
 #include <memory>
 
