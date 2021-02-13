@@ -104,6 +104,4 @@ protected:
     File* file = nullptr;
 };
 
-
-
 }

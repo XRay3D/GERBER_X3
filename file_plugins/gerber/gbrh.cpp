@@ -32,7 +32,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
     //myClassFormat.setFontWeight(QFont::Bold);
 
     static constexpr auto pattern2 = ctll::fixed_string("^%.+\\*%$");
-    for (auto m : ctre::range<pattern2>(data)) {
+    for (auto m : ctre::range<pattern2>(text)) {
         myClassFormat.setForeground(Qt::darkMagenta);
         setFormat(std::distance(data, m.data()), static_cast<int>(m.size()), myClassFormat);
     }
@@ -49,7 +49,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
 
     using namespace std::string_view_literals;
     static constexpr auto pattern = ctll::fixed_string("([DGIJMXY])([\\+\\-]?\\d+\\.?\\d*)");
-    for (auto m : ctre::range<pattern>(data)) {
+    for (auto m : ctre::range<pattern>(text)) {
         static const mvector key { 'D', 'G', 'I', 'J', 'M', 'X', 'Y' };
         myClassFormat.setForeground(color[key.indexOf(*m.data())]);
         setFormat(std::distance(data, m.data()), static_cast<int>(m.size()), myClassFormat);

@@ -64,8 +64,8 @@ include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}
     )
 
-#add_subdirectory(dxf)
-#add_subdirectory(excellon)
+add_subdirectory(dxf)
+add_subdirectory(excellon)
 add_subdirectory(gerber)
 
 

@@ -53,7 +53,6 @@ add_library(gerber SHARED
     gbrnode.h
     gbrparser.h
     gbrplugin.h
-    gbrregex.h
     gbrtypes.h
     mathparser.h
     compdialog.cpp

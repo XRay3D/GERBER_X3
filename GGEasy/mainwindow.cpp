@@ -143,10 +143,11 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if (1) {
-            QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
+            QDir dir("D:/Gerber Test Files/CopperCAM/");
+            //QDir dir("D:/Gerber Test Files/Ucamco/Gerber_File_Format_Examples 20200804");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList("*.gbr"), QDir::Files);
+                listFiles = dir.entryList(QStringList { "*.gbr", "*.exl" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;

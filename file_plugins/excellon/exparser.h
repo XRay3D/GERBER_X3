@@ -15,9 +15,8 @@
 
 #include "extypes.h"
 
-#include "interfaces/pluginfile.h"
-
 class FileInterface;
+class FilePluginInterface;
 
 namespace Excellon {
 
