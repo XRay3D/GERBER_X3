@@ -49,9 +49,11 @@ add_library(gerber SHARED
     gbrattributes.h
     gbrcomponent.h
     gbrfile.h
+    gbrh.h
     gbrnode.h
     gbrparser.h
     gbrplugin.h
+    gbrregex.h
     gbrtypes.h
     mathparser.h
     compdialog.cpp
@@ -65,6 +67,7 @@ add_library(gerber SHARED
     gbrattributes.cpp
     gbrcomponent.cpp
     gbrfile.cpp
+    gbrh.cpp
     gbrnode.cpp
     gbrparser.cpp
     gbrplugin.cpp

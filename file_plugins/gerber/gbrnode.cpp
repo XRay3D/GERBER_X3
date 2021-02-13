@@ -15,9 +15,9 @@
 *******************************************************************************/
 #include "gbrnode.h"
 #include "compdialog.h"
-//#include "gch.h"
 #include "ft_view.h"
 #include "gbrfile.h"
+#include "gbrh.h"
 #include "scene.h"
 
 #include <QAction>
@@ -206,12 +206,14 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));
-        dialog->resize(600, 600);
+        dialog->resize(800, 600);
         QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        //        new GCH(textBrowser->document());
+        new SyntaxHighlighter(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setFontFamily("JetBrains Mono");
+        textBrowser->setLineWrapMode(QTextEdit::NoWrap);
         verticalLayout->addWidget(textBrowser);
         QString s;
         s.reserve(1000000);

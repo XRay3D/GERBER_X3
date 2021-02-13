@@ -43,7 +43,7 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     connect(this, &GraphicsItem::colorChanged, [this] { update(); });
     visibleA.setDuration(100);
     visibleA.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(&visibleA, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleA.currentValue() > 0.9); });
+    connect(&visibleA, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleA.currentValue().toDouble() > 0.9); });
     QGraphicsItem::setVisible(false);
 }
 
@@ -76,7 +76,7 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor)
 
 void GraphicsItem::setVisible(bool visible)
 {
-    if (visible == isVisible())
+    if (visible == isVisible() && (visible && opacity() < 1.0))
         return;
     visibleA.setStartValue(visible ? 0.0 : 1.0);
     visibleA.setEndValue(visible ? 1.0 : 0.0);

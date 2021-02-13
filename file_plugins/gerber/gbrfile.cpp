@@ -332,7 +332,7 @@ void File::createGi()
     if (m_itemsType == NullType) {
         if /**/ (m_itemGroups[Components]->size())
             m_itemsType = Components;
-        else if (m_itemGroups[Normal]->size() && !zeroLine)
+        else if (m_itemGroups[Normal]->size())// && !zeroLine)
             m_itemsType = Normal;
         else
             m_itemsType = ApPaths;
