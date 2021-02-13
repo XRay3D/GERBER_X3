@@ -168,20 +168,7 @@ struct IntPoint {
         return { X * dScale, Y * dScale };
     }
 
-    friend inline bool operator<(const IntPoint& a, const IntPoint& b) noexcept
-    {
-        return std::tuple(a.X, a.Y) < std::tuple(b.X, b.Y);
-    }
-
-    friend inline bool operator==(const IntPoint& a, const IntPoint& b) noexcept
-    {
-        return a.X == b.X && a.Y == b.Y;
-    }
-
-    friend inline bool operator!=(const IntPoint& a, const IntPoint& b) noexcept
-    {
-        return a.X != b.X || a.Y != b.Y;
-    }
+    auto operator<=>(const IntPoint&) const noexcept = default;
 
     friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
     {

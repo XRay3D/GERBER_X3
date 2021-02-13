@@ -41,6 +41,8 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     for (const Path& tmpPath : qAsConst(tmpPaths))
         m_selectionShape.addPolygon(tmpPath);
     {
+        //        auto [min, max] = std::ranges::minmax(path);
+        //        m_boundingRect = QRectF(rl * dScale, rt * dScale, (rr - rl) * dScale, (rb - rt) * dScale)
         Clipper clipper;
         clipper.AddPath(path, ptClip);
         auto [rl, rt, rr, rb] = clipper.GetBounds();

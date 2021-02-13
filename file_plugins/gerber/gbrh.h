@@ -12,21 +12,20 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-
 #include <QSyntaxHighlighter>
 
 class QTextDocument;
 
-class GCH : public QSyntaxHighlighter {
+namespace Gerber {
+
+class SyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT
 public:
-    explicit GCH(QTextDocument* parent);
-
-signals:
+    explicit SyntaxHighlighter(QTextDocument* parent);
 
     // QSyntaxHighlighter interface
 protected:
     void highlightBlock(const QString& text) override;
-
-private:
 };
+
+}
