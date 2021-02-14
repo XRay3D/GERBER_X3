@@ -173,7 +173,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QS
 int main(int argc, char** argv)
 {
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && !defined(__GNUC__)
     HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);

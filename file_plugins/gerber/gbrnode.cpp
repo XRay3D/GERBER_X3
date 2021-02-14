@@ -25,6 +25,7 @@
 #include <QFileInfo>
 #include <QMenu>
 #include <QPainter>
+#include <QScrollBar>
 #include <QTextBrowser>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -207,19 +208,25 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));
         dialog->resize(800, 600);
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+
         QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        new SyntaxHighlighter(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         textBrowser->setFontFamily("JetBrains Mono");
         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
+        new SyntaxHighlighter(textBrowser->document());
+        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        verticalLayout->setMargin(6);
+#else
+        verticalLayout->setContentsMargins(6,6,6,6);
+#endif
         verticalLayout->addWidget(textBrowser);
         QString s;
         s.reserve(1000000);
         for (const QString& str : file->lines())
             s += str + '\n';
-        textBrowser->append(s);
+        textBrowser->setPlainText(s);
         dialog->exec();
         delete dialog;
     });
