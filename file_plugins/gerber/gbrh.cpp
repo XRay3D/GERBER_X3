@@ -33,25 +33,24 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
 
     static constexpr auto pattern2 = ctll::fixed_string("^%.+\\*%$");
     for (auto m : ctre::range<pattern2>(text)) {
-        myClassFormat.setForeground(Qt::darkMagenta);
+        myClassFormat.setForeground(QColor(0xFF, 0xFF, 0x00));
         setFormat(std::distance(data, m.data()), static_cast<int>(m.size()), myClassFormat);
+        return;
     }
 
-    static const mvector<QColor> color {
-        /*  D  */ QColor(255, 0, 0),
-        /*  G  */ QColor(0, 0, 0),
-        /*  I  */ QColor(0, 0, 127),
-        /*  J  */ QColor(127, 0, 127),
-        /*  M  */ QColor(0, 127, 127),
-        /*  X  */ QColor(127, 0, 0),
-        /*  Y  */ QColor(0, 127, 0),
+    static const std::map<QChar, QColor> color {
+        { 'D', QColor(0x00, 0xFF, 0xFF) },
+        { 'G', QColor(0x7F, 0x7F, 0x7F) },
+        { 'I', QColor(0x00, 0x00, 0xFF) },
+        { 'J', QColor(0xFF, 0x00, 0xFF) },
+        { 'M', QColor(0x00, 0xFF, 0xFF) },
+        { 'X', QColor(0xFF, 0x00, 0x00) },
+        { 'Y', QColor(0x00, 0xFF, 0x00) },
     };
-
     using namespace std::string_view_literals;
-    static constexpr auto pattern = ctll::fixed_string("([DGIJMXY])([\\+\\-]?\\d+\\.?\\d*)");
+    static constexpr auto pattern = ctll::fixed_string("[DGIJMXY][\\+\\-]?\\d+\\.?\\d*");
     for (auto m : ctre::range<pattern>(text)) {
-        static const mvector key { 'D', 'G', 'I', 'J', 'M', 'X', 'Y' };
-        myClassFormat.setForeground(color[key.indexOf(*m.data())]);
+        myClassFormat.setForeground(color.at(*m.data()));
         setFormat(std::distance(data, m.data()), static_cast<int>(m.size()), myClassFormat);
     }
 }

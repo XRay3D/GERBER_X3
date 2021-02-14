@@ -168,7 +168,18 @@ struct IntPoint {
         return { X * dScale, Y * dScale };
     }
 
+#ifdef __GNUC__
+    bool operator==(const IntPoint& L) const noexcept
+    {
+        return X == L.X && Y == L.Y;
+    }
+    bool operator!=(const IntPoint& L) const noexcept
+    {
+        return !(*this == L);
+    }
+#else
     auto operator<=>(const IntPoint&) const noexcept = default;
+#endif
 
     friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
     {
