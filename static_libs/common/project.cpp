@@ -368,7 +368,6 @@ int Project::addShape(Shapes::Shape* const shape)
     QMutexLocker locker(&m_mutex);
     if (!shape)
         return -1;
-    qDebug(__FUNCTION__);
     m_isPinsPlaced = false;
     const int newId = m_shapes.size()
         ? (--m_shapes.end())->first + 1

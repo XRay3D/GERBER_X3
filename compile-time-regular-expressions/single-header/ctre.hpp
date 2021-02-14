@@ -2998,33 +2998,39 @@ template <size_t Id, typename Name = void> struct captured_content {
             return toString();
         }
 
-        constexpr int toInt(bool* fl = nullptr) const noexcept {
+        constexpr int toInt(bool* fl = nullptr) const {
             int result {};
             if constexpr(std::is_same_v<char_type, char16_t>){
                 auto ar{ toString().toLocal8Bit() };
-                if (auto [p, ec] = std::from_chars(ar.data(), ar.data() + size(), result); fl) {
+                if (auto [p, ec] = std::from_chars(ar.data(), ar.data() + size(), result); fl)
                     *fl = ec == std::errc { };
-                }
             }else{
-                if (auto [p, ec] = std::from_chars(reinterpret_cast<const char*>(data()), reinterpret_cast<const char*>(data()) + size(), result); fl) {
+                if (auto [p, ec] = std::from_chars(reinterpret_cast<const char*>(data()), reinterpret_cast<const char*>(data()) + size(), result); fl)
                     *fl = ec == std::errc { };
-                }
             }
             return result;
         }
 
-        constexpr double toDouble(bool* fl = nullptr) const noexcept {
+        constexpr double toDouble(bool* fl = nullptr) const {
             double result {};
+#ifdef __GNUC__
+            if constexpr(std::is_same_v<char_type, char16_t>)
+                result = toString().toDouble(fl);
+            else
+                result = toByteArray().toDouble(fl);
+#else
+            const char* d{};
             if constexpr(std::is_same_v<char_type, char16_t>){
                 auto ar{ toString().toLocal8Bit() };
-                if (auto [p, ec] = std::from_chars(ar.data(), ar.data() + size(), result); fl) {
+                d = ar.data();
+                if (auto [p, ec] = std::from_chars(d, d + size(), result); fl)
                     *fl = ec == std::errc { };
-                }
             }else{
-                if (auto [p, ec] = std::from_chars(reinterpret_cast<const char*>(data()), reinterpret_cast<const char*>(data()) + size(), result); fl) {
+                d = data();
+                if (auto [p, ec] = std::from_chars(d, d + size(), result); fl)
                     *fl = ec == std::errc { };
-                }
             }
+#endif
             return result;
         }
         //template<class = std::enable_if_t<std::is_same_v<char_type, char8_t>>>
