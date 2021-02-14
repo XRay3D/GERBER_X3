@@ -13,6 +13,7 @@ Partial support for DXF files.
 
 * Windows: [x86](https://github.com/XRay3D/GERBER_X2/releases)
 * Windows: [amd64](https://github.com/XRay3D/GERBER_X2/releases)
+* Windows: [Test version(0.8.0 DXF)](https://disk.yandex.ru/d/L-laABnSVY4Ubw?w=1)
 
 СБЕР 4276 3801 0010 1497
 
