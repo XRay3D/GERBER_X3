@@ -21,6 +21,7 @@
 #include "project.h"
 #include <QDebug>
 #include <QSettings>
+#include <scene.h>
 
 #include "leakdetector.h"
 
@@ -47,9 +48,9 @@ ComponentsDialog::~ComponentsDialog()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("splitter", ui->splitter->saveState());
     settings.setValue("header", ui->componentsView->header()->saveState());
-    ui->graphicsView->scene()->clear();
     for (auto item : ui->graphicsView->scene()->items())
-        ui->graphicsView->scene()->removeItem(item);
+        App::scene()->addItem(item);
+    //ui->graphicsView->scene()->removeItem(item);
     delete ui;
 }
 

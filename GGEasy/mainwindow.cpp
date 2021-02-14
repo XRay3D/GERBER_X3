@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget* parent)
         );
     } else {
         setStyleSheet("QGroupBox, .QFrame {"
-                      "background-color: white;"
+                      //"background-color: white;"
                       "border: 1px solid gray;"
                       "border-radius: 3px; }" // Win 7 or other
                       "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */

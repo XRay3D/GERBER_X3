@@ -264,14 +264,12 @@ void Creator::createGc()
 
 void Creator::cancel() // direct connection!!
 {
-    qDebug(__FUNCTION__);
     setCancel(true);
     condition.wakeAll();
 }
 
 void Creator::proceed() // direct connection!!
 {
-    qDebug(__FUNCTION__);
     setCancel(false);
     condition.wakeAll();
 }

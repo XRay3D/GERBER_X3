@@ -248,7 +248,13 @@ int main(int argc, char** argv)
     //#endif
 
     //    QApplication::setStyle(new ProxyStyle(QApplication::style()));
-
+#ifdef linux
+    // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
+    // поэтому необходимо избавиться от данного мусора
+    QSharedMemory nixFixSharedMemory("AppSettings");
+    if (nixFixSharedMemory.attach())
+        nixFixSharedMemory.detach();
+#endif
     App a;
 
     QSettings::setDefaultFormat(QSettings::IniFormat);

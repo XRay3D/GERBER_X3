@@ -177,6 +177,10 @@ struct IntPoint {
     {
         return !(*this == L);
     }
+    bool operator<(const IntPoint& L) const noexcept
+    {
+        return std::tuple { X, Y } < std::tuple { L.X, L.Y };
+    }
 #else
     auto operator<=>(const IntPoint&) const noexcept = default;
 #endif
