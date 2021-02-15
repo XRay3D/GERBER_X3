@@ -17,19 +17,21 @@
 
 #include <QObject>
 
+class SourceDialog;
+
 namespace Gerber {
 
 class File;
 
-class Node : public QObject,
-             public FileTree::Node {
+class Node : public QObject, public FileTree::Node {
     friend class File;
     Q_OBJECT
 
     static QTimer m_decorationTimer;
     void repaint() const;
     Qt::CheckState m_current = Qt::Unchecked;
-    File* file;
+    File* file {};
+    mutable SourceDialog* dialog {};
 
 public:
     explicit Node(File* file, int* id);

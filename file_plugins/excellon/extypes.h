@@ -19,6 +19,14 @@
 class DrillItem;
 
 namespace Excellon {
+
+class ExcObj : public QObject {
+    Q_OBJECT
+public:
+    ExcObj() { }
+    virtual ~ExcObj() { }
+};
+
 #if _MSVC_LANG >= 201705L
 using Tools = std::map<int, double>;
 #else

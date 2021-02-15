@@ -41,6 +41,8 @@ add_library(common STATIC
     project.h
     settings.cpp
     settings.h
+    sourcedialog.cpp
+    sourcedialog.h
     )
 
 target_link_libraries(common PRIVATE

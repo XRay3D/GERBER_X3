@@ -16,6 +16,7 @@
 #include "ft_node.h"
 
 class ExcellonDialog;
+class SourceDialog;
 
 namespace Excellon {
 
@@ -25,6 +26,7 @@ class Node : public FileTree::Node {
     mutable ExcellonDialog* m_exFormatDialog = nullptr;
     friend class File;
     File* file;
+    mutable SourceDialog* dialog {};
 
 public:
     explicit Node(File* file, int* id);

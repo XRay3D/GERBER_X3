@@ -20,6 +20,8 @@
 #include "gbrh.h"
 #include "scene.h"
 
+#include <sourcedialog.h>
+
 #include <QAction>
 #include <QDialog>
 #include <QFileInfo>
@@ -170,67 +172,20 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.setToolTipDuration(0);
     menu.setToolTipsVisible(true);
-    //    File* file = file;
-    //    { //QActionGroup
-    //        menu.addSeparator();
-    //        QActionGroup* group = new QActionGroup(menu);
-    //        if (file->itemGroup(File::ApPaths)->size()) {
-    //            auto action = menu.addAction(GbrObj::tr("&Aperture paths"),
-    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::ApPaths)); });
-    //            action->setCheckable(true);
-    //            action->setChecked(file->itemsType() == File::ApPaths);
-    //            action->setToolTip(GbrObj::tr("Displays only aperture paths of copper\n"
-    //                                  "without width and without contacts."));
-    //            action->setActionGroup(group);
-    //        }
-    //        if (file->itemGroup(File::Components)->size()) {
-    //            auto action = menu.addAction(GbrObj::tr("&Components"),
-    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Components)); });
-    //            action->setCheckable(true);
-    //            action->setChecked(file->itemsType() == File::Components);
-    //            //            action->setToolTip("Displays only aperture paths of copper\n"
-    //            //                               "without width and without contacts.");
-    //            action->setActionGroup(group);
-    //        }
-    //        if (file->itemGroup(File::Normal)->size()) {
-    //            auto action = menu.addAction(GbrObj::tr("&Normal"),
-    //                [=](bool checked) { file->setItemType(static_cast<File::ItemsType>(checked * File::Normal)); });
-    //            action->setCheckable(true);
-    //            action->setChecked(file->itemsType() == File::Normal);
-    //            //            action->setToolTip("Displays only aperture paths of copper\n"
-    //            //                               "without width and without contacts.");
-    //            action->setActionGroup(group);
-    //        }
-    //        menu.addSeparator();
-    //    }
-
-    menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
-        QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
-        dialog->resize(800, 600);
-
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setFontFamily("JetBrains Mono");
-        textBrowser->setLineWrapMode(QTextEdit::NoWrap);
-        new SyntaxHighlighter(textBrowser->document());
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        verticalLayout->setMargin(6);
-#else
-        verticalLayout->setContentsMargins(6,6,6,6);
-#endif
-        verticalLayout->addWidget(textBrowser);
-        QString s;
-        s.reserve(1000000);
-        for (const QString& str : file->lines())
-            s += str + '\n';
-        textBrowser->setPlainText(s);
-        dialog->exec();
-        delete dialog;
-    });
-
+    if (!dialog)
+        menu.addAction(QIcon(), GbrObj::tr("&Show source"), [tv, this] {
+            dialog = new SourceDialog(file, new SyntaxHighlighter(nullptr));
+            dialog->restoreGeometry(tv->saveGeometry());
+            dialog->move(tv->mapToGlobal({}));
+            dialog->setObjectName(QString::fromUtf8("dialog"));
+            if constexpr (true) {
+                connect(dialog, &QDialog::finished, [this] {qDebug(""); dialog->deleteLater(), dialog = {}; });
+                dialog->show();
+            } else {
+                dialog->exec();
+                delete dialog;
+            }
+        });
     if (!file->itemGroup(File::Components)->empty()) {
         menu.addAction(QIcon(), GbrObj::tr("Show &Components"), [this, tv] {
             ComponentsDialog dialog(tv);

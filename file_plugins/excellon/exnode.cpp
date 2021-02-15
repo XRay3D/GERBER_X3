@@ -20,6 +20,7 @@
 #include "exh.h"
 #include "forms/drillform/drillform.h"
 #include "ft_view.h"
+#include <sourcedialog.h>
 
 #include <QBoxLayout>
 #include <QIcon>
@@ -114,23 +115,20 @@ QVariant Node::data(const QModelIndex& index, int role) const
 void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
-    menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
-        QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
-        dialog->resize(600, 600);
-        //Dialog->resize(400, 300);
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        textBrowser->setFont(QFont("JetBrains Mono"));
-        new SyntaxHighlighter(textBrowser->document());
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        verticalLayout->addWidget(textBrowser);
-        for (const QString& str : file->lines())
-            textBrowser->append(str);
-        dialog->exec();
-        delete dialog;
-    });
+    if (!dialog)
+        menu.addAction(QIcon(), ExcObj::tr("&Show source"), [tv, this] {
+            dialog = new SourceDialog(file, new SyntaxHighlighter(nullptr));
+            dialog->restoreGeometry(tv->saveGeometry());
+            dialog->move(tv->mapToGlobal({}));
+            dialog->setObjectName(QString::fromUtf8("dialog"));
+            if constexpr (true) {
+                ExcObj::connect(dialog, &QDialog::finished, [this] {qDebug(""); dialog->deleteLater(), dialog = {}; });
+                dialog->show();
+            } else {
+                dialog->exec();
+                delete dialog;
+            }
+        });
     menu.addSeparator();
     if (!m_exFormatDialog) {
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {

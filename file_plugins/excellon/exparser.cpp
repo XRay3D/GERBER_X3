@@ -102,8 +102,8 @@ FileInterface* Parser::parseFile(const QString& fileName)
 bool Parser::parseComment(const QString& line)
 {
     static constexpr auto regexComment = ctll::fixed_string("^;(.*)$");
-    static constexpr auto regexFormat = ctll::fixed_string(".*[FORMATformat].*(\\d{1}).(\\d{1}).*");
-    static constexpr auto regexTool = ctll::fixed_string("\\s*[HOLESIZEholesize]\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
+    static constexpr auto regexFormat = ctll::fixed_string(".*[FORMATformat]+.*(\\d{1}).(\\d{1}).*");
+    static constexpr auto regexTool = ctll::fixed_string("\\s*[HOLESIZEholesize]+\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
     if (auto [match, comment] = ctre::match<regexComment>(line); match) {
         if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
             qDebug() << "regexFormat" << matchFormat.data();
@@ -226,32 +226,22 @@ bool Parser::parseTCode(const QString& line)
                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
                                                      ".*$");
     static constexpr auto regex2 = ctll::fixed_string("^.+C(\\d*\\.?\\d+).*$");
-    if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(line); whole) {
+    if (auto [whole, tool, par1, val1, par2, val2, par3, val3] = ctre::match<regex>(line); whole) {
         m_state.tCode = tool;
-        if (auto [whole, diam] = *ctre::range<regex2>(line).begin(); whole) {
+        if (auto [whole, diam] = *ctre::range<regex2>(line).begin(); whole)
             file->m_tools[m_state.tCode] = diam;
-            return true;
-        }
+        return true;
     }
     return false;
 }
 
 bool Parser::parsePos(const QString& line)
 {
-
-    //    enum {
-    //        G = 1,
-    //        X,
-    //        Y,
-    //        A
-    //    };
-
     static constexpr auto regex = ctll::fixed_string("^(?:G(\\d+))?"
                                                      "(?:X([\\+\\-]?\\d*\\.?\\d*))?"
                                                      "(?:Y([\\+\\-]?\\d*\\.?\\d*))?"
                                                      "(?:A([\\+\\-]?\\d*\\.?\\d*))?"
                                                      ".*$");
-
     if (auto [whole, G, X, Y, A] = ctre::match<regex>(line); whole) {
         if (!X.size() && !Y.size())
             return false;
@@ -292,12 +282,6 @@ bool Parser::parsePos(const QString& line)
 
 bool Parser::parseSlot(const QString& line)
 {
-    //    enum {
-    //        X1 = 1,
-    //        Y1,
-    //        X2,
-    //        Y2
-    //    };
     static constexpr auto regex = ctll::fixed_string("^(?:X([\\+\\-]?\\d*\\.?\\d+))?"
                                                      "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
                                                      "G85"
@@ -391,7 +375,7 @@ bool Parser::parseFormat(const QString& line)
         }
         return true;
     }
-    static constexpr auto regex2 = ctll::fixed_string("^(FMAT).*(2)?$");
+    static constexpr auto regex2 = ctll::fixed_string("^(FMAT).*([12])?$");
     if (auto [whole, c1, c2] = ctre::match<regex2>(line); whole) {
         file->m_format.unitMode = Inches;
         file->m_format.zeroMode = LeadingZeros;
@@ -501,7 +485,6 @@ double Parser::parseNumber(QString Str, const State& state)
         if (Str.contains('.')) {
             val = Str.toDouble();
         } else {
-
             if (Str.startsWith('+')) {
                 Str.remove(0, 1);
                 sign = +1;
