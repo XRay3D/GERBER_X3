@@ -169,7 +169,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
         } // End of file parsing
 
-        qDebug() << (t.nsecsElapsed() * 0.000001) << "ms";
+        qDebug() << file->shortName() << t.elapsed() << "ms";
 
         //        for (auto [key, val] : rel)
         //            qDebug() << key << '\t' << val;
@@ -913,11 +913,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         return false;
 
     static constexpr auto ptrnCircularInterpolation = ctll::fixed_string("^(?:G0?([23]))?"
-                                                                                         "X?([\\+\\-]?\\d+)*"
-                                                                                         "Y?([\\+\\-]?\\d+)*"
-                                                                                         "I?([\\+\\-]?\\d+)*"
-                                                                                         "J?([\\+\\-]?\\d+)*"
-                                                                                         "[^D]*(?:D0?([12]))?\\*$");
+                                                                         "X?([\\+\\-]?\\d+)*"
+                                                                         "Y?([\\+\\-]?\\d+)*"
+                                                                         "I?([\\+\\-]?\\d+)*"
+                                                                         "J?([\\+\\-]?\\d+)*"
+                                                                         "[^D]*(?:D0?([12]))?\\*$");
     if (auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(gLine); whole) {
         if (!cg.size() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
