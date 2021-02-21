@@ -73,7 +73,8 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         clipper.AddPaths(src, ptClip);
         clipper.AddPath(frame, ptSubject, false);
         clipper.Execute(ctIntersection, scanLines);
-
+        if (!scanLines.size())
+            return scanLines;
         std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
         cInt start = scanLines.front().front().Y;
         bool fl = {};
@@ -94,6 +95,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         }
         return scanLines;
     };
+
     auto calcFrames = [](const Paths& src, const Path& frame) {
         Paths frames;
         {
@@ -210,28 +212,34 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                 for (auto& path : src)
                     RotatePath(path, angle);
                 auto zigzag { calcZigzag(src) };
-                auto merged { merge(calcScanLines(src, zigzag), calcFrames(src, zigzag)) };
-                for (auto& path : merged)
-                    RotatePath(path, -angle);
-                m_returnPs.append(merged);
-                qDebug() << "Run" << t.elapsed() << "ms";
+                auto scanLines { calcScanLines(src, zigzag) };
+                auto frames { calcFrames(src, zigzag) };
+                if (scanLines.size() && frames.size()) {
+                    auto merged { merge(scanLines, frames) };
+                    for (auto& path : merged)
+                        RotatePath(path, -angle);
+                    m_returnPs.append(merged);
+                }
             }
             {
                 for (auto& path : src)
                     RotatePath(path, 90);
                 auto zigzag { calcZigzag(src) };
-                auto merged { merge(calcScanLines(src, zigzag), calcFrames(src, zigzag)) };
-                for (auto& path : merged)
-                    RotatePath(path, -(angle + 90));
-                m_returnPs.append(merged);
-                qDebug() << "Run" << t.elapsed() << "ms";
+                auto scanLines { calcScanLines(src, zigzag) };
+                auto frames { calcFrames(src, zigzag) };
+                if (scanLines.size() && frames.size()) {
+                    auto merged { merge(scanLines, frames) };
+                    for (auto& path : merged)
+                        RotatePath(path, -(angle + 90));
+                    m_returnPs.append(merged);
+                }
             }
         }
     }
 
     mergeSegments(m_returnPs);
-
     sortB(m_returnPs);
+
     if (!profilePaths.empty() && prPass) {
         sortB(profilePaths);
         if (m_gcp.convent())
@@ -240,17 +248,18 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
             path.push_back(path.front());
     }
 
+    m_returnPss.clear();
     switch (prPass) {
     case NoProfilePass:
-        m_returnPss.prepend(m_returnPs);
+        m_returnPss.push_back(m_returnPs);
         break;
     case First:
         if (!profilePaths.empty())
-            m_returnPss.prepend(profilePaths);
-        m_returnPss.prepend(m_returnPs);
+            m_returnPss.push_back(profilePaths);
+        m_returnPss.push_back(m_returnPs);
         break;
     case Last:
-        m_returnPss.prepend(m_returnPs);
+        m_returnPss.push_back(m_returnPs);
         if (!profilePaths.empty())
             m_returnPss.push_back(profilePaths);
         break;

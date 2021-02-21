@@ -500,9 +500,9 @@ void MainWindow::createActionsToolPath()
     menu->addAction(action);
     toolpathActions.emplace(GCode::Drill, action);
 
-    // Hatching
-    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&Hatching"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+H"));
+    // Crosshatch
+    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+C"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Hatching, action);
 
