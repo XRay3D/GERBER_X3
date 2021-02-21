@@ -19,6 +19,7 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/gcdrillitem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcfile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gchatching.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcnode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcplugin.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcpocketoffset.cpp
@@ -36,6 +37,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/gcdrillitem.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gcfile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gchatching.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gcnode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gcode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gcplugin.h

@@ -12,33 +12,40 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+#include "formsutil/formsutil.h"
 
-#include "gccreator.h"
+namespace Ui {
+class HatchingForm;
+}
 
-namespace GCode {
+class HatchingForm : public FormsUtil {
+    Q_OBJECT
 
-class RasterCreator : public Creator {
 public:
-    RasterCreator();
-    ~RasterCreator() override = default;
+    explicit HatchingForm(QWidget* parent = nullptr);
+    ~HatchingForm();
 
-    // Creator interface
-protected:
-    void create() override; // Creator interface
-    GCodeType type() override { return Raster; }
+private slots:
+    void on_leName_textChanged(const QString& arg1);
 
 private:
-    enum {
-        NoProfilePass,
-        First,
-        Last
-    };
+    Ui::HatchingForm* ui;
 
-    void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
-    void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const cInt accDistance);
+    int direction = 0;
+    void updatePixmap();
+    void rb_clicked();
+    const QStringList names;
+    const QStringList pixmaps;
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 
-    IntRect rect;
+    // FormsUtil interface
+protected:
+    void createFile() override;
+    void updateName() override;
+
+public:
+    void editFile(GCode::File* file) override;
 };
-
-}

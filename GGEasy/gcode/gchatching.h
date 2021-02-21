@@ -17,10 +17,10 @@
 
 namespace GCode {
 
-class RasterCreator : public Creator {
+class HatchingCreator : public Creator {
 public:
-    RasterCreator();
-    ~RasterCreator() override = default;
+    HatchingCreator();
+    ~HatchingCreator() override = default;
 
     // Creator interface
 protected:
@@ -34,9 +34,7 @@ private:
         Last
     };
 
-    void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
-    void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const cInt accDistance);
+    void createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass);
 
     IntRect rect;
 };
