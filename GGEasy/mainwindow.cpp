@@ -19,6 +19,7 @@
 #include "aboutform.h"
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
+#include "forms/hatchingform.h"
 #include "forms/pocketoffsetform.h"
 #include "forms/pocketrasterform.h"
 #include "forms/profileform.h"
@@ -156,9 +157,9 @@ MainWindow::MainWindow(QWidget* parent)
             }
         }
 
-        //        QTimer::singleShot(++i * 200, [this] { selectAll(); });
-        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
-        //        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        QTimer::singleShot(++i * 200, [this] { selectAll(); });
+        QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Hatching]->triggered(); });
+        QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
     }
 }
 
@@ -499,6 +500,12 @@ void MainWindow::createActionsToolPath()
     menu->addAction(action);
     toolpathActions.emplace(GCode::Drill, action);
 
+    // Hatching
+    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&Hatching"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
+    action->setShortcut(QKeySequence("Ctrl+Shift+H"));
+    menu->addAction(action);
+    toolpathActions.emplace(GCode::Hatching, action);
+
     for (auto [key, action] : toolpathActions)
         action->setCheckable(true);
 }
@@ -735,20 +742,19 @@ void MainWindow::writeSettings()
 
 void MainWindow::selectAll()
 {
-    if (/*  */ toolpathActions.contains(GCode::Thermal)
-        && toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items()) {
-            item->setSelected(static_cast<GiType>(item->type()) == GiType::PrThermal);
-        }
-    } else if (toolpathActions.contains(GCode::Drill)
-        && toolpathActions[GCode::Drill]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items()) {
-            const auto type(static_cast<GiType>(item->type()));
-            item->setSelected( //
-                type == GiType::PrApetrure || //
-                type == GiType::PrDrill || //
-                type == GiType::PrSlot);
-        }
+    for (auto [k, v] : toolpathActions)
+        qDebug() << k << v->isChecked();
+
+    if /*  */ (toolpathActions[GCode::Thermal]->isChecked()) {
+        for (QGraphicsItem* item : App::scene()->items())
+            if (const auto type = static_cast<GiType>(item->type());
+                type == GiType::PrThermal)
+                item->setSelected(true);
+    } else if (toolpathActions[GCode::Drill]->isChecked()) {
+        for (QGraphicsItem* item : App::scene()->items())
+            if (const auto type = static_cast<GiType>(item->type());
+                type == GiType::PrApetrure || type == GiType::PrDrill || type == GiType::PrSlot)
+                item->setSelected(true);
     } else {
         for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible())

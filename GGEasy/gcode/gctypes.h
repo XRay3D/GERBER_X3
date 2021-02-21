@@ -35,6 +35,7 @@ enum GCodeType {
     Drill,
     Raster,
     LaserHLDI,
+    Hatching,
     GCodeProperties = 100,
 };
 
@@ -197,7 +198,8 @@ struct GCodeParams {
         NotTile,
         Trimming,
         CornerTrimming,
-        IgnoreCopper // need for Thermal
+        IgnoreCopper, // need for Thermal
+        HathStep // need for Hatching
     };
 
     GCodeParams() { }

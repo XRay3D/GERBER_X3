@@ -442,6 +442,8 @@ struct IntRect {
     cInt top;
     cInt right;
     cInt bottom;
+    cInt height() const { return bottom - top; }
+    cInt width() const { return right - left; }
 };
 
 enum EdgeSide {

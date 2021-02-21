@@ -16,6 +16,7 @@
 #include "gccreator.h"
 #include "gcfile.h"
 #include "gch.h"
+#include "gchatching.h"
 #include "gcnode.h"
 #include "gcplugin.h"
 #include "gcpocketoffset.h"

@@ -28,13 +28,13 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
 {
     static QTextCharFormat myClassFormat;
     static const std::map<char, QColor> color {
-        { 'A', QColor(0x00, 0x00, 0x80) },
-        { 'C', QColor(0x80, 0x80, 0x00) },
-        { 'G', QColor(0x80, 0x80, 0x80) },
-        { 'M', QColor(0x80, 0x00, 0x80) },
-        { 'T', QColor(0x00, 0x80, 0x80) },
-        { 'X', QColor(0x80, 0x00, 0x00) },
-        { 'Y', QColor(0x00, 0x80, 0x00) },
+        { 'A', QColor(0x00, 0x00, 0xFF) },
+        { 'C', QColor(0xFF, 0xFF, 0x00) },
+        { 'G', QColor(0xFF, 0xFF, 0xFF) },
+        { 'M', QColor(0xFF, 0x00, 0xFF) },
+        { 'T', QColor(0x00, 0xFF, 0xFF) },
+        { 'X', QColor(0xFF, 0x00, 0x00) },
+        { 'Y', QColor(0x00, 0xFF, 0x00) },
     };
 
     using namespace std::string_view_literals;
