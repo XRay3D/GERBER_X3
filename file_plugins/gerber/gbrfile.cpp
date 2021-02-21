@@ -14,9 +14,9 @@
 *                                                                              *
 *******************************************************************************/
 #include "gbrfile.h"
-#include "componentitem.h"
+#include "compitem.h"
 
-#include "componentitem.h"
+#include "compitem.h"
 #include "datapathitem.h"
 #include "datasoliditem.h"
 #include "ft_node.h"
@@ -261,21 +261,21 @@ void File::read(QDataStream& stream)
 
 void File::createGi()
 {
-    if (1) { // fill copper
+    if constexpr (1) { // fill copper
         for (Paths& paths : groupedPaths()) {
             GraphicsItem* item = new GiDataSolid(paths, this);
             m_itemGroups[Normal]->push_back(item);
         }
         m_itemGroups[Normal]->shrink_to_fit();
     }
-    if (1) { // add components
-        for (const Component& c : qAsConst(m_components)) {
-            if (!c.referencePoint.isNull())
-                m_itemGroups[Components]->push_back(new ComponentItem(c, this));
+    if constexpr (1) { // add components
+        for (const Component& component : qAsConst(m_components)) {
+            if (!component.referencePoint().isNull())
+                m_itemGroups[Components]->push_back(new ComponentItem(component, this));
         }
         m_itemGroups[Components]->shrink_to_fit();
     }
-    if (1) { // add aperture paths
+    if constexpr (1) { // add aperture paths
         auto contains = [&](const Path& path) -> bool {
             constexpr double k = 0.001 * uScale;
             for (const Path& chPath : checkList) { // find copy
@@ -332,7 +332,7 @@ void File::createGi()
     if (m_itemsType == NullType) {
         if /**/ (m_itemGroups[Components]->size())
             m_itemsType = Components;
-        else if (m_itemGroups[Normal]->size())// && !zeroLine)
+        else if (m_itemGroups[Normal]->size()) // && !zeroLine)
             m_itemsType = Normal;
         else
             m_itemsType = ApPaths;

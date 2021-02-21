@@ -14,12 +14,14 @@
 *                                                                              *
 *******************************************************************************/
 #include "compmodel.h"
-#include "app.h"
+#include "compdialog.h"
 #include "compnode.h"
+
+#include "app.h"
 #include "gbrfile.h"
 #include "project.h"
 
-#include <QRegularExpression>
+#include <ctre.hpp>
 
 #include "leakdetector.h"
 
@@ -29,39 +31,50 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ComponentsNode(""))
 {
+    //    auto file = App::project()->file<File>(fileId);
+    //    for (auto item : *file->itemGroup(File::Components))
+    //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
+
     auto file = App::project()->file<Gerber::File>(fileId);
 
-    QMap<QString, QVector<QPair<int, ComponentsNode*>>> map;
+    using pair = std::pair<int, ComponentsNode*>;
+    std::map<QString, mvector<pair>> map;
 
     auto unsorted = new ComponentsNode(GbrObj::tr("unsorted"));
 
-    for (const auto& c : file->components()) {
-        static const QRegularExpression rx("(\\D+)(\\d+).*");
-        if (auto match(rx.match(c.refdes)); match.hasMatch()) {
-            if (map[match.captured(1)].isEmpty())
-                map[match.captured(1)].append({ -1, new ComponentsNode(match.captured(1)) });
-            map[match.captured(1)].append({ match.captured(2).toInt(), new ComponentsNode(c) });
+    for (const auto& component : file->components()) {
+        static constexpr auto pattern = ctll::fixed_string("(\\D+)(\\d+).*");
+        if (auto [whole, c1, c2] = ctre::match<pattern>(component.refdes()); whole) {
+            if (map[c1].empty())
+                map[c1].emplace_back(-1, new ComponentsNode(c1));
+            map[c1].emplace_back(c2.toInt(), new ComponentsNode(component));
         } else {
-            unsorted->append(new ComponentsNode(c));
+            unsorted->append(new ComponentsNode(component));
         }
     }
 
-    auto it = map.begin();
-    while (it != map.end()) {
-        std::sort(
-            it.value().begin(),
-            it.value().end(),
-            [](const QPair<int, ComponentsNode*>& p1, const QPair<int, ComponentsNode*>& p2) {
-                return p1.first < p2.first;
-            });
-
-        for (int i = 1; i < it.value().size(); ++i) {
-            it.value().first().second->append(it.value()[i].second);
-        }
-
-        rootItem->append(it.value().first().second);
-        ++it;
+    for (auto& [key, value] : map) {
+        std::sort(value.begin(), value.end(), [](const pair& p1, const pair& p2) { return p1.first < p2.first; });
+        for (size_t i = 1; i < value.size(); ++i)
+            value.front().second->append(value[i].second);
+        rootItem->append(value.front().second);
     }
+
+    //    auto it = map.begin();
+    //    while (it != map.end()) {
+    //        std::sort(
+    //            it.value().begin(),
+    //            it.value().end(),
+    //            [](const QPair<int, ComponentsNode*>& p1, const QPair<int, ComponentsNode*>& p2) {
+    //                return p1.first < p2.first;
+    //            });
+    //        for (int i = 1; i < it.value().size(); ++i) {
+    //            it.value().first().second->append(it.value()[i].second);
+    //        }
+    //        rootItem->append(it.value().first().second);
+    //        ++it;
+    //    }
+
     if (unsorted->childCount() > 0)
         rootItem->append(unsorted);
     else
@@ -181,5 +194,4 @@ ComponentsNode* ComponentsModel::getItem(const QModelIndex& index) const
     }
     return rootItem;
 }
-
 }

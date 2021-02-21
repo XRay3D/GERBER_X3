@@ -16,6 +16,8 @@
 #include "gbrcomponent.h"
 #include <graphicsitem.h>
 
+namespace Gerber {
+
 class ComponentItem final : public GraphicsItem {
     const Gerber::Component& m_component;
     QVector<QRectF> pins;
@@ -23,6 +25,7 @@ class ComponentItem final : public GraphicsItem {
     mutable QVector<QPair<QPainterPath, QPointF>> pathPins;
     mutable double m_scale = std::numeric_limits<double>::max();
     mutable QPointF pt;
+    bool m_selected {};
 
 public:
     ComponentItem(const Gerber::Component& component, FileInterface* file);
@@ -34,4 +37,8 @@ public:
     // GraphicsItem interface
     Paths paths() const override;
     void changeColor() override { }
+
+    void setSelected(bool selected) { m_selected = selected; }
 };
+
+}

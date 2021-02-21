@@ -14,6 +14,8 @@
 #pragma once
 #include <QModelIndex>
 
+class QGraphicsRectItem;
+
 namespace Gerber {
 
 struct Component;
@@ -24,12 +26,9 @@ class ComponentsNode {
     ComponentsNode(ComponentsNode&&) = delete;
     ComponentsNode(const ComponentsNode&) = delete;
 
-    const Gerber::Component& component;
-    const QString name;
-
 public:
     ComponentsNode(const QString& name);
-    ComponentsNode(const Gerber::Component& component);
+    ComponentsNode(const Component& component);
     virtual ~ComponentsNode();
 
     ComponentsNode* child(int row);
@@ -46,6 +45,10 @@ public:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role) const;
+
+    QGraphicsRectItem* const item;
+    const Component& component;
+    const QString name;
 
 protected:
     ComponentsNode* m_parentItem = nullptr;

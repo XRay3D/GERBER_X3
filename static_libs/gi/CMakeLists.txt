@@ -19,35 +19,33 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-##set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 add_library(gi STATIC
-    bridgeitem.h
-    componentitem.h
-    datapathitem.h
-    datasoliditem.h
-    drillitem.h
-    drillpreviewgi.h
-    erroritem.h
-    gcpathitem.h
-    graphicsitem.h
-    itemgroup.h
-    thermalpreviewitem.h
     bridgeitem.cpp
-    componentitem.cpp
+    bridgeitem.h
     datapathitem.cpp
+    datapathitem.h
     datasoliditem.cpp
+    datasoliditem.h
     drillitem.cpp
+    drillitem.h
     drillpreviewgi.cpp
+    drillpreviewgi.h
     erroritem.cpp
+    erroritem.h
     gcpathitem.cpp
+    gcpathitem.h
     graphicsitem.cpp
+    graphicsitem.h
     itemgroup.cpp
+    itemgroup.h
     thermalpreviewitem.cpp
+    thermalpreviewitem.h
 )
 
 target_link_libraries(gi PRIVATE Qt${QT_VERSION_MAJOR}::Core)

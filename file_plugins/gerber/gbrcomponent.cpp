@@ -16,62 +16,103 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-bool Gerber::Component::setMountType(const QString& key)
+namespace Gerber {
+
+bool Component::setMountType(const QString& key)
 {
     int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
-    mount = static_cast<MountType>(val);
+    m_mount = static_cast<MountType>(val);
     return val > -1 ? true : false;
 }
 
-int Gerber::Component::value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
+int Component::value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
 
-int Gerber::Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
+int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
 
-bool Gerber::Component::setData(int key, const QStringList& data)
+bool Component::setData(int key, const QStringList& data)
 {
     bool fl = false;
     switch (key) {
     case Component::Rot:
-        rotation = data.last().toDouble(&fl);
-        break;
+        m_rotation = data.last().toDouble(&fl);
+        return fl;
     case Component::Mfr:
-        manufacturer.name = data.last();
-        break;
+        m_manufacturer.name = data.last();
+        return true;
     case Component::MPN:
-        manufacturer.partNumber = data.last();
-        break;
+        m_manufacturer.partNumber = data.last();
+        return true;
     case Component::Val:
-        value = data.last();
-        break;
+        m_value = data.last();
+        return true;
     case Component::Mnt:
         return setMountType(data.last());
     case Component::Ftp:
-        footprintName = data.last();
-        break;
+        m_footprintName = data.last();
+        return true;
     case Component::PgN:
-        package.name = data.last();
-        break;
+        m_package.name = data.last();
+        return true;
     case Component::Hgt:
-        height = data.last().toDouble(&fl);
-        break;
+        m_height = data.last().toDouble(&fl);
+        return fl;
     case Component::LbN:
-        library.name = data.last();
-        break;
+        m_library.name = data.last();
+        return true;
     case Component::LbD:
-        library.description = data.last();
-        break;
+        m_library.description = data.last();
+        return true;
     case Component::Sup:
-        break;
-    default:;
+        return false;
+    default:
+        return false;
     }
     return fl;
 }
 
-QString Gerber::Component::toolTip() const
+QString Component::toolTip() const
 {
     QString tt;
-    tt += QString(GbrObj::tr("Rotation: %1\n")).arg(rotation);
-    tt += QString(GbrObj::tr("Value: %1\n")).arg(value);
-    tt += QString(GbrObj::tr("Footprint: %1\n")).arg(footprintName);
+    tt += QString(GbrObj::tr("Rotation: %1\n")).arg(m_rotation);
+    tt += QString(GbrObj::tr("Value: %1\n")).arg(m_value);
+    tt += QString(GbrObj::tr("Footprint: %1\n")).arg(m_footprintName);
     return tt;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Component& c)
+{
+    stream << c.m_rotation;
+    stream << c.m_height;
+    stream << c.m_mount;
+    stream << c.m_footprintName;
+    stream << c.m_refdes;
+    stream << c.m_value;
+    stream << c.m_referencePoint;
+    stream << c.m_footprint;
+    stream << c.m_library;
+    stream << c.m_manufacturer;
+    stream << c.m_package;
+    stream << c.m_suppliers;
+    stream << c.m_pins;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Component& c)
+{
+    stream >> c.m_rotation;
+    stream >> c.m_height;
+    stream >> c.m_mount;
+    stream >> c.m_footprintName;
+    stream >> c.m_refdes;
+    stream >> c.m_value;
+    stream >> c.m_referencePoint;
+    stream >> c.m_footprint;
+    stream >> c.m_library;
+    stream >> c.m_manufacturer;
+    stream >> c.m_package;
+    stream >> c.m_suppliers;
+    stream >> c.m_pins;
+    return stream;
+}
+
 }
