@@ -71,7 +71,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Hatching Toolpath</string>
+         <string>Crosshatch Toolpath</string>
         </property>
        </widget>
       </item>
