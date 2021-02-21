@@ -443,7 +443,7 @@ void Parser::addPath()
     }
     if (aperFunctionMap.contains(m_state.aperture())
         && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
-        components[refDes].footprint = m_path;
+        components[refDes].setFootprint(m_path);
     }
     resetStep();
 }
@@ -479,10 +479,10 @@ void Parser::addFlash()
     if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
         switch (aperFunctionMap[m_state.aperture()].m_function->function) {
         case Attr::Aperture::ComponentPin:
-            components[refDes].pins.last().pos = m_state.curPos();
+            components[refDes].pins().back().pos = m_state.curPos();
             break;
         case Attr::Aperture::ComponentMain:
-            components[refDes].referencePoint = m_state.curPos();
+            components[refDes].setReferencePoint(m_state.curPos());
             break;
         default:
             break;
@@ -852,7 +852,7 @@ bool Parser::parseAttributes(const QString& gLine)
             case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
                 break;
             case Component::P:
-                components[sl.value(1)].pins.append({ sl.value(2), sl.value(3), {} });
+                components[sl.value(1)].addPin({ sl.value(2), sl.value(3), {} });
                 break;
             case Component::C:
                 switch (int key = Component::value2(sl.first())) {
@@ -881,7 +881,7 @@ bool Parser::parseAttributes(const QString& gLine)
                     //                        sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
                     //                    }
                     refDes = sl.last();
-                    components[refDes].refdes = refDes;
+                    components[refDes].setRefdes(refDes);
                 }
                 break;
             default:

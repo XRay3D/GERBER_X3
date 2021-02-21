@@ -24,8 +24,90 @@
 
 namespace Gerber {
 
-struct Component {
+class ComponentItem;
+
+struct Library {
+    QString name; /* <field> Library name. */
+    QString description; /* <field> Library description. */
+    friend QDataStream& operator<<(QDataStream& stream, const Library& l)
+    {
+        stream << l.name << l.description;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Library& l)
+    {
+        stream >> l.name >> l.description;
+        return stream;
+    }
+};
+struct Manufacturer {
+    QString name; /* <field> Manufacturer. */
+    QString partNumber; /* <field> Manufacturer part number. */
+    friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m)
+    {
+        stream << m.name << m.partNumber;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m)
+    {
+        stream >> m.name >> m.partNumber;
+        return stream;
+    }
+};
+struct Package {
+    QString name; /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
+    QString description; /* <field> Package description. */
+    friend QDataStream& operator<<(QDataStream& stream, const Package& p)
+    {
+        stream << p.name << p.description;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Package& p)
+    {
+        stream >> p.name >> p.description;
+        return stream;
+    }
+};
+struct Pin {
+    /*
+     *  <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name.
+     *  <SPN> is a field with a supplier part name
+     */
+    QString number;
+    QString description;
+    QPointF pos;
+    friend QDataStream& operator<<(QDataStream& stream, const Pin& p)
+    {
+        stream << p.number << p.description << p.pos;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Pin& p)
+    {
+        stream >> p.number >> p.description >> p.pos;
+        return stream;
+    }
+};
+struct Supplier {
+    QString name; /* <field> Library name. */
+    QString description; /* <field> Library description. */
+    friend QDataStream& operator<<(QDataStream& stream, const Supplier& s)
+    {
+        stream << s.name << s.description;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Supplier& s)
+    {
+        stream >> s.name >> s.description;
+        return stream;
+    }
+};
+
+class Component {
     Q_GADGET
+    //friend ComponentItem;
+    friend QDataStream& operator<<(QDataStream& stream, const Component& c);
+    friend QDataStream& operator>>(QDataStream& stream, Component& c);
+
 public:
     enum MountType {
         TH,
@@ -92,139 +174,66 @@ public:
     bool setData(int key, const QStringList& data);
     QString toolTip() const;
 
-    double rotation = 0.0; /* <decimal> The rotation angle of the component.*/
-    double height = 0.0; /* <decimal> Height, in the unit of the file. */
+    ComponentItem* componentitem() const { return m_componentitem; }
+    void setComponentitem(ComponentItem* componentitem) const { m_componentitem = componentitem; }
 
-    MountType mount = Other; /* (TH|SMD|BGA|Other) Mount type. */
+    Library library() const { return m_library; }
+    void setLibrary(const Library& library) { m_library = library; }
 
-    QString footprintName; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
-    QString refdes;
-    QString value; /* <field> E.g. 220nF. */
+    Manufacturer manufacturer() const { return m_manufacturer; }
+    void setManufacturer(const Manufacturer& manufacturer) { m_manufacturer = manufacturer; }
 
-    QPointF referencePoint;
-    QPolygonF footprint;
+    MountType mount() const { return m_mount; }
+    void setMount(const MountType& mount) { m_mount = mount; }
 
-    struct Library {
-        QString name; /* <field> Library name. */
-        QString description; /* <field> Library description. */
-        friend QDataStream& operator<<(QDataStream& stream, const Library& l)
-        {
-            stream << l.name;
-            stream << l.description;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Library& l)
-        {
-            stream >> l.name;
-            stream >> l.description;
-            return stream;
-        }
-    } library;
-    struct Manufacturer {
-        QString name; /* <field> Manufacturer. */
-        QString partNumber; /* <field> Manufacturer part number. */
-        friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m)
-        {
-            stream << m.name;
-            stream << m.partNumber;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m)
-        {
-            stream >> m.name;
-            stream >> m.partNumber;
-            return stream;
-        }
-    } manufacturer;
-    struct Package {
-        QString name; /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
-        QString description; /* <field> Package description. */
-        friend QDataStream& operator<<(QDataStream& stream, const Package& p)
-        {
-            stream << p.name;
-            stream << p.description;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Package& p)
-        {
-            stream >> p.name;
-            stream >> p.description;
-            return stream;
-        }
-    } package;
-    struct Supplier {
-        QString name; /* <field> Library name. */
-        QString description; /* <field> Library description. */
-        friend QDataStream& operator<<(QDataStream& stream, const Supplier& s)
-        {
-            stream << s.name;
-            stream << s.description;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Supplier& s)
-        {
-            stream >> s.name;
-            stream >> s.description;
-            return stream;
-        }
-    };
-    QList<Supplier> suppliers; /* <SN>,<SPN>,{<SN>,<SPN>} <SN> is a field with the supplier name. <SPN> is a field with a supplier part name*/
-    struct Pin {
-        QString number;
-        QString description;
-        QPointF pos;
-        friend QDataStream& operator<<(QDataStream& stream, const Pin& p)
-        {
-            stream << p.number;
-            stream << p.description;
-            stream << p.pos;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Pin& p)
-        {
-            stream >> p.number;
-            stream >> p.description;
-            stream >> p.pos;
-            return stream;
-        }
-    };
+    Package package() const { return m_package; }
+    void setPackage(const Package& package) { m_package = package; }
 
-    QList<Pin> pins;
+    mvector<Pin> pins() const { return m_pins; }
+    mvector<Pin>& pins() { return m_pins; }
+    void addPin(Pin&& pins) { m_pins.emplace_back(pins); }
 
-    friend QDataStream& operator<<(QDataStream& stream, const Component& c)
-    {
-        stream << c.rotation;
-        stream << c.height;
-        stream << c.mount;
-        stream << c.footprintName;
-        stream << c.refdes;
-        stream << c.value;
-        stream << c.referencePoint;
-        stream << c.footprint;
-        stream << c.library;
-        stream << c.manufacturer;
-        stream << c.package;
-        stream << c.suppliers;
-        stream << c.pins;
-        return stream;
-    }
+    mvector<Supplier> suppliers() const { return m_suppliers; }
+    void setSuppliers(const mvector<Supplier>& suppliers) { m_suppliers = suppliers; }
 
-    friend QDataStream& operator>>(QDataStream& stream, Component& c)
-    {
-        stream >> c.rotation;
-        stream >> c.height;
-        stream >> c.mount;
-        stream >> c.footprintName;
-        stream >> c.refdes;
-        stream >> c.value;
-        stream >> c.referencePoint;
-        stream >> c.footprint;
-        stream >> c.library;
-        stream >> c.manufacturer;
-        stream >> c.package;
-        stream >> c.suppliers;
-        stream >> c.pins;
-        return stream;
-    }
+    QPointF referencePoint() const { return m_referencePoint; }
+    void setReferencePoint(const QPointF& referencePoint) { m_referencePoint = referencePoint; }
+
+    QPolygonF footprint() const { return m_footprint; }
+    void setFootprint(const QPolygonF& footprint) { m_footprint = footprint; }
+
+    QString footprintName() const { return m_footprintName; }
+    void setFootprintName(const QString& footprintName) { m_footprintName = footprintName; }
+
+    QString refdes() const { return m_refdes; }
+    void setRefdes(const QString& refdes) { m_isNull = true, m_refdes = refdes; }
+
+    QString value() const { return m_value; }
+    void setValue(const QString& value) { m_value = value; }
+
+    double height() const { return m_height; }
+    void setHeight(double height) { m_height = height; }
+
+    double rotation() const { return m_rotation; }
+    void setRotation(double rotation) { m_rotation = rotation; }
+
+    bool isNull() const { return m_isNull; }
+
+private:
+    double m_rotation = 0.0; /* <decimal> The rotation angle of the component.*/
+    double m_height = 0.0; /* <decimal> Height, in the unit of the file. */
+    mutable ComponentItem* m_componentitem = nullptr;
+    Library m_library;
+    Manufacturer m_manufacturer;
+    MountType m_mount = Other; /* (TH|SMD|BGA|Other) Mount type. */
+    Package m_package;
+    mvector<Pin> m_pins;
+    mvector<Supplier> m_suppliers;
+    QPointF m_referencePoint;
+    QPolygonF m_footprint;
+    QString m_footprintName; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
+    QString m_refdes;
+    QString m_value; /* <field> E.g. 220nF. */
+    bool m_isNull = true;
 };
 }

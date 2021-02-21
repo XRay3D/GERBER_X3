@@ -14,10 +14,21 @@
 #pragma once
 #include <QTreeView>
 
+namespace Gerber {
+
+class ComponentItem;
+
 class ComponentsView : public QTreeView {
     Q_OBJECT
+    ComponentItem* item = nullptr;
+
 public:
     explicit ComponentsView(QWidget* parent = nullptr);
+    ~ComponentsView();
     void setFile(int fileId);
-signals:
+
+private:
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 };
+
+}

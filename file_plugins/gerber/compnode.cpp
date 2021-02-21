@@ -14,9 +14,15 @@
 *                                                                              *
 *******************************************************************************/
 #include "compnode.h"
+#include "compdialog.h"
+#include "compitem.h"
+
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
+#include "interfaces/file.h"
+
+#include <QGraphicsScene>
 #include <QSharedPointer>
 
 namespace Gerber {
@@ -26,18 +32,23 @@ const Component dummy;
 ComponentsNode::ComponentsNode(const QString& name)
     : component(dummy)
     , name(name)
+    , item(nullptr)
 {
 }
 
-ComponentsNode::ComponentsNode(const Gerber::Component& component)
+ComponentsNode::ComponentsNode(const Component& component)
     : component(component)
     , name("")
+    , item(ComponentsDialog::scene()->addRect(
+          component.componentitem()->boundingRect(),
+          Qt::NoPen,
+          component.componentitem()->file()->color()))
+
 {
 }
 
 ComponentsNode::~ComponentsNode()
 {
-
     childItems.clear();
 }
 
@@ -58,9 +69,8 @@ void ComponentsNode::setChild(int row, ComponentsNode* item)
 {
     if (item)
         item->m_parentItem = this;
-    if (row < childItems.size()) {
+    if (row < childItems.size())
         childItems[row].reset(item);
-    }
 }
 
 void ComponentsNode::append(ComponentsNode* item)
@@ -122,21 +132,21 @@ QVariant ComponentsNode::data(const QModelIndex& index, int role) const
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
         case 0: /* <field> Manufacturer. */
-            return component.refdes;
+            return component.refdes();
         case 1: /* <field> Manufacturer part number. */
-            return component.manufacturer.partNumber;
+            return component.manufacturer().partNumber;
         case 2: /* <field> E.g. 220nF. */
-            return component.value;
+            return component.value();
         case 3: /* (TH|SMD|BGA|Other) Mount type. */
-            return mountType.value(component.mount);
+            return mountType.value(component.mount());
         case 4: /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
-            return component.footprintName;
+            return component.footprintName();
         case 5: /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
-            return component.package.name;
+            return component.package().name;
         case 6: /* <field> Package description. */
-            return component.package.description;
+            return component.package().description;
         case 7: /* <decimal> Height, in the unit of the file. */
-            return component.height;
+            return component.height();
         default:
             return {};
         }

@@ -19,7 +19,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-##set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
@@ -37,40 +37,39 @@ include_directories(${CMAKE_STATIC_LIBS_DIR})
 
 add_library(gerber SHARED
     gerber.json
-    compdialog.ui
+    compdialog.cpp
     compdialog.h
+    compitem.cpp
+    compitem.h
+    compmodel.cpp
     compmodel.h
+    compnode.cpp
     compnode.h
-    componentitem.h
+    compview.cpp
     compview.h
+    gbraperture.cpp
     gbraperture.h
+    gbrattraperfunction.cpp
     gbrattraperfunction.h
+    gbrattrfilefunction.cpp
     gbrattrfilefunction.h
+    gbrattributes.cpp
     gbrattributes.h
+    gbrcomponent.cpp
     gbrcomponent.h
+    gbrfile.cpp
     gbrfile.h
+    gbrh.cpp
     gbrh.h
+    gbrnode.cpp
     gbrnode.h
+    gbrparser.cpp
     gbrparser.h
+    gbrplugin.cpp
     gbrplugin.h
     gbrtypes.h
-    mathparser.h
-    compdialog.cpp
-    compmodel.cpp
-    compnode.cpp
-    componentitem.cpp
-    compview.cpp
-    gbraperture.cpp
-    gbrattraperfunction.cpp
-    gbrattrfilefunction.cpp
-    gbrattributes.cpp
-    gbrcomponent.cpp
-    gbrfile.cpp
-    gbrh.cpp
-    gbrnode.cpp
-    gbrparser.cpp
-    gbrplugin.cpp
     mathparser.cpp
+    mathparser.h
     )
 
 link_directories(../../libs${SUFFIX})

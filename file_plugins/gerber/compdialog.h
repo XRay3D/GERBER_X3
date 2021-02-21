@@ -12,13 +12,18 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
+
 #include <QDialog>
 
-namespace Ui {
-class ComponentsDialog;
-}
+class QDialogButtonBox;
+class QGraphicsView;
+class QSplitter;
+class QVBoxLayout;
+class QGraphicsScene;
 
 namespace Gerber {
+
+class ComponentsView;
 
 class ComponentsDialog : public QDialog {
     Q_OBJECT
@@ -27,9 +32,23 @@ public:
     explicit ComponentsDialog(QWidget* parent = nullptr);
     ~ComponentsDialog();
     void setFile(int fileId);
+    static QGraphicsScene* scene() { return m_scene; };
 
 private:
-    Ui::ComponentsDialog* ui;
+    //QDialogButtonBox* buttonBox;
+    //QVBoxLayout* verticalLayout;
+    ComponentsView* componentsView;
+    QGraphicsView* graphicsView;
+    QSplitter* splitter;
+    static inline QGraphicsScene* m_scene;
+
+    void setupUi(QDialog* dialog); // setupUi
+
+    void retranslateUi(QDialog* dialog); // retranslateUi
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override;
+    void resizeEvent(QResizeEvent* event = nullptr) override;
 };
 
 }

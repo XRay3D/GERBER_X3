@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (1) {
+        if (0) {
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
             QDir dir("D:/Gerber Test Files/Ucamco/20191107_ciaa_acc/ciaa_acc");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
