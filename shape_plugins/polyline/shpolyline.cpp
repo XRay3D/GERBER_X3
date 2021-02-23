@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -138,14 +139,14 @@ QPointF PolyLine::centroid()
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area
-    QPolygonF vertices;
+    mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
         if (h->hType() == Handler::Corner)
-            vertices.append(h->pos());
+            vertices.push_back(h->pos());
     }
     // For all vertices
-    for (int i = 0; i < vertices.size(); ++i) {
+    for (size_t i = 0; i < vertices.size(); ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[(i + 1) % vertices.size()]);
         a = p0.x() * p1.y() - p1.x() * p0.y();

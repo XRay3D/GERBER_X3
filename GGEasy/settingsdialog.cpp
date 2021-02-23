@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -127,6 +128,7 @@ void SettingsDialog::readSettings()
     settings.getValue(chbxAntialiasing);
     App::settings().m_guiSmoothScSh = settings.getValue(chbxSmoothScSh, App::settings().m_guiSmoothScSh);
     App::settings().m_animSelection = settings.getValue(chbxAnimSelection, App::settings().m_animSelection);
+    App::settings().m_theme = settings.getValue(cbxTheme, App::settings().m_theme);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -181,6 +183,7 @@ void SettingsDialog::writeSettings()
     }
     App::settings().m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
     App::settings().m_animSelection = settings.setValue(chbxAnimSelection);
+    App::settings().m_theme = settings.setValue(cbxTheme);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -249,12 +252,12 @@ void SettingsDialog::reject()
 
 void SettingsDialog::accept()
 {
+    writeSettings();
     if (langIndex != cbxLanguage->currentIndex()) {
         QMessageBox::information(this, "", tr("The complete translation of the application will take\n"
                                               "effect after restarting the application."));
     }
-
-    writeSettings();
+    MainWindow::updateTheme();
     QDialog::accept();
 }
 

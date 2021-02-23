@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -33,39 +34,37 @@ AppSettings::AppSettings()
 //AppSettings* AppSettings::ptr() { return m_settings; }
 
 /*GUI*/
-QColor& AppSettings::guiColor(int id) { return /*m_settings->*/ m_guiColor[id]; }
-bool AppSettings::guiSmoothScSh() { return /*m_settings->*/ m_guiSmoothScSh; }
-bool AppSettings::animSelection() { return /*m_settings->*/ m_animSelection; }
+QColor& AppSettings::guiColor(int id) { return m_guiColor[id]; }
+bool AppSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
+bool AppSettings::animSelection() { return m_animSelection; }
+int AppSettings::theme() { return m_theme; }
 
 /*Clipper*/
 int AppSettings::clpCircleSegments(double radius)
 {
-    const double length = /*m_settings->*/ m_clpMinCircleSegmentLength; // mm
+    const double length = m_clpMinCircleSegmentLength; // mm
     const int destSteps = static_cast<int>(M_PI / asin((length * 0.5) / (radius)));
-    int intSteps = /*m_settings->*/ m_clpMinCircleSegments;
+    int intSteps = m_clpMinCircleSegments;
     while (intSteps < destSteps)
         intSteps <<= 1;
     return intSteps;
 }
 
 /*Markers*/
-QPointF AppSettings::mkrHomeOffset() { return /*m_settings->*/ m_mrkHomeOffset; }
-int AppSettings::mkrHomePos() { return /*m_settings->*/ m_mrkHomePos; }
-QPointF AppSettings::mkrPinOffset() { return /*m_settings->*/ m_mrkPinOffset; }
-QPointF AppSettings::mkrZeroOffset() { return /*m_settings->*/ m_mrkZeroOffset; }
-int AppSettings::mkrZeroPos() { return /*m_settings->*/ m_mrkZeroPos; }
+QPointF AppSettings::mkrHomeOffset() { return m_mrkHomeOffset; }
+int AppSettings::mkrHomePos() { return m_mrkHomePos; }
+QPointF AppSettings::mkrPinOffset() { return m_mrkPinOffset; }
+QPointF AppSettings::mkrZeroOffset() { return m_mrkZeroOffset; }
+int AppSettings::mkrZeroPos() { return m_mrkZeroPos; }
 
 /*Other*/
-double AppSettings::gridStep(double scale) { return /*m_settings->*/ m_inch ? pow(10.0, ceil(log10(30 / scale))) * .254 : pow(10.0, ceil(log10(8.0 / scale))); }
-bool AppSettings::inch() { return /*m_settings->*/ m_inch; }
-void AppSettings::setInch(bool val)
-{ /*m_settings->*/
-    m_inch = val;
-}
+double AppSettings::gridStep(double scale) { return m_inch ? pow(10.0, ceil(log10(30 / scale))) * .254 : pow(10.0, ceil(log10(8.0 / scale))); }
+bool AppSettings::inch() { return m_inch; }
+void AppSettings::setInch(bool val) { m_inch = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
 {
-    if (mod & Qt::ALT || /*m_settings->*/ m_snap) {
+    if (mod & Qt::ALT || m_snap) {
         const double gs = AppSettings::gridStep(App::graphicsView()->getScale());
         QPointF px(pt / gs);
         px.setX(gs * round(px.x()));
@@ -76,8 +75,8 @@ QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
 }
 
 void AppSettings::setSnap(bool val)
-{ /*m_settings->*/
+{
     m_snap = val;
 }
 
-bool AppSettings::snap() { return /*m_settings->*/ m_snap; }
+bool AppSettings::snap() { return m_snap; }

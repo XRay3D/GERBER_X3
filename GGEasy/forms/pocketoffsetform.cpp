@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -31,10 +32,6 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     : FormsUtil(new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
     , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") }
-    , pixmaps {
-        QStringLiteral("pock_offs_climb"),
-        QStringLiteral("pock_offs_conv"),
-    }
 {
     ui->setupUi(this);
     ui->toolHolder->label()->setText("Tool 1:");

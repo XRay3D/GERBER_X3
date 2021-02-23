@@ -222,6 +222,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 endif()
 
 
+#include(../PVS-Studio.cmake)
+#pvs_studio_add_target(TARGET example1.analyze ALL
+#                      OUTPUT FORMAT errorfile
+#                      ANALYZE ${PROJECT_NAME}
+#                      MODE GA:1,2 OP
+#                      LOG target.err)
+
+
 #if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 # set(SUFFIX "_clang")
 #elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

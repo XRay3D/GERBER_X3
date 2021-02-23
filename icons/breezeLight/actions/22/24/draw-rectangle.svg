@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0beta1 (fe3e306, 2019-09-17)"
+   sodipodi:docname="draw-rectangle.svg"
+   id="svg6"
+   version="1.1"
+   viewBox="0 0 24 24">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="svg6"
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="78"
+     inkscape:cy="12.470831"
+     inkscape:cx="12.242766"
+     inkscape:zoom="39.333333"
+     showgrid="true"
+     id="namedview8"
+     inkscape:window-height="1058"
+     inkscape:window-width="1834"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     inkscape:document-rotation="0"
+     bordercolor="#666666"
+     pagecolor="#ffffff">
+    <inkscape:grid
+       empspacing="4"
+       id="grid864"
+       type="xygrid" />
+  </sodipodi:namedview>
+  <defs
+     id="defs3051">
+    <style
+       id="current-color-scheme"
+       type="text/css">
+      .ColorScheme-Text {
+        color:#4d4d4d;
+      }
+      </style>
+  </defs>
+  <path
+     id="path4"
+     class="ColorScheme-Text"
+     d="M 4 4 L 4 20 L 20 20 L 20 4 L 4 4 z M 5 5 L 19 5 L 19 19 L 5 19 L 5 5 z "
+     style="fill:currentColor;fill-opacity:1;stroke:none" />
+  <circle
+     style="fill:#da4453;fill-rule:evenodd;stroke-width:1"
+     id="path832"
+     cx="12"
+     cy="12"
+     r="1.5" />
+  <circle
+     cy="4.5"
+     cx="19.5"
+     id="path832-5"
+     style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd;stroke-width:0.999997"
+     r="1.5" />
+  <circle
+     cy="19.5"
+     cx="4.5"
+     id="path832-5-9"
+     style="fill:#3daee9;fill-opacity:1;fill-rule:evenodd;stroke-width:0.999997"
+     r="1.5" />
+</svg>

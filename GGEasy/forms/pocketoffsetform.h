@@ -36,7 +36,10 @@ private:
     void updatePixmap();
     void rb_clicked();
     const QStringList names;
-    const QStringList pixmaps;
+    static inline const QString pixmaps[] {
+        QStringLiteral("pock_offs_climb"),
+        QStringLiteral("pock_offs_conv"),
+    };
     // QWidget interface
 protected:
     void resizeEvent(QResizeEvent* event) override;

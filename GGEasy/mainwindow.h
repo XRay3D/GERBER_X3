@@ -55,6 +55,7 @@ public:
 
     static void translate(const QString& locale);
     void loadFile(const QString& fileName);
+    static void updateTheme();
 
 signals:
     void parseFile(const QString& filename, int type);

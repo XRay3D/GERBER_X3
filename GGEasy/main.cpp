@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -63,7 +64,6 @@ public:
     }
 };
 
-void initIcon(const QString& path);
 void translation(QApplication* app);
 
 #define ATTRIBUTES_OFF() "\033[m"
@@ -208,41 +208,7 @@ int main(int argc, char** argv)
     //#ifdef Q_OS_WIN
     //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
     //    if (settings.value("AppsUseLightTheme") == 0) {
-    qApp->setStyle(QStyleFactory::create("Fusion"));
-    QPalette darkPalette;
 
-    const QColor darkColor = QColor(50, 50, 50);
-    const QColor disabledColor = QColor(127, 127, 127);
-    const QColor linkColor = QColor(61, 174, 233);
-    const QColor highlightColor = QColor(218, 68, 83);
-    const QColor windowTextColor = QColor(220, 220, 220);
-    const QColor baseColor = QColor(30, 30, 30);
-
-    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
-    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
-    darkPalette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
-    darkPalette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
-
-    darkPalette.setColor(QPalette::Text, windowTextColor);
-    darkPalette.setColor(QPalette::ToolTipText, windowTextColor);
-    darkPalette.setColor(QPalette::WindowText, windowTextColor);
-    darkPalette.setColor(QPalette::ButtonText, windowTextColor);
-    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-
-    darkPalette.setColor(QPalette::Link, linkColor);
-    darkPalette.setColor(QPalette::LinkVisited, highlightColor);
-
-    darkPalette.setColor(QPalette::AlternateBase, darkColor);
-    darkPalette.setColor(QPalette::Base, baseColor);
-    darkPalette.setColor(QPalette::Button, darkColor);
-
-    darkPalette.setColor(QPalette::Highlight, highlightColor);
-
-    darkPalette.setColor(QPalette::ToolTipBase, windowTextColor);
-    darkPalette.setColor(QPalette::Window, darkColor);
-
-    qApp->setPalette(darkPalette);
     //        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
     //    }
     //#endif
@@ -255,10 +221,10 @@ int main(int argc, char** argv)
     if (nixFixSharedMemory.attach())
         nixFixSharedMemory.detach();
 #endif
-    App a;
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
+    App a;
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QGLFormat glf = QGLFormat::defaultFormat();
@@ -266,7 +232,6 @@ int main(int argc, char** argv)
     glf.setSamples(16);
     QGLFormat::setDefaultFormat(glf);
 #endif
-    initIcon(qApp->applicationDirPath());
 
     if constexpr (0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
@@ -372,15 +337,4 @@ int main(int argc, char** argv)
     splash->finish(&mainWin);
 
     return app.exec();
-}
-
-void initIcon(const QString& path)
-{
-    QIcon::setThemeSearchPaths({
-        path + "/../icons/",
-        path + "/../icons/breeze/",
-        path + "/icons/",
-        path + "/icons/breeze/",
-    });
-    QIcon::setThemeName("Breeze");
 }

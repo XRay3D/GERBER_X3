@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -42,6 +43,6 @@ void GCH::highlightBlock(const QString& text)
     for (auto m : ctre::range<pattern>(text)) {
         static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
         myClassFormat.setForeground(color[key.indexOf(*m.data())]);
-        setFormat(std::distance(data, m.data()), m.size(), myClassFormat);
+        setFormat(static_cast<int>(std::distance(data, m.data())), static_cast<int>(m.size()), myClassFormat);
     }
 }
