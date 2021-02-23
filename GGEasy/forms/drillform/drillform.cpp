@@ -65,10 +65,48 @@ DrillForm::DrillForm(QWidget* parent)
     {
         ui->toolTable->setIconSize(QSize(IconSize, IconSize));
         ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
+        ui->toolTable->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
         ui->toolTable->setWordWrap(false);
         ui->toolTable->horizontalHeader()->setMinimumHeight(ui->toolTable->verticalHeader()->defaultSectionSize());
 
         connect(ui->toolTable, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
+        connect(ui->toolTable->horizontalHeader(), &QHeaderView::customContextMenuRequested, [this](const QPoint& pos) {
+            QMenu menu;
+            menu.addAction(QIcon::fromTheme("view-form"), tr("&Choose a tool for everyone"), [this] {
+                ui->toolTable->selectAll();
+                bool fl = true;
+                for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
+                    fl = model->isSlot(current.row());
+                    if (!fl)
+                        break;
+                }
+                mvector<Tool::Type> tools;
+                if (fl)
+                    tools = mvector<Tool::Type> { Tool::EndMill };
+                else
+                    tools = (m_worckType == GCode::Drill)
+                        ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill }
+                        : mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser };
+                ToolDatabase tdb(this, tools);
+                if (tdb.exec()) {
+                    const Tool tool(tdb.tool());
+                    for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
+                        if (model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
+                            model->setToolId(current.row(), tool.id());
+                            updateToolsOnGi(model->apertureId(current.row()));
+                        } else if (model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
+                            QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
+                        } else if (!model->isSlot(current.row())) {
+                            if (model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
+                                continue;
+                            model->setToolId(current.row(), tool.id());
+                            updateToolsOnGi(model->apertureId(current.row()));
+                        }
+                    }
+                }
+            });
+            menu.exec(ui->toolTable->horizontalHeader()->mapToGlobal(pos));
+        });
         connect(ui->toolTable, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
         connect(ui->toolTable, &QTableView::clicked, this, &DrillForm::on_clicked);
     }

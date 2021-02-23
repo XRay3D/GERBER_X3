@@ -145,6 +145,7 @@ set(HEADERS
     ${HEADERS}
     aboutform.h
     mainwindow.h
+    messageoutput.h
     openingdialog.h
     plugindialog.h
     point.h

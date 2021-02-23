@@ -1060,6 +1060,41 @@ void MainWindow::loadFile(const QString& fileName)
 
 void MainWindow::updateTheme()
 {
+    //    class ProxyStyle : public QProxyStyle {
+    //        //Q_OBJECT
+    //    public:
+    //        ProxyStyle(QStyle* style = nullptr)
+    //            : QProxyStyle(style)
+    //        {
+    //        }
+    //        ProxyStyle(const QString& key)
+    //            : QProxyStyle(key)
+    //        {
+    //        }
+    //        virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0) const override
+    //        {
+    //            //qDebug() << metric;
+    //            //        switch (metric) {
+    //            //        case QStyle::PM_SmallIconSize:
+    //            //            return 22;
+    //            //        default:
+    //            //            return QProxyStyle::pixelMetric(metric, option, widget);
+    //            //        }
+    //            return QProxyStyle::pixelMetric(metric, option, widget);
+    //        }
+    //        //        virtual QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt = nullptr, const QWidget* widget = nullptr) const override
+    //        //        {
+    //        //            qDebug() << standardPixmap;
+    //        //            return {};
+    //        //            return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+    //        //        }
+    //        QPixmap generatedIconPixmap(QIcon::Mode iconMode, const QPixmap& pixmap, const QStyleOption* opt) const override
+    //        {
+    //            qDebug() << iconMode;
+    //            return {};
+    //            return QProxyStyle::generatedIconPixmap(iconMode, pixmap, opt);
+    //        }
+    //    };
     qApp->setStyle(QStyleFactory::create("Fusion"));
     QColor baseColor;
     QColor disabledColor;
