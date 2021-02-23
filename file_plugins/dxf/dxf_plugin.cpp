@@ -238,7 +238,7 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             labelBoldFont->setObjectName(QString::fromUtf8("labelBoldFont"));
             formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
 
-            chbxBoldFont = new QCheckBox(groupBox);
+            chbxBoldFont = new QCheckBox(" ", groupBox);
             chbxBoldFont->setObjectName(QString::fromUtf8("chbxDxfBoldFont"));
             formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
             // Italic Font
@@ -246,7 +246,7 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             labelItalicFont->setObjectName(QString::fromUtf8("labelItalicFont"));
             formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
 
-            chbxItalicFont = new QCheckBox(groupBox);
+            chbxItalicFont = new QCheckBox(" ", groupBox);
             chbxItalicFont->setObjectName(QString::fromUtf8("chbxDxfItalicFont"));
             formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
             // Override Fonts
@@ -254,7 +254,7 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             labelOverrideFonts->setObjectName(QString::fromUtf8("labelOverrideFonts"));
             formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
 
-            chbxOverrideFonts = new QCheckBox(groupBox);
+            chbxOverrideFonts = new QCheckBox(" ", groupBox);
             chbxOverrideFonts->setObjectName(QString::fromUtf8("chbxDxfOverrideFonts"));
             formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
 

@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
-  <defs id="defs3051">
-    <style type="text/css" id="current-color-scheme">
-      .ColorScheme-Text {
-        color:#c0c0c0
-      }
-      </style>
-  </defs>
-    <path
-       style="fill:currentColor;fill-opacity:1;stroke:none" 
-       d="M 3 3 L 3 4 L 3 19 L 4 19 L 19 19 L 19 18 L 19 5 L 12.007812 5 L 10.007812 3 L 10 3.0078125 L 10 3 L 4 3 L 3 3 z M 4 4 L 7 4 L 9.5859375 4 L 10.589844 5.0039062 L 6.5703125 9 L 6.5683594 9 L 4 9 L 4 4 z M 9.0078125 8 L 18 8 L 18 18 L 4 18 L 4 10 L 5.5625 10 L 7 10 L 7 9.9921875 L 7.0078125 10 L 9.0078125 8 z "
-       class="ColorScheme-Text" />
-</svg>
+<svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"><path d="m3 3v1 15h1 15v-1-13h-6.992188l-2-2-.007812.0078125v-.0078125h-6zm1 1h3 2.5859375l1.0039065 1.0039062-4.0195315 3.9960938h-.0019531-2.5683594zm5.0078125 4h8.9921875v10h-14v-8h1.5625 1.4375v-.0078125l.0078125.0078125z" fill="#c0c0c0"/></svg>
