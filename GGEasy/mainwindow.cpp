@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -375,7 +376,8 @@ void MainWindow::createActionsService()
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
-            r.setSize({ 1280, 720 });
+            //r.setSize({ 1280, 720 });
+            r.setSize({ 1920, 1080 });
             setGeometry(r);
         }));
     }
@@ -718,6 +720,7 @@ void MainWindow::readSettings()
         settings.endArray();
     }
     settings.endGroup();
+    updateTheme();
 }
 
 void MainWindow::writeSettings()
@@ -1050,6 +1053,96 @@ void MainWindow::loadFile(const QString& fileName)
         }
     }
     qDebug() << fileName;
+}
+
+void MainWindow::updateTheme()
+{
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    QColor baseColor;
+    QColor disabledColor;
+    QColor highlightColor;
+    QColor linkColor;
+    QColor windowColor;
+    QColor windowTextColor;
+
+    qDebug() << App::settings().theme();
+
+    switch (App::settings().theme()) {
+    case LightBlue:
+        baseColor = QColor(230, 230, 230);
+        disabledColor = QColor(127, 127, 127);
+        highlightColor = QColor(61, 174, 233);
+        linkColor = QColor(61, 174, 233);
+        windowColor = QColor(200, 200, 200);
+        windowTextColor = QColor(0, 0, 0);
+        break;
+    case LightRed:
+        baseColor = QColor(230, 230, 230);
+        disabledColor = QColor(127, 127, 127);
+        highlightColor = QColor(218, 68, 83);
+        linkColor = QColor(61, 174, 233);
+        windowColor = QColor(200, 200, 200);
+        windowTextColor = QColor(0, 0, 0);
+        break;
+    case DarkBlue:
+        baseColor = QColor(30, 30, 30);
+        disabledColor = QColor(127, 127, 127);
+        highlightColor = QColor(61, 174, 233);
+        linkColor = QColor(61, 174, 233);
+        windowColor = QColor(50, 50, 50);
+        windowTextColor = QColor(220, 220, 220);
+        break;
+    case DarkRed:
+        baseColor = QColor(30, 30, 30);
+        disabledColor = QColor(127, 127, 127);
+        highlightColor = QColor(218, 68, 83);
+        linkColor = QColor(61, 174, 233);
+        windowColor = QColor(50, 50, 50);
+        windowTextColor = QColor(220, 220, 220);
+        break;
+    }
+
+    if (App::settings().theme() < DarkBlue) {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeLight/",
+            qApp->applicationDirPath() + "/icons/breezeLight/",
+        });
+    } else {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeDark/",
+            qApp->applicationDirPath() + "/icons/breezeDark/",
+        });
+    }
+    QIcon::setThemeName("Breeze");
+
+    QPalette palette;
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
+    palette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
+    palette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
+    palette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
+
+    palette.setColor(QPalette::Text, windowTextColor);
+    palette.setColor(QPalette::ToolTipText, windowTextColor);
+    palette.setColor(QPalette::WindowText, windowTextColor);
+    palette.setColor(QPalette::ButtonText, windowTextColor);
+    palette.setColor(QPalette::HighlightedText, Qt::black);
+    palette.setColor(QPalette::BrightText, Qt::red);
+
+    palette.setColor(QPalette::Link, linkColor);
+    palette.setColor(QPalette::LinkVisited, highlightColor);
+
+    palette.setColor(QPalette::AlternateBase, windowColor);
+    palette.setColor(QPalette::Base, baseColor);
+    palette.setColor(QPalette::Button, windowColor);
+
+    palette.setColor(QPalette::Highlight, highlightColor);
+
+    palette.setColor(QPalette::ToolTipBase, windowTextColor);
+    palette.setColor(QPalette::Window, windowColor);
+
+    qApp->setPalette(palette);
+    SettingsDialog d;
+    d.show();
 }
 
 void MainWindow::open()

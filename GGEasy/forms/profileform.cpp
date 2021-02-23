@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -28,14 +29,14 @@ ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)
     , names { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") }
-    , pixmaps {
-        QStringLiteral(":/toolpath/prof_on_climb.svg"),
-        QStringLiteral(":/toolpath/prof_out_climb.svg"),
-        QStringLiteral(":/toolpath/prof_in_climb.svg"),
-        QStringLiteral(":/toolpath/prof_on_conv.svg"),
-        QStringLiteral(":/toolpath/prof_out_conv.svg"),
-        QStringLiteral(":/toolpath/prof_in_conv.svg"),
-    }
+//    , pixmaps {
+//        "prof_on_climb",
+//        "prof_out_climb",
+//        "prof_in_climb",
+//        "prof_on_conv",
+//        "prof_out_conv",
+//        "prof_in_conv",
+//    }
 {
     ui->setupUi(this);
     parent->setWindowTitle(ui->label->text());
@@ -229,7 +230,7 @@ void ProfileForm::updateBridge()
 void ProfileForm::updatePixmap()
 {
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-    ui->lblPixmap->setPixmap(QIcon(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
+    ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
 }
 
 void ProfileForm::rb_clicked()

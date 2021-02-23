@@ -186,6 +186,13 @@ enum HomePosition : int {
     AlwaysZero
 };
 
+enum Theme : int {
+    LightBlue,
+    LightRed,
+    DarkBlue,
+    DarkRed,
+};
+
 class SettingsDialog;
 
 class AppSettings {
@@ -206,6 +213,7 @@ public:
     QColor& guiColor(int id);
     bool guiSmoothScSh();
     bool animSelection();
+    int theme();
 
     /*Clipper*/
     int clpCircleSegments(double radius);
@@ -245,6 +253,7 @@ private:
     };
     bool m_guiSmoothScSh;
     bool m_animSelection = true;
+    int m_theme = false;
 
     /*Clipper*/
     double m_clpMinCircleSegmentLength { 0.5 };

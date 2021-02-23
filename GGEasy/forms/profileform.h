@@ -37,7 +37,14 @@ private:
     void updateBridge();
     void updatePixmap();
     const QStringList names;
-    const QStringList pixmaps;
+    static inline const QString pixmaps[] {
+        QStringLiteral("prof_on_climb"),
+        QStringLiteral("prof_out_climb"),
+        QStringLiteral("prof_in_climb"),
+        QStringLiteral("prof_on_conv"),
+        QStringLiteral("prof_out_conv"),
+        QStringLiteral("prof_in_conv"),
+    };
     void rb_clicked();
     BridgeItem* brItem = nullptr;
 

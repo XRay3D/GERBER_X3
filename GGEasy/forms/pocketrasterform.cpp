@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -27,10 +28,6 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil(new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
-    , pixmaps {
-        QStringLiteral("pock_rast_climb"),
-        QStringLiteral("pock_rast_conv"),
-    }
 {
     ui->setupUi(this);
     parent->setWindowTitle(ui->label->text());
@@ -69,7 +66,6 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
 
 PocketRasterForm::~PocketRasterForm()
 {
-
 
     MySettings settings;
     settings.beginGroup("PocketRasterForm");

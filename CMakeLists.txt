@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.14)
 project(Gerber_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
-add_definitions(-DCTRE)# qDebug()
+add_definitions(-DCTRE)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)

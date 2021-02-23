@@ -1,5 +1,6 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
@@ -28,7 +29,7 @@ namespace Dxf {
 QStringList keys(const Layers& layers)
 {
     QStringList sl;
-    sl.reserve(layers.size());
+    sl.reserve(static_cast<int>(layers.size()));
     for (auto& [key, _] : layers)
         sl.append(key);
     return sl;
