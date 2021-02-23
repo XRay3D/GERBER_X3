@@ -30,7 +30,7 @@ GCUtils::GCUtils(const GCodeParams& gcp)
 
 QString GCUtils::getLastDir()
 {
-    if (Settings::sameFolder())
+    if (Settings::sameFolder() && !redirected)
         lastDir = QFileInfo(App::project()->name()).absolutePath();
     else if (lastDir.isEmpty()) {
         QSettings settings;
@@ -39,17 +39,19 @@ QString GCUtils::getLastDir()
             lastDir = QFileInfo(App::project()->name()).absolutePath();
         settings.setValue("LastGCodeDir", lastDir);
     }
-
     return lastDir += '/';
 }
 
-void GCUtils::setLastDir(QString value)
+void GCUtils::setLastDir(QString dirPath)
 {
-    if (Settings::sameFolder())
-        return;
-    value = QFileInfo(value).absolutePath();
-    if (lastDir != value) {
-        lastDir = value;
+    dirPath = QFileInfo(dirPath).absolutePath();
+    if (Settings::sameFolder() && !redirected) {
+        redirected = QFileInfo(App::project()->name()).absolutePath() != dirPath;
+        if (!redirected)
+            return;
+    }
+    if (lastDir != dirPath) {
+        lastDir = dirPath;
         QSettings settings;
         settings.setValue("LastGCodeDir", lastDir);
     }

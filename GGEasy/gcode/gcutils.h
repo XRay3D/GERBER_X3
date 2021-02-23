@@ -13,16 +13,16 @@
 *******************************************************************************/
 #pragma once
 #include "gctypes.h"
-#include <myclipper.h>
 #include <QList>
 #include <QString>
+#include <myclipper.h>
 
 class Project;
 
 namespace GCode {
 
 class GCUtils {
-    friend class::Project;
+    friend class ::Project;
 
 public:
     GCUtils(const GCodeParams& gcp);
@@ -38,7 +38,7 @@ public:
     void setToolType(int val) { m_toolType = val; }
 
     static QString getLastDir();
-    static void setLastDir(QString value);
+    static void setLastDir(QString dirPath);
 
 private:
     double m_feedRate = 0.0;
@@ -68,7 +68,8 @@ protected:
 
     Paths m_g0path;
 
-    inline static QString lastDir;
+    static inline QString lastDir;
+    static inline bool redirected;
     inline static const mvector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 
     mvector<double> getDepths();
