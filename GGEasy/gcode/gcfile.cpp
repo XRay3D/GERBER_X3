@@ -152,7 +152,7 @@ void File::saveMillingPocket(const QPointF& offset)
                         m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
                 }
             }
-            for (size_t j = paths.size() - 2; j >= 0 && i < depths.size() - 1; --j) {
+            for (size_t j = paths.size() - 2; j != std::numeric_limits<size_t>::max() && i < depths.size() - 1; --j) {
                 QPointF& point = paths[j].back();
                 m_lines.push_back(formated({ g0(), x(point.x()), y(point.y()) }));
             }
