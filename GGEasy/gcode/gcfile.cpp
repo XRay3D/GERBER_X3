@@ -733,14 +733,15 @@ void File::read(QDataStream& stream)
 void File::createGi()
 {
     switch (m_gcp.gcType) {
-    case Profile:
-    case Thermal:
+    case GCode::Profile:
+    case GCode::Thermal:
         createGiProfile();
         break;
-    case Raster: {
+    case GCode::Raster:
+    case GCode::Hatching:
         createGiRaster();
-    } break;
-    case Voronoi:
+        break;
+    case GCode::Voronoi:
         if (m_toolPathss.size() > 1) {
             GraphicsItem* item;
             item = new GcPathItem(m_toolPathss.back().back(), this);
@@ -751,13 +752,13 @@ void File::createGi()
         } else
             createGiProfile();
         break;
-    case Pocket:
+    case GCode::Pocket:
         createGiPocket();
         break;
-    case Drill:
+    case GCode::Drill:
         createGiDrill();
         break;
-    case LaserHLDI:
+    case GCode::LaserHLDI:
         createGiLaser();
         break;
     default:
@@ -784,6 +785,8 @@ void File::createGi()
     case GCode::LaserHLDI:
         m_icon = QIcon::fromTheme("raster-path");
         break;
+    case GCode::Hatching:
+        m_icon = QIcon::fromTheme("crosshatch-path");
     default:
         break;
     }
