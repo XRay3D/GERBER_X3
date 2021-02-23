@@ -157,9 +157,9 @@ MainWindow::MainWindow(QWidget* parent)
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
             }
         }
-        if (0) {
+        if (1) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
-            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Hatching]->triggered(); });
+            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Pocket]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
