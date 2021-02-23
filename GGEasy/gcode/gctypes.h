@@ -249,7 +249,8 @@ struct GCodeParams {
 class Settings {
 protected:
     static inline QString m_fileExtension = { "tap" };
-    static inline QString m_format { "G?X?Y?Z?F?S?" };
+    static inline QString m_formatMilling { "G?X?Y?Z?F?S?" };
+    static inline QString m_formatLaser { "G?X?Y?Z?F?S?" };
     static inline QString m_laserConstOn { "M3" };
     static inline QString m_laserDynamOn { "M4" };
     static inline QString m_spindleLaserOff { "M5" };
@@ -268,7 +269,8 @@ protected:
 
 public:
     static QString fileExtension() { return m_fileExtension; }
-    static QString format() { return m_format; }
+    static QString formatMilling() { return m_formatMilling; }
+    static QString formatLaser() { return m_formatLaser; }
     static QString laserConstOn() { return m_laserConstOn; }
     static QString laserDynamOn() { return m_laserDynamOn; }
 

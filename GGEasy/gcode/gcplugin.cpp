@@ -65,7 +65,8 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
         QCheckBox* chbxSameGFolder;
         QComboBox* cbxProfileSort;
         QLineEdit* leFileExtension;
-        QLineEdit* leFormat;
+        QLineEdit* leFormatMilling;
+        QLineEdit* leFormatLaser;
         QLineEdit* leLaserCPC;
         QLineEdit* leLaserDPC;
         QLineEdit* leSpindleCC;
@@ -130,6 +131,15 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
                 pteEnd->setObjectName(QString::fromUtf8("pteEnd"));
                 verticalLayoutM->addWidget(pteEnd);
 
+                auto lblFormatM = new QLabel(tabMilling);
+                lblFormatM->setObjectName(QString::fromUtf8("lblFormatM"));
+                lblFormatM->setText(QApplication::translate("SettingsDialog", "The format of the line with the coordinates:", nullptr));
+                verticalLayoutM->addWidget(lblFormatM);
+                leFormatMilling = new QLineEdit(tabMilling);
+                leFormatMilling->setObjectName(QString::fromUtf8("leFormatMilling"));
+                leFormatMilling->setToolTip(QApplication::translate("SettingsDialog", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
+                verticalLayoutM->addWidget(leFormatMilling);
+
                 tabwStart->addTab(tabMilling, QString());
                 tabwStart->setTabText(tabwStart->indexOf(tabMilling), QApplication::translate("SettingsDialog", "Milling", nullptr));
             }
@@ -155,6 +165,15 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
                 pteLaserEnd = new QPlainTextEdit(tabLaser);
                 pteLaserEnd->setObjectName(QString::fromUtf8("pteLaserEnd"));
                 verticalLayoutL->addWidget(pteLaserEnd);
+
+                auto lblFormatL = new QLabel(tabLaser);
+                lblFormatL->setObjectName(QString::fromUtf8("lblFormatL"));
+                lblFormatL->setText(QApplication::translate("SettingsDialog", "The format of the line with the coordinates:", nullptr));
+                verticalLayoutL->addWidget(lblFormatL);
+                leFormatLaser = new QLineEdit(tabLaser);
+                leFormatLaser->setObjectName(QString::fromUtf8("leFormatLaser"));
+                leFormatLaser->setToolTip(QApplication::translate("SettingsDialog", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
+                verticalLayoutL->addWidget(leFormatLaser);
 
                 tabwStart->addTab(tabLaser, QString());
                 tabwStart->setTabText(tabwStart->indexOf(tabLaser), QApplication::translate("SettingsDialog", "Laser", nullptr));
@@ -182,15 +201,6 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
                 tabwStart->setTabText(tabwStart->indexOf(tabProfile), QApplication::translate("SettingsDialog", "Profile", nullptr));
             }
             /**/ verticalLayout1->addWidget(tabwStart);
-
-            auto lblFormat = new QLabel(this);
-            lblFormat->setObjectName(QString::fromUtf8("lblFormat"));
-            lblFormat->setText(QApplication::translate("SettingsDialog", "The format of the line with the coordinates:", nullptr));
-            /**/ verticalLayout1->addWidget(lblFormat);
-            leFormat = new QLineEdit(this);
-            leFormat->setObjectName(QString::fromUtf8("leFormat"));
-            leFormat->setToolTip(QApplication::translate("SettingsDialog", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
-            /**/ verticalLayout1->addWidget(leFormat);
 
             auto grbxSpindle = new QGroupBox(this);
             grbxSpindle->setObjectName(QString::fromUtf8("grbxSpindle"));
@@ -244,7 +254,8 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
             m_info = settings.getValue(chbxInfo, m_info);
             m_sameFolder = settings.getValue(chbxSameGFolder, m_sameFolder);
             m_fileExtension = settings.getValue(leFileExtension, m_fileExtension);
-            m_format = settings.getValue(leFormat, m_format);
+            m_formatMilling = settings.getValue(leFormatMilling, m_formatMilling);
+            m_formatLaser = settings.getValue(leFormatLaser, m_formatLaser);
             m_laserConstOn = settings.getValue(leLaserCPC, m_laserConstOn);
             m_laserDynamOn = settings.getValue(leLaserDPC, m_laserDynamOn);
             m_spindleOn = settings.getValue(leSpindleCC, m_spindleOn);
@@ -263,7 +274,8 @@ SettingsTab Plugin::createSettingsTab(QWidget* parent)
         {
             settings.beginGroup("GCode");
             m_fileExtension = settings.setValue(leFileExtension);
-            m_format = settings.setValue(leFormat);
+            m_formatMilling = settings.setValue(leFormatMilling);
+            m_formatLaser = settings.setValue(leFormatLaser);
             m_info = settings.setValue(chbxInfo);
             m_laserConstOn = settings.setValue(leLaserCPC);
             m_laserDynamOn = settings.setValue(leLaserDPC);

@@ -43,7 +43,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
     auto data = reinterpret_cast<const char16_t*>(text.data());
     for (auto m : ctre::range<pattern>(text)) {
         myClassFormat.setForeground(color.at(*m.data()));
-        setFormat(std::distance(data, m.data()), m.size(), myClassFormat);
+        setFormat(static_cast<int>(std::distance(data, m.data())), static_cast<int>(m.size()), myClassFormat);
     }
 }
 
