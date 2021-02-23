@@ -385,7 +385,8 @@ void File::initSave()
     for (bool& fl : formatFlags)
         fl = false;
 
-    const QString format(Settings::format());
+    const QString format(m_gcp.getTool().type() == Tool::Laser ? Settings::formatLaser()
+                                                               : Settings::formatMilling());
     for (size_t i = 0; i < cmdList.size(); ++i) {
         const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
         if (index != -1) {

@@ -18,7 +18,7 @@ class QGraphicsRectItem;
 
 namespace Gerber {
 
-struct Component;
+class Component;
 
 class ComponentsNode {
     ComponentsNode& operator=(ComponentsNode&&) = delete;
