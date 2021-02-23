@@ -55,6 +55,9 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 */
 namespace Gerber {
 
+struct QRegularExpression {
+};
+
 QDebug operator<<(QDebug debug, const std::string_view& sw)
 {
     QDebugStateSaver saver(debug);
@@ -1116,7 +1119,6 @@ bool Parser::parseFormat(const QString& gLine)
 
 bool Parser::parseGCode(const QString& gLine)
 {
-    static const QRegularExpression regexp(QStringLiteral());
     static constexpr auto ptrnGCode = ctll::fixed_string("^G([0]?[0-9]{2})\\*$");
     if (auto [whole, c1] = ctre::match<ptrnGCode>(gLine); whole) {
         switch (int { c1 }) {

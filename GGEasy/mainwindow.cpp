@@ -1121,19 +1121,19 @@ void MainWindow::updateTheme()
         windowTextColor = QColor(0, 0, 0);
         break;
     case DarkBlue:
-        baseColor = QColor(30, 30, 30);
+        baseColor = QColor(40, 40, 40);
         disabledColor = QColor(127, 127, 127);
         highlightColor = QColor(61, 174, 233);
         linkColor = QColor(61, 174, 233);
-        windowColor = QColor(50, 50, 50);
+        windowColor = QColor(60, 60, 60);
         windowTextColor = QColor(220, 220, 220);
         break;
     case DarkRed:
-        baseColor = QColor(30, 30, 30);
+        baseColor = QColor(40, 40, 40);
         disabledColor = QColor(127, 127, 127);
         highlightColor = QColor(218, 68, 83);
         linkColor = QColor(61, 174, 233);
-        windowColor = QColor(50, 50, 50);
+        windowColor = QColor(60, 60, 60);
         windowTextColor = QColor(220, 220, 220);
         break;
     }
