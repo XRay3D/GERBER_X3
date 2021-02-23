@@ -157,7 +157,7 @@ MainWindow::MainWindow(QWidget* parent)
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
             }
         }
-        if (1) {
+        if (0) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
             QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Pocket]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -282,7 +282,7 @@ void MainWindow::createActionsFile()
     { // Save Selected Tool Paths
         auto action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
         action->setStatusTip(tr("Save selected toolpaths"));
-        fileToolBar->addAction(action);
+        fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
     }
     { // Export PDF
         auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
@@ -660,15 +660,18 @@ void MainWindow::saveSelectedGCodeFiles()
             if (name.isEmpty())
                 return;
             mvector<QString> sl;
-            for (int i = 0; i < files.size(); ++i) {
-                GCode::File* file = files[i];
+
+            sl.push_back(tr(";\tContains files:"));
+            for (auto file : files)
+                sl.push_back(";\t" + file->shortName());
+            for (auto file : files) {
                 file->itemGroup()->setVisible(false);
                 file->initSave();
-                if (i == 0)
+                if (file == files.front())
                     file->statFile();
-                file->addInfo(true);
+                file->addInfo();
                 file->genGcodeAndTile();
-                if (i == (files.size() - 1))
+                if (file == files.back())
                     file->endFile();
                 sl.append(file->gCodeText());
             }
