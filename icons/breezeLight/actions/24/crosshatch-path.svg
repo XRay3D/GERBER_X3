@@ -9,11 +9,11 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    viewBox="0 0 24 24"
    version="1.1"
-   id="svg8"
-   sodipodi:docname="object-to-path.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+   id="svg10"
+   sodipodi:docname="crosshatch-path.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)">
   <metadata
-     id="metadata12">
+     id="metadata14">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -33,22 +33,24 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1354"
-     inkscape:window-height="1066"
-     id="namedview10"
+     inkscape:window-width="1295"
+     inkscape:window-height="1015"
+     id="namedview12"
      showgrid="true"
-     inkscape:zoom="27.812867"
-     inkscape:cx="11.51792"
-     inkscape:cy="9.0698815"
-     inkscape:window-x="2036"
-     inkscape:window-y="730"
+     inkscape:zoom="28.963094"
+     inkscape:cx="16.520197"
+     inkscape:cy="10.745685"
+     inkscape:window-x="1403"
+     inkscape:window-y="502"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg8"
-     showguides="false">
+     inkscape:current-layer="svg10"
+     inkscape:document-rotation="0">
     <inkscape:grid
        type="xygrid"
-       id="grid822"
-       empspacing="8" />
+       id="grid821"
+       empspacing="2"
+       spacingx="0.5"
+       spacingy="0.5" />
   </sodipodi:namedview>
   <defs
      id="defs3051">
@@ -64,19 +66,17 @@
       </style>
   </defs>
   <path
-     style="fill:#da4453;fill-opacity:1;stroke:none;stroke-opacity:1"
-     d="M 4 5.0292969 L 4 21.029297 L 5 21.029297 L 5 6.0292969 L 15.060547 6.0292969 A 2.5 2.5 0 0 1 15 5.5 A 2.5 2.5 0 0 1 15.046875 5.0292969 L 4 5.0292969 z "
-     id="rect853" />
-  <path
      style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-opacity:1"
-     d="M 7 8 L 7 21 L 8 21 L 8 9 L 20 9 L 20 8 L 7 8 z "
-     id="rect867" />
-  <path
-     style="fill:#4d4d4d;fill-opacity:0.50196078;stroke:none;stroke-opacity:1"
-     d="M 8 9 L 8 21 L 20 21 L 20 9 L 8 9 z "
-     id="rect872" />
+     d="M 20,4 V 20 H 4 V 4 Z M 19,5 H 5 v 14 h 14 z"
+     id="rect823"
+     inkscape:connector-curvature="0" />
   <path
      style="fill:#3daee9;fill-opacity:1;stroke:none;stroke-opacity:1"
-     d="M 17.5 3 A 2.5 2.5 0 0 0 15 5.5 A 2.5 2.5 0 0 0 17.5 8 A 2.5 2.5 0 0 0 20 5.5 A 2.5 2.5 0 0 0 17.5 3 z M 17.5 4 A 1.5 1.5 0 0 1 19 5.5 A 1.5 1.5 0 0 1 17.5 7 A 1.5 1.5 0 0 1 16 5.5 A 1.5 1.5 0 0 1 17.5 4 z "
-     id="path882" />
+     d="M 16.5,5 A 2.5,2.5 0 0 1 19,7.5 2.5,2.5 0 0 1 16.5,10 2.5,2.5 0 0 1 14,7.5 2.5,2.5 0 0 1 16.5,5 Z m 0,1 A 1.5,1.5 0 0 0 15,7.5 1.5,1.5 0 0 0 16.5,9 1.5,1.5 0 0 0 18,7.5 1.5,1.5 0 0 0 16.5,6 Z"
+     id="path837"
+     inkscape:connector-curvature="0" />
+  <path
+     id="rect834"
+     style="fill:#da4453;fill-opacity:1;stroke:none;stroke-width:0.989"
+     d="m 7,7 v 4 h 3 v 2 H 7 v 4 h 4 v -3 h 2 v 3 h 4 v -4 h -3 v -2 h 3 V 9.947266 A 2.5,2.5 0 0 1 16.5,10 2.5,2.5 0 0 1 16,9.949219 V 10 H 14 V 8 h 0.05273 A 2.5,2.5 0 0 1 14,7.5 2.5,2.5 0 0 1 14.050781,7 H 13 v 3 H 11 V 7 Z m 1,1 h 2 v 2 H 8 Z m 3,3 h 2 v 2 h -2 z m -3,3 h 2 v 2 H 8 Z m 6,0 h 2 v 2 h -2 z" />
 </svg>

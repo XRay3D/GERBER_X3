@@ -504,7 +504,7 @@ void MainWindow::createActionsToolPath()
     toolpathActions.emplace(GCode::Drill, action);
 
     // Crosshatch
-    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
     action->setShortcut(QKeySequence("Ctrl+Shift+C"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Hatching, action);
@@ -1064,8 +1064,6 @@ void MainWindow::updateTheme()
     QColor linkColor;
     QColor windowColor;
     QColor windowTextColor;
-
-    qDebug() << App::settings().theme();
 
     switch (App::settings().theme()) {
     case LightBlue:

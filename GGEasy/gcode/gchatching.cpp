@@ -95,7 +95,6 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         }
         return scanLines;
     };
-
     auto calcFrames = [](const Paths& src, const Path& frame) {
         Paths frames;
         {
@@ -117,7 +116,6 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         }
         return frames;
     };
-
     auto calcZigzag = [hatchStep](const Paths& src) {
         Clipper clipper;
         clipper.AddPaths(src, ptClip, true);
@@ -270,7 +268,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
     if (m_returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        m_gcp.gcType = Raster;
+        m_gcp.gcType = Hatching;
         m_file = new File(m_returnPss, m_gcp);
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);

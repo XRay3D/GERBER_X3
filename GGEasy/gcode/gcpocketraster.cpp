@@ -43,9 +43,6 @@ void RasterCreator::create()
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass)
 {
-    QElapsedTimer t;
-    t.start();
-
     switch (m_gcp.side()) {
     case Outer:
         groupedPaths(CutoffPaths, static_cast<cInt>(m_toolDiameter + 5));
@@ -65,165 +62,156 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     Paths profilePaths;
     Paths fillPaths;
 
-    for (Paths src : m_groupedPss) {
-        if (prPass) {
-            ClipperOffset offset(uScale);
-            offset.AddPaths(src, jtRound, etClosedPolygon);
-            offset.Execute(src, -m_dOffset);
-            profilePaths.append(src);
-            fillPaths.append(src);
+    auto calcScanLines = [](const Paths& src, const Path& frame) {
+        Paths scanLines;
+
+        Clipper clipper;
+        clipper.AddPaths(src, ptClip);
+        clipper.AddPath(frame, ptSubject, false);
+        clipper.Execute(ctIntersection, scanLines);
+        if (!scanLines.size())
+            return scanLines;
+        std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
+        cInt start = scanLines.front().front().Y;
+        bool fl = {};
+        for (size_t i {}, last {}; i < scanLines.size(); ++i) {
+            if (auto y = scanLines[i].front().Y; y != start || i - 1 == scanLines.size()) {
+                std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Path& l, const Path& r) { // horizontal sort
+                    return fl ? l.front().X < r.front().X
+                              : l.front().X > r.front().X;
+                });
+                for (size_t k = last; k < i; ++k) { // fix direction
+                    if (fl ^ (scanLines[k].front().X < scanLines[k].back().X))
+                        std::swap(scanLines[k].front().X, scanLines[k].back().X);
+                }
+                start = y;
+                fl = !fl;
+                last = i;
+            }
+        }
+        return scanLines;
+    };
+    auto calcFrames = [](const Paths& src, const Path& frame) {
+        Paths frames;
+        {
+            Paths tmp;
+            Clipper clipper;
+            clipper.AddPaths(src, ptSubject, false);
+            clipper.AddPath(frame, ptClip);
+            clipper.Execute(ctIntersection, tmp);
+            //dbgPaths(tmp, "ctIntersection");
+            frames.append(tmp);
+            clipper.Execute(ctDifference, tmp);
+            //dbgPaths(tmp, "ctDifference");
+            frames.append(tmp);
+            std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
+            for (auto& path : frames) {
+                if (path.front().Y > path.back().Y)
+                    ReversePath(path); // fix vertical direction
+            }
+        }
+        return frames;
+    };
+    auto calcZigzag = [this](const Paths& src) {
+        Clipper clipper;
+        clipper.AddPaths(src, ptClip, true);
+        IntRect rect(clipper.GetBounds());
+        cInt o = uScale - (rect.height() % m_stepOver) / 2;
+        rect.top -= o;
+        rect.bottom += o;
+        rect.left -= uScale;
+        rect.right += uScale;
+        Path zigzag;
+        cInt start = rect.top;
+        bool fl {};
+
+        for (; start <= rect.bottom || fl; fl = !fl, start += m_stepOver) {
+            if (!fl) {
+                zigzag.emplace_back(rect.left, start);
+                zigzag.emplace_back(rect.right, start);
+            } else {
+                zigzag.emplace_back(rect.right, start);
+                zigzag.emplace_back(rect.left, start);
+            }
         }
 
+        zigzag.front().X -= m_stepOver;
+        zigzag.back().X -= m_stepOver;
+        return zigzag;
+    };
+    auto merge = [](const Paths& scanLines, const Paths& frames) {
+        Paths merged;
+        merged.reserve(scanLines.size() / 10);
+        std::list<Path> bList;
+        for (auto&& path : scanLines)
+            bList.emplace_back(std::move(path));
+
+        std::list<Path> fList;
+        for (auto&& path : frames)
+            fList.emplace_back(std::move(path));
+
+        setMax(bList.size());
+        while (bList.begin() != bList.end()) {
+            setCurrent(bList.size());
+
+            merged.resize(merged.size() + 1);
+            auto& path = merged.back();
+            for (auto bit = bList.begin(); bit != bList.end(); ++bit) {
+                getCancelThrow();
+                if (path.empty() || path.back() == bit->front()) {
+                    path.append(path.empty() ? *bit : bit->mid(1));
+                    bList.erase(bit);
+                    for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                        if (path.back() == fit->front() && fit->front().Y < fit->at(1).Y) {
+                            path.append(fit->mid(1));
+                            fList.erase(fit);
+                            bit = bList.begin();
+                            break;
+                        }
+                    }
+                    bit = bList.begin();
+                }
+                if (bList.begin() == bList.end())
+                    break;
+            }
+            for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                if (path.front() == fit->back() && fit->front().Y > fit->at(1).Y) {
+                    fit->append(path.mid(1));
+                    std::swap(*fit, path);
+                    fList.erase(fit);
+                    break;
+                }
+            }
+        }
+        merged.shrink_to_fit();
+        return merged;
+    };
+
+    for (Paths src : m_groupedPss) {
+        ClipperOffset offset(uScale);
+        offset.AddPaths(src, jtRound, etClosedPolygon);
+        offset.Execute(src, -m_dOffset);
+        for (auto& path : src)
+            path.push_back(path.front());
+        if (prPass)
+            profilePaths.append(src);
+
         if (src.size()) {
-            for (Path& path : src)
-                path.push_back(path.front());
-            ClipperOffset offset(uScale);
-            offset.AddPaths(src, jtRound, etClosedPolygon);
-            offset.Execute(src, prPass ? -m_dOffset * 1.05 : -m_dOffset);
-        } else
-            continue;
-
-        if (src.size()) {
-            for (Path& path : src) {
-                path.push_back(path.front());
-            }
-
-            Clipper clipper;
-            clipper.AddPaths(src, ptClip, true);
-            const IntRect r(clipper.GetBounds());
-            clipper.Clear();
-            const cInt size = static_cast<cInt>(IntPoint(r.left, r.top).distTo({ r.right, r.bottom }));
-            const cInt end = static_cast<cInt>(r.bottom + (size - (r.bottom - r.top)) * 0.5);
-            const cInt start = static_cast<cInt>(r.top - (size - (r.bottom - r.top)) * 0.5);
-            const cInt left = static_cast<cInt>(r.left - (size - (r.right - r.left)) * 0.5);
-            const cInt right = static_cast<cInt>(r.right + (size - (r.right - r.left)) * 0.5);
-            const IntPoint center(static_cast<cInt>(0.5 * (r.left + r.right)), static_cast<cInt>(0.5 * (r.top + r.bottom)));
-
-            Paths acc;
-            using Worck = mvector<std::tuple<cInt, cInt, cInt, cInt>>;
-            /////////////////////////////////////////////////////////
-            std::function<void(Worck)> scan = [this, &angle, &center, &src, &acc](Worck w) {
-                static QMutex m;
-                auto [_1, _2, _3, flag] = w.front();
-                Q_UNUSED(_1)
-                Q_UNUSED(_2)
-                Q_UNUSED(_3)
-                Paths scanLine;
-                {
-                    Clipper clipper;
-                    clipper.AddPaths(src, ptClip, true);
-                    for (auto& [left_, right_, var, _f] : w) {
-                        Q_UNUSED(_f)
-                        Path frame { { left_, var }, { right_, var } };
-                        RotatePath(frame, angle, center);
-                        clipper.AddPath(frame, ptSubject, false);
-                    }
-                    clipper.Execute(ctIntersection, scanLine, pftPositive);
-                    if (qFuzzyCompare(angle, 90)) {
-                        if (!flag) {
-                            for (Path& path : scanLine)
-                                if (path.front().Y > path.back().Y)
-                                    ReversePath(path);
-                        } else {
-                            for (Path& path : scanLine)
-                                if (path.front().Y < path.back().Y)
-                                    ReversePath(path);
-                        }
-                    } else {
-                        if (!flag) {
-                            for (Path& path : scanLine)
-                                if (path.front().X > path.back().X)
-                                    ReversePath(path);
-                        } else {
-                            for (Path& path : scanLine)
-                                if (path.front().X < path.back().X)
-                                    ReversePath(path);
-                        }
-                    }
-                }
-                {
-
-                    Paths toNext;
-                    Clipper clipper;
-                    clipper.AddPaths(src, ptSubject, false);
-                    for (auto [left_, right_, var, _f] : w) {
-                        Q_UNUSED(_f)
-                        Path frame {
-                            { left_, var },
-                            { right_, var },
-                            { right_, var += m_stepOver },
-                            { left_, var }
-                        };
-                        RotatePath(frame, angle, center);
-                        clipper.AddPath(frame, ptClip, true);
-                    }
-                    clipper.Execute(ctIntersection, toNext, pftPositive);
-                    mergeSegments(toNext);
-                    if (scanLine.empty()) {
-                        QMutexLocker l(&m);
-                        acc.append(toNext);
-                    } else {
-                        for (Path& dst : scanLine) {
-                            for (size_t i = 0; i < toNext.size(); ++i) {
-                                Path& next = toNext[i];
-                                if (dst.back() == next.front()) {
-                                    dst.append(next.mid(1));
-                                    toNext.remove(i--);
-                                } else if (dst.back() == next.back()) {
-                                    ReversePath(next);
-                                    dst.append(next.mid(1));
-                                    toNext.remove(i--);
-                                } else if (dst.front() == next.front()) {
-                                    toNext.remove(i--);
-                                } else if (dst.front() == next.back()) {
-                                    toNext.remove(i--);
-                                }
-                            }
-                        }
-                        QMutexLocker l(&m);
-                        acc.append(scanLine);
-                        acc.append(toNext);
-                    }
-                }
-            };
-            /////////////////////////////////////////////////////////
-
-            mvector<Worck> map;
-
-            if (/* DISABLES CODE */ (0)) {
-                for (cInt var = start, flag = 0; var < end + m_stepOver * 5; flag = (flag ? 0 : 1), var += flag ? m_stepOver : m_stepOver * 5) {
-                    map.push_back({ { left, right, var, flag },
-                        { left, right, static_cast<cInt>(var + m_stepOver * 2), flag },
-                        { left, right, static_cast<cInt>(var + m_stepOver * 4), flag } });
-                }
-            } else {
-                for (cInt var = start, flag = 0; var < end; flag = (flag ? 0 : 1), var += m_stepOver) {
-                    map.push_back(Worck { { left, right, var, flag } });
-                }
-            }
-            if (/* DISABLES CODE */ (0)) {
-                //PROG  m_progressMax += m_groupedPss.size() + map.size();
-                for (size_t i = 0; i < map.size(); ++i) {
-                    scan(map[i]);
-                    //++PROG m_progressVal;
-                }
-            } else {
-                //PROG  m_progressMax += m_groupedPss.size() + map.size();
-                for (size_t i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
-                    auto m(map.mid(i, c));
-                    QFuture<void> future = QtConcurrent::map(m, scan);
-                    future.waitForFinished();
-                    //PROG m_progressVal += m.size();
-                }
-            }
-
-            if (!acc.empty()) {
-                mergeSegments(acc);
-                m_returnPs.append(acc);
-                //sortB(m_returnPss.last());
+            for (auto& path : src)
+                RotatePath(path, angle);
+            auto zigzag { calcZigzag(src) };
+            auto scanLines { calcScanLines(src, zigzag) };
+            auto frames { calcFrames(src, zigzag) };
+            if (scanLines.size() && frames.size()) {
+                auto merged { merge(scanLines, frames) };
+                for (auto& path : merged)
+                    RotatePath(path, -angle);
+                m_returnPs.append(merged);
             }
         }
     }
+
+    mergeSegments(m_returnPs);
 
     sortB(m_returnPs);
     if (!profilePaths.empty() && prPass) {
