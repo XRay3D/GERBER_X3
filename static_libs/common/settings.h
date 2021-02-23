@@ -17,7 +17,6 @@
 #include <QFont>
 #include <QPointF>
 #include <QSettings>
-//#include <concepts> //
 #include <stdexcept>
 #include <type_traits>
 
@@ -34,15 +33,8 @@ class QTabWidget;
 
 #define varName(val) val, #val
 
-//template <typename T>
-//concept Checkable = requires(T *a)
-//{
-//    // clang-format off
-//    { a->isChecked() };// -> std::convertible_to<int>;
-//    { a->objectName() };// -> std::convertible_to<QString>;
-//    { a->setChecked({}) };
-//    // clang-format on
-//};
+template <typename W>
+concept IsWidget = std::is_base_of_v<QWidget, W>;
 
 class MySettings : public QSettings {
 public:
@@ -60,16 +52,7 @@ public:
         return value;
     }
 
-    //    template <Checkable W>
-    //    auto setValue(W widget)
-    //    {
-    //        const QString name { widget->objectName() };
-    //        assert(!name.isEmpty());
-    //        QSettings::setValue(name, widget->isChecked());
-    //        return widget->isChecked();
-    //    }
-
-    template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
+    template <IsWidget W>
     auto setValue(W* widget)
     {
         const QString name { widget->objectName() };
@@ -104,7 +87,7 @@ public:
         }
     }
 
-    template <typename W, typename = std::enable_if_t<std::is_base_of_v<QWidget, W>>>
+    template <IsWidget W>
     auto getValue(W* widget, const QVariant& defaultValue = {}) const
     {
         const QString name { widget->objectName() };
@@ -139,8 +122,8 @@ public:
         }
     }
 
-    template <typename V, typename = std::enable_if_t<std::is_arithmetic_v<V>>>
-    auto getValue(V& val, const char* name, V def = {}) const
+    template <typename V>
+    auto getValue(V& val, const char* name, V def = {}) const requires std::is_arithmetic_v<V>
     {
         if constexpr (std::is_floating_point_v<V>) {
             val = QSettings::value(name, def).toDouble();
@@ -153,8 +136,8 @@ public:
         }
     }
 
-    template <typename V, typename = std::enable_if_t<std::is_arithmetic_v<V>>>
-    auto setValue(V val, const char* name)
+    template <typename V>
+    auto setValue(V val, const char* name) requires std::is_arithmetic_v<V>
     {
         QSettings::setValue(name, val);
         return val;
