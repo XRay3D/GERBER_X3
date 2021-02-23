@@ -456,9 +456,9 @@ void File::genGcodeAndTile()
 
 Tool File::getTool() const { return m_gcp.getTool(); }
 
-void File::addInfo(bool fl)
+void File::addInfo()
 {
-    if (Settings::info() || fl) {
+    if (Settings::info()) {
         m_lines.push_back(QString(";\tName:\t%1").arg(shortName()));
         m_lines.push_back(QString(";\tTool:\t%1").arg(m_gcp.getTool().name()));
         m_lines.push_back(QString(";\tDepth:\t%1").arg(m_gcp.getDepth()));

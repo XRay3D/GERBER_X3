@@ -44,7 +44,7 @@ private:
 
     void initSave();
     void genGcodeAndTile();
-    void addInfo(bool fl = false);
+    void addInfo();
     void startPath(const QPointF& point);
     void endPath();
     void statFile();
