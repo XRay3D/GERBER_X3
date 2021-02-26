@@ -181,13 +181,15 @@ void Marker::updateGCPForm()
 {
     if (App::gCodePropertiesForm())
         App::gCodePropertiesForm()->updatePosDsbxs();
-    QSettings settings;
-    settings.beginGroup("Points");
-    settings.setValue("pos" + QString::number(m_type), pos());
-    App::project()->setChanged();
-    if (m_type == Zero)
+
+    if (m_type == Zero) {
+        App::project()->setZeroPos(pos());
         for (auto pin : Pin::pins())
             pin->updateToolTip();
+
+    } else {
+        App::project()->setHomePos(pos());
+    }
 }
 
 void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
