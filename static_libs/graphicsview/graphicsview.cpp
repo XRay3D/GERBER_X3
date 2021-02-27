@@ -352,10 +352,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, nullptr, event->modifiers());
-        QGraphicsView::mouseReleaseEvent(&releaseEvent);
-#elif QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
@@ -398,7 +395,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
 #endif
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
-        setDragMode(RubberBandDrag);
+        setDragMode(NoDrag);
         setInteractive(true);
     } else if (event->button() == Qt::RightButton) {
         // это что бы при вызове контекстного меню ничего постороннего не было
@@ -407,6 +404,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setInteractive(true);
         m_scene->setDrawRuller(false);
         emit mouseClickR(mappedPos(event));
+        latPos = event->pos();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
         emit mouseClickL(mappedPos(event));
@@ -415,6 +413,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
+    qDebug() << event;
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
