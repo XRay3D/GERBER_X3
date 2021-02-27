@@ -40,22 +40,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #endif()
 
 
+#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(SUFFIX "_gnu")
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(SUFFIX "${SUFFIX}_x64")
+    else()
+        set(SUFFIX "${SUFFIX}_x32")
+    endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
-endif()
-
-#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-if(CMAKE_CL_64)
-    set(SUFFIX "${SUFFIX}_x64")
-else()
-    set(SUFFIX "${SUFFIX}_x32")
+    if(CMAKE_CL_64)
+        set(SUFFIX "${SUFFIX}_x64")
+    else()
+        set(SUFFIX "${SUFFIX}_x32")
+    endif()
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -207,21 +212,20 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         )
 endif()
 
-###########################
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::PrintSupport> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGLWidgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-        )
-endif()
+############################
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::PrintSupport> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    )
+#if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGLWidgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#        )
+#endif()
 
 
 #include(../PVS-Studio.cmake)
