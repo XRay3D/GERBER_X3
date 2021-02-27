@@ -115,26 +115,6 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles);
     connect(ui->treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
-    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
-        setStyleSheet("QGroupBox, .QFrame {"
-                      //"background-color: white;"
-                      "border: 1px solid gray; }"
-                      "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-                      "QGroupBox::title {"
-                      "subcontrol-origin: margin;"
-                      "subcontrol-position: top center; }" /* position at the top center */
-        );
-    } else {
-        setStyleSheet("QGroupBox, .QFrame {"
-                      //"background-color: white;"
-                      "border: 1px solid gray;"
-                      "border-radius: 3px; }" // Win 7 or other
-                      "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-                      "QGroupBox::title {"
-                      "subcontrol-origin: margin;"
-                      "subcontrol-position: top center; }" /* position at the top center */
-        );
-    }
     App::toolHolder().readTools();
     setCurrentFile(QString());
 
@@ -1138,19 +1118,6 @@ void MainWindow::updateTheme()
         break;
     }
 
-    if (App::settings().theme() < DarkBlue) {
-        QIcon::setThemeSearchPaths({
-            qApp->applicationDirPath() + "/../icons/breezeLight/",
-            qApp->applicationDirPath() + "/icons/breezeLight/",
-        });
-    } else {
-        QIcon::setThemeSearchPaths({
-            qApp->applicationDirPath() + "/../icons/breezeDark/",
-            qApp->applicationDirPath() + "/icons/breezeDark/",
-        });
-    }
-    QIcon::setThemeName("Breeze");
-
     QPalette palette;
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
     palette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
@@ -1175,8 +1142,82 @@ void MainWindow::updateTheme()
 
     palette.setColor(QPalette::ToolTipBase, windowTextColor);
     palette.setColor(QPalette::Window, windowColor);
-
     qApp->setPalette(palette);
+
+    //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
+    //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    //                                         //"background-color: white;"
+    //                                         "border: 1px solid gray; }"
+    //                                         "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
+    //                                         "QGroupBox::title {"
+    //                                         "subcontrol-origin: margin;"
+    //                                         "subcontrol-position: top center; }" /* position at the top center */
+    //        );
+    //    } else {
+    //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    //                                         //"background-color: white;"
+    //                                         "border: 1px solid gray;"
+    //                                         "border-radius: 3px; }" // Win 7 or other
+    //                                         "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
+    //                                         "QGroupBox::title {"
+    //                                         "subcontrol-origin: margin;"
+    //                                         "subcontrol-position: top center; }" /* position at the top center */
+    //        );
+    //    }
+
+    if (App::settings().theme() < DarkBlue) {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeLight/",
+            qApp->applicationDirPath() + "/icons/breezeLight/",
+        });
+    } else {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeDark/",
+            qApp->applicationDirPath() + "/icons/breezeDark/",
+        });
+        //        App::graphicsView()->setStyleSheet(
+        //            QString("QScrollBar {"
+        //                    //            "    border: 2px solid grey;"
+        //                    "    background: %1;"
+        //                    //            "    width: 15px;"
+        //                    "    margin: 22px 0 22px 0;"
+        //                    "}"
+        //                    "QScrollBar::handle {"
+        //                    "    background: %2;"
+        //                    "    border-radius: 2px;"
+        //                    "    border: 1px solid grey;"
+        //                    //                        "    min-height: 20px;"
+        //                    "}"
+        //                    "QScrollBar::add-line {"
+        //                    //                    "    border: 2px solid grey;"
+        //                    //                    "    background: #32CC99;"
+        //                    //                    "    height: 20px;"
+        //                    //                    "    subcontrol-position: bottom;"
+        //                    //                    "    subcontrol-origin: margin;"
+        //                    "}"
+        //                    "QScrollBar::sub-line {"
+        //                    //                    "    border: 2px solid grey;"
+        //                    //                    "    background: #32CC99;"
+        //                    //                    "    height: 20px;"
+        //                    //                    "    subcontrol-position: top;"
+        //                    //                    "    subcontrol-origin: margin;"
+        //                    "}"
+        //                    "QScrollBar::up-arrow, QScrollBar::down-arrow {"
+        //                    //                    "    border: 2px solid grey;"
+        //                    //                    "    width: 3px;"
+        //                    //                    "    height: 3px;"
+        //                    //                    "    background: white;"
+        //                    "}"
+        //                    "QScrollBar::add-page, QScrollBar::sub-page {"
+        //                    //                    "    background: none;"
+        //                    "}")
+        //                .arg(windowColor.name())
+        //                .arg(highlightColor.darker().name())
+        //                .arg(disabledColor.name()) //
+        //        );
+    }
+    QIcon::setThemeName("Breeze");
+
     SettingsDialog d;
     d.show();
 }

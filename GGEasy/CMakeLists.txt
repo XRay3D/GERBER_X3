@@ -39,6 +39,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

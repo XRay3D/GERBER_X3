@@ -46,7 +46,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         interfaceItem->setExpanded(true);
         for (auto& [type, tuple] : App::filePlugins()) {
             auto& [parser, pobj] = tuple;
-            auto json(parser->info());
+            auto json { parser->info() };
             auto featureItem = new QTreeWidgetItem(interfaceItem);
             featureItem->setExpanded(true);
             featureItem->setIcon(0, decoration(Qt::lightGray, json.value("Name").toString()[0]));
@@ -67,7 +67,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         interfaceItem->setExpanded(true);
         for (auto& [type, tuple] : App::shapePlugins()) {
             auto& [shape, pobj] = tuple;
-            auto json(shape->info());
+            auto json { shape->info() };
             auto featureItem = new QTreeWidgetItem(interfaceItem);
             featureItem->setExpanded(true);
             featureItem->setIcon(0, shape->icon());

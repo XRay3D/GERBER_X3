@@ -46,7 +46,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     settings.getValue(ui->cbxSolver);
 #else
     ui->cbxSolver->setCurrentIndex(0);
-    ui->cbxSolver->setEnabled(false);
+//    ui->cbxSolver->setEnabled(false);
 #endif
     settings.endGroup();
 
