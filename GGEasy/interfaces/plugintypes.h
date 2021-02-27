@@ -52,7 +52,8 @@ enum class FileType {
     Excellon,
     GCode,
     Dxf,
-    Shapes
+    Hpgl,
+    Shapes = 100
 };
 
 enum Side {

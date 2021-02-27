@@ -24,9 +24,39 @@
 #include "point.h"
 #include <QFuture>
 #include <QtConcurrent>
+#include <algorithm>
 #include <forward_list>
+#include <ranges>
 
 #include "leakdetector.h"
+
+//struct sort_fn {
+//    template <std::random_access_iterator I, std::sentinel_for<I> S, class Comp = std::ranges::less, class Proj = std::identity>
+//    requires std::sortable<I, Comp, Proj> constexpr I
+//    operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
+//    {
+//        if (first == last)
+//            return { first };
+
+//        const auto pivot = *std::ranges::next(first, std::ranges::distance(first, last) / 2, last);
+
+//        auto tail1 = std::ranges::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
+//        auto tail2 = std::ranges::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
+
+//        (*this)(first, tail1.begin(), std::ref(comp), std::ref(proj));
+//        (*this)(tail2, std::ref(comp), std::ref(proj));
+
+//        return { std::ranges::next(first, last) };
+//    }
+
+//    template <std::ranges::random_access_range R, class Comp = std::ranges::less, class Proj = std::identity>
+//    requires std::sortable<std::ranges::iterator_t<R>, Comp, Proj> constexpr std::ranges::borrowed_iterator_t<R>
+//    operator()(R&& r, Comp comp = {}, Proj proj = {}) const
+//    {
+//        return (*this)(std::ranges::begin(r), std::ranges::end(r), std::move(comp), std::move(proj));
+//    }
+//};
+//inline constexpr sort_fn sort {};
 
 namespace GCode {
 HatchingCreator::HatchingCreator()
@@ -67,33 +97,36 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
     Paths profilePaths;
 
     auto calcScanLines = [](const Paths& src, const Path& frame) {
-        Paths scanLines;
+        Paths sl; // Scan Lines
 
         Clipper clipper;
         clipper.AddPaths(src, ptClip);
         clipper.AddPath(frame, ptSubject, false);
-        clipper.Execute(ctIntersection, scanLines);
-        if (!scanLines.size())
-            return scanLines;
-        std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
-        cInt start = scanLines.front().front().Y;
+        clipper.Execute(ctIntersection, sl);
+        if (!sl.size())
+            return sl;
+
+        std::ranges::sort(sl, {}, [](const Path& p) { return p.front().Y; }); // vertical sort
+
+        cInt start = sl.front().front().Y;
         bool fl = {};
-        for (size_t i {}, last {}; i < scanLines.size(); ++i) {
-            if (auto y = scanLines[i].front().Y; y != start || i - 1 == scanLines.size()) {
-                std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Path& l, const Path& r) { // horizontal sort
-                    return fl ? l.front().X < r.front().X
-                              : l.front().X > r.front().X;
-                });
+        for (size_t i {}, last {}; i < sl.size(); ++i) {
+            if (auto y = sl[i].front().Y; y != start || i - 1 == sl.size()) {
+
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; }) // horizontal sort
+                   : std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().X; }); // horizontal sort
+
                 for (size_t k = last; k < i; ++k) { // fix direction
-                    if (fl ^ (scanLines[k].front().X < scanLines[k].back().X))
-                        std::swap(scanLines[k].front().X, scanLines[k].back().X);
+                    if (fl ^ (sl[k].front().X < sl[k].back().X))
+                        std::swap(sl[k].front().X, sl[k].back().X);
                 }
+
                 start = y;
                 fl = !fl;
                 last = i;
             }
         }
-        return scanLines;
+        return sl;
     };
     auto calcFrames = [](const Paths& src, const Path& frame) {
         Paths frames;
@@ -108,6 +141,9 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
             clipper.Execute(ctDifference, tmp);
             //dbgPaths(tmp, "ctDifference");
             frames.append(tmp);
+
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().Y; }); // vertical sort
+
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
             for (auto& path : frames) {
                 if (path.front().Y > path.back().Y)

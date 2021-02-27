@@ -170,10 +170,11 @@ int main(int argc, char** argv)
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
-                if /**/ (auto parser = qobject_cast<FilePluginInterface*>(pobj); pobj && parser)
-                    App::filePlugins().emplace(parser->type(), PIF { parser, pobj });
-                else if (auto parser = qobject_cast<ShapePluginInterface*>(pobj); pobj && parser)
-                    App::shapePlugins().emplace(parser->type(), PIS { parser, pobj });
+                if /**/ (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
+                    App::filePlugins().emplace(file->type(), PIF { file, pobj });
+                } else if (auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
+                    App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
+                }
             }
         }
 
