@@ -31,6 +31,7 @@
 #include "ft_view.h"
 
 #include <QtWidgets>
+#include <drillpreviewgi.h>
 
 namespace Dxf {
 
@@ -156,6 +157,19 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
         return nullptr;
     }
     return file;
+}
+
+QIcon Plugin::drawDrillIcon()
+{
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
+    return QIcon(pixmap);
 }
 
 bool Plugin::thisIsIt(const QString& fileName)
@@ -322,6 +336,140 @@ void Plugin::updateFileModel(FileInterface* file)
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
+}
+
+class DrillPrGI final : public AbstractDrillPrGI {
+public:
+    explicit DrillPrGI(const GraphicObject& go, Row& row)
+        : AbstractDrillPrGI(row)
+        , go(go)
+    {
+        if (auto e = dynamic_cast<const Circle*>(go.entity()); e)
+            m_sourceDiameter = e->radius * 2;
+        m_sourcePath = drawDrill();
+        m_type = GiType::PrDrill;
+    }
+
+private:
+    QPainterPath drawDrill() const
+    {
+        QPainterPath painterPath;
+        const double radius = m_sourceDiameter;
+        painterPath.addEllipse(go.pos(), radius, radius);
+        return painterPath;
+    }
+
+    Paths offset(const Path& path, double offset) const
+    {
+        ClipperOffset cpOffset;
+        // cpOffset.AddPath(path, jtRound, etClosedLine);
+        cpOffset.AddPath(path, jtRound, etOpenRound);
+        Paths tmpPpaths;
+        cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
+        for (Path& path : tmpPpaths)
+            path.push_back(path.front());
+        return tmpPpaths;
+    }
+
+    const GraphicObject& go;
+
+    // AbstractDrillPrGI interface
+public:
+    void
+    updateTool() override
+    {
+        if (row.toolId > -1) {
+            colorState |= Tool;
+            if (m_type == GiType::PrSlot) {
+                m_toolPath = {};
+
+                auto& tool(App::toolHolder().tool(row.toolId));
+                const double diameter = tool.getDiameter(tool.getDepth());
+                const double lineKoeff = diameter * 0.7;
+
+                Paths tmpPpath;
+
+                ClipperOffset offset;
+                offset.AddPath(go.paths().front(), jtRound, etOpenRound);
+                offset.Execute(tmpPpath, diameter * 0.5 * uScale);
+
+                for (Path& path : tmpPpath) {
+                    path.push_back(path.front());
+                    m_toolPath.addPolygon(path);
+                }
+
+                Path path(go.paths().front());
+
+                if (path.size()) {
+                    for (IntPoint& pt : path) {
+                        m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
+                        m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
+                        m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
+                        m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
+                    }
+                    m_toolPath.moveTo(path.front());
+                    for (IntPoint& pt : path) {
+                        m_toolPath.lineTo(pt);
+                    }
+                }
+            }
+        } else {
+            colorState &= ~Tool;
+            m_toolPath = {};
+        }
+
+        changeColor();
+    }
+    IntPoint pos() const override { return go.pos(); }
+    Paths paths() const override
+    {
+        if (m_type == GiType::PrSlot)
+            return go.paths();
+        Paths paths(go.paths());
+        return ReversePaths(paths);
+    }
+    bool fit(double depth) override
+    {
+        return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth);
+    }
+};
+
+DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
+{
+    DrillPreviewGiMap giPeview;
+
+    auto const dxfFile = reinterpret_cast<File*>(file);
+
+    std::map<double, mvector<GraphicObject*>> cacheHoles;
+
+    for (auto& [key, lay] : dxfFile->layers()) {
+        for (auto go : lay->graphicObjects()) {
+            if (auto e = dynamic_cast<const Circle*>(go.entity()); e)
+                cacheHoles[e->radius * 2].push_back(&go);
+        }
+    }
+
+    //    std::map<int, mvector<const Excellon::Hole*>> cacheHoles;
+    //    for (const Excellon::Hole& hole : *dxfFile)
+    //        cacheHoles[hole.state.tCode] << &hole;
+    //    data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
+    int ctr {};
+    for (auto [diameter, gos] : cacheHoles) {
+        QString name(tr("Ø%1mm").arg(diameter));
+        data.emplace_back(std::move(name), drawDrillIcon(), ++ctr, diameter);
+        for (const GraphicObject* go : gos) {
+            giPeview[ctr].emplace_back(std::make_shared<DrillPrGI>(*go, data.back()));
+        }
+    }
+
+    return giPeview;
+}
+
+void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
+{
+    cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+    cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("crosshairs"));
+    cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
 }
 
 }
