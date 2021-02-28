@@ -29,7 +29,6 @@ add_library(common STATIC
     app.h
     colorselector.cpp
     colorselector.h
-    colorselector.ui
     datastream.h
     depthform.cpp
     depthform.h

@@ -61,7 +61,7 @@ private:
     void updateRuler();
     template <class T>
     void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
-
+    QPoint latPos;
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
