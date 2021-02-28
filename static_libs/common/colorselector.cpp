@@ -15,51 +15,90 @@
 *                                                                              *
 *******************************************************************************/
 #include "colorselector.h"
-#include "ui_colorselector.h"
 
 #include <QColorDialog>
+#include <QHBoxLayout>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPushButton>
 
 #include "leakdetector.h"
 
+class PushButton : public QPushButton {
+    //    Q_OBJECT
+    QColor& m_color;
+    void selectColor()
+    {
+        QColorDialog dialog(m_color);
+        dialog.setOption(QColorDialog::ShowAlphaChannel, true);
+        QColor color(m_color);
+        connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
+        if (dialog.exec() && m_color != color)
+            m_color = color;
+        setText("ARGB " + m_color.name(QColor::HexArgb).toUpper());
+    }
+
+public:
+    PushButton(QColor& color, QWidget* parent = nullptr)
+        : QPushButton("", parent)
+        , m_color(color)
+    {
+        connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
+        setText("ARGB " + m_color.name(QColor::HexArgb).toUpper());
+    }
+    virtual ~PushButton() { }
+
+protected:
+    void paintEvent(QPaintEvent* event) override
+    {
+        QPushButton::paintEvent(event);
+        QPainter p(this);
+        p.setPen(Qt::NoPen);
+
+        //        p.setBrush(Qt::white);
+        //        p.drawRect(rect() + QMargins(-3, -3, -3, -3));
+        QLinearGradient gr(rect().topRight(), rect().bottomLeft());
+        gr.setColorAt(0.1, Qt::black);
+        gr.setColorAt(0.9, Qt::white);
+        p.setBrush(gr);
+        p.drawRect(rect() + QMargins(-3, -3, -3, -3));
+        p.setBrush(m_color);
+        p.drawRect(rect() + QMargins(-3, -3, -3, -3));
+        //p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setPen(Qt::black);
+        p.drawText(rect(), Qt::AlignCenter, text());
+    }
+};
+
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::ColorSelector)
     , m_color(color)
     , m_defaultColor(std::move(defaultColor))
 {
-    ui->setupUi(this);
-    ui->frSelectColor->installEventFilter(this);
-    ui->frSelectColor->setStyleSheet("QFrame { background: " + m_color.name(QColor::HexArgb) + " }");
+    if (objectName().isEmpty())
+        setObjectName(QString::fromUtf8("ColorSelector"));
+    auto horizontalLayout = new QHBoxLayout(this);
+    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    pbSelectColor = new PushButton(color, this);
+    pbSelectColor->setObjectName(QString::fromUtf8("pbSelectColor"));
+
+    horizontalLayout->addWidget(pbSelectColor);
+
+    pbResetColor = new QPushButton(tr("Reset"), this);
+    pbResetColor->setObjectName(QString::fromUtf8("pbResetColor"));
+
+    horizontalLayout->addWidget(pbResetColor);
+
+    connect(pbResetColor, &QPushButton::clicked, this, &ColorSelector::resetColor);
 }
 
 ColorSelector::~ColorSelector()
 {
-    delete ui;
 }
 
-void ColorSelector::on_pbResetColor_clicked()
+void ColorSelector::resetColor()
 {
     m_color = m_defaultColor;
-    ui->frSelectColor->setStyleSheet("QFrame { background: " + m_color.name(QColor::HexArgb) + " }");
-}
-
-bool ColorSelector::eventFilter(QObject* watched, QEvent* event)
-{
-    if (watched == ui->frSelectColor) {
-        if (event->type() == QEvent::MouseButtonPress) {
-            QColorDialog dialog(m_color);
-            dialog.setOption(QColorDialog::ShowAlphaChannel, true);
-            QColor color(m_color);
-            connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
-            if (dialog.exec() && m_color != color) {
-                m_color = color; //dialog.currentColor();
-                ui->frSelectColor->setStyleSheet("QFrame { background: " + m_color.name(QColor::HexArgb) + " }");
-            }
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        return QWidget::eventFilter(watched, event);
-    }
+    //    pbSelectColor->setStyleSheet("QPushButton { background: " + m_color.name(QColor::HexArgb) + " }");
 }
