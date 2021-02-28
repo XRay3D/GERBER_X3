@@ -14,27 +14,22 @@
 #pragma once
 #include <QWidget>
 
-namespace Ui {
-class ColorSelector;
-}
+class QPushButton;
+class PushButton;
 
 class ColorSelector : public QWidget {
     Q_OBJECT
+
+    QPushButton* pbResetColor;
+    PushButton* pbSelectColor;
 
 public:
     explicit ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent = nullptr);
     ~ColorSelector() override;
 
-private slots:
-    void on_pbResetColor_clicked();
-
 private:
-    Ui::ColorSelector* ui;
+    void resetColor();
+
     QColor& m_color;
     const QColor m_defaultColor;
-
-    // QObject interface
-public:
-    bool eventFilter(QObject* watched, QEvent* event) override;
-    void setColor(QColor* color);
 };
