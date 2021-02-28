@@ -22,8 +22,7 @@ namespace Dxf {
 
 class File;
 
-class Plugin : public QObject,
-               public FilePluginInterface {
+class Plugin : public QObject, public FilePluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
     Q_INTERFACES(FilePluginInterface)
@@ -41,7 +40,8 @@ public:
     QJsonObject info() const override;
     std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
-
+    DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
+    void addToDrillForm(FileInterface* file, QComboBox* cbx);
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
 
@@ -52,6 +52,8 @@ signals:
 
 private:
     File* file = nullptr;
+    QIcon drawDrillIcon();
+
 };
 
 }

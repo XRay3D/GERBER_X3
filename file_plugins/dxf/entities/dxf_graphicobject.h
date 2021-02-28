@@ -14,6 +14,7 @@
 #pragma once
 
 #include "datastream.h"
+#include <interfaces/plugintypes.h>
 #include <myclipper.h>
 
 namespace Dxf {
@@ -21,7 +22,7 @@ namespace Dxf {
 class File;
 struct Entity;
 
-class GraphicObject {
+class GraphicObject : public AbstrGraphicObject {
     friend class File;
     friend class Plugin;
 
@@ -78,12 +79,76 @@ public:
 
     inline const File* file() const { return m_gFile; }
     inline const Entity* entity() const { return m_entity; }
-    // const
+
+    // AbstrGraphicObject interface
+
     inline const Path& path() const { return m_path; }
     inline const Paths& paths() const { return m_paths; }
-    // edit
-    inline Path& path() { return m_path; }
-    inline Paths& paths() { return m_paths; }
+
+    Path line() const override
+    {
+        return {};
+    }
+    Path lineW() const override
+    {
+        return {};
+    }
+    Path polyLine() const override
+    {
+        return {};
+    }
+    Paths polyLineW() const override
+    {
+        return {};
+    }
+    Path elipse() const override
+    {
+        return m_path;
+    }
+    Paths elipseW() const override
+    {
+        return m_paths;
+    }
+    Path arc() const override
+    {
+        return {};
+    }
+    Path arcW() const override
+    {
+        return {};
+    }
+    Path polygon() const override
+    {
+        return {};
+    }
+    Paths polygonWholes() const override
+    {
+        return {};
+    }
+    Path hole() const override
+    {
+        return {};
+    }
+    Paths holes() const override
+    {
+        return {};
+    }
+    bool positive() const override
+    {
+        return {};
+    }
+    bool closed() const override
+    {
+        return {};
+    }
+    Path& rPath() override
+    {
+        return m_path;
+    }
+    Paths& rPaths() override
+    {
+        return m_paths;
+    }
 };
 
 }
