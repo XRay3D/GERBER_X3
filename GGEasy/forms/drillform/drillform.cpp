@@ -233,10 +233,12 @@ bool DrillForm::canToShow()
         return true;
 
     QComboBox cbx;
-    for (auto file : App::project()->files(FileType::Gerber)) {
-        App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
-        if (cbx.count())
-            return true;
+    for (auto type : { FileType::Gerber, FileType::Dxf }) {
+        for (auto file : App::project()->files(type)) {
+            App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
+            if (cbx.count())
+                return true;
+        }
     }
 
     QMessageBox::information(nullptr, "", tr("No data to process."));
