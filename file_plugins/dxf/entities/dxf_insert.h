@@ -26,7 +26,7 @@ public:
     void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
-    GraphicObject toGo() const override { return { sp->file, this, {}, {} }; }
+    GraphicObject toGo() const override { return {}; }
 
     void transform(GraphicObject& item, QPointF tr) const;
 

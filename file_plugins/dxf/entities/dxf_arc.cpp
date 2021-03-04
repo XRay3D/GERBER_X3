@@ -86,10 +86,12 @@ void Arc::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Arc::type() const { return Type::ARC; }
+
 GraphicObject Arc::toGo() const
 {
     if (qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
-        return { sp->file, this, {}, {} };
+        return {};
 
     double aspan = endAngle - startAngle;
 
@@ -111,25 +113,43 @@ GraphicObject Arc::toGo() const
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QMatrix m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
 #else
     QTransform m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
 #endif
 
-    return { sp->file, this, p, {} };
+    return { this, p, {} };
+}
+
+void Arc::write(QDataStream& stream) const
+{
+    stream << centerPoint;
+    stream << thickness;
+    stream << radius;
+    stream << startAngle;
+    stream << endAngle;
+}
+
+void Arc::read(QDataStream& stream)
+{
+    stream >> centerPoint;
+    stream >> thickness;
+    stream >> radius;
+    stream >> startAngle;
+    stream >> endAngle;
 }
 
 }

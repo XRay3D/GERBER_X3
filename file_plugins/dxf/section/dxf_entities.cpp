@@ -16,7 +16,7 @@
 *******************************************************************************/
 #include "dxf_entities.h"
 #include "dxf_file.h"
-#include "entities/dxf_entity.h"
+#include "entities/dxf_allentities.h"
 
 #include <QGraphicsView>
 #include <QTimer>

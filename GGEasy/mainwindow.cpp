@@ -61,12 +61,12 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
 
-    new Marker(Marker::Home);
-    new Marker(Marker::Zero);
-    new Pin();
-    new Pin();
-    new Pin();
-    new Pin();
+    ui->graphicsView->scene()->addItem(new Marker(Marker::Home));
+    ui->graphicsView->scene()->addItem(new Marker(Marker::Zero));
+    ui->graphicsView->scene()->addItem(new Pin());
+    ui->graphicsView->scene()->addItem(new Pin());
+    ui->graphicsView->scene()->addItem(new Pin());
+    ui->graphicsView->scene()->addItem(new Pin());
 
     GCodePropertiesForm(); // init default vars;
 
@@ -124,17 +124,18 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (0) {
+        if (1) {
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
-            QDir dir("D:/Gerber Test Files/Ucamco/20191107_ciaa_acc/ciaa_acc");
+            QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList { "*.exc", "*.gbr" }, QDir::Files);
+                listFiles = dir.entryList(QStringList { "*.dxf" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
+                break;
             }
         }
         if (0) {
