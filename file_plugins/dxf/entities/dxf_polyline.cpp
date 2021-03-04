@@ -73,6 +73,8 @@ void PolyLine::parse(CodeData& code)
     //    qDebug() << data;
 }
 
+Entity::Type PolyLine::type() const { return Type::POLYLINE; }
+
 GraphicObject PolyLine::toGo() const
 {
     QPainterPath path;
@@ -109,24 +111,38 @@ GraphicObject PolyLine::toGo() const
     }
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QMatrix m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 #else
     QTransform m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 #endif
-    return { sp->file, this, p.value(0), {} };
+    return { this, p.value(0), {} };
+    }
+
+    void PolyLine::write(QDataStream &stream) const
+    {
+    stream << polylineFlags;
+    stream << startWidth;
+    stream << endWidth;
+}
+
+    void PolyLine::read(QDataStream &stream)
+    {
+    stream >> polylineFlags;
+    stream >> startWidth;
+    stream >> endWidth;
 }
 
 }

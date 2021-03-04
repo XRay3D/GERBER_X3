@@ -115,6 +115,8 @@ void MText::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type MText::type() const { return Type::MTEXT; }
+
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 GraphicObject MText::toGo() const
@@ -234,7 +236,7 @@ GraphicObject MText::toGo() const
     }
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
-    m.scale(1000 * scaleX, -1000 * scaleY);
+    m.scale(u * scaleX, -u * scaleY);
 
     QPainterPath path2;
     for (auto& poly : path.toFillPolygons(m))
@@ -244,13 +246,13 @@ GraphicObject MText::toGo() const
     m2.translate(insertionPoint.x(), insertionPoint.y());
     //    m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
 #else
     QTransform m;
-    m.scale(1000 * scaleX, -1000 * scaleY);
+    m.scale(u * scaleX, -u * scaleY);
 
     QPainterPath path2;
     for (auto& poly : path.toFillPolygons(m))
@@ -260,11 +262,35 @@ GraphicObject MText::toGo() const
     m2.translate(insertionPoint.x(), insertionPoint.y());
     //    m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
 #endif
-    return { sp->file, this, {}, paths };
+    return { this, {}, paths };
+}
+
+void MText::write(QDataStream &stream) const
+{
+    stream << textString;
+    stream << textStyleName;
+    stream << insertionPoint;
+    stream << rotation;
+    stream << nominalTextHeight;
+    stream << referenceRectangleWidth;
+    stream << attachmentPoint;
+    stream << drawingDirection;
+}
+
+void MText::read(QDataStream &stream)
+{
+    stream >> textString;
+    stream >> textStyleName;
+    stream >> insertionPoint;
+    stream >> rotation;
+    stream >> nominalTextHeight;
+    stream >> referenceRectangleWidth;
+    stream >> attachmentPoint;
+    stream >> drawingDirection;
 }
 }

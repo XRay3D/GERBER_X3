@@ -215,7 +215,7 @@ void DrillForm::updateFiles()
 #endif
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber }))
+    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber , FileType::Dxf }))
         App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
@@ -440,9 +440,11 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
     clear();
     file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
-
+    if (!file)
+        return;
     switch (file->type()) {
     case FileType::Gerber:
+    case FileType::Dxf:
         m_type = tAperture;
         break;
     case FileType::Excellon:

@@ -31,21 +31,21 @@ AttDef::AttDef(SectionParser* sp)
 //void AttDef::draw(const InsertEntity* const i) const
 //{
 //    if (i) {
-        //        for (int r = 0; r < i->rowCount; ++r) {
-        //            for (int c = 0; c < i->colCount; ++c) {
-        //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-        //                QPointF rad(radius, radius);
-        //                auto item = new ArcItem2(this, i->color());
-        //                scene->addItem(item);
-        //                //                item->setToolTip(layerName);
-        //                i->transform(item, tr);
-        //                i->attachToLayer(item);
-        //            }
-        //        }
+//        for (int r = 0; r < i->rowCount; ++r) {
+//            for (int c = 0; c < i->colCount; ++c) {
+//                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                QPointF rad(radius, radius);
+//                auto item = new ArcItem2(this, i->color());
+//                scene->addItem(item);
+//                //                item->setToolTip(layerName);
+//                i->transform(item, tr);
+//                i->attachToLayer(item);
+//            }
+//        }
 //    } else {
-        //        auto item = new ArcItem2(this, color());
-        //        scene->addItem(item);
-        //        attachToLayer(item);
+//        auto item = new ArcItem2(this, color());
+//        scene->addItem(item);
+//        attachToLayer(item);
 //    }
 //}
 
@@ -187,6 +187,12 @@ void AttDef::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject AttDef::toGo() const {  return { sp->file, this, {}, {} }; }
+Entity::Type AttDef::type() const { return Type::ATTDEF; }
+
+GraphicObject AttDef::toGo() const { return {}; }
+
+void AttDef::write(QDataStream &stream) const { }
+
+void AttDef::read(QDataStream &stream) { }
 
 }

@@ -18,6 +18,7 @@
 #include "dxf_file.h"
 #include "dxf_node.h"
 
+#include "entities/dxf_allentities.h"
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 #include "section/dxf_headerparser.h"
@@ -355,7 +356,7 @@ private:
     {
         QPainterPath painterPath;
         const double radius = m_sourceDiameter;
-        painterPath.addEllipse(go.pos(), radius, radius);
+        painterPath.addEllipse(pos(), radius, radius);
         return painterPath;
     }
 
@@ -420,7 +421,10 @@ public:
 
         changeColor();
     }
-    IntPoint pos() const override { return go.pos(); }
+    IntPoint pos() const override
+    {
+        return static_cast<const Circle*>(go.entity())->centerPoint;
+    }
     Paths paths() const override
     {
         if (m_type == GiType::PrSlot)

@@ -413,7 +413,6 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
-    qDebug() << event;
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));

@@ -16,10 +16,10 @@
 *******************************************************************************/
 #include "dxf_circle.h"
 #include "dxf_insert.h"
-#include <myclipper.h>
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 #include <QGraphicsEllipseItem>
+#include <myclipper.h>
 
 namespace Dxf {
 Circle::Circle(SectionParser* sp)
@@ -77,6 +77,8 @@ void Circle::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Circle::type() const { return Type::CIRCLE; }
+
 GraphicObject Circle::toGo() const
 {
     QPainterPath path;
@@ -85,25 +87,39 @@ GraphicObject Circle::toGo() const
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QMatrix m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 #else
     QTransform m;
-    m.scale(1000, 1000);
+    m.scale(u, u);
     QPainterPath path2;
     for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 #endif
 
-    return { sp->file, this, p.value(0), {} };
+    return { this, p.value(0), {} };
+}
+
+void Circle::write(QDataStream &stream) const
+{
+    stream << centerPoint;
+    stream << thickness;
+    stream << radius;
+}
+
+void Circle::read(QDataStream &stream)
+{
+    stream >> centerPoint;
+    stream >> thickness;
+    stream >> radius;
 }
 
 }

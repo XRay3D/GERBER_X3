@@ -91,6 +91,8 @@ void Text::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Text::type() const { return Type::TEXT; }
+
 QDebug operator<<(QDebug debug, const QFontMetricsF& fm)
 {
     QDebugStateSaver saver(debug);
@@ -196,31 +198,65 @@ GraphicObject Text::toGo() const
     path.addText(offset, font, text);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
-    m.scale(1000 * scaleX, -1000 * scaleY);
+    m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
     for (auto& poly : path.toFillPolygons(m))
         path2.addPolygon(poly);
     QMatrix m2;
     m2.translate(pt2.x(), pt2.y());
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
 #else
     QTransform m;
-    m.scale(1000 * scaleX, -1000 * scaleY);
+    m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
     for (auto& poly : path.toFillPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.translate(pt2.x(), pt2.y());
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(0.001, 0.001);
+    m2.scale(d, d);
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
 #endif
-    return { sp->file, this, {}, paths };
+    return { this, {}, paths };
+}
+
+void Text::write(QDataStream &stream) const
+{
+    stream << text;
+    stream << textStyleName;
+
+    stream << pt1;
+    stream << pt2;
+
+    stream << textGenerationFlag;
+    stream << horizontalJustType;
+    stream << verticalJustType;
+
+    stream << thickness;
+    stream << textHeight;
+    stream << rotation;
+}
+
+void Text::read(QDataStream &stream)
+{
+    stream >> text;
+    stream >> textStyleName;
+
+    stream >> pt1;
+    stream >> pt2;
+
+    stream >> textGenerationFlag;
+    stream >> horizontalJustType;
+    stream >> verticalJustType;
+
+    stream >> thickness;
+    stream >> textHeight;
+    stream >> rotation;
 }
 }

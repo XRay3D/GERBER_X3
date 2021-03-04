@@ -15,15 +15,111 @@
 *                                                                              *
 *******************************************************************************/
 #include "dxf_entity.h"
+#include "dxf_allentities.h"
 #include "dxf_file.h"
 #include "tables/dxf_layer.h"
 #include <QMetaEnum>
 
 namespace Dxf {
+
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& e)
+{
+    if (e) {
+        stream << e->type();
+        e->write(stream);
+    }
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& e)
+{
+    int type;
+    stream >> type;
+    e = std::make_shared<Arc>(nullptr);
+    switch (type) {
+    case Entity::ACAD_PROXY_ENTITY:
+        break;
+    case Entity::ARC:
+        e = std::make_shared<Arc>(nullptr);
+    case Entity::ATTDEF:
+        e = std::make_shared<AttDef>(nullptr);
+    case Entity::ATTRIB:
+    case Entity::BODY:
+        break;
+    case Entity::CIRCLE:
+        e = std::make_shared<Circle>(nullptr);
+    case Entity::DIMENSION:
+        break;
+    case Entity::ELLIPSE:
+        e = std::make_shared<Ellipse>(nullptr);
+    case Entity::HATCH:
+        e = std::make_shared<Hatch>(nullptr);
+    case Entity::HELIX:
+    case Entity::IMAGE:
+        break;
+    case Entity::INSERT:
+        //        return new InsertEntity(blocks, sp); //  e = std::make_shared<Dummy>(nullptr);
+    case Entity::LEADER:
+    case Entity::LIGHT:
+        break;
+    case Entity::LINE:
+        e = std::make_shared<Line>(nullptr);
+    case Entity::LWPOLYLINE:
+        e = std::make_shared<LwPolyline>(nullptr);
+    case Entity::MESH:
+    case Entity::MLEADER:
+    case Entity::MLEADERSTYLE:
+    case Entity::MLINE:
+        break;
+    case Entity::MTEXT:
+        e = std::make_shared<MText>(nullptr);
+    case Entity::OLE2FRAME:
+    case Entity::OLEFRAME:
+        break;
+    case Entity::POINT:
+        e = std::make_shared<Point>(nullptr);
+    case Entity::POLYLINE:
+        e = std::make_shared<PolyLine>(nullptr); //entities.append(new Dummy(sp, Entity::POLYLINE));
+    case Entity::RAY:
+    case Entity::REGION:
+    case Entity::SECTION:
+    case Entity::SEQEND:
+    case Entity::SHAPE:
+        break;
+    case Entity::SOLID:
+        e = std::make_shared<Solid>(nullptr);
+    case Entity::SPLINE:
+        e = std::make_shared<Spline>(nullptr);
+    case Entity::SUN:
+    case Entity::SURFACE:
+    case Entity::TABLE:
+        break;
+    case Entity::TEXT:
+        e = std::make_shared<Text>(nullptr);
+    case Entity::TOLERANCE:
+    case Entity::TRACE:
+    case Entity::UNDERLAY:
+    case Entity::VERTEX:
+        break;
+    case Entity::VIEWPORT:
+        e = std::make_shared<Dummy>(nullptr);
+    case Entity::WIPEOUT:
+    case Entity::XLINE:
+        break;
+    default:
+        //throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+        break;
+    }
+    e->read(stream);
+    return stream;
+}
+
 Entity::Entity(SectionParser* sp)
     : sp(sp)
 {
 }
+
+Entity::~Entity() { }
 
 void Entity::draw(const InsertEntity* const i) const
 {
@@ -133,6 +229,22 @@ void Entity::parse(CodeData& code)
         qDebug() << "default" << code;
         break;
     }
+}
+
+void Entity::write(QDataStream& stream) const
+{
+    stream << layerName;
+    stream << handle;
+    stream << softPointerID;
+    stream << colorNumber;
+}
+
+void Entity::read(QDataStream& stream)
+{
+    stream >> layerName;
+    stream >> handle;
+    stream >> softPointerID;
+    stream >> colorNumber;
 }
 
 Entity::Type Entity::toType(const QString& key)

@@ -69,7 +69,6 @@ Marker::Marker(Type type)
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
-    App::scene()->addItem(this);
 }
 
 Marker::~Marker() { m_markers[m_type] = nullptr; }
@@ -247,7 +246,6 @@ Pin::Pin()
     m_rect = m_path.boundingRect();
 
     setZValue(std::numeric_limits<qreal>::max() - m_index);
-    App::scene()->addItem(this);
     m_pins[m_index] = this;
 }
 
@@ -516,9 +514,7 @@ LayoutFrames::LayoutFrames()
     : QGraphicsObject(nullptr)
 {
     setZValue(-std::numeric_limits<double>::max());
-    App::scene()->addItem(this);
     setFlag(ItemIsSelectable, false);
-
     App::setLayoutFrames(this);
 }
 
@@ -629,7 +625,8 @@ void LayoutFrames::updateRect(bool fl)
     }
     m_path = std::move(path);
     QGraphicsItem::update();
-    scene()->setSceneRect(scene()->itemsBoundingRect());
+    if (scene())
+        scene()->setSceneRect(scene()->itemsBoundingRect());
     if (fl) {
         Marker::get(Marker::Home)->resetPos(false);
         Marker::get(Marker::Zero)->resetPos(false);
