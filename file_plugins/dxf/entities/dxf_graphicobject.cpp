@@ -16,6 +16,7 @@
 *******************************************************************************/
 #include "dxf_graphicobject.h"
 #include "dxf_entity.h"
+#include "dxf_file.h"
 
 namespace Dxf {
 
@@ -23,7 +24,7 @@ QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
 {
     stream << go.m_path;
     stream << go.m_paths;
-    stream << go.m_entity;
+    stream << go.m_entityId;
 
     stream << go.m_rotationAngle;
     stream << go.m_scaleX;
@@ -37,7 +38,7 @@ QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
 {
     stream >> go.m_path;
     stream >> go.m_paths;
-    stream >> go.m_entity;
+    stream >> go.m_entityId;
 
     stream >> go.m_rotationAngle;
     stream >> go.m_scaleX;
@@ -47,12 +48,15 @@ QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
     return stream;
 }
 
+size_t GraphicObject::entityId() const
+{
+    return m_entityId;
+}
+
 GraphicObject::GraphicObject() { }
 
-GraphicObject::GraphicObject(/*File* file, */ const Entity* entity, const Path& path, const Paths& paths)
-    : /*m_gFile(file)
-    ,*/
-    m_entity(const_cast<Entity*>(entity))
+GraphicObject::GraphicObject(size_t entityId, const Path& path, const Paths& paths)
+    : m_entityId(entityId)
     , m_path(path)
     , m_paths(paths)
 {
@@ -105,9 +109,9 @@ void GraphicObject::setPos(QPointF pos)
 
 QPointF GraphicObject::pos() const { return m_pos; }
 
+const Entity* GraphicObject::entity() const { return m_file ? m_file->entities().at(m_entityId).get() : nullptr; }
+
 //const File* GraphicObject::file() const { return m_gFile; }
-
-
 
 const Path& GraphicObject::path() const { return m_path; }
 

@@ -119,7 +119,7 @@ GraphicObject Solid::toGo() const
     }
     Path path(poly);
     ReversePath(path);
-    return { this, path, { path } };
+    return { id, path, { path } };
 }
 
 void Solid::write(QDataStream &stream) const

@@ -31,21 +31,6 @@ struct Block {
 
     friend QDataStream& operator>>(QDataStream& stream, Block*& /*b*/)
     {
-        //        switch (static_cast<FileType>(type)) {
-        //        case FileType::Gerber:
-        //            file = QSharedPointer<FileInterface>(new Gerber::File());
-        //            break;
-        //        case FileType::Excellon:
-        //            file = QSharedPointer<FileInterface>(new Excellon::File());
-        //            break;
-        //        case FileType::GCode:
-        //            file = QSharedPointer<FileInterface>(new GCode::File());
-        //            break;
-        //        case FileType::Dxf:
-        //            file = QSharedPointer<FileInterface>(new Dxf::File());
-        //            break;
-        //        }
-        //        stream >> *file;
         return stream;
     }
 
@@ -95,7 +80,7 @@ struct Block {
     QPointF basePoint;
     QString xrefPathName;
     Codes bData;
-    QVector<Entity*> entities;
+    Entities entities;
     Blocks& blocks;
 };
 }

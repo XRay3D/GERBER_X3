@@ -71,7 +71,7 @@ void Model::addFile(FileInterface* file)
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
-void Model::addShape(Shapes::Shape* shape)
+void Model::addShape(ShapeInterface *shape)
 {
     if (!shape)
         return;

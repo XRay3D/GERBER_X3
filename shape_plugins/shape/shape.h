@@ -27,9 +27,6 @@ class Shape : public GraphicsItem {
     friend class Node;
     friend class Handler;
 
-    friend QDataStream& operator<<(QDataStream& stream, const Shape& shape);
-    friend QDataStream& operator>>(QDataStream& stream, Shape& shape);
-
 public:
     Shape();
     ~Shape();

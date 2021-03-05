@@ -28,22 +28,20 @@ class GraphicObject final : public AbstrGraphicObject {
     friend class Plugin;
 
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go);
-
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go);
 
-    //    File* m_gFile = nullptr;
-    std::shared_ptr<Entity> m_entity;
+    size_t m_entityId {};
     Path m_path;
     Paths m_paths;
-
-    double m_rotationAngle = 0.0;
-    double m_scaleX = 0.0;
-    double m_scaleY = 0.0;
+    File* m_file = nullptr;
+    double m_rotationAngle {};
+    double m_scaleX {};
+    double m_scaleY {};
     QPointF m_pos;
 
 public:
     GraphicObject();
-    GraphicObject(/*File* file,*/ const Entity* entity, const Path& path, const Paths& paths);
+    GraphicObject(size_t entityId, const Path& path, const Paths& paths);
 
     void setRotation(double rotationAngle);
     inline double rotationAngle() const;
@@ -56,8 +54,8 @@ public:
     void setPos(QPointF pos);
     inline QPointF pos() const;
 
-    //    inline const File* file() const;
-    inline const Entity* entity() const { return m_entity.get(); }
+    const Entity* entity() const;
+    size_t entityId() const;
 
     // AbstrGraphicObject interface
 

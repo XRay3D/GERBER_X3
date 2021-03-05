@@ -22,9 +22,65 @@
 #include <project.h>
 #include <shape.h>
 
+namespace Shapes {
+class Node;
+}
+
+class ShapeInterface : public GraphicsItem {
+    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape)
+    {
+        //        stream << shape.type();
+        //        stream << shape.m_giId;
+        //        stream << shape.isVisible();
+
+        //        stream << qint32(shape.handlers.size());
+        //        for (const auto& item : shape.handlers) {
+        //            stream << item->pos();
+        //            stream << item->m_hType;
+        //        }
+
+        //        shape.write(stream);
+        return stream;
+    }
+    // read from project
+    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape)
+    {
+        //        //    App::scene()->addItem(&shape);
+        //        bool visible;
+        //        stream >> shape.m_giId;
+        //        shape.setZValue(shape.m_giId);
+        //        stream >> visible;
+        //        shape.setVisible(visible);
+        //        shape.setToolTip(QString::number(shape.m_giId));
+        //        {
+        //            qint32 size;
+        //            stream >> size;
+        //            shape.handlers.reserve(size);
+        //            while (size--) {
+        //                QPointF pos;
+        //                int type;
+        //                stream >> pos;
+        //                stream >> type;
+        //                shape.handlers.emplace_back(std::make_unique<Handler>(&shape, static_cast<Handler::HType>(type)));
+        //                //shape.handlers.emplace_back(new Handler(&shape, static_cast<Handler::HType>(type)));
+        //                shape.handlers.back()->QGraphicsItem::setPos(pos);
+        //                shape.handlers.back()->setVisible(false);
+        //            }
+        //        }
+        //        shape.read(stream);
+        //        shape.redraw();
+        return stream;
+    }
+
+public:
+    virtual Shapes::Node* node() const = 0;
+    virtual void write(QDataStream& stream) const = 0;
+    virtual void read(QDataStream& stream) = 0;
+};
+
 class ShapePluginInterface {
     static inline ShapePluginInterface* sp = nullptr;
-    static inline Shapes::Shape* item;
+    static inline ShapeInterface* item;
 
 public:
     static void addShapePoint_(const QPointF& point)
@@ -59,8 +115,8 @@ public:
     virtual ~ShapePluginInterface() = default;
     virtual QObject* getObject() = 0;
     virtual int type() const = 0;
-    [[nodiscard]] virtual Shapes::Shape* createShape() = 0;
-    [[nodiscard]] virtual Shapes::Shape* createShape(const QPointF& point) = 0;
+    [[nodiscard]] virtual ShapeInterface* createShape() = 0;
+    [[nodiscard]] virtual ShapeInterface* createShape(const QPointF& point) = 0;
     virtual bool addShapePoint(const QPointF& point) = 0;
     virtual void updateShape(const QPointF& point) = 0;
     virtual void finalizeShape() = 0;

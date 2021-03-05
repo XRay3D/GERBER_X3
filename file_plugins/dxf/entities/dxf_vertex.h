@@ -26,6 +26,8 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
     GraphicObject toGo() const override { return {}; }
+    void write(QDataStream&) const override { }
+    void read(QDataStream&) override { }
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbVertex)

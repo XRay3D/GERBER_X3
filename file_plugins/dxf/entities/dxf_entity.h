@@ -46,7 +46,7 @@ struct Entity {
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& e);
 
 public:
-    enum Type {
+    enum Type : int {
         NULL_ENT = -1,
         ACAD_PROXY_ENTITY,
         ARC,
@@ -107,8 +107,8 @@ public:
     virtual Type type() const = 0;
     virtual GraphicObject toGo() const = 0;
 
-    virtual void write(QDataStream& stream) const;;
-    virtual void read(QDataStream& stream);;
+    virtual void write(QDataStream& stream) const;
+    virtual void read(QDataStream& stream);
 
     static QString typeName(int key);
     QString name() const;
@@ -119,6 +119,7 @@ public:
     QString handle;
     QString softPointerID;
     int16_t colorNumber = 0;
+    size_t id {};
 
 #ifdef QT_DEBUG
     static constexpr double u = 10.;

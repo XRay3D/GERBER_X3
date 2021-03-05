@@ -17,9 +17,7 @@
 
 class FileInterface;
 
-namespace Shapes {
-class Shape;
-}
+class ShapeInterface;
 class Project;
 
 namespace FileTree {
@@ -87,7 +85,7 @@ private:
     const QString mimeType;
 
     void addFile(FileInterface* file);
-    void addShape(Shapes::Shape* shape);
+    void addShape(ShapeInterface* shape);
 };
 }
 #include "app.h"

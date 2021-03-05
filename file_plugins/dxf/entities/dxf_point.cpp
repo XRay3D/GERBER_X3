@@ -77,7 +77,7 @@ GraphicObject Point::toGo() const
     QPolygonF p;
     p.append(point);
 
-    return { this, p, {} };
+    return { id, p, {} };
 }
 
 void Point::write(QDataStream &stream) const

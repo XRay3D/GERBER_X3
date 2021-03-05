@@ -27,6 +27,8 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
     GraphicObject toGo() const override { return {}; }
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
 
     void transform(GraphicObject& item, QPointF tr) const;
 
