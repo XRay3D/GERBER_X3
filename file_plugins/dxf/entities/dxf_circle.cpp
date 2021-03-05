@@ -105,7 +105,7 @@ GraphicObject Circle::toGo() const
     auto p(path2.toSubpathPolygons(m2));
 #endif
 
-    return { this, p.value(0), {} };
+    return { id, p.value(0), {} };
 }
 
 void Circle::write(QDataStream &stream) const

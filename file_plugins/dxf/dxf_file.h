@@ -39,6 +39,7 @@ class File : public FileInterface {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;
+    friend struct SectionENTITIES;
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:
@@ -49,6 +50,7 @@ public:
     Layers& layers() { return m_layers; }
     Blocks& blocks() { return m_blocks; }
     Styles& styles() { return m_styles; }
+    EntitiesUP& entities() { return m_entities; }
 
     void setItemType(int type) override;
     int itemsType() const override;
@@ -59,6 +61,8 @@ private:
     HeaderData m_header;
     Layers m_layers;
     Styles m_styles;
+    EntitiesUP m_entities;
+
     mutable std::map<QString, bool> m_layersVisible;
 
     enum Group {
@@ -71,7 +75,7 @@ private:
     // FileInterface interface
 public:
     void initFrom(FileInterface* file) override;
-    FileTree::Node *node() override;
+    FileTree::Node* node() override;
     FileType type() const override;
     void createGi() override;
     bool isVisible() const override;

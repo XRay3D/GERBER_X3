@@ -232,7 +232,7 @@ GraphicObject LwPolyline::toGo() const
         path.arcTo(br, -start_angle, -span);
     };
 
-    for (int i = 0, size = poly.size() - 1; i < size; ++i)
+    for (size_t i = 0, size = poly.size() - 1; i < size; ++i)
         addSeg(poly[i], poly[i + 1]);
     if (polylineFlag == Closed)
         addSeg(poly.back(), poly.front());
@@ -262,7 +262,7 @@ GraphicObject LwPolyline::toGo() const
     offset.AddPath(p.value(0), jtRound, polylineFlag == Closed ? etClosedLine : etOpenRound);
     offset.Execute(paths, constantWidth * uScale * 0.5);
 
-    return { this, p.value(0), paths };
+    return { id, p.value(0), paths };
 }
 
 void LwPolyline::write(QDataStream &stream) const

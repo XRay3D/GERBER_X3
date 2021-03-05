@@ -131,7 +131,7 @@ GraphicObject Arc::toGo() const
     auto p(path2.toSubpathPolygons(m2).first());
 #endif
 
-    return { this, p, {} };
+    return { id, p, {} };
 }
 
 void Arc::write(QDataStream& stream) const

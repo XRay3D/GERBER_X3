@@ -17,6 +17,7 @@
 #include "dxf_plugin.h"
 #include "dxf_file.h"
 #include "dxf_node.h"
+#include "dxf_settingstab.h"
 
 #include "entities/dxf_allentities.h"
 #include "section/dxf_blocks.h"
@@ -218,97 +219,7 @@ QJsonObject Plugin::info() const
 
 std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
 {
-    class Tab : public SettingsTabInterface, Settings {
-        QCheckBox* chbxBoldFont;
-        QCheckBox* chbxItalicFont;
-        QCheckBox* chbxOverrideFonts;
-        QFontComboBox* fcbxDxfDefaultFont;
-
-    public:
-        Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent)
-        {
-            setObjectName(QString::fromUtf8("tabDxf"));
-            auto verticalLayout = new QVBoxLayout(this);
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
-            verticalLayout->setContentsMargins(6, 6, 6, 6);
-
-            auto groupBox = new QGroupBox(this);
-            groupBox->setObjectName(QString::fromUtf8("groupBox_3"));
-
-            auto formLayout = new QFormLayout(groupBox);
-            formLayout->setObjectName(QString::fromUtf8("formLayout_4"));
-            formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-            formLayout->setContentsMargins(6, 6, 6, 6);
-            // DefaultFont
-            auto labelDefaultFont = new QLabel(groupBox);
-            labelDefaultFont->setObjectName(QString::fromUtf8("labelDefaultFont"));
-            formLayout->setWidget(0, QFormLayout::LabelRole, labelDefaultFont);
-
-            fcbxDxfDefaultFont = new QFontComboBox(groupBox);
-            fcbxDxfDefaultFont->setObjectName(QString::fromUtf8("fcbxDxfDefaultFont"));
-            formLayout->setWidget(0, QFormLayout::FieldRole, fcbxDxfDefaultFont);
-            // Bold Font
-            auto labelBoldFont = new QLabel(groupBox);
-            labelBoldFont->setObjectName(QString::fromUtf8("labelBoldFont"));
-            formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
-
-            chbxBoldFont = new QCheckBox(" ", groupBox);
-            chbxBoldFont->setObjectName(QString::fromUtf8("chbxDxfBoldFont"));
-            formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
-            // Italic Font
-            auto labelItalicFont = new QLabel(groupBox);
-            labelItalicFont->setObjectName(QString::fromUtf8("labelItalicFont"));
-            formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
-
-            chbxItalicFont = new QCheckBox(" ", groupBox);
-            chbxItalicFont->setObjectName(QString::fromUtf8("chbxDxfItalicFont"));
-            formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
-            // Override Fonts
-            auto labelOverrideFonts = new QLabel(groupBox);
-            labelOverrideFonts->setObjectName(QString::fromUtf8("labelOverrideFonts"));
-            formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
-
-            chbxOverrideFonts = new QCheckBox(" ", groupBox);
-            chbxOverrideFonts->setObjectName(QString::fromUtf8("chbxDxfOverrideFonts"));
-            formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
-
-            verticalLayout->addWidget(groupBox);
-            auto verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-            verticalLayout->addItem(verticalSpacer);
-
-            chbxBoldFont->setText(QString());
-            chbxItalicFont->setText(QString());
-            chbxOverrideFonts->setText(QString());
-
-            groupBox->setTitle(QApplication::translate("SettingsDialog", "Font", nullptr));
-
-            labelBoldFont->setText(QApplication::translate("SettingsDialog", "Bold:", nullptr));
-            labelDefaultFont->setText(QApplication::translate("SettingsDialog", "Default Font:", nullptr));
-            labelItalicFont->setText(QApplication::translate("SettingsDialog", "Italic:", nullptr));
-            labelOverrideFonts->setText(QApplication::translate("SettingsDialog", "Override declared fonts in DXF:", nullptr));
-        }
-        virtual ~Tab() override { }
-        virtual void readSettings(MySettings& settings) override
-        {
-            settings.beginGroup("Dxf");
-            m_defaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
-            m_boldFont = settings.getValue(chbxBoldFont, false);
-            m_italicFont = settings.getValue(chbxItalicFont, false);
-            m_overrideFonts = settings.getValue(chbxOverrideFonts, false);
-            settings.endGroup();
-        }
-        virtual void writeSettings(MySettings& settings) override
-        {
-            settings.beginGroup("Dxf");
-            m_defaultFont = settings.setValue(fcbxDxfDefaultFont);
-            m_boldFont = settings.setValue(chbxBoldFont);
-            m_italicFont = settings.setValue(chbxItalicFont);
-            m_overrideFonts = settings.setValue(chbxOverrideFonts);
-            settings.endGroup();
-        }
-    };
-    return { new Tab(parent), "DXF" };
+    return { new SettingsTab(parent), "DXF" };
 }
 
 void Plugin::updateFileModel(FileInterface* file)
@@ -327,26 +238,29 @@ void Plugin::updateFileModel(FileInterface* file)
     }
     Dxf::Layers layers;
     for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
-        qDebug() << name << layer;
+        //        qDebug() << name << layer;
         if (!layer->isEmpty())
             layers[name] = layer;
     }
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
-        qDebug() << name << layer;
+        //        qDebug() << name << layer;
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
 }
 
 class DrillPrGI final : public AbstractDrillPrGI {
+    const GraphicObject& go;
+    const Circle* c;
+
 public:
     explicit DrillPrGI(const GraphicObject& go, Row& row)
         : AbstractDrillPrGI(row)
         , go(go)
+        , c(static_cast<const Circle*>(go.entity()))
     {
-        if (auto e = dynamic_cast<const Circle*>(go.entity()); e)
-            m_sourceDiameter = e->radius * 2;
+        m_sourceDiameter = c->radius * 2;
         m_sourcePath = drawDrill();
         m_type = GiType::PrDrill;
     }
@@ -355,8 +269,7 @@ private:
     QPainterPath drawDrill() const
     {
         QPainterPath painterPath;
-        const double radius = m_sourceDiameter;
-        painterPath.addEllipse(pos(), radius, radius);
+        painterPath.addEllipse(c->centerPoint, c->radius, c->radius);
         return painterPath;
     }
 
@@ -372,12 +285,9 @@ private:
         return tmpPpaths;
     }
 
-    const GraphicObject& go;
-
     // AbstractDrillPrGI interface
 public:
-    void
-    updateTool() override
+    void updateTool() override
     {
         if (row.toolId > -1) {
             colorState |= Tool;
@@ -423,7 +333,7 @@ public:
     }
     IntPoint pos() const override
     {
-        return static_cast<const Circle*>(go.entity())->centerPoint;
+        return c->centerPoint;
     }
     Paths paths() const override
     {
@@ -432,35 +342,30 @@ public:
         Paths paths(go.paths());
         return ReversePaths(paths);
     }
-    bool fit(double depth) override
-    {
-        return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth);
-    }
+    bool fit(double depth) override { return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth); }
 };
 
 DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
 {
     DrillPreviewGiMap giPeview;
 
-    auto const dxfFile = reinterpret_cast<File*>(file);
+    auto const dxfFile = static_cast<File*>(file);
 
-    std::map<double, mvector<GraphicObject*>> cacheHoles;
+    std::map<double, mvector<const GraphicObject*>> cacheHoles;
 
     for (auto& [key, lay] : dxfFile->layers()) {
-        for (auto go : lay->graphicObjects()) {
-            if (auto e = dynamic_cast<const Circle*>(go.entity()); e)
-                cacheHoles[e->radius * 2].push_back(&go);
+        for (const auto& go : lay->graphicObjects()) {
+            if (auto circle = dynamic_cast<const Circle*>(go.entity()); circle) {
+                cacheHoles[circle->radius * 2].push_back(&go);
+                qDebug() << circle->radius << circle->centerPoint << circle->id << go.entityId();
+            }
         }
     }
 
-    //    std::map<int, mvector<const Excellon::Hole*>> cacheHoles;
-    //    for (const Excellon::Hole& hole : *dxfFile)
-    //        cacheHoles[hole.state.tCode] << &hole;
-    //    data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
     int ctr {};
     for (auto [diameter, gos] : cacheHoles) {
         QString name(tr("Ø%1mm").arg(diameter));
-        data.emplace_back(std::move(name), drawDrillIcon(), ++ctr, diameter);
+        data.emplace_back(std::move(name), drawDrillIcon(), diameter, ++ctr);
         for (const GraphicObject* go : gos) {
             giPeview[ctr].emplace_back(std::make_shared<DrillPrGI>(*go, data.back()));
         }

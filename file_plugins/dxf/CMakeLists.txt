@@ -27,13 +27,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
 add_subdirectory(entities)
 add_subdirectory(section)
 add_subdirectory(tables)
 
 add_library(dxf SHARED
+    dxf.json
     dxf_block.cpp
     dxf_block.h
     dxf_codedata.cpp
@@ -44,16 +45,16 @@ add_library(dxf SHARED
     dxf_node.h
     dxf_plugin.cpp
     dxf_plugin.h
+    dxf_settingstab.cpp
+    dxf_settingstab.h
     dxf_sourcedialog.cpp
     dxf_sourcedialog.h
     dxf_types.cpp
     dxf_types.h
-    dxf.json
     ${HEADERS}
     ${SOURCE}
     )
 
-link_directories(../../libs${SUFFIX})
 target_link_libraries(dxf PRIVATE
     clipper
     common
@@ -63,6 +64,7 @@ target_link_libraries(dxf PRIVATE
     tooldatabase
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 

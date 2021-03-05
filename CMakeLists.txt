@@ -35,7 +35,7 @@ add_subdirectory(GGEasy)
 add_subdirectory(file_plugins)
 
 # plugins shape
-add_subdirectory(shape_plugins)
+#add_subdirectory(shape_plugins)
 
 ## QT4_WRAP_TS(lupdate_outputs lrelease_outputs prefix lang1 lang2 ... )
 #MACRO (QT4_WRAP_TS lupdate_outputs lrelease_outputs prefix)

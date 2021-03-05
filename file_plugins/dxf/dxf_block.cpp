@@ -34,7 +34,7 @@ Block::Block(Blocks& blocks, SectionParser* sp)
 }
 
 Block::~Block()
-{ /*qDeleteAll(entities);*/
+{
 }
 
 void Block::parseHeader(CodeData& code)

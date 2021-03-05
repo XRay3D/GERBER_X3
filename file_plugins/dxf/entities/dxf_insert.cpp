@@ -26,9 +26,11 @@ InsertEntity::InsertEntity(Blocks& blocks, SectionParser* sp)
 
 void InsertEntity::draw(const InsertEntity* const i) const
 {
+    return;
+
     if (!blocks.contains(blockName))
         return;
-    if (blocks[blockName]->entities.isEmpty())
+    if (blocks[blockName]->entities.empty())
         return;
 
     basePoint = blocks[blockName]->basePoint;

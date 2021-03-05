@@ -223,7 +223,7 @@ GraphicObject Text::toGo() const
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
 #endif
-    return { this, {}, paths };
+    return { id, {}, paths };
 }
 
 void Text::write(QDataStream &stream) const

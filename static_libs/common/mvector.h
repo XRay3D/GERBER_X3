@@ -117,8 +117,8 @@ struct mvector : std::vector<T> {
             return std::distance(V::begin(), it);
     }
 
-    template <class P, std::enable_if_t<std::is_base_of_v<T, std::unique_ptr<P>>, int> = 0>
-    inline auto indexOf(const P* t) const noexcept
+    template <class P>
+    inline auto indexOf(const P* t) const noexcept requires std::is_base_of_v<T, std::unique_ptr<P>>
     {
         using CP = const P;
         auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
@@ -128,8 +128,8 @@ struct mvector : std::vector<T> {
             return std::distance(V::begin(), it);
     }
 
-    template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
-    inline auto indexOf(P* t) const noexcept
+    template <class P>
+    inline auto indexOf(P* t) const noexcept requires std::is_base_of_v<T, std::shared_ptr<P>>
     {
         auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
         if (it == V::end())

@@ -227,7 +227,7 @@ GraphicObject Hatch::toGo() const
     clipper.AddPaths(paths, ptSubject);
     clipper.Execute(ctUnion, paths, pftEvenOdd);
     //dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
-    return { this, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths };
+    return { id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths };
 }
 
 void Hatch::write(QDataStream& stream) const

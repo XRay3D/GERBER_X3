@@ -37,8 +37,8 @@ using LayerTypes = std::vector<LayerType>;
 class FileInterface {
 
     //    friend class Project;
-    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<FileInterface>& file);
-    friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<FileInterface>& file);
+    //    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<FileInterface>& file);
+    //    friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<FileInterface>& file);
 
     friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file)
     {

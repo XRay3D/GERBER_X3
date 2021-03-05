@@ -128,7 +128,7 @@ GraphicObject PolyLine::toGo() const
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 #endif
-    return { this, p.value(0), {} };
+    return { id, p.value(0), {} };
     }
 
     void PolyLine::write(QDataStream &stream) const
