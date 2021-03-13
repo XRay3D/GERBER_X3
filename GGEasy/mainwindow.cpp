@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget* parent)
     , recentFiles(this, "recentFiles")
     , recentProjects(this, "recentProjects")
     , m_project(new Project(this))
+    , toolpathActionGroup(this)
+    , reloadQuestion(this)
 {
     App::setMainWindow(this);
 
@@ -124,23 +126,24 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (1) {
+        if (0) {
+            QDir dir("D:/Gerber Test Files/ГГГ");
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
-            QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
+            //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList { "*.dxf" }, QDir::Files);
+                listFiles = dir.entryList(QStringList { "*.*" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;
                 QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
-                break;
+                //break;
             }
         }
-        if (0) {
+        if (1) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
-            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Pocket]->triggered(); });
+            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
@@ -490,8 +493,10 @@ void MainWindow::createActionsToolPath()
     menu->addAction(action);
     toolpathActions.emplace(GCode::Hatching, action);
 
-    for (auto [key, action] : toolpathActions)
+    for (auto [key, action] : toolpathActions) {
         action->setCheckable(true);
+        toolpathActionGroup.addAction(action);
+    }
 }
 
 void MainWindow::createActionsShape()
@@ -685,7 +690,8 @@ void MainWindow::newFile()
 
 void MainWindow::readSettings()
 {
-    SettingsDialog().readSettings();
+    SettingsDialog().accept();
+
     QSettings settings;
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
@@ -958,9 +964,9 @@ void MainWindow::createDockWidget(int type)
     auto dwContent = new T(m_dockWidget);
     dwContent->setObjectName(typeid(T).name());
 
-    for (auto [key, action] : qAsConst(toolpathActions))
-        action->setChecked(false);
-    toolpathActions[type]->setChecked(true);
+    //    for (auto [key, action] : qAsConst(toolpathActions))
+    //        action->setChecked(false);
+    //    toolpathActions[type]->setChecked(true);
 
     m_dockWidget->pop();
     m_dockWidget->push(dwContent);
@@ -1020,14 +1026,10 @@ void MainWindow::loadFile(const QString& fileName)
             return;
         }
     } else {
-        if (m_project->contains(fileName) > -1
-            && QMessageBox::warning(this,
-                   tr("Warning"),
-                   QString(tr("Do you want to reload file %1?")).arg(QFileInfo(fileName).fileName()),
-                   QMessageBox::Ok | QMessageBox::Cancel)
-                == QMessageBox::Cancel) {
+        if (m_project->contains(fileName) > -1 && QMessageBox::question(this, tr("Warning"), //
+                                                      tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+                == QMessageBox::Cancel)
             return;
-        }
         for (auto& [type, tuple] : App::filePlugins()) {
             auto& [parser, pobj] = tuple;
             if (parser->thisIsIt(fileName)) {
@@ -1076,75 +1078,79 @@ void MainWindow::updateTheme()
     //            return QProxyStyle::generatedIconPixmap(iconMode, pixmap, opt);
     //        }
     //    };
-    qApp->setStyle(QStyleFactory::create("Fusion"));
-    QColor baseColor;
-    QColor disabledColor;
-    QColor highlightColor;
-    QColor linkColor;
-    QColor windowColor;
-    QColor windowTextColor;
 
-    switch (App::settings().theme()) {
-    case LightBlue:
-        baseColor = QColor(230, 230, 230);
-        disabledColor = QColor(127, 127, 127);
-        highlightColor = QColor(61, 174, 233);
-        linkColor = QColor(61, 174, 233);
-        windowColor = QColor(200, 200, 200);
-        windowTextColor = QColor(0, 0, 0);
-        break;
-    case LightRed:
-        baseColor = QColor(230, 230, 230);
-        disabledColor = QColor(127, 127, 127);
-        highlightColor = QColor(218, 68, 83);
-        linkColor = QColor(61, 174, 233);
-        windowColor = QColor(200, 200, 200);
-        windowTextColor = QColor(0, 0, 0);
-        break;
-    case DarkBlue:
-        baseColor = QColor(40, 40, 40);
-        disabledColor = QColor(127, 127, 127);
-        highlightColor = QColor(61, 174, 233);
-        linkColor = QColor(61, 174, 233);
-        windowColor = QColor(60, 60, 60);
-        windowTextColor = QColor(220, 220, 220);
-        break;
-    case DarkRed:
-        baseColor = QColor(40, 40, 40);
-        disabledColor = QColor(127, 127, 127);
-        highlightColor = QColor(218, 68, 83);
-        linkColor = QColor(61, 174, 233);
-        windowColor = QColor(60, 60, 60);
-        windowTextColor = QColor(220, 220, 220);
-        break;
+    if (App::settings().theme()) {
+        qApp->setStyle(QStyleFactory::create("Fusion"));
+        QColor baseColor;
+        QColor disabledColor;
+        QColor highlightColor;
+        QColor linkColor;
+        QColor windowColor;
+        QColor windowTextColor;
+
+        switch (App::settings().theme()) {
+        case LightBlue:
+            baseColor = QColor(230, 230, 230);
+            disabledColor = QColor(127, 127, 127);
+            highlightColor = QColor(61, 174, 233);
+            linkColor = QColor(61, 174, 233);
+            windowColor = QColor(200, 200, 200);
+            windowTextColor = QColor(0, 0, 0);
+            break;
+        case LightRed:
+            baseColor = QColor(230, 230, 230);
+            disabledColor = QColor(127, 127, 127);
+            highlightColor = QColor(218, 68, 83);
+            linkColor = QColor(61, 174, 233);
+            windowColor = QColor(200, 200, 200);
+            windowTextColor = QColor(0, 0, 0);
+            break;
+        case DarkBlue:
+            baseColor = QColor(40, 40, 40);
+            disabledColor = QColor(127, 127, 127);
+            highlightColor = QColor(61, 174, 233);
+            linkColor = QColor(61, 174, 233);
+            windowColor = QColor(60, 60, 60);
+            windowTextColor = QColor(220, 220, 220);
+            break;
+        case DarkRed:
+            baseColor = QColor(40, 40, 40);
+            disabledColor = QColor(127, 127, 127);
+            highlightColor = QColor(218, 68, 83);
+            linkColor = QColor(61, 174, 233);
+            windowColor = QColor(60, 60, 60);
+            windowTextColor = QColor(220, 220, 220);
+            break;
+        }
+
+        QPalette palette;
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
+        palette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
+        palette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
+        palette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
+
+        palette.setColor(QPalette::Text, windowTextColor);
+        palette.setColor(QPalette::ToolTipText, windowTextColor);
+        palette.setColor(QPalette::WindowText, windowTextColor);
+        palette.setColor(QPalette::ButtonText, windowTextColor);
+        palette.setColor(QPalette::HighlightedText, Qt::black);
+        palette.setColor(QPalette::BrightText, Qt::red);
+
+        palette.setColor(QPalette::Link, linkColor);
+        palette.setColor(QPalette::LinkVisited, highlightColor);
+
+        palette.setColor(QPalette::AlternateBase, windowColor);
+        palette.setColor(QPalette::Base, baseColor);
+        palette.setColor(QPalette::Button, windowColor);
+
+        palette.setColor(QPalette::Highlight, highlightColor);
+
+        palette.setColor(QPalette::ToolTipBase, windowTextColor);
+        palette.setColor(QPalette::Window, windowColor);
+        qApp->setPalette(palette);
+    } else {
+        qApp->setStyle(QStyleFactory::create("windowsvista"));
     }
-
-    QPalette palette;
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
-    palette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
-    palette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
-    palette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
-
-    palette.setColor(QPalette::Text, windowTextColor);
-    palette.setColor(QPalette::ToolTipText, windowTextColor);
-    palette.setColor(QPalette::WindowText, windowTextColor);
-    palette.setColor(QPalette::ButtonText, windowTextColor);
-    palette.setColor(QPalette::HighlightedText, Qt::black);
-    palette.setColor(QPalette::BrightText, Qt::red);
-
-    palette.setColor(QPalette::Link, linkColor);
-    palette.setColor(QPalette::LinkVisited, highlightColor);
-
-    palette.setColor(QPalette::AlternateBase, windowColor);
-    palette.setColor(QPalette::Base, baseColor);
-    palette.setColor(QPalette::Button, windowColor);
-
-    palette.setColor(QPalette::Highlight, highlightColor);
-
-    palette.setColor(QPalette::ToolTipBase, windowTextColor);
-    palette.setColor(QPalette::Window, windowColor);
-    qApp->setPalette(palette);
-
     //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
     //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
     //                                         //"background-color: white;"

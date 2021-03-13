@@ -52,6 +52,7 @@ class FileInterface {
         stream << file.m_groupedPaths;
         stream << file.m_side;
         stream << file.m_color;
+        stream << file.m_userColor;
         stream << file.m_date;
         stream << file.isVisible();
         return stream;
@@ -68,6 +69,7 @@ class FileInterface {
         stream >> file.m_groupedPaths;
         stream >> file.m_side;
         stream >> file.m_color;
+        stream >> file.m_userColor;
         stream >> file.m_date;
         if (App::splashScreen())
             App::splashScreen()->showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
@@ -153,6 +155,9 @@ public:
 
     virtual FileTree::Node* node() = 0;
 
+    bool userColor() const { return m_userColor; }
+    void setUserColor(bool userColor) { m_userColor = userColor; }
+
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
@@ -162,6 +167,7 @@ protected:
     FileTree::Node* m_node = nullptr;
     Pathss m_groupedPaths;
     QColor m_color;
+    bool m_userColor {};
     QDateTime m_date;
     QString m_name;
     Side m_side = Top;

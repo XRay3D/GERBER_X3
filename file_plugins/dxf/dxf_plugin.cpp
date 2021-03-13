@@ -252,24 +252,24 @@ void Plugin::updateFileModel(FileInterface* file)
 
 class DrillPrGI final : public AbstractDrillPrGI {
     const GraphicObject& go;
-    const Circle* c;
+    const Circle* circle;
 
 public:
     explicit DrillPrGI(const GraphicObject& go, Row& row)
         : AbstractDrillPrGI(row)
         , go(go)
-        , c(static_cast<const Circle*>(go.entity()))
+        , circle(static_cast<const Circle*>(go.entity()))
     {
-        m_sourceDiameter = c->radius * 2;
+        m_sourceDiameter = circle->radius * 2;
         m_sourcePath = drawDrill();
-        m_type = GiType::PrDrill;
+        m_type = GiType::PrApetrure;
     }
 
 private:
     QPainterPath drawDrill() const
     {
         QPainterPath painterPath;
-        painterPath.addEllipse(c->centerPoint, c->radius, c->radius);
+        painterPath.addEllipse(circle->centerPoint, circle->radius, circle->radius);
         return painterPath;
     }
 
@@ -291,83 +291,40 @@ public:
     {
         if (row.toolId > -1) {
             colorState |= Tool;
-            if (m_type == GiType::PrSlot) {
-                m_toolPath = {};
-
-                auto& tool(App::toolHolder().tool(row.toolId));
-                const double diameter = tool.getDiameter(tool.getDepth());
-                const double lineKoeff = diameter * 0.7;
-
-                Paths tmpPpath;
-
-                ClipperOffset offset;
-                offset.AddPath(go.paths().front(), jtRound, etOpenRound);
-                offset.Execute(tmpPpath, diameter * 0.5 * uScale);
-
-                for (Path& path : tmpPpath) {
-                    path.push_back(path.front());
-                    m_toolPath.addPolygon(path);
-                }
-
-                Path path(go.paths().front());
-
-                if (path.size()) {
-                    for (IntPoint& pt : path) {
-                        m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
-                        m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
-                        m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
-                        m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
-                    }
-                    m_toolPath.moveTo(path.front());
-                    for (IntPoint& pt : path) {
-                        m_toolPath.lineTo(pt);
-                    }
-                }
-            }
         } else {
             colorState &= ~Tool;
-            m_toolPath = {};
         }
-
+        m_toolPath = {};
         changeColor();
     }
-    IntPoint pos() const override
-    {
-        return c->centerPoint;
-    }
+    IntPoint pos() const override { return circle->centerPoint; }
     Paths paths() const override
     {
-        if (m_type == GiType::PrSlot)
-            return go.paths();
-        Paths paths(go.paths());
+        Paths paths { go.path() };
         return ReversePaths(paths);
     }
-    bool fit(double depth) override { return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth); }
+    bool fit(double depth) override { return m_sourceDiameter >= App::toolHolder().tool(row.toolId).getDiameter(depth); }
 };
 
 DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
 {
-    DrillPreviewGiMap giPeview;
-
     auto const dxfFile = static_cast<File*>(file);
-
     std::map<double, mvector<const GraphicObject*>> cacheHoles;
-
     for (auto& [key, lay] : dxfFile->layers()) {
         for (const auto& go : lay->graphicObjects()) {
             if (auto circle = dynamic_cast<const Circle*>(go.entity()); circle) {
-                cacheHoles[circle->radius * 2].push_back(&go);
-                qDebug() << circle->radius << circle->centerPoint << circle->id << go.entityId();
+                cacheHoles[circle->radius * 2.0].push_back(&go);
             }
         }
     }
-
-    int ctr {};
+    data.reserve(cacheHoles.size());
+    DrillPreviewGiMap giPeview;
     for (auto [diameter, gos] : cacheHoles) {
         QString name(tr("Ø%1mm").arg(diameter));
-        data.emplace_back(std::move(name), drawDrillIcon(), diameter, ++ctr);
-        for (const GraphicObject* go : gos) {
-            giPeview[ctr].emplace_back(std::make_shared<DrillPrGI>(*go, data.back()));
+        int id = static_cast<int>(data.size());
+        data.emplace_back(std::move(name), drawDrillIcon(), id, diameter);
+        for (const auto go : gos) {
+            giPeview[id].emplace_back(std::make_shared<DrillPrGI>(*go, data.back()));
         }
     }
 

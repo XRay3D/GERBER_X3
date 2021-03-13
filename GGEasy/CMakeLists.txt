@@ -69,7 +69,11 @@ elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
 endif()
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
-add_definitions(-DBUILD_DATE="${DT}")
+add_definitions(
+    -DBUILD_DATE="${DT}"
+    -D_USE_CGAL_
+    -D_USE_BOOST_
+    )
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
@@ -107,9 +111,15 @@ include_directories (
     ../static_libs/graphicsview
     ../static_libs/thermal
     ../static_libs/tooldatabase
+    C:/dev/CGAL-5.1.2/auxiliary/gmp/include
+    C:/dev/CGAL-5.1.2/include
+    C:/dev/boost_1_75_0
     )
 
-link_directories(../libs${SUFFIX})
+link_directories(
+    ../libs${SUFFIX}
+    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+    )
 
 add_subdirectory(forms)
 add_subdirectory(forms/drillform)
@@ -184,6 +194,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     thermal
     tooldatabase
     shape
+    libgmp-10#CGAL
+    libmpfr-4#CGAL
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui

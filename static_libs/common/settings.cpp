@@ -35,8 +35,10 @@ AppSettings::AppSettings()
 
 /*GUI*/
 QColor& AppSettings::guiColor(int id) { return m_guiColor[id]; }
-bool AppSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
 bool AppSettings::animSelection() { return m_animSelection; }
+bool AppSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
+bool AppSettings::scaleHZMarkers() { return m_scaleHZMarkers; }
+bool AppSettings::scalePinMarkers() { return m_scalePinMarkers; }
 int AppSettings::theme() { return m_theme; }
 
 /*Clipper*/

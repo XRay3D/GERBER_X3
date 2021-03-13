@@ -136,6 +136,8 @@ protected:
     void stacking(Paths& paths);
     void mergeSegments(Paths& paths, double glue = 0.0);
 
+    void mergePaths(Paths& paths, const double dist = 0.0);
+
     void markPolyNodeByNesting(PolyNode& polynode);
     void sortPolyNodeByNesting(PolyNode& polynode);
 

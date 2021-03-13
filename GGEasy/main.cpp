@@ -43,15 +43,15 @@ void translation(QApplication* app);
 int main(int argc, char** argv)
 {
 
-#if defined(Q_OS_WIN) && !defined(__GNUC__)
-    HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
-#endif
+//#if defined(Q_OS_WIN) && !defined(__GNUC__)
+//    HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
+//    DWORD dwMode = 0;
+//    GetConsoleMode(hOut, &dwMode);
+//    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+//    SetConsoleMode(hOut, dwMode);
+//#endif
 
-    qInstallMessageHandler(myMessageOutput);
+//    qInstallMessageHandler(myMessageOutput);
 
 #ifdef LEAK_DETECTOR
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
