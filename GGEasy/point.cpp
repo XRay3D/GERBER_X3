@@ -90,8 +90,10 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
-    auto sf = App::graphicsView()->scaleFactor() * 10;
-    painter->scale(sf, sf);
+    if (App::settings().scaleHZMarkers()) {
+        auto sf = App::graphicsView()->scaleFactor() * 10;
+        painter->scale(sf, sf);
+    }
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
     painter->drawPath(m_path);
@@ -249,9 +251,7 @@ Pin::Pin()
     m_pins[m_index] = this;
 }
 
-Pin::~Pin()
-{
-}
+Pin::~Pin() { }
 
 QRectF Pin::boundingRect() const
 {
@@ -271,8 +271,10 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     //c.setAlpha(50);
-    auto sf = App::graphicsView()->scaleFactor() * 10;
-    painter->scale(sf, sf);
+    if (App::settings().scalePinMarkers()) {
+        auto sf = App::graphicsView()->scaleFactor() * 10;
+        painter->scale(sf, sf);
+    }
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
     painter->drawPath(m_path);

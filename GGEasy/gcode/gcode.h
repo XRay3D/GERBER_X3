@@ -25,5 +25,5 @@
 #include "gcthermal.h"
 #include "gctypes.h"
 #include "gcutils.h"
-#include "gcvoronoi.h"
+#include "voroni/gcvoronoi.h"
 #include "voroni/jc_voronoi.h"

@@ -72,7 +72,7 @@ DrillForm::DrillForm(QWidget* parent)
         connect(ui->toolTable, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
         connect(ui->toolTable->horizontalHeader(), &QHeaderView::customContextMenuRequested, [this](const QPoint& pos) {
             QMenu menu;
-            menu.addAction(QIcon::fromTheme("view-form"), tr("&Choose a tool for everyone"), [this] {
+            menu.addAction(QIcon::fromTheme("view-form"), tr("&Choose a Tool for everyone"), [this] {
                 ui->toolTable->selectAll();
                 bool fl = true;
                 for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
@@ -103,6 +103,17 @@ DrillForm::DrillForm(QWidget* parent)
                             updateToolsOnGi(model->apertureId(current.row()));
                         }
                     }
+                }
+            });
+            menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool for everyone"), [this] {
+                ui->toolTable->selectAll();
+                for (QModelIndex current : ui->toolTable->selectionModel()->selectedIndexes()) {
+                    model->setToolId(current.row(), -1);
+                    updateToolsOnGi(model->apertureId(current.row()));
+                }
+                for (int i = 0; i < model->rowCount(); ++i) {
+                    if (model->toolId(i) != -1)
+                        return;
                 }
             });
             menu.exec(ui->toolTable->horizontalHeader()->mapToGlobal(pos));
@@ -170,6 +181,8 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
+    connect(ui->pbPickUpTools, &QPushButton::clicked, this, &DrillForm::pickUpTool);
+
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     for (QPushButton* button : findChildren<QPushButton*>()) {
@@ -215,7 +228,7 @@ void DrillForm::updateFiles()
 #endif
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber , FileType::Dxf }))
+    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber, FileType::Dxf }))
         App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
@@ -588,7 +601,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
         }
     }
 
-    menu.exec(ui->toolTable->mapToGlobal(pos /*+ QPoint(24, 24)*/));
+    menu.exec(ui->toolTable->viewport()->mapToGlobal(pos));
 }
 
 void DrillForm::updateToolsOnGi(int apToolId)
@@ -598,36 +611,30 @@ void DrillForm::updateToolsOnGi(int apToolId)
         item->updateTool();
 }
 
-void DrillForm::pickUpTool(const double k)
+void DrillForm::pickUpTool()
 {
+    const double k = 0.05;
     int ctr = 0;
-    for (const auto& [ //
-             icon,
-             name,
-             diameter,
-             apertureId,
-             isSlot,
-             useForCalc,
-             toolId] : model->data()) {
-        const double drillDiameterMin = diameter * (1.0 - k);
-        const double drillDiameterMax = diameter * (1.0 + k);
-        if (!isSlot)
+    for (const auto& row : model->data()) {
+        const double drillDiameterMin = row.diameter * (1.0 - k);
+        const double drillDiameterMax = row.diameter * (1.0 + k);
+        if (!row.isSlot)
             for (auto& [id, tool] : App::toolHolder().tools()) {
                 if (tool.type() == Tool::Drill
                     && drillDiameterMin <= tool.diameter()
                     && drillDiameterMax >= tool.diameter()) {
                     model->setToolId(ctr, id);
-                    updateToolsOnGi(apertureId);
+                    updateToolsOnGi(row.apertureId);
                     break;
                 }
             }
-        if (/*row.*/ toolId < 0)
+        if (row.toolId < 0)
             for (auto& [id, tool] : App::toolHolder().tools()) {
                 if (tool.type() == Tool::EndMill
                     && drillDiameterMin <= tool.diameter()
                     && drillDiameterMax >= tool.diameter()) {
                     model->setToolId(ctr, id);
-                    updateToolsOnGi(apertureId);
+                    updateToolsOnGi(row.apertureId);
                     break;
                 }
             }

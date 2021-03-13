@@ -27,7 +27,6 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/gcprofile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcthermal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gcutils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoi.cpp
     PARENT_SCOPE
     )
 
@@ -47,7 +46,6 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/gcthermal.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gctypes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/gcutils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoi.h
     PARENT_SCOPE
     )
 

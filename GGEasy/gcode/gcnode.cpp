@@ -62,7 +62,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
         }
     default:
         if (role == FileTree::Select) {
-            file->itemGroup()->setZValue((value.toBool() ? +(*m_id + 1) : -(*m_id + 1)) * 1000);
+            file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
             return true;
         }
         return false;

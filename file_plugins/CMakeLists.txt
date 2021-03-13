@@ -73,9 +73,9 @@ link_directories(
     )
 
 add_subdirectory(dxf)
-#add_subdirectory(excellon)
-#add_subdirectory(gerber)
-#add_subdirectory(hpgl)
+add_subdirectory(excellon)
+add_subdirectory(gerber)
+add_subdirectory(hpgl)
 
 
 

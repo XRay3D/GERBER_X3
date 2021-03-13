@@ -65,7 +65,7 @@ private:
     void on_customContextMenuRequested(const QPoint& pos);
 
     void updateToolsOnGi(int apToolId);
-    void pickUpTool(const double k = 0.05); // 5%
+    void pickUpTool();
 
     //    inline void updateCreateButton();
     inline void setSelected(int id, bool fl);

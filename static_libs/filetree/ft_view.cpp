@@ -92,40 +92,12 @@ void View::on_doubleClicked(const QModelIndex& index)
 void View::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     if (!selected.indexes().isEmpty()) {
-        //        auto index = selected.indexes().first();
-        //        const int row = index.parent().row();
-        //        switch (row) {
-        //        case Model::GerberFiles:
-        //        case Model::DrillFiles:
-        //        case Model::ToolPath:
-        //            //            const int id = index.data(Qt::UserRole).toInt();
-        //            //            FileInterface* file = App::project()->file(id);
-        //            //            file->itemGroup()->setZValue(id);
-        //            m_model->setData(index, true, Role::Select);
-        //            break;
-        //        case Model::Shapes:
         for (auto& index : selected.indexes())
             m_model->setData(index, true, Role::Select);
-        //            break;
-        //        }
     }
     if (!deselected.indexes().isEmpty()) {
-        //        auto index = deselected.indexes().first();
-        //        const int row = index.parent().row();
-        //        switch (row) {
-        //        case Model::GerberFiles:
-        //        case Model::DrillFiles:
-        //        case Model::ToolPath:
-        //            //            const int id = index.data(Qt::UserRole).toInt();
-        //            //            FileInterface* file = App::project()->file(id);
-        //            //            file->itemGroup()->setZValue(-id);
-        //            m_model->setData(index, false, Role::Select);
-        //            break;
-        //        case Model::Shapes:
         for (auto& index : deselected.indexes())
             m_model->setData(index, false, Role::Select);
-        //            break;
-        //    }
     }
 }
 
@@ -231,7 +203,7 @@ void View::contextMenuEvent(QContextMenuEvent* event)
     }
 
     if (!menu.isEmpty())
-        menu.exec(mapToGlobal(event->pos() + QPoint(0, menu.actionGeometry(menu.actions().first()).height())));
+        menu.exec(viewport()->mapToGlobal(event->pos()));
 }
 
 void View::mousePressEvent(QMouseEvent* event)

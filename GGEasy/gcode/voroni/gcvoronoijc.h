@@ -13,30 +13,52 @@
 *******************************************************************************/
 #pragma once
 
-#include <graphicsitem.h>
-#define QT_DEBUG
+#include "../gccreator.h"
+
 namespace GCode {
-class File;
-}
 
-class GcPathItem : public GraphicsItem {
-public:
-    GcPathItem(const Paths& paths, GCode::File* file = nullptr);
-    GcPathItem(const Path& path, GCode::File* file = nullptr);
-    ~GcPathItem() override = default;
-    QRectF boundingRect() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    Paths paths() const override;
+class VoronoiJc : public virtual Creator {
 
-private:
-    GCode::File* m_gcFile;
-#ifdef QT_DEBUG
-    QPainterPath m_arrows;
-    double m_sc = 0;
-    void updateArrows();
-#endif
 protected:
-    void changeColor() override { }
+    struct Pair {
+        IntPoint first;
+        IntPoint second;
+        int id;
+        bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
+    };
+
+    friend inline size_t qHash(const Pair& tag, uint seed);
+
+    using Pairs = QSet<Pair>;
+    using Pairss = mvector<Pairs>;
+    struct OrdPath {
+        int count = 1;
+        IntPoint Pt;
+        OrdPath* Next = nullptr;
+        OrdPath* Prev = nullptr;
+        OrdPath* Last = nullptr;
+        inline void push_back(OrdPath* opt)
+        {
+            ++count;
+            Last->Next = opt;
+            Last = opt->Prev->Last;
+            opt->Prev = this;
+        }
+        Path toPath()
+        {
+            Path rp;
+            rp.reserve(count);
+            rp.push_back(Pt);
+            OrdPath* next = Next;
+            while (next) {
+                rp.push_back(next->Pt);
+                next = next->Next;
+            }
+            return rp;
+        }
+    };
+
+    void jcVoronoi();
+    Paths toPath(const Pairs& pairs);
 };
-#undef QT_DEBUG
+}

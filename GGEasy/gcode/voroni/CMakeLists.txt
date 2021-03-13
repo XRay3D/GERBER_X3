@@ -15,12 +15,21 @@ cmake_minimum_required(VERSION 3.14)
 
 set(SOURCE
     ${SOURCE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoi.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoiboost.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoicgal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoijc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jc_voronoi.cpp
     PARENT_SCOPE
     )
 
 set(HEADERS
     ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoi.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoiboost.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoicgal.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gcvoronoijc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/jc_voronoi.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/voronoi_visual_utils.hpp
     PARENT_SCOPE
     )

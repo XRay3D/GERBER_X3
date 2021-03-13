@@ -88,7 +88,9 @@ private:
     bool openFlag;
 
     std::map<int, QAction*> toolpathActions;
+    QActionGroup toolpathActionGroup;
     QMap<QString, QProgressDialog*> m_progressDialogs;
+    QMessageBox reloadQuestion;
 
     void open();
     bool save();

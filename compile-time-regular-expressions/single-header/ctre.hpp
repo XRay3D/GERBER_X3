@@ -3046,7 +3046,7 @@ template <size_t Id, typename Name = void> struct captured_content {
             if constexpr(std::is_same_v<char_type, char>)
                return  QString{};
             else
-                return _matched ? QString(reinterpret_cast<const QChar*>(data()), size())
+                return _matched ? QString(reinterpret_cast<const QChar*>(data()),static_cast<int>(size()))
                                 : QString{};
         }
 
