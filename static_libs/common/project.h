@@ -45,7 +45,7 @@ using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
 struct FilesMap : std::map<int, std::shared_ptr<FileInterface>> {
     bool contains(int key) const { return find(key) != end(); }
 };
-struct ShapesMap : std::map<int, std::shared_ptr<Shapes::Shape>> {
+struct ShapesMap : std::map<int, std::shared_ptr<ShapeInterface>> {
     bool contains(int key) const { return find(key) != end(); }
 };
 #endif

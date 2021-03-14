@@ -55,7 +55,7 @@ size_t GraphicObject::entityId() const
 
 GraphicObject::GraphicObject() { }
 
-GraphicObject::GraphicObject(size_t entityId, const Path& path, const Paths& paths)
+GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
     : m_entityId(entityId)
     , m_path(path)
     , m_paths(paths)

@@ -119,7 +119,7 @@ public:
     QString handle;
     QString softPointerID;
     int16_t colorNumber = 0;
-    size_t id {};
+    int id {};
 
 #ifdef QT_DEBUG
     static constexpr double u = 10.;

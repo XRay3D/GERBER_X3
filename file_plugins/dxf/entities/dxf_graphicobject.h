@@ -30,7 +30,7 @@ class GraphicObject final : public AbstrGraphicObject {
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go);
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go);
 
-    size_t m_entityId {};
+    int m_entityId {};
     Path m_path;
     Paths m_paths;
     File* m_file = nullptr;
@@ -41,7 +41,7 @@ class GraphicObject final : public AbstrGraphicObject {
 
 public:
     GraphicObject();
-    GraphicObject(size_t entityId, const Path& path, const Paths& paths);
+    GraphicObject(int entityId, const Path& path, const Paths& paths);
 
     void setRotation(double rotationAngle);
     double rotationAngle() const;
