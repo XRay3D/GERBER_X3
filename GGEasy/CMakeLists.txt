@@ -52,6 +52,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     else()
         set(SUFFIX "${SUFFIX}_x32")
     endif()
+    include_directories (
+        /usr/lib/x86_64-linux-gnu/
+        )
+    link_directories(
+        /usr/lib/x86_64-linux-gnu/
+        )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -61,6 +67,14 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     else()
         set(SUFFIX "${SUFFIX}_x32")
     endif()
+    include_directories (
+        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
+        C:/dev/CGAL-5.1.2/include
+        C:/dev/boost_1_75_0
+        )
+    link_directories(
+        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+        )
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -99,14 +113,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-#set(TS_FILES
-# "translations/${PROJECT_NAME}_en.ts"
-# "translations/${PROJECT_NAME}_ru.ts"
-# )
-
-#include_directories(${CMAKE_STATIC_LIBS_DIR})
-
 include_directories (
+    ${INCLUDE_DIRECTORIES}
     ../shape_plugins/shape
     ../static_libs/clipper
     ../static_libs/common
@@ -116,14 +124,15 @@ include_directories (
     ../static_libs/graphicsview
     ../static_libs/thermal
     ../static_libs/tooldatabase
-    C:/dev/CGAL-5.1.2/auxiliary/gmp/include
-    C:/dev/CGAL-5.1.2/include
-    C:/dev/boost_1_75_0
+#    C:/dev/CGAL-5.1.2/auxiliary/gmp/include
+#    C:/dev/CGAL-5.1.2/include
+#    C:/dev/boost_1_75_0
     )
 
 link_directories(
+    ${LINK_DIRECTORIES}
     ../libs${SUFFIX}
-    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+#    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
     )
 
 add_subdirectory(forms)
@@ -198,8 +207,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     thermal
     tooldatabase
     shape
-    libgmp-10#CGAL
-    libmpfr-4#CGAL
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
@@ -207,6 +214,20 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
     )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        gmp#CGAL
+        mpfr#CGAL
+        )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        libgmp-10#CGAL
+        libmpfr-4#CGAL
+        )
+endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
