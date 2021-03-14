@@ -1161,21 +1161,31 @@ void MainWindow::updateTheme()
     //                                         "subcontrol-position: top center; }" /* position at the top center */
     //        );
     //    }
-
+    qDebug() << QIcon::fallbackSearchPaths();
+    qDebug() << QIcon::fallbackThemeName();
     if (App::settings().theme() < DarkBlue) {
-        QIcon::setThemeSearchPaths({
-            qApp->applicationDirPath() + "/../icons/breezeLight/",
-            qApp->applicationDirPath() + "/icons/breezeLight/",
-        });
+        QIcon::setThemeName("ggeasy-light");
+//        QIcon::setThemeSearchPaths({
+//            "://icons/ggeasy-light",
+//            ":/icons/ggeasy-light",
+//            "/icons/ggeasy-light",
+//            qApp->applicationDirPath() + "/icons/ggeasy-light",
+//            qApp->applicationDirPath() + "/../icons/ggeasy-light",
+//        });
     } else {
-        QIcon::setThemeSearchPaths({
-            qApp->applicationDirPath() + "/../icons/breezeDark/",
-            qApp->applicationDirPath() + "/icons/breezeDark/",
-        });
+        QIcon::setThemeName("ggeasy-dark");
+//        QIcon::setThemeSearchPaths({
+//            "://icons/ggeasy-dark",
+//            ":/icons/ggeasy-dark",
+//            "/icons/ggeasy-dark",
+//            qApp->applicationDirPath() + "/icons/ggeasy-dark",
+//            qApp->applicationDirPath() + "/../icons/ggeasy-dark",
+//        });
     }
-    QIcon::setThemeName("Breeze");
-    SettingsDialog d;
-    d.show();
+    qDebug() << QIcon::themeSearchPaths();
+    qDebug() << QIcon::themeName();
+
+    SettingsDialog().show();
 }
 
 void MainWindow::open()
