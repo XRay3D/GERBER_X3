@@ -16,6 +16,7 @@
 #include "graphicsitem.h"
 #include <QModelIndex>
 #include <ft_node.h>
+#include <interfaces/shapepluginin.h>
 #include <memory>
 
 namespace Shapes {
@@ -23,9 +24,11 @@ namespace Shapes {
 class Handler;
 class Node;
 
-class Shape : public GraphicsItem {
+class Shape : public ShapeInterface {
     friend class Node;
     friend class Handler;
+    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape);
+    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape);
 
 public:
     Shape();
@@ -40,8 +43,8 @@ public:
     // Shape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
-
-    Node* node() const;
+    Node* node() const override;
+    void finalize() { isFinal = true; }
 
 protected:
     mutable mvector<std::unique_ptr<Handler>> handlers;
@@ -49,6 +52,7 @@ protected:
     Node* m_node;
     std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos; // групповое перемещение
+    bool isFinal {};
 
     // QGraphicsItem interface
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -58,13 +62,16 @@ protected:
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // Shape interface
-    virtual void write(QDataStream& stream) const;
-    virtual void read(QDataStream& stream);
     virtual void updateOtherHandlers(Handler* handler);
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role) const;
     virtual void menu(QMenu& menu, FileTree::View* tv) const;
+    virtual void write([[maybe_unused]] QDataStream& stream) const { }
+    virtual void read([[maybe_unused]] QDataStream& stream) { }
+
+    void write_(QDataStream& stream) const override;
+    void read_(QDataStream& stream) override;
 };
 }

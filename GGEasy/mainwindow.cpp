@@ -62,20 +62,21 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     initWidgets();
-
+    LayoutFrames* lfp;
     ui->graphicsView->scene()->addItem(new Marker(Marker::Home));
     ui->graphicsView->scene()->addItem(new Marker(Marker::Zero));
     ui->graphicsView->scene()->addItem(new Pin());
     ui->graphicsView->scene()->addItem(new Pin());
     ui->graphicsView->scene()->addItem(new Pin());
     ui->graphicsView->scene()->addItem(new Pin());
+    ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
     GCodePropertiesForm(); // init default vars;
 
     connect(m_project, &Project::homePosChanged, Marker::get(Marker::Home), qOverload<const QPointF&>(&Marker::setPos));
     connect(m_project, &Project::zeroPosChanged, Marker::get(Marker::Zero), qOverload<const QPointF&>(&Marker::setPos));
     connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Pin::setPos));
-    connect(m_project, &Project::layoutFrameUpdate, new LayoutFrames(), &LayoutFrames::updateRect);
+    connect(m_project, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
 
     // connect plugins
@@ -141,7 +142,10 @@ MainWindow::MainWindow(QWidget* parent)
                 //break;
             }
         }
-        if (1) {
+        if (0)
+            QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/Untitled1_a1.dxf"); });
+
+        if (0) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
             QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -690,8 +694,6 @@ void MainWindow::newFile()
 
 void MainWindow::readSettings()
 {
-    SettingsDialog().accept();
-
     QSettings settings;
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
@@ -964,10 +966,6 @@ void MainWindow::createDockWidget(int type)
     auto dwContent = new T(m_dockWidget);
     dwContent->setObjectName(typeid(T).name());
 
-    //    for (auto [key, action] : qAsConst(toolpathActions))
-    //        action->setChecked(false);
-    //    toolpathActions[type]->setChecked(true);
-
     m_dockWidget->pop();
     m_dockWidget->push(dwContent);
     m_dockWidget->show();
@@ -991,26 +989,18 @@ QMenu* MainWindow::createPopupMenu()
 
 void MainWindow::translate(const QString& locale)
 {
-    static QTranslator qtTranslator;
-    static QTranslator appTranslator;
-
-    const QString trFolder(
-        qApp->applicationDirPath().contains("GERBER_X3/bin")
+    static std::vector<std::unique_ptr<QTranslator>> translators;
+    translators.clear();
+    QDir dir(qApp->applicationDirPath().contains("GERBER_X3/bin")
             ? qApp->applicationDirPath() + "/../GGEasy/translations"
             : qApp->applicationDirPath() + "/translations");
-
-    const QString qtTr("qtbase_" + locale + ".qm");
-    const QString appTr(qApp->applicationDisplayName() + "_" + locale + ".qm");
-
-    if (qtTranslator.load(qtTr, trFolder))
-        qApp->installTranslator(&qtTranslator);
-    else
-        qDebug() << "err qtTranslator";
-
-    if (appTranslator.load(appTr, trFolder))
-        qApp->installTranslator(&appTranslator);
-    else
-        qDebug() << "err appTranslator";
+    for (QString str : dir.entryList(QStringList { "*" + locale + ".qm" }, QDir::Files)) {
+        translators.emplace_back(std::make_unique<QTranslator>());
+        if (translators.back()->load(str, dir.path()))
+            qApp->installTranslator(translators.back().get());
+        else
+            qDebug() << "QTranslator err appTranslator";
+    }
 }
 
 void MainWindow::loadFile(const QString& fileName)

@@ -33,7 +33,6 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, Codes::it
     , it(it)
     , file(file)
 {
-
 }
 SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* file)
     : type(toType(*(from + 1)))
@@ -42,7 +41,6 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* fil
     , it(from)
     , file(file)
 {
-
 }
 
 SectionParser::SectionType SectionParser::toType(const QString& key)
@@ -57,6 +55,7 @@ const CodeData& SectionParser::nextCode() const
     auto& val = *it;
     ++it;
     return val;
+    return *(++it);
 }
 
 const CodeData& SectionParser::prevCode() const
@@ -64,6 +63,7 @@ const CodeData& SectionParser::prevCode() const
     --it;
     auto& val = *it;
     return val;
+    return *(--it);
 }
 
 bool SectionParser::hasNext() const

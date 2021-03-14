@@ -373,10 +373,9 @@ int Project::addShape(ShapeInterface* const shape)
     const int newId = m_shapes.size()
         ? (--m_shapes.end())->first + 1
         : 0;
-    //    shape->m_giId = newId;
-    //    shape->setToolTip(QString::number(newId));
-    //    shape->setZValue(newId);
-    //m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
+    shape->m_giId = newId;
+    shape->setToolTip(QString::number(newId));
+    shape->setZValue(newId);
     m_shapes.emplace(newId, shape);
     App::fileModel()->addShape(shape);
     setChanged();

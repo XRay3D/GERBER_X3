@@ -16,12 +16,14 @@
 
 class QPushButton;
 class PushButton;
+class QLineEdit;
 
 class ColorSelector : public QWidget {
     Q_OBJECT
 
     QPushButton* pbResetColor;
     PushButton* pbSelectColor;
+    QLineEdit* lineEdit;
 
 public:
     explicit ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent = nullptr);
@@ -29,6 +31,7 @@ public:
 
 private:
     void resetColor();
+    void updateName();
 
     QColor& m_color;
     const QColor m_defaultColor;

@@ -265,7 +265,7 @@ GraphicObject LwPolyline::toGo() const
     return { id, p.value(0), paths };
 }
 
-void LwPolyline::write(QDataStream &stream) const
+void LwPolyline::write(QDataStream& stream) const
 {
     stream << poly;
     stream << counter;
@@ -278,7 +278,7 @@ void LwPolyline::write(QDataStream &stream) const
     stream << thickness;
 }
 
-void LwPolyline::read(QDataStream &stream)
+void LwPolyline::read(QDataStream& stream)
 {
     stream >> poly;
     stream >> counter;

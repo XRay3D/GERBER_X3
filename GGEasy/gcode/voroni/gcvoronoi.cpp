@@ -45,7 +45,6 @@ void VoronoiCreator::create()
         break;
     case 2:
         boostVoronoi();
-        /**************/ return;
         break;
     }
 

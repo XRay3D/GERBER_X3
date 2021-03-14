@@ -197,6 +197,8 @@ void Marker::updateGCPForm()
 void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
+    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
+
     updateGCPForm();
 }
 
@@ -293,6 +295,7 @@ QPainterPath Pin::shape() const
 void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
+    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     QPointF pt[4] {
         m_pins[0]->pos(),
@@ -542,11 +545,11 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
-    {
-        QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView()->scaleFactor());
-        pen.setJoinStyle(Qt::MiterJoin);
-        painter->setPen(pen);
-    }
+
+    QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView()->scaleFactor());
+    pen.setJoinStyle(Qt::MiterJoin);
+    painter->setPen(pen);
+
     painter->drawPath(m_path);
     painter->restore();
 }
@@ -627,8 +630,6 @@ void LayoutFrames::updateRect(bool fl)
     }
     m_path = std::move(path);
     QGraphicsItem::update();
-    if (scene())
-        scene()->setSceneRect(scene()->itemsBoundingRect());
     if (fl) {
         Marker::get(Marker::Home)->resetPos(false);
         Marker::get(Marker::Zero)->resetPos(false);

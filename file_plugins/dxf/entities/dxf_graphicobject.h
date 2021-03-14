@@ -44,23 +44,23 @@ public:
     GraphicObject(size_t entityId, const Path& path, const Paths& paths);
 
     void setRotation(double rotationAngle);
-    inline double rotationAngle() const;
+    double rotationAngle() const;
 
     void setScale(double scaleX, double scaleY);
-    inline std::tuple<double, double> scale() const;
-    inline double scaleX() const;
-    inline double scaleY() const;
+    std::tuple<double, double> scale() const;
+    double scaleX() const;
+    double scaleY() const;
 
     void setPos(QPointF pos);
-    inline QPointF pos() const;
+    QPointF pos() const;
 
     const Entity* entity() const;
     size_t entityId() const;
 
     // AbstrGraphicObject interface
 
-    inline const Path& path() const override;
-    inline const Paths& paths() const override;
+    const Path& path() const override;
+    const Paths& paths() const override;
 
     Path line() const override;
     Path lineW() const override;

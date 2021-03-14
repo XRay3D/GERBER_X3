@@ -66,7 +66,7 @@ void AppSettings::setInch(bool val) { m_inch = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
 {
-    if (mod & Qt::ALT || m_snap) {
+    if ((mod & Qt::ALT) || m_snap) {
         const double gs = AppSettings::gridStep(App::graphicsView()->getScale());
         QPointF px(pt / gs);
         px.setX(gs * round(px.x()));
