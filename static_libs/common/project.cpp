@@ -120,6 +120,8 @@ bool Project::save(const QString& fileName)
         out << m_zero;
         for (auto& pt : m_pins)
             out << pt;
+        for (auto& fl : m_pinsUsed)
+            out << fl;
         out << m_worckRect;
         out << m_safeZ;
         out << m_boardThickness;
@@ -168,6 +170,8 @@ bool Project::open(const QString& fileName)
             emit zeroPosChanged(m_zero);
             for (auto& pt : m_pins)
                 in >> pt;
+            for (auto& fl : m_pinsUsed)
+                in >> fl;
             emit pinsPosChanged(m_pins);
             in >> m_worckRect;
             emit worckRectChanged(m_worckRect);
@@ -210,6 +214,8 @@ void Project::close()
     setSpaceY(0.0);
     m_isPinsPlaced = false;
     m_isModified = false;
+    for (auto& fl : m_pinsUsed)
+        fl = true;
     emit changed();
 }
 
@@ -443,7 +449,6 @@ void Project::setUntitled(bool value)
 }
 
 double Project::spaceX() const { return m_spacingX; }
-
 void Project::setSpaceX(double value)
 {
     m_spacingX = value;
@@ -452,7 +457,6 @@ void Project::setSpaceX(double value)
 }
 
 double Project::spaceY() const { return m_spacingY; }
-
 void Project::setSpaceY(double value)
 {
     m_spacingY = value;
@@ -461,7 +465,6 @@ void Project::setSpaceY(double value)
 }
 
 uint Project::stepsX() const { return m_stepsX; }
-
 void Project::setStepsX(uint value)
 {
     m_stepsX = value;
@@ -470,7 +473,6 @@ void Project::setStepsX(uint value)
 }
 
 uint Project::stepsY() const { return m_stepsY; }
-
 void Project::setStepsY(uint value)
 {
     m_stepsY = value;
@@ -479,7 +481,6 @@ void Project::setStepsY(uint value)
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
-
 void Project::setWorckRect(const QRectF& worckRect)
 {
     m_worckRect = worckRect;
@@ -489,7 +490,6 @@ void Project::setWorckRect(const QRectF& worckRect)
 }
 
 QPointF Project::homePos() const { return m_home; }
-
 void Project::setHomePos(const QPointF& pos)
 {
     m_home = pos;
@@ -497,7 +497,6 @@ void Project::setHomePos(const QPointF& pos)
 }
 
 QPointF Project::zeroPos() const { return m_zero; }
-
 void Project::setZeroPos(const QPointF& pos)
 {
     m_zero = pos;
@@ -505,7 +504,6 @@ void Project::setZeroPos(const QPointF& pos)
 }
 
 const QPointF* Project::pinsPos() const { return m_pins; }
-
 void Project::setPinsPos(const QPointF pos[4])
 {
     m_pins[0] = pos[0];
@@ -515,10 +513,16 @@ void Project::setPinsPos(const QPointF pos[4])
     setChanged();
 }
 
+bool Project::pinUsed(int idx) const { return m_pinsUsed[idx]; }
+void Project::setPinUsed(bool used, int idx)
+{
+    m_pinsUsed[idx] = used;
+    setChanged();
+}
+
 int Project::ver() const { return m_ver; }
 
 double Project::safeZ() const { return m_safeZ; }
-
 void Project::setSafeZ(double safeZ)
 {
     m_safeZ = safeZ;
@@ -526,7 +530,6 @@ void Project::setSafeZ(double safeZ)
 }
 
 double Project::boardThickness() const { return m_boardThickness; }
-
 void Project::setBoardThickness(double boardThickness)
 {
     m_boardThickness = boardThickness;
@@ -534,7 +537,6 @@ void Project::setBoardThickness(double boardThickness)
 }
 
 double Project::copperThickness() const { return m_copperThickness; }
-
 void Project::setCopperThickness(double copperThickness)
 {
     m_copperThickness = copperThickness;
@@ -542,7 +544,6 @@ void Project::setCopperThickness(double copperThickness)
 }
 
 double Project::clearence() const { return m_clearence; }
-
 void Project::setClearence(double clearence)
 {
     m_clearence = clearence;
@@ -550,7 +551,6 @@ void Project::setClearence(double clearence)
 }
 
 double Project::plunge() const { return m_plunge; }
-
 void Project::setPlunge(double plunge)
 {
     m_plunge = plunge;
@@ -558,7 +558,6 @@ void Project::setPlunge(double plunge)
 }
 
 double Project::glue() const { return m_glue; }
-
 void Project::setGlue(double glue)
 {
     m_glue = glue;

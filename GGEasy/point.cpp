@@ -267,7 +267,8 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (App::scene()->drawPdf())
         return;
 
-    QColor c(App::settings().guiColor(GuiColors::Pin));
+    QColor c(App::project()->pinUsed(m_index) ? App::settings().guiColor(GuiColors::Pin)
+                                              : QColor(127, 127, 127, 127));
     if (option->state & QStyle::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -389,7 +390,8 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                 QPointF point(pin->pos());
                 if (dst.contains(point))
                     continue;
-                dst.push_back(point);
+                if (App::project()->pinUsed(pin->m_index))
+                    dst.push_back(point);
             }
 
             QSettings settings;
@@ -429,12 +431,19 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             App::project()->addFile(gcode);
         }
     });
-    action = menu.addAction(tr("Fixed"), [](bool fl) {
-        for (Pin* pin : m_pins)
-            pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
-    });
-    action->setCheckable(true);
-    action->setChecked(!(m_pins[0]->flags() & QGraphicsItem::ItemIsMovable));
+    {
+        action = menu.addAction(tr("Fixed"), [](bool fl) {
+            for (Pin* pin : m_pins)
+                pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
+        });
+        action->setCheckable(true);
+        action->setChecked(!(m_pins[0]->flags() & QGraphicsItem::ItemIsMovable));
+    }
+    {
+        action = menu.addAction(tr("Used"), [this](bool fl) { App::project()->setPinUsed(fl, m_index); update(); });
+        action->setCheckable(true);
+        action->setChecked(App::project()->pinUsed(m_index));
+    }
     menu.addSeparator();
     action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
         SettingsDialog(nullptr, SettingsDialog::Utils).exec();

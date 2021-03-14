@@ -1162,18 +1162,17 @@ void MainWindow::updateTheme()
     //        );
     //    }
 
-    qDebug() << qApp->applicationDirPath();
-//    if (App::settings().theme() < DarkBlue) {
-//        QIcon::setThemeSearchPaths({
-//            qApp->applicationDirPath() + "/../icons/breezeLight/",
-//            qApp->applicationDirPath() + "/icons/breezeLight/",
-//        });
-//    } else {
-//        QIcon::setThemeSearchPaths({
-//            qApp->applicationDirPath() + "/../icons/breezeDark/",
-//            qApp->applicationDirPath() + "/icons/breezeDark/",
-//        });
-//    }
+    if (App::settings().theme() < DarkBlue) {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeLight/",
+            qApp->applicationDirPath() + "/icons/breezeLight/",
+        });
+    } else {
+        QIcon::setThemeSearchPaths({
+            qApp->applicationDirPath() + "/../icons/breezeDark/",
+            qApp->applicationDirPath() + "/icons/breezeDark/",
+        });
+    }
     QIcon::setThemeName("Breeze");
     SettingsDialog d;
     d.show();
