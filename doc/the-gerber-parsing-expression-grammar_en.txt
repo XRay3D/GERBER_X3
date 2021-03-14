@@ -1,0 +1,246 @@
+GERBER_GRAMMAR = '''
+@@grammar    :: Gerber_2020_09
+@@nameguard  :: False
+@@whitespace :: /\n/
+
+start = {statement}* M02 $;
+statement =
+    | single_statement
+    | compound_statement
+    ;
+
+single_statement =
+    | operation
+    | interpolation_state_command
+    | Dnn
+    | G04               
+    | attribute_command             
+    | AD
+    | AM
+    | coordinate_command	
+    | transformation_state_command
+    ;
+compound_statement =
+    | region_statement
+    | SR_statement	
+    | AB_statement
+    ;
+
+coordinate_command =
+    |FS
+    |MO
+    ;
+operation =
+    |D01
+    |D02
+    |D03
+    ;
+interpolation_state_command =
+    |G01
+    |G02
+    |G03
+    |G74
+    |G75
+    ;
+transformation_state_command =
+    |LP
+    |LM
+    |LR
+    |LS
+    ;
+attribute_command =
+    |TO
+    |TD
+    |TA
+    |TF
+    ;
+
+
+# Graphics commands
+#------------------
+
+FS = '%' @:('FS' 'LA' 'X'/[1-9][56]/ 'Y'/[1-9][56]/) '*%';
+MO = '%' @:('MO' ('MM'|'IN')) '*%';
+
+D01 = @:(['X' coordinate] ['Y' coordinate] ['I' coordinate 'J' coordinate] 'D01') '*';
+D02 = @:(['X' coordinate] ['Y' coordinate] 'D02') '*';
+D03 = @:(['X' coordinate] ['Y' coordinate] 'D03') '*';
+
+G01 = @:('G01') '*';
+G02 = @:('G02') '*';
+G03 = @:('G03') '*';
+G74 = @:('G74') '*';
+G75 = @:('G75') '*';
+
+Dnn = @:(aperture_ident) '*';
+
+G04 = @:('G04' string) '*';
+
+M02 = @:('M02') '*';
+
+LP = '%' @:('LP' ('C'|'D')) '*%';
+LM = '%' @:('LM' ('N'|'XY'|'Y'|'X')) '*%';
+LR = '%' @:('LR' decimal) '*%';
+LS = '%' @:('LS' decimal) '*%';
+
+AD = '%' @:('AD' aperture_ident AD_body) '*%';
+AD_body =
+   |'C' fst_par [nxt_par]
+   |'R' fst_par nxt_par [nxt_par]
+   |'O' fst_par nxt_par [nxt_par]
+   |'P' fst_par nxt_par [nxt_par [nxt_par]]
+   |!(('C'|'R'|'O'|'P')(','|'*')) name [fst_par {nxt_par}*]
+   ;
+fst_par = ',' @:decimal;
+nxt_par = 'X' @:decimal;
+
+AM = '%' @:('AM' macro_name macro_body) '%';
+macro_name = @:name '*';
+macro_body = {in_macro_block}+;
+in_macro_block =
+    |primitive
+	|variable_definition
+	;
+variable_definition = @:(macro_variable '=' expression) '*';
+macro_variable =      '$' pos_integer;
+primitive =
+    |@:('0'  string) '*'
+    |@:('1'  par par par par [par]) '*'
+    |@:('20' par par par par par par par) '*'
+    |@:('21' par par par par par par) '*'
+    |@:('4'  par par par par {par par}+ par) '*'
+    |@:('5'  par par par par par par) '*'
+    |@:('6'  par par par par par par par par par) '*'
+    |@:('7'  par par par par par par) '*'
+    ;
+par = ',' @:(expression);
+
+
+# Compound statements
+
+region_statement = G36 {contour}+ G37;
+contour =          D02 {D01|interpolation_state_command}*;
+G36 = @:('G36') '*';
+G37 = @:('G37') '*';
+
+AB_statement = AB_open {in_block_statement}* AB_close;
+AB_open  =     '%' @:('AB' aperture_ident) '*%';
+AB_close =     '%' @:('AB') '*%';
+
+SR_statement = SR_open {in_block_statement}* SR_close;
+SR_open =      '%' @:('SR' 'X' pos_integer 'Y' pos_integer 'I' decimal 'J' decimal) '*%';
+SR_close =     '%' @:('SR') '*%';
+
+in_block_statement =
+    |single_statement
+    |region_statement
+    |AB_statement
+    ;
+
+
+# Attribute commands
+#-------------------
+
+TF = '%' @:('TF' TF_atts) '*%'; 
+TA = '%' @:('TA' TA_atts) '*%';
+TO = '%' @:('TO' TO_atts) '*%';
+TD = '%' @:('TD' [all_atts]) '*%';
+
+TF_atts =
+    |'.Part'                nxt_field
+    |'.FileFunction'       {nxt_field}*
+    |'.FilePolarity'        nxt_field
+    |'.SameCoordinates'    [nxt_field]
+    |'.CreationDate'        nxt_field
+    |'.GenerationSoftware'  nxt_field nxt_field [nxt_field]
+    |'.ProjectId'           nxt_field nxt_field  nxt_field
+    |'.MD5'                 nxt_field
+    |user_name
+    ;
+TA_atts =
+    |'.AperFunction'   {nxt_field}*
+    |'.DrillTolerance'  nxt_field   nxt_field
+    |'.FlashText'      {nxt_field}*
+    |user_name         {nxt_field}*
+    ;
+TO_atts =
+    |'.N'     nxt_field   {nxt_field}*
+    |'.P'     nxt_field    nxt_field   [nxt_field]
+    |'.C'     nxt_field 
+    |'.CRot'  nxt_field
+    |'.CMfr'  nxt_field
+    |'.CMPN'  nxt_field
+    |'.CVal'  nxt_field
+    |'.CMnt'  nxt_field
+    |'.CFtp'  nxt_field
+    |'.CPgN'  nxt_field
+    |'.CPgD'  nxt_field
+    |'.CHgt'  nxt_field
+    |'.CLbN'  nxt_field
+    |'.CLbD'  nxt_field
+    |'.CSup'  nxt_field nxt_field {nxt_field nxt_field}*
+    |user_name {nxt_field}*
+    ;
+all_atts =
+    |TF_atts
+    |TA_atts
+    |TO_atts
+    ;
+nxt_field = ',' @:field;
+
+
+# Expressions
+#------------
+
+unsigned_expression =
+    |term term_operation unsigned_expression
+    |term
+    ;
+term =
+    |factor factor_operation term
+    |factor
+    ;
+factor =
+    |'(' expression ')'
+    |unsigned_decimal
+    |macro_variable
+    ;
+expression = [sign] unsigned_expression;
+
+
+# Numbers
+#--------
+
+unsigned_integer =
+    |'0'
+    |pos_integer
+    ;
+integer = [sign] unsigned_integer;
+unsigned_decimal = 
+    |unsigned_decimal_integer_part_pos
+    |unsigned_decimal_integer_part_zero
+    |unsigned_decimal_integer_part_none
+    |unsigned_integer
+    ;
+decimal = [sign] unsigned_decimal;
+
+# Terminals, by regex
+#--------------------
+
+sign =             /[+-]/;
+term_operation =   /[+-]/;
+factor_operation = /[x\/]/;
+
+pos_integer =    /[1-9][0-9]*/;
+aperture_ident = /D[1-9][0-9]+/;
+coordinate =     /[+-]{0,1}[0-9]+/;
+unsigned_decimal_integer_part_pos =  /[1-9][0-9]*\.[0-9]*/;
+unsigned_decimal_integer_part_zero = /0\.[0-9]*/;
+unsigned_decimal_integer_part_none = /\.[0-9]+/;
+
+name =          /[a-zA-Z_.$][a-zA-Z_.0-9]*/;
+standard_name = /\.[a-zA-Z_.0-9]+/;
+user_name =     /[a-zA-Z_$][.a-zA-Z_0-9]*/;
+string =        /[^%*]*/;
+field =         /[^%*,]*/;
+

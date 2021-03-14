@@ -47,6 +47,9 @@ Temporary Items
 
 # Build dir
 build-*
+libs_*
+build
+
 
 # Binaries
 bin/*
