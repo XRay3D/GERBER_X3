@@ -222,7 +222,51 @@ void Spline::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject Spline::toGo() const { return { sp->file, this, {}, {} }; }
+Entity::Type Spline::type() const { return Type::SPLINE; }
+
+GraphicObject Spline::toGo() const { return {  }; }
+
+void Spline::write(QDataStream &stream) const
+{
+    stream << FitPoints;
+    stream << ControlPoints;
+    stream << StartTangent;
+    stream << EndTangent;
+
+    stream << KnotValues;
+    stream << weight;
+
+    stream << knotTolerance;
+    stream << controlPointTolerance;
+    stream << fitTolerance;
+
+    stream << degreeOfTheSplineCurve;
+    stream << numberOfControlPoints;
+    stream << numberOfFitPoints;
+    stream << numberOfKnots;
+    stream << splineFlag;
+}
+
+void Spline::read(QDataStream &stream)
+{
+    stream >> FitPoints;
+    stream >> ControlPoints;
+    stream >> StartTangent;
+    stream >> EndTangent;
+
+    stream >> KnotValues;
+    stream >> weight;
+
+    stream >> knotTolerance;
+    stream >> controlPointTolerance;
+    stream >> fitTolerance;
+
+    stream >> degreeOfTheSplineCurve;
+    stream >> numberOfControlPoints;
+    stream >> numberOfFitPoints;
+    stream >> numberOfKnots;
+    stream >> splineFlag;
+}
 
 ////////////////////////////////////
 

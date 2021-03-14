@@ -20,7 +20,8 @@
 namespace Shapes {
 class Handler final : public QGraphicsItem {
     friend class Shape;
-    friend QDataStream& operator<<(QDataStream& stream, const Shape& sh);
+    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape);
+    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape);
 
 public:
     enum HType : int {
@@ -45,15 +46,15 @@ private:
     mvector<QPointF> pt;
     QPointF lastPos;
     void savePos();
+    bool pressed {};
 
-    // QGraphicsItem interface
 protected:
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-
+    // QGraphicsItem interface
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
-
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }

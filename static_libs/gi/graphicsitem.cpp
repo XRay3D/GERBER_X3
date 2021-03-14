@@ -92,6 +92,8 @@ const FileInterface* GraphicsItem::file() const { return m_file; }
 
 int GraphicsItem::id() const { return m_giId; }
 
+void GraphicsItem::setId(int id) { m_giId = id; }
+
 void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     colorState |= Hovered;

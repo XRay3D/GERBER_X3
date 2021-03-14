@@ -51,6 +51,9 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 include_directories (
     ../GGEasy
+    ../compile-time-regular-expressions/single-header/
+    ../magic_get/
+    ../magic_get/include/
     ../static_libs/clipper
     ../static_libs/common
     ../static_libs/filetree
@@ -64,10 +67,15 @@ include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}
     )
 
+
+link_directories(
+    ../libs${SUFFIX}
+    )
+
 add_subdirectory(dxf)
 add_subdirectory(excellon)
-#add_subdirectory(gerber)
-#add_subdirectory(hpgl)
+add_subdirectory(gerber)
+add_subdirectory(hpgl)
 
 
 

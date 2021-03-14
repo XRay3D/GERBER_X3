@@ -29,6 +29,8 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
     GraphicObject toGo() const override { return {}; }
+    void write(QDataStream&) const override { }
+    void read(QDataStream&) override { }
 };
 
 }

@@ -52,13 +52,13 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape)
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<ShapeInterface>& shape)
 {
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape)
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& shape)
 {
     int type;
     stream >> type;
@@ -332,7 +332,7 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types)
     return rfiles;
 }
 
-Shapes::Shape* Project::shape(int id)
+ShapeInterface* Project::shape(int id)
 {
     QMutexLocker locker(&m_mutex);
     return m_shapes[id].get();
@@ -364,7 +364,7 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape(Shapes::Shape* const shape)
+int Project::addShape(ShapeInterface* const shape)
 {
     QMutexLocker locker(&m_mutex);
     if (!shape)
@@ -376,7 +376,6 @@ int Project::addShape(Shapes::Shape* const shape)
     shape->m_giId = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
-    //m_shapes.emplace(newId, std::shared_ptr<Shapes::Shape>(shape));
     m_shapes.emplace(newId, shape);
     App::fileModel()->addShape(shape);
     setChanged();

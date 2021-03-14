@@ -42,6 +42,8 @@ Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
 {
     App::setScene(this);
+    double size = 1000.0; // 4 sqare meters
+    setSceneRect(-size, -size, +size * 2, +size * 2);
 }
 
 Scene::~Scene()
@@ -338,9 +340,12 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
             }
         }
         if (fl)
-            painter->setPen(QPen(QColor(255, 000, 000, 150), 0.0));
-        else
-            painter->setPen(QPen(QColor(255, 255, 000, 150), 0.0));
+            painter->setPen(QPen(QColor(255, 000, 000, 255), 0.0));
+        else {
+            QColor c(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF);
+            //            c.setAlpha(150);
+            painter->setPen(QPen(c, 0.0));
+        }
 
         painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
         painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));

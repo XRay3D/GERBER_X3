@@ -70,12 +70,26 @@ void Point::parse(Dxf::CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Point::type() const { return POINT; }
+
 GraphicObject Point::toGo() const
 {
     QPolygonF p;
     p.append(point);
 
-    return { sp->file, this, p, {} };
+    return { id, p, {} };
+}
+
+void Point::write(QDataStream &stream) const
+{
+    stream << point;
+    stream << thickness;
+}
+
+void Point::read(QDataStream &stream)
+{
+    stream >> point;
+    stream >> thickness;
 }
 
 }

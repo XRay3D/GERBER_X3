@@ -49,31 +49,31 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
 
     tableView->setAlternatingRowColors(true);
 
-    class ItemDelegate : public QItemDelegate {
-    public:
-        ItemDelegate(QObject* parent = nullptr)
-            : QItemDelegate(parent) {};
+    //    class ItemDelegate : public QItemDelegate {
+    //    public:
+    //        ItemDelegate(QObject* parent = nullptr)
+    //            : QItemDelegate(parent) {};
 
-        void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
-        {
-            if (option.state & QStyle::State_Selected)
-                painter->fillRect(option.rect, QColor(255, 200, 200));
-            auto option2(option);
-            option2.state &= ~QStyle::State_Selected;
-            QItemDelegate::paint(painter, option2, index);
-        }
-        // QItemDelegate interface
-    protected:
-        void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
-        {
-            if (option.state & QStyle::State_HasFocus) {
-                painter->setBrush(Qt::NoBrush);
-                painter->setPen(Qt::red);
-                painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
-            }
-        };
-    };
-    tableView->setItemDelegate(new ItemDelegate(tableView));
+    //        void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    //        {
+    //            if (option.state & QStyle::State_Selected)
+    //                painter->fillRect(option.rect, QColor(255, 200, 200));
+    //            auto option2(option);
+    //            option2.state &= ~QStyle::State_Selected;
+    //            QItemDelegate::paint(painter, option2, index);
+    //        }
+    //        // QItemDelegate interface
+    //    protected:
+    //        void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
+    //        {
+    //            if (option.state & QStyle::State_HasFocus) {
+    //                painter->setBrush(Qt::NoBrush);
+    //                painter->setPen(Qt::red);
+    //                painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
+    //            }
+    //        };
+    //    };
+    //    tableView->setItemDelegate(new ItemDelegate(tableView));
     verticalLayout->addWidget(tableView);
 
     {

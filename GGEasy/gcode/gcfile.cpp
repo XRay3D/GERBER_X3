@@ -51,7 +51,6 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , m_gcp(gcp)
 {
     if (gcp.tools.front().diameter()) {
-
         initSave();
         addInfo();
         statFile();

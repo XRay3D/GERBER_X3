@@ -352,6 +352,8 @@ void PluginText::updateShape(const QPointF&) { }
 
 void PluginText::finalizeShape()
 {
+    if (shape)
+        shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }

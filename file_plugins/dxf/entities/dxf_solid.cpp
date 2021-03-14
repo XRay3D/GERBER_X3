@@ -102,6 +102,8 @@ void Solid::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Solid::type() const { return Type::SOLID; }
+
 GraphicObject Solid::toGo() const
 {
     QPolygonF poly;
@@ -117,7 +119,33 @@ GraphicObject Solid::toGo() const
     }
     Path path(poly);
     ReversePath(path);
-    return { sp->file, this, path, { path } };
+    return { id, path, { path } };
+}
+
+void Solid::write(QDataStream &stream) const
+{
+    stream << firstCorner;
+    stream << secondCorner;
+    stream << thirdCorner;
+    stream << fourthCorner;
+
+    stream << corners;
+
+    stream << thickness;
+    stream << radius;
+}
+
+void Solid::read(QDataStream &stream)
+{
+    stream >> firstCorner;
+    stream >> secondCorner;
+    stream >> thirdCorner;
+    stream >> fourthCorner;
+
+    stream >> corners;
+
+    stream >> thickness;
+    stream >> radius;
 }
 
 }

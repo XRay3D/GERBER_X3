@@ -153,6 +153,11 @@ FileType File::type() const { return FileType::Dxf; }
 
 void File::createGi()
 {
+
+    for (auto& [name, layer] : m_layers)
+        for (auto& go : layer->m_graphicObjects)
+            go.m_file = this;
+
     ItemGroup* igNorm = m_itemGroups.back();
     ItemGroup* igPath = new ItemGroup;
     m_itemGroups.push_back(igPath);
@@ -175,9 +180,10 @@ void File::createGi()
                 if (go.path().size() > 1) {
                     auto gItem = new GiDataPath(go.path(), this);
                     if (go.entity()) {
-                        gItem->setToolTip(QString("Line %1\n%2")
-                                              .arg(go.entity()->data[0].line())
-                                              .arg(go.entity()->name()));
+                        //                        gItem->setToolTip(QString("Line %1\n%2")
+                        //                                              .arg(go.entity()->data[0].line())
+                        //                                              .arg(go.entity()->name()));
+                        gItem->setToolTip(go.entity()->name());
                     }
                     gItem->setPenColorPtr(&layer->m_colorPath);
                     igPath->push_back(gItem);
@@ -254,6 +260,7 @@ void File::write(QDataStream& stream) const
         }
     }
     stream << m_layersVisible;
+    stream << m_entities;
 }
 
 void File::read(QDataStream& stream)
@@ -272,6 +279,7 @@ void File::read(QDataStream& stream)
     }
     stream >> m_itemsType;
     stream >> m_layersVisible;
+    stream >> m_entities;
 }
 
 Paths File::merge() const { return m_mergedPaths; }

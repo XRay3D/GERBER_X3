@@ -82,6 +82,8 @@ void Line::parse(CodeData& code)
     //    qDebug() << data;
 }
 
+Entity::Type Line::type() const { return Type::LINE; }
+
 GraphicObject Line::toGo() const
 {
     QPolygonF p;
@@ -95,7 +97,21 @@ GraphicObject Line::toGo() const
     //    offset.AddPath(p, jtRound, etOpenRound);
     //    offset.Execute(paths, thickness * uScale);
 
-    return { sp->file, this, p, paths };
+    return { id, p, paths };
+}
+
+void Line::write(QDataStream &stream) const
+{
+    stream << startPoint;
+    stream << endPoint;
+    stream << thickness;
+}
+
+void Line::read(QDataStream &stream)
+{
+    stream >> startPoint;
+    stream >> endPoint;
+    stream >> thickness;
 }
 
 }

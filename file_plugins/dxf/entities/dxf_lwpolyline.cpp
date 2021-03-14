@@ -156,7 +156,7 @@ void LwPolyline::parse(CodeData& code)
             endWidth = code;
             break;
         case Bulge: // betven points
-            poly.last().bulge = code;
+            poly.back().bulge = code;
             break;
         case ExtrusionDirectionX:
             break;
@@ -170,6 +170,8 @@ void LwPolyline::parse(CodeData& code)
         code = sp->nextCode();
     } while (code.code() != 0);
 }
+
+Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 GraphicObject LwPolyline::toGo() const
 {
@@ -230,10 +232,10 @@ GraphicObject LwPolyline::toGo() const
         path.arcTo(br, -start_angle, -span);
     };
 
-    for (int i = 0, size = poly.size() - 1; i < size; ++i)
+    for (size_t i = 0, size = poly.size() - 1; i < size; ++i)
         addSeg(poly[i], poly[i + 1]);
     if (polylineFlag == Closed)
-        addSeg(poly.last(), poly.first());
+        addSeg(poly.back(), poly.front());
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMatrix m;
@@ -260,6 +262,32 @@ GraphicObject LwPolyline::toGo() const
     offset.AddPath(p.value(0), jtRound, polylineFlag == Closed ? etClosedLine : etOpenRound);
     offset.Execute(paths, constantWidth * uScale * 0.5);
 
-    return { sp->file, this, p.value(0), paths };
+    return { id, p.value(0), paths };
+}
+
+void LwPolyline::write(QDataStream& stream) const
+{
+    stream << poly;
+    stream << counter;
+    stream << polylineFlag;
+    stream << numberOfVertices;
+    stream << startWidth;
+    stream << endWidth;
+    stream << constantWidth;
+    stream << elevation;
+    stream << thickness;
+}
+
+void LwPolyline::read(QDataStream& stream)
+{
+    stream >> poly;
+    stream >> counter;
+    stream >> polylineFlag;
+    stream >> numberOfVertices;
+    stream >> startWidth;
+    stream >> endWidth;
+    stream >> constantWidth;
+    stream >> elevation;
+    stream >> thickness;
 }
 }

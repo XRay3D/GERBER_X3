@@ -16,15 +16,50 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QObject>
-
 #include <app.h>
 #include <ft_view.h>
+#include <graphicsitem.h>
 #include <project.h>
-#include <shape.h>
+
+namespace Shapes {
+class Node;
+}
+
+class ShapeInterface : public GraphicsItem {
+    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape)
+    {
+        stream << shape.type();
+        stream << shape.m_giId;
+        stream << shape.isVisible();
+        shape.write_(stream);
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape)
+    {
+        stream >> shape.m_giId;
+        bool visible;
+        stream >> visible;
+        shape.setZValue(shape.m_giId);
+        shape.setVisible(visible);
+        shape.setToolTip(QString::number(shape.m_giId));
+        shape.read_(stream);
+        return stream;
+    }
+
+public:
+    ShapeInterface()
+        : GraphicsItem(nullptr)
+    {
+    }
+    virtual Shapes::Node* node() const = 0;
+protected:
+    virtual void write_([[maybe_unused]] QDataStream& stream) const = 0;
+    virtual void read_([[maybe_unused]] QDataStream& stream) = 0;
+};
 
 class ShapePluginInterface {
     static inline ShapePluginInterface* sp = nullptr;
-    static inline Shapes::Shape* item;
+    static inline ShapeInterface* item;
 
 public:
     static void addShapePoint_(const QPointF& point)
@@ -44,7 +79,7 @@ public:
     }
     static void finalizeShape_()
     {
-        qDebug();
+        qDebug(__FUNCTION__);
         if (item)
             item->setSelected(true);
         if (sp)
@@ -59,8 +94,8 @@ public:
     virtual ~ShapePluginInterface() = default;
     virtual QObject* getObject() = 0;
     virtual int type() const = 0;
-    [[nodiscard]] virtual Shapes::Shape* createShape() = 0;
-    [[nodiscard]] virtual Shapes::Shape* createShape(const QPointF& point) = 0;
+    [[nodiscard]] virtual ShapeInterface* createShape() = 0;
+    [[nodiscard]] virtual ShapeInterface* createShape(const QPointF& point) = 0;
     virtual bool addShapePoint(const QPointF& point) = 0;
     virtual void updateShape(const QPointF& point) = 0;
     virtual void finalizeShape() = 0;

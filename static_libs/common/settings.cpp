@@ -35,8 +35,10 @@ AppSettings::AppSettings()
 
 /*GUI*/
 QColor& AppSettings::guiColor(int id) { return m_guiColor[id]; }
-bool AppSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
 bool AppSettings::animSelection() { return m_animSelection; }
+bool AppSettings::guiSmoothScSh() { return m_guiSmoothScSh; }
+bool AppSettings::scaleHZMarkers() { return m_scaleHZMarkers; }
+bool AppSettings::scalePinMarkers() { return m_scalePinMarkers; }
 int AppSettings::theme() { return m_theme; }
 
 /*Clipper*/
@@ -64,7 +66,7 @@ void AppSettings::setInch(bool val) { m_inch = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
 {
-    if (mod & Qt::ALT || m_snap) {
+    if ((mod & Qt::ALT) || m_snap) {
         const double gs = AppSettings::gridStep(App::graphicsView()->getScale());
         QPointF px(pt / gs);
         px.setX(gs * round(px.x()));

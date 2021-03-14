@@ -31,8 +31,7 @@
 namespace Shapes {
 
 Shape::Shape()
-    : GraphicsItem(nullptr)
-    , m_node(new Node(this, &m_giId))
+    : m_node(new Node(this, &m_giId))
 {
     m_paths.resize(1);
     changeColor();
@@ -114,57 +113,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
     return GraphicsItem::itemChange(change, value);
 }
 
-void Shape::write(QDataStream& /*stream*/) const { }
-
-void Shape::read(QDataStream& /*stream*/) { }
-
 void Shape::updateOtherHandlers(Handler*) { }
-
-// write to project
-QDataStream& operator<<(QDataStream& stream, const Shape& shape)
-{
-    stream << shape.type();
-    stream << shape.m_giId;
-    stream << shape.isVisible();
-
-    stream << qint32(shape.handlers.size());
-    for (const auto& item : shape.handlers) {
-        stream << item->pos();
-        stream << item->m_hType;
-    }
-
-    shape.write(stream);
-    return stream;
-}
-// read from project
-QDataStream& operator>>(QDataStream& stream, Shape& shape)
-{
-    //    App::scene()->addItem(&shape);
-    bool visible;
-    stream >> shape.m_giId;
-    shape.setZValue(shape.m_giId);
-    stream >> visible;
-    shape.setVisible(visible);
-    shape.setToolTip(QString::number(shape.m_giId));
-    {
-        qint32 size;
-        stream >> size;
-        shape.handlers.reserve(size);
-        while (size--) {
-            QPointF pos;
-            int type;
-            stream >> pos;
-            stream >> type;
-            shape.handlers.emplace_back(std::make_unique<Handler>(&shape, static_cast<Handler::HType>(type)));
-            //shape.handlers.emplace_back(new Handler(&shape, static_cast<Handler::HType>(type)));
-            shape.handlers.back()->QGraphicsItem::setPos(pos);
-            shape.handlers.back()->setVisible(false);
-        }
-    }
-    shape.read(stream);
-    shape.redraw();
-    return stream;
-}
 
 void Shape::changeColor()
 {
@@ -172,10 +121,12 @@ void Shape::changeColor()
 
     switch (colorState) {
     case Default:
-        m_bodyColor = QColor(255, 255, 255, 50);
+        m_bodyColor = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        m_bodyColor.setAlpha(50);
         break;
     case Hovered:
-        m_bodyColor = QColor(255, 255, 255, 100);
+        m_bodyColor = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        m_bodyColor.setAlpha(100);
         break;
     case Selected:
         m_bodyColor = QColor(255, 0x0, 0x0, 100);
@@ -189,10 +140,7 @@ void Shape::changeColor()
     animation.start();
 }
 
-Node* Shape::node() const
-{
-    return m_node;
-}
+Node* Shape::node() const { return m_node; }
 
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
 {
@@ -265,6 +213,37 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
     action->setCheckable(true);
     action->setChecked(isVisible());
     //    action->connect(action, &QAction::toggled );
+}
+
+// write to project
+void Shape::write_(QDataStream& stream) const
+{
+    stream << qint32(handlers.size());
+    for (const auto& item : handlers) {
+        stream << item->pos();
+        stream << item->m_hType;
+    }
+    write(stream);
+}
+
+// read from project
+void Shape::read_(QDataStream& stream)
+{
+    isFinal = true;
+    qint32 size;
+    stream >> size;
+    handlers.reserve(size);
+    while (size--) {
+        QPointF pos;
+        int type;
+        stream >> pos;
+        stream >> type;
+        handlers.emplace_back(std::make_unique<Handler>(this, static_cast<Handler::HType>(type)));
+        handlers.back()->QGraphicsItem::setPos(pos);
+        handlers.back()->setVisible(false);
+    }
+    read(stream);
+    redraw();
 }
 
 }

@@ -215,6 +215,8 @@ void Hatch::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
+Entity::Type Hatch::type() const { return Type::HATCH; }
+
 GraphicObject Hatch::toGo() const
 {
     Paths paths(edges.size());
@@ -225,6 +227,32 @@ GraphicObject Hatch::toGo() const
     clipper.AddPaths(paths, ptSubject);
     clipper.Execute(ctUnion, paths, pftEvenOdd);
     //dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
-    return { sp->file, this, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths };
+    return { id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths };
+}
+
+void Hatch::write(QDataStream& stream) const
+{
+    //    stream << edges;
+
+    stream << referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
+
+    stream << centerPoint;
+    stream << pathTypeFlags;
+    stream << edgeType;
+    stream << thickness;
+    stream << radius;
+}
+
+void Hatch::read(QDataStream& stream)
+{
+    //    stream >> edges;
+
+    stream >> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
+
+    stream >> centerPoint;
+    stream >> pathTypeFlags;
+    stream >> edgeType;
+    stream >> thickness;
+    stream >> radius;
 }
 }

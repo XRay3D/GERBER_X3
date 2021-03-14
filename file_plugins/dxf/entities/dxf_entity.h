@@ -22,9 +22,6 @@
 #include <qmath.h>
 #include <tuple>
 
-#ifndef ENTITY_H
-#define ENTITY_H
-
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMatrix>
 #else
@@ -44,8 +41,12 @@ class File;
 
 struct Entity {
     Q_GADGET
+
+    friend QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& e);
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& e);
+
 public:
-    enum Type {
+    enum Type : int {
         NULL_ENT = -1,
         ACAD_PROXY_ENTITY,
         ARC,
@@ -99,12 +100,15 @@ public:
     Codes data;
     SectionParser* sp = nullptr;
     Entity(SectionParser* sp);
-    virtual ~Entity() { }
+    virtual ~Entity();
     virtual void draw(const InsertEntity* const i = nullptr) const;
 
     virtual void parse(CodeData& code);
     virtual Type type() const = 0;
     virtual GraphicObject toGo() const = 0;
+
+    virtual void write(QDataStream& stream) const;
+    virtual void read(QDataStream& stream);
 
     static QString typeName(int key);
     QString name() const;
@@ -115,6 +119,7 @@ public:
     QString handle;
     QString softPointerID;
     int16_t colorNumber = 0;
+    size_t id {};
 
 #ifdef QT_DEBUG
     static constexpr double u = 10.;
@@ -241,47 +246,3 @@ public:
     };
 };
 }
-#endif // ENTITY_H
-
-#include "dxf_arc.h"
-#include "dxf_attdef.h"
-#include "dxf_circle.h"
-#include "dxf_dummy.h"
-#include "dxf_ellipse.h"
-#include "dxf_hatch.h"
-#include "dxf_insert.h"
-#include "dxf_line.h"
-#include "dxf_lwpolyline.h"
-#include "dxf_mtext.h"
-#include "dxf_point.h"
-#include "dxf_polyline.h"
-#include "dxf_solid.h"
-#include "dxf_spline.h"
-#include "dxf_text.h"
-//#include "dxf_attrib.h"
-//#include "dxf_body.h"
-//#include "dxf_dimension.h"
-//#include "dxf_helix.h"
-//#include "dxf_image.h"
-//#include "dxf_leader.h"
-//#include "dxf_light.h"
-//#include "dxf_mesh.h"
-//#include "dxf_mleader.h"
-//#include "dxf_mleaderstyle.h"
-//#include "dxf_mline.h"
-//#include "dxf_ole2frame.h"
-//#include "dxf_oleframe.h"
-//#include "dxf_ray.h"
-//#include "dxf_region.h"
-//#include "dxf_section.h"
-//#include "dxf_shape.h"
-//#include "dxf_sun.h"
-//#include "dxf_surface.h"
-//#include "dxf_table.h"
-//#include "dxf_tolerance.h"
-//#include "dxf_trace.h"
-//#include "dxf_underlay.h"
-//#include "dxf_vertex.h"
-//#include "dxf_viewport.h"
-//#include "dxf_wipeout.h"
-//#include "dxf_xline.h"

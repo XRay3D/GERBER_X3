@@ -47,15 +47,12 @@ Rectangle::~Rectangle() { }
 void Rectangle::redraw()
 {
     handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
-    IntPoint p1(handlers[Point1]->pos());
-    IntPoint p2(handlers[Point3]->pos());
-
     m_paths.front() = {
-        IntPoint { p1.X, p1.Y },
-        IntPoint { p2.X, p1.Y },
-        IntPoint { p2.X, p2.Y },
-        IntPoint { p1.X, p2.Y },
-        IntPoint { p1.X, p1.Y },
+        handlers[Point1]->pos(),
+        handlers[Point2]->pos(),
+        handlers[Point3]->pos(),
+        handlers[Point4]->pos(),
+        handlers[Point1]->pos(),
     };
     if (Area(m_paths.front()) < 0)
         ReversePath(m_paths.front());
@@ -137,6 +134,8 @@ void Plugin::updateShape(const QPointF& point)
 
 void Plugin::finalizeShape()
 {
+    if (shape)
+        shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }

@@ -24,6 +24,7 @@ class File;
 struct Entity;
 
 struct SectionENTITIES final : SectionParser {
+    friend Block;
     explicit SectionENTITIES(File* file, Codes::iterator from, Codes::iterator to);
     SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* sp);
 
@@ -31,12 +32,9 @@ struct SectionENTITIES final : SectionParser {
     // Section interface
     void parse() override;
 
-    QVector<Entity*> entities;
-    QMap<Entity::Type, QVector<Entity*>> entitiesMap;
-
 private:
-    Entity *entityParse(CodeData& code);
-
+    std::shared_ptr<Entity> entityParse(CodeData& code);
+    Entities entities;
     Entity::Type key;
     SectionParser* sp;
     Blocks& blocks;

@@ -52,14 +52,28 @@ public:
     // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
-    Type type() const override { return Type::LWPOLYLINE; }
+    Type type() const override;
     struct Segment : QPointF {
         double bulge = 0.0;
+        friend QDataStream& operator<<(QDataStream& stream, const Segment& e)
+        {
+            stream << static_cast<QPointF>(e);
+            stream << e.bulge;
+            return stream;
+        }
+        friend QDataStream& operator>>(QDataStream& stream, Segment& e)
+        {
+            stream >> static_cast<QPointF&>(e);
+            stream >> e.bulge;
+            return stream;
+        }
     };
 
     GraphicObject toGo() const override;
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
 
-    QVector<Segment> poly;
+    mvector<Segment> poly;
     int16_t counter = 0;
     int16_t polylineFlag = 0;
     int32_t numberOfVertices = 0;
