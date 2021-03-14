@@ -132,6 +132,8 @@ void Plugin::updateShape(const QPointF& point)
 
 void Plugin::finalizeShape()
 {
+    if (shape)
+        shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }

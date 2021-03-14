@@ -194,31 +194,35 @@ Node::Node(File* file, int* id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        if (role == Qt::CheckStateRole) {
-            file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
-            return true;
+    switch (role) {
+    case Qt::CheckStateRole:
+        file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+        return true;
+    case Qt::EditRole:
+        switch (FileTree::Column(index.column())) {
+        case FileTree::Column::Side:
+            if (role == Qt::EditRole) {
+                file->setSide(static_cast<Side>(value.toBool()));
+                //emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+                return true;
+            }
+        case FileTree::Column::ItemsType:
+            if (role == Qt::EditRole) {
+                file->setItemType(value.toInt());
+                emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+                return true;
+            }
+        default:
+            break;
         }
-        return false;
-    case FileTree::Column::Side:
-        if (role == Qt::EditRole) {
-            file->setSide(static_cast<Side>(value.toBool()));
-            //emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
-            return true;
-        }
-        return false;
-    case FileTree::Column::ItemsType:
-        if (role == Qt::EditRole) {
-            file->setItemType(value.toInt());
-            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
-            return true;
-        }
-        return false;
-    default:
-        return false;
+        break;
+    case FileTree::Select:
+        for (auto ig : file->itemGroups())
+            ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
+        return true;
     }
+    return {};
 }
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const

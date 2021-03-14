@@ -50,6 +50,7 @@ enum class GiType {
 
 class FileInterface;
 class ItemGroup;
+class ShapeInterface;
 
 //namespace Dxf {
 //class LayerModel;
@@ -103,6 +104,7 @@ public:
     const T* typedFile() const { return dynamic_cast<const T* const>(m_file); }
 
     int id() const;
+    void setId(int id);
     virtual void changeColor() = 0;
 
 protected:

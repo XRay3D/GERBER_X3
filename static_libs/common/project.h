@@ -29,20 +29,18 @@ enum FileVersion {
     ProVer_3,
     ProVer_4,
     ProVer_5,
+    ProVer_6,
 };
 
-namespace Shapes {
-class Shape;
-}
-
 class FileInterface;
+class ShapeInterface;
 class QFile;
 class QFileSystemWatcher;
 enum class FileType;
 
 #if _MSVC_LANG >= 201705L
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
-using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
+using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
 #else
 struct FilesMap : std::map<int, std::shared_ptr<FileInterface>> {
     bool contains(int key) const { return find(key) != end(); }
@@ -103,8 +101,8 @@ public:
     int contains(const QString& name);
 
     // Shape
-    int addShape(Shapes::Shape* const shape);
-    Shapes::Shape* shape(int id);
+    int addShape(ShapeInterface* const shape);
+    ShapeInterface* shape(int id);
     void deleteShape(int id);
 
     // Project

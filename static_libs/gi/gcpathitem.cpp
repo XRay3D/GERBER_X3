@@ -22,6 +22,9 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
+#define QT_DEBUG
+//#undef QT_DEBUG
+
 GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
     : m_gcFile(file)
 {

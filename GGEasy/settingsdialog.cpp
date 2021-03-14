@@ -115,20 +115,19 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         tabwMain->setCurrentIndex(tab);
 }
 
-SettingsDialog::~SettingsDialog()
-{
-    writeSettingsDialog();
-}
+SettingsDialog::~SettingsDialog() { writeSettingsDialog(); }
 
 void SettingsDialog::readSettings()
 {
     /*GUI*/
     settings.beginGroup("Viewer");
-    settings.getValue(chbxOpenGl);
     settings.getValue(chbxAntialiasing);
-    App::settings().m_guiSmoothScSh = settings.getValue(chbxSmoothScSh, App::settings().m_guiSmoothScSh);
-    App::settings().m_animSelection = settings.getValue(chbxAnimSelection, App::settings().m_animSelection);
-    App::settings().m_theme = settings.getValue(cbxTheme, App::settings().m_theme);
+    settings.getValue(chbxOpenGl);
+    settings.getValue(chbxScaleHZMarkers, App::settings().m_scaleHZMarkers);
+    settings.getValue(chbxScalePinMarkers, App::settings().m_scalePinMarkers);
+    settings.getValue(chbxSmoothScSh, App::settings().m_guiSmoothScSh);
+    settings.getValue(chbxAnimSelection, App::settings().m_animSelection);
+    settings.getValue(cbxTheme, App::settings().m_theme);
     settings.endGroup();
 
     settings.beginGroup("Color");
@@ -144,8 +143,8 @@ void SettingsDialog::readSettings()
 
     /*Clipper*/
     settings.beginGroup("Clipper");
-    App::settings().m_clpMinCircleSegmentLength = settings.getValue(dsbxMinCircleSegmentLength, App::settings().m_clpMinCircleSegmentLength);
-    App::settings().m_clpMinCircleSegments = settings.getValue(sbxMinCircleSegments, App::settings().m_clpMinCircleSegments);
+    settings.getValue(dsbxMinCircleSegmentLength, App::settings().m_clpMinCircleSegmentLength);
+    settings.getValue(sbxMinCircleSegments, App::settings().m_clpMinCircleSegments);
     settings.endGroup();
 
     /*Markers*/
@@ -159,8 +158,8 @@ void SettingsDialog::readSettings()
     dsbxPinY->setValue(App::settings().m_mrkPinOffset.y());
     dsbxZeroX->setValue(App::settings().m_mrkZeroOffset.x());
     dsbxZeroY->setValue(App::settings().m_mrkZeroOffset.y());
-    App::settings().m_mrkHomePos = settings.getValue(cbxHomePos, HomePosition::TopLeft);
-    App::settings().m_mrkZeroPos = settings.getValue(cbxZeroPos, HomePosition::TopLeft);
+    settings.getValue(cbxHomePos, HomePosition::TopLeft);
+    settings.getValue(cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
     /*Other*/
     settings.getValue(App::settings().m_inch, "inch", false);
@@ -169,6 +168,7 @@ void SettingsDialog::readSettings()
 
 void SettingsDialog::writeSettings()
 {
+    qDebug(__FUNCTION__);
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
@@ -181,8 +181,10 @@ void SettingsDialog::writeSettings()
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxAntialiasing);
     }
-    App::settings().m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
     App::settings().m_animSelection = settings.setValue(chbxAnimSelection);
+    App::settings().m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
+    App::settings().m_scaleHZMarkers = settings.setValue(chbxScaleHZMarkers);
+    App::settings().m_scalePinMarkers = settings.setValue(chbxScalePinMarkers);
     App::settings().m_theme = settings.setValue(cbxTheme);
     settings.endGroup();
 

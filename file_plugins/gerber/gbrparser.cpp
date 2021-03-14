@@ -76,7 +76,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     mutex.lock();
     try {
 
-        reset(fileName.toLocal8Bit());
+        reset(fileName);
 
         file->lines() = cleanAndFormatFile(gerberLines);
         file->m_graphicObjects.reserve(file->lines().size());
@@ -98,7 +98,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             auto dummy = [](const QString& gLine) -> bool {
                 static constexpr auto ptrnDummy = ctll::fixed_string("^%(.{2})(.+)\\*%$");
                 if (auto [whole, id, par] = ctre::match<ptrnDummy>(gLine); whole) { ///*regexp.match(gLine)); match.hasMatch()*/) {
-                    qDebug() << "dummy" << gLine << id.data() << par.data();
+                    //qDebug() << "dummy" << gLine << id.data() << par.data();
                     return true;
                 }
                 return false;

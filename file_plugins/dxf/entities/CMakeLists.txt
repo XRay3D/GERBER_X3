@@ -65,6 +65,7 @@ set(SOURCE
 
 set(HEADERS
     ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_allentities.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_arc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attdef.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_circle.h

@@ -25,7 +25,7 @@ public:
     // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
-    Type type() const override { return Type::LINE; }
+    Type type() const override;
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbLine)
@@ -42,6 +42,8 @@ public:
     };
 
     GraphicObject toGo() const override;
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
 
     QPointF startPoint;
     QPointF endPoint;

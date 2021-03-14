@@ -16,6 +16,7 @@
 *******************************************************************************/
 #include "plugindialog.h"
 #include "app.h"
+#include "ft_node.h"
 #include "interfaces/pluginfile.h"
 #include "interfaces/shapepluginin.h"
 

@@ -45,6 +45,7 @@ void Layer::parse(CodeData& code)
         case SubclassMarker:
             break;
         case LayerName:
+            qDebug() << code.string();
             m_name = code.string();
             break;
         case Flags:

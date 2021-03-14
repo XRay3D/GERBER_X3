@@ -473,6 +473,63 @@ void Creator::mergeSegments(Paths& paths, double glue)
     } while (size != paths.size());
 }
 
+void Creator::mergePaths(Paths& paths, const double dist)
+{
+    msg = tr("Merge Paths");
+    size_t max;
+    do {
+        max = paths.size();
+        for (size_t i = 0; i < paths.size(); ++i) {
+            setMax(max);
+            setCurrent(max - paths.size());
+            getCancelThrow();
+            for (size_t j = 0; j < paths.size(); ++j) {
+                if (i == j)
+                    continue;
+                else if (paths[i].front() == paths[j].front()) {
+                    ReversePath(paths[j]);
+                    paths[j].append(paths[i].mid(1));
+                    paths.remove(i--);
+                    break;
+                } else if (paths[i].back() == paths[j].back()) {
+                    ReversePath(paths[j]);
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    break;
+                } else if (paths[i].front() == paths[j].back()) {
+                    paths[j].append(paths[i].mid(1));
+                    paths.remove(i--);
+                    break;
+                } else if (paths[j].front() == paths[i].back()) {
+                    paths[i].append(paths[j].mid(1));
+                    paths.remove(j--);
+                    break;
+                } else if (dist != 0.0) {
+                    /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
+                        ReversePath(paths[j]);
+                        paths[i].append(paths[j].mid(1));
+                        paths.remove(j--);
+                        break; //
+                    } else if (paths[i].back().distTo(paths[j].front()) < dist) {
+                        paths[i].append(paths[j].mid(1));
+                        paths.remove(j--);
+                        break; //
+                    } else if (paths[i].front().distTo(paths[j].back()) < dist) {
+                        paths[j].append(paths[i].mid(1));
+                        paths.remove(i--);
+                        break;
+                    } else if (paths[i].front().distTo(paths[j].front()) < dist) {
+                        ReversePath(paths[j]);
+                        paths[j].append(paths[i].mid(1));
+                        paths.remove(i--);
+                        break;
+                    }
+                }
+            }
+        }
+    } while (max != paths.size());
+}
+
 void Creator::markPolyNodeByNesting(PolyNode& polynode)
 {
     int nestCtr = 0;

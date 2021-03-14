@@ -25,8 +25,10 @@ public:
 
     // Entity interface
     void parse(CodeData& code) override;
-    Type type() const override { return Type::MTEXT; }
+    Type type() const override;
     GraphicObject toGo() const override;
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
 
     enum DataEnum {
         SubclassMarker = 100, //	100	Маркер подкласса (AcDbMText)

@@ -51,8 +51,8 @@ signals:
     void fileError(const QString& fileName, const QString& error) override;
 
 private:
-    File* file = nullptr;
-    QIcon drawDrillIcon();
+    File* m_file = nullptr;
+    QIcon drawDrillIcon(QColor color);
 
 };
 

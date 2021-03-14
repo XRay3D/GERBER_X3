@@ -22,7 +22,6 @@
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 
-
 #include <QPainter>
 #include <qmath.h>
 
@@ -34,53 +33,53 @@ Ellipse::Ellipse(SectionParser* sp)
 
 //void Ellipse::draw(const InsertEntity* const i) const
 //{
-    //    if (i) {
-    //        //        for (int r = 0; r < i->rowCount; ++r) {
-    //        //            for (int c = 0; c < i->colCount; ++c) {
-    //        //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-    //        //                QPointF rad(radius, radius);
-    //        //                auto item = scene->addEllipse(QRectF(centerPoint - rad, centerPoint + rad), QPen(i->color(), thickness /*, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin*/), Qt::NoBrush);
-    //        //                item->setToolTip(layerName);
-    //        //                i->transform(item, tr);
-    //        //                i->attachToLayer(item);
-    //        //            }
-    //        //        }
-    //    } else {
-    //        QPainterPath path;
-    //        QLineF line(CenterPoint, EndpointOfMajorAxis);
-    //        const double angle = line.angle();
-    //        const double length = line.length() / 2;
-    //        //        const auto angle = qRadiansToDegrees(std::atan2(EndpointOfMajorAxis.y() - CenterPoint.y(), EndpointOfMajorAxis.x() - CenterPoint.x()));
+//    if (i) {
+//        //        for (int r = 0; r < i->rowCount; ++r) {
+//        //            for (int c = 0; c < i->colCount; ++c) {
+//        //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//        //                QPointF rad(radius, radius);
+//        //                auto item = scene->addEllipse(QRectF(centerPoint - rad, centerPoint + rad), QPen(i->color(), thickness /*, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin*/), Qt::NoBrush);
+//        //                item->setToolTip(layerName);
+//        //                i->transform(item, tr);
+//        //                i->attachToLayer(item);
+//        //            }
+//        //        }
+//    } else {
+//        QPainterPath path;
+//        QLineF line(CenterPoint, EndpointOfMajorAxis);
+//        const double angle = line.angle();
+//        const double length = line.length() / 2;
+//        //        const auto angle = qRadiansToDegrees(std::atan2(EndpointOfMajorAxis.y() - CenterPoint.y(), EndpointOfMajorAxis.x() - CenterPoint.x()));
 
-    //        double aspan = qRadiansToDegrees(endParameter) - qRadiansToDegrees(startParameter);
-    //        const bool ccw = endParameter > startParameter;
-    //        if (endParameter >= 0 && startParameter >= 0) {
-    //            if (!ccw)
-    //                aspan += 360;
-    //        } else {
-    //            if (aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
-    //                aspan += 360;
-    //            else if (aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
-    //                aspan -= 360;
-    //        }
-    //        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
-    //        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
-    //        //        auto item(new QGraphicsPathItem(path));
-    //        //        item->setPen(QPen(color(), 0.0));
-    //        //        item->setBrush(Qt::NoBrush);
-    //        //        item->setRotation(angle);
-    //        //        item->setPos(CenterPoint);
-    //        //        path.arcTo(QRectF(CenterPoint - rad, CenterPoint + rad), -qRadiansToDegrees(startParameter), -aspan);
-    //        //        attachToLayer(scene->addPath(path, QPen(color(), 0.0), Qt::NoBrush));
-    //        //        scene->addItem(item);
-    //        //        attachToLayer(item);
-    //        auto item = scene->addEllipse(QRectF(-rad, +rad), QPen(color(), 0.0), Qt::NoBrush);
-    //        item->setStartAngle(-qRadiansToDegrees(startParameter) * 16);
-    //        item->setSpanAngle(-qRadiansToDegrees(aspan) * 16);
-    //        item->setRotation(angle);
-    //        item->setPos(CenterPoint);
-    //        attachToLayer(item);
-    //    }
+//        double aspan = qRadiansToDegrees(endParameter) - qRadiansToDegrees(startParameter);
+//        const bool ccw = endParameter > startParameter;
+//        if (endParameter >= 0 && startParameter >= 0) {
+//            if (!ccw)
+//                aspan += 360;
+//        } else {
+//            if (aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
+//                aspan += 360;
+//            else if (aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
+//                aspan -= 360;
+//        }
+//        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
+//        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
+//        //        auto item(new QGraphicsPathItem(path));
+//        //        item->setPen(QPen(color(), 0.0));
+//        //        item->setBrush(Qt::NoBrush);
+//        //        item->setRotation(angle);
+//        //        item->setPos(CenterPoint);
+//        //        path.arcTo(QRectF(CenterPoint - rad, CenterPoint + rad), -qRadiansToDegrees(startParameter), -aspan);
+//        //        attachToLayer(scene->addPath(path, QPen(color(), 0.0), Qt::NoBrush));
+//        //        scene->addItem(item);
+//        //        attachToLayer(item);
+//        auto item = scene->addEllipse(QRectF(-rad, +rad), QPen(color(), 0.0), Qt::NoBrush);
+//        item->setStartAngle(-qRadiansToDegrees(startParameter) * 16);
+//        item->setSpanAngle(-qRadiansToDegrees(aspan) * 16);
+//        item->setRotation(angle);
+//        item->setPos(CenterPoint);
+//        attachToLayer(item);
+//    }
 //}
 
 void Ellipse::parse(CodeData& code)
@@ -131,6 +130,26 @@ void Ellipse::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject Ellipse::toGo() const {  return { sp->file, this, {}, {} }; }
+Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
+
+GraphicObject Ellipse::toGo() const { return {}; }
+
+void Ellipse::write(QDataStream &stream) const
+{
+    stream << startParameter;
+    stream << endParameter;
+    stream << ratioOfMinorAxisToMajorAxis;
+    stream << CenterPoint;
+    stream << EndpointOfMajorAxis;
+}
+
+void Ellipse::read(QDataStream &stream)
+{
+    stream >> startParameter;
+    stream >> endParameter;
+    stream >> ratioOfMinorAxisToMajorAxis;
+    stream >> CenterPoint;
+    stream >> EndpointOfMajorAxis;
+}
 
 }

@@ -170,6 +170,7 @@ enum HomePosition : int {
 };
 
 enum Theme : int {
+    System,
     LightBlue,
     LightRed,
     DarkBlue,
@@ -194,8 +195,10 @@ public:
 
     /*GUI*/
     QColor& guiColor(int id);
-    bool guiSmoothScSh();
     bool animSelection();
+    bool guiSmoothScSh();
+    bool scaleHZMarkers();
+    bool scalePinMarkers();
     int theme();
 
     /*Clipper*/
@@ -234,8 +237,10 @@ private:
         QColor(255, 0, 0, 120), //Zero
         QColor(Qt::red) //G0
     };
-    bool m_guiSmoothScSh;
     bool m_animSelection = true;
+    bool m_guiSmoothScSh;
+    bool m_scaleHZMarkers {};
+    bool m_scalePinMarkers {};
     int m_theme = false;
 
     /*Clipper*/

@@ -28,35 +28,34 @@ void InsertEntity::draw(const InsertEntity* const i) const
 {
     if (!blocks.contains(blockName))
         return;
-    if (blocks[blockName]->entities.isEmpty())
+    if (blocks[blockName]->entities.empty())
         return;
 
     basePoint = blocks[blockName]->basePoint;
 
-    for (auto e : blocks[blockName]->entities) {
-
+    for (auto entity : blocks[blockName]->entities) {
         if (i) {
-            InsertEntity t(*this);
+            InsertEntity copy(*this);
             if (layerName == "0")
-                t.layerName = i->layerName;
+                copy.layerName = i->layerName;
             if (insPos.isNull())
-                t.insPos = i->insPos;
+                copy.insPos = i->insPos;
 
             if (qFuzzyIsNull(rotationAngle))
-                t.rotationAngle = i->rotationAngle;
+                copy.rotationAngle = i->rotationAngle;
 
-            if (e->type() != INSERT) {
-                if (t.layerName == "0")
-                    t.layerName = e->layerName;
+            if (entity->type() != INSERT) {
+                if (copy.layerName == "0")
+                    copy.layerName = entity->layerName;
             }
-            e->draw(&t);
-        } else if (e->type() != INSERT) {
-            InsertEntity t(*this);
-            if (t.layerName == "0")
-                t.layerName = e->layerName;
-            e->draw(&t);
+            entity->draw(&copy);
+        } else if (entity->type() != INSERT) {
+            InsertEntity copy(*this);
+            if (copy.layerName == "0")
+                copy.layerName = entity->layerName;
+            entity->draw(&copy);
         } else {
-            e->draw(this);
+            entity->draw(this);
         }
     }
 }

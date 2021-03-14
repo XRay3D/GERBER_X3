@@ -12,8 +12,9 @@
 *                                                                              *
 *******************************************************************************/
 #pragma once
-#include <graphicsitem.h>
 
+#include <graphicsitem.h>
+#define QT_DEBUG
 namespace GCode {
 class File;
 }
@@ -38,3 +39,4 @@ private:
 protected:
     void changeColor() override { }
 };
+#undef QT_DEBUG

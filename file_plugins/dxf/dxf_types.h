@@ -54,6 +54,8 @@ struct SectionParser;
 struct Style;
 
 using GraphicObjects = std::vector<GraphicObject>;
+using EntitiesUP = std::vector<std::shared_ptr<Entity>>;
+using Entities = std::vector<Entity*>;
 
 #if _MSVC_LANG >= 201705L
 using Blocks = std::map<QString, Block*>;

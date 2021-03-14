@@ -39,26 +39,22 @@ Node::Node(File* file, int* id)
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        switch (role) {
-        case Qt::CheckStateRole:
-            file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            return true;
-        default:
-            return false;
-        }
-    case FileTree::Column::Side:
-        switch (role) {
-        case Qt::EditRole:
+    switch (role) {
+    case Qt::CheckStateRole:
+        file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        return true;
+    case Qt::EditRole:
+        if (index.column() == FileTree::Column::Side) {
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
-        default:
-            return false;
         }
-    default:
-        return false;
+        break;
+    case FileTree::Select:
+        for (auto ig : file->itemGroups())
+            ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
+        return true;
     }
+    return {};
 }
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const

@@ -344,6 +344,12 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
     //            layer->setItemsType(static_cast<ItemsType>(value.toInt()));
     //        return true;
     //    default:
+    //    if (role == FileTree::Select) {
+    //        for (auto ig : file->itemGroups())
+    //                        file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
+
+    //        return true;
+    //    }
     //        return false;
     //    }
     return {};

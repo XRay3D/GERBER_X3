@@ -88,7 +88,9 @@ private:
     bool openFlag;
 
     std::map<int, QAction*> toolpathActions;
+    QActionGroup toolpathActionGroup;
     QMap<QString, QProgressDialog*> m_progressDialogs;
+    QMessageBox reloadQuestion;
 
     void open();
     bool save();
@@ -148,7 +150,7 @@ protected:
 class DockWidget : public QDockWidget {
     Q_OBJECT
     QStack<QWidget*> widgets;
-    void setWidget(QWidget*) { }
+    //    void setWidget(QWidget*) { }
 
 public:
     explicit DockWidget(QWidget* parent = nullptr);

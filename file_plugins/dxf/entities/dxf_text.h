@@ -24,8 +24,10 @@ public:
     // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
-    Type type() const override { return Type::TEXT; }
+    Type type() const override;
     GraphicObject toGo() const override;
+    void write(QDataStream& stream) const override;
+    void read(QDataStream& stream) override;
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbText)

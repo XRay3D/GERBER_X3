@@ -29,7 +29,6 @@ Node::Node(Shape* shape, int* id)
     : FileTree::Node(id, FileTree::Shape)
     , shape(shape)
 {
-    //    shape()->setNode(this);
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
