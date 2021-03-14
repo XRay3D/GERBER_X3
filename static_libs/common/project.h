@@ -171,6 +171,9 @@ public:
     const QPointF* pinsPos() const;
     void setPinsPos(const QPointF pos[4]);
 
+    bool pinUsed(int idx) const;
+    void setPinUsed(bool used, int idx);
+
 signals:
     void changed();
     void homePosChanged(const QPointF&);
@@ -204,6 +207,7 @@ private:
     QPointF m_home;
     QPointF m_zero;
     QPointF m_pins[4];
+    bool m_pinsUsed[4] { true, true, true, true };
     QRectF m_worckRect;
 
     double m_safeZ;
