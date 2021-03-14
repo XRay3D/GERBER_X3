@@ -190,6 +190,7 @@ int main(int argc, char** argv)
     }
 
     SettingsDialog().accept();
+    MainWindow::updateTheme();
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
