@@ -221,7 +221,7 @@ bool Parser::parseMCode(const QString& line)
 
 bool Parser::parseTCode(const QString& line)
 {
-    static constexpr auto regex = ctll::fixed_string("^T([0-9]{1,2})"
+    static constexpr auto regex = ctll::fixed_string("^T(\\d+)"
                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
