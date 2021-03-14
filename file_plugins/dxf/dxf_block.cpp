@@ -87,7 +87,7 @@ void Block::parseData(CodeData& code)
     do {
         if (code == "ENDBLK")
             break;
-        sp->prevCode(); // unwind parser
+        //        sp->prevCode(); // unwind parser
         SectionENTITIES se(blocks, code, sp);
         entities = std::move(se.entities);
         if (code == "ENDBLK")

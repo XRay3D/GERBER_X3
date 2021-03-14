@@ -16,11 +16,10 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QObject>
-
 #include <app.h>
 #include <ft_view.h>
+#include <graphicsitem.h>
 #include <project.h>
-#include <shape.h>
 
 namespace Shapes {
 class Node;
@@ -29,53 +28,33 @@ class Node;
 class ShapeInterface : public GraphicsItem {
     friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape)
     {
-        //        stream << shape.type();
-        //        stream << shape.m_giId;
-        //        stream << shape.isVisible();
-
-        //        stream << qint32(shape.handlers.size());
-        //        for (const auto& item : shape.handlers) {
-        //            stream << item->pos();
-        //            stream << item->m_hType;
-        //        }
-
-        //        shape.write(stream);
+        stream << shape.type();
+        stream << shape.m_giId;
+        stream << shape.isVisible();
+        shape.write_(stream);
         return stream;
     }
-    // read from project
     friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape)
     {
-        //        //    App::scene()->addItem(&shape);
-        //        bool visible;
-        //        stream >> shape.m_giId;
-        //        shape.setZValue(shape.m_giId);
-        //        stream >> visible;
-        //        shape.setVisible(visible);
-        //        shape.setToolTip(QString::number(shape.m_giId));
-        //        {
-        //            qint32 size;
-        //            stream >> size;
-        //            shape.handlers.reserve(size);
-        //            while (size--) {
-        //                QPointF pos;
-        //                int type;
-        //                stream >> pos;
-        //                stream >> type;
-        //                shape.handlers.emplace_back(std::make_unique<Handler>(&shape, static_cast<Handler::HType>(type)));
-        //                //shape.handlers.emplace_back(new Handler(&shape, static_cast<Handler::HType>(type)));
-        //                shape.handlers.back()->QGraphicsItem::setPos(pos);
-        //                shape.handlers.back()->setVisible(false);
-        //            }
-        //        }
-        //        shape.read(stream);
-        //        shape.redraw();
+        stream >> shape.m_giId;
+        bool visible;
+        stream >> visible;
+        shape.setZValue(shape.m_giId);
+        shape.setVisible(visible);
+        shape.setToolTip(QString::number(shape.m_giId));
+        shape.read_(stream);
         return stream;
     }
 
 public:
+    ShapeInterface()
+        : GraphicsItem(nullptr)
+    {
+    }
     virtual Shapes::Node* node() const = 0;
-    virtual void write(QDataStream& stream) const = 0;
-    virtual void read(QDataStream& stream) = 0;
+protected:
+    virtual void write_([[maybe_unused]] QDataStream& stream) const = 0;
+    virtual void read_([[maybe_unused]] QDataStream& stream) = 0;
 };
 
 class ShapePluginInterface {
@@ -100,7 +79,7 @@ public:
     }
     static void finalizeShape_()
     {
-        qDebug();
+        qDebug(__FUNCTION__);
         if (item)
             item->setSelected(true);
         if (sp)

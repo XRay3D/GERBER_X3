@@ -46,21 +46,6 @@ void drawPos(QPainter* painter, const QPointF& pt1)
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
     const double k = App::graphicsView()->scaleFactor();
-    //    painter->drawLine(line);
-    //    line.setLength(20.0 * k);
-    //    line.setAngle(angle + 10);
-    //    painter->drawLine(line);
-    //    line.setAngle(angle - 10);
-    //    painter->drawLine(line);
-    // draw text
-    //painter->setFont(font);
-    //painter->drawText(textRect, Qt::AlignLeft, text);
-    //    QPointF pt(pt1);
-    //    if ((pt.x() + textRect.width() * k) > App::graphicsView()->visibleRegion().boundingRect().right())
-    //        pt.rx() -= textRect.width() * k;
-    //    if ((pt.y() - textRect.height() * k) < App::graphicsView()->visibleRegion().boundingRect().top())
-    //        pt.ry() += textRect.height() * k;
-    //    painter->translate(pt);
     painter->save();
     painter->scale(k, -k);
     int i = 0;
@@ -126,7 +111,8 @@ void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         c.setAlpha(100);
     painter->setBrush(c);
     painter->setPen(QPen(Qt::black, 0.0));
-    painter->drawEllipse(rect());
+    if (!pressed)
+        painter->drawEllipse(rect());
 }
 
 void Handler::setPos(const QPointF& pos)
@@ -135,7 +121,7 @@ void Handler::setPos(const QPointF& pos)
     if (m_hType == Center) {
         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
-    } else /*if (!Constructor::item) */ { // прилипание
+    } else if (shape->isFinal) { // прилипание
         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
         for (Handler* h : App::shapeHandlers()) {
@@ -170,21 +156,9 @@ void Handler::savePos()
     if (m_hType != Center)
         return;
     pt.clear();
+    pt.reserve(shape->handlers.size());
     for (auto& item : shape->handlers)
         pt.push_back(item->pos());
-}
-
-void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mouseMoveEvent(event);
-    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
-    event->accept();
-}
-
-void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsItem::mousePressEvent(event);
-    savePos();
 }
 
 void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
@@ -228,15 +202,34 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             gl->setContentsMargins(6, 6, 6, 6);
 #endif
         }
-        virtual ~Dialog() { }
+        ~Dialog() = default;
         void leaveEvent(QEvent*) override { reject(); };
-    } d(this);
-    d.move(event->screenPos());
-    d.exec();
+    } dialog(this);
+    dialog.move(event->screenPos());
+    dialog.exec();
 }
 
 void Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
 
 void Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
+
+void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseMoveEvent(event);
+    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
+}
+
+void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    savePos();
+    pressed = true;
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    pressed = false;
+    QGraphicsItem::mouseReleaseEvent(event);
+}
 
 }

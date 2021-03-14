@@ -302,11 +302,10 @@ void Entity::attachToLayer(GraphicObject&& go) const
         throw DxfObj::tr("SectionParser is null!");
     else if (sp->file == nullptr)
         throw DxfObj::tr("File in SectionParser is null!");
-    else if (sp->file->layer(layerName))
-        sp->file->layer(layerName)->addGraphicObject(std::move(go));
-    else {
+    else if (sp->file->layer(layerName) == nullptr)
         throw DxfObj::tr("Layer '%1' not found in file!").arg(layerName);
-    }
+
+    sp->file->layer(layerName)->addGraphicObject(std::move(go));
 }
 
 Entity::DataEnum Entity::toDataEnum(const QString& key)

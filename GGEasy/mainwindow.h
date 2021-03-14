@@ -150,7 +150,7 @@ protected:
 class DockWidget : public QDockWidget {
     Q_OBJECT
     QStack<QWidget*> widgets;
-    void setWidget(QWidget*) { }
+    //    void setWidget(QWidget*) { }
 
 public:
     explicit DockWidget(QWidget* parent = nullptr);

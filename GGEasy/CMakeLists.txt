@@ -170,7 +170,6 @@ set(HEADERS
 set(UI
     ${UI}
     aboutform.ui
-    colorsetup.ui
     mainwindow.ui
     settingsdialog.ui
     )

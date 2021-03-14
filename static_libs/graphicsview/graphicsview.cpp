@@ -50,6 +50,20 @@ GraphicsView::GraphicsView(QWidget* parent)
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
 
+    { //set Cursor
+        enum {
+            Size = 21,
+            Mid = 10
+        };
+        QPixmap cursor(Size, Size);
+        cursor.fill(Qt::transparent);
+        QPainter p(&cursor);
+        p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
+        p.drawLine(0, Mid, Size, Mid);
+        p.drawLine(Mid, 0, Mid, Size);
+        setCursor({ cursor, Mid, Mid });
+    }
+
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
     setOptimizationFlag(DontClipPainter);
 #else
@@ -124,11 +138,7 @@ void GraphicsView::setScene(QGraphicsScene* Scene)
     updateRuler();
 }
 
-void GraphicsView::zoomFit()
-{
-    scene()->setSceneRect(scene()->itemsBoundingRect());
-    fitInView(scene()->sceneRect(), false);
-}
+void GraphicsView::zoomFit() { fitInView(scene()->itemsBoundingRect(), false); }
 
 void GraphicsView::zoomToSelected()
 {
@@ -284,8 +294,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
             sb->setValue(sb->value() - delta);
     };
 
-    switch (event->modifiers()) {
-    case Qt::ControlModifier:
+    if (event->buttons() & Qt::RightButton) {
         if (abs(delta) == 120) {
             setInteractive(false);
             if (delta > 0)
@@ -294,18 +303,30 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
                 zoomOut();
             setInteractive(true);
         }
-        break;
-    case Qt::ShiftModifier:
-        if (!event->angleDelta().x())
-            sbUpdate(QAbstractScrollArea::horizontalScrollBar());
-        break;
-    case Qt::NoModifier:
-        if (!event->angleDelta().x())
-            sbUpdate(QAbstractScrollArea::verticalScrollBar());
-        break;
-    default:
-        //QGraphicsView::wheelEvent(event);
-        return;
+    } else {
+        switch (event->modifiers()) {
+        case Qt::ControlModifier:
+            if (abs(delta) == 120) {
+                setInteractive(false);
+                if (delta > 0)
+                    zoomIn();
+                else
+                    zoomOut();
+                setInteractive(true);
+            }
+            break;
+        case Qt::ShiftModifier:
+            if (!event->angleDelta().x())
+                sbUpdate(QAbstractScrollArea::horizontalScrollBar());
+            break;
+        case Qt::NoModifier:
+            if (!event->angleDelta().x())
+                sbUpdate(QAbstractScrollArea::verticalScrollBar());
+            break;
+        default:
+            //QGraphicsView::wheelEvent(event);
+            return;
+        }
     }
     mouseMove(mapToScene(pos));
     event->accept();
