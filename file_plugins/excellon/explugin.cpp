@@ -20,6 +20,7 @@
 #include "extypes.h"
 
 #include "app.h"
+#include "ctre.hpp"
 #include "doublespinbox.h"
 #include "drillitem.h"
 #include "drillpreviewgi.h"
@@ -78,12 +79,18 @@ bool Plugin::thisIsIt(const QString& fileName)
 
     QTextStream in(&file);
     QString line;
-    const QRegularExpression regex1("^T([0]?[0-9]{1})[FSC]((\\d*\\.?\\d+))?.*$");
-    const QRegularExpression regex2(".*Holesize.*");
+
+    static constexpr auto regex1 = ctll::fixed_string("^T(\\d+)"
+                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
+                                                      ".*$");
+    static constexpr auto regex2 = ctll::fixed_string(".*Holesize.*");
+
     while (in.readLineInto(&line)) {
-        if (regex1.match(line).hasMatch())
+        if (ctre::match<regex1>(line))
             return true;
-        if (regex2.match(line).hasMatch())
+        if (ctre::match<regex2>(line))
             return true;
     }
 
