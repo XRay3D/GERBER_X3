@@ -1,4 +1,5 @@
 red 		da4453ff
 gray dark 	4d4d4dff
+gray dark 	c0c0c0ff
 gray light 	4d4d4d80
 blue 		3daee9ff

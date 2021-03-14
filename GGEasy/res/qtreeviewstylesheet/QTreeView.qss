@@ -1,0 +1,20 @@
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(settings/vline.png);
+}
+
+QTreeView::branch:!has-children:has-siblings:adjoins-item {
+    border-image: url(settings/branch-more.png);
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(settings/branch-end.png);
+}
+/*
+QTreeView::branch:has-children:!has-siblings:closed,QTreeView::branch:closed:has-children:has-siblings {
+    border-image: url(:/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,QTreeView::branch:open:has-children:has-siblings  {
+    border-image: url(:/branch-open.png);
+}
+*/
