@@ -2985,10 +2985,10 @@ template <size_t Id, typename Name = void> struct captured_content {
         constexpr CTRE_FORCE_INLINE auto operator [](size_t i) const noexcept {
             return data()[i];
         }
-        /*constexpr*/ CTRE_FORCE_INLINE /*explicit*/ operator int() const noexcept {
+        constexpr CTRE_FORCE_INLINE operator int() const noexcept {
             return toInt(nullptr);
         }
-        /*constexpr*/ CTRE_FORCE_INLINE /*explicit*/ operator double() const noexcept {
+        constexpr CTRE_FORCE_INLINE operator double() const noexcept {
             return toDouble(nullptr);
         }
         /*constexpr*/ CTRE_FORCE_INLINE explicit operator QByteArray() const {
@@ -4764,15 +4764,15 @@ template <typename RE, typename Method, typename Modifier> struct regular_expres
 //		return exec(sv.begin(), sv.end());
 //	}
     //xr
-    static constexpr CTRE_FORCE_INLINE auto exec(const QByteArray &ba) noexcept {
-        std::string_view sv { reinterpret_cast<const char*>(ba.data()), static_cast<size_t>(ba.size()) };
-        return exec(sv.begin(), sv.end());
-    }
+
     static constexpr CTRE_FORCE_INLINE auto exec(QStringView str) noexcept {
         std::u16string_view sv { reinterpret_cast<const char16_t*>(str.data()), static_cast<size_t>(str.size()) };
         return exec(sv.begin(), sv.end());
     }
-
+    static constexpr CTRE_FORCE_INLINE auto exec(const QByteArray &ba) noexcept {
+        std::string_view sv { reinterpret_cast<const char*>(ba.data()), static_cast<size_t>(ba.size()) };
+        return exec(sv.begin(), sv.end());
+    }
 //  template <typename Range, typename = typename std::enable_if<RangeLikeType<Range>::value>::type> static constexpr CTRE_FORCE_INLINE auto exec(Range && range) noexcept {
 //        return exec(std::begin(range), std::end(range));
 //	}

@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent)
     , recentFiles(this, "recentFiles")
     , recentProjects(this, "recentProjects")
     , m_project(new Project(this))
-    , toolpathActionGroup(this)
+    , actionGroup(this)
     , reloadQuestion(this)
 {
     App::setMainWindow(this);
@@ -142,8 +142,8 @@ MainWindow::MainWindow(QWidget* parent)
                 //break;
             }
         }
-        if (0)
-            QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/Untitled1_a1.dxf"); });
+        if (1)
+            QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/pth.drl"); });
 
         if (0) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
@@ -335,7 +335,7 @@ void MainWindow::createActionsService()
     //toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     // G-Code Properties
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] { createDockWidget<GCodePropertiesForm>(GCode::GCodeProperties); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] { createDockWidget<GCodePropertiesForm>(); }));
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     toolpathActions.emplace(GCode::GCodeProperties, action);
     // Tool Base
@@ -450,32 +450,32 @@ void MainWindow::createActionsToolPath()
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
     // Profile
-    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(GCode::Profile); });
+    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(); });
     action->setShortcut(QKeySequence("Ctrl+Shift+F"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Profile, action);
 
     // Pocket
-    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(GCode::Pocket); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(); });
     action->setShortcut(QKeySequence("Ctrl+Shift+P"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Pocket, action);
 
     // Pocket Raster
-    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(GCode::Raster); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(); });
     action->setShortcut(QKeySequence("Ctrl+Shift+R"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Raster, action);
 
     // Voronoi
-    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(GCode::Voronoi); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(); });
     action->setShortcut(QKeySequence("Ctrl+Shift+V"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Voronoi, action);
 
     // Thermal Insulation
     action = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
-        ThermalForm::canToShow() ? createDockWidget<ThermalForm>(GCode::Thermal)
+        ThermalForm::canToShow() ? createDockWidget<ThermalForm>()
                                  : toolpathActions[GCode::Thermal]->setChecked(false);
     });
     action->setShortcut(QKeySequence("Ctrl+Shift+T"));
@@ -484,7 +484,7 @@ void MainWindow::createActionsToolPath()
 
     // Drilling
     action = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
-        DrillForm::canToShow() ? createDockWidget<DrillForm>(GCode::Drill)
+        DrillForm::canToShow() ? createDockWidget<DrillForm>()
                                : toolpathActions[GCode::Drill]->setChecked(false);
     });
     action->setShortcut(QKeySequence("Ctrl+Shift+D"));
@@ -492,14 +492,14 @@ void MainWindow::createActionsToolPath()
     toolpathActions.emplace(GCode::Drill, action);
 
     // Crosshatch
-    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(GCode::Hatching); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(); });
     action->setShortcut(QKeySequence("Ctrl+Shift+C"));
     menu->addAction(action);
     toolpathActions.emplace(GCode::Hatching, action);
 
     for (auto [key, action] : toolpathActions) {
         action->setCheckable(true);
-        toolpathActionGroup.addAction(action);
+        actionGroup.addAction(action);
     }
 }
 
@@ -519,11 +519,15 @@ void MainWindow::createActionsShape()
         auto& [shInt, pobj] = pair;
         auto action = toolBar->addAction(shInt->icon(), shInt->info().value("Name").toString());
         action->setCheckable(true);
+        actionGroup.addAction(action);
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
-        connect(action, &QAction::toggled, [shInt = shInt](bool checked) {
-            checked ? ShapePluginInterface::finalizeShape_(),
-                ShapePluginInterface::setShapePI(shInt)
-                    : ShapePluginInterface::finalizeShape_();
+        connect(action, &QAction::toggled, [shInt = shInt, this](bool checked) {
+            if (checked) {
+                ShapePluginInterface::finalizeShape_();
+                ShapePluginInterface::setShapePI(shInt);
+                createDockWidget<QPushButton>();
+            } else
+                ShapePluginInterface::finalizeShape_();
         });
     }
 
@@ -956,9 +960,8 @@ QString MainWindow::strippedName(const QString& fullFileName)
 }
 
 template <class T>
-void MainWindow::createDockWidget(int type)
+void MainWindow::createDockWidget()
 {
-    toolpathActions[type]->setChecked(true);
     if (dynamic_cast<T*>(m_dockWidget->widget()))
         return;
 
@@ -1141,6 +1144,7 @@ void MainWindow::updateTheme()
     } else {
         qApp->setStyle(QStyleFactory::create("windowsvista"));
     }
+
     //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
     //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
     //                                         //"background-color: white;"
@@ -1218,50 +1222,4 @@ void MainWindow::changeEvent(QEvent* event)
     if (event->type() == QEvent::LanguageChange) {
         ui->retranslateUi(this); // переведём окно заново
     }
-}
-
-//////////////////////////////////////////////////////
-/// \brief DockWidget::DockWidget
-/// \param parent
-///
-DockWidget::DockWidget(QWidget* parent)
-    : QDockWidget(parent)
-{
-    hide();
-    setVisible(false);
-}
-
-void DockWidget::push(QWidget* w)
-{
-    if (widget())
-        widgets.push(widget());
-    if (w)
-        QDockWidget::setWidget(w);
-}
-
-void DockWidget::pop()
-{
-    if (widget()) {
-        if (widget()->objectName() == "ErrorDialog") {
-            static_cast<QDialog*>(widget())->reject();
-            QTimer::singleShot(1, [this] { widgets.pop(); });
-        } else {
-            delete widget();
-        }
-    }
-    if (!widgets.isEmpty())
-        QDockWidget::setWidget(widgets.pop());
-}
-
-void DockWidget::closeEvent(QCloseEvent* event)
-{
-    pop();
-    event->accept();
-}
-
-void DockWidget::showEvent(QShowEvent* event)
-{
-    event->ignore();
-    if (widget() == nullptr)
-        QTimer::singleShot(1, this, &QDockWidget::close);
 }
