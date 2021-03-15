@@ -712,7 +712,6 @@ void MainWindow::readSettings()
         settings.endArray();
     }
     settings.endGroup();
-    updateTheme();
 }
 
 void MainWindow::writeSettings()
@@ -1033,6 +1032,7 @@ void MainWindow::loadFile(const QString& fileName)
 
 void MainWindow::updateTheme()
 {
+    qDebug(__FUNCTION__);
     //    class ProxyStyle : public QProxyStyle {
     //        //Q_OBJECT
     //    public:
@@ -1161,31 +1161,10 @@ void MainWindow::updateTheme()
     //                                         "subcontrol-position: top center; }" /* position at the top center */
     //        );
     //    }
-    qDebug() << QIcon::fallbackSearchPaths();
-    qDebug() << QIcon::fallbackThemeName();
-    if (App::settings().theme() < DarkBlue) {
-        QIcon::setThemeName("ggeasy-light");
-//        QIcon::setThemeSearchPaths({
-//            "://icons/ggeasy-light",
-//            ":/icons/ggeasy-light",
-//            "/icons/ggeasy-light",
-//            qApp->applicationDirPath() + "/icons/ggeasy-light",
-//            qApp->applicationDirPath() + "/../icons/ggeasy-light",
-//        });
-    } else {
-        QIcon::setThemeName("ggeasy-dark");
-//        QIcon::setThemeSearchPaths({
-//            "://icons/ggeasy-dark",
-//            ":/icons/ggeasy-dark",
-//            "/icons/ggeasy-dark",
-//            qApp->applicationDirPath() + "/icons/ggeasy-dark",
-//            qApp->applicationDirPath() + "/../icons/ggeasy-dark",
-//        });
-    }
-    qDebug() << QIcon::themeSearchPaths();
-    qDebug() << QIcon::themeName();
 
-    SettingsDialog().show();
+    QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
+    if (App::mainWindow() && App::mainWindow()->isVisible())
+        SettingsDialog().show();
 }
 
 void MainWindow::open()
