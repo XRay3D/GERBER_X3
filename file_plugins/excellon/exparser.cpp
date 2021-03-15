@@ -102,23 +102,25 @@ FileInterface* Parser::parseFile(const QString& fileName)
 
 bool Parser::parseComment(const QString& line)
 {
-    static constexpr auto regexComment = ctll::fixed_string("^;(.*)$");
-    static constexpr auto regexFormat = ctll::fixed_string(".*[FORMATformat].*(\\d{1}).(\\d{1}).*");
-    static constexpr auto regexTool = ctll::fixed_string("\\s*[HOLESIZEholesize]\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
-    if (auto [match, comment] = ctre::match<regexComment>(line); match) {
-        if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-            qDebug() << "regexFormat" << matchFormat.data();
-            file->m_format.integer = integer;
-            file->m_format.decimal = decimal;
+    if (line.startsWith(';')) {
+        qDebug() << "line" << line;
+        static constexpr auto regexComment = ctll::fixed_string("^;(.*)$");
+        static constexpr auto regexFormat = ctll::fixed_string(".*(?:FORMAT|format).*(\\d).(\\d)");
+        static constexpr auto regexTool = ctll::fixed_string("\\s*(?:HOLESIZE|holesize)\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
+        if (auto [match, comment] = ctre::match<regexComment>(line); match) {
+            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
+                file->m_format.integer = integer;
+                file->m_format.decimal = decimal;
+            }
+            if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
+                qDebug() << "regexTool" << matchTool.data();
+                const int tCode = static_cast<int>(tool.toDouble());
+                file->m_tools[tCode] = diam;
+                file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
+                m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
+            }
+            return true;
         }
-        if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
-            qDebug() << "regexTool" << matchTool.data();
-            const int tCode = static_cast<int>(tool.toDouble());
-            file->m_tools[tCode] = diam;
-            file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
-            m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
-        }
-        return true;
     }
     return false;
 }
