@@ -26,16 +26,20 @@
 
 using namespace Excellon;
 
-ExcellonDialog::ExcellonDialog(Excellon::File* file)
+ExcellonDialog::ExcellonDialog(Excellon::File* file, bool& checkPtr)
     : ui(new Ui::ExcellonDialog)
+    , checkPtr(checkPtr)
     , m_file(file)
     , m_format(file->format())
     , m_tmpFormat(file->format())
 {
+    checkPtr = true;
+
     ui->setupUi(this);
     setObjectName("ExcellonDialog");
 
     setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowTitle(file->shortName());
 
     ui->sbxInteger->setValue(m_format.integer);
     ui->sbxDecimal->setValue(m_format.decimal);
@@ -60,12 +64,6 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     connect(ui->rbMillimeters, &QRadioButton::toggled, [&] { updateFormat(); });
     connect(ui->rbTrailing, &QRadioButton::toggled, [&] { updateFormat(); });
 
-    //    connect(ui->rbLeading, &QRadioButton::toggled, [&](bool checked) { ui->sbxInteger->setEnabled(checked); });
-    //    connect(ui->rbTrailing, &QRadioButton::toggled, [&](bool checked) { ui->sbxDecimal->setEnabled(checked); });
-
-    //    connect(ui->sbxInteger, qOverload<int>(&QSpinBox::valueChanged), [&](int val) { ui->sbxDecimal->setValue(8 - val); });
-    //    connect(ui->sbxDecimal, qOverload<int>(&QSpinBox::valueChanged), [&](int val) { ui->sbxInteger->setValue(8 - val); });
-
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);
 
@@ -74,7 +72,7 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
 
 ExcellonDialog::~ExcellonDialog()
 {
-
+    checkPtr = false;
     delete ui;
 }
 
@@ -113,14 +111,12 @@ void ExcellonDialog::acceptFormat()
 void ExcellonDialog::rejectFormat()
 {
     App::graphicsView()->zoomFit();
-    //if (Project::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
 }
 
 void ExcellonDialog::closeEvent(QCloseEvent* event)
 {
-    //if (Project::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
     QDialog::closeEvent(event);
@@ -149,4 +145,11 @@ void ExcellonDialog::on_pushButton_clicked()
             return;
         }
     }
+}
+
+void ExcellonDialog::hideEvent(QHideEvent* event)
+{
+    m_file->setFormat(m_format);
+    deleteLater();
+    QDialog::hideEvent(event);
 }

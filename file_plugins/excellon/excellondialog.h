@@ -27,7 +27,7 @@ class ExcellonDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ExcellonDialog(Excellon::File* file);
+    explicit ExcellonDialog(Excellon::File* file, bool& checkPtr);
     ~ExcellonDialog() override;
 
 private slots:
@@ -36,6 +36,7 @@ private slots:
 
 private:
     Ui::ExcellonDialog* ui;
+    bool& checkPtr;
     Excellon::File* m_file;
     const Excellon::Format m_format;
     Excellon::Format m_tmpFormat;
@@ -45,5 +46,7 @@ private:
     void rejectFormat();
 
 protected:
+    // QWidget interface
     void closeEvent(QCloseEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
 };

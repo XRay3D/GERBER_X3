@@ -131,11 +131,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addSeparator();
     if (!m_exFormatDialog) {
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
-            //            if (App::drillForm())
-            //                App::drillForm()->on_pbClose_clicked();
-            m_exFormatDialog = new ExcellonDialog(file);
-            QObject::connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
-            m_exFormatDialog->show();
+            (new ExcellonDialog(file, m_exFormatDialog))->show();
         });
     }
     menu.addSeparator();
