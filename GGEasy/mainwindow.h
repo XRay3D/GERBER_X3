@@ -22,7 +22,9 @@
 #include <QMainWindow>
 #include <QStack>
 #include <QThread>
+#include <QTimer>
 #include <QTranslator>
+#include <qevent.h>
 
 namespace GCode {
 class File;
@@ -88,7 +90,7 @@ private:
     bool openFlag;
 
     std::map<int, QAction*> toolpathActions;
-    QActionGroup toolpathActionGroup;
+    QActionGroup actionGroup;
     QMap<QString, QProgressDialog*> m_progressDialogs;
     QMessageBox reloadQuestion;
 
@@ -98,8 +100,9 @@ private:
 
     void about();
     bool closeProject();
+
     template <class T>
-    void createDockWidget(int type);
+    void createDockWidget();
 
     void initWidgets();
 
@@ -153,14 +156,46 @@ class DockWidget : public QDockWidget {
     //    void setWidget(QWidget*) { }
 
 public:
-    explicit DockWidget(QWidget* parent = nullptr);
+    explicit DockWidget(QWidget* parent = nullptr)
+        : QDockWidget(parent)
+    {
+        hide();
+        setVisible(false);
+    }
     ~DockWidget() override = default;
 
-    void push(QWidget* w);
-    void pop();
+    void push(QWidget* w)
+    {
+        if (widget())
+            widgets.push(widget());
+        if (w)
+            QDockWidget::setWidget(w);
+    }
+    void pop()
+    {
+        if (widget()) {
+            if (widget()->objectName() == "ErrorDialog") {
+                static_cast<QDialog*>(widget())->reject();
+                QTimer::singleShot(1, [this] { widgets.pop(); });
+            } else {
+                delete widget();
+            }
+        }
+        if (!widgets.isEmpty())
+            QDockWidget::setWidget(widgets.pop());
+    }
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent* event) override;
-    void showEvent(QShowEvent* event) override;
+    void closeEvent(QCloseEvent* event) override
+    {
+        pop();
+        event->accept();
+    }
+    void showEvent(QShowEvent* event) override
+    {
+        event->ignore();
+        if (widget() == nullptr)
+            QTimer::singleShot(1, this, &QDockWidget::close);
+    }
 };
