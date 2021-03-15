@@ -2991,11 +2991,14 @@ template <size_t Id, typename Name = void> struct captured_content {
         /*constexpr*/ CTRE_FORCE_INLINE /*explicit*/ operator double() const noexcept {
             return toDouble(nullptr);
         }
-        /*constexpr*/ CTRE_FORCE_INLINE /*explicit*/ operator QByteArray() const {
+        /*constexpr*/ CTRE_FORCE_INLINE explicit operator QByteArray() const {
             return toByteArray();
         }
         /*constexpr*/ CTRE_FORCE_INLINE /*explicit*/ operator QString() const {
             return toString();
+        }
+        constexpr CTRE_FORCE_INLINE /*explicit*/ operator QStringView() const {
+            return QStringView(reinterpret_cast<const QChar*>(data()), size());
         }
 
         constexpr int toInt(bool* fl = nullptr) const {
