@@ -50,10 +50,7 @@ using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<GT, int, conv
 using DS = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<GT>>;
 using SDG2 = CGAL::Segment_Delaunay_graph_2<GT, ST, DS>;
 
-inline IntPoint toIntPoint(const CGAL::Point_2<K>& point)
-{
-    return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) };
-}
+inline auto toIntPoint(const CGAL::Point_2<K>& point) { return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) }; }
 
 ///////////////////////////////////
 
@@ -129,7 +126,8 @@ void VoronoiCgal::cgalVoronoi()
     segments.reserve(id);
     {
         std::map<int, Paths> pathPairs;
-        for (SDG2::Finite_edges_iterator eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
+        for (auto eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
+            qDebug() << typeid(eit).name() << '\n';
             const SDG2::Edge e = *eit;
             CGAL_precondition(!sdg.is_infinite(e));
             if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
@@ -173,7 +171,7 @@ void VoronoiCgal::cgalVoronoi()
         clipper.Execute(ctIntersection, segments, pftNonZero);
     }
 
-    std::ranges::sort(segments, {}, [](const Path& path) { return (path.front().Y + path.back().Y) ; });
+    std::ranges::sort(segments, {}, [](const Path& path) { return (path.front().Y + path.back().Y); });
     //    mergePaths(segments, 0.005 * uScale);
     mergeSegments(segments, 0.005 * uScale);
 

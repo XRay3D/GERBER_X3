@@ -142,10 +142,10 @@ MainWindow::MainWindow(QWidget* parent)
                 //break;
             }
         }
-        if (1)
+        if (0)
             QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/pth.drl"); });
 
-        if (0) {
+        if (1) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
             QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
