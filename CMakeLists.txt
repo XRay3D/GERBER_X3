@@ -17,6 +17,7 @@ project(Gerber_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
+add_definitions(-L/usr/lib64 -static -static-libstdc++ -static-libgcc)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)

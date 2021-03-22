@@ -52,12 +52,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     else()
         set(SUFFIX "${SUFFIX}_x32")
     endif()
-    include_directories (
-        /usr/lib/x86_64-linux-gnu/
-        )
-    link_directories(
-        /usr/lib/x86_64-linux-gnu/
-        )
+#    include_directories (
+#        /usr/lib/x86_64-linux-gnu/
+#        )
+#    link_directories(
+#        /usr/lib/x86_64-linux-gnu/
+#        )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
