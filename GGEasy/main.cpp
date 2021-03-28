@@ -21,6 +21,7 @@
 #include "splashscreen.h"
 #include "version.h"
 
+#include "ctre.hpp"
 #include "interfaces/shapepluginin.h"
 //#include "style.h"
 
@@ -43,6 +44,21 @@ void translation(QApplication* app);
 
 int main(int argc, char** argv)
 {
+    //    QString s1("FILE_FORMAT=3:3");
+    //    QString s2("file_format=3:3");
+    //    static constexpr auto regexFormat = ctll::fixed_string(".*(?:FORMAT|format).*(\\d{1}).(\\d{1})");
+    //    if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(s1); matchFormat) {
+    //        qDebug() << "regexFormat" << matchFormat.toString();
+    //        qDebug() << "regexFormat" << integer.toString();
+    //        qDebug() << "regexFormat" << decimal.toString();
+    //    }
+    //    if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(s2); matchFormat) {
+    //        qDebug() << "regexFormat" << matchFormat.toString();
+    //        qDebug() << "regexFormat" << integer.toString();
+    //        qDebug() << "regexFormat" << decimal.toString();
+    //    }
+
+    //    return 0;
 
     //#if defined(Q_OS_WIN) && !defined(__GNUC__)
     //    HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
@@ -61,8 +77,8 @@ int main(int argc, char** argv)
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    //QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-    //QApplication::setAttribute(Qt::AA_Use96Dpi);
+//QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+//QApplication::setAttribute(Qt::AA_Use96Dpi);
 #else
     QApplication::setAttribute(Qt::AA_Use96Dpi);
 #endif
@@ -74,15 +90,15 @@ int main(int argc, char** argv)
 
     QApplication app(argc, argv);
 
-    //#ifdef Q_OS_WIN
-    //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-    //    if (settings.value("AppsUseLightTheme") == 0) {
+//#ifdef Q_OS_WIN
+//    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
+//    if (settings.value("AppsUseLightTheme") == 0) {
 
-    //        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-    //    }
-    //#endif
+//        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+//    }
+//#endif
 
-    //    QApplication::setStyle(new ProxyStyle(QApplication::style()));
+//    QApplication::setStyle(new ProxyStyle(QApplication::style()));
 #ifdef linux
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
@@ -190,7 +206,6 @@ int main(int argc, char** argv)
     }
 
     SettingsDialog().accept();
-    MainWindow::updateTheme();
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");

@@ -22,7 +22,7 @@ namespace Excellon {
 class File;
 
 class Node : public FileTree::Node {
-    mutable ExcellonDialog* m_exFormatDialog = nullptr;
+    mutable bool m_exFormatDialog {};
     friend class File;
     File* file;
 
