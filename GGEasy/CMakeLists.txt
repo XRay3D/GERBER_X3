@@ -215,19 +215,19 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        gmp#CGAL
-        mpfr#CGAL
-        )
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        libgmp-10#CGAL
-        libmpfr-4#CGAL
-        )
-endif()
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#    target_link_libraries(${PROJECT_NAME} PRIVATE
+#        gmp#CGAL
+#        mpfr#CGAL
+#        )
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    target_link_libraries(${PROJECT_NAME} PRIVATE
+#        libgmp-10#CGAL
+#        libmpfr-4#CGAL
+#        )
+#endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
