@@ -200,6 +200,15 @@ void View::contextMenuEvent(QContextMenuEvent* event)
         }
     } else {
         reinterpret_cast<Node*>(m_menuIndex.internalId())->menu(menu, this);
+        if (auto selectedRows { selectionModel()->selectedRows().toVector() }; selectedRows.count() > 1) {
+            menu.addSeparator();
+            // FIXME rename Action in future.
+            menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
+                std::ranges::sort(selectedRows, std::greater {}, &QModelIndex::row);
+                for (auto&& index : selectedRows)
+                    m_model->removeRow(index.row(), index.parent());
+            });
+        }
     }
 
     if (!menu.isEmpty())
