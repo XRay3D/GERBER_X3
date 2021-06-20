@@ -205,7 +205,7 @@ public:
     QString footprintName() const { return m_footprintName; }
     void setFootprintName(const QString& footprintName) { m_footprintName = footprintName; }
 
-    QString refdes() const { return m_refdes; }
+    const QString& refdes() const { return m_refdes; }
     void setRefdes(const QString& refdes) { m_isNull = true, m_refdes = refdes; }
 
     QString value() const { return m_value; }
