@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "leakdetector.h"
+#include "utils.h"
 
 namespace Excellon {
 
@@ -104,18 +105,19 @@ bool Parser::parseComment(const QString& line)
 {
     if (line.startsWith(';')) {
         qDebug() << "line" << line;
-        static constexpr auto regexComment = ctll::fixed_string("^;(.*)$");
-        static constexpr auto regexFormat = ctll::fixed_string(".*(?:FORMAT|format).*(\\d).(\\d)");
-        static constexpr auto regexTool = ctll::fixed_string("\\s*(?:HOLESIZE|holesize)\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*");
-        if (auto [match, comment] = ctre::match<regexComment>(line); match) {
+        auto data { to_sv16(line) };
+        static constexpr ctll::fixed_string regexComment(R"(^;(.*)$)"); // fixed_string("^;(.*)$");
+        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
+        static constexpr ctll::fixed_string regexTool(R"(\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)"); // fixed_string("\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*");
+        if (auto [match, comment] = ctre::match<regexComment>(data); match) {
             if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-                file->m_format.integer = integer;
-                file->m_format.decimal = decimal;
+                file->m_format.integer = rxCap(integer).toInt();
+                file->m_format.decimal = rxCap(decimal).toInt();
             }
             if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
                 qDebug() << "regexTool" << matchTool.data();
-                const int tCode = static_cast<int>(tool.toDouble());
-                file->m_tools[tCode] = diam;
+                const int tCode = static_cast<int>(rxCap(tool).toDouble());
+                file->m_tools[tCode] = rxCap(diam).toDouble();
                 file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
                 m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
             }
@@ -127,114 +129,126 @@ bool Parser::parseComment(const QString& line)
 
 bool Parser::parseGCode(const QString& line)
 {
-    static constexpr auto regex = ctll::fixed_string("^G([0]?[0-9]{2}).*$");
-    if (auto [whole, c1] = ctre::match<regex>(line); whole) {
-        switch (c1.toInt()) {
-        case G00:
-            m_state.gCode = G00;
-            m_state.wm = RouteMode;
-            parsePos(line);
-            break;
-        case G01:
-            m_state.gCode = G01;
-            parsePos(line);
-            break;
-        case G02:
-            m_state.gCode = G02;
-            parsePos(line);
-            break;
-        case G03:
-            m_state.gCode = G03;
-            parsePos(line);
-            break;
-        case G05:
-            m_state.gCode = G05;
-            m_state.wm = DrillMode;
-            break;
-        case G90:
-            m_state.gCode = G90;
-            break;
-        default:
-            break;
+    if (line.startsWith('G')) {
+        auto data { to_sv16(line) };
+        static constexpr ctll::fixed_string regex(R"(^G([0]?[0-9]{2}).*$)"); // fixed_string("^G([0]?[0-9]{2}).*$");
+        if (auto [whole, c1] = ctre::match<regex>(data); whole) {
+            switch (rxCap(c1).toInt()) {
+            case G00:
+                m_state.gCode = G00;
+                m_state.wm = RouteMode;
+                parsePos(line);
+                break;
+            case G01:
+                m_state.gCode = G01;
+                parsePos(line);
+                break;
+            case G02:
+                m_state.gCode = G02;
+                parsePos(line);
+                break;
+            case G03:
+                m_state.gCode = G03;
+                parsePos(line);
+                break;
+            case G05:
+                m_state.gCode = G05;
+                m_state.wm = DrillMode;
+                break;
+            case G90:
+                m_state.gCode = G90;
+                break;
+            default:
+                break;
+            }
+            return true;
         }
-        return true;
+        return false;
     }
     return false;
 }
 
 bool Parser::parseMCode(const QString& line)
 {
-    static constexpr auto regex = ctll::fixed_string("^M([0]?[0-9]{2})$");
-    if (auto [whole, c1] = ctre::match<regex>(line); whole) {
-        switch (c1.toInt()) {
-        case M00: {
-            auto tools = file->m_tools;
-            QList<int> keys;
-            std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
-            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
-                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
-            //            QList<int> keys(file->m_tools.keys());
-            //            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
-            //                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
-        } break;
-        case M15:
-            m_state.mCode = M15;
-            m_state.wm = RouteMode;
-            m_state.rawPosList = { m_state.rawPos };
-            m_state.path = QPolygonF({ m_state.pos });
-            break;
-        case M16:
-            m_state.mCode = M16;
-            m_state.wm = RouteMode;
-            m_state.rawPosList.append(m_state.rawPos);
-            m_state.path.append(m_state.pos);
-            file->append(Hole(m_state, file));
-            m_state.path.clear();
-            m_state.rawPosList.clear();
-            break;
-        case M30:
-            m_state.mCode = M30;
-            break;
-        case M48:
-            m_state.mCode = M48;
-            break;
-        case M71:
-            m_state.mCode = M71;
-            file->m_format.unitMode = Millimeters;
-            break;
-        case M72:
-            m_state.mCode = M72;
-            file->m_format.unitMode = Inches;
-            break;
-        case M95:
-            m_state.mCode = M95;
-            break;
-        default:
-            break;
+    if (line.startsWith('M')) {
+        static constexpr ctll::fixed_string regex(R"(^M([0]?[0-9]{2})$)"); // fixed_string("^M([0]?[0-9]{2})$");
+        auto data { to_sv16(line) };
+        if (auto [whole, c1] = ctre::match<regex>(data); whole) {
+            switch (rxCap(c1).toInt()) {
+            case M00: {
+                auto tools = file->m_tools;
+                QList<int> keys;
+                std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
+                if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
+                    m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+                //            QList<int> keys(file->m_tools.keys());
+                //            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
+                //                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+            } break;
+            case M15:
+                m_state.mCode = M15;
+                m_state.wm = RouteMode;
+                m_state.rawPosList = { m_state.rawPos };
+                m_state.path = QPolygonF({ m_state.pos });
+                break;
+            case M16:
+                m_state.mCode = M16;
+                m_state.wm = RouteMode;
+                m_state.rawPosList.append(m_state.rawPos);
+                m_state.path.append(m_state.pos);
+                file->append(Hole(m_state, file));
+                m_state.path.clear();
+                m_state.rawPosList.clear();
+                break;
+            case M30:
+                m_state.mCode = M30;
+                break;
+            case M48:
+                m_state.mCode = M48;
+                break;
+            case M71:
+                m_state.mCode = M71;
+                file->m_format.unitMode = Millimeters;
+                break;
+            case M72:
+                m_state.mCode = M72;
+                file->m_format.unitMode = Inches;
+                break;
+            case M95:
+                m_state.mCode = M95;
+                break;
+            default:
+                break;
+            }
+            return true;
         }
-        return true;
-    }
-    if (line == "%" && m_state.mCode == M48) {
-        m_state.mCode = M95;
-        return true;
+        if (line == "%" && m_state.mCode == M48) {
+            m_state.mCode = M95;
+            return true;
+        }
+        return false;
     }
     return false;
 }
 
 bool Parser::parseTCode(const QString& line)
 {
-    static constexpr auto regex = ctll::fixed_string("^T(\\d+)"
-                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                     "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                     ".*$");
-    static constexpr auto regex2 = ctll::fixed_string("^.+C(\\d*\\.?\\d+).*$");
-    if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(line); whole) {
-        m_state.tCode = tool;
-        if (auto [whole, diam] = *ctre::range<regex2>(line).begin(); whole) {
-            file->m_tools[m_state.tCode] = diam;
-            return true;
+    if (line.startsWith('T')) {
+        auto data { to_sv16(line) };
+        static constexpr ctll::fixed_string regex(R"(^T(\d+))"
+                                                  R"((?:([CFS])(\d*\.?\d+))?)"
+                                                  R"((?:([CFS])(\d*\.?\d+))?)"
+                                                  R"((?:([CFS])(\d*\.?\d+))?)"
+                                                  R"(.*$)");
+        static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
+        if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(data); whole) {
+            m_state.tCode = rxCap(tool).toInt();
+            if (auto [whole, diam] = *ctre::range<regex2>(data).begin(); whole) {
+                file->m_tools[m_state.tCode] = rxCap(diam).toDouble();
+                return true;
+            }
         }
+        return false;
     }
     return false;
 }
@@ -249,25 +263,26 @@ bool Parser::parsePos(const QString& line)
     //        A
     //    };
 
-    static constexpr auto regex = ctll::fixed_string("^(?:G(\\d+))?"
-                                                     "(?:X([\\+\\-]?\\d*\\.?\\d*))?"
-                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d*))?"
-                                                     "(?:A([\\+\\-]?\\d*\\.?\\d*))?"
-                                                     ".*$");
+    auto data { to_sv16(line) };
+    static constexpr ctll::fixed_string regex(R"(^(?:G(\d+))?)"
+                                              R"((?:X([\+\-]?\d*\.?\d*))?)"
+                                              R"((?:Y([\+\-]?\d*\.?\d*))?)"
+                                              R"((?:A([\+\-]?\d*\.?\d*))?)"
+                                              R"(.*$)");
 
-    if (auto [whole, G, X, Y, A] = ctre::match<regex>(line); whole) {
+    if (auto [whole, G, X, Y, A] = ctre::match<regex>(data); whole) {
         if (!X.size() && !Y.size())
             return false;
 
         if (X.size())
-            m_state.rawPos.X = X.toString();
+            m_state.rawPos.X = rxCap(X);
         if (Y.size())
-            m_state.rawPos.Y = Y.toString();
+            m_state.rawPos.Y = rxCap(Y);
         if (A.size())
-            m_state.rawPos.A = A.toString();
+            m_state.rawPos.A = rxCap(A);
 
-        parseNumber(X, m_state.pos.rx());
-        parseNumber(Y, m_state.pos.ry());
+        parseNumber(rxCap(X), m_state.pos.rx());
+        parseNumber(rxCap(Y), m_state.pos.ry());
 
         switch (m_state.wm) {
         case DrillMode:
@@ -301,24 +316,25 @@ bool Parser::parseSlot(const QString& line)
     //        X2,
     //        Y2
     //    };
-    static constexpr auto regex = ctll::fixed_string("^(?:X([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     "G85"
-                                                     "(?:X([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     ".*$");
-    if (auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(line); whole) {
+    auto data { to_sv16(line) };
+    static constexpr ctll::fixed_string regex(R"(^(?:X([\+\-]?\d*\.?\d+))?)"
+                                              R"((?:Y([\+\-]?\d*\.?\d+))?)"
+                                              R"(G85)"
+                                              R"((?:X([\+\-]?\d*\.?\d+))?)"
+                                              R"((?:Y([\+\-]?\d*\.?\d+))?)"
+                                              R"(.*$)");
+    if (auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(data); whole) {
         m_state.gCode = G85;
         m_state.path.clear();
         m_state.rawPosList.clear();
         {
             if (X1.size())
-                m_state.rawPos.X = X1.toString();
-            parseNumber(X1, m_state.pos.rx());
+                m_state.rawPos.X = rxCap(X1);
+            parseNumber(rxCap(X1), m_state.pos.rx());
 
             if (Y1.size())
-                m_state.rawPos.Y = Y1.toString();
-            parseNumber(Y1, m_state.pos.ry());
+                m_state.rawPos.Y = rxCap(Y1);
+            parseNumber(rxCap(Y1), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
@@ -326,12 +342,12 @@ bool Parser::parseSlot(const QString& line)
 
         {
             if (X2.size())
-                m_state.rawPos.X = X2.toString();
-            parseNumber(X2, m_state.pos.rx());
+                m_state.rawPos.X = rxCap(X2);
+            parseNumber(rxCap(X2), m_state.pos.rx());
 
             if (Y2.size())
-                m_state.rawPos.Y = Y2.toString();
-            parseNumber(Y2, m_state.pos.ry());
+                m_state.rawPos.Y = rxCap(Y2);
+            parseNumber(rxCap(Y2), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
@@ -348,15 +364,16 @@ bool Parser::parseSlot(const QString& line)
 
 bool Parser::parseRepeat(const QString& line)
 {
-    static constexpr auto regex = ctll::fixed_string("^R(\\d+)"
-                                                     "(?:X([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     "(?:Y([\\+\\-]?\\d*\\.?\\d+))?"
-                                                     "$");
-    if (auto [whole, c1, c2, c3] = ctre::match<regex>(line); whole) {
-        int count = c1;
+    auto data { to_sv16(line) };
+    static constexpr ctll::fixed_string regex(R"(^R(\d+))"
+                                              R"((?:X([\+\-]?\d*\.?\d+))?)"
+                                              R"((?:Y([\+\-]?\d*\.?\d+))?)"
+                                              R"($)");
+    if (auto [whole, c1, c2, c3] = ctre::match<regex>(data); whole) {
+        int count = rxCap(c1).toInt();
         QPointF p;
-        parseNumber(c2, p.rx());
-        parseNumber(c3, p.ry());
+        parseNumber(rxCap(c2), p.rx());
+        parseNumber(rxCap(c3), p.ry());
         for (int i = 0; i < count; ++i) {
             m_state.pos += p;
             file->append(Hole(m_state, file));
@@ -368,11 +385,12 @@ bool Parser::parseRepeat(const QString& line)
 
 bool Parser::parseFormat(const QString& line)
 {
+    auto data { to_sv16(line) };
     static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
-    static constexpr auto regex = ctll::fixed_string("^(METRIC|INCH).*(LZ|TZ)?$");
-    if (auto [whole, c1, c2] = ctre::match<regex>(line); whole) {
-        switch (unitMode.indexOf(c1)) {
+    static constexpr ctll::fixed_string regex(R"(^(METRIC|INCH).*(LZ|TZ)?$)"); // fixed_string("^(METRIC|INCH).*(LZ|TZ)?$");
+    if (auto [whole, c1, c2] = ctre::match<regex>(data); whole) {
+        switch (unitMode.indexOf(rxCap(c1))) {
         case Inches:
             file->m_format.unitMode = Inches;
             break;
@@ -382,7 +400,7 @@ bool Parser::parseFormat(const QString& line)
         default:
             break;
         }
-        switch (zeroMode.indexOf(c2)) {
+        switch (zeroMode.indexOf(rxCap(c2))) {
         case LeadingZeros:
             file->m_format.zeroMode = LeadingZeros;
             break;
@@ -394,8 +412,8 @@ bool Parser::parseFormat(const QString& line)
         }
         return true;
     }
-    static constexpr auto regex2 = ctll::fixed_string("^(FMAT).*(2)?$");
-    if (auto [whole, c1, c2] = ctre::match<regex2>(line); whole) {
+    static constexpr ctll::fixed_string regex2(R"(^(FMAT).*(2)?$)"); // fixed_string("^(FMAT).*(2)?$");
+    if (auto [whole, c1, c2] = ctre::match<regex2>(data); whole) {
         file->m_format.unitMode = Inches;
         file->m_format.zeroMode = LeadingZeros;
         return true;

@@ -25,6 +25,7 @@
 #include <ctre.hpp>
 
 #include "leakdetector.h"
+#include "utils.h"
 
 namespace Gerber {
 
@@ -44,11 +45,14 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
     auto unsorted = new ComponentsNode(GbrObj::tr("unsorted"));
 
     for (const auto& component : file->components()) {
-        static constexpr auto pattern = ctll::fixed_string("(\\D+)(\\d+).*");
-        if (auto [whole, c1, c2] = ctre::match<pattern>(component.refdes()); whole) {
-            if (map[c1].empty())
-                map[c1].emplace_back(-1, new ComponentsNode(c1));
-            map[c1].emplace_back(c2.toInt(), new ComponentsNode(component));
+        static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
+
+        auto data { to_sv16(component.refdes()) };
+
+        if (auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
+            if (map[rxCap(c1)].empty())
+                map[rxCap(c1)].emplace_back(-1, new ComponentsNode(rxCap(c1)));
+            map[rxCap(c1)].emplace_back(rxCap(c2).toInt(), new ComponentsNode(component));
         } else {
             unsorted->append(new ComponentsNode(component));
         }

@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 {
     //    QString s1("FILE_FORMAT=3:3");
     //    QString s2("file_format=3:3");
-    //    static constexpr auto regexFormat = ctll::fixed_string(".*(?:FORMAT|format).*(\\d{1}).(\\d{1})");
+    //    static constexpr ctll::fixed_string regexFormat_(R"(.*(?:FORMAT|format).*(\\d{1}).(\\d{1}))");// fixed_string(".*(?:FORMAT|format).*(\\d{1}).(\\d{1})");
     //    if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(s1); matchFormat) {
     //        qDebug() << "regexFormat" << matchFormat.toString();
     //        qDebug() << "regexFormat" << integer.toString();
