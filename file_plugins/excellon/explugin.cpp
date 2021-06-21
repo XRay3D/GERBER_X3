@@ -26,7 +26,7 @@
 #include "drillpreviewgi.h"
 #include "ft_view.h"
 #include "interfaces/file.h"
-
+#include "utils.h"
 #include <QtWidgets>
 
 #include "leakdetector.h"
@@ -80,17 +80,18 @@ bool Plugin::thisIsIt(const QString& fileName)
     QTextStream in(&file);
     QString line;
 
-    static constexpr auto regex1 = ctll::fixed_string("^T(\\d+)"
-                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                      "(?:([CFS])(\\d*\\.?\\d+))?"
-                                                      ".*$");
-    static constexpr auto regex2 = ctll::fixed_string(".*Holesize.*");
+    static constexpr ctll::fixed_string regex1(R"(^T(\d+))"
+                                               R"((?:([CFS])(\d*\.?\d+))?)"
+                                               R"((?:([CFS])(\d*\.?\d+))?)"
+                                               R"((?:([CFS])(\d*\.?\d+))?)"
+                                               R"(.*$)");
+    static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
     while (in.readLineInto(&line)) {
-        if (ctre::match<regex1>(line))
+        auto data { to_sv16(line) };
+        if (ctre::match<regex1>(data))
             return true;
-        if (ctre::match<regex2>(line))
+        if (ctre::match<regex2>(data))
             return true;
     }
 

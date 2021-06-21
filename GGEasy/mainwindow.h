@@ -148,6 +148,10 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void changeEvent(QEvent* event) override;
+
+    // QObject interface
+public:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 };
 
 class DockWidget : public QDockWidget {

@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Pin::setPos));
     connect(m_project, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
+    menuBar()->installEventFilter(this);
 
     // connect plugins
     for (auto& [type, pair] : App::filePlugins()) {
@@ -145,7 +146,7 @@ MainWindow::MainWindow(QWidget* parent)
         if (0)
             QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/pth.drl"); });
 
-        if (1) {
+        if (0) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
             QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -1222,4 +1223,26 @@ void MainWindow::changeEvent(QEvent* event)
     if (event->type() == QEvent::LanguageChange) {
         ui->retranslateUi(this); // переведём окно заново
     }
+}
+
+bool MainWindow::eventFilter(QObject* watched, QEvent* event)
+{
+    if (0 && watched == menuBar()) {
+        static QPoint pt;
+        auto mEvent = reinterpret_cast<QMouseEvent*>(event);
+        switch (event->type()) {
+        case QEvent::MouseMove:
+            if (!pt.isNull())
+                setGeometry(geometry().translated(mEvent->pos() - pt));
+            break;
+        case QEvent::MouseButtonPress:
+            pt = mEvent->pos();
+            break;
+        case QEvent::MouseButtonRelease:
+            pt = {};
+            break;
+        default:;
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
 }

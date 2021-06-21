@@ -21,12 +21,14 @@
 GCH::GCH(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
+    // myClassFormat.setFontWeight(QFont::Bold);
 }
 
 void GCH::highlightBlock(const QString& text)
 {
-    QTextCharFormat myClassFormat;
-    myClassFormat.setFontWeight(QFont::Bold);
+    qDebug(__FUNCTION__);
+
+    static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
     static const mvector<Qt::GlobalColor> color {
         Qt::darkMagenta, // 'F',
         Qt::black, //       'G',
@@ -38,11 +40,55 @@ void GCH::highlightBlock(const QString& text)
     };
 
     using namespace std::string_view_literals;
-    static constexpr auto pattern = ctll::fixed_string("([GXYZFSM])([\\+\\-]?\\d+\\.?\\d*)");
-    auto data = reinterpret_cast<const char16_t*>(text.data());
-    for (auto m : ctre::range<pattern>(text)) {
-        static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
-        myClassFormat.setForeground(color[key.indexOf(*m.data())]);
-        setFormat(static_cast<int>(std::distance(data, m.data())), static_cast<int>(m.size()), myClassFormat);
+    static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
+    auto data { to_sv16(text) };
+    for (auto [whole, code, number] : ctre::range<pattern>(data)) {
+        { // code
+            switch (*code.data()) {
+            case 'F':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0xFF, 0xFF, 0xFF));
+                break;
+            case 'G':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0xFF, 0xFF, 0x7F));
+                break;
+            case 'M':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0x7F, 0x7F, 0x7F));
+                break;
+            case 'S':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0xFF, 0x7F, 0xFF));
+                break;
+            case 'X':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0xFF, 0x7F, 0x7F));
+                break;
+            case 'Y':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0x7F, 0xFF, 0xFF));
+                break;
+            case 'Z':
+                myClassFormat.setFontWeight(QFont::Bold);
+                myClassFormat.setForeground(QColor(0x7F, 0x7F, 0xFF));
+                break;
+            default:
+                myClassFormat.setForeground(QColor(0x7F, 0x7F, 0x7F));
+                break;
+            }
+            //myClassFormat.setForeground(color[key.indexOf(*m.data())]);
+            int start = std::distance(data.data(), code.data());
+            int count = static_cast<int>(code.size());
+            setFormat(start, count, myClassFormat);
+        }
+        { // number
+            myClassFormat.setFontWeight(QFont::Normal);
+            myClassFormat.setForeground(QColor(0x7F, 0x7F, 0x7F));
+            //myClassFormat.setForeground(color[key.indexOf(*m.data())]);
+            int start = std::distance(data.data(), number.data());
+            int count = static_cast<int>(number.size());
+            setFormat(start, count, myClassFormat);
+        }
     }
 }

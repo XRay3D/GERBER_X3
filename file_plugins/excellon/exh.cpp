@@ -38,12 +38,13 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
         { 'Y', QColor(0x00, 0xFF, 0x00) },
     };
 
-    using namespace std::string_view_literals;
-    static constexpr auto pattern = ctll::fixed_string("([ACGMTXY])([\\+\\-]?\\d+\\.?\\d*)");
-    auto data = reinterpret_cast<const char16_t*>(text.data());
-    for (auto m : ctre::range<pattern>(text)) {
+    std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
+    static constexpr ctll::fixed_string pattern(R"(([ACGMTXY])([\+\-]?\d+\.?\d*))");
+    for (auto m : ctre::range<pattern>(data)) {
         myClassFormat.setForeground(color.at(*m.data()));
-        setFormat(static_cast<int>(std::distance(data, m.data())), static_cast<int>(m.size()), myClassFormat);
+        int start = std::distance(data.data(), m.data());
+        int count = static_cast<int>(m.size());
+        setFormat(start, count, myClassFormat);
     }
 }
 
