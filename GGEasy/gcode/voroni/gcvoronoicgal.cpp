@@ -15,6 +15,7 @@
 *                                                                              *
 *******************************************************************************/
 #include "gcvoronoicgal.h"
+#if __has_include(<CGAL/Algebraic_structure_traits_.h>)
 #include <CGAL/Algebraic_structure_traits.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Segment_Delaunay_graph_2.h>
@@ -186,3 +187,8 @@ void VoronoiCgal::cgalVoronoi() {
 }
 
 }
+#else
+namespace GCode {
+void VoronoiCgal::cgalVoronoi() { }
+}
+#endif

@@ -1,0 +1,7 @@
+[submodule "magic_get"]
+	path = magic_get
+	url = git@github.com:apolukhin/magic_get.git
+[submodule "compile-time-regular-expressions"]
+	path = compile-time-regular-expressions
+	url = git@github.com:hanickadot/compile-time-regular-expressions.git
+	

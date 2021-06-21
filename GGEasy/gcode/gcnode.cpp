@@ -124,6 +124,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
         return itemFlag;
     }
 }
+
 void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
@@ -132,22 +133,28 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
-        QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
-        dialog->resize(600, 600);
-        //Dialog->resize(400, 300);
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-        textBrowser->setFont(QFont("Consolas"));
-        new GCH(textBrowser->document());
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        verticalLayout->addWidget(textBrowser);
-        for (const QString& str : file->lines())
-            textBrowser->append(str);
-        dialog->exec();
-        delete dialog;
+    menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
+        QDialog dialog(tv);
+        {
+            Timer t("QDialog");
+            dialog.resize(600, 600);
+            auto verticalLayout = new QVBoxLayout(&dialog);
+            auto textBrowser = new QTextBrowser(&dialog);
+            QFont f("Consolas");
+            f.setPixelSize(20);
+            textBrowser->setFont(f);
+            new GCH(textBrowser->document());
+            verticalLayout->addWidget(textBrowser);
+            verticalLayout->setMargin(6);
+
+            {
+                Timer t("GCH");
+                for (const QString& str : file->lines())
+                    textBrowser->append(str);
+            }
+        }
+
+        dialog.exec();
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"),

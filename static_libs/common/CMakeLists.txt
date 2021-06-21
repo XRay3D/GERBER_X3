@@ -34,6 +34,7 @@ add_library(common STATIC
     depthform.h
     doublespinbox.cpp
     doublespinbox.h
+    utils.h
     leakdetector.h
     mvector.h
     project.cpp
