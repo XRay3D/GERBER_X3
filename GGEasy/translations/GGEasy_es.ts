@@ -1193,12 +1193,12 @@ type</source>
 <context>
     <name>Excellon::Plugin</name>
     <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="97"/>
+        <location filename="../../file_plugins/excellon/explugin.cpp" line="105"/>
         <source>Excellon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="308"/>
+        <location filename="../../file_plugins/excellon/explugin.cpp" line="316"/>
         <source>Tool Ø%1mm</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1303,6 +1303,14 @@ type</source>
     </message>
 </context>
 <context>
+    <name>FileTree::View</name>
+    <message>
+        <location filename="../../static_libs/filetree/ft_view.cpp" line="206"/>
+        <source>Delete Selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FormsUtil</name>
     <message>
         <location filename="../forms/formsutil/formsutil.cpp" line="79"/>
@@ -1354,7 +1362,7 @@ type</source>
 <context>
     <name>GCode::VoronoiBoost</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoiboost.cpp" line="104"/>
+        <location filename="../gcode/voroni/gcvoronoiboost.cpp" line="99"/>
         <source>Calc BOOST Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1362,7 +1370,7 @@ type</source>
 <context>
     <name>GCode::VoronoiCgal</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoicgal.cpp" line="94"/>
+        <location filename="../gcode/voroni/gcvoronoicgal.cpp" line="88"/>
         <source>Calc CGAL Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1378,7 +1386,7 @@ type</source>
 <context>
     <name>GCode::VoronoiJc</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoijc.cpp" line="123"/>
+        <location filename="../gcode/voroni/gcvoronoijc.cpp" line="120"/>
         <source>Merge Segments</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1521,48 +1529,48 @@ type</source>
 <context>
     <name>Gerber::GbrObj</name>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="44"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="45"/>
         <source>unsorted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="127"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="131"/>
         <source>Ref Des</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="129"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="133"/>
         <source>Manufacturer
 part
 number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="133"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="137"/>
         <source>Value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="135"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="139"/>
         <source>Mount
 type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="138"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="142"/>
         <source>Footprint
 name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="141"/>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="144"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="145"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="148"/>
         <source>Package
 name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="147"/>
+        <location filename="../../file_plugins/gerber/compmodel.cpp" line="151"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1656,19 +1664,19 @@ without width and without contacts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="462"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="587"/>
+        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="463"/>
+        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="589"/>
         <source>Aperture %1 not found! Available %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="537"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="540"/>
+        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="539"/>
+        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="542"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="593"/>
+        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="595"/>
         <source>Aperture D%1 (%2) not supported!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1676,37 +1684,37 @@ without width and without contacts</source>
 <context>
     <name>Gerber::Plugin</name>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="149"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="151"/>
         <source>Gerber Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="325"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="327"/>
         <source>, drill Ø%1mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="426"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="428"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="483"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="485"/>
         <source>Lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="490"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="492"/>
         <source>Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="496"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="498"/>
         <source>Regions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="510"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="512"/>
         <source>Region</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1895,431 +1903,431 @@ Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="220"/>
+        <location filename="../mainwindow.cpp" line="212"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="225"/>
+        <location filename="../mainwindow.cpp" line="216"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="228"/>
-        <location filename="../mainwindow.cpp" line="230"/>
+        <location filename="../mainwindow.cpp" line="219"/>
+        <location filename="../mainwindow.cpp" line="221"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="236"/>
-        <location filename="../mainwindow.cpp" line="239"/>
+        <location filename="../mainwindow.cpp" line="227"/>
+        <location filename="../mainwindow.cpp" line="230"/>
         <source>&amp;New project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="238"/>
+        <location filename="../mainwindow.cpp" line="229"/>
         <source>Create a new file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="242"/>
-        <location filename="../mainwindow.cpp" line="245"/>
+        <location filename="../mainwindow.cpp" line="233"/>
+        <location filename="../mainwindow.cpp" line="236"/>
         <source>&amp;Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="244"/>
+        <location filename="../mainwindow.cpp" line="235"/>
         <source>Open an existing file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="248"/>
-        <location filename="../mainwindow.cpp" line="251"/>
+        <location filename="../mainwindow.cpp" line="239"/>
+        <location filename="../mainwindow.cpp" line="242"/>
         <source>&amp;Save project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="250"/>
+        <location filename="../mainwindow.cpp" line="241"/>
         <source>Save the document to disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="254"/>
-        <location filename="../mainwindow.cpp" line="257"/>
+        <location filename="../mainwindow.cpp" line="245"/>
+        <location filename="../mainwindow.cpp" line="248"/>
         <source>Save project &amp;As...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="256"/>
+        <location filename="../mainwindow.cpp" line="247"/>
         <source>Save the document under a new name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="260"/>
-        <location filename="../mainwindow.cpp" line="264"/>
-        <location filename="../mainwindow.cpp" line="939"/>
+        <location filename="../mainwindow.cpp" line="251"/>
+        <location filename="../mainwindow.cpp" line="255"/>
+        <location filename="../mainwindow.cpp" line="906"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="262"/>
+        <location filename="../mainwindow.cpp" line="253"/>
         <source>Close project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="271"/>
-        <location filename="../mainwindow.cpp" line="273"/>
+        <location filename="../mainwindow.cpp" line="262"/>
+        <location filename="../mainwindow.cpp" line="264"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="272"/>
+        <location filename="../mainwindow.cpp" line="263"/>
         <source>Save selected toolpaths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="276"/>
-        <location filename="../mainwindow.cpp" line="278"/>
+        <location filename="../mainwindow.cpp" line="267"/>
+        <location filename="../mainwindow.cpp" line="269"/>
         <source>&amp;Export PDF...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="277"/>
+        <location filename="../mainwindow.cpp" line="268"/>
         <source>Export to PDF file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="284"/>
+        <location filename="../mainwindow.cpp" line="275"/>
         <source>Recent Files...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="285"/>
+        <location filename="../mainwindow.cpp" line="276"/>
         <source>Recent Projects...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="289"/>
+        <location filename="../mainwindow.cpp" line="280"/>
         <source>P&amp;rint</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="291"/>
+        <location filename="../mainwindow.cpp" line="282"/>
         <source>Print</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="295"/>
+        <location filename="../mainwindow.cpp" line="286"/>
         <source>E&amp;xit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="297"/>
+        <location filename="../mainwindow.cpp" line="288"/>
         <source>Exit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="303"/>
+        <location filename="../mainwindow.cpp" line="293"/>
         <source>&amp;Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="305"/>
+        <location filename="../mainwindow.cpp" line="295"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="314"/>
+        <location filename="../mainwindow.cpp" line="304"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="318"/>
+        <location filename="../mainwindow.cpp" line="308"/>
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="325"/>
+        <location filename="../mainwindow.cpp" line="314"/>
         <source>&amp;Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="327"/>
-        <location filename="../mainwindow.cpp" line="329"/>
+        <location filename="../mainwindow.cpp" line="316"/>
+        <location filename="../mainwindow.cpp" line="318"/>
         <source>Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="332"/>
+        <location filename="../mainwindow.cpp" line="321"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="333"/>
+        <location filename="../mainwindow.cpp" line="322"/>
         <source>Show the application&apos;s settings box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="338"/>
+        <location filename="../mainwindow.cpp" line="327"/>
         <source>&amp;G-Code Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="342"/>
+        <location filename="../mainwindow.cpp" line="331"/>
         <source>Tool Base</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="347"/>
+        <location filename="../mainwindow.cpp" line="336"/>
         <source>Autoplace All Refpoints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="359"/>
+        <location filename="../mainwindow.cpp" line="348"/>
         <source>Snap to grid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="365"/>
+        <location filename="../mainwindow.cpp" line="354"/>
         <source>Resize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="376"/>
+        <location filename="../mainwindow.cpp" line="364"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="378"/>
+        <location filename="../mainwindow.cpp" line="366"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="379"/>
+        <location filename="../mainwindow.cpp" line="367"/>
         <source>Show the application&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="381"/>
+        <location filename="../mainwindow.cpp" line="369"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="382"/>
+        <location filename="../mainwindow.cpp" line="370"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="386"/>
+        <location filename="../mainwindow.cpp" line="374"/>
         <source>About &amp;Plugins…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="387"/>
+        <location filename="../mainwindow.cpp" line="375"/>
         <source>Show loaded plugins…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="392"/>
+        <location filename="../mainwindow.cpp" line="379"/>
         <source>&amp;Viev</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="395"/>
-        <location filename="../mainwindow.cpp" line="397"/>
+        <location filename="../mainwindow.cpp" line="382"/>
+        <location filename="../mainwindow.cpp" line="384"/>
         <source>Zoom ToolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="403"/>
-        <location filename="../mainwindow.cpp" line="404"/>
+        <location filename="../mainwindow.cpp" line="390"/>
+        <location filename="../mainwindow.cpp" line="391"/>
         <source>Fit best</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="409"/>
-        <location filename="../mainwindow.cpp" line="410"/>
+        <location filename="../mainwindow.cpp" line="396"/>
+        <location filename="../mainwindow.cpp" line="397"/>
         <source>100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="411"/>
+        <location filename="../mainwindow.cpp" line="398"/>
         <source>Ctrl+0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="415"/>
-        <location filename="../mainwindow.cpp" line="416"/>
+        <location filename="../mainwindow.cpp" line="402"/>
+        <location filename="../mainwindow.cpp" line="403"/>
         <source>Zoom in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="421"/>
-        <location filename="../mainwindow.cpp" line="422"/>
+        <location filename="../mainwindow.cpp" line="408"/>
+        <location filename="../mainwindow.cpp" line="409"/>
         <source>Zoom out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="431"/>
-        <location filename="../mainwindow.cpp" line="432"/>
+        <location filename="../mainwindow.cpp" line="418"/>
+        <location filename="../mainwindow.cpp" line="419"/>
         <source>Zoom to selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="440"/>
+        <location filename="../mainwindow.cpp" line="426"/>
         <source>&amp;Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="442"/>
-        <location filename="../mainwindow.cpp" line="444"/>
+        <location filename="../mainwindow.cpp" line="428"/>
+        <location filename="../mainwindow.cpp" line="430"/>
         <source>Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="453"/>
+        <location filename="../mainwindow.cpp" line="439"/>
         <source>Pro&amp;file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="459"/>
+        <location filename="../mainwindow.cpp" line="445"/>
         <source>&amp;Pocket</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="465"/>
+        <location filename="../mainwindow.cpp" line="451"/>
         <source>&amp;PocketR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="471"/>
+        <location filename="../mainwindow.cpp" line="457"/>
         <source>&amp;Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="477"/>
+        <location filename="../mainwindow.cpp" line="463"/>
         <source>&amp;Thermal Insulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="486"/>
+        <location filename="../mainwindow.cpp" line="472"/>
         <source>&amp;Drilling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="495"/>
+        <location filename="../mainwindow.cpp" line="481"/>
         <source>&amp;Crosshatch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="511"/>
-        <location filename="../mainwindow.cpp" line="513"/>
+        <location filename="../mainwindow.cpp" line="496"/>
+        <location filename="../mainwindow.cpp" line="498"/>
         <source>Graphics Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="559"/>
+        <location filename="../mainwindow.cpp" line="548"/>
         <source>Union</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="560"/>
+        <location filename="../mainwindow.cpp" line="549"/>
         <source>Difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="561"/>
+        <location filename="../mainwindow.cpp" line="550"/>
         <source>Exclusion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="562"/>
+        <location filename="../mainwindow.cpp" line="551"/>
         <source>Intersection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="589"/>
+        <location filename="../mainwindow.cpp" line="576"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="591"/>
+        <location filename="../mainwindow.cpp" line="578"/>
         <source>GCode (*.%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="654"/>
+        <location filename="../mainwindow.cpp" line="639"/>
         <source>;	Contains files:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="807"/>
         <source>File open errors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="873"/>
-        <location filename="../mainwindow.cpp" line="879"/>
-        <location filename="../mainwindow.cpp" line="922"/>
-        <location filename="../mainwindow.cpp" line="1019"/>
+        <location filename="../mainwindow.cpp" line="843"/>
+        <location filename="../mainwindow.cpp" line="849"/>
+        <location filename="../mainwindow.cpp" line="890"/>
+        <location filename="../mainwindow.cpp" line="979"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="873"/>
+        <location filename="../mainwindow.cpp" line="843"/>
         <source>Do you want to close this project?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="879"/>
+        <location filename="../mainwindow.cpp" line="849"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="919"/>
+        <location filename="../mainwindow.cpp" line="887"/>
         <source>File saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="923"/>
+        <location filename="../mainwindow.cpp" line="891"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="981"/>
+        <location filename="../mainwindow.cpp" line="943"/>
         <source>Icon size = 24</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="982"/>
+        <location filename="../mainwindow.cpp" line="944"/>
         <source>Icon size = 48</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="983"/>
+        <location filename="../mainwindow.cpp" line="945"/>
         <source>Icon size = 72</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1020"/>
+        <location filename="../mainwindow.cpp" line="980"/>
         <source>Do you want to reload file %1?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1185"/>
-        <location filename="../mainwindow.cpp" line="1214"/>
+        <location filename="../mainwindow.cpp" line="1134"/>
+        <location filename="../mainwindow.cpp" line="1161"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1187"/>
+        <location filename="../mainwindow.cpp" line="1136"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1214"/>
+        <location filename="../mainwindow.cpp" line="1161"/>
         <source>Project (*.g2g)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2348,7 +2356,7 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="444"/>
+        <location filename="../point.cpp" line="443"/>
         <source>Used</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2748,24 +2756,24 @@ Reload it into the project?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="129"/>
+        <location filename="../gcode/gcnode.cpp" line="130"/>
         <source>&amp;Save Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="133"/>
+        <location filename="../gcode/gcnode.cpp" line="134"/>
         <location filename="../../file_plugins/excellon/exnode.cpp" line="113"/>
         <source>&amp;Hide other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="135"/>
+        <location filename="../gcode/gcnode.cpp" line="136"/>
         <location filename="../../file_plugins/excellon/exnode.cpp" line="114"/>
         <source>&amp;Show source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="153"/>
+        <location filename="../gcode/gcnode.cpp" line="160"/>
         <source>&amp;Delete Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2796,7 +2804,7 @@ Reload it into the project?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="171"/>
+        <location filename="../main.cpp" line="187"/>
         <source>Load plugin %1
 
 
@@ -2804,19 +2812,19 @@ Reload it into the project?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="616"/>
         <location filename="../mainwindow.cpp" line="631"/>
-        <location filename="../mainwindow.cpp" line="646"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="618"/>
         <location filename="../mainwindow.cpp" line="633"/>
-        <location filename="../mainwindow.cpp" line="648"/>
         <source>GCode (*.%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="685"/>
+        <location filename="../mainwindow.cpp" line="670"/>
         <source>No selected toolpath files.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2843,12 +2851,12 @@ The old border will be used.</source>
     </message>
     <message>
         <location filename="../point.cpp" line="225"/>
-        <location filename="../point.cpp" line="449"/>
+        <location filename="../point.cpp" line="448"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="515"/>
+        <location filename="../point.cpp" line="514"/>
         <source>Pin %1
 X %2:Y %3</source>
         <translation type="unfinished"></translation>
@@ -2921,7 +2929,7 @@ X %2:Y %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="142"/>
+        <location filename="../../file_plugins/excellon/exnode.cpp" line="138"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3389,22 +3397,22 @@ effect after restarting the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="209"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="211"/>
         <source>Gerber</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="210"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="212"/>
         <source>Cleaning Polygons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="211"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="213"/>
         <source>Skip duplicates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="212"/>
+        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="214"/>
         <source>Simplify Regions</source>
         <translation type="unfinished"></translation>
     </message>
