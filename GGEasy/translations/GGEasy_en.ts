@@ -2683,7 +2683,7 @@ Would you like to continue?</source>
     <message>
         <location filename="../forms/profileform.ui" line="193"/>
         <source>Lenght:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../forms/profileform.ui" line="298"/>

@@ -3238,7 +3238,7 @@ Would you like to continue?</source>
     <message>
         <location filename="../forms/profileform.ui" line="193"/>
         <source>Lenght:</source>
-        <translation>Длинна:</translation>
+        <translation>Длина:</translation>
     </message>
     <message>
         <location filename="../forms/profileform.ui" line="203"/>
