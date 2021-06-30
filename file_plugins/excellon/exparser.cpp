@@ -275,11 +275,11 @@ bool Parser::parsePos(const QString& line)
             return false;
 
         if (X.size())
-            m_state.rawPos.X = rxCap(X);
+            m_state.rawPos.X = QString{rxCap(X)};
         if (Y.size())
-            m_state.rawPos.Y = rxCap(Y);
+            m_state.rawPos.Y = QString{rxCap(Y)};
         if (A.size())
-            m_state.rawPos.A = rxCap(A);
+            m_state.rawPos.A = QString{rxCap(A)};
 
         parseNumber(rxCap(X), m_state.pos.rx());
         parseNumber(rxCap(Y), m_state.pos.ry());
@@ -329,11 +329,11 @@ bool Parser::parseSlot(const QString& line)
         m_state.rawPosList.clear();
         {
             if (X1.size())
-                m_state.rawPos.X = rxCap(X1);
+                m_state.rawPos.X = QString{rxCap(X1)};
             parseNumber(rxCap(X1), m_state.pos.rx());
 
             if (Y1.size())
-                m_state.rawPos.Y = rxCap(Y1);
+                m_state.rawPos.Y = QString{rxCap(Y1)};
             parseNumber(rxCap(Y1), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
@@ -342,11 +342,11 @@ bool Parser::parseSlot(const QString& line)
 
         {
             if (X2.size())
-                m_state.rawPos.X = rxCap(X2);
+                m_state.rawPos.X = QString{rxCap(X2)};
             parseNumber(rxCap(X2), m_state.pos.rx());
 
             if (Y2.size())
-                m_state.rawPos.Y = rxCap(Y2);
+                m_state.rawPos.Y = QString{rxCap(Y2)};
             parseNumber(rxCap(Y2), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
