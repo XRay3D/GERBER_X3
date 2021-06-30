@@ -34,7 +34,7 @@
 #include <QPluginLoader>
 #include <QSystemSemaphore>
 
-#include "leakdetector.h"
+#include "style.h"
 
 void translation(QApplication* app);
 
@@ -42,8 +42,12 @@ void translation(QApplication* app);
 #include <qt_windows.h>
 #endif
 
+#include "leakdetector.h"
+
 int main(int argc, char** argv)
 {
+
+    //QApplication::setStyle(new MyStyle);
     //    QString s1("FILE_FORMAT=3:3");
     //    QString s2("file_format=3:3");
     //    static constexpr ctll::fixed_string regexFormat_(R"(.*(?:FORMAT|format).*(\\d{1}).(\\d{1}))");// fixed_string(".*(?:FORMAT|format).*(\\d{1}).(\\d{1})");

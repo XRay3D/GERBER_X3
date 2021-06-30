@@ -354,7 +354,8 @@ void MainWindow::createActionsService() {
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
             //r.setSize({ 1280, 720 });
-            r.setSize({1920, 1080});
+            r.setTopLeft({ 0, 1080 });
+            r.setSize({ 1920, 1080 });
             setGeometry(r);
         }));
     }
@@ -1099,7 +1100,7 @@ void MainWindow::updateTheme() {
         palette.setColor(QPalette::Window, windowColor);
         qApp->setPalette(palette);
     } else {
-        qApp->setStyle(QStyleFactory::create("windowsvista"));
+        //qApp->setStyle(QStyleFactory::create("windowsvista"));
     }
 
     //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
