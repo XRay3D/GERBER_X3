@@ -76,11 +76,12 @@ struct rxCap {
     {
     }
     operator QString() const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()); }
-    auto toInt() const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toInt(); }
-    auto toDouble() const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toDouble(); }
 
-    operator int() const { return toInt(); }
-    operator double() const { return toDouble(); }
+    inline operator int() const { return toInt(); }
+    inline operator double() const { return toDouble(); }
+
+    auto toInt(bool* ok = nullptr) const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toInt(ok); }
+    auto toDouble(bool* ok = nullptr) const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toDouble(ok); }
 };
 template <class T>
 rxCap(T) -> rxCap<T>;
