@@ -3988,7 +3988,7 @@ Continue saving?</source>
     <message>
         <location filename="../gcode/gcplugin.cpp" line="242"/>
         <source>Spindle/Laser Off:</source>
-        <translation>Включение шпинделя / лазера:</translation>
+        <translation>Выключение шпинделя / лазера:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="267"/>
