@@ -85,7 +85,7 @@ public:
         : m_itemGroups(1, new ItemGroup)
     {
     }
-    virtual ~FileInterface()  g   cg{ qDeleteAll(m_itemGroups); }
+    virtual ~FileInterface() { qDeleteAll(m_itemGroups); }
 
     QString shortName() const { return QFileInfo(m_name).fileName(); }
     QString name() const { return m_name; }
@@ -118,7 +118,7 @@ public:
 
     mvector<QString>& lines() { return m_lines; }
     const mvector<QString>& lines() const { return m_lines; }
-    const QString C  lines2() const
+    const QString lines2() const
     {
         QString rstr;
         for (auto&& str : m_lines)
