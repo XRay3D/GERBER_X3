@@ -18,12 +18,9 @@
 #include "gcfile.h"
 #include "gch.h"
 
-#include <QBoxLayout>
-#include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
 #include <QMenu>
-#include <QTextBrowser>
 
 #include "ft_view.h"
 
@@ -134,27 +131,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-        QDialog dialog(tv);
-        {
-            Timer t("QDialog");
-            dialog.resize(600, 600);
-            auto verticalLayout = new QVBoxLayout(&dialog);
-            auto textBrowser = new QTextBrowser(&dialog);
-            QFont f("Consolas");
-            f.setPixelSize(20);
-            textBrowser->setFont(f);
-            new GCH(textBrowser->document());
-            verticalLayout->addWidget(textBrowser);
-            verticalLayout->setMargin(6);
-
-            {
-                Timer t("GCH");
-                for (const QString& str : file->lines())
-                    textBrowser->append(str);
-            }
-        }
-
-        dialog.exec();
+        Dialog(file->lines2(),file->name(), tv).exec();
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"),

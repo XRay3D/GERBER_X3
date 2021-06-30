@@ -14,13 +14,20 @@
 #pragma once
 
 #include "utils.h"
+#include <QDialog>
 #include <QSyntaxHighlighter>
 
 class QTextDocument;
 
+class Dialog : public QDialog {
+    Q_OBJECT
+public:
+    Dialog(const QString& text, const QString& windowTitle, QWidget* parent = nullptr);
+    virtual ~Dialog();
+};
+
 class GCH final : public QSyntaxHighlighter {
     Q_OBJECT
-    QTextCharFormat myClassFormat;
 
 public:
     explicit GCH(QTextDocument* parent);
