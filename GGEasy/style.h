@@ -1,7 +1,8 @@
-#ifndef STYLE_H
-#define STYLE_H
+#pragma once
 
+#include <QCommonStyle>
 #include <QProxyStyle>
+#include <QtGui>
 
 class Style : public QProxyStyle {
     Q_OBJECT
@@ -16,4 +17,16 @@ public:
     void drawItemPixmap(QPainter* painter, const QRect& rect, int alignment, const QPixmap& pixmap) const override;
 };
 
-#endif // STYLE_H
+class MyStyle : public QCommonStyle {
+    Q_OBJECT
+public:
+    explicit MyStyle();
+
+    void drawControl(ControlElement element, const QStyleOption* opt, QPainter* p, const QWidget* w) const;
+    void drawItemText(QPainter* painter, const QRect& rect, int flags, const QPalette& pal, bool enabled, const QString& text, QPalette::ColorRole textRole) const;
+    void drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPainter* p, const QWidget* w) const;
+
+signals:
+
+public slots:
+};
