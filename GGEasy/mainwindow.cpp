@@ -81,20 +81,14 @@ MainWindow::MainWindow(QWidget* parent)
     // connect plugins
     for(auto& [type, pair] : App::filePlugins()) {
         auto& [parser, pobj] = pair;
+        if(parser->type() == int(FileType::GCode))
+            continue;
         pobj->moveToThread(&parserThread);
         connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
         connect(pobj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
         connect(pobj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
         connect(this, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
         connect(m_project, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
-    }
-
-    { // add dummy gcode plugin
-        auto parser = new GCode::Plugin(this);
-        PIF pi {
-            static_cast<FilePluginInterface*>(parser),
-            static_cast<QObject*>(parser)};
-        App::filePlugins().emplace(parser->type(), pi);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -121,7 +115,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     readSettings();
 
-    if(qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if(qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
         int i = 0;
         int k = 100;
 
@@ -354,8 +348,8 @@ void MainWindow::createActionsService() {
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
             auto r(geometry());
             //r.setSize({ 1280, 720 });
-            r.setTopLeft({ 0, 1080 });
-            r.setSize({ 1920, 1080 });
+            r.setTopLeft({0, 1080});
+            r.setSize({1920, 1080});
             setGeometry(r);
         }));
     }
@@ -683,9 +677,7 @@ void MainWindow::readSettings() {
     restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     restoreState(settings.value("state", QByteArray()).toByteArray());
     lastPath = settings.value("lastPath").toString();
-    if(qApp->applicationDirPath().contains("GERBER_X3/bin"))
-        loadFile(settings.value("project").toString());
-    //r
+
     for(auto toolBar : findChildren<QToolBar*>()) {
         settings.beginReadArray(toolBar->objectName());
         int ctr = 0;
@@ -695,6 +687,10 @@ void MainWindow::readSettings() {
         }
         settings.endArray();
     }
+
+    if(qApp->applicationDirPath().contains("GERBER_X3/bin"))
+        loadFile(settings.value("project").toString());
+
     settings.endGroup();
 }
 

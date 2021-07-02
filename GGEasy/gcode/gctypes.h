@@ -265,6 +265,8 @@ protected:
     static inline bool m_info { true };
     static inline bool m_sameFolder { true };
 
+    static inline bool m_simplifyHldi { false };
+
     static inline int m_profileSort = 0;
 
 public:
@@ -285,6 +287,8 @@ public:
 
     static bool info() { return m_info; }
     static bool sameFolder() { return m_sameFolder; }
+
+    static bool simplifyHldi() { return m_simplifyHldi; }
 
     static int profileSort() { return m_profileSort; }
 };

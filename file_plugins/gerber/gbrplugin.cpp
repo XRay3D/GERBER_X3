@@ -174,7 +174,7 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
         Tab(QWidget* parent = nullptr)
             : SettingsTabInterface(parent)
         {
-            setObjectName(QString::fromUtf8("tabDxf"));
+            setObjectName(QString::fromUtf8("tabGerber"));
             auto verticalLayout = new QVBoxLayout(this);
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
             verticalLayout->setContentsMargins(6, 6, 6, 6);
