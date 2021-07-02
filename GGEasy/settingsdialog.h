@@ -29,9 +29,9 @@ public:
     explicit SettingsDialog(QWidget* parent = nullptr, int tab = -1);
     ~SettingsDialog() override;
     void readSettings();
-    void writeSettings();
+    void saveSettings();
     void readSettingsDialog();
-    void writeSettingsDialog();
+    void saveSettingsDialog();
     /////////////////////
     static void translator(QApplication* app, const QString& path);
     enum {

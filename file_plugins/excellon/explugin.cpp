@@ -128,7 +128,7 @@ QJsonObject Plugin::info() const
 //        Tab(QWidget* parent = nullptr)
 //            : SettingsTabInterface(parent)
 //        {
-//            setObjectName(QString::fromUtf8("tabDxf"));
+//            setObjectName(QString::fromUtf8("tabExcellon"));
 //            auto verticalLayout = new QVBoxLayout(this);
 //            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
 //            verticalLayout->setContentsMargins(6, 6, 6, 6);

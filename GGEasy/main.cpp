@@ -44,8 +44,9 @@ void translation(QApplication* app);
 
 #include "leakdetector.h"
 
-int main(int argc, char** argv)
-{
+#include <gcode/gcplugin.h>
+
+int main(int argc, char** argv) {
 
     //QApplication::setStyle(new MyStyle);
     //    QString s1("FILE_FORMAT=3:3");
@@ -107,7 +108,7 @@ int main(int argc, char** argv)
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     QSharedMemory nixFixSharedMemory("AppSettings");
-    if (nixFixSharedMemory.attach())
+    if(nixFixSharedMemory.attach())
         nixFixSharedMemory.detach();
 #endif
 
@@ -122,14 +123,14 @@ int main(int argc, char** argv)
     QGLFormat::setDefaultFormat(glf);
 #endif
 
-    if constexpr (0) {
+    if constexpr(0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
         semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
         QSharedMemory nix_fix_shared_memory("GGEasy_Memory");
-        if (nix_fix_shared_memory.attach()) {
+        if(nix_fix_shared_memory.attach()) {
             nix_fix_shared_memory.detach();
         }
 #endif
@@ -137,7 +138,7 @@ int main(int argc, char** argv)
         QSharedMemory sharedMemory("GGEasy_Memory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false; // переменную для проверки ууже запущенного приложения
-        if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
+        if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true; // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
             sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем 1 байт памяти
@@ -147,10 +148,10 @@ int main(int argc, char** argv)
         QCommandLineParser parser;
         parser.addPositionalArgument("url", "Url of file to open");
         parser.process(app);
-        if (is_running) {
+        if(is_running) {
             system("pause");
-            if (parser.positionalArguments().length()) {
-                for (const QString& fileName : parser.positionalArguments()) {
+            if(parser.positionalArguments().length()) {
+                for(const QString& fileName : parser.positionalArguments()) {
                     instance()->loadFile(fileName);
                 }
             }
@@ -185,40 +186,47 @@ int main(int argc, char** argv)
 #endif
         // load plugins
         QDir dir(QApplication::applicationDirPath() + "/plugins");
-        if (dir.exists()) { // Поиск всех файлов в папке "plugins"
+        if(dir.exists()) { // Поиск всех файлов в папке "plugins"
             QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
-            for (const auto& str : listFiles) { // Проход по всем файлам
+            for(const auto& str : listFiles) { // Проход по всем файлам
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
                 if /**/ (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
-                    App::filePlugins().emplace(file->type(), PIF { file, pobj });
-                } else if (auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
-                    App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
+                    App::filePlugins().emplace(file->type(), PIF {file, pobj});
+                } else if(auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
+                    App::shapePlugins().emplace(shape->type(), PIS {shape, pobj});
                 }
             }
+        }
+        { // add dummy gcode plugin
+            auto parser = new GCode::Plugin(&app);
+            PIF pi {
+                static_cast<FilePluginInterface*>(parser),
+                static_cast<QObject*>(parser)};
+            App::filePlugins().emplace(parser->type(), pi);
         }
 
         QSettings settings;
         settings.beginGroup("MainWindow");
         QString locale(settings.value("locale").toString());
-        if (locale.isEmpty())
+        if(locale.isEmpty())
             locale = QLocale().name().left(2);
         settings.setValue("locale", locale);
         settings.endGroup();
         MainWindow::translate(locale);
     }
 
-    SettingsDialog().accept();
+    SettingsDialog().reject();
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
-    mainWin.setIconSize({ 24, 24 });
+    mainWin.setIconSize({24, 24});
 
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");
     parser.process(app);
-    for (const QString& fileName : parser.positionalArguments()) {
+    for(const QString& fileName : parser.positionalArguments()) {
         mainWin.loadFile(fileName);
     }
 
