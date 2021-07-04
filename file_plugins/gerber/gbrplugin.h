@@ -37,7 +37,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
-    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
     ThermalPreviewGiVec createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool) override;

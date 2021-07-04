@@ -88,7 +88,7 @@ bool Plugin::thisIsIt(const QString& fileName)
     static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
     while (in.readLineInto(&line)) {
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         if (ctre::match<regex1>(data))
             return true;
         if (ctre::match<regex2>(data))
@@ -116,7 +116,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-//std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
+//SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 //{
 //    class Tab : public SettingsTabInterface, Settings {
 //        QCheckBox* chbxCleanPolygons;

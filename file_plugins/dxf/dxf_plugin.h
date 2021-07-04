@@ -38,7 +38,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
-    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx);
@@ -53,7 +53,6 @@ signals:
 private:
     File* m_file = nullptr;
     QIcon drawDrillIcon(QColor color);
-
 };
 
 }

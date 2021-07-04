@@ -136,7 +136,7 @@ bool Plugin::thisIsIt(const QString& fileName)
         QTextStream in(&file);
         QString line;
         while (in.readLineInto(&line)) {
-            auto data { to_sv16(line) };
+            auto data { toU16StrView(line) };
             if (*ctre::range<pattern>(data).begin())
                 return true;
         }
@@ -162,7 +162,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 {
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxCleanPolygons;
@@ -233,7 +233,9 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             settings.endGroup();
         }
     };
-    return { new Tab(parent), "Gerber X3" };
+    auto tab = new Tab(parent);
+    tab->setWindowTitle("Gerber X3");
+    return tab;
 }
 
 void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)

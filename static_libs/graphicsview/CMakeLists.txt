@@ -29,14 +29,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 endif()
 
 add_library(graphicsview STATIC
-    edid.h
-    graphicsview.h
-    qdruler.h
-    scene.h
     edid.cpp
+    edid.h
     graphicsview.cpp
-    qdruler.cpp
+    graphicsview.h
+    ruler.cpp
+    ruler.h
     scene.cpp
+    scene.h
     )
 
 target_link_libraries(graphicsview PRIVATE

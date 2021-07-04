@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 // https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
-#include "qdruler.h"
+#include "ruler.h"
 
 #include "app.h"
 
@@ -13,7 +13,7 @@
 #include <QTextFormat>
 #include <QtMath>
 
-QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
+Ruler::Ruler(Ruler::Type rulerType, QWidget* parent)
     : QWidget(parent)
     , drawText(false)
     , mouseTracking(false)
@@ -30,17 +30,17 @@ QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
     //setFont(txtFont);
 }
 
-QSize QDRuler::minimumSizeHint() const { return QSize(RulerBreadth, RulerBreadth); }
+QSize Ruler::minimumSizeHint() const { return QSize(Ruler::Breadth, Ruler::Breadth); }
 
-QDRuler::RULER_TYPE QDRuler::RulerType() const { return rulerType; }
+Ruler::Type Ruler::RulerType() const { return rulerType; }
 
-qreal QDRuler::Origin() const { return origin; }
+qreal Ruler::Origin() const { return origin; }
 
-qreal QDRuler::RulerUnit() const { return rulerUnit; }
+qreal Ruler::RulerUnit() const { return rulerUnit; }
 
-qreal QDRuler::RulerZoom() const { return rulerZoom; }
+qreal Ruler::RulerZoom() const { return rulerZoom; }
 
-void QDRuler::SetOrigin(const qreal origin_)
+void Ruler::SetOrigin(const qreal origin_)
 {
     if (!qFuzzyCompare(origin, origin_)) {
         origin = origin_;
@@ -48,7 +48,7 @@ void QDRuler::SetOrigin(const qreal origin_)
     }
 }
 
-void QDRuler::SetRulerUnit(const qreal rulerUnit_)
+void Ruler::SetRulerUnit(const qreal rulerUnit_)
 {
     if (!qFuzzyCompare(rulerUnit, rulerUnit_)) {
         rulerUnit = rulerUnit_;
@@ -56,7 +56,7 @@ void QDRuler::SetRulerUnit(const qreal rulerUnit_)
     }
 }
 
-void QDRuler::SetRulerZoom(const qreal rulerZoom_)
+void Ruler::SetRulerZoom(const qreal rulerZoom_)
 {
     if (!qFuzzyCompare(rulerZoom, rulerZoom_)) {
         rulerZoom = rulerZoom_;
@@ -64,14 +64,14 @@ void QDRuler::SetRulerZoom(const qreal rulerZoom_)
     }
 }
 
-void QDRuler::SetCursorPos(const QPoint cursorPos_)
+void Ruler::SetCursorPos(const QPoint cursorPos_)
 {
     cursorPos = cursorPos_; //this->mapFromGlobal(cursorPos_);
     //cursorPos += QPoint(RulerBreadth, RulerBreadth);
     update();
 }
 
-void QDRuler::SetMouseTrack(const bool track)
+void Ruler::SetMouseTrack(const bool track)
 {
     if (mouseTracking != track) {
         mouseTracking = track;
@@ -80,14 +80,14 @@ void QDRuler::SetMouseTrack(const bool track)
     }
 }
 
-void QDRuler::mouseMoveEvent(QMouseEvent* event)
+void Ruler::mouseMoveEvent(QMouseEvent* event)
 {
     cursorPos = event->pos();
     update();
     QWidget::mouseMoveEvent(event);
 }
 
-void QDRuler::paintEvent(QPaintEvent* event)
+void Ruler::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event)
     QPainter painter(this);
@@ -108,7 +108,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::darkGray, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, static_cast<double>(RulerBreadth) * 0.6);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, static_cast<double>(Ruler::Breadth) * 0.6);
     drawText = false;
 
     // drawing a scale of 0.2
@@ -117,12 +117,12 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::green, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, static_cast<double>(RulerBreadth) * 0.3);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, static_cast<double>(Ruler::Breadth) * 0.3);
     drawText = false;
 
     // drawing a scale of 1.0
     meterPen = QPen(Qt::red, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, static_cast<double>(RulerBreadth) * 0);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, static_cast<double>(Ruler::Breadth) * 0);
 
     // drawing the current mouse position indicator
     if (mouseTracking) {
@@ -138,7 +138,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
     }
 }
 
-void QDRuler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMeter, qreal startPositoin)
+void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMeter, qreal startPositoin)
 {
     // Flagging whether we are horizontal or vertical only to reduce
     // to cheching many times
@@ -171,7 +171,7 @@ void QDRuler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMe
     }
 }
 
-void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startMark, qreal endMark, int startTickNo, qreal step, qreal startPosition)
+void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startMark, qreal endMark, int startTickNo, qreal step, qreal startPosition)
 {
     bool isHorzRuler = (Horizontal == rulerType);
     for (qreal current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
@@ -214,7 +214,7 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
     }
 }
 
-void QDRuler::DrawMousePosTick(QPainter* painter)
+void Ruler::DrawMousePosTick(QPainter* painter)
 {
     QPoint starPt = cursorPos;
     QPoint endPt;

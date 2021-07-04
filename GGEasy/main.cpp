@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
         MainWindow::translate(locale);
     }
 
-    SettingsDialog().reject();
+    SettingsDialog().accept();
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");

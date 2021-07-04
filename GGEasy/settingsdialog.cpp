@@ -54,18 +54,47 @@ const QString colorName[GuiColors::Count] {
     QObject::tr("G0"),
 };
 
+class ModelSettings : public QAbstractListModel {
+    std::vector<QWidget*> m_data;
+
+public:
+    ModelSettings(QObject* parent = nullptr)
+        : QAbstractListModel { parent }
+    {
+    }
+    virtual ~ModelSettings() { }
+
+    // QAbstractItemModel interface
+    int rowCount(const QModelIndex& /*parent*/) const override { return m_data.size(); }
+    int columnCount(const QModelIndex& /*parent*/) const override { return 1; }
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        if (role == Qt::DisplayRole)
+            return m_data[index.row()]->windowTitle();
+        return {};
+    }
+    void addWidget(QWidget* w) { m_data.emplace_back(w); }
+};
+
+////////////////////////////////////////////////////////////////////////////
+/// \brief SettingsDialog::SettingsDialog
+/// \param parent
+/// \param tab
+///
 SettingsDialog::SettingsDialog(QWidget* parent, int tab)
-    : QDialog(parent) {
+    : QDialog(parent)
+{
     setupUi(this);
+
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
-    for(int i = 0; i < GuiColors::Count; ++i) {
+    for (int i = 0; i < GuiColors::Count; ++i) {
         formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(App::settings().m_guiColor[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
 
     connect(cbxFontSize, &QComboBox::currentTextChanged, [](const QString& fontSize) {
-        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression("font-size:\\s*\\d+"), "font-size: " + fontSize));
+        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression(R"(font-size:\s*\d+)"), "font-size: " + fontSize));
         QFont f;
         f.setPointSize(fontSize.toInt());
         qApp->setFont(f);
@@ -79,8 +108,8 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     QString locale(settings.value("locale").toString());
     settings.endGroup();
 
-    for(int i = 0; i < cbxLanguage->count(); ++i) {
-        if(cbxLanguage->itemData(i).toString() == locale) {
+    for (int i = 0; i < cbxLanguage->count(); ++i) {
+        if (cbxLanguage->itemData(i).toString() == locale) {
             cbxLanguage->setCurrentIndex(i);
             langIndex = i;
             break;
@@ -98,24 +127,38 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
 
     tabs.reserve(App::filePlugins().size());
-    for(auto& [type, tuple] : App::filePlugins()) {
+
+    //    auto model = new ModelSettings(listView);
+
+    for (auto& [type, tuple] : App::filePlugins()) {
         auto& [parser, pobj] = tuple;
-        auto [tab, name] = parser->createSettingsTab(tabwMain);
-        if(!tab)
+        auto tab = parser->createSettingsTab(this);
+        if (!tab)
             continue;
+
+        //        model->addWidget(tab);
+        //        auto gbx = new QGroupBox(tab->windowTitle(), this);
+        //        auto lay = new QHBoxLayout(gbx);
+        //        lay->addWidget(tab);
+        //        verticalLayout_3->addWidget(gbx);
+
         tabs.push_back(tab);
-        tabwMain->addTab(tab, name);
+        tabwMain->addTab(tab, tab->windowTitle());
+        tab->readSettings(settings);
     }
+
+    //    listView->setModel(model);
 
     readSettings();
     readSettingsDialog();
-    if(tab > -1)
+    if (tab > -1)
         tabwMain->setCurrentIndex(tab);
 }
 
 SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 
-void SettingsDialog::readSettings() {
+void SettingsDialog::readSettings()
+{
     /*GUI*/
     settings.beginGroup("Viewer");
     settings.getValue(chbxAntialiasing);
@@ -128,7 +171,7 @@ void SettingsDialog::readSettings() {
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for(int i = 0; i < GuiColors::Count; ++i)
+    for (int i = 0; i < GuiColors::Count; ++i)
         App::settings().m_guiColor[i].setNamedColor(settings.value(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb)).toString());
     settings.endGroup();
 
@@ -161,20 +204,21 @@ void SettingsDialog::readSettings() {
     /*Other*/
     settings.getValue(App::settings().m_inch, "inch", false);
     settings.getValue(App::settings().m_snap, "snap", false);
-    for(auto tab : tabs)
+    for (auto tab : tabs)
         tab->readSettings(settings);
 }
 
-void SettingsDialog::saveSettings() {
+void SettingsDialog::saveSettings()
+{
     /*GUI*/
     settings.beginGroup("Viewer");
-    if(settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
+    if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
         App::graphicsView()->setOpenGL(chbxOpenGl->isChecked());
         App::graphicsView()->viewport()->setObjectName("viewport");
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxOpenGl);
     }
-    if(settings.value("chbxAntialiasing").toBool() != chbxAntialiasing->isChecked()) {
+    if (settings.value("chbxAntialiasing").toBool() != chbxAntialiasing->isChecked()) {
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxAntialiasing);
     }
@@ -186,7 +230,7 @@ void SettingsDialog::saveSettings() {
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for(int i = 0; i < GuiColors::Count; ++i)
+    for (int i = 0; i < GuiColors::Count; ++i)
         settings.setValue(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb));
     settings.endGroup();
 
@@ -212,44 +256,55 @@ void SettingsDialog::saveSettings() {
     /*Other*/
     settings.setValue(App::settings().m_inch, "inch");
     settings.setValue(App::settings().m_snap, "snap");
-    for(auto tab : tabs)
+    for (auto tab : tabs)
         tab->writeSettings(settings);
 }
 
-void SettingsDialog::readSettingsDialog() {
+void SettingsDialog::readSettingsDialog()
+{
     settings.beginGroup("SettingsDialog");
     restoreGeometry(settings.value("geometry").toByteArray());
     settings.getValue(tabwMain);
     settings.endGroup();
 }
 
-void SettingsDialog::saveSettingsDialog() {
+void SettingsDialog::saveSettingsDialog()
+{
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
     settings.setValue(tabwMain);
     settings.endGroup();
 }
 
-void SettingsDialog::translator(QApplication* app, const QString& path) {
-    if(QFile::exists(path)) {
+void SettingsDialog::translator(QApplication* app, const QString& path)
+{
+    if (QFile::exists(path)) {
         QTranslator* pTranslator = new QTranslator(qApp);
-        if(pTranslator->load(path))
+        if (pTranslator->load(path))
             app->installTranslator(pTranslator);
         else
             delete pTranslator;
     }
 }
 
-void SettingsDialog::reject() {
+void SettingsDialog::reject()
+{
     readSettings();
-    if(!isVisible())
+
+    if (!isVisible())
         MainWindow::updateTheme();
+
     QDialog::reject();
 }
 
-void SettingsDialog::accept() {
+void SettingsDialog::accept()
+{
+    if (isVisible() && !buttonBox->button(QDialogButtonBox::Ok)->hasFocus())
+        return;
+
     saveSettings();
-    if(langIndex != cbxLanguage->currentIndex()) {
+
+    if (langIndex != cbxLanguage->currentIndex()) {
         QMessageBox::information(this, "", tr("The complete translation of the application will take\n"
                                               "effect after restarting the application."));
     }
@@ -257,10 +312,18 @@ void SettingsDialog::accept() {
     QDialog::accept();
 }
 
-void SettingsDialog::showEvent(QShowEvent* event) {
+void SettingsDialog::showEvent(QShowEvent* event)
+{
     int width = 0;
-    for(int i = 0; i < tabwMain->tabBar()->count(); ++i)
+    for (int i = 0; i < tabwMain->tabBar()->count(); ++i)
         width += tabwMain->tabBar()->tabRect(i).width();
     resize(width + 20, 10);
     QDialog::showEvent(event);
+}
+
+bool SettingsDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress)
+        return false;
+    return QDialog::eventFilter(watched, event);
 }

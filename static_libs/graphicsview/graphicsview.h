@@ -16,7 +16,7 @@
 #include <QGraphicsView>
 #include <QSettings>
 
-class QDRuler;
+class Ruler;
 class Scene;
 
 class GraphicsView : public QGraphicsView {
@@ -54,8 +54,8 @@ signals:
     void mouseClickL(const QPointF&);
 
 private:
-    QDRuler* hRuler;
-    QDRuler* vRuler;
+    Ruler* hRuler;
+    Ruler* vRuler;
     Scene* m_scene;
 
     void updateRuler();
