@@ -45,8 +45,6 @@ public:
     virtual void writeSettings(MySettings& settings) = 0;
 };
 
-using SettingsTab = std::pair<SettingsTabInterface*, QString>;
-
 class FilePluginInterface {
 public:
     explicit FilePluginInterface() { }
@@ -63,8 +61,7 @@ public:
         [[maybe_unused]] FileInterface* file,
         [[maybe_unused]] const ThParam2& param,
         [[maybe_unused]] Tool& tool) { return {}; };
-    [[nodiscard]] virtual SettingsTab createSettingsTab(
-        [[maybe_unused]] QWidget* parent) { return { nullptr, "" }; };
+    [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual FileInterface* createFile() = 0;
     virtual QJsonObject info() const = 0;
 

@@ -45,6 +45,9 @@ public slots:
     void reject() override;
     void accept() override;
 
+    // QObject interface
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
     // QWidget interface
 protected:
     void showEvent(QShowEvent* event) override;

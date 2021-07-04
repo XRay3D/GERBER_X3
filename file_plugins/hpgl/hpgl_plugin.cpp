@@ -40,7 +40,6 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     QTextStream in(&file);
     Parser::parseFile(fileName);
     return Parser::file;
-
 }
 
 bool Plugin::thisIsIt(const QString& fileName)
@@ -73,7 +72,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 {
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxBoldFont;
@@ -165,7 +164,9 @@ std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* par
             settings.endGroup();
         }
     };
-    return { new Tab(parent), "DXF" };
+//    auto tab = new Tab(parent);
+//    tab->setWindowTitle("HPGL");
+    return nullptr;
 }
 
 void Plugin::updateFileModel(FileInterface* file)

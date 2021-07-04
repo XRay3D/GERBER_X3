@@ -28,7 +28,7 @@ public:
     int type() const override;
     QString folderName() const override;
 
-    SettingsTab createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     FileInterface* createFile() override;
     QJsonObject info() const override;
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;

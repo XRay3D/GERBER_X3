@@ -219,9 +219,11 @@ QJsonObject Plugin::info() const
     };
 }
 
-std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 {
-    return { new SettingsTab(parent), "DXF" };
+    auto settingsTab = new SettingsTab(parent);
+    settingsTab->setWindowTitle("DXF");
+    return settingsTab;
 }
 
 void Plugin::updateFileModel(FileInterface* file)

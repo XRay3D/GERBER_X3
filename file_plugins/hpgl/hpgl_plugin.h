@@ -40,7 +40,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
-    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
 
 public slots:

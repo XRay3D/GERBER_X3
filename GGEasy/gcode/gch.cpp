@@ -43,7 +43,7 @@ void GCH::highlightBlock(const QString& text)
 
     using namespace std::string_view_literals;
     static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
-    auto data { to_sv16(text) };
+    auto data { toU16StrView(text) };
     for (auto [whole, code, number] : ctre::range<pattern>(data)) {
         { // code
             QTextCharFormat myClassFormat;

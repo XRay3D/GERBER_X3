@@ -16,7 +16,7 @@
 *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
-#include "qdruler.h"
+#include "ruler.h"
 #include "scene.h"
 #include "settings.h"
 
@@ -76,15 +76,15 @@ GraphicsView::GraphicsView(QWidget* parent)
     ////////////////////////////////////
 
     // add two rulers on top and left.
-    setViewportMargins(RulerBreadth, 0, 0, RulerBreadth);
+    setViewportMargins(Ruler::Breadth, 0, 0, Ruler::Breadth);
 
     // add grid layout
     QGridLayout* gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(0);
 
     // create rulers
-    hRuler = new QDRuler(QDRuler::Horizontal, this);
-    vRuler = new QDRuler(QDRuler::Vertical, this);
+    hRuler = new Ruler(Ruler::Horizontal, this);
+    vRuler = new Ruler(Ruler::Vertical, this);
     hRuler->SetMouseTrack(true);
     vRuler->SetMouseTrack(true);
 
@@ -98,7 +98,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         vRuler->update();
     });
     corner->setCheckable(true);
-    corner->setFixedSize(RulerBreadth, RulerBreadth);
+    corner->setFixedSize(Ruler::Breadth, Ruler::Breadth);
 
     gridLayout->addWidget(corner, 1, 0);
     gridLayout->addWidget(hRuler, 1, 1);

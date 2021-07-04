@@ -399,7 +399,7 @@ HEADERS  += \
     static_libs\gi\thermalpreviewitem.h \
     static_libs\graphicsview\edid.h \
     static_libs\graphicsview\graphicsview.h \
-    static_libs\graphicsview\qdruler.h \
+    static_libs\graphicsview\ruler.h \
     static_libs\graphicsview\scene.h \
     static_libs\thermal\thermal.h \
     static_libs\thermal\thermaldelegate.h \
