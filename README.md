@@ -5,7 +5,7 @@ V0.8.0
 Частичная поддержка файлов DXF.
 
 Форумы по программе:
-* [cnc-club.ru](https://www.cnc-club.ru/forum/viewtopic.php?f=155&p=594920#p594920)
+* [cnc-club.ru](https://www.cnc-club.ru/forum/viewtopic.php?f=155&t=22277&view=unread#unread)
 * [cnc3018.ru](https://cnc3018.ru/threads/ggeasy-grber2gcode-frezerovka-pechatnyx-plat-na-chpu-zasvetka-lazerom-izuchaem-delimsja-opytom-i-dostizhenijami.2231/)
 
 Program for preparing G-code from Gerber (RS-274X Revision 2020.09) files for CNC milling.
