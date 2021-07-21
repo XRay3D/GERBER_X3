@@ -38,6 +38,8 @@ private slots:
     void on_pbStep_clicked();
     void on_pushButton_clicked();
 
+    void on_pbSetAsDefault_clicked();
+
 private:
     Ui::ExcellonDialog* ui;
     Excellon::File* m_file;

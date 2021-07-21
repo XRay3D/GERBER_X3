@@ -229,6 +229,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="pbSetAsDefault">
+     <property name="text">
+      <string>Set as default</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

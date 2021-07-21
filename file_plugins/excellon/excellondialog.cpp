@@ -22,6 +22,7 @@
 #include "scene.h"
 #include <cmath>
 
+#include "exsettingstab.h"
 #include "leakdetector.h"
 
 using namespace Excellon;
@@ -148,3 +149,24 @@ void ExcellonDialog::resetFormat()
 void ExcellonDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
 
 void ExcellonDialog::hideEvent(QHideEvent* event) { deleteLater(); }
+
+void ExcellonDialog::on_pbSetAsDefault_clicked()
+{
+    QSettings settings;
+    settings.beginGroup("Excellon");
+
+    settings.setValue("dsbxX", m_tmpFormat.offsetPos.x());
+    settings.setValue("dsbxY", m_tmpFormat.offsetPos.y());
+
+    settings.setValue("rbInches", m_tmpFormat.unitMode == Inches);
+    settings.setValue("rbMillimeters", m_tmpFormat.unitMode == Millimeters);
+
+    settings.setValue("rbLeading", m_tmpFormat.zeroMode == LeadingZeros);
+    settings.setValue("rbTrailing", m_tmpFormat.zeroMode == TrailingZeros);
+
+    settings.setValue("sbxDecimal", m_tmpFormat.decimal);
+    settings.setValue("sbxInteger", m_tmpFormat.integer);
+    settings.endGroup();
+
+    Settings::setformat(m_tmpFormat);
+}
