@@ -25,10 +25,14 @@ class File;
 
 class ExcellonDialog : public QDialog {
     Q_OBJECT
+    static inline bool m_showed;
+    bool accepted;
 
 public:
-    explicit ExcellonDialog(Excellon::File* file, bool& checkPtr);
+    explicit ExcellonDialog(Excellon::File* file);
     ~ExcellonDialog() override;
+
+    static bool showed();
 
 private slots:
     void on_pbStep_clicked();
@@ -36,17 +40,20 @@ private slots:
 
 private:
     Ui::ExcellonDialog* ui;
-    bool& checkPtr;
     Excellon::File* m_file;
     const Excellon::Format m_format;
     Excellon::Format m_tmpFormat;
     int m_step = 3;
+
     void updateFormat();
+
     void acceptFormat();
     void rejectFormat();
 
-protected:
+    void resetFormat();
+
     // QWidget interface
+protected:
     void closeEvent(QCloseEvent* event) override;
     void hideEvent(QHideEvent* event) override;
 };

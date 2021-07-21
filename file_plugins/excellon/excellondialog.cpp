@@ -26,14 +26,15 @@
 
 using namespace Excellon;
 
-ExcellonDialog::ExcellonDialog(Excellon::File* file, bool& checkPtr)
+bool ExcellonDialog::showed() { return m_showed; }
+
+ExcellonDialog::ExcellonDialog(Excellon::File* file)
     : ui(new Ui::ExcellonDialog)
-    , checkPtr(checkPtr)
     , m_file(file)
     , m_format(file->format())
     , m_tmpFormat(file->format())
 {
-    checkPtr = true;
+    m_showed = true;
 
     ui->setupUi(this);
     setObjectName("ExcellonDialog");
@@ -72,7 +73,8 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file, bool& checkPtr)
 
 ExcellonDialog::~ExcellonDialog()
 {
-    checkPtr = false;
+    m_showed = false;
+    resetFormat();
     delete ui;
 }
 
@@ -84,42 +86,6 @@ void ExcellonDialog::on_pbStep_clicked()
     ui->pbStep->setText("x" + QString::number(singleStep));
     ui->dsbxX->setSingleStep(singleStep);
     ui->dsbxY->setSingleStep(singleStep);
-}
-
-void ExcellonDialog::updateFormat()
-{
-
-    m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
-    m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
-
-    m_tmpFormat.integer = ui->sbxInteger->value();
-    m_tmpFormat.decimal = ui->sbxDecimal->value();
-
-    m_tmpFormat.unitMode = static_cast<UnitMode>(ui->rbMillimeters->isChecked());
-    m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
-
-    m_file->setFormat(m_tmpFormat);
-    App::graphicsView()->zoomFit();
-}
-
-void ExcellonDialog::acceptFormat()
-{
-    App::graphicsView()->zoomFit();
-    deleteLater();
-}
-
-void ExcellonDialog::rejectFormat()
-{
-    App::graphicsView()->zoomFit();
-    m_file->setFormat(m_format);
-    deleteLater();
-}
-
-void ExcellonDialog::closeEvent(QCloseEvent* event)
-{
-    m_file->setFormat(m_format);
-    deleteLater();
-    QDialog::closeEvent(event);
 }
 
 void ExcellonDialog::on_pushButton_clicked()
@@ -147,9 +113,38 @@ void ExcellonDialog::on_pushButton_clicked()
     }
 }
 
-void ExcellonDialog::hideEvent(QHideEvent* event)
+void ExcellonDialog::updateFormat()
 {
-    m_file->setFormat(m_format);
-    deleteLater();
-    QDialog::hideEvent(event);
+
+    m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
+    m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
+
+    m_tmpFormat.integer = ui->sbxInteger->value();
+    m_tmpFormat.decimal = ui->sbxDecimal->value();
+
+    m_tmpFormat.unitMode = static_cast<UnitMode>(ui->rbMillimeters->isChecked());
+    m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
+
+    m_file->setFormat(m_tmpFormat);
+    App::graphicsView()->zoomFit();
 }
+
+void ExcellonDialog::acceptFormat()
+{
+    accepted = true;
+    App::graphicsView()->zoomFit();
+}
+
+void ExcellonDialog::rejectFormat() { deleteLater(); }
+
+void ExcellonDialog::resetFormat()
+{
+    if (accepted)
+        return;
+    m_file->setFormat(m_format);
+    App::graphicsView()->zoomFit();
+}
+
+void ExcellonDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
+
+void ExcellonDialog::hideEvent(QHideEvent* event) { deleteLater(); }
