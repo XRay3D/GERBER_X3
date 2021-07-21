@@ -46,10 +46,16 @@ private:
     QMap<long, long> vGrid;
     void drawRuller(QPainter* painter);
 
+    int fpsCtr {};
+    int currentFps {};
+
     // QGraphicsScene interface
 protected:
     void drawBackground(QPainter* painter, const QRectF& rect) override;
     void drawForeground(QPainter* painter, const QRectF& rect) override;
+
+    // QObject interface
+    void timerEvent(QTimerEvent* event) override;
 };
 
 #include "app.h"

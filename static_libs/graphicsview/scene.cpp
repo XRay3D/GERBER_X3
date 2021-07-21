@@ -44,6 +44,8 @@ Scene::Scene(QObject* parent)
     App::setScene(this);
     double size = 1000.0; // 4 sqare meters
     setSceneRect(-size, -size, +size * 2, +size * 2);
+
+    startTimer(1000);
 }
 
 Scene::~Scene()
@@ -169,7 +171,7 @@ void Scene::drawRuller(QPainter* painter)
         return;
 
     const double scaleFactor = App::graphicsView()->scaleFactor();
-
+    painter->save();
     painter->setBrush(QColor(127, 127, 127, 100));
     painter->setPen(QPen(Qt::green, 0.0));
     {
@@ -219,6 +221,7 @@ void Scene::drawRuller(QPainter* painter)
         painter->setBrush(Qt::white);
         painter->drawPath(path);
     }
+    painter->restore();
 }
 
 void Scene::drawBackground(QPainter* painter, const QRectF& rect)
@@ -233,6 +236,8 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     if (m_drawPdf)
         return;
+
+    ++fpsCtr;
 
     { // draw grid
         const long upScale = 100000;
@@ -386,5 +391,37 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     //        m_frameCount++;
     //    }
 
+    { // NOTE FPS counter
+        painter->setRenderHint(QPainter::Antialiasing, true);
+
+        const double scaleFactor = App::graphicsView()->scaleFactor();
+        painter->translate(rect.bottomLeft());
+        painter->scale(scaleFactor, -scaleFactor);
+
+        QPainterPath path;
+
+        auto txt { QString("FPS: %1").arg(currentFps) };
+
+        QFont font;
+        font.setPixelSize(16);
+        font.setWeight(QFont::Thin);
+
+        const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, txt);
+        path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, txt);
+
+        painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setBrush(Qt::black);
+        painter->drawPath(path);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(Qt::white);
+        painter->drawPath(path);
+    }
+
     painter->restore();
+}
+
+void Scene::timerEvent(QTimerEvent* event)
+{
+    currentFps = fpsCtr;
+    fpsCtr = 0;
 }

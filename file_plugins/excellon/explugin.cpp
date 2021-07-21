@@ -116,79 +116,283 @@ QJsonObject Plugin::info() const
     };
 }
 
-//SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-//{
-//    class Tab : public SettingsTabInterface, Settings {
-//        QCheckBox* chbxCleanPolygons;
-//        QCheckBox* chbxSkipDuplicates;
-//        QCheckBox* chbxSimplifyRegions;
-//        DoubleSpinBox* dsbxCleanPolygonsDist;
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
+{
+    class Tab : public SettingsTabInterface, Settings {
 
-//    public:
-//        Tab(QWidget* parent = nullptr)
-//            : SettingsTabInterface(parent)
-//        {
-//            setObjectName(QString::fromUtf8("tabExcellon"));
-//            auto verticalLayout = new QVBoxLayout(this);
-//            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-//            verticalLayout->setContentsMargins(6, 6, 6, 6);
+        DoubleSpinBox* dsbxX;
+        DoubleSpinBox* dsbxY;
+        QRadioButton* rbInches;
+        QRadioButton* rbLeading;
+        QRadioButton* rbMillimeters;
+        QRadioButton* rbTrailing;
+        QSpinBox* sbxDecimal;
+        QSpinBox* sbxInteger;
 
-//            auto groupBox = new QGroupBox(this);
-//            groupBox->setObjectName(QString::fromUtf8("groupBox"));
-//            auto verticalLayout2 = new QVBoxLayout(groupBox);
-//            verticalLayout2->setObjectName(QString::fromUtf8("verticalLayout2"));
-//            verticalLayout2->setContentsMargins(6, 9, 6, 6);
+        QLineEdit* leParseDecimalAndInteger;
+        QLineEdit* leParseUnit;
+        QLineEdit* leParseZero;
 
-//            chbxCleanPolygons = new QCheckBox(groupBox);
-//            chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
-//            verticalLayout2->addWidget(chbxCleanPolygons);
+    public:
+        Tab(QWidget* parent = nullptr)
+            : SettingsTabInterface(parent)
+        {
+            setObjectName(QString::fromUtf8("tabExcellon"));
 
-//            dsbxCleanPolygonsDist = new DoubleSpinBox(groupBox);
-//            dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
-//            dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
-//            dsbxCleanPolygonsDist->setSingleStep(0.001);
-//            dsbxCleanPolygonsDist->setDecimals(4);
-//            verticalLayout2->addWidget(dsbxCleanPolygonsDist);
+            auto vlayTab = new QVBoxLayout(this);
+            vlayTab->setContentsMargins(6, 6, 6, 6);
 
-//            chbxSkipDuplicates = new QCheckBox(groupBox);
-//            chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
-//            verticalLayout2->addWidget(chbxSkipDuplicates);
+            {
+                auto gboxDefaulValues = new QGroupBox(this);
 
-//            chbxSimplifyRegions = new QCheckBox(groupBox);
-//            chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
-//            verticalLayout2->addWidget(chbxSimplifyRegions);
+                gboxDefaulValues->setTitle(QApplication::translate("ExcellonDialog", "Default values", nullptr));
+                auto grbxUnits = new QGroupBox(gboxDefaulValues);
+                {
+                    grbxUnits->setTitle(QApplication::translate("ExcellonDialog", "Units", nullptr));
+                    rbInches = new QRadioButton(grbxUnits);
+                    rbInches->setObjectName(QString::fromUtf8("rbInches"));
 
-//            verticalLayout->addWidget(groupBox);
-//            auto verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-//            verticalLayout->addItem(verticalSpacer);
+                    rbMillimeters = new QRadioButton(grbxUnits);
+                    rbMillimeters->setObjectName(QString::fromUtf8("rbMillimeters"));
 
-//            groupBox->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
-//            chbxCleanPolygons->setText(QApplication::translate("SettingsDialog", "Cleaning Polygons", nullptr));
-//            chbxSkipDuplicates->setText(QApplication::translate("SettingsDialog", "Skip duplicates", nullptr));
-//            chbxSimplifyRegions->setText(QApplication::translate("SettingsDialog", "Simplify Regions", nullptr));
-//        }
-//        virtual ~Tab() override { }
-//        virtual void readSettings(MySettings& settings) override
-//        {
-//            settings.beginGroup("Gerber");
-//            m_cleanPolygons = settings.getValue(chbxCleanPolygons, m_cleanPolygons);
-//            m_cleanPolygonsDist = settings.getValue(dsbxCleanPolygonsDist, m_cleanPolygonsDist);
-//            m_simplifyRegions = settings.getValue(chbxSimplifyRegions, m_simplifyRegions);
-//            m_skipDuplicates = settings.getValue(chbxSkipDuplicates, m_skipDuplicates);
-//            settings.endGroup();
-//        }
-//        virtual void writeSettings(MySettings& settings) override
-//        {
-//            settings.beginGroup("Gerber");
-//            m_cleanPolygons = settings.setValue(chbxCleanPolygons);
-//            m_cleanPolygonsDist = settings.setValue(dsbxCleanPolygonsDist);
-//            m_simplifyRegions = settings.setValue(chbxSimplifyRegions);
-//            m_skipDuplicates = settings.setValue(chbxSkipDuplicates);
-//            settings.endGroup();
-//        }
-//    };
-//    return { new Tab(parent), "Gerber X3" };
-//}
+                    auto vlay = new QVBoxLayout(grbxUnits);
+                    vlay->setContentsMargins(6, 6, 6, 6);
+                    vlay->addWidget(rbInches);
+                    vlay->addWidget(rbMillimeters);
+                }
+                auto grbxZeroes = new QGroupBox(gboxDefaulValues);
+                {
+                    grbxZeroes->setTitle(QApplication::translate("ExcellonDialog", "Zeroes", nullptr));
+
+                    rbLeading = new QRadioButton(grbxZeroes);
+                    rbLeading->setObjectName(QString::fromUtf8("rbLeading"));
+
+                    rbTrailing = new QRadioButton(grbxZeroes);
+                    rbTrailing->setObjectName(QString::fromUtf8("rbTrailing"));
+
+                    auto vlay = new QVBoxLayout(grbxZeroes);
+                    vlay->setContentsMargins(6, 6, 6, 6);
+                    vlay->addWidget(rbLeading);
+                    vlay->addWidget(rbTrailing);
+                }
+                auto grbxFormat = new QGroupBox(gboxDefaulValues);
+                {
+                    grbxFormat->setTitle(QApplication::translate("ExcellonDialog", "Format", nullptr));
+
+                    sbxInteger = new QSpinBox(grbxFormat);
+                    sbxInteger->setObjectName(QString::fromUtf8("sbxInteger"));
+                    sbxInteger->setWrapping(false);
+                    sbxInteger->setAlignment(Qt::AlignCenter);
+                    sbxInteger->setProperty("showGroupSeparator", QVariant(false));
+                    sbxInteger->setMinimum(1);
+                    sbxInteger->setMaximum(8);
+
+                    sbxDecimal = new QSpinBox(grbxFormat);
+                    sbxDecimal->setObjectName(QString::fromUtf8("sbxDecimal"));
+                    sbxDecimal->setAlignment(Qt::AlignCenter);
+                    sbxDecimal->setMinimum(1);
+                    sbxDecimal->setMaximum(8);
+
+                    auto hlay = new QHBoxLayout(grbxFormat);
+                    hlay->setContentsMargins(6, 6, 6, 6);
+                    hlay->addWidget(sbxInteger);
+                    hlay->addWidget(new QLabel(QApplication::translate("ExcellonDialog", ":", nullptr), grbxFormat));
+                    hlay->addWidget(sbxDecimal);
+
+                    hlay->setStretch(0, 1);
+                    hlay->setStretch(2, 1);
+                }
+
+                auto grbxOffset = new QGroupBox(gboxDefaulValues);
+                {
+                    grbxOffset->setTitle(QApplication::translate("ExcellonDialog", "Offset", nullptr));
+
+                    dsbxX = new DoubleSpinBox(grbxOffset);
+                    dsbxX->setObjectName(QString::fromUtf8("dsbxX"));
+                    dsbxX->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
+                    dsbxX->setDecimals(4);
+                    dsbxX->setMinimum(-1000.0);
+                    dsbxX->setMaximum(1000.0);
+
+                    dsbxY = new DoubleSpinBox(grbxOffset);
+                    dsbxY->setObjectName(QString::fromUtf8("dsbxY"));
+                    dsbxY->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
+                    dsbxY->setDecimals(4);
+                    dsbxY->setMinimum(-1000.0);
+                    dsbxY->setMaximum(1000.0);
+
+                    auto formLay = new QFormLayout(grbxOffset);
+                    formLay->setContentsMargins(6, 6, 6, 6);
+                    formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "X:", nullptr), grbxOffset), dsbxX);
+                    formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Y:", nullptr), grbxOffset), dsbxY);
+                }
+
+                auto vlay = new QVBoxLayout(gboxDefaulValues);
+                vlay->setContentsMargins(6, 6, 6, 6);
+                vlay->addWidget(grbxUnits);
+                vlay->addWidget(grbxZeroes);
+                vlay->addWidget(grbxFormat);
+                vlay->addWidget(grbxOffset);
+                vlayTab->addWidget(gboxDefaulValues);
+            }
+            if (0) {
+                auto grbxParse = new QGroupBox(this);
+
+                grbxParse->setTitle(QApplication::translate("ExcellonDialog", "Parse Reg.Expr.", nullptr));
+
+                leParseZero = new QLineEdit(this);
+                leParseZero->setObjectName(QString::fromUtf8("pteParseZero"));
+
+                leParseUnit = new QLineEdit(this);
+                leParseUnit->setObjectName(QString::fromUtf8("pteParseUnit"));
+
+                leParseDecimalAndInteger = new QLineEdit(this);
+                leParseDecimalAndInteger->setObjectName(QString::fromUtf8("pteParseDecimalAndInteger"));
+
+                auto leTestParseZero = new QLineEdit(this);
+                auto leTestParseUnit = new QLineEdit(this);
+                auto leTestParseDecimalAndInteger = new QLineEdit(this);
+                auto leTestOutput = new QLineEdit(this);
+
+                auto testParseZero = [leTestOutput, leTestParseZero, this](const QString&) {
+                    QRegularExpression re(leParseZero->text());
+                    QString text;
+                    if (re.isValid()) {
+                        auto match = re.match(leTestParseZero->text());
+                        for (int ctr {}; QString & string : match.capturedTexts()) {
+                            text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                        }
+                        if (!match.hasMatch())
+                            text = "No captured texts";
+                    } else {
+                        text = re.errorString();
+                    }
+                    leTestOutput->setText(text);
+                };
+                connect(leTestParseZero, &QLineEdit::textChanged, testParseZero);
+                connect(leParseZero, &QLineEdit::textChanged, testParseZero);
+
+                auto testParseUnit = [leTestOutput, leTestParseUnit, this](const QString&) {
+                    QRegularExpression re(leParseUnit->text());
+                    QString text;
+                    if (re.isValid()) {
+                        auto match = re.match(leTestParseUnit->text());
+                        for (int ctr {}; QString & string : match.capturedTexts()) {
+                            text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                        }
+                        if (!match.hasMatch())
+                            text = "No captured texts";
+                    } else {
+                        text = re.errorString();
+                    }
+                    leTestOutput->setText(text);
+                };
+                connect(leTestParseUnit, &QLineEdit::textChanged, testParseUnit);
+                connect(leParseUnit, &QLineEdit::textChanged, testParseUnit);
+
+                auto testlParseDecimalAndInteger = [leTestOutput, leTestParseDecimalAndInteger, this](const QString&) {
+                    QRegularExpression re(leParseDecimalAndInteger->text());
+                    QString text;
+                    if (re.isValid()) {
+                        auto match = re.match(leTestParseDecimalAndInteger->text());
+                        for (int ctr {}; QString & string : match.capturedTexts()) {
+                            text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                        }
+                        if (!match.hasMatch())
+                            text = "No captured texts";
+                    } else {
+                        text = re.errorString();
+                    }
+                    leTestOutput->setText(text);
+                };
+                connect(leTestParseDecimalAndInteger, &QLineEdit::textChanged, testlParseDecimalAndInteger);
+                connect(leParseDecimalAndInteger, &QLineEdit::textChanged, testlParseDecimalAndInteger);
+
+                auto formLay = new QFormLayout(grbxParse);
+                formLay->setContentsMargins(6, 6, 6, 6);
+                formLay->setLabelAlignment(Qt::AlignRight);
+
+                QWidget* nullWidget = nullptr;
+
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Parse Zero:", nullptr), grbxParse), leParseZero);
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse), leTestParseZero);
+
+                formLay->addRow(new QLabel("", grbxParse), nullWidget);
+
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Parse Unit:", nullptr), grbxParse), leParseUnit);
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse), leTestParseUnit);
+
+                formLay->addRow(new QLabel("", grbxParse), nullWidget);
+
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Parse Decimal And Integer:", nullptr), grbxParse), leParseDecimalAndInteger);
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse), leTestParseDecimalAndInteger);
+
+                formLay->addRow(new QLabel("", grbxParse), nullWidget);
+
+                formLay->addRow(new QLabel(QApplication::translate("ExcellonDialog", "Test Output:", nullptr), grbxParse), leTestOutput);
+                vlayTab->addWidget(grbxParse);
+            }
+            vlayTab->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
+            rbInches->setText(QApplication::translate("ExcellonDialog", "Inches", nullptr));
+            rbLeading->setText(QApplication::translate("ExcellonDialog", "Leading", nullptr));
+            rbMillimeters->setText(QApplication::translate("ExcellonDialog", "Millimeters", nullptr));
+            rbTrailing->setText(QApplication::translate("ExcellonDialog", "Trailing", nullptr));
+        }
+
+        virtual ~Tab() override { }
+
+        virtual void readSettings(MySettings& settings) override
+        {
+            settings.beginGroup("Excellon");
+            //  static inline Format m_format;
+
+            m_format.decimal = settings.getValue(sbxDecimal, m_format.decimal);
+            m_format.integer = settings.getValue(sbxInteger, m_format.integer);
+
+            m_format.offsetPos.rx() = settings.getValue(dsbxX, m_format.offsetPos.x());
+            m_format.offsetPos.ry() = settings.getValue(dsbxY, m_format.offsetPos.y());
+
+            m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbInches, bool(m_format.unitMode == Inches)));
+            m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbMillimeters, bool(m_format.unitMode == Millimeters)));
+
+            m_format.zeroMode = static_cast<ZeroMode>(settings.getValue(rbLeading, bool(m_format.zeroMode == LeadingZeros)));
+            m_format.zeroMode = static_cast<ZeroMode>(settings.getValue(rbTrailing, bool(m_format.zeroMode == TrailingZeros)));
+
+            //            m_parseZeroMode = settings.getValue(leParseZero, m_parseZeroMode);
+            //            m_parseUnitMode = settings.getValue(leParseUnit, m_parseUnitMode);
+            //            m_parseDecimalAndInteger = settings.getValue(leParseDecimalAndInteger, m_parseDecimalAndInteger);
+
+            settings.endGroup();
+        }
+
+        virtual void writeSettings(MySettings& settings) override
+        {
+            settings.beginGroup("Excellon");
+
+            m_format.decimal = settings.setValue(sbxDecimal);
+            m_format.integer = settings.setValue(sbxInteger);
+
+            m_format.offsetPos.rx() = settings.setValue(dsbxX);
+            m_format.offsetPos.ry() = settings.setValue(dsbxY);
+
+            settings.setValue(rbInches);
+            m_format.unitMode = static_cast<UnitMode>(settings.setValue(rbMillimeters));
+
+            settings.setValue(rbLeading);
+            m_format.zeroMode = static_cast<ZeroMode>(settings.setValue(rbTrailing));
+
+            //            m_parseZeroMode = settings.setValue(leParseZero);
+            //            m_parseUnitMode = settings.setValue(leParseUnit);
+            //            m_parseDecimalAndInteger = settings.setValue(leParseDecimalAndInteger);
+
+            settings.endGroup();
+        }
+    };
+    auto tab = new Tab(parent);
+    tab->setWindowTitle("Excellon");
+    return tab;
+}
 
 void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
 {
