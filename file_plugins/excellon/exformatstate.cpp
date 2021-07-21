@@ -28,11 +28,6 @@ Format::Format(File* file)
 void State::reset(Format* f)
 {
     format = f;
-    if (format) {
-        format->unitMode = Millimeters;
-        format->decimal = 4;
-        format->integer = 3;
-    }
     rawPos.clear();
     gCode = G_NULL;
     wm = DrillMode;

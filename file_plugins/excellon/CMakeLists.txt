@@ -31,24 +31,26 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 include_directories(${CMAKE_STATIC_LIBS_DIR})
 
 add_library(excellon SHARED
-    excellondialog.ui
+    drillitem.cpp
     drillitem.h
     excellon.h
-    excellondialog.h
-    exfile.h
-    exh.h
-    exnode.h
-    exparser.h
-    explugin.h
-    extypes.h
-    drillitem.cpp
     excellondialog.cpp
+    excellondialog.h
+    excellondialog.ui
     exfile.cpp
+    exfile.h
     exformatstate.cpp
     exh.cpp
+    exh.h
     exnode.cpp
+    exnode.h
     exparser.cpp
+    exparser.h
     explugin.cpp
+    explugin.h
+    exsettingstab.cpp
+    exsettingstab.h
+    extypes.h
     excellon.json
     ${SOURCE}
     ${HEADERS}

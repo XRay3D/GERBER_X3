@@ -315,6 +315,8 @@ protected:
     static inline QString m_parseDecimalAndInteger;
 
 public:
+    static inline void setformat(const Format& format) { m_format = format; }
+
     static inline Format format() { return m_format; }
 
     static QString parseZeroMode() { return m_parseZeroMode; }
