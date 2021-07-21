@@ -107,13 +107,13 @@ bool Parser::parseComment(const QString& line)
         qDebug() << "line" << line;
         auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regexComment(R"(^;(.*)$)"); // fixed_string("^;(.*)$");
-        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
+        //        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
         static constexpr ctll::fixed_string regexTool(R"(\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)"); // fixed_string("\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*");
         if (auto [match, comment] = ctre::match<regexComment>(data); match) {
-            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-                file->m_format.integer = CtreCapTo(integer).toInt();
-                file->m_format.decimal = CtreCapTo(decimal).toInt();
-            }
+            //            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
+            //                file->m_format.integer = CtreCapTo(integer).toInt();
+            //                file->m_format.decimal = CtreCapTo(decimal).toInt();
+            //            }
             if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
                 qDebug() << "regexTool" << matchTool.data();
                 const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
@@ -247,8 +247,8 @@ bool Parser::parseTCode(const QString& line)
                 file->m_tools[m_state.tCode] = CtreCapTo(diam).toDouble();
                 return true;
             }
+            return true;
         }
-        return false;
     }
     return false;
 }

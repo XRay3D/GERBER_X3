@@ -53,8 +53,9 @@ QDataStream& operator<<(QDataStream& s, const Tools& c)
 
 File::File()
     : FileInterface()
-    , m_format(this)
+    , m_format(Settings::format())
 {
+    m_format.file = this;
 }
 
 File::~File() { }
@@ -66,11 +67,9 @@ Format File::format() const
 
 void File::setFormat(const Format& value)
 {
-    m_format.zeroMode = value.zeroMode;
-    m_format.unitMode = value.unitMode;
-    m_format.decimal = value.decimal;
-    m_format.integer = value.integer;
-    m_format.offsetPos = value.offsetPos;
+    qDebug(__FUNCTION__);
+    m_format = value;
+    m_format.file = this;
     for (Hole& hole : *this) {
         hole.state.updatePos();
         hole.item->updateHole();
@@ -89,7 +88,6 @@ double File::tool(int t) const
 Tools File::tools() const
 {
     Tools tools(m_tools);
-    QMap<int, double>::iterator toolIt;
     if (m_format.unitMode == Inches)
         for (auto& [_, tool] : tools)
             tool *= 25.4;

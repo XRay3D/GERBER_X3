@@ -306,4 +306,20 @@ public:
     //    friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
 };
 
+class Settings {
+protected:
+    static inline Format m_format;
+
+    static inline QString m_parseZeroMode;
+    static inline QString m_parseUnitMode;
+    static inline QString m_parseDecimalAndInteger;
+
+public:
+    static inline Format format() { return m_format; }
+
+    static QString parseZeroMode() { return m_parseZeroMode; }
+    static QString parseUnitMode() { return m_parseUnitMode; }
+    static QString parseDecimalAndInteger() { return m_parseDecimalAndInteger; }
+};
+
 } // namespace Excellon

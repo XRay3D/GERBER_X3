@@ -25,6 +25,7 @@ public:
 private:
     void createProfile(const Tool& tool, const double depth);
     void trimmingOpenPaths(Paths& paths);
+    void calcArcs();
 
     IntPoint from;
 
@@ -47,4 +48,5 @@ protected:
     void create() override; // Creator interface
     GCodeType type() override;
 };
+
 }
