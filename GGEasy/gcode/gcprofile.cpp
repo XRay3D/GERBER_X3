@@ -366,6 +366,8 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
 
 void ProfileCreator::calcArcs()
 {
+    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
+        return;
     auto addPoint = [](const QPointF& pos) {
         //        static QPainterPath path;
         //        path.moveTo(0, +1);
