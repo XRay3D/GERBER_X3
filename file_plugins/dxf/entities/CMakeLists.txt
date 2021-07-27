@@ -17,6 +17,7 @@ set(SOURCE
     ${SOURCE}
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_arc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attdef.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attrib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_circle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dummy.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_ellipse.cpp
@@ -29,6 +30,7 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_mtext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_point.cpp#
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_polyline.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_seqend.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_solid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_spline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_text.cpp
@@ -68,6 +70,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_allentities.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_arc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attdef.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attrib.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_circle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dummy.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_ellipse.h
@@ -80,6 +83,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_mtext.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_point.h#
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_polyline.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_seqend.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_solid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_spline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_text.h

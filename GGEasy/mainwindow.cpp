@@ -121,14 +121,14 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 0;
         int k = 100;
 
-        if (0) {
-            QDir dir("D:/Gerber Test Files/ГГГ");
+        if (1) {
+            QDir dir(R"(C:\Users\bakiev\Downloads\Attachments_inscrut@gf.tom.ru_2021-07-25_08-43-27)");
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
             //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList { "*.*" }, QDir::Files);
+                listFiles = dir.entryList(QStringList { "*.dxf" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;
