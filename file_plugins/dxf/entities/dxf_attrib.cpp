@@ -13,10 +13,28 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *                                                                              *
 *******************************************************************************/
-#include "attrib.h"
+#include "dxf_attrib.h"
 namespace Dxf {
-ATTRIB::ATTRIB(SectionParser* sp)
+Attrib::Attrib(SectionParser* sp)
     : Entity(sp)
 {
 }
+
+void Attrib::parse(CodeData& code)
+{
+    do {
+        data.push_back(code);
+        switch (code.code()) {
+        default:
+            Entity::parse(code);
+        }
+        code = sp->nextCode();
+    } while (code.code() != 0);
+}
+
+GraphicObject Attrib::toGo() const
+{
+    return {};
+}
+
 }

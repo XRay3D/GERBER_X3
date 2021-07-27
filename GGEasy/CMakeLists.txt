@@ -68,12 +68,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set(SUFFIX "${SUFFIX}_x32")
     endif()
     include_directories (
-        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
-        C:/dev/CGAL-5.1.2/include
-        C:/dev/boost_1_75_0
+#        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
+#        C:/dev/CGAL-5.1.2/include
+        C:/local/boost_1_76_0_x64
         )
     link_directories(
-        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+#        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
         )
 endif()
 

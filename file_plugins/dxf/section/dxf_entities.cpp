@@ -71,6 +71,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code)
     case Entity::ATTDEF:
         return std::make_shared<AttDef>(sp); //return std::make_shared<Dummy>(sp);
     case Entity::ATTRIB:
+        return std::make_shared<Attrib>(sp); //return std::make_shared<Dummy>(sp);
     case Entity::BODY:
         break;
     case Entity::CIRCLE:
@@ -111,6 +112,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code)
     case Entity::REGION:
     case Entity::SECTION:
     case Entity::SEQEND:
+        return std::make_shared<SeqEnd>(sp); //return std::make_shared<Dummy>(sp);
     case Entity::SHAPE:
         break;
     case Entity::SOLID:
