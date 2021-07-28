@@ -18,6 +18,7 @@
 #include "ui_tooleditform.h"
 
 #include "toolitem.h"
+#include <QDebug>
 #include <QSettings>
 
 #include "leakdetector.h"
@@ -91,6 +92,9 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->cbxToolType->setItemIcon(Tool::Engraver, QIcon::fromTheme("engraving"));
     ui->cbxToolType->setItemIcon(Tool::Laser, QIcon::fromTheme("laser"));
 
+    ui->lblWarn->setPixmap(QIcon::fromTheme("window-close").pixmap({ 16, 16 }));
+    ui->lblWarn->setToolTip(QApplication::translate("ToolEditForm", "If the offset value is more than 50%, unmilled areas are possible.\nThese errors do not appear in the visualization.", "При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации."));
+
     QSettings settings;
     ui->cbxFeedSpeeds->setCurrentIndex(settings.value("cbxFeedSpeeds").toInt());
     //ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
@@ -154,9 +158,9 @@ void ToolEditForm::setVisibleToolWidgets(bool visible)
     ui->cbxToolType->setVisible(visible);
     ui->cbxUnits->setVisible(visible);
     ui->chbxAutoName->setVisible(visible);
-    ui->groupBox_2->setVisible(visible);
-    ui->groupBox_3->setVisible(visible);
-    ui->groupBox_4->setVisible(visible);
+    ui->grbxGeometry->setVisible(visible);
+    ui->grbxFeedSpeeds->setVisible(visible);
+    ui->grbxCuttingParameters->setVisible(visible);
     ui->lblToolType->setVisible(visible);
     ui->lblUnits->setVisible(visible);
     setMinimumWidth(width());
@@ -167,19 +171,19 @@ void ToolEditForm::setupToolWidgets(int type)
     const int lastType = m_tool.type();
     m_tool.setType(type);
 
-    auto setEnabled = [&, type](DoubleSpinBox* dsbx_, double min, double max) {
-        if (!dsbx_->isEnabled()) {
-            saveRestoreMap[type].restore(dsbx_);
-            dsbx_->setEnabled(true);
+    auto setEnabled = [this, type](DoubleSpinBox* dsbx, double min, double max) {
+        if (!dsbx->isEnabled()) {
+            saveRestoreMap[type].restore(dsbx);
+            dsbx->setEnabled(true);
         }
         if (min != 0.0 || max != 0.0)
-            dsbx_->setRange(min, max);
+            dsbx->setRange(min, max);
     };
-    auto setDisabled = [&, lastType](DoubleSpinBox* dsbx_) {
-        if (dsbx_->isEnabled()) {
-            saveRestoreMap[lastType].save(dsbx_);
-            dsbx_->setRange(0.0, 0.0);
-            dsbx_->setEnabled(false);
+    auto setDisabled = [this, lastType](DoubleSpinBox* dsbx) {
+        if (dsbx->isEnabled()) {
+            saveRestoreMap[lastType].save(dsbx);
+            dsbx->setRange(0.0, 0.0);
+            dsbx->setEnabled(false);
         }
     };
 
@@ -195,11 +199,7 @@ void ToolEditForm::setupToolWidgets(int type)
         setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
         if (qFuzzyCompare(ui->dsbxAngle->value(), 90.0))
             ui->dsbxAngle->setValue(120.0); ////////////////////
-        //        if (ui->dsbxOneTurnCut->value() == 0.0) {
-        //            ui->dsbxOneTurnCut->setValue(ui->dsbxDiameter->value() * 0.5);
-        //            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        //        }
-        ui->label_3->setText(tr("Pass"));
+        ui->lblPassDepth->setText(tr("Pass"));
         break;
     case Tool::EndMill:
         setDisabled(ui->dsbxAngle);
@@ -208,13 +208,9 @@ void ToolEditForm::setupToolWidgets(int type)
         setEnabled(ui->dsbxOneTurnCutPercent, 0.0, 100.0);
         setEnabled(ui->dsbxPassDepth, 0.0, 10.0);
         setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
-        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value() * 0.5);
-        setEnabled(ui->dsbxStepoverPercent, 0.0, 50.0);
-        //        if (ui->dsbxStepover->value() == 0.0) {
-        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        //        }
-        ui->label_3->setText(tr("Depth"));
+        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxStepoverPercent, 0.0, 100.0);
+        ui->lblPassDepth->setText(tr("Depth"));
         break;
     case Tool::Engraver:
         setEnabled(ui->dsbxAngle, 0.0, 180.0);
@@ -223,13 +219,9 @@ void ToolEditForm::setupToolWidgets(int type)
         setEnabled(ui->dsbxOneTurnCutPercent, 0.0, 100.0);
         setEnabled(ui->dsbxPassDepth, 0.0, 10.0);
         setEnabled(ui->dsbxPlungeRate, 0.0, 100000.0);
-        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value() * 0.5);
-        setEnabled(ui->dsbxStepoverPercent, 0.0, 50.0);
-        //        if (ui->dsbxStepover->value() == 0.0) {
-        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        //        }
-        ui->label_3->setText(tr("Depth"));
+        setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value());
+        setEnabled(ui->dsbxStepoverPercent, 0.0, 100.0);
+        ui->lblPassDepth->setText(tr("Depth"));
         break;
     case Tool::Laser:
         setDisabled(ui->dsbxAngle);
@@ -240,10 +232,6 @@ void ToolEditForm::setupToolWidgets(int type)
         setEnabled(ui->dsbxFeedRate, 0.0, 100000.0);
         setEnabled(ui->dsbxStepover, 0.0, ui->dsbxDiameter->value());
         setEnabled(ui->dsbxStepoverPercent, 0.0, 100.0);
-        //        if (ui->dsbxStepover->value() == 0.0) {
-        //            ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-        //            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
-        //        }
         break;
     }
     setChanged();
@@ -260,8 +248,9 @@ void ToolEditForm::valueChangedSlot(double value)
         m_tool.setDiameter(value);
         ui->dsbxOneTurnCut->setMaximum(value);
         ui->dsbxStepover->setMaximum(value);
-        if (ui->dsbxStepover->value() == 0.0)
+        if (ui->dsbxStepover->value() == 0.0) {
             ui->dsbxStepover->setValue(value * 0.5);
+        }
         if (ui->dsbxOneTurnCut->value() == 0.0)
             ui->dsbxOneTurnCut->setValue(value * 0.1);
         ui->dsbxOneTurnCutPercent->valueChanged(ui->dsbxOneTurnCutPercent->value());
@@ -272,9 +261,8 @@ void ToolEditForm::valueChangedSlot(double value)
         break;
     case Tool::OneTurnCut:
         m_tool.setOneTurnCut(value);
-        ui->dsbxOneTurnCutPercent->setValue(m_tool.diameter() > 0.0
-                ? value / (m_tool.diameter() * 0.01)
-                : 0);
+        ui->dsbxOneTurnCutPercent->setValue(m_tool.diameter() > 0.0 ? value / (m_tool.diameter() * 0.01)
+                                                                    : 0.0);
         if (ui->chbxFeedRate->isChecked())
             ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         if (ui->chbxPlungeRate->isChecked())
@@ -295,9 +283,7 @@ void ToolEditForm::valueChangedSlot(double value)
         break;
     case Tool::Stepover:
         m_tool.setStepover(value);
-        ui->dsbxStepoverPercent->setValue(m_tool.diameter() > 0.0
-                ? value / (m_tool.diameter() * 0.01)
-                : 0);
+        ui->dsbxStepoverPercent->setValue(m_tool.diameter() > 0.0 ? value / (m_tool.diameter() * 0.01) : 0.0);
         break;
     case Tool::OneTurnCutPercent:
         ui->dsbxOneTurnCut->setValue(value * (m_tool.diameter() * 0.01));
@@ -308,6 +294,9 @@ void ToolEditForm::valueChangedSlot(double value)
     default:
         break;
     }
+
+    const bool overflow = (ui->dsbxStepover->value() > (m_tool.diameter() * 0.5));
+    ui->lblWarn->setVisible(overflow);
 
     updateName();
     setChanged();
