@@ -15,9 +15,12 @@
 
 #include "dxf_arc.h"
 #include "dxf_attdef.h"
+#include "dxf_attrib.h"
 #include "dxf_circle.h"
 #include "dxf_dummy.h"
 #include "dxf_ellipse.h"
+#include "dxf_entity.h"
+#include "dxf_graphicobject.h"
 #include "dxf_hatch.h"
 #include "dxf_insert.h"
 #include "dxf_line.h"
@@ -25,12 +28,10 @@
 #include "dxf_mtext.h"
 #include "dxf_point.h"
 #include "dxf_polyline.h"
+#include "dxf_seqend.h"
 #include "dxf_solid.h"
 #include "dxf_spline.h"
 #include "dxf_text.h"
-
-#include "dxf_entity.h"
-#include "dxf_graphicobject.h"
 
 //#include "dxf_attrib.h"
 //#include "dxf_body.h"
