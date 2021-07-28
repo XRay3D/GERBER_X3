@@ -40,17 +40,17 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity)
     case Entity::NULL_ENT:
         entity = std::make_shared<Dummy>(nullptr);
         break;
-        break;
     case Entity::ACAD_PROXY_ENTITY:
         break;
     case Entity::ARC:
         entity = std::make_shared<Arc>(nullptr);
         break;
-        break;
     case Entity::ATTDEF:
         entity = std::make_shared<AttDef>(nullptr);
         break;
     case Entity::ATTRIB:
+        entity = std::make_shared<Attrib>(nullptr);
+        break;
     case Entity::BODY:
         break;
     case Entity::CIRCLE:
@@ -99,6 +99,8 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity)
     case Entity::REGION:
     case Entity::SECTION:
     case Entity::SEQEND:
+        entity = std::make_shared<SeqEnd>(nullptr);
+        break;
     case Entity::SHAPE:
         break;
     case Entity::SOLID:
