@@ -368,19 +368,11 @@ void ProfileCreator::calcArcs()
 {
     if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
         return;
-    auto addPoint = [](const QPointF& pos) {
-        //        static QPainterPath path;
-        //        path.moveTo(0, +1);
-        //        path.lineTo(0, -1);
-        //        path.moveTo(+1, 0);
-        //        path.lineTo(-1, 0);
-        //        path.arcTo(QRectF(QPointF(-1, -1), QSizeF(6, 6)), 90, 90);
-        //        path.arcTo(QRectF(QPointF(-1, -1), QSizeF(6, 6)), 360, -90);
-        //        auto item = App::scene()->addPath(path, QPen(QColor(255, 255, 255), 0.0), Qt::NoBrush);
-        //        item->setPos(pos);
-        auto item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(QColor(255, 255, 255), 0.0));
+    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
+        QGraphicsLineItem* item;
+        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
         item->setPos(pos);
-        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(QColor(255, 255, 255), 0.0));
+        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
         item->setPos(pos);
     };
 
@@ -392,7 +384,14 @@ void ProfileCreator::calcArcs()
     int ctr {};
 
     constexpr double centerError = 0.2;
-    constexpr int minSegCtr = 2;
+    constexpr int minSegCtr = 3;
+
+    struct Center {
+        QPointF pt;
+        int i {};
+    };
+
+    std::vector<Center> centers;
 
     for (auto polys : m_returnPss) {
         CleanPolygons(polys, uScale * 0.001);
@@ -408,19 +407,14 @@ void ProfileCreator::calcArcs()
                     normals.back().intersect(line, &intersectionPoint);
                     if (polyOfCenters.size() && QLineF(polyOfCenters.back(), intersectionPoint).length() < centerError) {
                         center += intersectionPoint;
+                        addPoint(intersectionPoint, Qt::darkGray);
                         ++ctr;
+                        centers.emplace_back(intersectionPoint, i);
                     } else if (ctr > minSegCtr) {
                         center /= ctr;
-                        addPoint(center);
+                        addPoint(center, Qt::red);
                         double r = QLineF(center, beg).length();
                         QRectF rect(-r, -r, +r * 2, +r * 2);
-
-                        //                        auto angle1 = QLineF(center, beg).angle();
-                        //                        auto angle2 = QLineF(center, poly[(i - 1) % size]).angle();
-                        //                        QPainterPath pp;
-                        //                        //pp.moveTo(beg);
-                        //                        pp.arcTo(rect, angle1, angle2 - angle1);
-                        //                        App::scene()->addPath(pp, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
 
                         App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
                         ctr = {};
