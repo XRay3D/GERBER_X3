@@ -479,7 +479,6 @@ public:
     IntRect GetBounds();
     bool PreserveCollinear() { return m_PreserveCollinear; }
     void PreserveCollinear(bool value) { m_PreserveCollinear = value; }
-    void cancel() { m_cancel = true; } // need for terminate
 
 protected:
     void DisposeLocalMinimaList();
@@ -510,7 +509,6 @@ protected:
 
     typedef std::priority_queue<cInt> ScanbeamList;
     ScanbeamList m_Scanbeam;
-    bool m_cancel = false; // need for terminate
 };
 
 class cancelException : public std::exception {
