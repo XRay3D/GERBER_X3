@@ -83,6 +83,7 @@ struct CtreCapTo {
 
     operator double() const { return toDouble(); }
     operator int() const { return toInt(); }
+
 };
 template <class T>
 CtreCapTo(T) -> CtreCapTo<T>;
