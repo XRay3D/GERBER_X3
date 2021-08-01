@@ -31,7 +31,8 @@ ComponentItem::ComponentItem(const Component& component, FileInterface* file)
 {
     component.setComponentitem(this);
     pathPins.resize(m_component.pins().size());
-    m_shape.addPolygon(m_component.footprint());
+    for (auto&& poly : m_component.footprint())
+        m_shape.addPolygon(poly);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolTip(m_component.toolTip());
@@ -72,7 +73,15 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     painter->setBrush(color);
     color.setAlpha(255);
     painter->setPen({ m_selected ? Qt::red : color, 2 * m_scale });
-    painter->drawPath(m_shape);
+    auto fillPolygons { m_shape.toFillPolygons() };
+    if (fillPolygons.size()) {
+        for (auto&& poly : fillPolygons)
+            painter->drawPolygon(poly);
+    } else {
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(m_shape);
+    }
+
     painter->setBrush(Qt::NoBrush);
     double min = std::min(m_shape.boundingRect().width(), m_shape.boundingRect().height());
     double k = std::min(min, m_scale * 20);

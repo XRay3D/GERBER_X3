@@ -446,9 +446,8 @@ void Parser::addPath()
         }
         break;
     }
-    if (aperFunctionMap.contains(m_state.aperture())
-        && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
-        components[refDes].setFootprint(m_path);
+    if (aperFunctionMap.contains(m_state.aperture()) && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
+        components[refDes].addFootprint(m_path);
     }
     resetStep();
 }
@@ -863,7 +862,7 @@ bool Parser::parseAttributes(const QString& gLine)
             switch (int index = Component::value1(sl.first()); index) {
             case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Component::P:
+            case Component::P: // Pins
                 components[sl.value(1)].addPin({ sl.value(2), sl.value(3), {} });
                 break;
             case Component::C:
@@ -1249,6 +1248,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
             addFlash();
             break;
         }
+
         return true;
     }
     return false;
