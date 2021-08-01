@@ -21,6 +21,7 @@
 //#include <QThreadPool>
 //#include <QtConcurrent>
 //#include "tool.h"
+#include <source_location>
 
 using namespace ClipperLib;
 
@@ -65,18 +66,20 @@ public:
     static void incCurrent() { ++m_current; }
 
     static bool getCancel() { return m_cancel; }
-    static bool getCancelThrow()
+    static void ifCancelThenThrow(const std::source_location location = std::source_location::current())
     {
-        if (m_cancel)
-            throw cancelException(__FUNCTION__);
-        return m_cancel;
+        static std::stringstream ss;
+        if (m_cancel) {
+            ss.clear();
+            ss << "file: "
+               << location.file_name() << "("
+               << location.line() << ":"
+               << location.column() << ") `"
+               << location.function_name();
+            throw cancelException(ss.str().data());
+        }
     }
-    static void setCancel(bool cancel)
-    {
-        m_cancel = cancel;
-        if (m_clipper && cancel)
-            m_clipper->cancel();
-    }
+    static void setCancel(bool cancel) { m_cancel = cancel; }
 };
 
 namespace GCode {

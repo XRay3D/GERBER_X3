@@ -482,7 +482,7 @@ void Creator::mergePaths(Paths& paths, const double dist)
         for (size_t i = 0; i < paths.size(); ++i) {
             setMax(max);
             setCurrent(max - paths.size());
-            getCancelThrow();
+            ifCancelThenThrow();
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;

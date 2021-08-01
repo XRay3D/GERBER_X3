@@ -1635,8 +1635,7 @@ bool Clipper::ExecuteInternal()
         ProgressCancel::setMax(static_cast<int>(m_Scanbeam.size()));
         ProgressCancel::setCurrent(0);
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-            if (m_cancel)
-                throw cancelException(__FUNCTION__);
+            ProgressCancel::ifCancelThenThrow(); // terminate
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {
@@ -1650,7 +1649,6 @@ bool Clipper::ExecuteInternal()
     } catch (const cancelException& ce) {
         ClearJoins();
         ClearGhostJoins();
-        m_cancel = false;
         throw ce;
     } catch (...) {
         succeeded = false;
