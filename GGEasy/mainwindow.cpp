@@ -116,12 +116,13 @@ MainWindow::MainWindow(QWidget* parent)
     setCurrentFile(QString());
 
     readSettings();
+    toolpathActions[GCode::GCodeProperties]->triggered();
 
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
         int i = 0;
         int k = 100;
 
-        if (1) {
+        if (0) {
             QDir dir(R"(C:\Users\bakiev\Downloads\Attachments_inscrut@gf.tom.ru_2021-07-25_08-43-27)");
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
             //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
@@ -136,10 +137,10 @@ MainWindow::MainWindow(QWidget* parent)
                 //break;
             }
         }
-        if (0)
-            QTimer::singleShot(++i * 200, [this] { loadFile("C:/Users/X-Ray/Desktop/kbt/pth.drl"); });
+        if (1)
+            QTimer::singleShot(++i * 200, [this] { loadFile(R"(D:\Downloads\uhu neu\XGerber\uhu LM 6203  ohne massenflache neu\uhuLM6203ohnemassenflacheneu.X3T)"); });
 
-        if (1) {
+        if (0) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
             QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -175,6 +176,7 @@ bool MainWindow::closeProject()
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         m_project->close();
+        //        ui->graphicsView->scene()->clear();
         return true;
     }
     return false;

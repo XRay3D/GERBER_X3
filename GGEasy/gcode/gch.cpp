@@ -111,7 +111,11 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     textBrowser->setPlainText(text);
 
     auto verticalLayout = new QVBoxLayout(this);
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    verticalLayout->setContentsMargins(6, 6, 6, 6);
+#else
     verticalLayout->setMargin(6);
+#endif
     verticalLayout->addWidget(textBrowser);
 }
 

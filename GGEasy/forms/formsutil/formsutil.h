@@ -49,7 +49,7 @@ protected:
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
 
-    GCode::Creator* m_tpc = nullptr;
+    GCode::Creator* const m_tpc;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
     UsedItems m_usedItems;

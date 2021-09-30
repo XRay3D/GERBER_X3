@@ -4472,7 +4472,7 @@ effect after restarting the application.</source>
     <message>
         <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="373"/>
         <source>One-turn Cut</source>
-        <translation>Рез за оборот</translation>
+        <translation type="unfinished">Подача на оборот</translation>
     </message>
     <message>
         <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="431"/>

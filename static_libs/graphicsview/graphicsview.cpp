@@ -61,7 +61,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
         p.drawLine(0, Mid, Size, Mid);
         p.drawLine(Mid, 0, Mid, Size);
-        setCursor({ cursor, Mid, Mid });
+        setCursor(QCursor{ cursor, Mid, Mid });
     }
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))

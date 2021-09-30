@@ -17,7 +17,7 @@ project(Gerber_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
-add_definitions(-L/usr/lib64 -static -static-libstdc++ -static-libgcc)
+#add_definitions(-L/usr/lib64 -static -static-libstdc++ -static-libgcc)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)
@@ -49,7 +49,7 @@ add_subdirectory(GGEasy)
 add_subdirectory(file_plugins)
 
 # plugins shape
-add_subdirectory(shape_plugins)
+#add_subdirectory(shape_plugins)
 
 ## QT4_WRAP_TS(lupdate_outputs lrelease_outputs prefix lang1 lang2 ... )
 #MACRO (QT4_WRAP_TS lupdate_outputs lrelease_outputs prefix)

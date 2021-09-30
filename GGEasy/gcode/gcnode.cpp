@@ -124,17 +124,24 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
+    static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(*m_id);
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-        Dialog(file->lines2(),file->name(), tv).exec();
-    });
+    if (!dialog[*m_id])
+        menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
+            dialog[*m_id] = new Dialog(file->lines2(), file->name(), tv);
+            auto destroy = [this] {
+                delete dialog[*m_id];
+                dialog[*m_id] = nullptr;
+            };
+            QObject::connect(dialog[*m_id], &QDialog::finished, destroy);
+            dialog[*m_id]->show();
+        });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"),
-        tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
 }
