@@ -18,6 +18,7 @@
 
 #include "recent.h"
 
+#include <QActionGroup>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QStack>

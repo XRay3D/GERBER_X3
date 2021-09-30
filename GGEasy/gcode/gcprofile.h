@@ -25,7 +25,6 @@ public:
 private:
     void createProfile(const Tool& tool, const double depth);
     void trimmingOpenPaths(Paths& paths);
-    void calcArcs();
 
     IntPoint from;
 
