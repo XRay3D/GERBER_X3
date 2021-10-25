@@ -30,7 +30,7 @@ DrillItem::DrillItem(double diameter, GCode::File* file)
 
 bool DrillItem::isSlot() { return false; }
 
-Paths DrillItem::paths() const
+Paths DrillItem::paths(int) const
 {
     Path path(CirclePath(m_diameter * uScale, (pos())));
     ReversePath(path);

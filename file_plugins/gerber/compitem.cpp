@@ -134,6 +134,6 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
                 m_scale);
 }
 
-Paths ComponentItem::paths() const { return {}; }
+Paths ComponentItem::paths(int) const { return {}; }
 
 }

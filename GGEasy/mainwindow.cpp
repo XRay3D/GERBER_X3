@@ -137,12 +137,12 @@ MainWindow::MainWindow(QWidget* parent)
                 //break;
             }
         }
-        if (1)
+        if (0)
             QTimer::singleShot(++i * 200, [this] { loadFile(R"(D:\Downloads\uhu neu\XGerber\uhu LM 6203  ohne massenflache neu\uhuLM6203ohnemassenflacheneu.X3T)"); });
 
-        if (0) {
+        if (1) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
-            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
+            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(++i * 200, [] { App::graphicsView()->zoomToSelected(); });
         }

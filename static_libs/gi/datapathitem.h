@@ -38,7 +38,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
     QPainterPath shape() const override;
     void changeColor() override { }
 

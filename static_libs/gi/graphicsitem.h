@@ -93,7 +93,7 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths() const = 0;
+    virtual Paths paths(int alternate = {}) const = 0;
     virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() { }
 

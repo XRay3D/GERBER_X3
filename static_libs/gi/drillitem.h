@@ -59,7 +59,7 @@ protected:
 //    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override; //QGraphicsItem
 //    int type() const override;
 //    // GraphicsItem interface
-//    Paths paths() const override;
+//    Paths paths(int alternate = {}) const override;
 //    void changeColor() override;
 
 //    bool isSlot() override; // AbstractDrillItem

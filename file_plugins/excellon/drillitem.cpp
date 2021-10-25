@@ -17,8 +17,8 @@
 #include "drillitem.h"
 #include "excellon.h"
 
-#include <graphicsview.h>
 #include "scene.h"
+#include <graphicsview.h>
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -28,8 +28,7 @@ using namespace ClipperLib;
 DrillItem::DrillItem(Excellon::Hole* hole, FileInterface* file)
     : GraphicsItem(file)
     , m_diameter(hole->state.currentToolDiameter())
-    , m_hole(hole)
-{
+    , m_hole(hole) {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     create();
@@ -38,8 +37,7 @@ DrillItem::DrillItem(Excellon::Hole* hole, FileInterface* file)
 
 DrillItem::DrillItem(double diameter, FileInterface* file)
     : GraphicsItem(file)
-    , m_diameter(diameter)
-{
+    , m_diameter(diameter) {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     create();
@@ -52,8 +50,7 @@ QRectF DrillItem::boundingRect() const { return m_rect; }
 
 QPainterPath DrillItem::shape() const { return m_shape; }
 
-void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
 
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
@@ -72,8 +69,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*optio
 
 int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
 
-bool DrillItem::isSlot()
-{
+bool DrillItem::isSlot() {
     if (m_hole)
         return !m_hole->state.path.isEmpty();
     return false;
@@ -81,8 +77,7 @@ bool DrillItem::isSlot()
 
 double DrillItem::diameter() const { return m_diameter; }
 
-void DrillItem::setDiameter(double diameter)
-{
+void DrillItem::setDiameter(double diameter) {
     if (m_diameter == diameter)
         return;
     m_diameter = diameter;
@@ -91,22 +86,30 @@ void DrillItem::setDiameter(double diameter)
     update();
 }
 
-Paths DrillItem::paths() const
-{
+Paths DrillItem::paths(int alternate) const {
     Path path;
     if (m_hole) {
         if (m_hole->state.path.isEmpty())
             path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-        else
+        else if (alternate) {
+            Paths paths;
+            ClipperOffset offset;
+            offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
+            offset.Execute(paths, m_diameter * uScale * 0.5);
+            //            for (auto&& path : paths)
+            //                scene()->addPolygon(path, { Qt::red, 0.0 });
+            ReversePaths(paths);
+            return paths;
+        } else {
             return { m_hole->state.path.translated(m_hole->state.format->offsetPos) };
+        }
     } else
         path = CirclePath(m_diameter * uScale, (pos()));
     ReversePath(path);
     return { path };
 }
 
-void DrillItem::changeColor()
-{
+void DrillItem::changeColor() {
     animation.setStartValue(m_bodyColor);
 
     switch (colorState) {
@@ -142,8 +145,7 @@ void DrillItem::changeColor()
     animation.start();
 }
 
-void DrillItem::updateHole()
-{
+void DrillItem::updateHole() {
     if (!m_hole)
         return;
     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
@@ -156,8 +158,7 @@ void DrillItem::updateHole()
     setPos(p);
 }
 
-void DrillItem::create()
-{
+void DrillItem::create() {
     m_shape = QPainterPath();
     if (!m_hole) {
         //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);

@@ -30,7 +30,7 @@ public:
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
     Paths* rPaths() override;
     // GraphicsItem interface
     void changeColor() override;
