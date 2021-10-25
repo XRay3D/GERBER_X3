@@ -25,7 +25,7 @@ public:
     ~DrillItem() override = default;
 
     // GraphicsItem interface
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
 
     // AbstractDrillItem interface
     bool isSlot() override;

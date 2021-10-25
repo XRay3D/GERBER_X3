@@ -35,7 +35,7 @@ public:
     int type() const override;
     void setNewPos(const QPointF& pos);
     // GraphicsItem interface
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
 
     bool ok() const;
     double lenght() const;

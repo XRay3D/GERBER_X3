@@ -72,8 +72,8 @@ link_directories(
     ../libs${SUFFIX}
     )
 
-#add_subdirectory(dxf)
-#add_subdirectory(excellon)
+add_subdirectory(dxf)
+add_subdirectory(excellon)
 add_subdirectory(gerber)
 #add_subdirectory(hpgl)
 

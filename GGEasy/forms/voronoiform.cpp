@@ -25,8 +25,7 @@
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)
-    , ui(new Ui::VoronoiForm)
-{
+    , ui(new Ui::VoronoiForm) {
     ui->setupUi(this);
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
@@ -61,8 +60,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     updateName();
 }
 
-VoronoiForm::~VoronoiForm()
-{
+VoronoiForm::~VoronoiForm() {
     MySettings settings;
     settings.beginGroup("VoronoiForm");
     settings.setValue(ui->dsbxPrecision);
@@ -73,8 +71,7 @@ VoronoiForm::~VoronoiForm()
     delete ui;
 }
 
-void VoronoiForm::createFile()
-{
+void VoronoiForm::createFile() {
     const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -86,42 +83,35 @@ void VoronoiForm::createFile()
     FileInterface const* file = nullptr;
     bool skip { true };
 
+    auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
+        if (!file) {
+            file = gi->file();
+            boardSide = gi->file()->side();
+        }
+        if (file != gi->file()) {
+            if (skip) {
+                if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                    return true;
+            }
+        }
+        return {};
+    };
+
     for (auto* item : App::scene()->selectedItems()) {
-        auto* gi = dynamic_cast<GraphicsItem*>(item);
+        auto gi = dynamic_cast<GraphicsItem*>(item);
         switch (static_cast<GiType>(item->type())) {
         case GiType::DataSolid:
-            if (!file) {
-                file = gi->file();
-                boardSide = gi->file()->side();
-            }
-            if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
         case GiType::DataPath:
-            //RawItem* gi = static_cast<RawItem*>(item);
-            if (!file) {
-                file = gi->file();
-                boardSide = gi->file()->side();
-            }
-            if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
+            if (testFile(gi))
+                return;
             wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
-            //        case DrillItemType:
-            //            //            if (static_cast<DrillItem*>(item)->isSlot())
-            //            //                wrPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
-            //            //            else
-            //            wPaths.push_back(static_cast<GraphicsItem*>(item)->paths());
-            //            break;
+        case GiType::Drill:
+            if (testFile(gi))
+                return;
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths(1));
         default:
             break;
         }
@@ -149,19 +139,16 @@ void VoronoiForm::createFile()
     createToolpath();
 }
 
-void VoronoiForm::updateName()
-{
+void VoronoiForm::updateName() {
     ui->leName->setText(tr("Voronoi"));
     setWidth(0.0);
 }
 
-void VoronoiForm::on_leName_textChanged(const QString& arg1)
-{
+void VoronoiForm::on_leName_textChanged(const QString& arg1) {
     m_fileName = arg1;
 }
 
-void VoronoiForm::setWidth(double)
-{
+void VoronoiForm::setWidth(double) {
     const auto tool { ui->toolHolder->tool() };
     const double d = tool.getDiameter(ui->dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
@@ -170,11 +157,9 @@ void VoronoiForm::setWidth(double)
     }
 }
 
-void VoronoiForm::editFile(GCode::File* /*file*/)
-{
+void VoronoiForm::editFile(GCode::File* /*file*/) {
 }
 
-void VoronoiForm::on_cbxSolver_currentIndexChanged(int index)
-{
+void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
     ui->dsbxPrecision->setEnabled(!index);
 }

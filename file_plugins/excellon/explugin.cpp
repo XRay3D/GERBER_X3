@@ -113,7 +113,7 @@ QJsonObject Plugin::info() const
 {
     return QJsonObject {
         { "Name", "Excellon" },
-        { "Version", "1.0" },
+        { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "Opening drill files like Excellon" },
     };

@@ -99,7 +99,7 @@ void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
 int GcPathItem::type() const { return static_cast<int>(GiType::Path); }
 
-Paths GcPathItem::paths() const { return {} /*m_paths*/; }
+Paths GcPathItem::paths(int) const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
 void GcPathItem::updateArrows()
 {

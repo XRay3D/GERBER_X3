@@ -201,6 +201,6 @@ void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths BridgeItem::paths() const { return Paths(); }
+Paths BridgeItem::paths(int) const { return Paths(); }
 
 int BridgeItem::type() const { return static_cast<int>(GiType::Bridge); }

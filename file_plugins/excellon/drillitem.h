@@ -24,7 +24,7 @@ class Hole;
 class DrillItem : public GraphicsItem {
 public:
     DrillItem(Excellon::Hole* hole, FileInterface* file);
-    DrillItem(double diameter, FileInterface *file);
+    DrillItem(double diameter, FileInterface* file);
     ~DrillItem() override;
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -32,7 +32,7 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // GraphicsItem interface
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
     void changeColor() override;
 
     bool isSlot();
