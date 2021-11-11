@@ -32,8 +32,10 @@ endif()
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
 if(CMAKE_CL_64)
     set(SUFFIX "${SUFFIX}_x64")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64/plugins")
 else()
     set(SUFFIX "${SUFFIX}_x32")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32/plugins")
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -46,7 +48,6 @@ elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     set(SUFFIX "${SUFFIX}_rd")
 endif()
 
-set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin/plugins")
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 include_directories (

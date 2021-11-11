@@ -64,8 +64,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
     if(CMAKE_CL_64)
         set(SUFFIX "${SUFFIX}_x64")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
     else()
         set(SUFFIX "${SUFFIX}_x32")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
     endif()
     include_directories (
 #        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
@@ -96,7 +98,6 @@ add_definitions(
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin")
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
