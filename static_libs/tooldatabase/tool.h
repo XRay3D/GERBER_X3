@@ -104,6 +104,7 @@ public:
     QString errorStr() const;
     void errorMessageBox(QWidget* parent = nullptr) const;
     size_t hash() const;
+    size_t hash2() const;
 
     QPainterPath path(const QPointF& pt = {}) const;
     void updatePath(double depth = 0.0);
@@ -125,6 +126,7 @@ private:
     uint m_id;
 
     mutable size_t m_hash = 0;
+    mutable size_t m_hash2 = 0;
 
     Type m_type;
 
