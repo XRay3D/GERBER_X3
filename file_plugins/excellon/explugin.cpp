@@ -17,6 +17,7 @@
 #include "explugin.h"
 #include "exfile.h"
 #include "exnode.h"
+#include "exsettingstab.h"
 #include "extypes.h"
 
 #include "app.h"
@@ -27,9 +28,11 @@
 #include "ft_view.h"
 #include "interfaces/file.h"
 #include "utils.h"
-#include <QtWidgets>
 
 #include "leakdetector.h"
+
+#include <QComboBox>
+#include <QJsonObject>
 
 namespace Excellon {
 
@@ -88,7 +91,7 @@ bool Plugin::thisIsIt(const QString& fileName)
     static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
     while (in.readLineInto(&line)) {
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         if (ctre::match<regex1>(data))
             return true;
         if (ctre::match<regex2>(data))
@@ -110,85 +113,18 @@ QJsonObject Plugin::info() const
 {
     return QJsonObject {
         { "Name", "Excellon" },
-        { "Version", "1.0" },
+        { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "Opening drill files like Excellon" },
     };
 }
 
-//std::pair<SettingsTabInterface*, QString> Plugin::createSettingsTab(QWidget* parent)
-//{
-//    class Tab : public SettingsTabInterface, Settings {
-//        QCheckBox* chbxCleanPolygons;
-//        QCheckBox* chbxSkipDuplicates;
-//        QCheckBox* chbxSimplifyRegions;
-//        DoubleSpinBox* dsbxCleanPolygonsDist;
-
-//    public:
-//        Tab(QWidget* parent = nullptr)
-//            : SettingsTabInterface(parent)
-//        {
-//            setObjectName(QString::fromUtf8("tabDxf"));
-//            auto verticalLayout = new QVBoxLayout(this);
-//            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-//            verticalLayout->setContentsMargins(6, 6, 6, 6);
-
-//            auto groupBox = new QGroupBox(this);
-//            groupBox->setObjectName(QString::fromUtf8("groupBox"));
-//            auto verticalLayout2 = new QVBoxLayout(groupBox);
-//            verticalLayout2->setObjectName(QString::fromUtf8("verticalLayout2"));
-//            verticalLayout2->setContentsMargins(6, 9, 6, 6);
-
-//            chbxCleanPolygons = new QCheckBox(groupBox);
-//            chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
-//            verticalLayout2->addWidget(chbxCleanPolygons);
-
-//            dsbxCleanPolygonsDist = new DoubleSpinBox(groupBox);
-//            dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
-//            dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
-//            dsbxCleanPolygonsDist->setSingleStep(0.001);
-//            dsbxCleanPolygonsDist->setDecimals(4);
-//            verticalLayout2->addWidget(dsbxCleanPolygonsDist);
-
-//            chbxSkipDuplicates = new QCheckBox(groupBox);
-//            chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
-//            verticalLayout2->addWidget(chbxSkipDuplicates);
-
-//            chbxSimplifyRegions = new QCheckBox(groupBox);
-//            chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
-//            verticalLayout2->addWidget(chbxSimplifyRegions);
-
-//            verticalLayout->addWidget(groupBox);
-//            auto verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-//            verticalLayout->addItem(verticalSpacer);
-
-//            groupBox->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
-//            chbxCleanPolygons->setText(QApplication::translate("SettingsDialog", "Cleaning Polygons", nullptr));
-//            chbxSkipDuplicates->setText(QApplication::translate("SettingsDialog", "Skip duplicates", nullptr));
-//            chbxSimplifyRegions->setText(QApplication::translate("SettingsDialog", "Simplify Regions", nullptr));
-//        }
-//        virtual ~Tab() override { }
-//        virtual void readSettings(MySettings& settings) override
-//        {
-//            settings.beginGroup("Gerber");
-//            m_cleanPolygons = settings.getValue(chbxCleanPolygons, m_cleanPolygons);
-//            m_cleanPolygonsDist = settings.getValue(dsbxCleanPolygonsDist, m_cleanPolygonsDist);
-//            m_simplifyRegions = settings.getValue(chbxSimplifyRegions, m_simplifyRegions);
-//            m_skipDuplicates = settings.getValue(chbxSkipDuplicates, m_skipDuplicates);
-//            settings.endGroup();
-//        }
-//        virtual void writeSettings(MySettings& settings) override
-//        {
-//            settings.beginGroup("Gerber");
-//            m_cleanPolygons = settings.setValue(chbxCleanPolygons);
-//            m_cleanPolygonsDist = settings.setValue(dsbxCleanPolygonsDist);
-//            m_simplifyRegions = settings.setValue(chbxSimplifyRegions);
-//            m_skipDuplicates = settings.setValue(chbxSkipDuplicates);
-//            settings.endGroup();
-//        }
-//    };
-//    return { new Tab(parent), "Gerber X3" };
-//}
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
+{
+    auto tab = new ExSettingsTab(parent);
+    tab->setWindowTitle("Excellon");
+    return tab;
+}
 
 void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
 {
@@ -241,8 +177,7 @@ private:
 
     // AbstractDrillPrGI interface
 public:
-    void
-    updateTool() override
+    void updateTool() override
     {
         if (row.toolId > -1) {
             colorState |= Tool;

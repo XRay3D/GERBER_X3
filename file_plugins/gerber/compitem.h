@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -35,7 +35,7 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     // GraphicsItem interface
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
     void changeColor() override { }
 
     void setSelected(bool selected) { m_selected = selected; }

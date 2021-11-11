@@ -2,7 +2,7 @@
 #*                                                                              *
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  14 January 2021                                                 *
+#* Date      :  11 November 2021                                                *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2021                                          *
 #*                                                                              *
@@ -32,8 +32,10 @@ endif()
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
 if(CMAKE_CL_64)
     set(SUFFIX "${SUFFIX}_x64")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64/plugins")
 else()
     set(SUFFIX "${SUFFIX}_x32")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32/plugins")
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -46,7 +48,6 @@ elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     set(SUFFIX "${SUFFIX}_rd")
 endif()
 
-set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin/plugins")
 set(STATIC_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})

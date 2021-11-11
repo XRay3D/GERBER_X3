@@ -2,7 +2,7 @@
 #*   *
 #* Author : Damir Bakiev  *
 #* Version : na  *
-#* Date : 14 January 2021  *
+#* Date : 11 November 2021 *
 #* Website : na  *
 #* Copyright : Damir Bakiev 2016-2021  *
 #*   *
@@ -23,7 +23,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-#set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
@@ -64,16 +64,18 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
     if(CMAKE_CL_64)
         set(SUFFIX "${SUFFIX}_x64")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
     else()
         set(SUFFIX "${SUFFIX}_x32")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
     endif()
     include_directories (
-        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
-        C:/dev/CGAL-5.1.2/include
-        C:/dev/boost_1_75_0
+#        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
+#        C:/dev/CGAL-5.1.2/include
+        C:/local/boost_1_76_0_x64
         )
     link_directories(
-        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+#        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
         )
 endif()
 
@@ -96,7 +98,6 @@ add_definitions(
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin")
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS

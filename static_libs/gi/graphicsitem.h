@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -93,7 +93,7 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths() const = 0;
+    virtual Paths paths(int alternate = {}) const = 0;
     virtual Paths* rPaths() { return nullptr; }
     virtual void redraw() { }
 

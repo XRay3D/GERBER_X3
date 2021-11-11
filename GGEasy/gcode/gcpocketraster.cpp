@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -157,7 +157,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
             merged.resize(merged.size() + 1);
             auto& path = merged.back();
             for (auto bit = bList.begin(); bit != bList.end(); ++bit) {
-                getCancelThrow();
+                ifCancelThenThrow();
                 if (path.empty() || path.back() == bit->front()) {
                     path.append(path.empty() ? *bit : bit->mid(1));
                     bList.erase(bit);

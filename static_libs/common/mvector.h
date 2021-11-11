@@ -14,9 +14,9 @@ struct mvector : std::vector<T> {
     mvector(size_t size) : V(size) {}
     mvector(size_t size, const T& t) : V(size, t) {}
     mvector(const V& v) : V(v) {}
-    mvector(V&& v) : V(std::move(v)) {}
+    mvector(V&& v) : V(std::forward<V>(v)) {}
     mvector(const M& v) : V(v) {}
-    mvector(M&& v) : V(std::move(v)) {}
+    mvector(M&& v) : V(std::forward<M>(v)) {}
     mvector(const std::initializer_list<T>& v) : V(v) {}
     // clang-format on
 

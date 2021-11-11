@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -16,7 +16,7 @@
 #include <QGraphicsView>
 #include <QSettings>
 
-class QDRuler;
+class Ruler;
 class Scene;
 
 class GraphicsView : public QGraphicsView {
@@ -54,8 +54,8 @@ signals:
     void mouseClickL(const QPointF&);
 
 private:
-    QDRuler* hRuler;
-    QDRuler* vRuler;
+    Ruler* hRuler;
+    Ruler* vRuler;
     Scene* m_scene;
 
     void updateRuler();

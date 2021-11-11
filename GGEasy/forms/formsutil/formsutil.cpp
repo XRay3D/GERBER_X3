@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -19,17 +19,9 @@
 
 #include "gcode/gcode.h"
 
-#include "erroritem.h"
 #include "project.h"
 #include "qprogressdialog.h"
 #include "scene.h"
-#include <QEvent>
-#include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QTimer>
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
@@ -98,7 +90,6 @@ void FormsUtil::timerEvent(QTimerEvent* event)
         const auto [max, val] = m_tpc->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-
         progressDialog->setLabelText(m_tpc->msg);
     }
     if (event->timerId() == flikerTimerId) {

@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -304,6 +304,24 @@ public:
         return stream;
     }
     //    friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
+};
+
+class Settings {
+protected:
+    static inline Format m_format;
+
+    static inline QString m_parseZeroMode;
+    static inline QString m_parseUnitMode;
+    static inline QString m_parseDecimalAndInteger;
+
+public:
+    static inline void setformat(const Format& format) { m_format = format; }
+
+    static inline Format format() { return m_format; }
+
+    static QString parseZeroMode() { return m_parseZeroMode; }
+    static QString parseUnitMode() { return m_parseUnitMode; }
+    static QString parseDecimalAndInteger() { return m_parseDecimalAndInteger; }
 };
 
 } // namespace Excellon

@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -28,7 +28,7 @@ public:
     int type() const override;
     QString folderName() const override;
 
-    SettingsTab createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     FileInterface* createFile() override;
     QJsonObject info() const override;
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;

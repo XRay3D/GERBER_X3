@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -199,8 +199,8 @@ public:
     QPointF referencePoint() const { return m_referencePoint; }
     void setReferencePoint(const QPointF& referencePoint) { m_referencePoint = referencePoint; }
 
-    QPolygonF footprint() const { return m_footprint; }
-    void setFootprint(const QPolygonF& footprint) { m_footprint = footprint; }
+    mvector<QPolygonF> footprint() const { return m_footprint; }
+    void addFootprint(const QPolygonF& footprint) { m_footprint.emplace_back(footprint); }
 
     QString footprintName() const { return m_footprintName; }
     void setFootprintName(const QString& footprintName) { m_footprintName = footprintName; }
@@ -230,7 +230,7 @@ private:
     mvector<Pin> m_pins;
     mvector<Supplier> m_suppliers;
     QPointF m_referencePoint;
-    QPolygonF m_footprint;
+    mvector<QPolygonF> m_footprint;
     QString m_footprintName; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString m_refdes;
     QString m_value; /* <field> E.g. 220nF. */

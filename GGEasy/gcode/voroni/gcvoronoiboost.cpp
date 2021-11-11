@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -77,7 +77,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
-    qDebug() << "discretize" << sampled_edge.size();
+//    qDebug() << "discretize" << sampled_edge.size();
     Path path;
     path.reserve(sampled_edge.size());
     for(const auto& p : sampled_edge)
@@ -115,7 +115,7 @@ void VoronoiBoost::boostVoronoi() {
         for(const Path& path : paths) {
             for(size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
-                getCancelThrow();
+                ifCancelThenThrow();
                 const IntPoint& point = path[i];
                 vecId.emplace_back(id);
                 //                !i ? srcSegments.emplace_back(path.back().X, path.back().Y, point.X, point.Y /*, id, id2++*/)

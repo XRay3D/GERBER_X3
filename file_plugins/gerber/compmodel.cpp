@@ -47,12 +47,12 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
     for (const auto& component : file->components()) {
         static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
 
-        auto data { to_sv16(component.refdes()) };
+        auto data { toU16StrView(component.refdes()) };
 
         if (auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
-            if (map[rxCap(c1)].empty())
-                map[rxCap(c1)].emplace_back(-1, new ComponentsNode(rxCap(c1)));
-            map[rxCap(c1)].emplace_back(rxCap(c2).toInt(), new ComponentsNode(component));
+            if (map[CtreCapTo(c1)].empty())
+                map[CtreCapTo(c1)].emplace_back(-1, new ComponentsNode(CtreCapTo(c1)));
+            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new ComponentsNode(component));
         } else {
             unsorted->append(new ComponentsNode(component));
         }

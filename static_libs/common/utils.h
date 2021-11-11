@@ -63,25 +63,27 @@ template <class T = seconds>
 template <class T>
 Timer(std::string_view, T) -> Timer<T>;
 
-inline auto to_sv16(const QString& str)
+inline auto toU16StrView(const QString& str)
 {
     return std::u16string_view(reinterpret_cast<const char16_t*>(str.utf16()), str.size());
 }
 
 template <class T>
-struct rxCap {
+struct CtreCapTo {
     T& cap;
-    rxCap(T& cap)
+    CtreCapTo(T& cap)/*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
         : cap { cap }
     {
     }
-    operator QString() const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()); }
 
-    inline operator int() const { return toInt(); }
-    inline operator double() const { return toDouble(); }
+    auto toDouble() const { return QString(*this).toDouble(); }
+    auto toInt() const { return QString(*this).toInt(); }
 
-    auto toInt(bool* ok = nullptr) const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toInt(ok); }
-    auto toDouble(bool* ok = nullptr) const { return QString(reinterpret_cast<const QChar*>(cap.data()), cap.size()).toDouble(ok); }
+    operator QString() const { return QString(reinterpret_cast<const QChar*>(cap.data()), static_cast<size_t>(cap.size())); }
+
+    operator double() const { return toDouble(); }
+    operator int() const { return toInt(); }
+
 };
 template <class T>
-rxCap(T) -> rxCap<T>;
+CtreCapTo(T) -> CtreCapTo<T>;

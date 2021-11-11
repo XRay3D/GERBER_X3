@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -46,10 +46,16 @@ private:
     QMap<long, long> vGrid;
     void drawRuller(QPainter* painter);
 
+    int fpsCtr {};
+    int currentFps {};
+
     // QGraphicsScene interface
 protected:
     void drawBackground(QPainter* painter, const QRectF& rect) override;
     void drawForeground(QPainter* painter, const QRectF& rect) override;
+
+    // QObject interface
+    void timerEvent(QTimerEvent* event) override;
 };
 
 #include "app.h"

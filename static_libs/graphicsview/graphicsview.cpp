@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -16,7 +16,7 @@
 *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
-#include "qdruler.h"
+#include "ruler.h"
 #include "scene.h"
 #include "settings.h"
 
@@ -61,7 +61,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
         p.drawLine(0, Mid, Size, Mid);
         p.drawLine(Mid, 0, Mid, Size);
-        setCursor({ cursor, Mid, Mid });
+        setCursor(QCursor{ cursor, Mid, Mid });
     }
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
@@ -76,15 +76,15 @@ GraphicsView::GraphicsView(QWidget* parent)
     ////////////////////////////////////
 
     // add two rulers on top and left.
-    setViewportMargins(RulerBreadth, 0, 0, RulerBreadth);
+    setViewportMargins(Ruler::Breadth, 0, 0, Ruler::Breadth);
 
     // add grid layout
     QGridLayout* gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(0);
 
     // create rulers
-    hRuler = new QDRuler(QDRuler::Horizontal, this);
-    vRuler = new QDRuler(QDRuler::Vertical, this);
+    hRuler = new Ruler(Ruler::Horizontal, this);
+    vRuler = new Ruler(Ruler::Vertical, this);
     hRuler->SetMouseTrack(true);
     vRuler->SetMouseTrack(true);
 
@@ -98,7 +98,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         vRuler->update();
     });
     corner->setCheckable(true);
-    corner->setFixedSize(RulerBreadth, RulerBreadth);
+    corner->setFixedSize(Ruler::Breadth, Ruler::Breadth);
 
     gridLayout->addWidget(corner, 1, 0);
     gridLayout->addWidget(hRuler, 1, 1);

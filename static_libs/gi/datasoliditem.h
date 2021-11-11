@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -30,7 +30,7 @@ public:
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
-    Paths paths() const override;
+    Paths paths(int alternate = {}) const override;
     Paths* rPaths() override;
     // GraphicsItem interface
     void changeColor() override;

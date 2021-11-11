@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -18,6 +18,7 @@
 
 #include "recent.h"
 
+#include <QActionGroup>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QStack>
@@ -161,45 +162,40 @@ class DockWidget : public QDockWidget {
 
 public:
     explicit DockWidget(QWidget* parent = nullptr)
-        : QDockWidget(parent)
-    {
+        : QDockWidget(parent) {
         hide();
         setVisible(false);
     }
     ~DockWidget() override = default;
 
-    void push(QWidget* w)
-    {
-        if (widget())
+    void push(QWidget* w) {
+        if(widget())
             widgets.push(widget());
-        if (w)
+        if(w)
             QDockWidget::setWidget(w);
     }
-    void pop()
-    {
-        if (widget()) {
-            if (widget()->objectName() == "ErrorDialog") {
+    void pop() {
+        if(widget()) {
+            if(widget()->objectName() == "ErrorDialog") {
                 static_cast<QDialog*>(widget())->reject();
                 QTimer::singleShot(1, [this] { widgets.pop(); });
             } else {
                 delete widget();
             }
         }
-        if (!widgets.isEmpty())
+        if(!widgets.isEmpty())
             QDockWidget::setWidget(widgets.pop());
     }
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent* event) override
-    {
+    void closeEvent(QCloseEvent* event) override {
         pop();
         event->accept();
     }
-    void showEvent(QShowEvent* event) override
-    {
+    void showEvent(QShowEvent* event) override {
         event->ignore();
-        if (widget() == nullptr)
+        if(widget() == nullptr)
             QTimer::singleShot(1, this, &QDockWidget::close);
     }
 };

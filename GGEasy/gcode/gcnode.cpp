@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -18,12 +18,9 @@
 #include "gcfile.h"
 #include "gch.h"
 
-#include <QBoxLayout>
-#include <QDialog>
 #include <QFileInfo>
 #include <QIcon>
 #include <QMenu>
-#include <QTextBrowser>
 
 #include "ft_view.h"
 
@@ -127,37 +124,24 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
 
 void Node::menu(QMenu& menu, FileTree::View* tv) const
 {
+    static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(*m_id);
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-        QDialog dialog(tv);
-        {
-            Timer t("QDialog");
-            dialog.resize(600, 600);
-            auto verticalLayout = new QVBoxLayout(&dialog);
-            auto textBrowser = new QTextBrowser(&dialog);
-            QFont f("Consolas");
-            f.setPixelSize(20);
-            textBrowser->setFont(f);
-            new GCH(textBrowser->document());
-            verticalLayout->addWidget(textBrowser);
-            verticalLayout->setMargin(6);
-
-            {
-                Timer t("GCH");
-                for (const QString& str : file->lines())
-                    textBrowser->append(str);
-            }
-        }
-
-        dialog.exec();
-    });
+    if (!dialog[*m_id])
+        menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
+            dialog[*m_id] = new Dialog(file->lines2(), file->name(), tv);
+            auto destroy = [this] {
+                delete dialog[*m_id];
+                dialog[*m_id] = nullptr;
+            };
+            QObject::connect(dialog[*m_id], &QDialog::finished, destroy);
+            dialog[*m_id]->show();
+        });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"),
-        tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
 }

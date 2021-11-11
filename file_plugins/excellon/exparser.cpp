@@ -105,19 +105,19 @@ bool Parser::parseComment(const QString& line)
 {
     if (line.startsWith(';')) {
         qDebug() << "line" << line;
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regexComment(R"(^;(.*)$)"); // fixed_string("^;(.*)$");
-        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
+        //        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
         static constexpr ctll::fixed_string regexTool(R"(\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)"); // fixed_string("\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*");
         if (auto [match, comment] = ctre::match<regexComment>(data); match) {
-            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-                file->m_format.integer = rxCap(integer).toInt();
-                file->m_format.decimal = rxCap(decimal).toInt();
-            }
+            //            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
+            //                file->m_format.integer = CtreCapTo(integer).toInt();
+            //                file->m_format.decimal = CtreCapTo(decimal).toInt();
+            //            }
             if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
                 qDebug() << "regexTool" << matchTool.data();
-                const int tCode = static_cast<int>(rxCap(tool).toDouble());
-                file->m_tools[tCode] = rxCap(diam).toDouble();
+                const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
+                file->m_tools[tCode] = CtreCapTo(diam).toDouble();
                 file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
                 m_state.tCode = tCode; //m_state.tCode = file->m_tools.firstKey();
             }
@@ -130,10 +130,10 @@ bool Parser::parseComment(const QString& line)
 bool Parser::parseGCode(const QString& line)
 {
     if (line.startsWith('G')) {
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regex(R"(^G([0]?[0-9]{2}).*$)"); // fixed_string("^G([0]?[0-9]{2}).*$");
         if (auto [whole, c1] = ctre::match<regex>(data); whole) {
-            switch (rxCap(c1).toInt()) {
+            switch (CtreCapTo(c1).toInt()) {
             case G00:
                 m_state.gCode = G00;
                 m_state.wm = RouteMode;
@@ -172,9 +172,9 @@ bool Parser::parseMCode(const QString& line)
 {
     if (line.startsWith('M')) {
         static constexpr ctll::fixed_string regex(R"(^M([0]?[0-9]{2})$)"); // fixed_string("^M([0]?[0-9]{2})$");
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         if (auto [whole, c1] = ctre::match<regex>(data); whole) {
-            switch (rxCap(c1).toInt()) {
+            switch (CtreCapTo(c1).toInt()) {
             case M00: {
                 auto tools = file->m_tools;
                 QList<int> keys;
@@ -234,7 +234,7 @@ bool Parser::parseMCode(const QString& line)
 bool Parser::parseTCode(const QString& line)
 {
     if (line.startsWith('T')) {
-        auto data { to_sv16(line) };
+        auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regex(R"(^T(\d+))"
                                                   R"((?:([CFS])(\d*\.?\d+))?)"
                                                   R"((?:([CFS])(\d*\.?\d+))?)"
@@ -242,13 +242,13 @@ bool Parser::parseTCode(const QString& line)
                                                   R"(.*$)");
         static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
         if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(data); whole) {
-            m_state.tCode = rxCap(tool).toInt();
+            m_state.tCode = CtreCapTo(tool).toInt();
             if (auto [whole, diam] = *ctre::range<regex2>(data).begin(); whole) {
-                file->m_tools[m_state.tCode] = rxCap(diam).toDouble();
+                file->m_tools[m_state.tCode] = CtreCapTo(diam).toDouble();
                 return true;
             }
+            return true;
         }
-        return false;
     }
     return false;
 }
@@ -263,7 +263,7 @@ bool Parser::parsePos(const QString& line)
     //        A
     //    };
 
-    auto data { to_sv16(line) };
+    auto data { toU16StrView(line) };
     static constexpr ctll::fixed_string regex(R"(^(?:G(\d+))?)"
                                               R"((?:X([\+\-]?\d*\.?\d*))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d*))?)"
@@ -275,14 +275,14 @@ bool Parser::parsePos(const QString& line)
             return false;
 
         if (X.size())
-            m_state.rawPos.X = QString{rxCap(X)};
+            m_state.rawPos.X = QString { CtreCapTo(X) };
         if (Y.size())
-            m_state.rawPos.Y = QString{rxCap(Y)};
+            m_state.rawPos.Y = QString { CtreCapTo(Y) };
         if (A.size())
-            m_state.rawPos.A = QString{rxCap(A)};
+            m_state.rawPos.A = QString { CtreCapTo(A) };
 
-        parseNumber(rxCap(X), m_state.pos.rx());
-        parseNumber(rxCap(Y), m_state.pos.ry());
+        parseNumber(CtreCapTo(X), m_state.pos.rx());
+        parseNumber(CtreCapTo(Y), m_state.pos.ry());
 
         switch (m_state.wm) {
         case DrillMode:
@@ -316,7 +316,7 @@ bool Parser::parseSlot(const QString& line)
     //        X2,
     //        Y2
     //    };
-    auto data { to_sv16(line) };
+    auto data { toU16StrView(line) };
     static constexpr ctll::fixed_string regex(R"(^(?:X([\+\-]?\d*\.?\d+))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"(G85)"
@@ -329,12 +329,12 @@ bool Parser::parseSlot(const QString& line)
         m_state.rawPosList.clear();
         {
             if (X1.size())
-                m_state.rawPos.X = QString{rxCap(X1)};
-            parseNumber(rxCap(X1), m_state.pos.rx());
+                m_state.rawPos.X = QString { CtreCapTo(X1) };
+            parseNumber(CtreCapTo(X1), m_state.pos.rx());
 
             if (Y1.size())
-                m_state.rawPos.Y = QString{rxCap(Y1)};
-            parseNumber(rxCap(Y1), m_state.pos.ry());
+                m_state.rawPos.Y = QString { CtreCapTo(Y1) };
+            parseNumber(CtreCapTo(Y1), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
@@ -342,12 +342,12 @@ bool Parser::parseSlot(const QString& line)
 
         {
             if (X2.size())
-                m_state.rawPos.X = QString{rxCap(X2)};
-            parseNumber(rxCap(X2), m_state.pos.rx());
+                m_state.rawPos.X = QString { CtreCapTo(X2) };
+            parseNumber(CtreCapTo(X2), m_state.pos.rx());
 
             if (Y2.size())
-                m_state.rawPos.Y = QString{rxCap(Y2)};
-            parseNumber(rxCap(Y2), m_state.pos.ry());
+                m_state.rawPos.Y = QString { CtreCapTo(Y2) };
+            parseNumber(CtreCapTo(Y2), m_state.pos.ry());
 
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
@@ -364,16 +364,16 @@ bool Parser::parseSlot(const QString& line)
 
 bool Parser::parseRepeat(const QString& line)
 {
-    auto data { to_sv16(line) };
+    auto data { toU16StrView(line) };
     static constexpr ctll::fixed_string regex(R"(^R(\d+))"
                                               R"((?:X([\+\-]?\d*\.?\d+))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"($)");
     if (auto [whole, c1, c2, c3] = ctre::match<regex>(data); whole) {
-        int count = rxCap(c1).toInt();
+        int count = CtreCapTo(c1).toInt();
         QPointF p;
-        parseNumber(rxCap(c2), p.rx());
-        parseNumber(rxCap(c3), p.ry());
+        parseNumber(CtreCapTo(c2), p.rx());
+        parseNumber(CtreCapTo(c3), p.ry());
         for (int i = 0; i < count; ++i) {
             m_state.pos += p;
             file->append(Hole(m_state, file));
@@ -385,12 +385,12 @@ bool Parser::parseRepeat(const QString& line)
 
 bool Parser::parseFormat(const QString& line)
 {
-    auto data { to_sv16(line) };
+    auto data { toU16StrView(line) };
     static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
     static constexpr ctll::fixed_string regex(R"(^(METRIC|INCH).*(LZ|TZ)?$)"); // fixed_string("^(METRIC|INCH).*(LZ|TZ)?$");
     if (auto [whole, c1, c2] = ctre::match<regex>(data); whole) {
-        switch (unitMode.indexOf(rxCap(c1))) {
+        switch (unitMode.indexOf(CtreCapTo(c1))) {
         case Inches:
             file->m_format.unitMode = Inches;
             break;
@@ -400,7 +400,7 @@ bool Parser::parseFormat(const QString& line)
         default:
             break;
         }
-        switch (zeroMode.indexOf(rxCap(c2))) {
+        switch (zeroMode.indexOf(CtreCapTo(c2))) {
         case LeadingZeros:
             file->m_format.zeroMode = LeadingZeros;
             break;
@@ -549,5 +549,4 @@ double Parser::parseNumber(QString Str, const State& state)
     }
     return val;
 }
-
 }

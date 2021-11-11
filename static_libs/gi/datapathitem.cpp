@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -100,7 +100,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
 int GiDataPath::type() const { return static_cast<int>(GiType::DataPath); }
 
-Paths GiDataPath::paths() const { return { m_path }; }
+Paths GiDataPath::paths(int) const { return { m_path }; }
 
 QPainterPath GiDataPath::shape() const { return m_selectionShape; }
 

@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -59,7 +59,7 @@ protected:
 //    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override; //QGraphicsItem
 //    int type() const override;
 //    // GraphicsItem interface
-//    Paths paths() const override;
+//    Paths paths(int alternate = {}) const override;
 //    void changeColor() override;
 
 //    bool isSlot() override; // AbstractDrillItem

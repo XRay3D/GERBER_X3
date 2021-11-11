@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -49,7 +49,7 @@ protected:
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
 
-    GCode::Creator* m_tpc = nullptr;
+    GCode::Creator* const m_tpc;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
     UsedItems m_usedItems;

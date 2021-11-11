@@ -96,7 +96,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             if (!(m_lineNum % 1000))
                 emit interface->fileProgress(file->shortName(), 0, m_lineNum);
             auto dummy = [](const QString& gLine) -> bool {
-                auto data { to_sv16(gLine) };
+                auto data { toU16StrView(gLine) };
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
                 if (auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole) { ///*regexp.match(gLine)); match.hasMatch()*/) {
                     //qDebug() << "dummy" << gLine << id.data() << par.data();
@@ -446,9 +446,8 @@ void Parser::addPath()
         }
         break;
     }
-    if (aperFunctionMap.contains(m_state.aperture())
-        && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
-        components[refDes].setFootprint(m_path);
+    if (aperFunctionMap.contains(m_state.aperture()) && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
+        components[refDes].addFootprint(m_path);
     }
     resetStep();
 }
@@ -524,14 +523,14 @@ void Parser::resetStep()
 
 IntPoint Parser::parsePosition(const QString& xyStr)
 {
-    auto data { to_sv16(xyStr) };
+    auto data { toU16StrView(xyStr) };
     static constexpr ctll::fixed_string ptrnPosition(R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"); // fixed_string("(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+");
     if (auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
         cInt tmp = 0;
-        if (parseNumber(rxCap(x), tmp, m_state.format()->xInteger, m_state.format()->xDecimal))
+        if (parseNumber(CtreCapTo(x), tmp, m_state.format()->xInteger, m_state.format()->xDecimal))
             m_state.format()->coordValueNotation == AbsoluteNotation ? m_state.curPos().X = tmp : m_state.curPos().X += tmp;
         tmp = 0;
-        if (parseNumber(rxCap(y), tmp, m_state.format()->yInteger, m_state.format()->yDecimal))
+        if (parseNumber(CtreCapTo(y), tmp, m_state.format()->yInteger, m_state.format()->yDecimal))
             m_state.format()->coordValueNotation == AbsoluteNotation ? m_state.curPos().Y = tmp : m_state.curPos().Y += tmp;
     }
 
@@ -637,15 +636,15 @@ bool Parser::parseAperture(const QString& gLine)
      *    * Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
      *    * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
      */
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static const QVector<QString> slApertureType { "C", "R", "O", "P", "M" };
     static constexpr ctll::fixed_string ptrnAperture(R"(^%ADD(\d\d+)([a-zA-Z_$\.][a-zA-Z0-9_$\.\-]*),?(.*)\*%$)"); // fixed_string("^%ADD(\d\d+)([a-zA-Z_$\.][a-zA-Z0-9_$\.\-]*),?(.*)\*%$");
     if (auto [whole, apId, apType, paramList_] = ctre::match<ptrnAperture>(data); whole) {
-        int aperture { rxCap(apId) };
-        auto paramList { QString(rxCap(paramList_)).split('X') };
+        int aperture { CtreCapTo(apId) };
+        auto paramList { QString(CtreCapTo(paramList_)).split('X') };
         double hole = 0.0, rotation = 0.0;
         auto& apertures = file->m_apertures;
-        switch (slApertureType.indexOf(QString { rxCap(apType) })) {
+        switch (slApertureType.indexOf(QString { CtreCapTo(apType) })) {
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
@@ -674,7 +673,7 @@ bool Parser::parseAperture(const QString& gLine)
             VarMap macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
-            apertures.emplace(aperture, std::make_shared<ApMacro>(rxCap(apType).operator QString(), m_apertureMacro[rxCap(apType)].split('*'), macroCoeff, file->format()));
+            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), m_apertureMacro[CtreCapTo(apType)].split('*'), macroCoeff, file->format()));
             break;
         }
         if (attAper.m_function)
@@ -686,10 +685,10 @@ bool Parser::parseAperture(const QString& gLine)
 
 bool Parser::parseApertureBlock(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnApertureBlock(R"(^%ABD(\d+)\*%$)"); // fixed_string("^%ABD(\d+)\*%$");
     if (auto [whole, id] = ctre::match<ptrnApertureBlock>(data); whole) {
-        m_abSrIdStack.push({ WorkingType::ApertureBlock, int(rxCap(id)) });
+        m_abSrIdStack.push({ WorkingType::ApertureBlock, int(CtreCapTo(id)) });
         file->m_apertures.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
         return true;
     }
@@ -709,7 +708,7 @@ bool Parser::parseTransformations(const QString& gLine)
         trRotate,
         trScale,
     };
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static const QVector<char> slTransformations { 'P', 'M', 'R', 'S' };
     static const QVector<char> slLevelPolarity { 'D', 'C' };
     static const QVector<QString> slLoadMirroring { "N", "X", "Y", "XY" };
@@ -719,7 +718,7 @@ bool Parser::parseTransformations(const QString& gLine)
         switch (slTransformations.indexOf(trType)) {
         case trPolarity:
             addPath();
-            switch (slLevelPolarity.indexOf(QString { rxCap(val) }.front().toLatin1())) {
+            switch (slLevelPolarity.indexOf(QString { CtreCapTo(val) }.front().toLatin1())) {
             case Positive:
                 m_state.setImgPolarity(Positive);
                 break;
@@ -731,7 +730,7 @@ bool Parser::parseTransformations(const QString& gLine)
             }
             return true;
         case trMirror:
-            m_state.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(QString { rxCap(val) })));
+            m_state.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(QString { CtreCapTo(val) })));
             return true;
         case trRotate:
             m_state.setRotating(val);
@@ -751,16 +750,16 @@ bool Parser::parseStepRepeat(const QString& gLine)
      *     <SR close>     = %SR*%
      *     <SR statement> = <SR open>{<single command>|<region statement>}<SR close>
      */
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnStepRepeat(R"(^%SRX(\d+)Y(\d+)I(.\d*\.?\d*)J(.\d*\.?\d*)\*%$)"); // fixed_string("^%SRX(\d+)Y(\d+)I(.\d*\.?\d*)J(.\d*\.?\d*)\*%$");
     if (auto [whole, srx, sry, sri, srj] = ctre::match<ptrnStepRepeat>(data); whole) {
         if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
         m_stepRepeat.reset();
-        m_stepRepeat.x = rxCap(srx);
-        m_stepRepeat.y = rxCap(sry);
-        m_stepRepeat.i = rxCap(sri), m_stepRepeat.i *= uScale;
-        m_stepRepeat.j = rxCap(srj), m_stepRepeat.j *= uScale;
+        m_stepRepeat.x = CtreCapTo(srx);
+        m_stepRepeat.y = CtreCapTo(sry);
+        m_stepRepeat.i = CtreCapTo(sri), m_stepRepeat.i *= uScale;
+        m_stepRepeat.j = CtreCapTo(srj), m_stepRepeat.j *= uScale;
         if (m_state.format()->unitMode == Inches) {
             m_stepRepeat.i *= 25.4;
             m_stepRepeat.j *= 25.4;
@@ -807,11 +806,11 @@ ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->m_aperture
 bool Parser::parseApertureMacros(const QString& gLine)
 {
     // Start macro if(match, else not an AM, carry on.
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnApertureMacros(R"(^%AM([^\*]+)\*([^%]+)?(%)?$)"); // fixed_string("^%AM([^\*]+)\*([^%]+)?(%)?$");
     if (auto [whole, c1, c2, c3] = ctre::match<ptrnApertureMacros>(data); whole) {
         if (c1.size() && c2.size()) {
-            m_apertureMacro[rxCap(c1)] = QString { rxCap(c2) };
+            m_apertureMacro[CtreCapTo(c1)] = QString { CtreCapTo(c2) };
             return true;
         }
     }
@@ -820,10 +819,10 @@ bool Parser::parseApertureMacros(const QString& gLine)
 
 bool Parser::parseAttributes(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnAttributes(R"(^%(T[FAOD])(\.?)(.*)\*%$)"); // fixed_string("^%(T[FAOD])(\.?)(.*)\*%$");
     if (auto [whole, c1, c2, c3] = ctre::match<ptrnAttributes>(data); whole) {
-        QString cap[] { rxCap(whole), rxCap(c1), rxCap(c2), rxCap(c3) };
+        QString cap[] { CtreCapTo(whole), CtreCapTo(c1), CtreCapTo(c2), CtreCapTo(c3) };
         switch (Attr::Command::value(cap[1])) {
         case Attr::Command::TF:
             attFile.parse(cap[3].split(','));
@@ -863,7 +862,7 @@ bool Parser::parseAttributes(const QString& gLine)
             switch (int index = Component::value1(sl.first()); index) {
             case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Component::P:
+            case Component::P: // Pins
                 components[sl.value(1)].addPin({ sl.value(2), sl.value(3), {} });
                 break;
             case Component::C:
@@ -924,7 +923,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
     if (!(gLine.startsWith('G') || gLine.startsWith('X') || gLine.startsWith('Y')))
         return false;
 
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnCircularInterpolation(R"(^(?:G0?([23]))?)"
                                                                   R"(X?([\+\-]?\d+)*)"
                                                                   R"(Y?([\+\-]?\d+)*)"
@@ -935,16 +934,16 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         if (!cg.size() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
         cInt x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(rxCap(cx), x, m_state.format()->xInteger, m_state.format()->xDecimal)
+        cx.size() ? parseNumber(CtreCapTo(cx), x, m_state.format()->xInteger, m_state.format()->xDecimal)
                   : x = m_state.curPos().X;
-        cy.size() ? parseNumber(rxCap(cy), y, m_state.format()->yInteger, m_state.format()->yDecimal)
+        cy.size() ? parseNumber(CtreCapTo(cy), y, m_state.format()->yInteger, m_state.format()->yDecimal)
                   : y = m_state.curPos().Y;
-        parseNumber(rxCap(ci), i, m_state.format()->xInteger, m_state.format()->xDecimal);
-        parseNumber(rxCap(cj), j, m_state.format()->yInteger, m_state.format()->yDecimal);
+        parseNumber(CtreCapTo(ci), i, m_state.format()->xInteger, m_state.format()->xDecimal);
+        parseNumber(CtreCapTo(cj), j, m_state.format()->yInteger, m_state.format()->yDecimal);
         // Set operation code if provided
         if (cd.size())
-            m_state.setDCode(static_cast<Operation>(rxCap(cd).toInt()));
-        int gc = rxCap(cg);
+            m_state.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
+        int gc = CtreCapTo(cg);
         switch (gc) {
         case G02:
             m_state.setInterpolation(ClockwiseCircular);
@@ -1061,7 +1060,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
 
 bool Parser::parseEndOfFile(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnEndOfFile1(R"(^M[0]?[0123]\*)"); // fixed_string("^M[0]?[0123]\*");
     static constexpr ctll::fixed_string ptrnEndOfFile2(R"(^D0?2M0?[02]\*)"); // fixed_string("^D0?2M0?[02]\*");
     if (ctre::match<ptrnEndOfFile1>(data) || ctre::match<ptrnEndOfFile2>(data)) {
@@ -1077,12 +1076,12 @@ bool Parser::parseFormat(const QString& gLine)
     // Example: %FSLAX24Y24*%
     // TODO: This is ignoring most of the format-> Implement the rest.
 
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static const QVector<QChar> zeroOmissionModeList { 'L', 'T' };
     static const QVector<QChar> coordinateValuesNotationList { 'A', 'I' };
     static constexpr ctll::fixed_string ptrnFormat(R"(^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$)"); // fixed_string("^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$");
     if (auto [whole, c1, c2, c3, c4, c5, c6] = ctre::match<ptrnFormat>(data); whole) {
-        switch (zeroOmissionModeList.indexOf(rxCap(c1).operator QString()[0])) {
+        switch (zeroOmissionModeList.indexOf(CtreCapTo(c1).operator QString()[0])) {
         case OmitLeadingZeros:
             m_state.format()->zeroOmisMode = OmitLeadingZeros;
             break;
@@ -1092,7 +1091,7 @@ bool Parser::parseFormat(const QString& gLine)
             break;
 #endif
         }
-        switch (coordinateValuesNotationList.indexOf(rxCap(c2).operator QString()[0])) {
+        switch (coordinateValuesNotationList.indexOf(CtreCapTo(c2).operator QString()[0])) {
         case AbsoluteNotation:
             m_state.format()->coordValueNotation = AbsoluteNotation;
             break;
@@ -1102,10 +1101,10 @@ bool Parser::parseFormat(const QString& gLine)
             break;
 #endif
         }
-        m_state.format()->xInteger = rxCap(c3);
-        m_state.format()->xDecimal = rxCap(c4);
-        m_state.format()->yInteger = rxCap(c5);
-        m_state.format()->yDecimal = rxCap(c6);
+        m_state.format()->xInteger = CtreCapTo(c3);
+        m_state.format()->xDecimal = CtreCapTo(c4);
+        m_state.format()->yInteger = CtreCapTo(c5);
+        m_state.format()->yDecimal = CtreCapTo(c6);
 
         int intVal = m_state.format()->xInteger;
         if (intVal < 0 || intVal > 8) {
@@ -1130,10 +1129,10 @@ bool Parser::parseFormat(const QString& gLine)
 
 bool Parser::parseGCode(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnGCode(R"(^G([0]?[0-9]{2})\*$)"); // fixed_string("^G([0]?[0-9]{2})\*$");
     if (auto [whole, c1] = ctre::match<ptrnGCode>(data); whole) {
-        switch (int { rxCap(c1) }) {
+        switch (int { CtreCapTo(c1) }) {
         case G01:
             m_state.setInterpolation(Linear);
             m_state.setGCode(G01);
@@ -1204,11 +1203,11 @@ bool Parser::parseGCode(const QString& gLine)
 
 bool Parser::parseImagePolarity(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static const mvector<QString> slImagePolarity { "POS", "NEG" };
     static constexpr ctll::fixed_string ptrnImagePolarity(R"(^%IP(POS|NEG)\*%$)"); // fixed_string("^%IP(POS|NEG)\*%$");
     if (auto [whole, c1] = ctre::match<ptrnImagePolarity>(data); whole) {
-        switch (slImagePolarity.indexOf(rxCap(c1))) {
+        switch (slImagePolarity.indexOf(CtreCapTo(c1))) {
         case Positive:
             m_state.setImgPolarity(Positive);
             break;
@@ -1226,13 +1225,13 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     // G01 - Linear interpolation plus flashes
     // Operation code (D0x) missing is deprecated... oh well I will support it.
     // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnLineInterpolation(R"(^(?:G0?(1))?(?=.*X([\+\-]?\d+))?(?=.*Y([\+\-]?\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\*$)"); // fixed_string("^(?:G0?(1))?(?=.*X([\+\-]?\d+))?(?=.*Y([\+\-]?\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\*$");
     if (auto [whole, c1, c2, c3, c4] = ctre::match<ptrnLineInterpolation>(data); whole) {
         parsePosition(gLine);
         Operation dcode = m_state.dCode();
         if (c4.size())
-            dcode = static_cast<Operation>(rxCap(c4).toInt());
+            dcode = static_cast<Operation>(CtreCapTo(c4).toInt());
 
         switch (dcode) {
         case D01: // перемещение в указанную точку x-y с открытым затвором засветки
@@ -1249,6 +1248,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
             addFlash();
             break;
         }
+
         return true;
     }
     return false;
@@ -1256,7 +1256,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
 
 bool Parser::parseLoadName(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnLoadName(R"(^%LN(.+)\*%$)"); // fixed_string("^%LN(.+)\*%$");
     if (ctre::match<ptrnLoadName>(data)) {
         //qDebug() << gLine << match.capturedTexts();
@@ -1267,10 +1267,10 @@ bool Parser::parseLoadName(const QString& gLine)
 
 bool Parser::parseDCode(const QString& gLine)
 {
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnDCode(R"(^D0?([123])\*$)"); // fixed_string("^D0?([123])\*$");
     if (auto [whole, c1] = ctre::match<ptrnDCode>(data); whole) {
-        switch (int { rxCap(c1) }) {
+        switch (int { CtreCapTo(c1) }) {
         case D01:
             m_state.setDCode(D01);
             break;
@@ -1290,7 +1290,7 @@ bool Parser::parseDCode(const QString& gLine)
     static constexpr ctll::fixed_string ptrnDCodeAperture(R"(^(?:G54)?D(\d+)\*$)"); // fixed_string("^(?:G54)?D(\d+)\*$");
     if (auto [whole, c1] = ctre::match<ptrnDCodeAperture>(data); whole) {
         addPath();
-        m_state.setAperture(rxCap(c1));
+        m_state.setAperture(CtreCapTo(c1));
         m_state.setDCode(D02);
 #ifdef DEPRECATED
         m_state.setGCode(G54);
@@ -1305,11 +1305,11 @@ bool Parser::parseUnitMode(const QString& gLine)
 {
     // Mode (IN/MM)
     // Example: %MOIN*%
-    auto data { to_sv16(gLine) };
+    auto data { toU16StrView(gLine) };
     static const QVector<QString> slUnitType { "IN", "MM" };
     static constexpr ctll::fixed_string ptrnUnitMode(R"(^%MO(IN|MM)\*%$)"); // fixed_string("^%MO(IN|MM)\*%$");
     if (auto [whole, c1] = ctre::match<ptrnUnitMode>(data); whole) {
-        switch (slUnitType.indexOf(QString { rxCap(c1) })) {
+        switch (slUnitType.indexOf(QString { CtreCapTo(c1) })) {
         case Inches:
             m_state.format()->unitMode = Inches;
             break;

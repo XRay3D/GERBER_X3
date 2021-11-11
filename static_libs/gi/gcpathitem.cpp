@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -99,7 +99,7 @@ void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
 int GcPathItem::type() const { return static_cast<int>(GiType::Path); }
 
-Paths GcPathItem::paths() const { return {} /*m_paths*/; }
+Paths GcPathItem::paths(int) const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
 void GcPathItem::updateArrows()
 {

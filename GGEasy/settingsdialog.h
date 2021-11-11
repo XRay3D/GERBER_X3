@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -29,9 +29,9 @@ public:
     explicit SettingsDialog(QWidget* parent = nullptr, int tab = -1);
     ~SettingsDialog() override;
     void readSettings();
-    void writeSettings();
+    void saveSettings();
     void readSettingsDialog();
-    void writeSettingsDialog();
+    void saveSettingsDialog();
     /////////////////////
     static void translator(QApplication* app, const QString& path);
     enum {
@@ -44,6 +44,9 @@ public:
 public slots:
     void reject() override;
     void accept() override;
+
+    // QObject interface
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
     // QWidget interface
 protected:

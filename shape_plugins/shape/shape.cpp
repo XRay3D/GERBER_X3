@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2020                                          *
 *                                                                              *
@@ -58,7 +58,7 @@ QRectF Shape::boundingRect() const { return m_shape.boundingRect(); }
 
 QPainterPath Shape::shape() const { return m_shape; }
 
-Paths Shape::paths() const { return m_paths; }
+Paths Shape::paths(int) const { return m_paths; }
 
 void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
 {

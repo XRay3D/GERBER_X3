@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -13,8 +13,8 @@
 *******************************************************************************/
 #pragma once
 
-#define VER_FILEVERSION 0, 8, 0, 0
-#define VER_FILEVERSION_STR "0.8.0.0\0"
+#define VER_FILEVERSION 0, 8, 0, 3
+#define VER_FILEVERSION_STR "0.8.0.3\0"
 
 #define VER_PRODUCTVERSION VER_FILEVERSION
 #define VER_PRODUCTVERSION_STR VER_FILEVERSION_STR

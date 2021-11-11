@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>168</width>
-    <height>383</height>
+    <width>178</width>
+    <height>422</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,41 @@
        <widget class="QRadioButton" name="rbMillimeters">
         <property name="text">
          <string>Millimeters</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Zeroes</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="rbLeading">
+        <property name="text">
+         <string>Leading</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbTrailing">
+        <property name="text">
+         <string>Trailing</string>
         </property>
        </widget>
       </item>
@@ -118,41 +153,6 @@
         </property>
         <property name="maximum">
          <number>8</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Zeroes</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QRadioButton" name="rbLeading">
-        <property name="text">
-         <string>Leading</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="rbTrailing">
-        <property name="text">
-         <string>Trailing</string>
         </property>
        </widget>
       </item>
@@ -226,6 +226,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pbSetAsDefault">
+     <property name="text">
+      <string>Set as default</string>
+     </property>
     </widget>
    </item>
    <item>

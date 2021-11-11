@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -15,24 +15,22 @@
 #include <QPen>
 #include <QWidget>
 
-enum {
-    RulerBreadth = 24
-};
-
-class QDRuler : public QWidget {
+class Ruler : public QWidget {
     Q_OBJECT
     //    Q_ENUMS(RulerType)
     //    Q_PROPERTY(qreal origin READ origin WRITE setOrigin)
     //    Q_PROPERTY(qreal rulerUnit READ rulerUnit WRITE setRulerUnit)
     //    Q_PROPERTY(qreal rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
-    enum RULER_TYPE {
+    enum Type {
         Horizontal,
         Vertical
     };
 
-    QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent);
-    QDRuler::RULER_TYPE RulerType() const;
+    enum { Breadth = 24 };
+
+    Ruler(Ruler::Type rulerType, QWidget* parent);
+    Ruler::Type RulerType() const;
     qreal Origin() const;
     qreal RulerUnit() const;
     qreal RulerZoom() const;
@@ -66,5 +64,5 @@ private:
     qreal rulerUnit;
     qreal rulerZoom;
     qreal tickKoef;
-    RULER_TYPE rulerType;
+    Type rulerType;
 };

@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -37,7 +37,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
-    //    std::pair<SettingsTabInterface*, QString> createSettingsTab(QWidget* parent) override;
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
 

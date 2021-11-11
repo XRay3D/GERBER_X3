@@ -2,7 +2,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -118,6 +118,13 @@ public:
 
     mvector<QString>& lines() { return m_lines; }
     const mvector<QString>& lines() const { return m_lines; }
+    const QString lines2() const
+    {
+        QString rstr;
+        for (auto&& str : m_lines)
+            rstr.append(str).append('\n');
+        return rstr;
+    }
     virtual mvector<const AbstrGraphicObject*> graphicObjects() const { return {}; }
 
     enum Group {

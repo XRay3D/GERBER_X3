@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -145,7 +145,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     for(int i = 0; i < merge.size(); ++i) {
         setMax(max);
         setCurrent(max - merge.size());
-        getCancelThrow();
+        ifCancelThenThrow();
         for(int j = 0; j < merge.size(); ++j) {
             if(i == j)
                 continue;

@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -54,10 +54,38 @@ const QString colorName[GuiColors::Count] {
     QObject::tr("G0"),
 };
 
+class ModelSettings : public QAbstractListModel {
+    std::vector<QWidget*> m_data;
+
+public:
+    ModelSettings(QObject* parent = nullptr)
+        : QAbstractListModel { parent }
+    {
+    }
+    virtual ~ModelSettings() { }
+
+    // QAbstractItemModel interface
+    int rowCount(const QModelIndex& /*parent*/) const override { return m_data.size(); }
+    int columnCount(const QModelIndex& /*parent*/) const override { return 1; }
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        if (role == Qt::DisplayRole)
+            return m_data[index.row()]->windowTitle();
+        return {};
+    }
+    void addWidget(QWidget* w) { m_data.emplace_back(w); }
+};
+
+////////////////////////////////////////////////////////////////////////////
+/// \brief SettingsDialog::SettingsDialog
+/// \param parent
+/// \param tab
+///
 SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     : QDialog(parent)
 {
     setupUi(this);
+
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
     for (int i = 0; i < GuiColors::Count; ++i) {
@@ -66,7 +94,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     }
 
     connect(cbxFontSize, &QComboBox::currentTextChanged, [](const QString& fontSize) {
-        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression("font-size:\\s*\\d+"), "font-size: " + fontSize));
+        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression(R"(font-size:\s*\d+)"), "font-size: " + fontSize));
         QFont f;
         f.setPointSize(fontSize.toInt());
         qApp->setFont(f);
@@ -99,15 +127,27 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(labelAPIcon->size()));
 
     tabs.reserve(App::filePlugins().size());
+
+    //    auto model = new ModelSettings(listView);
+
     for (auto& [type, tuple] : App::filePlugins()) {
         auto& [parser, pobj] = tuple;
-        auto [tab, name] = parser->createSettingsTab(tabwMain);
+        auto tab = parser->createSettingsTab(this);
         if (!tab)
             continue;
+
+        //        model->addWidget(tab);
+        //        auto gbx = new QGroupBox(tab->windowTitle(), this);
+        //        auto lay = new QHBoxLayout(gbx);
+        //        lay->addWidget(tab);
+        //        verticalLayout_3->addWidget(gbx);
+
         tabs.push_back(tab);
-        tabwMain->addTab(tab, name);
+        tabwMain->addTab(tab, tab->windowTitle());
         tab->readSettings(settings);
     }
+
+    //    listView->setModel(model);
 
     readSettings();
     readSettingsDialog();
@@ -115,7 +155,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         tabwMain->setCurrentIndex(tab);
 }
 
-SettingsDialog::~SettingsDialog() { writeSettingsDialog(); }
+SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 
 void SettingsDialog::readSettings()
 {
@@ -164,11 +204,12 @@ void SettingsDialog::readSettings()
     /*Other*/
     settings.getValue(App::settings().m_inch, "inch", false);
     settings.getValue(App::settings().m_snap, "snap", false);
+    for (auto tab : tabs)
+        tab->readSettings(settings);
 }
 
-void SettingsDialog::writeSettings()
+void SettingsDialog::saveSettings()
 {
-    qDebug(__FUNCTION__);
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
@@ -227,7 +268,7 @@ void SettingsDialog::readSettingsDialog()
     settings.endGroup();
 }
 
-void SettingsDialog::writeSettingsDialog()
+void SettingsDialog::saveSettingsDialog()
 {
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
@@ -249,12 +290,20 @@ void SettingsDialog::translator(QApplication* app, const QString& path)
 void SettingsDialog::reject()
 {
     readSettings();
+
+    if (!isVisible())
+        MainWindow::updateTheme();
+
     QDialog::reject();
 }
 
 void SettingsDialog::accept()
 {
-    writeSettings();
+    if (isVisible() && !buttonBox->button(QDialogButtonBox::Ok)->hasFocus())
+        return;
+
+    saveSettings();
+
     if (langIndex != cbxLanguage->currentIndex()) {
         QMessageBox::information(this, "", tr("The complete translation of the application will take\n"
                                               "effect after restarting the application."));
@@ -270,4 +319,11 @@ void SettingsDialog::showEvent(QShowEvent* event)
         width += tabwMain->tabBar()->tabRect(i).width();
     resize(width + 20, 10);
     QDialog::showEvent(event);
+}
+
+bool SettingsDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress)
+        return false;
+    return QDialog::eventFilter(watched, event);
 }

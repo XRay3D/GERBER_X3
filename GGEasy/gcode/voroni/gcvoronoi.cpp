@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -34,26 +34,23 @@ void VoronoiCreator::create() {
     const auto width = m_gcp.params[GCodeParams::Width].toDouble();
 
     groupedPaths(CopperPaths);
-    switch(m_gcp.params[GCodeParams::VorT].toInt()) {
+    switch (m_gcp.params[GCodeParams::VorT].toInt()) {
     case 0:
-        jcVoronoi();
+        boostVoronoi();
         break;
     case 1:
-        cgalVoronoi();
-        break;
-    case 2:
-        boostVoronoi();
+        jcVoronoi();
         break;
     }
 
-    if(width < tool.getDiameter(depth)) {
+    if (width < tool.getDiameter(depth)) {
         m_returnPs.resize(m_returnPs.size() - 1); // remove frame
         m_gcp.gcType = Voronoi;
-        m_file = new File({sortBE(m_returnPs)}, m_gcp);
+        m_file = new File({ sortBE(m_returnPs) }, m_gcp);
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
     } else {
-        Paths copy{m_returnPs};
+        Paths copy { m_returnPs };
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
         m_gcp.gcType = Voronoi;
@@ -63,8 +60,8 @@ void VoronoiCreator::create() {
             clipper.AddPaths(copy, ptSubject, false);
             clipper.Execute(ctDifference, copy, pftNonZero);
             sortBE(copy);
-            for(auto&& p : copy)
-                m_returnPss.push_back({p});
+            for (auto&& p : copy)
+                m_returnPss.push_back({ p });
         }
         dbgPaths(m_returnPs, "создание пермычек");
         { // создание заливки.
@@ -73,6 +70,15 @@ void VoronoiCreator::create() {
             offset.AddPaths(copy, jtRound, etOpenRound);
             offset.Execute(m_workingRawPs, m_dOffset + 10);
         }
+        // erase empty paths
+        auto begin = m_returnPss.begin();
+        while (begin != m_returnPss.end()) {
+            if (begin->empty())
+                m_returnPss.erase(begin);
+            else
+                ++begin;
+        }
+
         m_file = new File(m_returnPss, m_gcp, m_workingRawPs);
         m_file->setFileName(tool.nameEnc());
         emit fileReady(m_file);
@@ -93,11 +99,11 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     { // fit offset to copper
         Clipper clipper;
         clipper.AddPaths(m_returnPs, ptSubject, true);
-        for(const Paths& paths : m_groupedPss)
+        for (const Paths& paths : m_groupedPss)
             clipper.AddPaths(paths, ptClip, true);
         clipper.Execute(ctDifference, m_returnPs, pftPositive, pftNegative);
     }
-    if(0) { // cut to copper rect
+    if (0) { // cut to copper rect
         Clipper clipper;
         clipper.AddPaths(m_returnPs, ptSubject, true);
         clipper.AddPath(frame, ptClip, true);
@@ -116,10 +122,10 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
             offset.Clear();
             offset.AddPaths(tmpPaths1, jtMiter, etClosedPolygon);
             offset.Execute(tmpPaths1, -m_stepOver);
-        } while(tmpPaths1.size());
+        } while (tmpPaths1.size());
         m_returnPs = tmpPaths;
     }
-    if(m_returnPs.empty()) {
+    if (m_returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }

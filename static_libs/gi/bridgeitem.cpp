@@ -5,7 +5,7 @@
 *                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
-* Date      :  14 January 2021                                                 *
+* Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
 * Copyright :  Damir Bakiev 2016-2021                                          *
 *                                                                              *
@@ -201,6 +201,6 @@ void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths BridgeItem::paths() const { return Paths(); }
+Paths BridgeItem::paths(int) const { return Paths(); }
 
 int BridgeItem::type() const { return static_cast<int>(GiType::Bridge); }
