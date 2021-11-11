@@ -18,7 +18,7 @@
 #include "gcvoronoijc.h"
 
 namespace GCode {
-class VoronoiCreator : public VoronoiCgal, public VoronoiJc, public VoronoiBoost {
+class VoronoiCreator : /*public VoronoiCgal,*/ public VoronoiJc, public VoronoiBoost {
 
 public:
     VoronoiCreator() { }
