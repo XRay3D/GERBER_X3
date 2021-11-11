@@ -33,7 +33,7 @@ public:
 
 signals:
     void saveGCodeFile(int id);
-    void saveGCodeFiles();
+    void saveGCodeFiles();// NOTE unused
     void saveSelectedGCodeFiles();
 
 private:
