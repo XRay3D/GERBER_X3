@@ -102,17 +102,12 @@
     <widget class="QComboBox" name="cbxSolver">
      <item>
       <property name="text">
-       <string>JC_VORONOI</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>CGAL</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
        <string>BOOST</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>JC_VORONOI</string>
       </property>
      </item>
     </widget>

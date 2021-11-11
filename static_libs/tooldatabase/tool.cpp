@@ -337,22 +337,6 @@ size_t Tool::hash() const {
     push_back(m_id);
     m_hash = qHash(hashData);
 
-    //    QCryptographicHash calcHash(QCryptographicHash::Sha1);
-    //    calcHash.addData(m_name.toLocal8Bit());
-    //    calcHash.addData(m_note.toLocal8Bit());
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_type), sizeof(Type));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_angle), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_diameter), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_feedRate), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_oneTurnCut), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_passDepth), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_plungeRate), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_spindleSpeed), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_stepover), sizeof(double));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_autoName), sizeof(bool));
-    //    calcHash.addData(reinterpret_cast<const char*>(&m_id), sizeof(int));
-    //    m_hash = *reinterpret_cast<int*>(calcHash.result().data());
-
     return m_hash;
 }
 

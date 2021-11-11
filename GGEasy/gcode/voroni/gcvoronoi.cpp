@@ -36,13 +36,10 @@ void VoronoiCreator::create() {
     groupedPaths(CopperPaths);
     switch (m_gcp.params[GCodeParams::VorT].toInt()) {
     case 0:
-        jcVoronoi();
+        boostVoronoi();
         break;
     case 1:
-        cgalVoronoi();
-        break;
-    case 2:
-        boostVoronoi();
+        jcVoronoi();
         break;
     }
 
