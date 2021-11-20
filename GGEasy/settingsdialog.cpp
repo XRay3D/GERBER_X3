@@ -59,16 +59,14 @@ class ModelSettings : public QAbstractListModel {
 
 public:
     ModelSettings(QObject* parent = nullptr)
-        : QAbstractListModel { parent }
-    {
+        : QAbstractListModel { parent } {
     }
     virtual ~ModelSettings() { }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& /*parent*/) const override { return m_data.size(); }
     int columnCount(const QModelIndex& /*parent*/) const override { return 1; }
-    QVariant data(const QModelIndex& index, int role) const override
-    {
+    QVariant data(const QModelIndex& index, int role) const override {
         if (role == Qt::DisplayRole)
             return m_data[index.row()]->windowTitle();
         return {};
@@ -82,8 +80,7 @@ public:
 /// \param tab
 ///
 SettingsDialog::SettingsDialog(QWidget* parent, int tab)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     setupUi(this);
 
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
@@ -157,8 +154,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
 SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 
-void SettingsDialog::readSettings()
-{
+void SettingsDialog::readSettings() {
     /*GUI*/
     settings.beginGroup("Viewer");
     settings.getValue(chbxAntialiasing);
@@ -208,8 +204,7 @@ void SettingsDialog::readSettings()
         tab->readSettings(settings);
 }
 
-void SettingsDialog::saveSettings()
-{
+void SettingsDialog::saveSettings() {
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
@@ -260,24 +255,22 @@ void SettingsDialog::saveSettings()
         tab->writeSettings(settings);
 }
 
-void SettingsDialog::readSettingsDialog()
-{
+void SettingsDialog::readSettingsDialog() {
     settings.beginGroup("SettingsDialog");
-    restoreGeometry(settings.value("geometry").toByteArray());
+    if (auto geometry { settings.value("geometry").toByteArray() }; geometry.size())
+        restoreGeometry(geometry);
     settings.getValue(tabwMain);
     settings.endGroup();
 }
 
-void SettingsDialog::saveSettingsDialog()
-{
+void SettingsDialog::saveSettingsDialog() {
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
     settings.setValue(tabwMain);
     settings.endGroup();
 }
 
-void SettingsDialog::translator(QApplication* app, const QString& path)
-{
+void SettingsDialog::translator(QApplication* app, const QString& path) {
     if (QFile::exists(path)) {
         QTranslator* pTranslator = new QTranslator(qApp);
         if (pTranslator->load(path))
@@ -287,8 +280,7 @@ void SettingsDialog::translator(QApplication* app, const QString& path)
     }
 }
 
-void SettingsDialog::reject()
-{
+void SettingsDialog::reject() {
     readSettings();
 
     if (!isVisible())
@@ -297,8 +289,7 @@ void SettingsDialog::reject()
     QDialog::reject();
 }
 
-void SettingsDialog::accept()
-{
+void SettingsDialog::accept() {
     if (isVisible() && !buttonBox->button(QDialogButtonBox::Ok)->hasFocus())
         return;
 
@@ -312,8 +303,7 @@ void SettingsDialog::accept()
     QDialog::accept();
 }
 
-void SettingsDialog::showEvent(QShowEvent* event)
-{
+void SettingsDialog::showEvent(QShowEvent* event) {
     int width = 0;
     for (int i = 0; i < tabwMain->tabBar()->count(); ++i)
         width += tabwMain->tabBar()->tabRect(i).width();
@@ -321,8 +311,7 @@ void SettingsDialog::showEvent(QShowEvent* event)
     QDialog::showEvent(event);
 }
 
-bool SettingsDialog::eventFilter(QObject* watched, QEvent* event)
-{
+bool SettingsDialog::eventFilter(QObject* watched, QEvent* event) {
     if (event->type() == QEvent::KeyPress)
         return false;
     return QDialog::eventFilter(watched, event);

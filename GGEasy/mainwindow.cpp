@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget* parent)
 
         if (1) {
             QTimer::singleShot(++i * 200, [this] { selectAll(); });
-            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Voronoi]->triggered(); });
+            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
             QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(++i * 200, [] { App::graphicsView()->zoomToSelected(); });
         }
