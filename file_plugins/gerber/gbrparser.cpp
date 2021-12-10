@@ -916,8 +916,7 @@ bool Parser::parseAttributes(const QString& gLine)
     return false;
 }
 
-bool Parser::parseCircularInterpolation(const QString& gLine)
-{
+bool Parser::parseCircularInterpolation(const QString& gLine) {
     // G02/G03 - Circular interpolation
     // 2-clockwise, 3-counterclockwise
     if (!(gLine.startsWith('G') || gLine.startsWith('X') || gLine.startsWith('Y')))
@@ -934,16 +933,14 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         if (!cg.size() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
         cInt x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(CtreCapTo(cx), x, m_state.format()->xInteger, m_state.format()->xDecimal)
-                  : x = m_state.curPos().X;
-        cy.size() ? parseNumber(CtreCapTo(cy), y, m_state.format()->yInteger, m_state.format()->yDecimal)
-                  : y = m_state.curPos().Y;
+        cx.size() ? parseNumber(CtreCapTo(cx), x, m_state.format()->xInteger, m_state.format()->xDecimal) : x = m_state.curPos().X;
+        cy.size() ? parseNumber(CtreCapTo(cy), y, m_state.format()->yInteger, m_state.format()->yDecimal) : y = m_state.curPos().Y;
         parseNumber(CtreCapTo(ci), i, m_state.format()->xInteger, m_state.format()->xDecimal);
         parseNumber(CtreCapTo(cj), j, m_state.format()->yInteger, m_state.format()->yDecimal);
         // Set operation code if provided
         if (cd.size())
             m_state.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
-        int gc = CtreCapTo(cg);
+        int gc = cg ? int(CtreCapTo(cg)) : m_state.gCode();
         switch (gc) {
         case G02:
             m_state.setInterpolation(ClockwiseCircular);
