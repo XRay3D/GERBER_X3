@@ -43,8 +43,7 @@ class ProgressCancel {
 public:
     ProgressCancel() { }
 
-    static void reset()
-    {
+    static void reset() {
         m_max = 0;
         m_current = 0;
         m_cancel = false;
@@ -66,16 +65,15 @@ public:
     static void incCurrent() { ++m_current; }
 
     static bool getCancel() { return m_cancel; }
-    static void ifCancelThenThrow(const std::source_location location = std::source_location::current())
-    {
+    static void ifCancelThenThrow(/*const std::source_location location = std::source_location::current()*/) {
         static std::stringstream ss;
         if (m_cancel) {
             ss.clear();
-            ss << "file: "
-               << location.file_name() << "("
-               << location.line() << ":"
-               << location.column() << ") `"
-               << location.function_name();
+            ss << "file: ";
+            //               << location.file_name() << "("
+            //               << location.line() << ":"
+            //               << location.column() << ") `"
+            //               << location.function_name();
             throw cancelException(ss.str().data());
         }
     }

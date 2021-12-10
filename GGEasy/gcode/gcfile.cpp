@@ -37,74 +37,74 @@
 
 void calcArcs(Path path) {
     return;
-    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
-        return;
-    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
-        QGraphicsLineItem* item;
-        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
-        item->setPos(pos);
-        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
-        item->setPos(pos);
-    };
+//    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
+//        return;
+//    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
+//        QGraphicsLineItem* item;
+//        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
+//        item->setPos(pos);
+//        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
+//        item->setPos(pos);
+//    };
 
-    QPolygonF polyOfCenters;
-    std::vector<QLineF> normals;
-    QPointF center;
-    QPointF beg;
-    QPointF end;
-    int ctr {};
+//    QPolygonF polyOfCenters;
+//    std::vector<QLineF> normals;
+//    QPointF center;
+//    QPointF beg;
+//    QPointF end;
+//    int ctr {};
 
-    constexpr double centerError = 0.2;
-    constexpr int minSegCtr = 3;
+//    constexpr double centerError = 0.2;
+//    constexpr int minSegCtr = 3;
 
-    struct Center {
-        QPointF pt;
-        int i {};
-    };
+//    struct Center {
+//        QPointF pt;
+//        int i {};
+//    };
 
-    std::vector<Center> centers;
+//    std::vector<Center> centers;
 
-    CleanPolygon(path, uScale * 0.001);
-    QPolygonF poly = path;
-    for (int i {}, size { static_cast<int>(poly.size()) }; i < size; ++i) {
-        QLineF line(QLineF(poly[i], end = poly[(i + 1) % size]).center(), poly[i]);
-        line = line.normalVector();
-        if (beg.isNull())
-            beg = poly[i];
-        //                App::scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
-        if (normals.size()) {
-            QPointF intersectionPoint;
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-            normals.back().intersects(line, &intersectionPoint);
-#else
-            normals.back().intersect(line, &intersectionPoint);
-#endif
-            if (polyOfCenters.size() && QLineF(polyOfCenters.back(), intersectionPoint).length() < centerError) {
-                center += intersectionPoint;
-                addPoint(intersectionPoint, Qt::darkGray);
-                ++ctr;
-                centers.emplace_back(intersectionPoint, i);
-            } else if (ctr > minSegCtr) {
-                center /= ctr;
-                addPoint(center, Qt::red);
-                double r = QLineF(center, beg).length();
-                QRectF rect(-r, -r, +r * 2, +r * 2);
+//    CleanPolygon(path, uScale * 0.001);
+//    QPolygonF poly = path;
+//    for (int i {}, size { static_cast<int>(poly.size()) }; i < size; ++i) {
+//        QLineF line(QLineF(poly[i], end = poly[(i + 1) % size]).center(), poly[i]);
+//        line = line.normalVector();
+//        if (beg.isNull())
+//            beg = poly[i];
+//        //                App::scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
+//        if (normals.size()) {
+//            QPointF intersectionPoint;
+//#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+//            normals.back().intersects(line, &intersectionPoint);
+//#else
+//            normals.back().intersect(line, &intersectionPoint);
+//#endif
+//            if (polyOfCenters.size() && QLineF(polyOfCenters.back(), intersectionPoint).length() < centerError) {
+//                center += intersectionPoint;
+//                addPoint(intersectionPoint, Qt::darkGray);
+//                ++ctr;
+//                centers.emplace_back(intersectionPoint, i);
+//            } else if (ctr > minSegCtr) {
+//                center /= ctr;
+//                addPoint(center, Qt::red);
+//                double r = QLineF(center, beg).length();
+//                QRectF rect(-r, -r, +r * 2, +r * 2);
 
-                App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
-                ctr = {};
-                center = {};
-                beg = {};
-                end = {};
-            } else {
-                ctr = {};
-                center = {};
-                beg = {};
-                end = {};
-            }
-            polyOfCenters.push_back(intersectionPoint);
-        }
-        normals.emplace_back(line);
-    }
+//                App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
+//                ctr = {};
+//                center = {};
+//                beg = {};
+//                end = {};
+//            } else {
+//                ctr = {};
+//                center = {};
+//                beg = {};
+//                end = {};
+//            }
+//            polyOfCenters.push_back(intersectionPoint);
+//        }
+//        normals.emplace_back(line);
+//    }
 }
 
 namespace GCode {

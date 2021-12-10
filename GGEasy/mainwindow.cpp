@@ -17,7 +17,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "aboutform.h"
+//import "aboutform.h";
 #include "forms/drillform/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/hatchingform.h"
@@ -41,7 +41,10 @@
 #include <datasoliditem.h>
 #include <forward_list>
 
+#include "aboutform.h"
 #include "leakdetector.h"
+//import std.core;
+//import std;
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -116,33 +119,33 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
+    if (1 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
         int i = 0;
         int k = 100;
 
         if (0) {
-            QDir dir(R"(C:\Users\bakiev\Downloads\Attachments_inscrut@gf.tom.ru_2021-07-25_08-43-27)");
+            QDir dir(R"(D:\Downloads\Gerber_p2xsdrr_brd (1))");
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
             //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(QStringList { "*.dxf" }, QDir::Files);
+                listFiles = dir.entryList(); //(QStringList { "*.dxf" }, QDir::Files);
             for (QString str : listFiles) {
                 str = dir.path() + '/' + str;
                 qDebug() << str;
-                QTimer::singleShot(++i * k, [this, str] { loadFile(str); });
+                QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                 //break;
             }
         }
-        if (0)
-            QTimer::singleShot(++i * 200, [this] { loadFile(R"(D:\Downloads\uhu neu\XGerber\uhu LM 6203  ohne massenflache neu\uhuLM6203ohnemassenflacheneu.X3T)"); });
+        if (1)
+            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\Downloads\Gerber_p2xsdrr_brd (1)\_Gerber_BottomLayer.GBL)"); });
 
-        if (1) {
-            QTimer::singleShot(++i * 200, [this] { selectAll(); });
-            QTimer::singleShot(++i * 200, [this] { toolpathActions[GCode::Profile]->triggered(); });
-            QTimer::singleShot(++i * 200, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(++i * 200, [] { App::graphicsView()->zoomToSelected(); });
+        if (0) {
+            QTimer::singleShot(i += k, [this] { selectAll(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->triggered(); });
+            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
     }
 }
@@ -327,8 +330,7 @@ void MainWindow::createActionsService() {
     // Tool Base
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
     // Separator
-    serviceMenu->addSeparator();
-    toolpathToolBar->addSeparator();
+    serviceMenu->addAction(toolpathToolBar->addSeparator());
     //Autoplace All Refpoints
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
@@ -339,10 +341,13 @@ void MainWindow::createActionsService() {
         ui->graphicsView->zoomFit();
     }));
     // Separator
-    serviceMenu->addSeparator();
-    toolpathToolBar->addSeparator();
+    serviceMenu->addAction(toolpathToolBar->addSeparator());
     // Snap to grid
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { App::settings().setSnap(checked); }));
+    action->setCheckable(true);
+    // Separator
+    serviceMenu->addAction(toolpathToolBar->addSeparator());
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(""), tr("Ruller"), ui->graphicsView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)

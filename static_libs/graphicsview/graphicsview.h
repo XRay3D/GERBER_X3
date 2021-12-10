@@ -36,6 +36,8 @@ public:
     void zoomOut();
     void fitInView(QRectF destRect, bool withBorders = true);
 
+    void setRuler(bool ruller) { ruler_ = ruller; }
+
     double scaleFactor();
     QPointF mappedPos(QMouseEvent* event) const;
 
@@ -57,6 +59,7 @@ private:
     Ruler* hRuler;
     Ruler* vRuler;
     Scene* m_scene;
+    bool ruler_ {};
 
     void updateRuler();
     template <class T>
