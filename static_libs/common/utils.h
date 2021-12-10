@@ -13,14 +13,14 @@ using minutes = std::ratio<60>;
 using hours = std::ratio<3600>;
 using std::is_same_v;
 template <class T = seconds>
-    requires //
+requires //
     is_same_v<T, nanoseconds> || //
     is_same_v<T, microseconds> || //
     is_same_v<T, milliseconds> || //
     is_same_v<T, seconds> || //
     is_same_v<T, minutes> || //
     is_same_v<T, hours> //
-    struct Timer {
+struct Timer {
 #ifdef __gnu_linux__
     const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
 #else
@@ -31,12 +31,10 @@ template <class T = seconds>
 
     constexpr Timer(std::string_view name, T = {})
         : t1 { std::chrono::high_resolution_clock::now() }
-        , stringView { name }
-    {
+        , stringView { name } {
     }
 
-    ~Timer()
-    {
+    ~Timer() {
         using std::chrono::duration;
         using std::chrono::high_resolution_clock;
 
@@ -63,27 +61,27 @@ template <class T = seconds>
 template <class T>
 Timer(std::string_view, T) -> Timer<T>;
 
-inline auto toU16StrView(const QString& str)
-{
+inline auto toU16StrView(const QString& str) {
     return std::u16string_view(reinterpret_cast<const char16_t*>(str.utf16()), str.size());
 }
 
 template <class T>
 struct CtreCapTo {
     T& cap;
-    CtreCapTo(T& cap)/*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
-        : cap { cap }
-    {
+    CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
+        : cap { cap } {
     }
 
     auto toDouble() const { return QString(*this).toDouble(); }
     auto toInt() const { return QString(*this).toInt(); }
 
-    operator QString() const { return QString(reinterpret_cast<const QChar*>(cap.data()), static_cast<size_t>(cap.size())); }
+    operator QString() const {
+        //qDebug("QString  D%d S%d", cap.data(), cap.size());
+        return QString(reinterpret_cast<const QChar*>(cap.data()), static_cast<size_t>(cap.size()));
+    }
 
     operator double() const { return toDouble(); }
     operator int() const { return toInt(); }
-
 };
 template <class T>
 CtreCapTo(T) -> CtreCapTo<T>;

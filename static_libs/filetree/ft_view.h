@@ -21,7 +21,7 @@ namespace FileTree {
 
 class View : public QTreeView {
     Q_OBJECT
-    friend class MainWindow;
+    friend class ::MainWindow;
 
 public:
     explicit View(QWidget* parent = nullptr);
@@ -33,7 +33,7 @@ public:
 
 signals:
     void saveGCodeFile(int id);
-    void saveGCodeFiles();// NOTE unused
+    void saveGCodeFiles(); // NOTE unused
     void saveSelectedGCodeFiles();
 
 private:
