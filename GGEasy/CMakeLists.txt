@@ -13,9 +13,12 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.5)
 
-set(PROJECT_NAME "GGEasy")
+#set(PROJECT_NAME "GGEasy")
 
-project(${PROJECT_NAME} LANGUAGES CXX)
+#project(${PROJECT_NAME} LANGUAGES CXX)
+project(GGEasy)
+
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -25,6 +28,41 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+#set(PREBUILT_MODULE_PATH ${CMAKE_BINARY_DIR}/modules)
+
+#function(add_module name)
+#    file(MAKE_DIRECTORY ${PREBUILT_MODULE_PATH})
+#    add_custom_target(${name}.pcm
+#            COMMAND
+#                ${CMAKE_CXX_COMPILER}
+#                -std=c++20
+#                -stdlib=libc++
+#                -fmodules
+#                -c
+#                ${CMAKE_CURRENT_SOURCE_DIR}/${ARGN}
+#                -Xclang -emit-module-interface
+#                -o ${PREBUILT_MODULE_PATH}/${name}.pcm
+
+#            )
+#endfunction()
+
+#add_compile_options(-fmodules)
+#add_compile_options(-stdlib=libc++)
+#add_compile_options(-fbuiltin-module-map)
+#add_compile_options(-fimplicit-module-maps)
+#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
+
+#add_module(module module.h)
+##add_dependencies(${PROJECT_NAME} module.pcm)
+##add_library(${PROJECT_NAME} module.pcm)
+
+#add_compile_options(-fmodules)
+#add_compile_options(-stdlib=libc++)
+#add_compile_options(-fbuiltin-module-map)
+#add_compile_options(-fimplicit-module-maps)
+#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
+
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
@@ -43,61 +81,32 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(SUFFIX "_clang")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(SUFFIX "_gnu")
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(SUFFIX "${SUFFIX}_x64")
-    else()
-        set(SUFFIX "${SUFFIX}_x32")
-    endif()
-#    include_directories (
-#        /usr/lib/x86_64-linux-gnu/
-#        )
-#    link_directories(
-#        /usr/lib/x86_64-linux-gnu/
-#        )
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(SUFFIX "_intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(SUFFIX "_msvc")
-    if(CMAKE_CL_64)
-        set(SUFFIX "${SUFFIX}_x64")
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
-    else()
-        set(SUFFIX "${SUFFIX}_x32")
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
-    endif()
-    include_directories (
-#        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
-#        C:/dev/CGAL-5.1.2/include
-        C:/local/boost_1_76_0_x64
-        )
-    link_directories(
-#        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
-        )
+if(CMAKE_CL_64)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
+else()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(SUFFIX "${SUFFIX}_d")
-elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    set(SUFFIX "${SUFFIX}_r")
-elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
-    set(SUFFIX "${SUFFIX}_rm")
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    set(SUFFIX "${SUFFIX}_rd")
-endif()
+include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(
     -DBUILD_DATE="${DT}"
-    -D_USE_CGAL_
+    #    -D_USE_CGAL_
     -D_USE_BOOST_
     )
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
+
+find_package(Boost)
+if (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIR})
+    message(${Boost_INCLUDE_DIR})
+    add_definitions( "-D_USE_BOOST_" )
+else()
+    message("Boost not found!!!" FATAL_ERROR)
+endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
@@ -108,7 +117,8 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     OpenGL
     PrintSupport
     Widgets
-    REQUIRED)
+    REQUIRED
+    )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
@@ -125,15 +135,12 @@ include_directories (
     ../static_libs/graphicsview
     ../static_libs/thermal
     ../static_libs/tooldatabase
-#    C:/dev/CGAL-5.1.2/auxiliary/gmp/include
-#    C:/dev/CGAL-5.1.2/include
-#    C:/dev/boost_1_75_0
     )
 
 link_directories(
     ${LINK_DIRECTORIES}
     ../libs${SUFFIX}
-#    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
+    #    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
     )
 
 add_subdirectory(forms)
@@ -245,6 +252,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         )
 endif()
 
+
+set(TARGETS
+    ${PROJECT_NAME}
+    )
+
+foreach(TNAME ${TARGETS})
+    target_compile_features(${TNAME} PUBLIC  cxx_std_20)
+    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_BINARY_DIR})
+    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
+endforeach()
+
 ############################
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 #    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
@@ -268,24 +286,6 @@ endif()
 #                      MODE GA:1,2 OP
 #                      LOG target.err)
 
-
-#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-# set(SUFFIX "_clang")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-# set(SUFFIX "_gnu")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-# set(SUFFIX "_intel")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-# set(SUFFIX "_msvc")
-#endif()
-
-##if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-##if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-#if(CMAKE_CL_64)
-# set(SUFFIX "${SUFFIX}_x64")
-#else()
-# set(SUFFIX "${SUFFIX}_x32")
-#endif()
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
 # "C:/Qt/5.12.10/mingw73_64/plugins/platforms"
 # "$<TARGET_FILE_DIR::${PROJECT_NAME}>/platforms"
