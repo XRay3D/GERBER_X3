@@ -21,8 +21,8 @@ template <class T = seconds>
     is_same_v<T, minutes> || //
     is_same_v<T, hours> //
     struct Timer {
-#ifdef __gnu_linux__
-    const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
+#if defined(__gnu_linux__) || defined(__GNUC__)
+        const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
 #else
     const std::chrono::time_point<std::chrono::steady_clock> t1;
 #endif
@@ -71,7 +71,7 @@ inline auto toU16StrView(const QString& str)
 template <class T>
 struct CtreCapTo {
     T& cap;
-    CtreCapTo(T& cap)/*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
+    CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
         : cap { cap }
     {
     }
@@ -83,7 +83,6 @@ struct CtreCapTo {
 
     operator double() const { return toDouble(); }
     operator int() const { return toInt(); }
-
 };
 template <class T>
 CtreCapTo(T) -> CtreCapTo<T>;

@@ -13,7 +13,7 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.14)
 
-project(Gerber_X3)
+project(GERBER_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)

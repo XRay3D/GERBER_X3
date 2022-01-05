@@ -22,6 +22,7 @@
 //#include <QtConcurrent>
 //#include "tool.h"
 #include <source_location>
+#include <sstream>
 
 using namespace ClipperLib;
 
@@ -76,7 +77,7 @@ public:
                << location.line() << ":"
                << location.column() << ") `"
                << location.function_name();
-            throw cancelException(ss.str().data());
+            throw cancelException(ss.str().data() /*__FUNCTION__*/);
         }
     }
     static void setCancel(bool cancel) { m_cancel = cancel; }
