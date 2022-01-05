@@ -120,7 +120,8 @@ struct IntPoint {
 #endif
     IntPoint(cInt x = 0, cInt y = 0) noexcept
         : X(x)
-        , Y(y) {
+        , Y(y)
+    {
     }
 
     IntPoint(IntPoint&& p) noexcept = default;
@@ -129,67 +130,89 @@ struct IntPoint {
     IntPoint& operator=(const IntPoint& p) noexcept = default;
     IntPoint(QPointF&& p) noexcept
         : X(p.x() * uScale)
-        , Y(p.y() * uScale) {
+        , Y(p.y() * uScale)
+    {
     }
     IntPoint(const QPointF& p) noexcept
         : X(p.x() * uScale)
-        , Y(p.y() * uScale) {
+        , Y(p.y() * uScale)
+    {
     }
-    IntPoint& operator=(QPointF&& p) noexcept {
+    IntPoint& operator=(QPointF&& p) noexcept
+    {
         X = p.x() * uScale;
         Y = p.y() * uScale;
         return *this;
     }
-    IntPoint& operator=(const QPointF& p) noexcept {
+    IntPoint& operator=(const QPointF& p) noexcept
+    {
         X = p.x() * uScale;
         Y = p.y() * uScale;
         return *this;
     }
 
-    bool isNull() const noexcept {
+    bool isNull() const noexcept
+    {
         return X == 0 && Y == 0;
     }
 
-    friend inline IntPoint& operator*=(IntPoint& pt, double s) noexcept {
-        pt.X *= s;
-        pt.Y *= s;
-        return pt;
+    friend inline IntPoint& operator*=(IntPoint& pt, double s) noexcept
+    {
+        return pt.X *= s, pt.Y *= s, pt;
     }
 
-    operator QPointF() const noexcept {
+    IntPoint& operator+=(IntPoint& pt) noexcept
+    {
+        return X += pt.X, Y += pt.Y, *this;
+    }
+
+    IntPoint& operator-=(IntPoint& pt) noexcept
+    {
+        return X -= pt.X, Y -= pt.Y, *this;
+    }
+
+    operator QPointF() const noexcept
+    {
         return { X * dScale, Y * dScale };
     }
 
 #ifdef __GNUC__
-    bool operator==(const IntPoint& L) const noexcept {
+    bool operator==(const IntPoint& L) const noexcept
+    {
         return X == L.X && Y == L.Y;
     }
-    bool operator!=(const IntPoint& L) const noexcept {
+    bool operator!=(const IntPoint& L) const noexcept
+    {
         return !(*this == L);
     }
-    bool operator<(const IntPoint& L) const noexcept {
+    bool operator<(const IntPoint& L) const noexcept
+    {
         return std::tuple { X, Y } < std::tuple { L.X, L.Y };
     }
 #else
     auto operator<=>(const IntPoint&) const noexcept = default;
 #endif
 
-    friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt) {
+    friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
+    {
         stream.writeRawData(reinterpret_cast<const char*>(&pt), sizeof(IntPoint));
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt) {
+    friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt)
+    {
         stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(IntPoint));
         return stream;
     }
 
-    friend QDebug operator<<(QDebug d, const IntPoint& p) {
+    friend QDebug operator<<(QDebug d, const IntPoint& p)
+    {
         d << "IntPt(" << p.X << ", " << p.Y << ")";
         return d;
     }
 
-    double angleTo(const IntPoint& pt2) const noexcept {
+    double angleTo(const IntPoint& pt2) const noexcept
+    {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
         const double theta = atan2(-dy, dx) * 360.0 / (M_PI * 2);
@@ -200,7 +223,8 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double angleRadTo(const IntPoint& pt2) const noexcept {
+    double angleRadTo(const IntPoint& pt2) const noexcept
+    {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
         const double theta = atan2(-dy, dx);
@@ -212,12 +236,14 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double distTo(const IntPoint& pt2) const noexcept {
+    double distTo(const IntPoint& pt2) const noexcept
+    {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return sqrt(x * x + y * y);
     }
-    double distToSq(const IntPoint& pt2) const noexcept {
+    double distToSq(const IntPoint& pt2) const noexcept
+    {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return (x * x + y * y);
@@ -240,23 +266,27 @@ struct Path : mvector<IntPoint> {
     Path(Path&& v) : MV(std::move(v)) {}
     Path(const std::initializer_list<IntPoint>& v) : MV(v) {}
     // clang-format on
-    Path(const QPolygonF& v) {
+    Path(const QPolygonF& v)
+    {
         MV::reserve(v.size());
         for (auto& pt : v) {
             MV::push_back(pt);
         }
     }
 
-    Path& operator=(const Path& v) {
+    Path& operator=(const Path& v)
+    {
         MV::operator=(v);
         return *this;
     }
-    Path& operator=(Path&& v) {
+    Path& operator=(Path&& v)
+    {
         MV::operator=(std::move(v));
         return *this;
     }
 
-    operator QPolygonF() const {
+    operator QPolygonF() const
+    {
         QPolygonF poly;
         poly.reserve(int(size() + 1)); // +1 if need closed polygons
         for (const auto pt : *this)
@@ -278,22 +308,26 @@ struct Paths : mvector<Path> {
     Paths(Paths&& v) : MV(std::move(v)) {}
     Paths(const std::initializer_list<Path>& v) : MV(v) {}
     // clang-format on
-    Paths(const QList<QPolygonF>& v) {
+    Paths(const QList<QPolygonF>& v)
+    {
         MV::reserve(v.size());
         for (auto&& qpolygonf : v)
             MV::emplace_back(qpolygonf);
     }
 
-    Paths& operator=(const Paths& v) {
+    Paths& operator=(const Paths& v)
+    {
         MV::operator=(v);
         return *this;
     }
-    Paths& operator=(Paths&& v) {
+    Paths& operator=(Paths&& v)
+    {
         MV::operator=(std::move(v));
         return *this;
     }
 
-    operator mvector<QPolygonF>() const {
+    operator mvector<QPolygonF>() const
+    {
         mvector<QPolygonF> polys;
         polys.reserve(size());
         for (const auto& poly : *this)
@@ -324,11 +358,13 @@ struct DoublePoint {
     double Y;
     DoublePoint(double x = 0, double y = 0)
         : X(x)
-        , Y(y) {
+        , Y(y)
+    {
     }
     DoublePoint(IntPoint ip)
         : X(static_cast<double>(ip.X))
-        , Y(static_cast<double>(ip.Y)) {
+        , Y(static_cast<double>(ip.Y))
+    {
     }
 };
 //------------------------------------------------------------------------------
@@ -492,7 +528,8 @@ protected:
 class cancelException : public std::exception {
 public:
     cancelException(const char* description)
-        : m_descr(description) {
+        : m_descr(description)
+    {
     }
     ~cancelException() noexcept override = default;
     const char* what() const noexcept override { return m_descr.c_str(); }
@@ -634,7 +671,8 @@ private:
 class clipperException : public std::exception {
 public:
     clipperException(const char* description)
-        : m_descr(description) {
+        : m_descr(description)
+    {
     }
     ~clipperException() noexcept override = default;
     const char* what() const noexcept override { return m_descr.c_str(); }
