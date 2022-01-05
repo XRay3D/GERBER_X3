@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
         int i = 0;
         int k = 100;
 
