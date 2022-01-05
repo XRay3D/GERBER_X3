@@ -28,9 +28,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
 endif()
 
-#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-if(CMAKE_CL_64)
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(SUFFIX "${SUFFIX}_x64")
     set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64/plugins")
 else()
@@ -74,8 +72,8 @@ link_directories(
     )
 
 #add_subdirectory(dxf)
-add_subdirectory(excellon)
-#add_subdirectory(gerber)
+#add_subdirectory(excellon)
+add_subdirectory(gerber)
 #add_subdirectory(hpgl)
 
 
