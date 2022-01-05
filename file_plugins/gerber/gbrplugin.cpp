@@ -31,7 +31,7 @@
 #include <thermalnode.h>
 #include <thermalpreviewitem.h>
 
-#include <QtConcurrent>
+//#include <QtConcurrent>
 #include <QtWidgets>
 
 #include <ctre.hpp> //

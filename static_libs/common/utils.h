@@ -20,9 +20,10 @@ requires //
     is_same_v<T, seconds> || //
     is_same_v<T, minutes> || //
     is_same_v<T, hours> //
-struct Timer {
-#ifdef __gnu_linux__
-    const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
+
+    struct Timer {
+#if defined(__gnu_linux__) || defined(__GNUC__)
+        const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
 #else
     const std::chrono::time_point<std::chrono::steady_clock> t1;
 #endif

@@ -30,7 +30,7 @@ endif()
 
 #if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-if(CMAKE_CL_64)
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(SUFFIX "${SUFFIX}_x64")
 else()
     set(SUFFIX "${SUFFIX}_x32")
