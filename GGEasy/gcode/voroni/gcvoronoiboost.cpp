@@ -15,12 +15,14 @@
 *                                                                              *
 *******************************************************************************/
 #include "gcvoronoiboost.h"
+
+#if __has_include(<boost/polygon/voronoi.hpp>)
 #include "mvector.h"
 
 #include <cstdio>
 #include <vector>
-#if __has_include(<boost/polygon/voronoi.hpp>)
-#include "voronoi_visual_utils.hpp"
+
+#include "voronoi_visual_utils.h"
 #include <boost/polygon/polygon.hpp>
 #include <boost/polygon/voronoi.hpp>
 
@@ -236,8 +238,8 @@ void VoronoiBoost::boostVoronoi() {
     m_returnPs.push_back(frame);
 }
 }
-#endif
-
+#else
 void GCode::VoronoiBoost::boostVoronoi()
 {
 }
+#endif
