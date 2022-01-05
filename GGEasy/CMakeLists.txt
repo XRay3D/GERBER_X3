@@ -47,11 +47,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(SUFFIX "_gnu")
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(SUFFIX "${SUFFIX}_x64")
-    else()
-        set(SUFFIX "${SUFFIX}_x32")
-    endif()
 #    include_directories (
 #        /usr/lib/x86_64-linux-gnu/
 #        )
@@ -62,13 +57,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
-    if(CMAKE_CL_64)
-        set(SUFFIX "${SUFFIX}_x64")
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
-    else()
-        set(SUFFIX "${SUFFIX}_x32")
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
-    endif()
     include_directories (
 #        C:/dev/CGAL-5.1.2/auxiliary/gmp/include
 #        C:/dev/CGAL-5.1.2/include
@@ -78,6 +66,15 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 #        C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
         )
 endif()
+
+if(CMAKE_CL_64)
+    set(SUFFIX "${SUFFIX}_x64")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
+else()
+    set(SUFFIX "${SUFFIX}_x32")
+    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
+endif()
+
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(SUFFIX "${SUFFIX}_d")
@@ -95,6 +92,13 @@ add_definitions(
     -D_USE_CGAL_
     -D_USE_BOOST_
     )
+
+
+#find_package(Boost)
+#if(Boost_FOUND)
+#  include_directories(${INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
+#  add_executable(foo foo.cc)
+#endif()
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)

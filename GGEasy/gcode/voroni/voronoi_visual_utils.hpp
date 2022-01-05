@@ -7,12 +7,12 @@
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
-#ifndef BOOST_POLYGON_VORONOI_VISUAL_UTILS
-#define BOOST_POLYGON_VORONOI_VISUAL_UTILS
+//#ifndef BOOST_POLYGON_VORONOI_VISUAL_UTILS
+//#define BOOST_POLYGON_VORONOI_VISUAL_UTILS
 
 #include <stack>
 #include <vector>
-
+#if __has_include(<boost/polygon/isotropy.hpp>)
 #include <boost/polygon/isotropy.hpp>
 #include <boost/polygon/point_concept.hpp>
 #include <boost/polygon/rectangle_concept.hpp>

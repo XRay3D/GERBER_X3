@@ -19,7 +19,7 @@
 
 #include <cstdio>
 #include <vector>
-
+#if __has_include(<boost/polygon/voronoi.hpp>)
 #include "voronoi_visual_utils.hpp"
 #include <boost/polygon/polygon.hpp>
 #include <boost/polygon/voronoi.hpp>
@@ -235,4 +235,9 @@ void VoronoiBoost::boostVoronoi() {
     m_returnPs = segments;
     m_returnPs.push_back(frame);
 }
+}
+#endif
+
+void GCode::VoronoiBoost::boostVoronoi()
+{
 }
