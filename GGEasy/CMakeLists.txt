@@ -13,10 +13,10 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.14)
 
-set(PROJECT_NAME "GGEasy")
+#set(PROJECT_NAME "GGEasy")
 
-project(${PROJECT_NAME} LANGUAGES CXX)
-
+#project(${PROJECT_NAME} LANGUAGES CXX)
+project(GGEasy)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -25,6 +25,41 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+#set(PREBUILT_MODULE_PATH ${CMAKE_BINARY_DIR}/modules)
+
+#function(add_module name)
+#    file(MAKE_DIRECTORY ${PREBUILT_MODULE_PATH})
+#    add_custom_target(${name}.pcm
+#            COMMAND
+#                ${CMAKE_CXX_COMPILER}
+#                -std=c++20
+#                -stdlib=libc++
+#                -fmodules
+#                -c
+#                ${CMAKE_CURRENT_SOURCE_DIR}/${ARGN}
+#                -Xclang -emit-module-interface
+#                -o ${PREBUILT_MODULE_PATH}/${name}.pcm
+
+#            )
+#endfunction()
+
+#add_compile_options(-fmodules)
+#add_compile_options(-stdlib=libc++)
+#add_compile_options(-fbuiltin-module-map)
+#add_compile_options(-fimplicit-module-maps)
+#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
+
+#add_module(module module.h)
+##add_dependencies(${PROJECT_NAME} module.pcm)
+##add_library(${PROJECT_NAME} module.pcm)
+
+#add_compile_options(-fmodules)
+#add_compile_options(-stdlib=libc++)
+#add_compile_options(-fbuiltin-module-map)
+#add_compile_options(-fimplicit-module-maps)
+#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
+
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
@@ -57,15 +92,7 @@ else()
     set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(SUFFIX "${SUFFIX}_d")
-elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    set(SUFFIX "${SUFFIX}_r")
-elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
-    set(SUFFIX "${SUFFIX}_rm")
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    set(SUFFIX "${SUFFIX}_rd")
-endif()
+include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -78,6 +105,15 @@ find_package(Boost)
 if(Boost_FOUND)
     include_directories(${INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
     add_definitions(-D_USE_BOOST_)
+endif()
+
+find_package(Boost)
+if (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIR})
+    message(${Boost_INCLUDE_DIR})
+    add_definitions( "-D_USE_BOOST_" )
+else()
+    message("Boost not found!!!" FATAL_ERROR)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
@@ -272,6 +308,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         )
 endif()
 
+
+set(TARGETS
+    ${PROJECT_NAME}
+    )
+
+foreach(TNAME ${TARGETS})
+    target_compile_features(${TNAME} PUBLIC  cxx_std_20)
+    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_BINARY_DIR})
+    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
+endforeach()
+
 ############################
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 #    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
@@ -295,7 +342,6 @@ endif()
 #                      MODE GA:1,2 OP
 #                      LOG target.err)
 
-
 #if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 # set(SUFFIX "_clang")
 #elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -313,6 +359,7 @@ endif()
 #else()
 # set(SUFFIX "${SUFFIX}_x32")
 #endif()
+
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
 # "C:/Qt/5.12.10/mingw73_64/plugins/platforms"
 # "$<TARGET_FILE_DIR::${PROJECT_NAME}>/platforms"

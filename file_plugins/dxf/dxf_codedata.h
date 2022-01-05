@@ -20,6 +20,9 @@
 
 namespace Dxf {
 
+template <typename T>
+struct TypenameTest;
+
 class CodeData;
 using variant = std::variant<int16_t, int32_t, int64_t, double, QString>;
 using Codes = std::vector<CodeData>;
@@ -53,14 +56,13 @@ public:
     inline static constexpr bool always_false_v = false;
 
     template <typename T>
-    inline operator T() const
-    {
+    inline operator T() const {
         return std::visit([this](auto&& arg) -> std::decay_t<T> {
             using To = std::decay_t<T>;
             using Fr = std::decay_t<decltype(arg)>;
             bool ok = true;
             T val;
-            if constexpr /**/ (std::is_same_v<Fr, To>) {
+            /*  */ if constexpr (std::is_same_v<Fr, To>) {
                 return arg;
             } else if constexpr (std::is_same_v<To, QString> && std::is_integral_v<Fr>) {
                 //                qDebug()
@@ -93,7 +95,7 @@ public:
                 //                         << "\n\tTo" << typeid(To).name();
                 return T(arg);
             } else
-                static_assert(always_false_v<T>, "non-exhaustive visitor!");
+                TypenameTest<T> {}; //static_assert(always_false_v<T>, "non-exhaustive visitor!");
             if (!ok)
                 throw QString("CodeData::operator T(), %1 to %2 from %3")
                     .arg(typeid(Fr).name())
