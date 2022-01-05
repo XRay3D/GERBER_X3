@@ -20,7 +20,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
-if(CMAKE_CL_64)
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(SUFFIX "${SUFFIX}_x64")
     set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64/plugins")
 else()
     set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32/plugins")

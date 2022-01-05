@@ -22,6 +22,7 @@
 //#include <QtConcurrent>
 //#include "tool.h"
 #include <source_location>
+#include <sstream>
 
 using namespace ClipperLib;
 
@@ -69,12 +70,12 @@ public:
         static std::stringstream ss;
         if (m_cancel) {
             ss.clear();
-            ss << "file: ";
-            //               << location.file_name() << "("
-            //               << location.line() << ":"
-            //               << location.column() << ") `"
-            //               << location.function_name();
-            throw cancelException(ss.str().data());
+            ss << "file: "
+               << location.file_name() << "("
+               << location.line() << ":"
+               << location.column() << ") `"
+               << location.function_name();
+            throw cancelException(ss.str().data() /*__FUNCTION__*/);
         }
     }
     static void setCancel(bool cancel) { m_cancel = cancel; }

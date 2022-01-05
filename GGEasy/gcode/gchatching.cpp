@@ -22,8 +22,8 @@
 #include <execution>
 #endif
 #include "point.h"
-#include <QFuture>
-#include <QtConcurrent>
+//#include <QFuture>
+//#include <QtConcurrent>
 #include <algorithm>
 #include <forward_list>
 #include <ranges>

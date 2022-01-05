@@ -1,25 +1,22 @@
 #/*******************************************************************************
-#*   *
-#* Author : Damir Bakiev  *
-#* Version : na  *
-#* Date : 11 November 2021 *
-#* Website : na  *
-#* Copyright : Damir Bakiev 2016-2021  *
-#*   *
-#* License:   *
+#*                                                                              *
+#* Author    :  Damir Bakiev                                                    *
+#* Version   :  na                                                              *
+#* Date      :  11 November 2021                                                *
+#* Website   :  na                                                              *
+#* Copyright :  Damir Bakiev 2016-2021                                          *
+#*                                                                              *
+#* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt  *
-#*   *
+#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#*                                                                              *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
 #set(PROJECT_NAME "GGEasy")
 
 #project(${PROJECT_NAME} LANGUAGES CXX)
 project(GGEasy)
-
-
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -77,27 +74,38 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(SUFFIX "_clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(SUFFIX "_gnu")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(SUFFIX "_intel")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(SUFFIX "_msvc")
+endif()
 
-#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-
-if(CMAKE_CL_64)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(SUFFIX "${SUFFIX}_x64")
+    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
 else()
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
+    set(SUFFIX "${SUFFIX}_x32")
+    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
 endif()
 
 include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
-string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
-add_definitions(
-    -DBUILD_DATE="${DT}"
-    #    -D_USE_CGAL_
-    -D_USE_BOOST_
-    )
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_GX3_DIR}/bin)
+string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
+add_definitions(-DBUILD_DATE="${DT}")
+
+find_package(Boost)
+if(Boost_FOUND)
+    include_directories(${INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
+    add_definitions(-D_USE_BOOST_)
+endif()
 
 find_package(Boost)
 if (Boost_FOUND)
@@ -110,7 +118,7 @@ endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
-    Concurrent
+    #    Concurrent
     Core
     Gui
     LinguistTools
@@ -143,14 +151,6 @@ link_directories(
     #    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
     )
 
-add_subdirectory(forms)
-add_subdirectory(forms/drillform)
-add_subdirectory(forms/formsutil)
-
-add_subdirectory(gcode)
-add_subdirectory(gcode/voroni)
-
-add_subdirectory(interfaces)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
@@ -165,6 +165,34 @@ set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
 set(SOURCE
     ${SOURCE}
     aboutform.cpp
+    forms/drillform/drillform.cpp
+    forms/drillform/drillmodel.cpp
+    forms/formsutil/errordialog.cpp
+    forms/formsutil/formsutil.cpp
+    forms/gcodepropertiesform.cpp
+    forms/hatchingform.cpp
+    forms/pocketoffsetform.cpp
+    forms/pocketrasterform.cpp
+    forms/profileform.cpp
+    forms/toolname.cpp
+    forms/voronoiform.cpp
+    gcode/gccreator.cpp
+    gcode/gcdrillitem.cpp
+    gcode/gcfile.cpp
+    gcode/gch.cpp
+    gcode/gchatching.cpp
+    gcode/gcnode.cpp
+    gcode/gcplugin.cpp
+    gcode/gcpocketoffset.cpp
+    gcode/gcpocketraster.cpp
+    gcode/gcprofile.cpp
+    gcode/gcthermal.cpp
+    gcode/gcutils.cpp
+    gcode/voroni/gcvoronoi.cpp
+    gcode/voroni/gcvoronoiboost.cpp
+    gcode/voroni/gcvoronoicgal.cpp
+    gcode/voroni/gcvoronoijc.cpp
+    gcode/voroni/jc_voronoi.cpp
     main.cpp
     mainwindow.cpp
     plugindialog.cpp
@@ -177,6 +205,41 @@ set(SOURCE
 set(HEADERS
     ${HEADERS}
     aboutform.h
+    forms/drillform/drillform.h
+    forms/drillform/drillmodel.h
+    forms/formsutil/errordialog.h
+    forms/formsutil/formsutil.h
+    forms/gcodepropertiesform.h
+    forms/hatchingform.h
+    forms/pocketoffsetform.h
+    forms/pocketrasterform.h
+    forms/profileform.h
+    forms/toolname.h
+    forms/voronoiform.h
+    gcode/gccreator.h
+    gcode/gcdrillitem.h
+    gcode/gcfile.h
+    gcode/gch.h
+    gcode/gchatching.h
+    gcode/gcnode.h
+    gcode/gcode.h
+    gcode/gcplugin.h
+    gcode/gcpocketoffset.h
+    gcode/gcpocketraster.h
+    gcode/gcprofile.h
+    gcode/gcthermal.h
+    gcode/gctypes.h
+    gcode/gcutils.h
+    gcode/voroni/gcvoronoi.h
+    gcode/voroni/gcvoronoiboost.h
+    gcode/voroni/gcvoronoicgal.h
+    gcode/voroni/gcvoronoijc.h
+    gcode/voroni/jc_voronoi.h
+    gcode/voroni/voronoi_visual_utils.h
+    interfaces/file.h
+    interfaces/pluginfile.h
+    interfaces/plugintypes.h
+    interfaces/shapepluginin.h
     mainwindow.h
     messageoutput.h
     openingdialog.h
@@ -192,6 +255,13 @@ set(HEADERS
 set(UI
     ${UI}
     aboutform.ui
+    forms/drillform/drillform.ui
+    forms/gcodepropertiesform.ui
+    forms/hatchingform.ui
+    forms/pocketoffsetform.ui
+    forms/pocketrasterform.ui
+    forms/profileform.ui
+    forms/voronoiform.ui
     mainwindow.ui
     settingsdialog.ui
     )
@@ -215,27 +285,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     thermal
     tooldatabase
     shape
-    Qt${QT_VERSION_MAJOR}::Concurrent
+    #    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
     )
-
-#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#    target_link_libraries(${PROJECT_NAME} PRIVATE
-#        gmp#CGAL
-#        mpfr#CGAL
-#        )
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    target_link_libraries(${PROJECT_NAME} PRIVATE
-#        libgmp-10#CGAL
-#        libmpfr-4#CGAL
-#        )
-#endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
@@ -285,6 +341,24 @@ endforeach()
 #                      ANALYZE ${PROJECT_NAME}
 #                      MODE GA:1,2 OP
 #                      LOG target.err)
+
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+# set(SUFFIX "_clang")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+# set(SUFFIX "_gnu")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+# set(SUFFIX "_intel")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+# set(SUFFIX "_msvc")
+#endif()
+
+##if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+##if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+# set(SUFFIX "${SUFFIX}_x64")
+#else()
+# set(SUFFIX "${SUFFIX}_x32")
+#endif()
 
 #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
 # "C:/Qt/5.12.10/mingw73_64/plugins/platforms"

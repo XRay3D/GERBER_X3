@@ -13,33 +13,19 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.14)
 
-project(Gerber_X3)
+project(GERBER_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
-#add_definitions(-L/usr/lib64 -static -static-libstdc++ -static-libgcc)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)
 
-#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#    #    set(SUFFIX "_clang")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#    set(CMAKE_CXX_FLAGS_DEBUG_INIT "-std=c++2a "${CMAKE_CXX_FLAGS_DEBUG_INIT})
-#    set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-std=c++2a "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT})
-#    set(CMAKE_CXX_FLAGS_RELEASE_INIT "-std=c++2a "${CMAKE_CXX_FLAGS_RELEASE_INIT})
-#    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-std=c++2a "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT})
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-#    #    set(SUFFIX "_intel")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    set(CMAKE_CXX_FLAGS_DEBUG_INIT "/EHsc /MD /experimental:module "${CMAKE_CXX_FLAGS_DEBUG_INIT})
-#    set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/EHsc /MD /experimental:module "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT})
-#    set(CMAKE_CXX_FLAGS_RELEASE_INIT "/EHsc /MD /experimental:module "${CMAKE_CXX_FLAGS_RELEASE_INIT})
-#    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/EHsc /MD /experimental:module "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT})
-#    #    set(SUFFIX "_msvc")
-#endif()
-
-include (${PROJECT_SOURCE_DIR}/SUFFIX.cmake)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+endif()
 
 include_directories(magic_get/)
 include_directories(magic_get/include/)

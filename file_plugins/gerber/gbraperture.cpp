@@ -146,22 +146,22 @@ Path AbstractAperture::drawDrill(const State& state)
 
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
-    bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
+    QMatrix m;
+    if (!qFuzzyIsNull(state.rotating()))
+        m.rotate(state.rotating());
+    if (!qFuzzyCompare(state.scaling(), 1.0))
+        m.scale(state.scaling(), state.scaling());
+    if (state.mirroring() & X_Mirroring)
+        m.scale(-1, +1);
+    if (state.mirroring() & Y_Mirroring)
+        m.scale(+1, -1);
 
-        if (state.mirroring() & X_Mirroring)
-            pt.X = -pt.X;
-        if (state.mirroring() & Y_Mirroring)
-            pt.Y = -pt.Y;
-        if (state.rotating() != 0.0 || state.scaling() != 1.0) {
-            const double tmpAangle = qDegreesToRadians(state.rotating() - IntPoint().angleTo(pt));
-            const double length = IntPoint().distTo(pt) * state.scaling();
-            pt = IntPoint(static_cast<cInt>(qCos(tmpAangle) * length), static_cast<cInt>(qSin(tmpAangle) * length));
-        }
+    if (!m.isIdentity()) {
+        for (IntPoint& pt : poligon)
+            pt = m.map(pt);
+        if (m.m11() < 0 ^ m.m22() < 0)
+            ReversePath(poligon);
     }
-
-    if (fl != (Area(poligon) < 0))
-        ReversePath(poligon);
 }
 
 /////////////////////////////////////////////////////

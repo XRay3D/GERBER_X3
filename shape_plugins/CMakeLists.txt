@@ -30,7 +30,7 @@ endif()
 
 #if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 #if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-if(CMAKE_CL_64)
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(SUFFIX "${SUFFIX}_x64")
     set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64/plugins")
 else()
@@ -70,9 +70,9 @@ include_directories(
     shape
     )
 
-add_subdirectory(circle)
-add_subdirectory(circlearc)
-add_subdirectory(polyline)
-add_subdirectory(rectangle)
-add_subdirectory(text)
+#add_subdirectory(circle)
+#add_subdirectory(circlearc)
+#add_subdirectory(polyline)
+#add_subdirectory(rectangle)
+#add_subdirectory(text)
 
