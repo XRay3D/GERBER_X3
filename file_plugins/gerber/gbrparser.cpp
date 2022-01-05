@@ -712,13 +712,12 @@ bool Parser::parseTransformations(const QString& gLine)
     static const QVector<char> slTransformations { 'P', 'M', 'R', 'S' };
     static const QVector<char> slLevelPolarity { 'D', 'C' };
     static const QVector<QString> slLoadMirroring { "N", "X", "Y", "XY" };
-    static constexpr ctll::fixed_string ptrnTransformations(R"(^%L([PMRS])(.+)\*%$)"); // fixed_string("^%L([PMRS])(.+)\*%$");
-    if (auto [whole, tr, val] = ctre::match<ptrnTransformations>(data); whole) {
+    if (auto [whole, tr, val] = ctre::match<R"(^%L([PMRS])(.+)\*%$)">(data); whole) {
         const char trType = tr.data()[0];
         switch (slTransformations.indexOf(trType)) {
         case trPolarity:
             addPath();
-            switch (slLevelPolarity.indexOf(QString { CtreCapTo(val) }.front().toLatin1())) {
+            switch (slLevelPolarity.indexOf(val.data()[0])) {
             case Positive:
                 m_state.setImgPolarity(Positive);
                 break;
@@ -730,13 +729,13 @@ bool Parser::parseTransformations(const QString& gLine)
             }
             return true;
         case trMirror:
-            m_state.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(QString { CtreCapTo(val) })));
+            m_state.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(CtreCapTo(val))));
             return true;
         case trRotate:
-            m_state.setRotating(val);
+            m_state.setRotating(CtreCapTo(val));
             return true;
         case trScale:
-            m_state.setScaling(val);
+            m_state.setScaling(CtreCapTo(val));
             return true;
         }
     }
