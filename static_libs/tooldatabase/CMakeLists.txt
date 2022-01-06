@@ -1,17 +1,14 @@
 #/*******************************************************************************
-#*                                                                              *
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
 #* Date      :  11 November 2021                                                *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2021                                          *
-#*                                                                              *
+#* Copyright :  Damir Bakiev 2016-2022                                          *
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*                                                                              *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(tooldatabase LANGUAGES CXX)
 
@@ -47,6 +44,7 @@ add_library(tooldatabase STATIC
     tooltreeview.cpp
     toolselectorform.h
     toolselectorform.cpp
+    toolpch.h
     )
 
 target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Core)

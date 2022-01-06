@@ -156,17 +156,17 @@ struct IntPoint {
         return X == 0 && Y == 0;
     }
 
-    friend inline IntPoint& operator*=(IntPoint& pt, double s) noexcept
+    IntPoint& operator*=(double s) noexcept
     {
-        return pt.X *= s, pt.Y *= s, pt;
+        return X *= s, Y *= s, *this;
     }
 
-    IntPoint& operator+=(IntPoint& pt) noexcept
+    IntPoint& operator+=(const IntPoint& pt) noexcept
     {
         return X += pt.X, Y += pt.Y, *this;
     }
 
-    IntPoint& operator-=(IntPoint& pt) noexcept
+    IntPoint& operator-=(const IntPoint& pt) noexcept
     {
         return X -= pt.X, Y -= pt.Y, *this;
     }
@@ -176,7 +176,7 @@ struct IntPoint {
         return { X * dScale, Y * dScale };
     }
 
-#ifdef __GNUC__
+#ifdef __GNUC___
     bool operator==(const IntPoint& L) const noexcept
     {
         return X == L.X && Y == L.Y;

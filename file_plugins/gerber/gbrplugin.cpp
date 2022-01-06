@@ -2,17 +2,14 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-*                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  01 February 2020                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2021                                          *
-*                                                                              *
+* Copyright :  Damir Bakiev 2016-2022                                          *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
 *******************************************************************************/
 #include "gbrplugin.h"
 
@@ -24,7 +21,7 @@
 #include "drillpreviewgi.h"
 #include "ft_view.h"
 #include "settings.h"
-#include "tool.h"
+#include "toolpch.h"
 #include "utils.h"
 
 #include <thermalmodel.h>
@@ -515,7 +512,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         }
     }
 
-#ifdef QT_DEBUG
+#if 1 // NOTE fix to perf
     for (auto& worker : map) {
         creator(worker);
     }

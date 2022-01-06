@@ -2,17 +2,14 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-*                                                                              *
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
 * Date      :  11 November 2021                                                *
 * Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2021                                          *
-*                                                                              *
+* Copyright :  Damir Bakiev 2016-2022                                          *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
 *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
@@ -43,7 +40,8 @@
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
 
-void setCursor(QWidget* w) {
+void setCursor(QWidget* w)
+{
     enum {
         Size = 21,
         Mid = 10
@@ -58,7 +56,8 @@ void setCursor(QWidget* w) {
 }
 
 GraphicsView::GraphicsView(QWidget* parent)
-    : QGraphicsView(parent) {
+    : QGraphicsView(parent)
+{
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
@@ -132,18 +131,21 @@ GraphicsView::GraphicsView(QWidget* parent)
     App::setGraphicsView(this);
 }
 
-GraphicsView::~GraphicsView() {
+GraphicsView::~GraphicsView()
+{
     App::setGraphicsView(nullptr);
 }
 
-void GraphicsView::setScene(QGraphicsScene* Scene) {
+void GraphicsView::setScene(QGraphicsScene* Scene)
+{
     QGraphicsView::setScene(Scene);
     updateRuler();
 }
 
 void GraphicsView::zoomFit() { fitInView(scene()->itemsBoundingRect(), false); }
 
-void GraphicsView::zoomToSelected() {
+void GraphicsView::zoomToSelected()
+{
     QRectF rect;
     for (const QGraphicsItem* item : scene()->selectedItems()) {
         const QRectF tmpRect(item->pos().isNull() ? item->boundingRect() : item->boundingRect().translated(item->pos()));
@@ -154,7 +156,8 @@ void GraphicsView::zoomToSelected() {
     fitInView(rect);
 }
 
-void GraphicsView::zoom100() {
+void GraphicsView::zoom100()
+{
     double x = 1.0, y = 1.0;
     const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
     if (/* DISABLES CODE */ (0)) {
@@ -175,7 +178,8 @@ void GraphicsView::zoom100() {
     }
 }
 
-void GraphicsView::zoomIn() {
+void GraphicsView::zoomIn()
+{
     if (getScale() > 10000.0)
         return;
 
@@ -187,7 +191,8 @@ void GraphicsView::zoomIn() {
     }
 }
 
-void GraphicsView::zoomOut() {
+void GraphicsView::zoomOut()
+{
     if (getScale() < 1.0)
         return;
     if (App::settings().guiSmoothScSh()) {
@@ -198,7 +203,8 @@ void GraphicsView::zoomOut() {
     }
 }
 
-void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
+void GraphicsView::fitInView(QRectF dstRect, bool withBorders)
+{
     if (dstRect.isNull())
         return;
     if (withBorders)
@@ -215,11 +221,13 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
     }
 }
 
-double GraphicsView::scaleFactor() {
+double GraphicsView::scaleFactor()
+{
     return 1.0 / getScale();
 }
 
-QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
+QPointF GraphicsView::mappedPos(QMouseEvent* event) const
+{
     if (event->modifiers() & Qt::AltModifier || App::settings().snap()) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
         const double gs = App::settings().gridStep(matrix().m11());
@@ -234,7 +242,8 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
     return mapToScene(event->pos());
 }
 
-void GraphicsView::setScale(double s) noexcept {
+void GraphicsView::setScale(double s) noexcept
+{
     const auto trf(transform());
     setTransform({ +s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
@@ -243,7 +252,8 @@ void GraphicsView::setScale(double s) noexcept {
 
 double GraphicsView::getScale() noexcept { return transform().m11(); }
 
-void GraphicsView::setOpenGL(bool useOpenGL) {
+void GraphicsView::setOpenGL(bool useOpenGL)
+{
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     setViewport(useOpenGL ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)) : new QWidget());
 #else
@@ -256,11 +266,13 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
     ::setCursor(viewport());
 }
 
-void GraphicsView::setViewRect(QRectF r) {
+void GraphicsView::setViewRect(QRectF r)
+{
     QGraphicsView::fitInView(r, Qt::KeepAspectRatio);
 }
 
-QRectF GraphicsView::getViewRect() {
+QRectF GraphicsView::getViewRect()
+{
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
 
@@ -273,7 +285,8 @@ QRectF GraphicsView::getViewRect() {
     return visible_scene_rect;
 }
 
-void GraphicsView::wheelEvent(QWheelEvent* event) {
+void GraphicsView::wheelEvent(QWheelEvent* event)
+{
     const auto delta = event->angleDelta().y();
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
@@ -328,10 +341,9 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
     update();
 }
 
-void GraphicsView::updateRuler() {
-    if (!ruler_)
-        return;
-    layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
+void GraphicsView::updateRuler()
+{
+    // layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
     updateSceneRect(QRectF()); //actualize mapFromScene
     QPoint p = mapFromScene(QPointF());
     vRuler->SetOrigin(p.y());
@@ -340,7 +352,8 @@ void GraphicsView::updateRuler() {
     hRuler->SetRulerZoom(qAbs(transform().m11() * 0.1));
 }
 
-void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
+void GraphicsView::dragEnterEvent(QDragEnterEvent* event)
+{
     if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
         return;
@@ -348,7 +361,8 @@ void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
     event->ignore();
 }
 
-void GraphicsView::dropEvent(QDropEvent* event) {
+void GraphicsView::dropEvent(QDropEvent* event)
+{
     for (QUrl& var : event->mimeData()->urls())
         emit fileDroped(var.path().remove(0, 1));
     event->acceptProposedAction();
@@ -356,12 +370,14 @@ void GraphicsView::dropEvent(QDropEvent* event) {
 
 void GraphicsView::dragMoveEvent(QDragMoveEvent* event) { event->acceptProposedAction(); }
 
-void GraphicsView::resizeEvent(QResizeEvent* event) {
+void GraphicsView::resizeEvent(QResizeEvent* event)
+{
     QGraphicsView::resizeEvent(event);
     updateRuler();
 }
 
-void GraphicsView::mousePressEvent(QMouseEvent* event) {
+void GraphicsView::mousePressEvent(QMouseEvent* event)
+{
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
@@ -400,7 +416,8 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
+void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
+{
     if (event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -425,7 +442,8 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
+void GraphicsView::mouseMoveEvent(QMouseEvent* event)
+{
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     const QPointF point(mappedPos(event));
@@ -434,7 +452,8 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 template <class T>
-void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end) {
+void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end)
+{
     auto* animation = new QPropertyAnimation(target, propertyName);
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName, end);
