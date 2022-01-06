@@ -1,17 +1,14 @@
 #/*******************************************************************************
-#*                                                                              *
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
 #* Date      :  11 November 2021                                                *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2021                                          *
-#*                                                                              *
+#* Copyright :  Damir Bakiev 2016-2022                                          *
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*                                                                              *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 #set(PROJECT_NAME "GGEasy")
 
@@ -266,6 +263,8 @@ set(UI
     settingsdialog.ui
     )
 
+
+
 add_executable(${PROJECT_NAME}
     ${TS_FILES}
     ${SOURCE}
@@ -278,13 +277,13 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
+    common
     filetree
     gi
     graphicsview
-    common
+    shape
     thermal
     tooldatabase
-    shape
     #    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
@@ -295,6 +294,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+endif()
+
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
