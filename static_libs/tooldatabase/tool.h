@@ -120,7 +120,7 @@ private:
     double m_stepover;
     static inline double m_depth;
 
-    uint m_id;
+    int m_id;
 
     mutable size_t m_hash = 0;
     mutable size_t m_hash2 = 0;

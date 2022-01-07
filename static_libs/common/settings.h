@@ -17,6 +17,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+inline QString settingsPath;
+
 class DoubleSpinBox;
 class QAbstractButton;
 class QComboBox;

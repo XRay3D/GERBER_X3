@@ -12,7 +12,10 @@
 #include "gbrtypes.h"
 
 #include <QtMath>
+#include <numbers>
 #include <variant>
+
+constexpr double M_2PI = std::numbers::pi * 2;
 
 namespace Gerber {
 

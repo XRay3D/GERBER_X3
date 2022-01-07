@@ -13,6 +13,7 @@
 *******************************************************************************/
 #include "tool.h"
 #include "datastream.h"
+#include "settings.h"
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -227,32 +228,34 @@ double Tool::getDepth() const {
 
 void Tool::read(const QJsonObject& json) {
     m_angle = json["angle"].toDouble();
+    m_autoName = json["autoName"].toBool();
     m_diameter = json["diameter"].toDouble();
     m_feedRate = json["feedRate"].toDouble();
+    m_id = json["autoName"].toInt();
+    m_name = json["name"].toString();
+    m_note = json["note"].toString();
     m_oneTurnCut = json["oneTurnCut"].toDouble();
     m_passDepth = json["passDepth"].toDouble();
     m_plungeRate = json["plungeRate"].toDouble();
     m_spindleSpeed = json["spindleSpeed"].toInt();
     m_stepover = json["stepover"].toDouble();
-    m_name = json["name"].toString();
-    m_note = json["note"].toString();
     m_type = static_cast<Type>(json["type"].toInt());
-    m_autoName = json["autoName"].toBool();
 }
 
 void Tool::write(QJsonObject& json) const {
     json["angle"] = m_angle;
+    json["autoName"] = m_autoName;
     json["diameter"] = m_diameter;
     json["feedRate"] = m_feedRate;
+    json["id"] = m_id;
+    json["name"] = m_name;
+    json["note"] = m_note;
     json["oneTurnCut"] = m_oneTurnCut;
     json["passDepth"] = m_passDepth;
     json["plungeRate"] = m_plungeRate;
     json["spindleSpeed"] = m_spindleSpeed;
     json["stepover"] = m_stepover;
-    json["name"] = m_name;
-    json["note"] = m_note;
     json["type"] = m_type;
-    json["autoName"] = m_autoName;
 }
 
 bool Tool::isValid() const {
@@ -375,11 +378,13 @@ ToolHolder::ToolHolder() { }
 void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
-    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    QFile file(settingsPath + QStringLiteral("/tools.json"));
 
-    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+    if (!file.exists())
+        file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path
+    if (file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
-    } else {
+    else {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         file.setFileName(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
         if (file.exists() && file.open(QIODevice::ReadOnly)) {

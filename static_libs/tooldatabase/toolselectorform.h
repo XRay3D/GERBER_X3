@@ -36,16 +36,16 @@ private slots:
     void on_pbEdit_clicked();
 
 private:
-    Tool m_tool;
+    Tool tool_;
     const int counter;
-    const QString m_toolFileName;
+    const QString toolFileName_;
 
     void readTool();
     void updateForm();
     void writeTool() const;
 
     ///////////////////////////
-    QLabel* m_label;
+    QLabel* label_;
     QLabel* lblPixmap;
     QLabel* lblName;
     QPushButton* pbSelect;
