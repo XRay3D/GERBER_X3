@@ -2,74 +2,37 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 
-#include "mainwindow.h"
-#include "messageoutput.h"
-#include "settingsdialog.h"
-#include "splashscreen.h"
-#include "version.h"
-
-#include "ctre.hpp"
+#include "gcode/gcplugin.h"
 #include "interfaces/shapepluginin.h"
-//#include "style.h"
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#endif
-
+#include "mainwindow.h"
+#include "settingsdialog.h"
+#include "version.h"
 #include <QCommandLineParser>
 #include <QDir>
 #include <QPluginLoader>
 #include <QSystemSemaphore>
 
-#include "style.h"
-
-void translation(QApplication* app);
-
-#ifdef Q_OS_WIN
-#include <qt_windows.h>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QGLWidget>
+#include <QStandardPaths>
 #endif
 
 #include "leakdetector.h"
 
-#include <gcode/gcplugin.h>
+void translation(QApplication* app);
 
-int main(int argc, char** argv) {
-
-    //QApplication::setStyle(new MyStyle);
-    //    QString s1("FILE_FORMAT=3:3");
-    //    QString s2("file_format=3:3");
-    //    static constexpr ctll::fixed_string regexFormat_(R"(.*(?:FORMAT|format).*(\\d{1}).(\\d{1}))");// fixed_string(".*(?:FORMAT|format).*(\\d{1}).(\\d{1})");
-    //    if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(s1); matchFormat) {
-    //        qDebug() << "regexFormat" << matchFormat.toString();
-    //        qDebug() << "regexFormat" << integer.toString();
-    //        qDebug() << "regexFormat" << decimal.toString();
-    //    }
-    //    if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(s2); matchFormat) {
-    //        qDebug() << "regexFormat" << matchFormat.toString();
-    //        qDebug() << "regexFormat" << integer.toString();
-    //        qDebug() << "regexFormat" << decimal.toString();
-    //    }
-
-    //    return 0;
-
-    //#if defined(Q_OS_WIN) && !defined(__GNUC__)
-    //    HANDLE hOut = GetStdHandle(STD_ERROR_HANDLE);
-    //    DWORD dwMode = 0;
-    //    GetConsoleMode(hOut, &dwMode);
-    //    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    //    SetConsoleMode(hOut, dwMode);
-    //#endif
-
+int main(int argc, char** argv)
+{
     //    qInstallMessageHandler(myMessageOutput);
 
 #ifdef LEAK_DETECTOR
@@ -86,32 +49,32 @@ int main(int argc, char** argv) {
 #endif
 
     Q_INIT_RESOURCE(resources);
-    QApplication::setApplicationName("GGEasy");
-    QApplication::setOrganizationName("settings" /*VER_COMPANYNAME_STR*/);
-    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
     QApplication app(argc, argv);
 
-//#ifdef Q_OS_WIN
-//    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-//    if (settings.value("AppsUseLightTheme") == 0) {
+    //#ifdef Q_OS_WIN
+    //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
+    //    if (settings.value("AppsUseLightTheme") == 0) {
+    //        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    //    }
+    //#endif
 
-//        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-//    }
-//#endif
-
-//    QApplication::setStyle(new ProxyStyle(QApplication::style()));
 #ifdef linux
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     QSharedMemory nixFixSharedMemory("AppSettings");
-    if(nixFixSharedMemory.attach())
+    if (nixFixSharedMemory.attach())
         nixFixSharedMemory.detach();
 #endif
+    QApplication::setApplicationName("GGEasy");
+    //    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
+    //    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
+    settingsPath = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    qDebug() << settingsPath;
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
-    App a;
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsPath);
+    [[maybe_unused]] App appSingleton;
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QGLFormat glf = QGLFormat::defaultFormat();
@@ -120,14 +83,14 @@ int main(int argc, char** argv) {
     QGLFormat::setDefaultFormat(glf);
 #endif
 
-    if constexpr(0) {
+    if constexpr (0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
         semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
         QSharedMemory nix_fix_shared_memory("GGEasy_Memory");
-        if(nix_fix_shared_memory.attach()) {
+        if (nix_fix_shared_memory.attach()) {
             nix_fix_shared_memory.detach();
         }
 #endif
@@ -135,7 +98,7 @@ int main(int argc, char** argv) {
         QSharedMemory sharedMemory("GGEasy_Memory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false; // переменную для проверки ууже запущенного приложения
-        if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
+        if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true; // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
             sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем 1 байт памяти
@@ -145,10 +108,10 @@ int main(int argc, char** argv) {
         QCommandLineParser parser;
         parser.addPositionalArgument("url", "Url of file to open");
         parser.process(app);
-        if(is_running) {
+        if (is_running) {
             system("pause");
-            if(parser.positionalArguments().length()) {
-                for(const QString& fileName : parser.positionalArguments()) {
+            if (parser.positionalArguments().length()) {
+                for (const QString& fileName : parser.positionalArguments()) {
                     instance()->loadFile(fileName);
                 }
             }
@@ -177,22 +140,25 @@ int main(int argc, char** argv) {
         const QString suffix("*.so");
 #endif
 #elif _WIN32
-        const QString suffix("*.dll");
+        const auto suffix = QStringLiteral("*.dll");
 #else
         static_assert(false, "Select OS");
 #endif
         // load plugins
         QDir dir(QApplication::applicationDirPath() + "/plugins");
-        if(dir.exists()) { // Поиск всех файлов в папке "plugins"
+        if (dir.exists()) { // Поиск всех файлов в папке "plugins"
             QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
-            for(const auto& str : listFiles) { // Проход по всем файлам
+            for (const auto& str : listFiles) { // Проход по всем файлам
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
-                if /**/ (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
+                if (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
                     App::filePlugins().emplace(file->type(), PIF {file, pobj});
-                } else if(auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
+                    continue;
+                }
+                if (auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
                     App::shapePlugins().emplace(shape->type(), PIS {shape, pobj});
+                    continue;
                 }
             }
         }
@@ -207,7 +173,7 @@ int main(int argc, char** argv) {
         QSettings settings;
         settings.beginGroup("MainWindow");
         QString locale(settings.value("locale").toString());
-        if(locale.isEmpty())
+        if (locale.isEmpty())
             locale = QLocale().name().left(2);
         settings.setValue("locale", locale);
         settings.endGroup();
@@ -223,7 +189,7 @@ int main(int argc, char** argv) {
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");
     parser.process(app);
-    for(const QString& fileName : parser.positionalArguments()) {
+    for (const QString& fileName : parser.positionalArguments()) {
         mainWin.loadFile(fileName);
     }
 

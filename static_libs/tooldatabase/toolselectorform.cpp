@@ -12,7 +12,9 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #include "toolselectorform.h"
-
+#include "settings.h"
+#include "tooldatabase.h"
+#include "tooleditdialog.h"
 #include <QDebug>
 #include <QFile>
 #include <QJsonArray>
@@ -20,23 +22,16 @@
 #include <QJsonObject>
 #include <QtWidgets>
 
-#include "tooldatabase.h"
-#include "tooleditdialog.h"
-
 #include "leakdetector.h"
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
-    , counter { static_cast<int>(parent->findChildren<ToolSelectorForm*>().count()) }
-    , m_toolFileName {
-        qApp->applicationDirPath()
-        + "/settings/"
-        + parent->objectName() + QString::number(counter)
-        + ".json"
-    } {
+    , counter {static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
+    , toolFileName_ {settingsPath + '/' + parent->objectName() + QString::number(counter) + ".json"}
+{
     setupUi(this);
     readTool();
-    m_label->setStyleSheet(m_tool.id() < 0 ? "QLabel { color: red }" : "");
+    label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
 }
 
 ToolSelectorForm::~ToolSelectorForm() {
@@ -44,50 +39,47 @@ ToolSelectorForm::~ToolSelectorForm() {
 }
 
 void ToolSelectorForm::setTool(const Tool& tool) {
-    m_tool = tool;
-    m_label->setStyleSheet(tool.id() < 0 ? "QLabel { color: red }" : "");
+    tool_ = tool;
+    label_->setStyleSheet(tool.id() < 0 ? "QLabel { color: red }" : "");
     updateForm();
 }
 
-const Tool& ToolSelectorForm::tool() const { return m_tool; }
+const Tool& ToolSelectorForm::tool() const { return tool_; }
 
 void ToolSelectorForm::on_pbSelect_clicked() {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraver, Tool::Laser });
-    if (tdb.exec()) {
+    if (tdb.exec())
         setTool(tdb.tool());
-    }
 }
 
 void ToolSelectorForm::on_pbEdit_clicked() {
     ToolEditDialog d;
-    d.setTool(m_tool);
-    if (d.exec()) {
+    d.setTool(tool_);
+    if (d.exec())
         setTool(d.tool());
-        m_tool.setId(-1);
-    }
 }
 
 void ToolSelectorForm::updateForm() {
-    lblPixmap->setPixmap(m_tool.icon().pixmap({ 22, 22 }));
-    lblName->setText(m_tool.name());
-    setToolTip(m_tool.note());
+    lblPixmap->setPixmap(tool_.icon().pixmap({22, 22}));
+    lblName->setText(tool_.name());
+    setToolTip(tool_.note());
     emit updateName();
 }
 
 void ToolSelectorForm::readTool() {
-    QFile file(m_toolFileName);
+    QFile file(toolFileName_);
     if (file.open(QIODevice::ReadOnly))
-        m_tool.read(QJsonDocument::fromJson(file.readAll()).object());
+        tool_.read(QJsonDocument::fromJson(file.readAll()).object());
     else
         qWarning("Couldn't open tools file.");
     updateForm();
 }
 
 void ToolSelectorForm::writeTool() const {
-    QFile file(m_toolFileName);
+    QFile file(toolFileName_);
     if (file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
-        m_tool.write(json);
+        tool_.write(json);
         file.write(QJsonDocument(json).toJson());
     } else {
         qWarning("Couldn't open tools file.");
@@ -95,7 +87,7 @@ void ToolSelectorForm::writeTool() const {
 }
 
 QLabel* ToolSelectorForm::label() const {
-    return m_label;
+    return label_;
 }
 
 void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
@@ -108,29 +100,29 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     gridLayout->setContentsMargins(0, 0, 0, 0);
 
     {
-        m_label = new QLabel(ToolSelectorForm);
-        m_label->setObjectName(QString::fromUtf8("label"));
+        label_ = new QLabel(ToolSelectorForm);
+        label_->setObjectName(QString::fromUtf8("label"));
 
         {
             QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
             sizePolicy.setHorizontalStretch(0);
             sizePolicy.setVerticalStretch(0);
-            sizePolicy.setHeightForWidth(m_label->sizePolicy().hasHeightForWidth());
-            m_label->setSizePolicy(sizePolicy);
+            sizePolicy.setHeightForWidth(label_->sizePolicy().hasHeightForWidth());
+            label_->setSizePolicy(sizePolicy);
         }
 
         QFont font;
         font.setBold(true);
         //        font.setWeight(75);
-        m_label->setFont(font);
+        label_->setFont(font);
 
         QFontMetrics fm(font);
 
-        m_label->setMinimumWidth(std::max(
+        label_->setMinimumWidth(std::max(
             fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
             fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));
-        m_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        gridLayout->addWidget(m_label, 0, 0, 1, 1);
+        label_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        gridLayout->addWidget(label_, 0, 0, 1, 1);
     }
 
     {
@@ -170,9 +162,9 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
 void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm) {
     ToolSelectorForm->setWindowTitle(QCoreApplication::translate("ToolSelectorForm", "Form", nullptr));
     if (counter > 1)
-        m_label->setText(QCoreApplication::translate("ToolSelectorForm", "Tool %1:", nullptr).arg(counter));
+        label_->setText(QCoreApplication::translate("ToolSelectorForm", "Tool %1:", nullptr).arg(counter));
     else
-        m_label->setText(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr));
+        label_->setText(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr));
     pbEdit->setText(QCoreApplication::translate("ToolSelectorForm", "Edit", nullptr));
     pbSelect->setText(QCoreApplication::translate("ToolSelectorForm", "Select", nullptr));
 }

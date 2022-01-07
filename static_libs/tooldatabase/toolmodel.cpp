@@ -236,7 +236,7 @@ Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction 
 
 void ToolModel::exportTools()
 {
-    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    QFile file(settingsPath + QStringLiteral("/tools.json"));
     if (!file.open(QIODevice::WriteOnly)) {
         qDebug() << file.errorString();
         return;
@@ -293,11 +293,13 @@ void ToolModel::importTools()
 {
     QJsonDocument loadDoc;
 
-    QFile file(qApp->applicationDirPath() + QStringLiteral("/tools.json"));
+    QFile file(settingsPath + QStringLiteral("/tools.json"));
 
-    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+    if (!file.exists())
+        file.setFileName(qApp->applicationDirPath() + "/tools.json");
+    if (file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
-    } else {
+    else {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         file.setFileName(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
         if (file.exists() && file.open(QIODevice::ReadOnly)) {
