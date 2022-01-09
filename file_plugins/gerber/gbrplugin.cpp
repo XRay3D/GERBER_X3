@@ -426,7 +426,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
 
     param.model->appendRow(QIcon(), tr("All"), param.par);
 
-    mvector<Worker> map;
+    mvector<Worker> workers;
     auto creator = [this, &m_sourcePreview, &tool, &param](Worker w) {
         static QMutex m;
         auto& [go, node, name, strageIdx] = w;
@@ -452,13 +452,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
         return areaMin <= area && area <= areaMax;
     };
 
-#if _MSVC_LANG >= 201705L
     using ThermalNodes = std::map<int, ThermalNode*>;
-#else
-    struct ThermalNodes : std::map<int, ThermalNode*> {
-        bool contains(int key) const { return find(key) != end(); }
-    };
-#endif
 
     ThermalNodes thermalNodes;
     if (param.perture) {
@@ -473,7 +467,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
                     if (thermalNodes.contains(dCode)
                         && go.state().dCode() == D03
                         && go.state().aperture() == dCode) {
-                        map.push_back({ &go, thermalNodes[dCode], "", ctr++ });
+                        workers.emplace_back(&go, thermalNodes[dCode], "", ctr++);
                     }
                 }
             }
@@ -488,7 +482,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
                 && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
                 && go.path().front().distTo(go.path().back()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
                 && testArea(go.paths())) {
-                map.push_back({ &go, thermalNodes[Line], tr("Line"), ctr++ });
+                workers.emplace_back(&go, thermalNodes[Line], tr("Line"), ctr++);
             }
         }
     }
@@ -508,21 +502,19 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
             return go1->state().curPos() < go2->state().curPos();
         });
         for (auto& go : gos) {
-            map.push_back({ go, thermalNodes[Region], tr("Region"), ctr++ });
+            workers.emplace_back(go, thermalNodes[Region], tr("Region"), ctr++);
         }
     }
 
-#if 1 // NOTE fix to perf
-    for (auto& worker : map) {
-        creator(worker);
+    std::vector<std::future<void>> futures;
+
+    for (size_t i = 0, c = QThread::idealThreadCount(); i < workers.size(); i += c) {
+        futures.clear();
+        for (auto&& wr : workers.mid(i, c))
+            futures.emplace_back(std::async(std::launch::async, creator, wr));
+        for (auto&& future : futures)
+            future.wait();
     }
-#else
-    for (size_t i = 0, c = QThread::idealThreadCount(); i < map.size(); i += c) {
-        auto m(map.mid(i, c));
-        QFuture<void> future = QtConcurrent::map(m, creator);
-        future.waitForFinished();
-    }
-#endif
 
     return m_sourcePreview;
 }
