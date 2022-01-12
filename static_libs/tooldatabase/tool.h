@@ -23,7 +23,6 @@ class Tool {
 
 public:
     Tool();
-    Tool(int);
 
     enum Type {
         Drill,
@@ -47,8 +46,8 @@ public:
     };
 
     // name
-    QString name() const;
     QString nameEnc() const;
+    QString name() const;
     void setName(const QString& name);
     // note
     QString note() const;
@@ -107,38 +106,32 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString m_name;
+    QString m_name { QObject::tr("Default") };
     QString m_note;
 
-    double m_angle;
-    double m_diameter;
-    double m_feedRate;
-    double m_oneTurnCut;
-    double m_passDepth;
-    double m_plungeRate;
-    double m_spindleSpeed;
-    double m_stepover;
+    double m_angle {};
+    double m_diameter { 1 };
+    double m_feedRate { 100 };
+    double m_oneTurnCut { 0.1 };
+    double m_passDepth { 2 };
+    double m_plungeRate { 600 };
+    double m_spindleSpeed { 12000 };
+    double m_stepover { 0.5 };
     static inline double m_depth;
 
-    int m_id;
+    int m_id { -1 };
 
     mutable size_t m_hash = 0;
     mutable size_t m_hash2 = 0;
 
-    Type m_type;
+    Type m_type { EndMill };
 
     QPainterPath m_path;
 
-    bool m_autoName;
+    bool m_autoName { true };
 };
 
-#if _MSVC_LANG >= 201705L
 using Tools = std::map<int, Tool, std::greater<int>>;
-#else
-struct Tools : std::map<int, Tool, std::greater<int>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-#endif
 
 class ToolHolder {
     friend class ToolItem;
