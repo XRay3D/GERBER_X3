@@ -1524,7 +1524,7 @@ type</source>
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="588"/>
         <source>Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>Apply</translation>
     </message>
 </context>
 <context>
@@ -1621,7 +1621,7 @@ name</source>
     <message>
         <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>
         <source>Aperture paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Stroke of a aperture</translation>
     </message>
     <message>
         <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>

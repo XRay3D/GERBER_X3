@@ -453,7 +453,7 @@ void Parser::addFlash()
     m_state.setType(Aperture);
     if (!file->m_apertures.contains(m_state.aperture()) && file->m_apertures[m_state.aperture()].get() == nullptr) {
         QString str;
-        for (auto [ap, apPtr] : file->m_apertures)
+        for (const auto& [ap, apPtr] : file->m_apertures)
             str += QString::number(ap) + ", ";
         throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
     }
@@ -579,7 +579,7 @@ Paths Parser::createLine()
     Paths solution;
     if (!file->m_apertures.contains(m_state.aperture())) {
         QString str;
-        for (auto [ap, apPtr] : file->m_apertures)
+        for (const auto& [ap, apPtr] : file->m_apertures)
             str += QString::number(ap) + ", ";
         throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
     }

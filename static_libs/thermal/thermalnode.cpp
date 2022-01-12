@@ -171,7 +171,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const
             if (childs.empty())
                 return m_checked ? Qt::Checked : Qt::Unchecked;
             int val = 0;
-            for (auto node : childs) {
+            for (const auto& node : childs) {
                 val |= node->m_checked ? 2 : 1;
             }
             return chState[val];

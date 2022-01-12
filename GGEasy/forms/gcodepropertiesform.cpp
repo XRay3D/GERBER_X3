@@ -106,6 +106,8 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
             ui->dsbxClearence->flicker();
     });
 
+    ui->pbOk->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+
     if (parent != nullptr)
         parent->setWindowTitle(ui->label->text());
 

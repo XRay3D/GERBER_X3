@@ -1708,7 +1708,7 @@ type</source>
     <message>
         <location filename="../forms/gcodepropertiesform.ui" line="588"/>
         <source>Ok</source>
-        <translation>Да</translation>
+        <translation>Применить</translation>
     </message>
 </context>
 <context>
