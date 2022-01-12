@@ -45,6 +45,8 @@ elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
     set(SUFFIX "${SUFFIX}_rd")
 endif()
 
+set(PLUGINS_DIR "${PLUGINS_DIR}/plugins")
+
 set(STATIC_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
@@ -67,9 +69,9 @@ include_directories(
     shape
     )
 
-#add_subdirectory(circle)
-#add_subdirectory(circlearc)
-#add_subdirectory(polyline)
-#add_subdirectory(rectangle)
-#add_subdirectory(text)
+add_subdirectory(circle)
+add_subdirectory(circlearc)
+add_subdirectory(polyline)
+add_subdirectory(rectangle)
+add_subdirectory(text)
 
