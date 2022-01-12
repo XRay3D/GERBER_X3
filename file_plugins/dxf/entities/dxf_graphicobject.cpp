@@ -75,7 +75,7 @@ void GraphicObject::setScale(double scaleX, double scaleY)
     auto scale = [](Path& path, double sx, double sy, const IntPoint& center = {}) {
         const bool fl = Area(path) < 0;
         for (IntPoint& pt : path) {
-            const double dAangle = (M_PI * 2) - center.angleRadTo(pt);
+            const double dAangle = (pi * 2) - center.angleRadTo(pt);
             const double length = center.distTo(pt);
             pt = IntPoint(static_cast<cInt>(cos(dAangle) * length * sx), static_cast<cInt>(sin(dAangle) * length * sy));
             pt.X += center.X;

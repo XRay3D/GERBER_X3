@@ -16,14 +16,6 @@
 #include <QDebug>
 #include <QPolygonF>
 
-#ifndef two_pi
-#define two_pi (6.28318530717958647692528676655900576)
-#endif
-
-#ifndef M_PI
-#define M_PI (3.1415926535897932384626433832795)
-#endif
-
 //QDebug operator<<(QDebug debug, const IntPoint& p)
 //{
 //    //QDebugStateSaver saver(debug);

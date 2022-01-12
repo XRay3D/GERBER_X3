@@ -341,7 +341,7 @@ QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(m_diam).arg
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
-bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(M_PI / m_verticesCount) > toolDiam; }
+bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(pi / m_verticesCount) > toolDiam; }
 
 void ApPolygon::read(QDataStream& stream)
 {

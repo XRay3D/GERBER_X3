@@ -345,9 +345,9 @@ mvector<QString> Parser::cleanAndFormatFile(QString data)
 double Parser::arcAngle(double start, double stop)
 {
     if (m_state.interpolation() == CounterclockwiseCircular && stop <= start)
-        stop += 2.0 * M_PI;
+        stop += 2.0 * pi;
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
-        stop -= 2.0 * M_PI;
+        stop -= 2.0 * pi;
     return qAbs(stop - start);
 }
 
@@ -547,12 +547,12 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     const int intSteps = App::settings().clpCircleSegments(radius * dScale); //MinStepsPerCircle;
 
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
-        stop -= 2.0 * M_PI;
+        stop -= 2.0 * pi;
     else if (m_state.interpolation() == CounterclockwiseCircular && stop <= start)
-        stop += 2.0 * M_PI;
+        stop += 2.0 * pi;
 
     double angle = qAbs(stop - start);
-    double steps = qMax(static_cast<int>(ceil(angle / (2.0 * M_PI) * intSteps)), 2);
+    double steps = qMax(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[m_state.interpolation()] * angle * 1.0 / steps;
     for (int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
@@ -1025,7 +1025,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 const double start = atan2(-j, -i);
                 const double stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
                 const double angle = arcAngle(start, stop);
-                if (angle < (M_PI + 1e-5) * 0.5) {
+                if (angle < (pi + 1e-5) * 0.5) {
                     arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
                     // Replace with exact values
                     m_state.setCurPos({ x, y });

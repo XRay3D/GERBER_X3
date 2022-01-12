@@ -31,12 +31,6 @@
 
 namespace Excellon {
 
-#ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795
-#endif
-
-//const int id1 = qRegisterMetaType<Gerber::File*>("Gerber::GFile*");
-
 Plugin::Plugin(QObject* parent)
     : QObject(parent)
     , Parser(this)

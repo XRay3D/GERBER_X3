@@ -358,7 +358,7 @@ inline double qwtFastAtan2(double y, double x)
 
     if (x < 0) {
         const double d = qwtFastAtan(y / x);
-        return (y >= 0) ? d + M_PI : d - M_PI;
+        return (y >= 0) ? d + pi : d - pi;
     }
 
     if (y < 0.0)
@@ -373,13 +373,13 @@ inline double qwtFastAtan2(double y, double x)
 //! Translate degrees into radians
 inline double qwtRadians(double degrees)
 {
-    return degrees * M_PI / 180.0;
+    return degrees * pi / 180.0;
 }
 
 //! Translate radians into degrees
 inline double qwtDegrees(double degrees)
 {
-    return degrees * 180.0 / M_PI;
+    return degrees * 180.0 / pi;
 }
 
 inline double qwtGetMin(const double* array, int size)
@@ -418,9 +418,9 @@ inline double qwtGetMax(const double* array, int size)
 */
 inline double qwtNormalizeRadians(double radians)
 {
-    double a = ::fmod(radians, 2.0 * M_PI);
+    double a = ::fmod(radians, 2.0 * pi);
     if (a < 0.0)
-        a += 2.0 * M_PI;
+        a += 2.0 * pi;
 
     return a;
 }

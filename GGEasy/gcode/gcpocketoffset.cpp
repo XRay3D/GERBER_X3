@@ -202,7 +202,7 @@ void PocketCreator::createMultiTool(mvector<Tool>& tools, double depth)
 
     auto removeSmall = [](Paths& paths, double dOffset) {
         //return;
-        const auto ta = dOffset * dOffset * M_PI;
+        const auto ta = dOffset * dOffset * pi;
         const auto tp = dOffset * 4;
         for (size_t i = 0; i < paths.size(); ++i) {
             const auto a = abs(Area(paths[i]));

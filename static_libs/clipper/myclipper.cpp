@@ -41,8 +41,8 @@ Path CirclePath(double diametr, const IntPoint& center)
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
         poligon[i] = IntPoint(
-            static_cast<cInt>(cos(i * 2 * M_PI / intSteps) * radius) + center.X,
-            static_cast<cInt>(sin(i * 2 * M_PI / intSteps) * radius) + center.Y);
+            static_cast<cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
+            static_cast<cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
     }
     return poligon;
 }

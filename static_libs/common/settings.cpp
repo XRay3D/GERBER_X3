@@ -15,10 +15,8 @@
 #include "app.h"
 #include "graphicsview.h"
 #include <cmath>
-
-#ifndef M_PI
-#define M_PI (3.1415926535897932384626433832795)
-#endif
+#include <numbers>
+using std::numbers::pi;
 
 /*G-Code*/
 AppSettings::AppSettings()
@@ -42,7 +40,7 @@ int AppSettings::theme() { return m_theme; }
 int AppSettings::clpCircleSegments(double radius)
 {
     const double length = m_clpMinCircleSegmentLength; // mm
-    const int destSteps = static_cast<int>(M_PI / asin((length * 0.5) / (radius)));
+    const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (radius)));
     int intSteps = m_clpMinCircleSegments;
     while (intSteps < destSteps)
         intSteps <<= 1;
