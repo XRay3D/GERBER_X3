@@ -23,7 +23,7 @@
 
 #include "settings.h"
 
-#include "leakdetector.h"
+
 
 namespace GCode {
 

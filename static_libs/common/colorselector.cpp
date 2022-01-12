@@ -20,7 +20,7 @@
 #include <QPainter>
 #include <QPushButton>
 
-#include "leakdetector.h"
+
 
 class PushButton : public QPushButton {
     //    Q_OBJECT

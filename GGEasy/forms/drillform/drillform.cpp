@@ -29,7 +29,7 @@
 #include <QPainter>
 #include <QTimer>
 
-#include "leakdetector.h"
+
 
 enum { IconSize = 24 };
 

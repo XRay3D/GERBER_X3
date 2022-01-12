@@ -22,7 +22,7 @@
 #include <QtWidgets>
 #include <scene.h>
 
-#include "leakdetector.h"
+
 
 namespace Gerber {
 

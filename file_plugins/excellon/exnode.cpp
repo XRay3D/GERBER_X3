@@ -24,7 +24,7 @@
 #include <QMenu>
 #include <QTextBrowser>
 
-#include "leakdetector.h"
+
 
 namespace Excellon {
 

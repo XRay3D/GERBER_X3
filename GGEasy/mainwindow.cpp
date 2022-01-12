@@ -39,7 +39,7 @@
 #include <forward_list>
 
 #include "aboutform.h"
-#include "leakdetector.h"
+
 //import std.core;
 //import std;
 

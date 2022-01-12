@@ -18,7 +18,7 @@
 #include "settings.h"
 #include <QMessageBox>
 
-#include "leakdetector.h"
+
 
 enum {
     Offset,

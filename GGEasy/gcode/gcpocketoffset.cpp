@@ -19,7 +19,7 @@
 #include <QDialog>
 #include <QElapsedTimer>
 
-#include "leakdetector.h"
+
 
 namespace GCode {
 PocketCreator::PocketCreator()

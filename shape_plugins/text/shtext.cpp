@@ -25,7 +25,7 @@
 #include <QTimer>
 #include <interfaces/file.h>
 
-#include "leakdetector.h"
+
 
 namespace Shapes {
 

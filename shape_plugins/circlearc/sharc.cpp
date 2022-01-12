@@ -17,7 +17,7 @@
 #include <QIcon>
 #include <QtMath>
 
-#include "leakdetector.h"
+
 
 namespace Shapes {
 

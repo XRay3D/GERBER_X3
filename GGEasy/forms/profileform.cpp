@@ -20,7 +20,7 @@
 #include "settings.h"
 #include <QMessageBox>
 
-#include "leakdetector.h"
+
 
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)

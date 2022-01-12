@@ -22,7 +22,7 @@
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
-#include "leakdetector.h"
+
 
 FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)

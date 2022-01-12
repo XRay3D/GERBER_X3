@@ -22,7 +22,7 @@
 #include <QJsonObject>
 #include <QMimeData>
 
-#include "leakdetector.h"
+
 
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)

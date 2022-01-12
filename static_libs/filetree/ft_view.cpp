@@ -30,7 +30,7 @@
 #include <QPainter>
 #include <QTimer>
 
-#include "leakdetector.h"
+
 
 namespace FileTree {
 

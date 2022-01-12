@@ -20,7 +20,7 @@
 #include <cmath>
 
 #include "exsettingstab.h"
-#include "leakdetector.h"
+
 
 using namespace Excellon;
 

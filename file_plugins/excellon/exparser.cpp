@@ -19,7 +19,7 @@
 #include <QFile>
 #include <cmath>
 
-#include "leakdetector.h"
+
 #include "utils.h"
 
 namespace Excellon {

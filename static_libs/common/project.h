@@ -18,7 +18,7 @@
 #include <QRectF>
 #include <memory>
 
-#include "leakdetector.h"
+
 
 enum FileVersion {
     ProVer_1 = 1,

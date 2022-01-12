@@ -34,7 +34,7 @@
 #include <QPicture>
 #include <QTimer>
 
-#include "leakdetector.h"
+
 
 enum { Size = 24 };
 

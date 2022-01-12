@@ -21,7 +21,7 @@
 #include <CGAL/Segment_Delaunay_graph_traits_2.h>
 #include <ranges>
 
-#include "leakdetector.h"
+
 
 struct convert_info {
     using Info = int;

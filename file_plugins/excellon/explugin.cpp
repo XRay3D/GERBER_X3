@@ -26,7 +26,7 @@
 #include "interfaces/file.h"
 #include "utils.h"
 
-#include "leakdetector.h"
+
 
 #include <QComboBox>
 #include <QJsonObject>

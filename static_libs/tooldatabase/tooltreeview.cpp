@@ -20,7 +20,7 @@
 #include <QPainter>
 #include <QPushButton>
 
-#include "leakdetector.h"
+
 
 ToolTreeView::ToolTreeView(QWidget* parent)
     : QTreeView(parent)

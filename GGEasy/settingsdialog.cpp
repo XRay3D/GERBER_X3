@@ -16,10 +16,9 @@
 #include "graphicsview.h"
 #include "interfaces/pluginfile.h"
 
+#include <QDesktopServices>
 #include <QtWidgets>
 #include <mainwindow.h>
-
-#include "leakdetector.h"
 
 const int gridColor = 100;
 

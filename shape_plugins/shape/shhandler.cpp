@@ -23,7 +23,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtWidgets>
 
-#include "leakdetector.h"
+
 
 namespace Shapes {
 

@@ -19,7 +19,7 @@
 #include <QModelIndex>
 #include <QVariant>
 
-#include "leakdetector.h"
+
 
 ToolItem::ToolItem(const ToolItem& item)
 {

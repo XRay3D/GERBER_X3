@@ -18,7 +18,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 
-#include "leakdetector.h"
+
 
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     : QDialog(parent)

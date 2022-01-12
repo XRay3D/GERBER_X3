@@ -16,7 +16,7 @@
 
 #include <QIcon>
 
-#include "leakdetector.h"
+
 
 QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const
 {

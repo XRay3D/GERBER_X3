@@ -23,7 +23,7 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-#include "leakdetector.h"
+
 
 namespace Shapes {
 

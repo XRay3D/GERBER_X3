@@ -14,7 +14,7 @@
 #include "ui_aboutform.h"
 #include <QDesktopServices>
 
-#include "leakdetector.h"
+
 
 AboutForm::AboutForm(QWidget* parent)
     : QDialog(parent)
