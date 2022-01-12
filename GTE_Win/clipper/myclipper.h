@@ -16,8 +16,8 @@
 #include <QDebug>
 #include <QPolygonF>
 
-#ifndef M_2PI
-#define M_2PI (6.28318530717958647692528676655900576)
+#ifndef two_pi
+#define two_pi (6.28318530717958647692528676655900576)
 #endif
 
 #ifndef M_PI

@@ -15,8 +15,8 @@
 //#include "qdebug.h"
 //#include "qmath.h"
 
-//#ifndef M_2PI
-//#define M_2PI 6.28318530717958647692528676655900576
+//#ifndef two_pi
+//#define two_pi 6.28318530717958647692528676655900576
 //#endif
 
 //static inline bool qt_is_finite(double d)
@@ -45,7 +45,7 @@
 //    const double dx = pt2.X - pt1.X;
 //    const double dy = pt2.Y - pt1.Y;
 
-//    const double theta = qAtan2(-dy, dx) * 360.0 / M_2PI;
+//    const double theta = qAtan2(-dy, dx) * 360.0 / two_pi;
 
 //    const double theta_normalized = theta < 0 ? theta + 360 : theta;
 
@@ -57,7 +57,7 @@
 
 //void IntLine::setAngle(double angle)
 //{
-//    const double angleR = angle * M_2PI / 360.0;
+//    const double angleR = angle * two_pi / 360.0;
 //    const double l = length();
 
 //    const double dx = qCos(angleR) * l;
@@ -69,7 +69,7 @@
 
 //IntLine IntLine::fromPolar(double length, double angle)
 //{
-//    const double angleR = angle * M_2PI / 360.0;
+//    const double angleR = angle * two_pi / 360.0;
 //    return IntLine(0, 0, qCos(angleR) * length, -qSin(angleR) * length);
 //}
 
@@ -141,5 +141,5 @@
 //    // only accept cos_line in the range [-1,1], if it is outside, use 0 (we return 0 rather than PI for those cases)
 //    if (cos_line >= -1.0 && cos_line <= 1.0)
 //        rad = qAcos(cos_line);
-//    return rad * 360 / M_2PI;
+//    return rad * 360 / two_pi;
 //}
