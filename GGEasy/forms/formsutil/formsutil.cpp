@@ -22,8 +22,6 @@
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
-
-
 FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)

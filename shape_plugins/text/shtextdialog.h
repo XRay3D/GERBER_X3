@@ -44,4 +44,3 @@ public slots:
     void accept() override;
     void reject() override;
 };
-

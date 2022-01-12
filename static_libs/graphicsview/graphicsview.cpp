@@ -35,8 +35,6 @@
 #include <QScrollBar>
 #include <cmath>
 
-
-
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
 

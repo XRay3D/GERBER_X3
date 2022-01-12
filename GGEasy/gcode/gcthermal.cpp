@@ -15,8 +15,6 @@
 #include "gcfile.h"
 #include "project.h"
 
-
-
 namespace GCode {
 
 ThermalCreator::ThermalCreator() { }

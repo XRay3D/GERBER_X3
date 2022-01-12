@@ -29,8 +29,6 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-
-
 namespace Gerber {
 
 QTimer Node::m_decorationTimer;

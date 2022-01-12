@@ -49,6 +49,7 @@ public:
     {
     }
     virtual Shapes::Node* node() const = 0;
+
 protected:
     virtual void write_([[maybe_unused]] QDataStream& stream) const = 0;
     virtual void read_([[maybe_unused]] QDataStream& stream) = 0;

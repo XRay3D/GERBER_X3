@@ -53,7 +53,8 @@ public:
     inline static constexpr bool always_false_v = false;
 
     template <typename T>
-    inline operator T() const {
+    inline operator T() const
+    {
         return std::visit([this](auto&& arg) -> std::decay_t<T> {
             using To = std::decay_t<T>;
             using Fr = std::decay_t<decltype(arg)>;

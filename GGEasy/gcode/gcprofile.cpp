@@ -16,19 +16,20 @@
 #include "bridgeitem.h"
 #include "scene.h"
 
-
-
 namespace GCode {
-ProfileCreator::ProfileCreator() {
+ProfileCreator::ProfileCreator()
+{
 }
 
-void ProfileCreator::create() {
+void ProfileCreator::create()
+{
     createProfile(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
 GCodeType ProfileCreator::type() { return Profile; }
 
-void ProfileCreator::createProfile(const Tool& tool, const double depth) {
+void ProfileCreator::createProfile(const Tool& tool, const double depth)
+{
     do {
 
         m_toolDiameter = tool.getDiameter(depth);
@@ -85,7 +86,8 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
     emit fileReady(nullptr);
 }
 
-void ProfileCreator::trimmingOpenPaths(Paths& paths) {
+void ProfileCreator::trimmingOpenPaths(Paths& paths)
+{
     const double dOffset = m_toolDiameter * uScale * 0.5;
     for (size_t i = 0; i < paths.size(); ++i) {
         auto& p = paths[i];
@@ -131,7 +133,8 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
     }
 }
 
-void ProfileCreator::cornerTrimming() {
+void ProfileCreator::cornerTrimming()
+{
     const double bulge = (m_toolDiameter - m_toolDiameter * M_SQRT1_2) * M_SQRT1_2;
     const double sqareSide = m_toolDiameter * M_SQRT1_2 * 0.5;
     const double testAngle = m_gcp.convent() ? 90.0 : 270.0;
@@ -163,7 +166,8 @@ void ProfileCreator::cornerTrimming() {
     }
 }
 
-void ProfileCreator::makeBridges() {
+void ProfileCreator::makeBridges()
+{
     // find Bridges
     mvector<BridgeItem*> bridgeItems;
     for (QGraphicsItem* item : App::scene()->items()) {
@@ -238,7 +242,8 @@ void ProfileCreator::makeBridges() {
     }
 }
 
-void ProfileCreator::reorder() {
+void ProfileCreator::reorder()
+{
     PolyTree polyTree;
     {
         Clipper clipper;
@@ -271,7 +276,8 @@ void ProfileCreator::reorder() {
     }
 }
 
-void ProfileCreator::reduceDistance(IntPoint& from, Path& to) {
+void ProfileCreator::reduceDistance(IntPoint& from, Path& to)
+{
     double d = std::numeric_limits<double>::max();
     int ctr2 = 0, idx = 0;
     for (auto pt2 : to) {
@@ -285,7 +291,8 @@ void ProfileCreator::reduceDistance(IntPoint& from, Path& to) {
     from = to.back();
 }
 
-void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
+void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths)
+{
     rpaths.clear();
     rpaths.reserve(polytree.Total());
 

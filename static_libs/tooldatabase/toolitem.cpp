@@ -19,8 +19,6 @@
 #include <QModelIndex>
 #include <QVariant>
 
-
-
 ToolItem::ToolItem(const ToolItem& item)
 {
     if (item.m_toolId > 0) {

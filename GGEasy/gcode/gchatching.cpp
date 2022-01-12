@@ -25,8 +25,6 @@
 #include <forward_list>
 #include <ranges>
 
-
-
 //struct sort_fn {
 //    template <std::random_access_iterator I, std::sentinel_for<I> S, class Comp = std::ranges::less, class Proj = std::identity>
 //    requires std::sortable<I, Comp, Proj> constexpr I

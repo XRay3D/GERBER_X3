@@ -21,7 +21,6 @@
 
 #include "exsettingstab.h"
 
-
 using namespace Excellon;
 
 bool ExcellonDialog::showed() { return m_showed; }

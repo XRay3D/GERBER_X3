@@ -9,9 +9,9 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #pragma once
-#include <graphicsitem.h>
 #include <QTimer>
 #include <cmath>
+#include <graphicsitem.h>
 
 namespace Gerber {
 class File;

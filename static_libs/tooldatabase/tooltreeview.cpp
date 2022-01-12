@@ -20,8 +20,6 @@
 #include <QPainter>
 #include <QPushButton>
 
-
-
 ToolTreeView::ToolTreeView(QWidget* parent)
     : QTreeView(parent)
 {

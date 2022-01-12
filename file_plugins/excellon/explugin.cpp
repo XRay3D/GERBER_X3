@@ -26,8 +26,6 @@
 #include "interfaces/file.h"
 #include "utils.h"
 
-
-
 #include <QComboBox>
 #include <QJsonObject>
 

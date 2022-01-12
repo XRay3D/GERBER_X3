@@ -24,8 +24,6 @@
 #include <QMenu>
 #include <QTextBrowser>
 
-
-
 namespace Excellon {
 
 Node::Node(File* file, int* id)

@@ -18,8 +18,6 @@
 
 #include <QSpinBox>
 
-
-
 ThermalDelegate::ThermalDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {

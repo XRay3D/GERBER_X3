@@ -48,12 +48,8 @@
 #include <ostream>
 #include <stdexcept>
 
-
-
 namespace ClipperLib {
 
-static double const pi = 3.14159265358979323846;
-static double const two_pi = pi * 2;
 static double const def_arc_tolerance = 0.25;
 
 enum Direction {

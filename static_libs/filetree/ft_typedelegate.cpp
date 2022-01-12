@@ -18,8 +18,6 @@
 
 #include <QComboBox>
 
-
-
 namespace FileTree {
 
 TypeDelegate::TypeDelegate(QObject* parent)

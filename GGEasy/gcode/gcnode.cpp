@@ -23,8 +23,6 @@
 
 #include "settings.h"
 
-
-
 namespace GCode {
 
 Node::Node(File* file, int* id)

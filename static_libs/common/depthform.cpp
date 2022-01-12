@@ -18,8 +18,6 @@
 #include "settings.h"
 #include <QtWidgets>
 
-
-
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)
     , m_parentName(parent->objectName())

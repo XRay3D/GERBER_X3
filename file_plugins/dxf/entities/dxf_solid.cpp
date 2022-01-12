@@ -119,7 +119,7 @@ GraphicObject Solid::toGo() const
     return { id, path, { path } };
 }
 
-void Solid::write(QDataStream &stream) const
+void Solid::write(QDataStream& stream) const
 {
     stream << firstCorner;
     stream << secondCorner;
@@ -132,7 +132,7 @@ void Solid::write(QDataStream &stream) const
     stream << radius;
 }
 
-void Solid::read(QDataStream &stream)
+void Solid::read(QDataStream& stream)
 {
     stream >> firstCorner;
     stream >> secondCorner;

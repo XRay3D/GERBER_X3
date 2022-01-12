@@ -221,9 +221,9 @@ void Spline::parse(CodeData& code)
 
 Entity::Type Spline::type() const { return Type::SPLINE; }
 
-GraphicObject Spline::toGo() const { return {  }; }
+GraphicObject Spline::toGo() const { return {}; }
 
-void Spline::write(QDataStream &stream) const
+void Spline::write(QDataStream& stream) const
 {
     stream << FitPoints;
     stream << ControlPoints;
@@ -244,7 +244,7 @@ void Spline::write(QDataStream &stream) const
     stream << splineFlag;
 }
 
-void Spline::read(QDataStream &stream)
+void Spline::read(QDataStream& stream)
 {
     stream >> FitPoints;
     stream >> ControlPoints;

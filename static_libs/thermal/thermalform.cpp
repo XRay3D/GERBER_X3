@@ -15,7 +15,6 @@
 #include "ui_thermalform.h"
 
 #include "graphicsview.h"
-#include <myclipper.h>
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
@@ -24,7 +23,7 @@
 #include "thermalnode.h"
 #include "thermalpreviewitem.h"
 #include "toolpch.h"
-#include "toolpch.h"
+#include <myclipper.h>
 
 #include <QCheckBox>
 #include <QDockWidget>
@@ -33,8 +32,6 @@
 #include <QMessageBox>
 #include <QPicture>
 #include <QTimer>
-
-
 
 enum { Size = 24 };
 

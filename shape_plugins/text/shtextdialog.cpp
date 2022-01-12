@@ -15,8 +15,6 @@
 #include "shtext.h"
 #include "ui_shtextdialog.h"
 
-
-
 using namespace Shapes;
 
 ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)

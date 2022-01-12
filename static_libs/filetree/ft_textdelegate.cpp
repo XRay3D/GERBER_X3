@@ -15,8 +15,6 @@
 
 #include <QLineEdit>
 
-
-
 namespace FileTree {
 
 TextDelegate::TextDelegate(QObject* parent)

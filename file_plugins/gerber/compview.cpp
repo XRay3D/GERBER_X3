@@ -22,8 +22,6 @@
 #include <QDebug>
 #include <QGraphicsRectItem>
 
-
-
 namespace Gerber {
 
 ComponentsView::ComponentsView(QWidget* parent)

@@ -162,7 +162,7 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
         painter.begin(&pixmap);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setBrush(Qt::black);
-        painter.setPen(Qt::NoPen);//QPen(Qt::black, 0.0));
+        painter.setPen(Qt::NoPen); //QPen(Qt::black, 0.0));
         painter.translate(-painterPath.boundingRect().left() * scale, painterPath.boundingRect().bottom() * scale);
         painter.scale(scale, -scale);
         painter.drawPath(painterPath);

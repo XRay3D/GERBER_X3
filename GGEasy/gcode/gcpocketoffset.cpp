@@ -19,8 +19,6 @@
 #include <QDialog>
 #include <QElapsedTimer>
 
-
-
 namespace GCode {
 PocketCreator::PocketCreator()
 {

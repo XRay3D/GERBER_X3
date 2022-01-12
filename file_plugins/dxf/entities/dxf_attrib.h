@@ -20,7 +20,6 @@ public:
     Type type() const override { return ATTRIB; };
     GraphicObject toGo() const override;
 
-
     /*
 Attrib group codes
 

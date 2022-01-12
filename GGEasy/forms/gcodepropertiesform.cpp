@@ -19,8 +19,6 @@
 #include "settings.h"
 #include <QMessageBox>
 
-
-
 GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm)

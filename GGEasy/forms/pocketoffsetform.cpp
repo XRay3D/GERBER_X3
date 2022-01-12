@@ -18,8 +18,6 @@
 #include "settings.h"
 #include <QMessageBox>
 
-
-
 enum {
     Offset,
     Raster,

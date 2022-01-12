@@ -18,8 +18,6 @@
 #include <QRectF>
 #include <memory>
 
-
-
 enum FileVersion {
     ProVer_1 = 1,
     ProVer_2,

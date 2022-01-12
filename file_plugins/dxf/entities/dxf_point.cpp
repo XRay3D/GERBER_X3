@@ -77,13 +77,13 @@ GraphicObject Point::toGo() const
     return { id, p, {} };
 }
 
-void Point::write(QDataStream &stream) const
+void Point::write(QDataStream& stream) const
 {
     stream << point;
     stream << thickness;
 }
 
-void Point::read(QDataStream &stream)
+void Point::read(QDataStream& stream)
 {
     stream >> point;
     stream >> thickness;

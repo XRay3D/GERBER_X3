@@ -9,9 +9,9 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #pragma once
+#include "mvector.h"
 #include "toolmodel.h"
 #include <QTreeView>
-#include "mvector.h"
 
 class QPushButton;
 

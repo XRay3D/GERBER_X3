@@ -41,7 +41,8 @@ class ProgressCancel {
 public:
     ProgressCancel() { }
 
-    static void reset() {
+    static void reset()
+    {
         m_max = 0;
         m_current = 0;
         m_cancel = false;

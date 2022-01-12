@@ -22,8 +22,6 @@
 #include <QJsonObject>
 #include <QMimeData>
 
-
-
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ToolItem())

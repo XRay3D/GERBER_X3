@@ -21,8 +21,6 @@
 
 #include <QTimer>
 
-
-
 namespace FileTree {
 
 using TreeItem = Node;
@@ -68,7 +66,7 @@ void Model::addFile(FileInterface* file)
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
-void Model::addShape(ShapeInterface *shape)
+void Model::addShape(ShapeInterface* shape)
 {
     if (!shape)
         return;

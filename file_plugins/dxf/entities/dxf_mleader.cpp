@@ -12,7 +12,7 @@
 *******************************************************************************/
 #include "mleader.h"
 namespace Dxf {
-MLEADER::MLEADER(SectionParser *sp)
+MLEADER::MLEADER(SectionParser* sp)
     : Entity(sp)
 {
 }

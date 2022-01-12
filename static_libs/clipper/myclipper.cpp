@@ -31,7 +31,8 @@
 //#endif
 //}
 
-Path CirclePath(double diametr, const IntPoint& center) {
+Path CirclePath(double diametr, const IntPoint& center)
+{
     if (diametr == 0.0)
         return Path();
 
@@ -46,7 +47,8 @@ Path CirclePath(double diametr, const IntPoint& center) {
     return poligon;
 }
 
-Path RectanglePath(double width, double height, const IntPoint& center) {
+Path RectanglePath(double width, double height, const IntPoint& center)
+{
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
@@ -62,7 +64,8 @@ Path RectanglePath(double width, double height, const IntPoint& center) {
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const IntPoint& center) {
+void RotatePath(Path& poligon, double angle, const IntPoint& center)
+{
     const bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
@@ -75,7 +78,8 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center) {
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const IntPoint& pos) {
+void TranslatePath(Path& path, const IntPoint& pos)
+{
     if (pos.X == 0 && pos.Y == 0)
         return;
     for (auto& pt : path) {
@@ -84,7 +88,8 @@ void TranslatePath(Path& path, const IntPoint& pos) {
     }
 }
 
-double Perimeter(const Path& path) {
+double Perimeter(const Path& path)
+{
     double p = 0.0;
     for (size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
         double x = path[j].X - path[i].X;
@@ -95,7 +100,8 @@ double Perimeter(const Path& path) {
     return sqrt(p);
 }
 
-void mergeSegments(Paths& paths, double glue) {
+void mergeSegments(Paths& paths, double glue)
+{
     size_t size;
     do {
         size = paths.size();
@@ -167,15 +173,16 @@ void mergeSegments(Paths& paths, double glue) {
     } while (size != paths.size());
 }
 
-void mergePaths(Paths& paths, const double dist) {
-//    msg = tr("Merge Paths");
+void mergePaths(Paths& paths, const double dist)
+{
+    //    msg = tr("Merge Paths");
     size_t max;
     do {
         max = paths.size();
         for (size_t i = 0; i < paths.size(); ++i) {
-//            setMax(max);
-//            setCurrent(max - paths.size());
-//            ifCancelThenThrow();
+            //            setMax(max);
+            //            setCurrent(max - paths.size());
+            //            ifCancelThenThrow();
             for (size_t j = 0; j < paths.size(); ++j) {
                 if (i == j)
                     continue;

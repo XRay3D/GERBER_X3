@@ -22,7 +22,7 @@ AbstractAperture::AbstractAperture(const Format* format)
 {
 }
 
-AbstractAperture::~AbstractAperture() {}
+AbstractAperture::~AbstractAperture() { }
 
 double AbstractAperture::drillDiameter() const
 {

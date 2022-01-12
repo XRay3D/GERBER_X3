@@ -19,7 +19,6 @@
 #include <QFile>
 #include <cmath>
 
-
 #include "utils.h"
 
 namespace Excellon {

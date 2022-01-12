@@ -27,8 +27,6 @@
 #include <QFileInfo>
 #include <QModelIndex>
 
-
-
 using LayerTypes = std::vector<LayerType>;
 
 class FileInterface {

@@ -23,7 +23,8 @@ struct Hatch final : Entity {
     // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
-    Type type() const override;;
+    Type type() const override;
+    ;
     GraphicObject toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;

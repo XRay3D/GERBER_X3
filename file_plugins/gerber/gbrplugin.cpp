@@ -33,8 +33,6 @@
 
 #include <ctre.hpp> //
 
-
-
 namespace Gerber {
 
 #ifndef M_PI

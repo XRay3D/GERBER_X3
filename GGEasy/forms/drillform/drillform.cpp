@@ -29,8 +29,6 @@
 #include <QPainter>
 #include <QTimer>
 
-
-
 enum { IconSize = 24 };
 
 Paths offset(const Path& path, double offset, bool fl = false)

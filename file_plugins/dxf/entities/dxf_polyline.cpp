@@ -126,17 +126,17 @@ GraphicObject PolyLine::toGo() const
     auto p(path2.toSubpathPolygons(m2));
 #endif
     return { id, p.value(0), {} };
-    }
+}
 
-    void PolyLine::write(QDataStream &stream) const
-    {
+void PolyLine::write(QDataStream& stream) const
+{
     stream << polylineFlags;
     stream << startWidth;
     stream << endWidth;
 }
 
-    void PolyLine::read(QDataStream &stream)
-    {
+void PolyLine::read(QDataStream& stream)
+{
     stream >> polylineFlags;
     stream >> startWidth;
     stream >> endWidth;

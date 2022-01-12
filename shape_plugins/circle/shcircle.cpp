@@ -17,8 +17,6 @@
 #include "shhandler.h"
 #include <QIcon>
 
-
-
 namespace Shapes {
 
 Circle::Circle(QPointF center, QPointF pt)
