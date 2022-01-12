@@ -33,7 +33,7 @@ void ErrorItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*optio
     painter->setPen(Qt::NoPen);
     if (isSelected()) {
         static QTime t(QTime::currentTime());
-        painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * M_PI * 8)) * 30 + 30, 255, 255, 255));
+        painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * pi * 8)) * 30 + 30, 255, 255, 255));
     } else {
         QBrush br(QColor(255, 0, 255));
         //        br.setStyle(Qt::Dense4Pattern);

@@ -191,7 +191,7 @@ typedef QVector<PolyNode*> PolyNodes;
 class PolyNode {
 public:
     PolyNode();
-    /*virtual*/ ~PolyNode() {}
+    /*virtual*/ ~PolyNode() { }
     Path Contour;
     PolyNodes Childs;
     PolyNode* Parent;

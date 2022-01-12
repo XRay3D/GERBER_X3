@@ -343,7 +343,7 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
         Tuple: (center, start_angle, end_angle, radius)
     */
     double r = signedBulgeRadius(start_point, end_point, bulge);
-    double a = angle(start_point, end_point) + (M_PI / 2.0 - atan(bulge) * 2.0);
+    double a = angle(start_point, end_point) + (pi / 2.0 - atan(bulge) * 2.0);
     QPointF c = polar(start_point, a, r);
     if (bulge < 0.0)
         return { c, angle(c, end_point), angle(c, start_point), abs(r) };

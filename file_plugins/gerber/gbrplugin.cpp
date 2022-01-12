@@ -35,10 +35,6 @@
 
 namespace Gerber {
 
-#ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795
-#endif
-
 const int id1 = qRegisterMetaType<File*>("G::GFile*");
 
 Plugin::Plugin(QObject* parent)
@@ -151,7 +147,7 @@ QJsonObject Plugin::info() const
 {
     return QJsonObject {
         { "Name", "Gerber X3" },
-        { "Version", "1.0" },
+        { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "Opening GerberX3 files, with support for all kinds of aperture macros and components." },
     };
@@ -374,7 +370,7 @@ public:
             const auto fp(sourcePath.toFillPolygons());
             for (int i = 0; i < m_node->count(); ++i) { // Gaps
                 ClipperOffset offset;
-                double angle = i * 2 * M_PI / m_node->count() + qDegreesToRadians(m_node->angle());
+                double angle = i * 2 * pi / m_node->count() + qDegreesToRadians(m_node->angle());
                 offset.AddPath({ center,
                                    IntPoint(
                                        static_cast<cInt>((cos(angle) * radius) + center.X),

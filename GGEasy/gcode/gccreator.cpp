@@ -580,7 +580,7 @@ bool Creator::createability(bool side)
     //    Paths wpe;
     const double d = m_gcp.tools.back().getDiameter(m_gcp.getDepth()) * uScale;
     const double r = d * 0.5;
-    const double testArea = d * d - M_PI * r * r;
+    const double testArea = d * d - pi * r * r;
 
     Paths srcPaths;
     for (size_t pIdx = 0; pIdx < m_groupedPss.size(); ++pIdx) {

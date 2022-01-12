@@ -67,6 +67,10 @@
 #include <QPolygonF>
 #include <QtMath>
 
+#include <numbers>
+using std::numbers::pi;
+constexpr auto two_pi = pi * 2;
+
 namespace ClipperLib {
 
 enum ClipType {
