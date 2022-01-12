@@ -363,11 +363,7 @@ void MainWindow::createActionsService()
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
-            auto r(geometry());
-            //r.setSize({ 1280, 720 });
-            r.setTopLeft({ 0, 1080 });
-            r.setSize({ 1920, 1080 });
-            setGeometry(r);
+            setGeometry(QRect { 0, 1080, 1024, 720 });
         }));
     }
 }

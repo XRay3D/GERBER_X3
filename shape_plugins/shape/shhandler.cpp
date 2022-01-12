@@ -44,7 +44,7 @@ void drawPos(QPainter* painter, const QPointF& pt1)
     painter->save();
     painter->scale(k, -k);
     int i = 0;
-    for (QString txt : text.split('\n')) {
+    for (const QString& txt : text.split('\n')) {
         QPainterPath path;
         path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * ++i), font, txt);
         painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));

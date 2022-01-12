@@ -79,9 +79,11 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
         painter->drawPath(m_shape);
     }
 
+    constexpr int s = 10;
+
     painter->setBrush(Qt::NoBrush);
     double min = std::min(m_shape.boundingRect().width(), m_shape.boundingRect().height());
-    double k = std::min(min, m_scale * 20);
+    double k = std::min(min, m_scale * s);
     painter->drawLine(
         m_component.referencePoint() + QPointF { k, k },
         m_component.referencePoint() - QPointF { k, k });
@@ -93,8 +95,8 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
         { m_component.referencePoint() + QPointF { k, k },
             m_component.referencePoint() - QPointF { k, k } });
     if (m_scale < 0.05) {
-        double size = std::min(min, m_scale * 20);
-        for (auto [number, description, pos] : m_component.pins()) {
+        double size = std::min(min, m_scale * s);
+        for (const auto &[number, description, pos] : m_component.pins()) {
             Q_UNUSED(number)
             Q_UNUSED(description)
             painter->setBrush(Qt::NoBrush);
@@ -102,7 +104,7 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             painter->drawLine(pos + QPointF { +size, +size }, pos - QPointF { +size, +size });
             painter->drawLine(pos + QPointF { -size, +size }, pos - QPointF { -size, +size });
         }
-        for (auto [path, pos] : pathPins) {
+        for (const auto& [path, pos] : pathPins) {
             painter->save();
             painter->translate(pos);
             painter->scale(m_scale, -m_scale);
@@ -123,12 +125,13 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
         m_scale);
 
     if (m_scale < 0.05)
-        for (auto [number, description, pos] : m_component.pins())
+        for (const auto& [number, description, pos] : m_component.pins()) {
             drawText(painter,
                 QString(description + '(' + number + ')'),
                 App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF,
                 pos + QPointF(0, m_scale * 60),
                 m_scale);
+        }
 }
 
 Paths ComponentItem::paths(int) const { return {}; }

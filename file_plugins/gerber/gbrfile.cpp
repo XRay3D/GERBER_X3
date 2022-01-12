@@ -222,7 +222,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
 
 bool File::flashedApertures() const
 {
-    for (auto [_, aperture] : m_apertures) {
+    for (const auto& [_, aperture] : m_apertures) {
         if (aperture->flashed())
             return true;
     }
