@@ -71,6 +71,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(SUFFIX "${SUFFIX}_x64")
+    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
+else()
+    set(SUFFIX "${SUFFIX}_x32")
+    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(SUFFIX "_clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -79,14 +87,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(SUFFIX "_intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(SUFFIX "_msvc")
-endif()
-
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(SUFFIX "${SUFFIX}_x64")
-    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
-else()
-    set(SUFFIX "${SUFFIX}_x32")
-    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
 endif()
 
 include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
@@ -299,6 +299,31 @@ endif()
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
 endif()
+
+# windeployqt
+install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
+set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+get_target_property(_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E
+        env PATH="${_QT_BIN_DIR}" "${WINDEPLOYQT_EXECUTABLE}"
+            --verbose 0
+            --no-compiler-runtime
+            \"$<TARGET_FILE:${PROJECT_NAME}>\"
+    COMMENT "Deploying Qt..."
+)
+#execute_process(
+#    COMMAND "${CMAKE_COMMAND}" -E
+#        env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
+#            --dry-run
+#            --no-compiler-runtime
+#            --list mapping
+#            \"$<TARGET_FILE:myapp>\"
+#    OUTPUT_VARIABLE _output
+#    OUTPUT_STRIP_TRAILING_WHITESPACE
+#)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
 
