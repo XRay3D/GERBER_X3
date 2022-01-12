@@ -25,8 +25,6 @@
 #include <QTimer>
 #include <interfaces/file.h>
 
-
-
 namespace Shapes {
 
 Text::Text(QPointF pt1)

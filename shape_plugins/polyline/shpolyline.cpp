@@ -16,8 +16,6 @@
 #include "shhandler.h"
 #include <QIcon>
 
-
-
 namespace Shapes {
 
 PolyLine::PolyLine(QPointF pt1, QPointF pt2)

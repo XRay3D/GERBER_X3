@@ -110,8 +110,8 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
 
 void File::initFrom(FileInterface* file)
 {
-//    FileInterface::initFrom(file);
-//    static_cast<Node*>(m_node)->file = this;
+    //    FileInterface::initFrom(file);
+    //    static_cast<Node*>(m_node)->file = this;
 }
 
 FileTree::Node* File::node()

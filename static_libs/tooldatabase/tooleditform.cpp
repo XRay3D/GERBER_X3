@@ -18,8 +18,6 @@
 #include <QDebug>
 #include <QSettings>
 
-
-
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::ToolEditForm)

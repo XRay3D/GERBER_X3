@@ -31,8 +31,6 @@ Q_DECLARE_METATYPE(ErrorItem*)
 
 enum { IconSize = 32 };
 
-
-
 QIcon errorIcon(const QPainterPath& path)
 {
 

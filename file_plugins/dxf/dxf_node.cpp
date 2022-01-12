@@ -26,8 +26,6 @@
 #include <QMenu>
 #include <QtWidgets>
 
-
-
 namespace Dxf {
 
 class Dialog : public QDialog {

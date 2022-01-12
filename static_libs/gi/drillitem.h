@@ -39,8 +39,6 @@ protected:
     double m_diameter = 0.0;
 };
 
-
-
 //namespace Excellon {
 
 //class File;

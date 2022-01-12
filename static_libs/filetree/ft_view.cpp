@@ -30,8 +30,6 @@
 #include <QPainter>
 #include <QTimer>
 
-
-
 namespace FileTree {
 
 View::View(QWidget* parent)

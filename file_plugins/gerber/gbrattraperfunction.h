@@ -175,7 +175,7 @@ public:
 struct HeatsinkPad : AbstrAperFunc {
     Q_GADGET
     /*Радиатор или термопрокладка, обычно для SMD*/
-/*Радиатор или термопрокладка, обычно для SMD*/
+    /*Радиатор или термопрокладка, обычно для SMD*/
 public:
     HeatsinkPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)
@@ -328,7 +328,7 @@ public:
 struct Border : AbstrAperFunc {
     Q_GADGET
     /**/
-/*Медный бордюр производственной панели.*/
+    /*Медный бордюр производственной панели.*/
 public:
     Border(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function)

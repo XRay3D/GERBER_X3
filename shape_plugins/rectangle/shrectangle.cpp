@@ -16,8 +16,6 @@
 #include "shhandler.h"
 #include <QIcon>
 
-
-
 namespace Shapes {
 
 Rectangle::Rectangle(QPointF pt1, QPointF pt2)

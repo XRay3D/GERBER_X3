@@ -267,7 +267,7 @@ GraphicObject MText::toGo() const
     return { id, {}, paths };
 }
 
-void MText::write(QDataStream &stream) const
+void MText::write(QDataStream& stream) const
 {
     stream << textString;
     stream << textStyleName;
@@ -279,7 +279,7 @@ void MText::write(QDataStream &stream) const
     stream << drawingDirection;
 }
 
-void MText::read(QDataStream &stream)
+void MText::read(QDataStream& stream)
 {
     stream >> textString;
     stream >> textStyleName;

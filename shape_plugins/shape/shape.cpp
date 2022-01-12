@@ -23,8 +23,6 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-
-
 namespace Shapes {
 
 Shape::Shape()

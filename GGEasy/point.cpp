@@ -29,7 +29,6 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-
 #include "settingsdialog.h"
 
 using namespace ClipperLib;

@@ -23,8 +23,6 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtWidgets>
 
-
-
 namespace Shapes {
 
 constexpr double StickingDistance = 10;

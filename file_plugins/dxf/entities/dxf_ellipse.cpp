@@ -131,7 +131,7 @@ Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
 GraphicObject Ellipse::toGo() const { return {}; }
 
-void Ellipse::write(QDataStream &stream) const
+void Ellipse::write(QDataStream& stream) const
 {
     stream << startParameter;
     stream << endParameter;
@@ -140,7 +140,7 @@ void Ellipse::write(QDataStream &stream) const
     stream << EndpointOfMajorAxis;
 }
 
-void Ellipse::read(QDataStream &stream)
+void Ellipse::read(QDataStream& stream)
 {
     stream >> startParameter;
     stream >> endParameter;

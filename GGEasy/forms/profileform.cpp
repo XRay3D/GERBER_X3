@@ -20,8 +20,6 @@
 #include "settings.h"
 #include <QMessageBox>
 
-
-
 ProfileForm::ProfileForm(QWidget* parent)
     : FormsUtil(new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)

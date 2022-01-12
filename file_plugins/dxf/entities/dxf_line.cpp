@@ -97,14 +97,14 @@ GraphicObject Line::toGo() const
     return { id, p, paths };
 }
 
-void Line::write(QDataStream &stream) const
+void Line::write(QDataStream& stream) const
 {
     stream << startPoint;
     stream << endPoint;
     stream << thickness;
 }
 
-void Line::read(QDataStream &stream)
+void Line::read(QDataStream& stream)
 {
     stream >> startPoint;
     stream >> endPoint;

@@ -17,7 +17,6 @@
 
 #include "exnode.h"
 
-
 namespace Excellon {
 
 QDataStream& operator>>(QDataStream& s, Tools& c)

@@ -18,8 +18,6 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 
-
-
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     : QDialog(parent)
     , ui(new Ui::ToolDatabase)

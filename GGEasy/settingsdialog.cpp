@@ -55,14 +55,16 @@ class ModelSettings : public QAbstractListModel {
 
 public:
     ModelSettings(QObject* parent = nullptr)
-        : QAbstractListModel { parent } {
+        : QAbstractListModel { parent }
+    {
     }
     virtual ~ModelSettings() { }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& /*parent*/) const override { return m_data.size(); }
     int columnCount(const QModelIndex& /*parent*/) const override { return 1; }
-    QVariant data(const QModelIndex& index, int role) const override {
+    QVariant data(const QModelIndex& index, int role) const override
+    {
         if (role == Qt::DisplayRole)
             return m_data[index.row()]->windowTitle();
         return {};

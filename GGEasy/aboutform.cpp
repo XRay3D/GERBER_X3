@@ -14,8 +14,6 @@
 #include "ui_aboutform.h"
 #include <QDesktopServices>
 
-
-
 AboutForm::AboutForm(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::AboutForm)
@@ -27,7 +25,7 @@ AboutForm::AboutForm(QWidget* parent)
 #elif __GNUG__ // specific variant for GCC
     QString str(QString(BUILD_DATE).append("<br/>GCC_VER: ") + QString(__VERSION__));
 #else
-    QString str(QString(/*BUILD_DATE*/__DATE__ " " __TIME__).append("<br/>MSC_VER: ") + QString::number(_MSC_VER));
+    QString str(QString(/*BUILD_DATE*/ __DATE__ " " __TIME__).append("<br/>MSC_VER: ") + QString::number(_MSC_VER));
 #endif
     str.push_back("<br/>Application Version: " + qApp->applicationVersion());
     ui->lblAbout->setText(ui->lblAbout->text().arg(/*qApp->applicationVersion()*/ str));

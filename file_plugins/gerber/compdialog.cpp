@@ -22,8 +22,6 @@
 #include <QtWidgets>
 #include <scene.h>
 
-
-
 namespace Gerber {
 
 ComponentsDialog::ComponentsDialog(QWidget* parent)

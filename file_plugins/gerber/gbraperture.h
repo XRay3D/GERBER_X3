@@ -85,7 +85,8 @@ class ApCircle final : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const Format* format);
     ApCircle(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     QString name() const;
@@ -110,7 +111,8 @@ class ApRectangle final : public AbstractAperture {
 public:
     ApRectangle(double width, double height, double drillDiam, const Format* format);
     ApRectangle(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     QString name() const;
@@ -134,7 +136,8 @@ class ApObround final : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const Format* format);
     ApObround(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     QString name() const;
@@ -158,7 +161,8 @@ class ApPolygon final : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format);
     ApPolygon(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     double rotation() const;
@@ -186,7 +190,8 @@ class ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const Format* format);
     ApMacro(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     QString name() const;
@@ -230,7 +235,8 @@ class ApBlock final : public AbstractAperture, public QList<GraphicObject> {
 public:
     ApBlock(const Format* format);
     ApBlock(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+        : AbstractAperture(format)
+    {
         read(stream);
     }
     QString name() const;

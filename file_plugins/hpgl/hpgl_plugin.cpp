@@ -161,8 +161,8 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             settings.endGroup();
         }
     };
-//    auto tab = new Tab(parent);
-//    tab->setWindowTitle("HPGL");
+    //    auto tab = new Tab(parent);
+    //    tab->setWindowTitle("HPGL");
     return nullptr;
 }
 

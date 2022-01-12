@@ -24,7 +24,8 @@
 #pragma comment(lib, "Setupapi")
 #endif
 
-QSizeF GetRealSize() {
+QSizeF GetRealSize()
+{
     static QSizeF size;
     if (!size.isEmpty())
         return size;
@@ -87,7 +88,7 @@ QSizeF GetRealSize() {
         } // for
     } while (0);
 #endif
-    if (size.isEmpty())// FIXME current display of graficsview
+    if (size.isEmpty()) // FIXME current display of graficsview
         size = QGuiApplication::screens()[0]->physicalSize();
 
     return size;

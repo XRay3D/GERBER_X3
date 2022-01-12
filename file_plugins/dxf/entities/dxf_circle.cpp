@@ -105,14 +105,14 @@ GraphicObject Circle::toGo() const
     return { id, p.value(0), {} };
 }
 
-void Circle::write(QDataStream &stream) const
+void Circle::write(QDataStream& stream) const
 {
     stream << centerPoint;
     stream << thickness;
     stream << radius;
 }
 
-void Circle::read(QDataStream &stream)
+void Circle::read(QDataStream& stream)
 {
     stream >> centerPoint;
     stream >> thickness;

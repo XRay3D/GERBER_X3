@@ -15,8 +15,6 @@
 
 #include <QComboBox>
 
-
-
 namespace FileTree {
 
 SideDelegate::SideDelegate(QObject* parent)

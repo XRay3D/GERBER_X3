@@ -16,8 +16,6 @@
 #include "graphicsview.h"
 #include <QPainter>
 
-
-
 BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
     : m_ptr(ptr)
     , m_side(side)

@@ -42,9 +42,8 @@
 #include <future>
 #include <thread>
 
-
-
-void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
+void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool)
+{
     if (ps.empty()) {
         return;
     }
@@ -90,7 +89,8 @@ namespace GCode {
 
 Creator::Creator() { }
 
-void Creator::reset() {
+void Creator::reset()
+{
     ProgressCancel::reset();
     //    setCreator(this);
 
@@ -110,7 +110,8 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, cInt k) {
+Pathss& Creator::groupedPaths(Grouping group, cInt k)
+{
     PolyTree polyTree;
     Clipper clipper;
     clipper.AddPaths(m_workingPs, ptSubject, true);
@@ -171,7 +172,8 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k) {
 /// \brief Creator::addRawPaths
 /// \param paths
 ///
-void Creator::addRawPaths(Paths rawPaths) {
+void Creator::addRawPaths(Paths rawPaths)
+{
     if (rawPaths.empty())
         return;
 
@@ -222,7 +224,8 @@ void Creator::addSupportPaths(Pathss supportPaths) { m_supportPss.append(support
 
 void Creator::addPaths(const Paths& paths) { m_workingPs.append(paths); }
 
-void Creator::createGc() {
+void Creator::createGc()
+{
     QElapsedTimer t;
     t.start();
     try {
@@ -268,11 +271,13 @@ void Creator::proceed() // direct connection!!
 
 GCode::File* Creator::file() const { return m_file; }
 
-std::pair<int, int> Creator::getProgress() {
+std::pair<int, int> Creator::getProgress()
+{
     return { static_cast<int>(getMax()), static_cast<int>(getCurrent()) };
 }
 
-void Creator::stacking(Paths& paths) {
+void Creator::stacking(Paths& paths)
+{
     if (paths.empty())
         return;
     QElapsedTimer t;
@@ -389,7 +394,8 @@ void Creator::stacking(Paths& paths) {
     //    }
 }
 
-void Creator::mergeSegments(Paths& paths, double glue) {
+void Creator::mergeSegments(Paths& paths, double glue)
+{
     size_t size;
     do {
         size = paths.size();
@@ -461,7 +467,8 @@ void Creator::mergeSegments(Paths& paths, double glue) {
     } while (size != paths.size());
 }
 
-void Creator::mergePaths(Paths& paths, const double dist) {
+void Creator::mergePaths(Paths& paths, const double dist)
+{
     msg = tr("Merge Paths");
     size_t max;
     do {
@@ -517,7 +524,8 @@ void Creator::mergePaths(Paths& paths, const double dist) {
     } while (max != paths.size());
 }
 
-void Creator::markPolyNodeByNesting(PolyNode& polynode) {
+void Creator::markPolyNodeByNesting(PolyNode& polynode)
+{
     int nestCtr = 0;
     std::function<int(PolyNode&)> sorter = [&sorter, &nestCtr](PolyNode& polynode) {
         ++nestCtr;
@@ -528,7 +536,8 @@ void Creator::markPolyNodeByNesting(PolyNode& polynode) {
     sorter(polynode);
 }
 
-void Creator::sortPolyNodeByNesting(PolyNode& polynode) {
+void Creator::sortPolyNodeByNesting(PolyNode& polynode)
+{
     int nestCtr = 0;
     std::function<int(PolyNode&)> sorter = [&sorter, &nestCtr](PolyNode& polynode) {
         ++nestCtr;
@@ -553,7 +562,8 @@ void Creator::sortPolyNodeByNesting(PolyNode& polynode) {
     sorter(polynode);
 }
 
-void Creator::isContinueCalc() {
+void Creator::isContinueCalc()
+{
     emit errorOccurred();
     mutex.lock();
     condition.wait(&mutex);
@@ -563,7 +573,8 @@ void Creator::isContinueCalc() {
     //        throw cancelException("canceled by user");
 }
 
-bool Creator::createability(bool side) {
+bool Creator::createability(bool side)
+{
     QElapsedTimer t;
     t.start();
     //    Paths wpe;
@@ -676,7 +687,8 @@ bool Creator::createability(bool side) {
 
 GCodeParams Creator::getGcp() const { return m_gcp; }
 
-void Creator::setGcp(const GCodeParams& gcp) {
+void Creator::setGcp(const GCodeParams& gcp)
+{
     m_gcp = gcp;
     reset();
 }
@@ -712,7 +724,8 @@ void Creator::setGcp(const GCodeParams& gcp) {
 //        }
 //}
 
-Paths& Creator::sortB(Paths& src) {
+Paths& Creator::sortB(Paths& src)
+{
     IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
@@ -731,7 +744,8 @@ Paths& Creator::sortB(Paths& src) {
     return src;
 }
 
-Paths& Creator::sortBE(Paths& src) {
+Paths& Creator::sortBE(Paths& src)
+{
     IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         //PROG //PROG .3setProgMaxAndVal(src.size(), firstIdx);
@@ -766,7 +780,8 @@ Paths& Creator::sortBE(Paths& src) {
     return src;
 }
 
-Pathss& Creator::sortB(Pathss& src) {
+Pathss& Creator::sortB(Pathss& src)
+{
     IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t i = 0; i < src.size(); ++i) {
         if (src[i].empty())
@@ -789,7 +804,8 @@ Pathss& Creator::sortB(Pathss& src) {
     return src;
 }
 
-Pathss& Creator::sortBE(Pathss& src) {
+Pathss& Creator::sortBE(Pathss& src)
+{
     IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
@@ -823,7 +839,8 @@ Pathss& Creator::sortBE(Pathss& src) {
     return src;
 }
 
-bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret) {
+bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret)
+{
     const size_t cnt = path.size();
     if (cnt < 2)
         return false;

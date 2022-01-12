@@ -13,8 +13,8 @@
 *******************************************************************************/
 #include "datasoliditem.h"
 
-#include "interfaces/file.h"
 #include "graphicsview.h"
+#include "interfaces/file.h"
 #include "scene.h"
 #include <QElapsedTimer>
 #include <QPainter>

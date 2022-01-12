@@ -19,8 +19,6 @@
 #include "settings.h"
 #include <QMessageBox>
 
-
-
 HatchingForm::HatchingForm(QWidget* parent)
     : FormsUtil(new GCode::HatchingCreator, parent)
     , ui(new Ui::HatchingForm)

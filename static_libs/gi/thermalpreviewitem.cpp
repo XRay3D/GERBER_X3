@@ -30,8 +30,6 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
 
-
-
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr(this)
     , pa1(this, "bodyColor")

@@ -31,10 +31,10 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 #pragma once
 
+#include <QByteArray>
 #include <qt_windows.h>
 #include <thumbcache.h> // For IThumbnailProvider
 #include <wincodec.h> // Windows Imaging Codecs
-#include <QByteArray>
 
 #pragma comment(lib, "windowscodecs.lib")
 

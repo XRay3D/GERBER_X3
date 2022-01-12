@@ -21,7 +21,6 @@
 
 #include <ctre.hpp>
 
-
 #include "utils.h"
 
 namespace Gerber {

@@ -30,85 +30,85 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-
-
-void calcArcs(Path path) {
+void calcArcs(Path path)
+{
     return;
-//    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
-//        return;
-//    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
-//        QGraphicsLineItem* item;
-//        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
-//        item->setPos(pos);
-//        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
-//        item->setPos(pos);
-//    };
+    //    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    //        return;
+    //    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
+    //        QGraphicsLineItem* item;
+    //        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
+    //        item->setPos(pos);
+    //        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
+    //        item->setPos(pos);
+    //    };
 
-//    QPolygonF polyOfCenters;
-//    std::vector<QLineF> normals;
-//    QPointF center;
-//    QPointF beg;
-//    QPointF end;
-//    int ctr {};
+    //    QPolygonF polyOfCenters;
+    //    std::vector<QLineF> normals;
+    //    QPointF center;
+    //    QPointF beg;
+    //    QPointF end;
+    //    int ctr {};
 
-//    constexpr double centerError = 0.2;
-//    constexpr int minSegCtr = 3;
+    //    constexpr double centerError = 0.2;
+    //    constexpr int minSegCtr = 3;
 
-//    struct Center {
-//        QPointF pt;
-//        int i {};
-//    };
+    //    struct Center {
+    //        QPointF pt;
+    //        int i {};
+    //    };
 
-//    std::vector<Center> centers;
+    //    std::vector<Center> centers;
 
-//    CleanPolygon(path, uScale * 0.001);
-//    QPolygonF poly = path;
-//    for (int i {}, size { static_cast<int>(poly.size()) }; i < size; ++i) {
-//        QLineF line(QLineF(poly[i], end = poly[(i + 1) % size]).center(), poly[i]);
-//        line = line.normalVector();
-//        if (beg.isNull())
-//            beg = poly[i];
-//        //                App::scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
-//        if (normals.size()) {
-//            QPointF intersectionPoint;
-//#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-//            normals.back().intersects(line, &intersectionPoint);
-//#else
-//            normals.back().intersect(line, &intersectionPoint);
-//#endif
-//            if (polyOfCenters.size() && QLineF(polyOfCenters.back(), intersectionPoint).length() < centerError) {
-//                center += intersectionPoint;
-//                addPoint(intersectionPoint, Qt::darkGray);
-//                ++ctr;
-//                centers.emplace_back(intersectionPoint, i);
-//            } else if (ctr > minSegCtr) {
-//                center /= ctr;
-//                addPoint(center, Qt::red);
-//                double r = QLineF(center, beg).length();
-//                QRectF rect(-r, -r, +r * 2, +r * 2);
+    //    CleanPolygon(path, uScale * 0.001);
+    //    QPolygonF poly = path;
+    //    for (int i {}, size { static_cast<int>(poly.size()) }; i < size; ++i) {
+    //        QLineF line(QLineF(poly[i], end = poly[(i + 1) % size]).center(), poly[i]);
+    //        line = line.normalVector();
+    //        if (beg.isNull())
+    //            beg = poly[i];
+    //        //                App::scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
+    //        if (normals.size()) {
+    //            QPointF intersectionPoint;
+    //#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    //            normals.back().intersects(line, &intersectionPoint);
+    //#else
+    //            normals.back().intersect(line, &intersectionPoint);
+    //#endif
+    //            if (polyOfCenters.size() && QLineF(polyOfCenters.back(), intersectionPoint).length() < centerError) {
+    //                center += intersectionPoint;
+    //                addPoint(intersectionPoint, Qt::darkGray);
+    //                ++ctr;
+    //                centers.emplace_back(intersectionPoint, i);
+    //            } else if (ctr > minSegCtr) {
+    //                center /= ctr;
+    //                addPoint(center, Qt::red);
+    //                double r = QLineF(center, beg).length();
+    //                QRectF rect(-r, -r, +r * 2, +r * 2);
 
-//                App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
-//                ctr = {};
-//                center = {};
-//                beg = {};
-//                end = {};
-//            } else {
-//                ctr = {};
-//                center = {};
-//                beg = {};
-//                end = {};
-//            }
-//            polyOfCenters.push_back(intersectionPoint);
-//        }
-//        normals.emplace_back(line);
-//    }
+    //                App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
+    //                ctr = {};
+    //                center = {};
+    //                beg = {};
+    //                end = {};
+    //            } else {
+    //                ctr = {};
+    //                center = {};
+    //                beg = {};
+    //                end = {};
+    //            }
+    //            polyOfCenters.push_back(intersectionPoint);
+    //        }
+    //        normals.emplace_back(line);
+    //    }
 }
 
 namespace GCode {
 
 File::File()
     : GCUtils(m_gcp)
-    , FileInterface() {
+    , FileInterface()
+{
 }
 
 File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths)
@@ -116,7 +116,8 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     , FileInterface()
     , m_pocketPaths(pocketPaths)
     , m_toolPathss(toolPathss)
-    , m_gcp(gcp) {
+    , m_gcp(gcp)
+{
     if (gcp.tools.front().diameter()) {
         initSave();
         addInfo();
@@ -126,7 +127,8 @@ File::File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocket
     }
 }
 
-bool File::save(const QString& name) {
+bool File::save(const QString& name)
+{
     if (name.isEmpty())
         return false;
 
@@ -155,7 +157,8 @@ bool File::save(const QString& name) {
     return true;
 }
 
-void File::saveDrill(const QPointF& offset) {
+void File::saveDrill(const QPointF& offset)
+{
     QPolygonF path(normalizedPaths(offset, m_toolPathss.front()).front());
 
     const mvector<double> depths(getDepths());
@@ -173,7 +176,8 @@ void File::saveDrill(const QPointF& offset) {
     }
 }
 
-void File::saveLaserPocket(const QPointF& offset) {
+void File::saveLaserPocket(const QPointF& offset)
+{
     saveLaserProfile(offset);
     //    m_lines.push_back(Settings::laserDynamOn());
     //    mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
@@ -192,7 +196,8 @@ void File::saveLaserPocket(const QPointF& offset) {
     //    }
 }
 
-void File::saveMillingPocket(const QPointF& offset) {
+void File::saveMillingPocket(const QPointF& offset)
+{
     m_lines.push_back(Settings::spindleOn());
 
     mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
@@ -223,7 +228,8 @@ void File::saveMillingPocket(const QPointF& offset) {
     }
 }
 
-void File::saveMillingProfile(const QPointF& offset) {
+void File::saveMillingProfile(const QPointF& offset)
+{
     if (m_gcp.gcType == Raster) {
         saveMillingRaster(offset);
         return;
@@ -271,7 +277,8 @@ void File::saveMillingProfile(const QPointF& offset) {
     }
 }
 
-void File::saveLaserProfile(const QPointF& offset) {
+void File::saveLaserProfile(const QPointF& offset)
+{
     m_lines.push_back(Settings::laserDynamOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
@@ -293,7 +300,8 @@ void File::saveLaserProfile(const QPointF& offset) {
     }
 }
 
-void File::saveMillingRaster(const QPointF& offset) {
+void File::saveMillingRaster(const QPointF& offset)
+{
     m_lines.push_back(Settings::spindleOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
@@ -319,7 +327,8 @@ void File::saveMillingRaster(const QPointF& offset) {
     }
 }
 
-void File::saveLaserHLDI(const QPointF& offset) {
+void File::saveLaserHLDI(const QPointF& offset)
+{
     m_lines.push_back(Settings::laserConstOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
@@ -371,7 +380,8 @@ void File::saveLaserHLDI(const QPointF& offset) {
 
 const GCodeParams& File::gcp() const { return m_gcp; }
 
-mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
+mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset)
+{
     mvector<mvector<QPolygonF>> pathss;
     pathss.reserve(m_toolPathss.size());
     for (const Paths& paths : m_toolPathss) {
@@ -407,7 +417,8 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     return pathss;
 }
 
-mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_) {
+mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_)
+{
     mvector<QPolygonF> paths(paths_.empty() ? m_toolPathss.front() : paths_);
 
     for (QPolygonF& path : paths)
@@ -432,7 +443,8 @@ mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& pat
     return paths;
 }
 
-void File::initSave() {
+void File::initSave()
+{
     m_lines.clear();
 
     for (bool& fl : formatFlags)
@@ -457,7 +469,8 @@ void File::initSave() {
     setToolType(m_gcp.getTool().type());
 }
 
-void File::genGcodeAndTile() {
+void File::genGcodeAndTile()
+{
     const QRectF rect = App::project()->worckRect();
     for (size_t x = 0; x < App::project()->stepsX(); ++x) {
         for (size_t y = 0; y < App::project()->stepsY(); ++y) {
@@ -508,7 +521,8 @@ void File::genGcodeAndTile() {
 
 Tool File::getTool() const { return m_gcp.getTool(); }
 
-void File::addInfo() {
+void File::addInfo()
+{
     if (Settings::info()) {
         m_lines.push_back(QString(";\t              Name: %1").arg(shortName()));
         m_lines.push_back(QString(";\t              Tool: %1").arg(m_gcp.getTool().name()));
@@ -522,7 +536,8 @@ void File::addInfo() {
 
 GCodeType File::gtype() const { return m_gcp.gcType; }
 
-void File::startPath(const QPointF& point) {
+void File::startPath(const QPointF& point)
+{
     if (toolType() == Tool::Laser) {
         m_lines.push_back(formated({ g0(), x(point.x()), y(point.y()), speed(0) })); //start xy
         //        m_gCodeText.push_back(formated({ g1(), speed(spindleSpeed) }));
@@ -533,7 +548,8 @@ void File::startPath(const QPointF& point) {
     }
 }
 
-void File::endPath() {
+void File::endPath()
+{
     if (toolType() == Tool::Laser) {
         //
     } else {
@@ -541,7 +557,8 @@ void File::endPath() {
     }
 }
 
-void File::statFile() {
+void File::statFile()
+{
     if (toolType() == Tool::Laser) {
         QString str(Settings::laserStart()); //"G21 G17 G90"); //G17 XY plane
         m_lines.push_back(str);
@@ -554,7 +571,8 @@ void File::statFile() {
     }
 }
 
-void File::endFile() {
+void File::endFile()
+{
     if (toolType() == Tool::Laser) {
         m_lines.push_back(Settings::spindleLaserOff());
         QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
@@ -574,7 +592,8 @@ void File::endFile() {
 
 mvector<QString> File::gCodeText() const { return m_lines; }
 
-void File::createGiDrill() {
+void File::createGiDrill()
+{
     GraphicsItem* item;
     for (const IntPoint& point : m_toolPathss.front().front()) {
         item = new DrillItem(m_gcp.getTool().diameter(), this);
@@ -588,7 +607,8 @@ void File::createGiDrill() {
     itemGroup()->push_back(item);
 }
 
-void File::createGiPocket() {
+void File::createGiPocket()
+{
     GraphicsItem* item;
     if (m_pocketPaths.size()) {
         //        {
@@ -642,7 +662,8 @@ void File::createGiPocket() {
     itemGroup()->push_back(item);
 }
 
-void File::createGiProfile() {
+void File::createGiProfile()
+{
     GraphicsItem* item;
     for (const Paths& paths : m_toolPathss) {
         item = new GcPathItem(paths, this);
@@ -668,7 +689,8 @@ void File::createGiProfile() {
     itemGroup()->push_back(item);
 }
 
-void File::createGiRaster() {
+void File::createGiRaster()
+{
     //        int k = static_cast<int>((m_toolPathss.size() > 1) ? (300.0 / (m_toolPathss.size() - 1)) * i : 0);
     //        QColor* c = new QColor;
     //        *c = QColor::fromHsv(k, 255, 255, 255);
@@ -707,7 +729,8 @@ void File::createGiRaster() {
     itemGroup()->push_back(item);
 }
 
-void File::createGiLaser() {
+void File::createGiLaser()
+{
     Paths paths;
     paths.reserve(m_toolPathss.front().size() / 2 + 1);
     m_g0path.reserve(paths.size());
@@ -753,13 +776,15 @@ void File::createGiLaser() {
     }
 }
 
-void File::write(QDataStream& stream) const {
+void File::write(QDataStream& stream) const
+{
     stream << m_gcp;
     stream << m_pocketPaths;
     stream << m_toolPathss;
 }
 
-void File::read(QDataStream& stream) {
+void File::read(QDataStream& stream)
+{
     auto& gcp = *const_cast<GCodeParams*>(&m_gcp);
     switch (App::project()->ver()) {
     case ProVer_5:
@@ -787,7 +812,8 @@ void File::read(QDataStream& stream) {
     // _read(stream);
 }
 
-void File::createGi() {
+void File::createGi()
+{
     switch (m_gcp.gcType) {
     case GCode::Profile:
     case GCode::Thermal:
@@ -854,7 +880,8 @@ void File::createGi() {
     itemGroup()->setVisible(true);
 }
 
-FileTree::Node* File::node() {
+FileTree::Node* File::node()
+{
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 

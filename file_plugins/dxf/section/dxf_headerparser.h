@@ -23,8 +23,7 @@ struct SectionHEADER final : SectionParser {
     virtual ~SectionHEADER() = default;
     // Section interface
     void parse() override;
-    
-    
+
     HeaderData& header;
 };
 

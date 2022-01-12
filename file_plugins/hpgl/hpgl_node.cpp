@@ -23,8 +23,6 @@
 #include <QMenu>
 #include <QtWidgets>
 
-
-
 namespace Hpgl {
 
 class Dialog : public QDialog {

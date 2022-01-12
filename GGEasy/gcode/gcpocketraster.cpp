@@ -23,8 +23,6 @@
 //#include <QFuture>
 //#include <QtConcurrent>
 
-
-
 namespace GCode {
 RasterCreator::RasterCreator()
 {

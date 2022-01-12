@@ -223,7 +223,7 @@ GraphicObject Text::toGo() const
     return { id, {}, paths };
 }
 
-void Text::write(QDataStream &stream) const
+void Text::write(QDataStream& stream) const
 {
     stream << text;
     stream << textStyleName;
@@ -240,7 +240,7 @@ void Text::write(QDataStream &stream) const
     stream << rotation;
 }
 
-void Text::read(QDataStream &stream)
+void Text::read(QDataStream& stream)
 {
     stream >> text;
     stream >> textStyleName;
