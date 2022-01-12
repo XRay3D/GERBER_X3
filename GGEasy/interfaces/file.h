@@ -27,7 +27,7 @@
 #include <QFileInfo>
 #include <QModelIndex>
 
-#include "leakdetector.h"
+
 
 using LayerTypes = std::vector<LayerType>;
 

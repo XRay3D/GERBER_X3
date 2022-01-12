@@ -29,7 +29,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-#include "leakdetector.h"
+
 #include "settingsdialog.h"
 
 using namespace ClipperLib;

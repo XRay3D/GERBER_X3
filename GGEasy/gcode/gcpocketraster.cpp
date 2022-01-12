@@ -23,7 +23,7 @@
 //#include <QFuture>
 //#include <QtConcurrent>
 
-#include "leakdetector.h"
+
 
 namespace GCode {
 RasterCreator::RasterCreator()

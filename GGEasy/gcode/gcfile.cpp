@@ -30,7 +30,7 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-#include "leakdetector.h"
+
 
 void calcArcs(Path path) {
     return;

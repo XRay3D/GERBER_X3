@@ -18,7 +18,7 @@
 
 #include <QSpinBox>
 
-#include "leakdetector.h"
+
 
 ThermalDelegate::ThermalDelegate(QObject* parent)
     : QStyledItemDelegate(parent)

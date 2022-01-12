@@ -31,7 +31,7 @@ Q_DECLARE_METATYPE(ErrorItem*)
 
 enum { IconSize = 32 };
 
-#include "leakdetector.h"
+
 
 QIcon errorIcon(const QPainterPath& path)
 {

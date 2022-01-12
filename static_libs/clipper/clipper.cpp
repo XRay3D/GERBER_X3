@@ -48,7 +48,7 @@
 #include <ostream>
 #include <stdexcept>
 
-#include "leakdetector.h"
+
 
 namespace ClipperLib {
 

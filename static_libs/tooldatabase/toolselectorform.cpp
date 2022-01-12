@@ -22,7 +22,7 @@
 #include <QJsonObject>
 #include <QtWidgets>
 
-#include "leakdetector.h"
+
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)

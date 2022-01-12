@@ -27,8 +27,6 @@
 #include <QStandardPaths>
 #endif
 
-#include "leakdetector.h"
-
 void translation(QApplication* app);
 
 int main(int argc, char** argv)

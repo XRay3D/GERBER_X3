@@ -35,7 +35,7 @@
 #include <QScrollBar>
 #include <cmath>
 
-#include "leakdetector.h"
+
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;

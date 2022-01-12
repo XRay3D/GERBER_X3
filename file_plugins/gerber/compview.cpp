@@ -22,7 +22,7 @@
 #include <QDebug>
 #include <QGraphicsRectItem>
 
-#include "leakdetector.h"
+
 
 namespace Gerber {
 

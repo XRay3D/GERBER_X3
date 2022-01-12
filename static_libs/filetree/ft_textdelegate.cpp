@@ -15,7 +15,7 @@
 
 #include <QLineEdit>
 
-#include "leakdetector.h"
+
 
 namespace FileTree {
 

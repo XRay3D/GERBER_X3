@@ -26,7 +26,7 @@
 #include <QMenu>
 #include <QtWidgets>
 
-#include "leakdetector.h"
+
 
 namespace Dxf {
 

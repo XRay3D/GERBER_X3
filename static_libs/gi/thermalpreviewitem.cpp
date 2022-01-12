@@ -30,7 +30,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
 
-#include "leakdetector.h"
+
 
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr(this)

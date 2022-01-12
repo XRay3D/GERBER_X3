@@ -18,7 +18,7 @@
 #include <QDebug>
 #include <QSettings>
 
-#include "leakdetector.h"
+
 
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)

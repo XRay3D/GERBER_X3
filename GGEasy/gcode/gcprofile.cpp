@@ -16,7 +16,7 @@
 #include "bridgeitem.h"
 #include "scene.h"
 
-#include "leakdetector.h"
+
 
 namespace GCode {
 ProfileCreator::ProfileCreator() {

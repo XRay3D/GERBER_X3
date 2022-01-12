@@ -29,7 +29,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include "leakdetector.h"
+
 
 namespace Gerber {
 

@@ -22,7 +22,7 @@
 
 #include "interfaces/pluginfile.h"
 
-#include "leakdetector.h"
+
 #include "utils.h"
 #include <QElapsedTimer>
 #include <QMutex>

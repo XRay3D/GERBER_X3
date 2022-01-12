@@ -17,7 +17,7 @@
 #include <QApplication>
 #include <QRadioButton>
 
-#include "leakdetector.h"
+
 
 ////////////////////////////////////////////////////////////
 /// \brief RadioDelegate::RadioDelegate

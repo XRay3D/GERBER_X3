@@ -42,7 +42,7 @@
 #include <future>
 #include <thread>
 
-#include "leakdetector.h"
+
 
 void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
     if (ps.empty()) {

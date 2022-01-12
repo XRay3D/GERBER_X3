@@ -18,7 +18,7 @@
 #include "settings.h"
 #include <QMessageBox>
 
-#include "leakdetector.h"
+
 
 VoronoiForm::VoronoiForm(QWidget* parent)
     : FormsUtil(new GCode::VoronoiCreator, parent)

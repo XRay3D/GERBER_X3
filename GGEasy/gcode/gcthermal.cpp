@@ -15,7 +15,7 @@
 #include "gcfile.h"
 #include "project.h"
 
-#include "leakdetector.h"
+
 
 namespace GCode {
 

@@ -16,7 +16,7 @@
 #include "shhandler.h"
 #include <QIcon>
 
-#include "leakdetector.h"
+
 
 namespace Shapes {
 

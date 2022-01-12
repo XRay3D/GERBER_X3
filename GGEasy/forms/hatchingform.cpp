@@ -19,7 +19,7 @@
 #include "settings.h"
 #include <QMessageBox>
 
-#include "leakdetector.h"
+
 
 HatchingForm::HatchingForm(QWidget* parent)
     : FormsUtil(new GCode::HatchingCreator, parent)

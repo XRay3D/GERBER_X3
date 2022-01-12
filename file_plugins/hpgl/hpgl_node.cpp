@@ -23,7 +23,7 @@
 #include <QMenu>
 #include <QtWidgets>
 
-#include "leakdetector.h"
+
 
 namespace Hpgl {
 

@@ -16,7 +16,7 @@
 #include "drillitem.h"
 
 #include "exnode.h"
-#include "leakdetector.h"
+
 
 namespace Excellon {
 

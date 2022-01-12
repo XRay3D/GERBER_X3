@@ -21,7 +21,7 @@
 
 #include <QTimer>
 
-#include "leakdetector.h"
+
 
 namespace FileTree {
 

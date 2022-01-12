@@ -28,7 +28,7 @@
 #include <QThread>
 
 #include "gbrnode.h"
-#include "leakdetector.h"
+
 
 namespace Gerber {
 

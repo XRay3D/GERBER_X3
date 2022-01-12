@@ -15,7 +15,7 @@
 
 #include <QComboBox>
 
-#include "leakdetector.h"
+
 
 namespace FileTree {
 
