@@ -21,6 +21,7 @@ class SettingsDialog : public QDialog, private Ui::SettingsDialog {
     int langIndex;
     MySettings settings;
     mvector<SettingsTabInterface*> tabs;
+    QPushButton* button;
 
 public:
     explicit SettingsDialog(QWidget* parent = nullptr, int tab = -1);

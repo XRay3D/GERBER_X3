@@ -353,5 +353,35 @@
         <file>tool/drill.png</file>
         <file>tool/endmill.png</file>
         <file>tool/engraving.png</file>
+        <file>icons/ggeasy-dark/actions/16/dialog-cancel.svg</file>
+        <file>icons/ggeasy-dark/actions/16/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-dark/actions/16/flip-horizontal.svg</file>
+        <file>icons/ggeasy-dark/actions/16/flip-vertical.svg</file>
+        <file>icons/ggeasy-dark/actions/16/rotate-90.svg</file>
+        <file>icons/ggeasy-dark/actions/22/dialog-cancel.svg</file>
+        <file>icons/ggeasy-dark/actions/22/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-dark/actions/22/flip-horizontal.svg</file>
+        <file>icons/ggeasy-dark/actions/22/flip-vertical.svg</file>
+        <file>icons/ggeasy-dark/actions/22/rotate-90.svg</file>
+        <file>icons/ggeasy-dark/actions/24/dialog-cancel.svg</file>
+        <file>icons/ggeasy-dark/actions/24/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-dark/actions/24/flip-horizontal.svg</file>
+        <file>icons/ggeasy-dark/actions/24/flip-vertical.svg</file>
+        <file>icons/ggeasy-dark/actions/24/rotate-90.svg</file>
+        <file>icons/ggeasy-light/actions/16/dialog-cancel.svg</file>
+        <file>icons/ggeasy-light/actions/16/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-light/actions/16/flip-horizontal.svg</file>
+        <file>icons/ggeasy-light/actions/16/flip-vertical.svg</file>
+        <file>icons/ggeasy-light/actions/16/rotate-90.svg</file>
+        <file>icons/ggeasy-light/actions/22/dialog-cancel.svg</file>
+        <file>icons/ggeasy-light/actions/22/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-light/actions/22/flip-horizontal.svg</file>
+        <file>icons/ggeasy-light/actions/22/flip-vertical.svg</file>
+        <file>icons/ggeasy-light/actions/22/rotate-90.svg</file>
+        <file>icons/ggeasy-light/actions/24/dialog-cancel.svg</file>
+        <file>icons/ggeasy-light/actions/24/dialog-ok-apply.svg</file>
+        <file>icons/ggeasy-light/actions/24/flip-horizontal.svg</file>
+        <file>icons/ggeasy-light/actions/24/flip-vertical.svg</file>
+        <file>icons/ggeasy-light/actions/24/rotate-90.svg</file>
     </qresource>
 </RCC>

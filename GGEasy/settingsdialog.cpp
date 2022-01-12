@@ -76,7 +76,8 @@ public:
 /// \param tab
 ///
 SettingsDialog::SettingsDialog(QWidget* parent, int tab)
-    : QDialog(parent) {
+    : QDialog(parent)
+{
     setupUi(this);
 
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
@@ -146,11 +147,23 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     readSettingsDialog();
     if (tab > -1)
         tabwMain->setCurrentIndex(tab);
+
+    { //Open Settings Folder
+        button = new QPushButton(tr("Open Settings Folder"), buttonBox);
+        button->setIcon(QIcon::fromTheme("folder"));
+        button->setMinimumWidth(QFontMetrics(font()).boundingRect(button->text()).width() + 32);
+        buttonBox->addButton(button, QDialogButtonBox::NRoles);
+        connect(button, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl(settingsPath, QUrl::TolerantMode)); });
+    }
+
+    buttonBox->button(QDialogButtonBox::Ok)->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    buttonBox->button(QDialogButtonBox::Cancel)->setIcon(QIcon::fromTheme("dialog-cancel"));
 }
 
 SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 
-void SettingsDialog::readSettings() {
+void SettingsDialog::readSettings()
+{
     /*GUI*/
     settings.beginGroup("Viewer");
     settings.getValue(chbxAntialiasing);
@@ -200,7 +213,8 @@ void SettingsDialog::readSettings() {
         tab->readSettings(settings);
 }
 
-void SettingsDialog::saveSettings() {
+void SettingsDialog::saveSettings()
+{
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != chbxOpenGl->isChecked()) {
@@ -251,7 +265,8 @@ void SettingsDialog::saveSettings() {
         tab->writeSettings(settings);
 }
 
-void SettingsDialog::readSettingsDialog() {
+void SettingsDialog::readSettingsDialog()
+{
     settings.beginGroup("SettingsDialog");
     if (auto geometry { settings.value("geometry").toByteArray() }; geometry.size())
         restoreGeometry(geometry);
@@ -259,14 +274,16 @@ void SettingsDialog::readSettingsDialog() {
     settings.endGroup();
 }
 
-void SettingsDialog::saveSettingsDialog() {
+void SettingsDialog::saveSettingsDialog()
+{
     settings.beginGroup("SettingsDialog");
     settings.setValue("geometry", saveGeometry());
     settings.setValue(tabwMain);
     settings.endGroup();
 }
 
-void SettingsDialog::translator(QApplication* app, const QString& path) {
+void SettingsDialog::translator(QApplication* app, const QString& path)
+{
     if (QFile::exists(path)) {
         QTranslator* pTranslator = new QTranslator(qApp);
         if (pTranslator->load(path))
@@ -276,7 +293,8 @@ void SettingsDialog::translator(QApplication* app, const QString& path) {
     }
 }
 
-void SettingsDialog::reject() {
+void SettingsDialog::reject()
+{
     readSettings();
 
     if (!isVisible())
@@ -285,7 +303,8 @@ void SettingsDialog::reject() {
     QDialog::reject();
 }
 
-void SettingsDialog::accept() {
+void SettingsDialog::accept()
+{
     if (isVisible() && !buttonBox->button(QDialogButtonBox::Ok)->hasFocus())
         return;
 
@@ -299,15 +318,19 @@ void SettingsDialog::accept() {
     QDialog::accept();
 }
 
-void SettingsDialog::showEvent(QShowEvent* event) {
+void SettingsDialog::showEvent(QShowEvent* event)
+{
     int width = 0;
     for (int i = 0; i < tabwMain->tabBar()->count(); ++i)
         width += tabwMain->tabBar()->tabRect(i).width();
     resize(width + 20, 10);
+    button->setMaximumHeight(buttonBox->button(QDialogButtonBox::Ok)->height());
+
     QDialog::showEvent(event);
 }
 
-bool SettingsDialog::eventFilter(QObject* watched, QEvent* event) {
+bool SettingsDialog::eventFilter(QObject* watched, QEvent* event)
+{
     if (event->type() == QEvent::KeyPress)
         return false;
     return QDialog::eventFilter(watched, event);

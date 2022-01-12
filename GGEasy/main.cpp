@@ -65,13 +65,14 @@ int main(int argc, char** argv)
         nixFixSharedMemory.detach();
 #endif
     QApplication::setApplicationName("GGEasy");
-    //    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
-    //    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
-
+    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
+    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
     settingsPath = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    if (QDir dir(settingsPath); !dir.exists())
+        dir.mkpath(settingsPath);
     qDebug() << settingsPath;
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsPath);
+    //QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
     [[maybe_unused]] App appSingleton;
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -151,11 +152,11 @@ int main(int argc, char** argv)
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 QObject* pobj = loader.instance(); // Загрузка плагина
                 if (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
-                    App::filePlugins().emplace(file->type(), PIF {file, pobj});
+                    App::filePlugins().emplace(file->type(), PIF { file, pobj });
                     continue;
                 }
                 if (auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
-                    App::shapePlugins().emplace(shape->type(), PIS {shape, pobj});
+                    App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
                     continue;
                 }
             }
@@ -164,7 +165,8 @@ int main(int argc, char** argv)
             auto parser = new GCode::Plugin(&app);
             PIF pi {
                 static_cast<FilePluginInterface*>(parser),
-                static_cast<QObject*>(parser)};
+                static_cast<QObject*>(parser)
+            };
             App::filePlugins().emplace(parser->type(), pi);
         }
 
@@ -182,7 +184,7 @@ int main(int argc, char** argv)
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
-    mainWin.setIconSize({24, 24});
+    mainWin.setIconSize({ 24, 24 });
 
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");

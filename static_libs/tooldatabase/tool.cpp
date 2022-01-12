@@ -26,7 +26,8 @@
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
-QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
+QDataStream& operator<<(QDataStream& stream, const Tool& tool)
+{
     stream << tool.m_name;
     stream << tool.m_note;
     stream << tool.m_type;
@@ -42,7 +43,8 @@ QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
     stream << tool.m_id;
     return stream;
 }
-QDataStream& operator>>(QDataStream& stream, Tool& tool) {
+QDataStream& operator>>(QDataStream& stream, Tool& tool)
+{
     stream >> tool.m_name;
     stream >> tool.m_note;
     stream >> tool.m_type;
