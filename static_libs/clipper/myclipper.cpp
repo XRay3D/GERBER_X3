@@ -204,7 +204,17 @@ void mergePaths(Paths& paths, const double dist)
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
-                } else if (dist != 0.0) {
+                }
+            }
+        }
+    } while (max != paths.size());
+    if (dist != 0.0) {
+        do {
+            max = paths.size();
+            for (size_t i = 0; i < paths.size(); ++i) {
+                for (size_t j = 0; j < paths.size(); ++j) {
+                    if (i == j)
+                        continue;
                     /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
                         ReversePath(paths[j]);
                         paths[i].append(paths[j].mid(1));
@@ -226,6 +236,6 @@ void mergePaths(Paths& paths, const double dist)
                     }
                 }
             }
-        }
-    } while (max != paths.size());
+        } while (max != paths.size());
+    }
 }

@@ -118,27 +118,25 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
 
         int i = 0;
         int k = 100;
 
-        if (0) {
-            QDir dir(R"(D:\Downloads\Gerber_p2xsdrr_brd (1))");
+        if (1) {
+            QDir dir(R"(C:\Users\bakiev\Downloads\1_низ)");
             //QDir dir("D:/Gerber Test Files/CopperCAM/");
             //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
-            QStringList listFiles;
             if (dir.exists())
-                listFiles = dir.entryList(); //(QStringList { "*.dxf" }, QDir::Files);
-            for (QString str : listFiles) {
-                str = dir.path() + '/' + str;
-                qDebug() << str;
-                QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                //break;
-            }
+                for (QString str : dir.entryList({ "*.gbr" }, QDir::Files)) {
+                    str = dir.path() + '/' + str;
+                    qDebug() << str;
+                    QTimer::singleShot(i += k, [this, str] { loadFile(str); });
+                    //break;
+                }
         }
-        if (1)
+        if (0)
             QTimer::singleShot(i += k, [this] { loadFile(R"(D:\Downloads\Gerber_p2xsdrr_brd (1)\_Gerber_BottomLayer.GBL)"); });
 
         if (0) {

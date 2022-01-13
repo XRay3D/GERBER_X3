@@ -32,6 +32,16 @@ struct mvector : std::vector<T> {
     }
 
     inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
+//    inline void append(V&& vec)
+//    {
+//        if (vec.empty())
+//            return;
+//        const auto newSize = V::size() + vec.size();
+//        if (V::capacity() < newSize)
+//            V::resize(newSize);
+//        for (auto&& val : vec)
+//            V::push_back(std::move(val));
+//    }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
