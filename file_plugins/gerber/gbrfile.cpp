@@ -86,33 +86,37 @@ Paths File::merge() const
     size_t i = 0;
 
     if constexpr (1) {
-        std::list<std::map<int, Paths>> paths;
-
-        int exp = -1;
-        for (auto& go : m_graphicObjects) {
-            if (exp != go.state().imgPolarity()) {
-                exp = go.state().imgPolarity();
-                paths.resize(paths.size() + 1);
-            }
-            if (go.state().type() == Line) {
-                auto& map = paths.back();
-                map[go.state().aperture()].push_back(go.path());
-            }
-        }
-
-        for (auto& map : paths) {
-            for (auto& [aperture, paths] : map) {
-                mergePaths(paths);
-                ClipperOffset offset;
-                for (int i {}; i < paths.size(); ++i) {
-                    auto& path = paths[i];
-                    if (path.back() == path.front()) {
-                        offset.AddPath(paths[i], ClipperLib::jtRound, ClipperLib::etClosedLine);
-                        paths.erase(paths.begin() + i--);
-                    }
+        std::list<Paths> pathList;
+        {
+            std::list<std::map<int, Paths>> pathListMap;
+            int exp = -1;
+            for (auto& go : m_graphicObjects) {
+                if (exp != go.state().imgPolarity()) {
+                    exp = go.state().imgPolarity();
+                    pathListMap.resize(pathListMap.size() + 1);
                 }
-                offset.AddPaths(paths, ClipperLib::jtRound, ClipperLib::etOpenRound);
-                offset.Execute(paths, m_apertures.at(aperture)->apertureSize() * uScale * 0.5);
+                if (go.state().type() == Line) {
+                    auto& paths = pathListMap.back();
+                    paths[go.state().aperture()].push_back(go.path());
+                }
+            }
+            for (auto& map : pathListMap) {
+                pathList.resize(pathList.size() + 1);
+                for (auto& [aperture, paths] : map) {
+                    mergePaths(paths);
+                    ClipperOffset offset;
+                    for (int i {}; i < paths.size(); ++i) {
+                        auto& path = paths[i];
+                        if (path.back() == path.front()) {
+                            offset.AddPath(paths[i], ClipperLib::jtRound, ClipperLib::etClosedLine);
+                            paths.erase(paths.begin() + i--);
+                        }
+                    }
+                    offset.AddPaths(paths, ClipperLib::jtRound, ClipperLib::etOpenRound);
+                    offset.Execute(paths, m_apertures.at(aperture)->apertureSize() * uScale * 0.5);
+                    //pathList.back().append(std::move(paths));
+                    pathList.back().append(paths);
+                }
             }
         }
 
@@ -129,9 +133,10 @@ Paths File::merge() const
                 }
             } while (i < m_graphicObjects.size() && exp == m_graphicObjects.at(i).state().imgPolarity());
 
-            for (auto& [dCode, paths] : paths.front())
-                clipper.AddPaths(paths, ptClip, true);
-            paths.pop_front();
+            if (exp)
+                ReversePaths(pathList.front());
+            clipper.AddPaths(pathList.front(), ptClip, true);
+            pathList.pop_front();
 
             if (m_graphicObjects.at(i - 1).state().imgPolarity() == Positive)
                 clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
