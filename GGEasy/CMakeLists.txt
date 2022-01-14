@@ -93,7 +93,7 @@ include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}")
@@ -313,7 +313,7 @@ if(WIN32)
         \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt..."
         )
-elseif (UNIX)
+elseif (UNIX)#LINUX
     #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
