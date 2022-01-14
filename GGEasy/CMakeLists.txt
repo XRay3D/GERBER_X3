@@ -91,9 +91,9 @@ endif()
 
 include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}")
@@ -296,24 +296,27 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
+install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
+    # windeployqt
+    set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+    get_target_property(_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E
+        env PATH="${_QT_BIN_DIR}" "${WINDEPLOYQT_EXECUTABLE}"
+        --verbose 0
+        --no-compiler-runtime
+        \"$<TARGET_FILE:${PROJECT_NAME}>\"
+        COMMENT "Deploying Qt..."
+        )
+elseif (UNIX)
+    #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
-# windeployqt
-install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
-set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-get_target_property(_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
-get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
-find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E
-        env PATH="${_QT_BIN_DIR}" "${WINDEPLOYQT_EXECUTABLE}"
-            --verbose 0
-            --no-compiler-runtime
-            \"$<TARGET_FILE:${PROJECT_NAME}>\"
-    COMMENT "Deploying Qt..."
-)
 #execute_process(
 #    COMMAND "${CMAKE_COMMAND}" -E
 #        env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
