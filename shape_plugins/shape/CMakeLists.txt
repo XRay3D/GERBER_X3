@@ -53,4 +53,6 @@ target_link_libraries(shape PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 
+#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
+
 #target_compile_definitions(shape PRIVATE SHAPE_LIBRARY)
