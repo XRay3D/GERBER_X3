@@ -20,7 +20,7 @@ set(CMAKE_AUTORCC ON)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
@@ -69,7 +69,7 @@ add_library(gerber SHARED
     mathparser.h
     )
 
-link_directories(../../libs${SUFFIX})
+
 target_link_libraries(gerber PRIVATE
     clipper
     common

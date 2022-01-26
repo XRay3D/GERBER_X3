@@ -71,25 +71,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(SUFFIX "${SUFFIX}_x64")
-    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
-else()
-    set(SUFFIX "${SUFFIX}_x32")
-    set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(SUFFIX "_clang")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(SUFFIX "_gnu")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(SUFFIX "_intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(SUFFIX "_msvc")
-endif()
-
-include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
+include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -141,13 +123,6 @@ include_directories (
     ../static_libs/thermal
     ../static_libs/tooldatabase
     )
-
-link_directories(
-    ${LINK_DIRECTORIES}
-    ../libs${SUFFIX}
-    #    C:/dev/CGAL-5.1.2/auxiliary/gmp/lib
-    )
-
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
@@ -302,7 +277,7 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
     # windeployqt
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-    get_target_property(_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    get_target_property(_QMAKE_EXECUTABLE Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
     get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

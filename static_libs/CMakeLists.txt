@@ -15,35 +15,7 @@ project(Static_Libs)
 #set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(SUFFIX "_clang")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(SUFFIX "_gnu")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(SUFFIX "_intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(SUFFIX "_msvc")
-endif()
-
-#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(SUFFIX "${SUFFIX}_x64")
-else()
-    set(SUFFIX "${SUFFIX}_x32")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(SUFFIX "${SUFFIX}_d")
-elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    set(SUFFIX "${SUFFIX}_r")
-elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
-    set(SUFFIX "${SUFFIX}_rm")
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    set(SUFFIX "${SUFFIX}_rd")
-endif()
-
-set(STATIC_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}")
+include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
@@ -65,7 +37,6 @@ include_directories(
     ../shape_plugins/shape
     )
 
-link_directories(../libs${SUFFIX})
 
 # static lib
 add_subdirectory(clipper)

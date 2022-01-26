@@ -15,26 +15,11 @@ set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include (${PROJECT_SOURCE_DIR}/../SUFFIX.cmake)
+include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
 
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(SUFFIX "${SUFFIX}_x64")
-    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x64")
-else()
-    set(PLUGINS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin_x32")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(SUFFIX "${SUFFIX}_d")
-elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    set(SUFFIX "${SUFFIX}_r")
-elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
-    set(SUFFIX "${SUFFIX}_rm")
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    set(SUFFIX "${SUFFIX}_rd")
-endif()
-
-set(PLUGINS_DIR "${PLUGINS_DIR}/plugins")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
@@ -54,12 +39,12 @@ include_directories (
     ../static_libs/thermal
     ../static_libs/tooldatabase
     ../static_libs/tooldatabase
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libs${SUFFIX}
+    ${CMAKE_SOURCE_DIR}/libs${SUFFIX}
     )
 
 
 link_directories(
-    ../libs${SUFFIX}
+    ${CMAKE_SOURCE_DIR}/libs${SUFFIX}
     )
 
 add_subdirectory(dxf)
