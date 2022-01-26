@@ -19,6 +19,10 @@
 
 namespace Gerber {
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+using QMatrix = QTransform;
+#endif
+
 #if _MSVC_LANG >= 201705L
 #else
 QDataStream& operator>>(QDataStream& s, ApertureMap& c)

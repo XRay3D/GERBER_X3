@@ -35,8 +35,6 @@ include_directories(
     ../../static_libs/tooldatabase
     )
 
-link_directories(../../libs${SUFFIX})
-
 add_library(shape STATIC
     shape.cpp
     shape.h

@@ -18,7 +18,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
@@ -34,7 +34,7 @@ add_library(circle SHARED
     circle.json
     )
 
-link_directories(../../libs${SUFFIX})
+
 target_link_libraries(circle PRIVATE
     clipper
     common
