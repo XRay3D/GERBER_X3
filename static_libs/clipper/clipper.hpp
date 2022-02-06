@@ -240,57 +240,31 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double distTo(const IntPoint& pt2) const noexcept
-    {
+    double distTo(const IntPoint& pt2) const noexcept {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return sqrt(x * x + y * y);
     }
-    double distToSq(const IntPoint& pt2) const noexcept
-    {
+    double distToSq(const IntPoint& pt2) const noexcept {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return (x * x + y * y);
     }
 };
+
 //------------------------------------------------------------------------------
-
-//typedef mvector /*mvector*/<IntPoint> Path;
-//typedef mvector /*mvector*/<Path> Paths;
-
 struct Path : mvector<IntPoint> {
     using MV = mvector<IntPoint>;
-    // clang-format off
-    Path() {}
-    Path(size_t size) : MV(size) {}
-    Path(size_t size, const IntPoint& t) : MV(size, t) {}
-    Path(const MV& v) : MV(v) {}
-    Path(MV&& v) : MV(std::move(v)) {}
-    Path(const Path& v) : MV(v) {}
-    Path(Path&& v) : MV(std::move(v)) {}
-    Path(const std::initializer_list<IntPoint>& v) : MV(v) {}
-    // clang-format on
-    Path(const QPolygonF& v)
-    {
+    using MV::MV;
+
+    Path(const QPolygonF& v) {
         MV::reserve(v.size());
         for (auto& pt : v) {
             MV::push_back(pt);
         }
     }
 
-    Path& operator=(const Path& v)
-    {
-        MV::operator=(v);
-        return *this;
-    }
-    Path& operator=(Path&& v)
-    {
-        MV::operator=(std::move(v));
-        return *this;
-    }
-
-    operator QPolygonF() const
-    {
+    operator QPolygonF() const {
         QPolygonF poly;
         poly.reserve(int(size() + 1)); // +1 if need closed polygons
         for (const auto pt : *this)
@@ -302,36 +276,20 @@ struct Path : mvector<IntPoint> {
 
 struct Paths : mvector<Path> {
     using MV = mvector<Path>;
-    // clang-format off
-    Paths() {}
-    Paths(size_t size) : MV(size) {}
-    Paths(size_t size, const Path& t) : MV(size, t) {}
-    Paths(const MV& v) : MV(v) {}
-    Paths(MV&& v) : MV(std::move(v)) {}
-    Paths(const Paths& v) : MV(v) {}
-    Paths(Paths&& v) : MV(std::move(v)) {}
-    Paths(const std::initializer_list<Path>& v) : MV(v) {}
-    // clang-format on
-    Paths(const QList<QPolygonF>& v)
-    {
+    using MV::MV;
+
+    Paths(const MV& v)
+        : MV(v) { }
+    Paths(MV&& v)
+        : MV(std::move(v)) { }
+
+    Paths(const QList<QPolygonF>& v) {
         MV::reserve(v.size());
         for (auto&& qpolygonf : v)
             MV::emplace_back(qpolygonf);
     }
 
-    Paths& operator=(const Paths& v)
-    {
-        MV::operator=(v);
-        return *this;
-    }
-    Paths& operator=(Paths&& v)
-    {
-        MV::operator=(std::move(v));
-        return *this;
-    }
-
-    operator mvector<QPolygonF>() const
-    {
+    operator mvector<QPolygonF>() const {
         mvector<QPolygonF> polys;
         polys.reserve(size());
         for (const auto& poly : *this)
