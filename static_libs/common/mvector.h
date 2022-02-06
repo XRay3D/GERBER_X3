@@ -3,50 +3,21 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <span>
 #include <vector>
 
 template <class T>
 struct mvector : std::vector<T> {
     using V = std::vector<T>;
     using M = mvector<T>;
-    // clang-format off
-    mvector() {}
-    mvector(size_t size) : V(size) {}
-    mvector(size_t size, const T& t) : V(size, t) {}
-    mvector(const V& v) : V(v) {}
-    mvector(V&& v) : V(std::forward<V>(v)) {}
-    mvector(const M& v) : V(v) {}
-    mvector(M&& v) : V(std::forward<M>(v)) {}
-    mvector(const std::initializer_list<T>& v) : V(v) {}
-    // clang-format on
-
-    mvector& operator=(const M& v)
-    {
-        V::operator=(v);
-        return *this;
-    }
-    mvector& operator=(M&& v)
-    {
-        V::operator=(std::move(v));
-        return *this;
-    }
+    using V::V;
 
     inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
-//    inline void append(V&& vec)
-//    {
-//        if (vec.empty())
-//            return;
-//        const auto newSize = V::size() + vec.size();
-//        if (V::capacity() < newSize)
-//            V::resize(newSize);
-//        for (auto&& val : vec)
-//            V::push_back(std::move(val));
-//    }
+    inline void append(const std::span<T>& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
-    bool removeOne(const T& t)
-    {
+    bool removeOne(const T& t) {
         auto it = std::find(V::begin(), V::end(), t);
         if (it == V::end())
             return false;
