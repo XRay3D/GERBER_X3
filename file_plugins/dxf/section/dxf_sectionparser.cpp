@@ -28,58 +28,50 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, Codes::it
     , from(from)
     , to(to)
     , it(it)
-    , file(file)
-{
+    , file(file) {
 }
 SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* file)
     : type(toType(*(from + 1)))
     , from(from)
     , to(to)
     , it(from)
-    , file(file)
-{
+    , file(file) {
 }
 
-SectionParser::SectionType SectionParser::toType(const QString& key)
-{
+SectionParser::SectionType SectionParser::toType(const QString& key) {
     return static_cast<SectionType>(staticMetaObject
                                         .enumerator(0)
                                         .keysToValue(key.toLocal8Bit().data()));
 }
 
-const CodeData& SectionParser::nextCode() const
-{
+const CodeData& SectionParser::nextCode() const {
     auto& val = *it;
     ++it;
     return val;
     return *(++it);
 }
 
-const CodeData& SectionParser::prevCode() const
-{
+const CodeData& SectionParser::prevCode() const {
     --it;
     auto& val = *it;
     return val;
     return *(--it);
 }
 
-bool SectionParser::hasNext() const
-{
+bool SectionParser::hasNext() const {
 
     return std::distance(it, to) > 0;
 }
 
-bool SectionParser::hasPrev() const
-{
+bool SectionParser::hasPrev() const {
 
     return std::distance(from, it) > 0;
 }
 
-QDebug operator<<(QDebug debug, const SectionParser& c)
-{
+QDebug operator<<(QDebug debug, const SectionParser& c) {
     QDebugStateSaver saver(debug);
     debug.nospace() << "\rSEC(" << c.type << ", " << std::distance(c.from, c.to) << ')';
     return debug;
 }
 
-}
+} // namespace Dxf

@@ -30,4 +30,4 @@ protected:
 private:
 };
 
-}
+} // namespace Excellon

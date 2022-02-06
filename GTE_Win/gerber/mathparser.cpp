@@ -15,12 +15,10 @@
 #include <QtMath>
 
 MathParser::MathParser(QMap<QString, double>& variables)
-    : variables(&variables)
-{
+    : variables(&variables) {
 }
 
-double MathParser::getVariable(QString variableName)
-{
+double MathParser::getVariable(QString variableName) {
     if (!variables->contains(variableName)) {
         qWarning() << "Error: Try get unexists variable '" + variableName + "'";
         return 0.0;
@@ -28,8 +26,7 @@ double MathParser::getVariable(QString variableName)
     return variables->value(variableName, 0.0);
 }
 
-double MathParser::parse(const QString& s)
-{
+double MathParser::parse(const QString& s) {
     Result result;
     try {
         result = plusMinus(s);
@@ -95,7 +92,7 @@ Result MathParser::functionVariable(QString s) //throws Exception
         f += s.at(i);
         i++;
     }
-    if (!f.isEmpty()) { // если что-нибудь нашли
+    if (!f.isEmpty()) {                         // если что-нибудь нашли
         if (s.length() > i && s.at(i) == '(') { // и следующий символ скобка значит - это функция
             Result r = bracket(s.mid(f.length()));
             return processFunction(f, r);
@@ -160,8 +157,7 @@ Result MathParser::num(QString s) //throws Exception
     return Result(dPart, restPart);
 }
 
-Result MathParser::processFunction(QString func, Result r)
-{
+Result MathParser::processFunction(QString func, Result r) {
     enum {
         sin,
         cos,

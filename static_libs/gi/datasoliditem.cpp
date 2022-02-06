@@ -23,8 +23,7 @@
 
 GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
     : GraphicsItem(file)
-    , m_paths(paths)
-{
+    , m_paths(paths) {
     for (Path path : qAsConst(m_paths)) {
         if (path.size())
             path.push_back(path.front());
@@ -41,8 +40,7 @@ QRectF GiDataSolid::boundingRect() const { return m_shape.boundingRect(); }
 
 QPainterPath GiDataSolid::shape() const { return m_shape; }
 
-void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
         painter->setPen(Qt::NoPen);
@@ -64,8 +62,7 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
 
 int GiDataSolid::type() const { return static_cast<int>(GiType::DataSolid); }
 
-void GiDataSolid::redraw()
-{
+void GiDataSolid::redraw() {
     m_shape = QPainterPath();
     for (Path path : qAsConst(m_paths)) {
         path.push_back(path.front());
@@ -81,8 +78,7 @@ Paths GiDataSolid::paths(int) const { return m_paths; }
 
 Paths* GiDataSolid::rPaths() { return &m_paths; }
 
-void GiDataSolid::changeColor()
-{
+void GiDataSolid::changeColor() {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);

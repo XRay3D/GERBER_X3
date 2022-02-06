@@ -28,12 +28,10 @@ struct QRegularExpression {
 };
 
 Parser::Parser(FilePluginInterface* const interface)
-    : interface(interface)
-{
+    : interface(interface) {
 }
 
-FileInterface* Parser::parseFile(const QString& fileName)
-{
+FileInterface* Parser::parseFile(const QString& fileName) {
     QFile file_(fileName);
     if (!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
@@ -97,8 +95,7 @@ FileInterface* Parser::parseFile(const QString& fileName)
     return file;
 }
 
-bool Parser::parseComment(const QString& line)
-{
+bool Parser::parseComment(const QString& line) {
     if (line.startsWith(';')) {
         qDebug() << "line" << line;
         auto data { toU16StrView(line) };
@@ -123,8 +120,7 @@ bool Parser::parseComment(const QString& line)
     return false;
 }
 
-bool Parser::parseGCode(const QString& line)
-{
+bool Parser::parseGCode(const QString& line) {
     if (line.startsWith('G')) {
         auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regex(R"(^G([0]?[0-9]{2}).*$)"); // fixed_string("^G([0]?[0-9]{2}).*$");
@@ -164,8 +160,7 @@ bool Parser::parseGCode(const QString& line)
     return false;
 }
 
-bool Parser::parseMCode(const QString& line)
-{
+bool Parser::parseMCode(const QString& line) {
     if (line.startsWith('M')) {
         static constexpr ctll::fixed_string regex(R"(^M([0]?[0-9]{2})$)"); // fixed_string("^M([0]?[0-9]{2})$");
         auto data { toU16StrView(line) };
@@ -227,8 +222,7 @@ bool Parser::parseMCode(const QString& line)
     return false;
 }
 
-bool Parser::parseTCode(const QString& line)
-{
+bool Parser::parseTCode(const QString& line) {
     if (line.startsWith('T')) {
         auto data { toU16StrView(line) };
         static constexpr ctll::fixed_string regex(R"(^T(\d+))"
@@ -249,8 +243,7 @@ bool Parser::parseTCode(const QString& line)
     return false;
 }
 
-bool Parser::parsePos(const QString& line)
-{
+bool Parser::parsePos(const QString& line) {
 
     //    enum {
     //        G = 1,
@@ -305,8 +298,7 @@ bool Parser::parsePos(const QString& line)
     return false;
 }
 
-bool Parser::parseSlot(const QString& line)
-{
+bool Parser::parseSlot(const QString& line) {
     //    enum {
     //        X1 = 1,
     //        Y1,
@@ -359,8 +351,7 @@ bool Parser::parseSlot(const QString& line)
     return false;
 }
 
-bool Parser::parseRepeat(const QString& line)
-{
+bool Parser::parseRepeat(const QString& line) {
     auto data { toU16StrView(line) };
     static constexpr ctll::fixed_string regex(R"(^R(\d+))"
                                               R"((?:X([\+\-]?\d*\.?\d+))?)"
@@ -380,8 +371,7 @@ bool Parser::parseRepeat(const QString& line)
     return false;
 }
 
-bool Parser::parseFormat(const QString& line)
-{
+bool Parser::parseFormat(const QString& line) {
     auto data { toU16StrView(line) };
     static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
@@ -418,8 +408,7 @@ bool Parser::parseFormat(const QString& line)
     return false;
 }
 
-bool Parser::parseNumber(QString Str, double& val)
-{
+bool Parser::parseNumber(QString Str, double& val) {
     bool flag = false;
     int sign = +1;
     if (!Str.isEmpty()) {
@@ -455,8 +444,7 @@ bool Parser::parseNumber(QString Str, double& val)
     return flag;
 }
 
-void Parser::circularRout()
-{
+void Parser::circularRout() {
 
     double radius = 0.0;
     parseNumber(m_state.rawPos.A, radius);
@@ -481,8 +469,7 @@ void Parser::circularRout()
     m_state.path.last() = m_state.pos;
 }
 
-QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center)
-{
+QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
     double radius = sqrt(pow((center.x() - p1.x()), 2) + pow((center.y() - p1.y()), 2));
     double start = atan2(p1.y() - center.y(), p1.x() - center.x());
     double stop = atan2(p2.y() - center.y(), p2.x() - center.x());
@@ -511,8 +498,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center)
     return arc(center, radius, start, stop);
 }
 
-double Parser::parseNumber(QString Str, const State& state)
-{
+double Parser::parseNumber(QString Str, const State& state) {
     double val = 0.0;
     int sign = +1;
     if (!Str.isEmpty()) {
@@ -546,4 +532,4 @@ double Parser::parseNumber(QString Str, const State& state)
     }
     return val;
 }
-}
+} // namespace Excellon

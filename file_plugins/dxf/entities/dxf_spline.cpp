@@ -23,8 +23,7 @@
 #include <QtMath>
 
 namespace Dxf {
-QPolygonF interpolate(const QPolygonF& points, int numValues)
-{
+QPolygonF interpolate(const QPolygonF& points, int numValues) {
     QwtSpline spline;
     spline.setSplineType(QwtSpline::Periodic);
     if (!spline.setPoints(points))
@@ -46,8 +45,7 @@ void BSplineCurve(const QPointF& point1,
     const QPointF& point3,
     const QPointF& point4,
     const double t,
-    QPointF& result)
-{
+    QPointF& result) {
     const double t2 = t * t;
     const double t3 = t2 * t;
     const double mt = 1.0 - t;
@@ -85,8 +83,7 @@ void BSplineCurve(const QPointF& point1,
 //    b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
 //    return b;
 //}
-double blend(QVector<double>& uVec, double u, int k, int d)
-{
+double blend(QVector<double>& uVec, double u, int k, int d) {
     if (d == 1) {
         if (uVec[k] <= u && u < uVec[k + 1])
             return 1;
@@ -98,8 +95,7 @@ double blend(QVector<double>& uVec, double u, int k, int d)
     return b;
 }
 
-void drawBSplineCurve(const Spline& poly, QPainterPath& path)
-{
+void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
 
     int n, d;
     d = poly.degreeOfTheSplineCurve; // Enter degree of curve:
@@ -128,12 +124,10 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path)
 }
 
 Spline::Spline(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
-void Spline::parse(CodeData& code)
-{
+void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -223,8 +217,7 @@ Entity::Type Spline::type() const { return Type::SPLINE; }
 
 GraphicObject Spline::toGo() const { return {}; }
 
-void Spline::write(QDataStream& stream) const
-{
+void Spline::write(QDataStream& stream) const {
     stream << FitPoints;
     stream << ControlPoints;
     stream << StartTangent;
@@ -244,8 +237,7 @@ void Spline::write(QDataStream& stream) const
     stream << splineFlag;
 }
 
-void Spline::read(QDataStream& stream)
-{
+void Spline::read(QDataStream& stream) {
     stream >> FitPoints;
     stream >> ControlPoints;
     stream >> StartTangent;
@@ -298,8 +290,7 @@ void Spline::read(QDataStream& stream)
   \param intervalSize interval size
   \return 0: if equal, -1: if value2 > value1, 1: if value1 > value2
 */
-inline int qwtFuzzyCompare(double value1, double value2, double intervalSize)
-{
+inline int qwtFuzzyCompare(double value1, double value2, double intervalSize) {
     const double eps = qAbs(1.0e-6 * intervalSize);
 
     if (value2 - value1 > eps)
@@ -311,19 +302,16 @@ inline int qwtFuzzyCompare(double value1, double value2, double intervalSize)
     return 0;
 }
 
-inline bool qwtFuzzyGreaterOrEqual(double d1, double d2)
-{
+inline bool qwtFuzzyGreaterOrEqual(double d1, double d2) {
     return (d1 >= d2) || qFuzzyCompare(d1, d2);
 }
 
-inline bool qwtFuzzyLessOrEqual(double d1, double d2)
-{
+inline bool qwtFuzzyLessOrEqual(double d1, double d2) {
     return (d1 <= d2) || qFuzzyCompare(d1, d2);
 }
 
 //! Return the sign
-inline int qwtSign(double x)
-{
+inline int qwtSign(double x) {
     if (x > 0.0)
         return 1;
     else if (x < 0.0)
@@ -333,14 +321,12 @@ inline int qwtSign(double x)
 }
 
 //! Return the square of a number
-inline double qwtSqr(double x)
-{
+inline double qwtSqr(double x) {
     return x * x;
 }
 
 //! Approximation of arc tangent ( error below 0,005 radians )
-inline double qwtFastAtan(double x)
-{
+inline double qwtFastAtan(double x) {
     if (x < -1.0)
         return -M_PI_2 - x / (x * x + 0.28);
 
@@ -351,8 +337,7 @@ inline double qwtFastAtan(double x)
 }
 
 //! Approximation of arc tangent ( error below 0,005 radians )
-inline double qwtFastAtan2(double y, double x)
-{
+inline double qwtFastAtan2(double y, double x) {
     if (x > 0)
         return qwtFastAtan(y / x);
 
@@ -371,19 +356,16 @@ inline double qwtFastAtan2(double y, double x)
 }
 
 //! Translate degrees into radians
-inline double qwtRadians(double degrees)
-{
+inline double qwtRadians(double degrees) {
     return degrees * pi / 180.0;
 }
 
 //! Translate radians into degrees
-inline double qwtDegrees(double degrees)
-{
+inline double qwtDegrees(double degrees) {
     return degrees * 180.0 / pi;
 }
 
-inline double qwtGetMin(const double* array, int size)
-{
+inline double qwtGetMin(const double* array, int size) {
     if (size <= 0)
         return 0.0;
 
@@ -399,8 +381,7 @@ inline double qwtGetMin(const double* array, int size)
   \param array Pointer to an array
   \param size Array size
 */
-inline double qwtGetMax(const double* array, int size)
-{
+inline double qwtGetMax(const double* array, int size) {
     if (size <= 0)
         return 0.0;
 
@@ -416,8 +397,7 @@ inline double qwtGetMax(const double* array, int size)
   \param radians Angle in radians
   \return Normalized angle in radians
 */
-inline double qwtNormalizeRadians(double radians)
-{
+inline double qwtNormalizeRadians(double radians) {
     double a = ::fmod(radians, 2.0 * pi);
     if (a < 0.0)
         a += 2.0 * pi;
@@ -430,8 +410,7 @@ inline double qwtNormalizeRadians(double radians)
   \param radians Angle in degrees
   \return Normalized angle in degrees
 */
-inline double qwtNormalizeDegrees(double degrees)
-{
+inline double qwtNormalizeDegrees(double degrees) {
     double a = ::fmod(degrees, 360.0);
     if (a < 0.0)
         a += 360.0;
@@ -443,8 +422,7 @@ inline double qwtNormalizeDegrees(double degrees)
 class QwtSpline::PrivateData {
 public:
     PrivateData()
-        : splineType(QwtSpline::Natural)
-    {
+        : splineType(QwtSpline::Natural) {
     }
 
     QwtSpline::SplineType splineType;
@@ -458,8 +436,7 @@ public:
     QPolygonF points;
 };
 
-static int lookup(double x, const QPolygonF& values)
-{
+static int lookup(double x, const QPolygonF& values) {
 #if 0
     //qLowerBound/qHigherBound ???
 #endif
@@ -488,8 +465,7 @@ static int lookup(double x, const QPolygonF& values)
 }
 
 //! Constructor
-QwtSpline::QwtSpline()
-{
+QwtSpline::QwtSpline() {
     d_data = new PrivateData;
 }
 
@@ -497,8 +473,7 @@ QwtSpline::QwtSpline()
    Copy constructor
    \param other Spline used for initialization
 */
-QwtSpline::QwtSpline(const QwtSpline& other)
-{
+QwtSpline::QwtSpline(const QwtSpline& other) {
     d_data = new PrivateData(*other.d_data);
 }
 
@@ -507,15 +482,13 @@ QwtSpline::QwtSpline(const QwtSpline& other)
    \param other Spline used for initialization
    \return *this
 */
-QwtSpline& QwtSpline::operator=(const QwtSpline& other)
-{
+QwtSpline& QwtSpline::operator=(const QwtSpline& other) {
     *d_data = *other.d_data;
     return *this;
 }
 
 //! Destructor
-QwtSpline::~QwtSpline()
-{
+QwtSpline::~QwtSpline() {
     delete d_data;
 }
 
@@ -524,8 +497,7 @@ QwtSpline::~QwtSpline()
    \param splineType Spline type
    \sa splineType()
 */
-void QwtSpline::setSplineType(SplineType splineType)
-{
+void QwtSpline::setSplineType(SplineType splineType) {
     d_data->splineType = splineType;
 }
 
@@ -533,8 +505,7 @@ void QwtSpline::setSplineType(SplineType splineType)
    \return the spline type
    \sa setSplineType()
 */
-QwtSpline::SplineType QwtSpline::splineType() const
-{
+QwtSpline::SplineType QwtSpline::splineType() const {
     return d_data->splineType;
 }
 
@@ -549,8 +520,7 @@ QwtSpline::SplineType QwtSpline::splineType() const
            increasing, which means <code>points[i].x() < points[i+1].x()</code>.
        If this is not the case, the function will return false
 */
-bool QwtSpline::setPoints(const QPolygonF& points)
-{
+bool QwtSpline::setPoints(const QPolygonF& points) {
     const int size = points.size();
     if (size <= 2) {
         reset();
@@ -578,32 +548,27 @@ bool QwtSpline::setPoints(const QPolygonF& points)
 /*!
    \return Points, that have been by setPoints()
 */
-QPolygonF QwtSpline::points() const
-{
+QPolygonF QwtSpline::points() const {
     return d_data->points;
 }
 
 //! \return A coefficients
-const QVector<double>& QwtSpline::coefficientsA() const
-{
+const QVector<double>& QwtSpline::coefficientsA() const {
     return d_data->a;
 }
 
 //! \return B coefficients
-const QVector<double>& QwtSpline::coefficientsB() const
-{
+const QVector<double>& QwtSpline::coefficientsB() const {
     return d_data->b;
 }
 
 //! \return C coefficients
-const QVector<double>& QwtSpline::coefficientsC() const
-{
+const QVector<double>& QwtSpline::coefficientsC() const {
     return d_data->c;
 }
 
 //! Free allocated memory and set size to 0
-void QwtSpline::reset()
-{
+void QwtSpline::reset() {
     d_data->a.resize(0);
     d_data->b.resize(0);
     d_data->c.resize(0);
@@ -611,8 +576,7 @@ void QwtSpline::reset()
 }
 
 //! True if valid
-bool QwtSpline::isValid() const
-{
+bool QwtSpline::isValid() const {
     return d_data->a.size() > 0;
 }
 
@@ -622,8 +586,7 @@ bool QwtSpline::isValid() const
   \param x Coordinate
   \return Interpolated coordinate
 */
-double QwtSpline::value(double x) const
-{
+double QwtSpline::value(double x) const {
     if (d_data->a.size() == 0)
         return 0.0;
 
@@ -641,8 +604,7 @@ double QwtSpline::value(double x) const
   \brief Determines the coefficients for a natural spline
   \return true if successful
 */
-bool QwtSpline::buildNaturalSpline(const QPolygonF& points)
-{
+bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     int i;
 
     const QPointF* p = points.data();
@@ -711,8 +673,7 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points)
   \brief Determines the coefficients for a periodic spline
   \return true if successful
 */
-bool QwtSpline::buildPeriodicSpline(const QPolygonF& points)
-{
+bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     int i;
 
     const QPointF* p = points.data();
@@ -796,4 +757,4 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points)
 
     return true;
 }
-}
+} // namespace Dxf

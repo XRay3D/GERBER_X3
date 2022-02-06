@@ -161,13 +161,11 @@ struct Format {
     int yInteger = IntegerDefVal;
     int yDecimal = DecimalDefVal;
 
-    friend QDataStream& operator<<(QDataStream& stream, const Format& format)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
         stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Format));
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Format& format)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Format& format) {
         stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Format));
         return stream;
     }
@@ -175,8 +173,7 @@ struct Format {
 
 class State {
     friend class File;
-    friend QDataStream& operator<<(QDataStream& stream, const State& state)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const State& state) {
         stream << state.m_dCode;
         stream << state.m_gCode;
         stream << state.m_imgPolarity;
@@ -193,8 +190,7 @@ class State {
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, State& state)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, State& state) {
         stream >> state.m_dCode;
         stream >> state.m_gCode;
         stream >> state.m_imgPolarity;
@@ -241,8 +237,7 @@ public:
         , m_curPos(IntPoint())
         , m_mirroring(NoMirroring)
         , m_scaling(1.0)
-        , m_rotating(0.0)
-    {
+        , m_rotating(0.0) {
     }
 
     inline Format* format() const { return m_format; }
@@ -288,15 +283,13 @@ public:
 class GraphicObject final : public AbstrGraphicObject {
     friend class File;
     friend class Plugin;
-    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
         stream << go.m_path;
         stream << go.m_paths;
         stream << go.m_state;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
         stream >> go.m_path;
         stream >> go.m_paths;
         stream >> go.m_state;
@@ -310,8 +303,7 @@ class GraphicObject final : public AbstrGraphicObject {
 
 public:
     GraphicObject()
-        : m_gFile(nullptr)
-    {
+        : m_gFile(nullptr) {
     }
     GraphicObject(
         int /*id*/,
@@ -322,8 +314,7 @@ public:
         : m_gFile(gFile)
         , m_path(path)
         , m_paths(paths)
-        , m_state(state)
-    {
+        , m_state(state) {
     }
     inline File* gFile() const { return m_gFile; }
     inline State state() const { return m_state; }
@@ -340,7 +331,7 @@ public:
     Path polyLine() const override { return closed() ? Path() : m_path; }
     Paths polyLineW() const override { return closed() ? Paths() : m_paths; } // closed
 
-    Path elipse() const override; // { return m_gFile.; } // circle
+    Path elipse() const override;   // { return m_gFile.; } // circle
     Paths elipseW() const override; // { return {}; }
 
     Path arc() const override { return {}; } // part of elipse
@@ -350,7 +341,7 @@ public:
     Paths polygonWholes() const override { return m_paths; }
 
     Path hole() const override { return !positive() ? m_path : Path(); }
-    Paths holes() const override { return !positive() ? Paths({ m_paths.front() }) : m_paths.mid(1); }
+    Paths holes() const override { return !positive() ? Paths { m_paths.front() } : m_paths.mid(1); }
 
     bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; } // not hole
     bool closed() const override { return m_path.size()
@@ -359,8 +350,7 @@ public:
 };
 
 struct StepRepeatStr {
-    void reset()
-    {
+    void reset() {
         x = 0;
         y = 0;
         i = 0.0;

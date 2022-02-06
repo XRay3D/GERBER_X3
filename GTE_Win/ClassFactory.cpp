@@ -19,8 +19,7 @@
 long g_cDllRef = 0;
 
 ClassFactory::ClassFactory()
-    : m_cRef(1)
-{
+    : m_cRef(1) {
     InterlockedIncrement(&g_cDllRef);
 }
 
@@ -29,8 +28,7 @@ ClassFactory::~ClassFactory() { InterlockedDecrement(&g_cDllRef); }
 //
 // IUnknown
 //
-IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void** ppv)
-{
+IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void** ppv) {
     static const QITAB qit[] = {
         QITABENT(ClassFactory, IClassFactory),
         { nullptr, 0 }
@@ -39,14 +37,12 @@ IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void** ppv)
 }
 
 IFACEMETHODIMP_(ULONG)
-ClassFactory::AddRef()
-{
+ClassFactory::AddRef() {
     return InterlockedIncrement(&m_cRef);
 }
 
 IFACEMETHODIMP_(ULONG)
-ClassFactory::Release()
-{
+ClassFactory::Release() {
     ULONG cRef = InterlockedDecrement(&m_cRef);
     if (0 == cRef) {
         delete this;
@@ -58,8 +54,7 @@ ClassFactory::Release()
 // IClassFactory
 //
 
-IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, void** ppv)
-{
+IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, void** ppv) {
     HRESULT hr = CLASS_E_NOAGGREGATION;
 
     // pUnkOuter is used for aggregation. We do not support it in the sample.
@@ -78,8 +73,7 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, vo
     return hr;
 }
 
-IFACEMETHODIMP ClassFactory::LockServer(BOOL fLock)
-{
+IFACEMETHODIMP ClassFactory::LockServer(BOOL fLock) {
     if (fLock) {
         InterlockedIncrement(&g_cDllRef);
     } else {

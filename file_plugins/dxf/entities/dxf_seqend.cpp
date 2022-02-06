@@ -2,12 +2,10 @@
 
 namespace Dxf {
 SeqEnd::SeqEnd(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
-void SeqEnd::parse(CodeData& code)
-{
+void SeqEnd::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (code.code()) {
@@ -18,8 +16,7 @@ void SeqEnd::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject SeqEnd::toGo() const
-{
+GraphicObject SeqEnd::toGo() const {
     return {};
 }
-}
+} // namespace Dxf

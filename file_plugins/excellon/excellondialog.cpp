@@ -29,8 +29,7 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     : ui(new Ui::ExcellonDialog)
     , m_file(file)
     , m_format(file->format())
-    , m_tmpFormat(file->format())
-{
+    , m_tmpFormat(file->format()) {
     m_showed = true;
 
     ui->setupUi(this);
@@ -68,15 +67,13 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     on_pbStep_clicked();
 }
 
-ExcellonDialog::~ExcellonDialog()
-{
+ExcellonDialog::~ExcellonDialog() {
     m_showed = false;
     resetFormat();
     delete ui;
 }
 
-void ExcellonDialog::on_pbStep_clicked()
-{
+void ExcellonDialog::on_pbStep_clicked() {
     if (++m_step == 4)
         m_step = -1;
     const double singleStep = pow(0.1, m_step);
@@ -85,8 +82,7 @@ void ExcellonDialog::on_pbStep_clicked()
     ui->dsbxY->setSingleStep(singleStep);
 }
 
-void ExcellonDialog::on_pushButton_clicked()
-{
+void ExcellonDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
     for (QGraphicsItem* item : App::scene()->selectedItems()) {
@@ -110,8 +106,7 @@ void ExcellonDialog::on_pushButton_clicked()
     }
 }
 
-void ExcellonDialog::updateFormat()
-{
+void ExcellonDialog::updateFormat() {
 
     m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
     m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
@@ -126,16 +121,14 @@ void ExcellonDialog::updateFormat()
     App::graphicsView()->zoomFit();
 }
 
-void ExcellonDialog::acceptFormat()
-{
+void ExcellonDialog::acceptFormat() {
     accepted = true;
     App::graphicsView()->zoomFit();
 }
 
 void ExcellonDialog::rejectFormat() { deleteLater(); }
 
-void ExcellonDialog::resetFormat()
-{
+void ExcellonDialog::resetFormat() {
     if (accepted)
         return;
     m_file->setFormat(m_format);
@@ -146,8 +139,7 @@ void ExcellonDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
 
 void ExcellonDialog::hideEvent(QHideEvent* event) { deleteLater(); }
 
-void ExcellonDialog::on_pbSetAsDefault_clicked()
-{
+void ExcellonDialog::on_pbSetAsDefault_clicked() {
     QSettings settings;
     settings.beginGroup("Excellon");
 

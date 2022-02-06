@@ -45,4 +45,4 @@ protected:
     GCodeType type() override;
 };
 
-}
+} // namespace GCode

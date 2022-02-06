@@ -15,12 +15,10 @@
 namespace Dxf {
 
 DimStyle::DimStyle(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void DimStyle::parse(CodeData& code)
-{
+void DimStyle::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void DimStyle::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

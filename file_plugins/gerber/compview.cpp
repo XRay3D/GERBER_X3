@@ -25,18 +25,15 @@
 namespace Gerber {
 
 ComponentsView::ComponentsView(QWidget* parent)
-    : QTreeView(parent)
-{
+    : QTreeView(parent) {
 }
 
-ComponentsView::~ComponentsView()
-{
+ComponentsView::~ComponentsView() {
     if (item)
         item->setSelected(false);
 }
 
-void ComponentsView::setFile(int fileId)
-{
+void ComponentsView::setFile(int fileId) {
     setModel(new ComponentsModel(fileId, this));
     expandAll();
 
@@ -64,10 +61,9 @@ void ComponentsView::setFile(int fileId)
     });
 }
 
-void ComponentsView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
-{
+void ComponentsView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     //qDebug() << selected.value(0) << deselected.value(0);
     QTreeView::selectionChanged(selected, deselected);
 }
 
-}
+} // namespace Gerber

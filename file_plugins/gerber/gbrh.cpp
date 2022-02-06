@@ -18,12 +18,10 @@
 namespace Gerber {
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
-    : QSyntaxHighlighter(parent)
-{
+    : QSyntaxHighlighter(parent) {
 }
 
-void SyntaxHighlighter::highlightBlock(const QString& text)
-{
+void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     static QTextCharFormat myClassFormat;
     //myClassFormat.setFontWeight(QFont::Bold);
@@ -57,4 +55,4 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
         setFormat(start, count, myClassFormat);
     }
 }
-}
+} // namespace Gerber

@@ -30,14 +30,12 @@
 
 const int isadfsdfg = qRegisterMetaType<FileInterface*>("FileInterface*");
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<FileInterface>& file)
-{
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<FileInterface>& file) {
     stream << *file;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file)
-{
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file) {
     int type;
     stream >> type;
     if (App::filePlugins().contains(type)) {
@@ -49,14 +47,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<ShapeInterface>& shape)
-{
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<ShapeInterface>& shape) {
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& shape)
-{
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& shape) {
     int type;
     stream >> type;
     if (App::shapePlugins().contains(type)) {
@@ -69,8 +65,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& sh
 
 Project::Project(QObject* parent)
     : QObject(parent)
-    , watcher(new QFileSystemWatcher(this))
-{
+    , watcher(new QFileSystemWatcher(this)) {
     connect(watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
         const int id = m_files[contains(path)]->id();
         if (id > -1
@@ -89,13 +84,11 @@ Project::Project(QObject* parent)
     App::setProject(this);
 }
 
-Project::~Project()
-{
+Project::~Project() {
     App::setProject(nullptr);
 }
 
-bool Project::save(const QString& fileName)
-{
+bool Project::save(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly)) {
         qDebug() << file.errorString();
@@ -138,8 +131,7 @@ bool Project::save(const QString& fileName)
     return false;
 }
 
-bool Project::open(const QString& fileName)
-{
+bool Project::open(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
@@ -202,8 +194,7 @@ bool Project::open(const QString& fileName)
     return false;
 }
 
-void Project::close()
-{
+void Project::close() {
     setWorckRect({});
     setStepsX(1);
     setStepsY(1);
@@ -216,8 +207,7 @@ void Project::close()
     emit changed();
 }
 
-void Project::deleteFile(int id)
-{
+void Project::deleteFile(int id) {
     QMutexLocker locker(&m_mutex);
     if (m_files.contains(id)) {
         watcher->removePath(m_files[id]->name());
@@ -227,8 +217,7 @@ void Project::deleteFile(int id)
         qWarning() << "Error id" << id << "File not found";
 }
 
-void Project::deleteShape(int id)
-{
+void Project::deleteShape(int id) {
     QMutexLocker locker(&m_mutex);
     try {
         if (m_shapes.contains(id)) {
@@ -247,8 +236,7 @@ bool Project::isModified() { return m_isModified; }
 
 void Project::setModified(bool fl) { m_isModified = fl; }
 
-QRectF Project::getBoundingRect()
-{
+QRectF Project::getBoundingRect() {
     QMutexLocker locker(&m_mutex);
     IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
     IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
@@ -269,8 +257,7 @@ QRectF Project::getBoundingRect()
     return QRectF(topLeft, botRight);
 }
 
-QString Project::fileNames()
-{
+QString Project::fileNames() {
     QMutexLocker locker(&m_mutex);
     QString fileNames;
     for (const auto& [id, sp] : m_files) {
@@ -281,8 +268,7 @@ QString Project::fileNames()
     return fileNames;
 }
 
-int Project::contains(const QString& name)
-{
+int Project::contains(const QString& name) {
     //QMutexLocker locker(&m_mutex);
     if (m_reloadFile)
         return -1;
@@ -295,8 +281,7 @@ int Project::contains(const QString& name)
     return -1;
 }
 
-bool Project::reload(int id, FileInterface* file)
-{
+bool Project::reload(int id, FileInterface* file) {
     if (m_files.contains(id)) {
         file->initFrom(m_files[id].get());
         m_files[id].reset(file);
@@ -307,8 +292,7 @@ bool Project::reload(int id, FileInterface* file)
     return false;
 }
 
-mvector<FileInterface*> Project::files(FileType type)
-{
+mvector<FileInterface*> Project::files(FileType type) {
     QMutexLocker locker(&m_mutex);
     mvector<FileInterface*> rfiles;
     rfiles.reserve(m_files.size());
@@ -320,8 +304,7 @@ mvector<FileInterface*> Project::files(FileType type)
     return rfiles;
 }
 
-mvector<FileInterface*> Project::files(const mvector<FileType> types)
-{
+mvector<FileInterface*> Project::files(const mvector<FileType> types) {
     QMutexLocker locker(&m_mutex);
     mvector<FileInterface*> rfiles;
     rfiles.reserve(m_files.size());
@@ -335,14 +318,12 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types)
     return rfiles;
 }
 
-ShapeInterface* Project::shape(int id)
-{
+ShapeInterface* Project::shape(int id) {
     QMutexLocker locker(&m_mutex);
     return m_shapes[id].get();
 }
 
-int Project::addFile(FileInterface* file)
-{
+int Project::addFile(FileInterface* file) {
     QMutexLocker locker(&m_mutex);
     if (!file)
         return -1;
@@ -367,8 +348,7 @@ int Project::addFile(FileInterface* file)
     return file->id();
 }
 
-int Project::addShape(ShapeInterface* const shape)
-{
+int Project::addShape(ShapeInterface* const shape) {
     QMutexLocker locker(&m_mutex);
     if (!shape)
         return -1;
@@ -385,8 +365,7 @@ int Project::addShape(ShapeInterface* const shape)
     return newId;
 }
 
-bool Project::contains(FileInterface* file)
-{
+bool Project::contains(FileInterface* file) {
     for (const auto& [id, sp] : m_files)
         if (sp.get() == file)
             return true;
@@ -395,8 +374,7 @@ bool Project::contains(FileInterface* file)
 
 QString Project::name() { return m_name; }
 
-void Project::setName(const QString& name)
-{
+void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
     if (m_isUntitled)
         m_name = QObject::tr("Untitled.g2g");
@@ -404,14 +382,12 @@ void Project::setName(const QString& name)
         m_name = name;
 }
 
-void Project::setChanged()
-{
+void Project::setChanged() {
     m_isModified = true;
     changed();
 }
 
-bool Project::pinsPlacedMessage()
-{
+bool Project::pinsPlacedMessage() {
 
     if (m_isPinsPlaced == false) {
         QMessageBox msgbx(QMessageBox::Information,
@@ -438,48 +414,42 @@ bool Project::isUntitled() { return m_isUntitled; }
 
 bool Project::isPinsPlaced() const { return m_isPinsPlaced; }
 
-void Project::setUntitled(bool value)
-{
+void Project::setUntitled(bool value) {
     m_isUntitled = value;
     emit layoutFrameUpdate();
     setChanged();
 }
 
 double Project::spaceX() const { return m_spacingX; }
-void Project::setSpaceX(double value)
-{
+void Project::setSpaceX(double value) {
     m_spacingX = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
 double Project::spaceY() const { return m_spacingY; }
-void Project::setSpaceY(double value)
-{
+void Project::setSpaceY(double value) {
     m_spacingY = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
 uint Project::stepsX() const { return m_stepsX; }
-void Project::setStepsX(uint value)
-{
+void Project::setStepsX(uint value) {
     m_stepsX = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
 uint Project::stepsY() const { return m_stepsY; }
-void Project::setStepsY(uint value)
-{
+void Project::setStepsY(uint value) {
     m_stepsY = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
 QRectF Project::worckRect() const { return m_worckRect; }
-void Project::setWorckRect(const QRectF& worckRect)
-{
+void Project::setWorckRect(const QRectF& worckRect) {
     m_worckRect = worckRect;
     m_isPinsPlaced = true;
     emit layoutFrameUpdate();
@@ -487,22 +457,19 @@ void Project::setWorckRect(const QRectF& worckRect)
 }
 
 QPointF Project::homePos() const { return m_home; }
-void Project::setHomePos(const QPointF& pos)
-{
+void Project::setHomePos(const QPointF& pos) {
     m_home = pos;
     setChanged();
 }
 
 QPointF Project::zeroPos() const { return m_zero; }
-void Project::setZeroPos(const QPointF& pos)
-{
+void Project::setZeroPos(const QPointF& pos) {
     m_zero = pos;
     setChanged();
 }
 
 const QPointF* Project::pinsPos() const { return m_pins; }
-void Project::setPinsPos(const QPointF pos[4])
-{
+void Project::setPinsPos(const QPointF pos[4]) {
     m_pins[0] = pos[0];
     m_pins[1] = pos[1];
     m_pins[2] = pos[2];
@@ -511,8 +478,7 @@ void Project::setPinsPos(const QPointF pos[4])
 }
 
 bool Project::pinUsed(int idx) const { return m_pinsUsed[idx]; }
-void Project::setPinUsed(bool used, int idx)
-{
+void Project::setPinUsed(bool used, int idx) {
     m_pinsUsed[idx] = used;
     setChanged();
 }
@@ -520,43 +486,37 @@ void Project::setPinUsed(bool used, int idx)
 int Project::ver() const { return m_ver; }
 
 double Project::safeZ() const { return m_safeZ; }
-void Project::setSafeZ(double safeZ)
-{
+void Project::setSafeZ(double safeZ) {
     m_safeZ = safeZ;
     setChanged();
 }
 
 double Project::boardThickness() const { return m_boardThickness; }
-void Project::setBoardThickness(double boardThickness)
-{
+void Project::setBoardThickness(double boardThickness) {
     m_boardThickness = boardThickness;
     setChanged();
 }
 
 double Project::copperThickness() const { return m_copperThickness; }
-void Project::setCopperThickness(double copperThickness)
-{
+void Project::setCopperThickness(double copperThickness) {
     m_copperThickness = copperThickness;
     setChanged();
 }
 
 double Project::clearence() const { return m_clearence; }
-void Project::setClearence(double clearence)
-{
+void Project::setClearence(double clearence) {
     m_clearence = clearence;
     setChanged();
 }
 
 double Project::plunge() const { return m_plunge; }
-void Project::setPlunge(double plunge)
-{
+void Project::setPlunge(double plunge) {
     m_plunge = plunge;
     setChanged();
 }
 
 double Project::glue() const { return m_glue; }
-void Project::setGlue(double glue)
-{
+void Project::setGlue(double glue) {
     m_glue = glue;
     setChanged();
 }

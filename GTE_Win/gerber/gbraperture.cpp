@@ -18,19 +18,16 @@
 namespace Gerber {
 
 AbstractAperture::AbstractAperture(const Format* format)
-    : m_format(format)
-{
+    : m_format(format) {
 }
 
 AbstractAperture::~AbstractAperture() { }
 
-double AbstractAperture::drillDiameter() const
-{
+double AbstractAperture::drillDiameter() const {
     return m_drillDiam;
 }
 
-Paths AbstractAperture::draw(const State& state, bool fl)
-{
+Paths AbstractAperture::draw(const State& state, bool fl) {
     if (state.dCode() == D03 && state.imgPolarity() == Positive && fl)
         m_isFlashed = true;
     if (m_paths.isEmpty())
@@ -73,20 +70,17 @@ Paths AbstractAperture::draw(const State& state, bool fl)
     return tmpPpaths;
 }
 
-double AbstractAperture::minSize() const
-{
+double AbstractAperture::minSize() const {
     return m_size;
 }
 
-double AbstractAperture::apertureSize()
-{
+double AbstractAperture::apertureSize() {
     if (m_paths.isEmpty())
         draw();
     return m_size;
 }
 
-Path AbstractAperture::drawDrill(const State& state)
-{
+Path AbstractAperture::drawDrill(const State& state) {
     if (qFuzzyIsNull(m_drillDiam))
         return Path();
 
@@ -99,8 +93,7 @@ Path AbstractAperture::drawDrill(const State& state)
     return drill;
 }
 
-void AbstractAperture::transform(Path& poligon, const State& state)
-{
+void AbstractAperture::transform(Path& poligon, const State& state) {
     bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
 
@@ -126,8 +119,7 @@ void AbstractAperture::transform(Path& poligon, const State& state)
 /// \param format
 ///
 ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
     m_diam = diam;
     m_drillDiam = drillDiam;
     // GerberAperture interface
@@ -139,8 +131,7 @@ ApertureType ApCircle::type() const { return Circle; }
 
 bool ApCircle::fit(double toolDiam) const { return m_diam > toolDiam; }
 
-void ApCircle::draw()
-{
+void ApCircle::draw() {
     m_paths.push_back(CirclePath(m_diam * uScale));
     m_size = m_diam;
 }
@@ -152,8 +143,7 @@ void ApCircle::draw()
 /// \param format
 ///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
     m_width = width;
     m_height = height;
     m_drillDiam = drillDiam;
@@ -171,8 +161,7 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 
 bool ApRectangle::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
 
-void ApRectangle::draw()
-{
+void ApRectangle::draw() {
     m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
     m_size = qSqrt(m_width * m_width + m_height * m_height);
 }
@@ -184,8 +173,7 @@ void ApRectangle::draw()
 /// \param format
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
 
     m_width = width;
     m_height = height;
@@ -198,8 +186,7 @@ ApertureType ApObround::type() const { return Obround; }
 
 bool ApObround::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
 
-void ApObround::draw()
-{
+void ApObround::draw() {
     Clipper clipper;
     const cInt h = static_cast<cInt>(m_height * uScale);
     const cInt w = static_cast<cInt>(m_width * uScale);
@@ -228,8 +215,7 @@ void ApObround::draw()
 /// \param format
 ///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
     m_diam = diam;
     m_verticesCount = nVertices;
     m_rotation = rotation;
@@ -246,8 +232,7 @@ ApertureType ApPolygon::type() const { return Polygon; }
 
 bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(pi / m_verticesCount) > toolDiam; }
 
-void ApPolygon::draw()
-{
+void ApPolygon::draw() {
     Path poligon;
     const double step = 360.0 / m_verticesCount;
     const double diam = this->m_diam * uScale;
@@ -270,8 +255,7 @@ void ApPolygon::draw()
 /// \param format
 ///
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
     m_macro = macro;
     m_modifiers = modifiers;
     while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
@@ -286,12 +270,11 @@ ApertureType ApMacro::type() const { return Macro; }
 
 bool ApMacro::fit(double) const { return true; }
 
-void ApMacro::draw()
-{
+void ApMacro::draw() {
     enum {
         Comment = 0,
         Circle = 1,
-        OutlineCustomPolygon = 4, // MAXIMUM 5000 POINTS
+        OutlineCustomPolygon = 4,  // MAXIMUM 5000 POINTS
         OutlineRegularPolygon = 5, // 3-12 POINTS
         Moire = 6,
         Thermal = 7,
@@ -410,8 +393,7 @@ void ApMacro::draw()
     m_size = qSqrt(x * x + y * y);
 }
 
-Path ApMacro::drawCenterLine(const QList<double>& mod)
-{
+Path ApMacro::drawCenterLine(const QList<double>& mod) {
     enum {
         Width = 2,
         Height,
@@ -432,8 +414,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
     return polygon;
 }
 
-Path ApMacro::drawCircle(const QList<double>& mod)
-{
+Path ApMacro::drawCircle(const QList<double>& mod) {
     enum {
         Diameter = 2,
         CenterX,
@@ -453,8 +434,7 @@ Path ApMacro::drawCircle(const QList<double>& mod)
     return polygon;
 }
 
-void ApMacro::drawMoire(const QList<double>& mod)
-{
+void ApMacro::drawMoire(const QList<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -505,8 +485,7 @@ void ApMacro::drawMoire(const QList<double>& mod)
     }
 }
 
-Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
-{
+Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod) {
     enum {
         NumberOfVertices = 2,
         X,
@@ -527,8 +506,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
     return polygon;
 }
 
-Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
-{
+Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod) {
     enum {
         NumberOfVertices = 2,
         CenterX,
@@ -560,8 +538,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
     return polygon;
 }
 
-void ApMacro::drawThermal(const QList<double>& mod)
-{
+void ApMacro::drawThermal(const QList<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -600,8 +577,7 @@ void ApMacro::drawThermal(const QList<double>& mod)
     }
 }
 
-Path ApMacro::drawVectorLine(const QList<double>& mod)
-{
+Path ApMacro::drawVectorLine(const QList<double>& mod) {
     enum {
         Width = 2,
         StartX,
@@ -639,8 +615,7 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
 /// \param format
 ///
 ApBlock::ApBlock(const Format* format)
-    : AbstractAperture(format)
-{
+    : AbstractAperture(format) {
 }
 
 QString ApBlock::name() const { return QString("BLOCK"); }
@@ -649,8 +624,7 @@ ApertureType ApBlock::type() const { return Block; }
 
 bool ApBlock::fit(double) const { return true; }
 
-void ApBlock::draw()
-{
+void ApBlock::draw() {
     m_paths.clear();
     int i = 0;
     while (i < size()) {

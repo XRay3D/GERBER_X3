@@ -28,8 +28,7 @@ struct Row {
         , name(name)
         , diameter(diameter)
         , apertureId(id)
-        , toolId(-1)
-    {
+        , toolId(-1) {
     }
     const QIcon icon;
     const QString name;

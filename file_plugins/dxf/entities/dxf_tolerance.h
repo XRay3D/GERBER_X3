@@ -14,4 +14,4 @@ namespace Dxf {
 struct Tolerance final : Entity {
     Tolerance(SectionParser* sp);
 };
-}
+} // namespace Dxf

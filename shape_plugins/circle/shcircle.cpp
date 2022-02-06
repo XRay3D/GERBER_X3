@@ -20,8 +20,7 @@
 namespace Shapes {
 
 Circle::Circle(QPointF center, QPointF pt)
-    : m_radius(QLineF(center, pt).length())
-{
+    : m_radius(QLineF(center, pt).length()) {
     m_paths.resize(1);
 
     handlers.reserve(PtCount);
@@ -39,8 +38,7 @@ Circle::Circle(QPointF center, QPointF pt)
 
 Circle::~Circle() { }
 
-void Circle::redraw()
-{
+void Circle::redraw() {
     m_radius = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = App::settings().clpCircleSegments(m_radius);
     const cInt radius = static_cast<cInt>(m_radius * uScale);
@@ -66,8 +64,7 @@ QString Circle::name() const { return QObject::tr("Circle"); }
 
 QIcon Circle::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
-void Circle::setPt(const QPointF& pt)
-{
+void Circle::setPt(const QPointF& pt) {
     if (handlers[Point1]->pos() == pt)
         return;
     handlers[Point1]->setPos(pt);
@@ -76,8 +73,7 @@ void Circle::setPt(const QPointF& pt)
 
 double Circle::radius() const { return m_radius; }
 
-void Circle::setRadius(double radius)
-{
+void Circle::setRadius(double radius) {
     if (!qFuzzyCompare(m_radius, radius))
         return;
     m_radius = radius;
@@ -95,8 +91,7 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShCircle); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Circle" },
         { "Version", "1.0" },
@@ -109,28 +104,24 @@ QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 Shape* Plugin::createShape() { return new Circle(); }
 
-Shape* Plugin::createShape(const QPointF& point)
-{
+Shape* Plugin::createShape(const QPointF& point) {
     return shape = new Circle(point, point);
 }
 
-bool Plugin::addShapePoint(const QPointF&)
-{
+bool Plugin::addShapePoint(const QPointF&) {
     return false;
 }
 
-void Plugin::updateShape(const QPointF& point)
-{
+void Plugin::updateShape(const QPointF& point) {
     if (shape)
         shape->setPt(point);
 }
 
-void Plugin::finalizeShape()
-{
+void Plugin::finalizeShape() {
     if (shape)
         shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }
 
-}
+} // namespace Shapes

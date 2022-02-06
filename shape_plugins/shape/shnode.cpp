@@ -24,12 +24,10 @@ namespace Shapes {
 
 Node::Node(Shape* shape, int* id)
     : FileTree::Node(id, FileTree::Shape)
-    , shape(shape)
-{
+    , shape(shape) {
 }
 
-bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     return shape->setData(index, value, role);
     //    switch (FileTree::Column(index.column())) {
     //    case FileTree::Column::NameColorVisible:
@@ -53,8 +51,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     //        return false;
     //    }
 }
-QVariant Node::data(const QModelIndex& index, int role) const
-{
+QVariant Node::data(const QModelIndex& index, int role) const {
     return shape->data(index, role);
     //    switch (FileTree::Column(index.column())) {
     //    case FileTree::Column::NameColorVisible:
@@ -101,8 +98,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     //    }
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     return shape->flags(index);
     //    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     //    switch (FileTree::Column(index.column())) {
@@ -121,8 +117,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     //    }
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Node::menu(QMenu& menu, FileTree::View* tv) const {
     shape->menu(menu, tv);
     //    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
     //        App::fileModel()->removeRow(row(), index().parent());
@@ -135,4 +130,4 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     //    }
 }
 
-}
+} // namespace Shapes

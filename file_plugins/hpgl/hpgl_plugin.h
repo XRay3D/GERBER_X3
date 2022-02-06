@@ -52,4 +52,4 @@ private:
     File* file = nullptr;
 };
 
-}
+} // namespace Hpgl

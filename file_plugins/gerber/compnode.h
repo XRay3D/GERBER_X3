@@ -52,4 +52,4 @@ protected:
     QList<QSharedPointer<ComponentsNode>> childItems;
 };
 
-}
+} // namespace Gerber

@@ -19,20 +19,18 @@ namespace GCode {
 
 ThermalCreator::ThermalCreator() { }
 
-void ThermalCreator::create()
-{
+void ThermalCreator::create() {
     createThermal(
         App::project()->file(m_gcp.params[GCodeParams::FileId].toInt()),
         m_gcp.tools.front(),
         m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
-void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth)
-{
+void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth) {
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
-    { // create tool path
+    {     // create tool path
         { // execute offset
             ClipperOffset offset;
             offset.AddPaths(m_workingPs, jtRound, etClosedPolygon);
@@ -107,4 +105,4 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         emit fileReady(m_file);
     }
 }
-}
+} // namespace GCode

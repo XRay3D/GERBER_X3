@@ -17,32 +17,27 @@
 
 namespace Gerber::Attr {
 
-File::StdAttr File::toStdAttr(const QString& key)
-{
+File::StdAttr File::toStdAttr(const QString& key) {
     return static_cast<StdAttr>(
         staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
-File::ePart File::toPart(const QString& key)
-{
+File::ePart File::toPart(const QString& key) {
     return static_cast<ePart>(
         staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
 }
 
-File::eFilePolarity File::toFilePolarityValue(const QString& key)
-{
+File::eFilePolarity File::toFilePolarityValue(const QString& key) {
     return static_cast<eFilePolarity>(
         staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data()));
 }
 
-File::Function File::toFunction(const QString& key)
-{
+File::Function File::toFunction(const QString& key) {
     return static_cast<Function>(
         staticMetaObject.enumerator(3).keyToValue(key.toLocal8Bit().data()));
 }
 
-void File::parse(const QStringList& list)
-{
+void File::parse(const QStringList& list) {
     switch (toStdAttr(list.first())) {
     case StdAttr::Part:
         part = list.mid(1);
@@ -161,18 +156,15 @@ void File::parse(const QStringList& list)
 ///
 int Aperture::value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
 
-Aperture::StdAttr Aperture::toStdAttr(const QString& key)
-{
+Aperture::StdAttr Aperture::toStdAttr(const QString& key) {
     return static_cast<StdAttr>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
-Aperture::Function Aperture::toFunction(const QString& key)
-{
+Aperture::Function Aperture::toFunction(const QString& key) {
     return static_cast<Function>(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
 }
 
-void Aperture::parse(const QStringList& list)
-{
+void Aperture::parse(const QStringList& list) {
     switch (toStdAttr(list.first())) {
     case StdAttr::AperFunction:
         //qDebug() << list;
@@ -320,4 +312,4 @@ void Aperture::parse(const QStringList& list)
     }
 }
 
-}
+} // namespace Gerber::Attr

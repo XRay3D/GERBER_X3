@@ -26,8 +26,7 @@ FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
     , m_tpc(tps)
     , fileCount(1)
-    , progressDialog(new QProgressDialog(this))
-{
+    , progressDialog(new QProgressDialog(this)) {
     m_tpc->moveToThread(&thread);
 
     connect(&thread, &QThread::finished, m_tpc, &QObject::deleteLater);
@@ -51,14 +50,12 @@ FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     progressDialog->reset();
 }
 
-FormsUtil::~FormsUtil()
-{
+FormsUtil::~FormsUtil() {
     thread.quit();
     thread.wait();
 }
 
-void FormsUtil::fileHandler(GCode::File* file)
-{
+void FormsUtil::fileHandler(GCode::File* file) {
     if (--fileCount == 0)
         cancel();
 
@@ -79,8 +76,7 @@ void FormsUtil::fileHandler(GCode::File* file)
     }
 }
 
-void FormsUtil::timerEvent(QTimerEvent* event)
-{
+void FormsUtil::timerEvent(QTimerEvent* event) {
     if (event->timerId() == progressTimerId && progressDialog && m_tpc) {
         const auto [max, val] = m_tpc->getProgress();
         progressDialog->setMaximum(max);
@@ -92,8 +88,7 @@ void FormsUtil::timerEvent(QTimerEvent* event)
     }
 }
 
-void FormsUtil::addUsedGi(GraphicsItem* gi)
-{
+void FormsUtil::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
         FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
@@ -106,14 +101,12 @@ void FormsUtil::addUsedGi(GraphicsItem* gi)
     }
 }
 
-void FormsUtil::cancel()
-{
+void FormsUtil::cancel() {
     m_tpc->cancel();
     stopProgress();
 }
 
-void FormsUtil::errorHandler(int)
-{
+void FormsUtil::errorHandler(int) {
     stopProgress();
     flikerTimerId = startTimer(32);
     if (ErrorDialog(m_tpc->items, this).exec()) {
@@ -126,8 +119,7 @@ void FormsUtil::errorHandler(int)
     flikerTimerId = 0;
 }
 
-void FormsUtil::startProgress()
-{
+void FormsUtil::startProgress() {
     if (!fileCount)
         fileCount = 1;
     m_tpc->msg = m_fileName;
@@ -135,8 +127,7 @@ void FormsUtil::startProgress()
     progressTimerId = startTimer(100);
 }
 
-void FormsUtil::stopProgress()
-{
+void FormsUtil::stopProgress() {
     killTimer(progressTimerId);
     progressTimerId = 0;
     progressDialog->reset();

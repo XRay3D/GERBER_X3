@@ -14,4 +14,4 @@ namespace Dxf {
 struct Wipeout final : Entity {
     Wipeout(SectionParser* sp);
 };
-}
+} // namespace Dxf

@@ -35,12 +35,10 @@
 namespace Dxf {
 
 Plugin::Plugin(QObject* parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_)
-{
+FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -160,8 +158,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     return m_file;
 }
 
-QIcon Plugin::drawDrillIcon(QColor color)
-{
+QIcon Plugin::drawDrillIcon(QColor color) {
     QPixmap pixmap(IconSize, IconSize);
     pixmap.fill(Qt::transparent);
     QPainter painter;
@@ -173,8 +170,7 @@ QIcon Plugin::drawDrillIcon(QColor color)
     return QIcon(pixmap);
 }
 
-bool Plugin::thisIsIt(const QString& fileName)
-{
+bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
@@ -206,8 +202,7 @@ QString Plugin::folderName() const { return tr("Dxf Files"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Dxf" },
         { "Version", "1.0" },
@@ -216,15 +211,13 @@ QJsonObject Plugin::info() const
     };
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-{
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     auto settingsTab = new SettingsTab(parent);
     settingsTab->setWindowTitle("DXF");
     return settingsTab;
 }
 
-void Plugin::updateFileModel(FileInterface* file)
-{
+void Plugin::updateFileModel(FileInterface* file) {
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
@@ -261,8 +254,7 @@ public:
         : AbstractDrillPrGI(row)
         , go(go)
         , circle(dynamic_cast<const Circle*>(go.entity()))
-        , lwpline(dynamic_cast<const LwPolyline*>(go.entity()))
-    {
+        , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
         m_sourceDiameter = circle ? circle->radius * 2
                                   : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
 
@@ -271,8 +263,7 @@ public:
     }
 
 private:
-    QPainterPath drawDrill() const
-    {
+    QPainterPath drawDrill() const {
         QPainterPath painterPath;
         painterPath.addEllipse(circle ? circle->centerPoint
                                       : go.pos(),
@@ -280,8 +271,7 @@ private:
         return painterPath;
     }
 
-    Paths offset(const Path& path, double offset) const
-    {
+    Paths offset(const Path& path, double offset) const {
         ClipperOffset cpOffset;
         cpOffset.AddPath(path, jtRound, etOpenRound);
         Paths tmpPpaths;
@@ -293,8 +283,7 @@ private:
 
     // AbstractDrillPrGI interface
 public:
-    void updateTool() override
-    {
+    void updateTool() override {
         row.toolId > -1 ? colorState |= Tool
                         : colorState &= ~Tool;
         m_toolPath = {};
@@ -302,16 +291,14 @@ public:
     }
     IntPoint pos() const override { return circle ? circle->centerPoint
                                                   : go.pos(); }
-    Paths paths() const override
-    {
+    Paths paths() const override {
         Paths paths { go.path() };
         return ReversePaths(paths);
     }
     bool fit(double depth) override { return m_sourceDiameter >= App::toolHolder().tool(row.toolId).getDiameter(depth); }
 };
 
-DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
-{
+DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
     auto const dxfFile = static_cast<File*>(file);
     DrillPreviewGiMap giPeview;
 
@@ -360,8 +347,7 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     return giPeview;
 }
 
-void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
-{
+void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
     int ctr {};
     for (auto& [key, lay] : static_cast<File*>(file)->layers())
         if (lay->isVisible()) {
@@ -386,4 +372,4 @@ void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
     }
 }
 
-}
+} // namespace Dxf

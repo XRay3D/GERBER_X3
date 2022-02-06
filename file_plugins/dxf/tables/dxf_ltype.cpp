@@ -15,12 +15,10 @@
 namespace Dxf {
 
 LType::LType(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void LType::parse(CodeData& code)
-{
+void LType::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void LType::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

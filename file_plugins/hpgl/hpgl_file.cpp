@@ -29,8 +29,7 @@
 namespace Hpgl {
 
 File::File()
-    : FileInterface()
-{
+    : FileInterface() {
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
@@ -38,19 +37,16 @@ File::File()
     };
 }
 
-File::~File()
-{
+File::~File() {
 }
 
-void File::setItemType(int type)
-{
+void File::setItemType(int type) {
     m_itemsType = type;
 }
 
 int File::itemsType() const { return m_itemsType; }
 
-Pathss& File::groupedPaths(File::Group group, bool fl)
-{
+Pathss& File::groupedPaths(File::Group group, bool fl) {
     if (m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
@@ -72,8 +68,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
     return m_groupedPaths;
 }
 
-void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
-{
+void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
     Paths paths;
     switch (group) {
@@ -108,21 +103,18 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
-void File::initFrom(FileInterface* file)
-{
+void File::initFrom(FileInterface* file) {
     //    FileInterface::initFrom(file);
     //    static_cast<Node*>(m_node)->file = this;
 }
 
-FileTree::Node* File::node()
-{
+FileTree::Node* File::node() {
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
 FileType File::type() const { return FileType::Hpgl; }
 
-void File::createGi()
-{
+void File::createGi() {
     //    ItemGroup* igNorm = m_itemGroups.back();
     //    ItemGroup* igPath = new ItemGroup;
     //    m_itemGroups.push_back(igPath);
@@ -185,8 +177,7 @@ void File::createGi()
 
 bool File::isVisible() const { return m_visible; }
 
-void File::setVisible(bool visible)
-{
+void File::setVisible(bool visible) {
     if (visible == m_visible)
         return;
     m_visible = visible;
@@ -205,8 +196,7 @@ void File::setVisible(bool visible)
     //    }
 }
 
-void File::write(QDataStream& stream) const
-{
+void File::write(QDataStream& stream) const {
     //    stream << m_header;
     //    {
     //        stream << int(m_layers.size());
@@ -226,8 +216,7 @@ void File::write(QDataStream& stream) const
     //    stream << m_layersVisible;
 }
 
-void File::read(QDataStream& stream)
-{
+void File::read(QDataStream& stream) {
     //    stream >> m_header;
     //    {
     //        int size;
@@ -245,4 +234,4 @@ void File::read(QDataStream& stream)
 }
 
 Paths File::merge() const { return m_mergedPaths; }
-}
+} // namespace Hpgl

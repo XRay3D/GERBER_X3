@@ -186,5 +186,5 @@ public:
 protected:
     void draw() override;
 };
-}
+} // namespace Gerber
 #endif // GERBERAPERTURE_H

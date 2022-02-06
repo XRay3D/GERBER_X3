@@ -16,28 +16,28 @@ struct AbstrGraphicObject {
     AbstrGraphicObject() { }
     virtual ~AbstrGraphicObject() { }
 
-    virtual Path line() const = 0; //{ return {}; }
+    virtual Path line() const = 0;  //{ return {}; }
     virtual Path lineW() const = 0; //{ return {}; } // closed
 
-    virtual Path polyLine() const = 0; //{ return {}; }
+    virtual Path polyLine() const = 0;   //{ return {}; }
     virtual Paths polyLineW() const = 0; //{ return {}; } // closed
 
-    virtual Path elipse() const = 0; //{ return {}; } // circle
+    virtual Path elipse() const = 0;   //{ return {}; } // circle
     virtual Paths elipseW() const = 0; //{ return {}; }
 
-    virtual Path arc() const = 0; //{ return {}; } // part of elipse
+    virtual Path arc() const = 0;  //{ return {}; } // part of elipse
     virtual Path arcW() const = 0; //{ return {}; }
 
-    virtual Path polygon() const = 0; //{ return {}; }
+    virtual Path polygon() const = 0;        //{ return {}; }
     virtual Paths polygonWholes() const = 0; //{ return {}; }
 
-    virtual Path hole() const = 0; //{ return {}; }
+    virtual Path hole() const = 0;   //{ return {}; }
     virtual Paths holes() const = 0; //{ return {}; }
 
     virtual bool positive() const = 0; //{ return {}; } // not hole
-    virtual bool closed() const = 0; //{ return {}; } // front == back
+    virtual bool closed() const = 0;   //{ return {}; } // front == back
 
-    virtual const Path& path() const = 0; //{ return {}; }
+    virtual const Path& path() const = 0;   //{ return {}; }
     virtual const Paths& paths() const = 0; //{ return {}; }
 
     virtual Path& rPath() = 0;

@@ -18,12 +18,10 @@
 namespace Excellon {
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
-    : QSyntaxHighlighter(parent)
-{
+    : QSyntaxHighlighter(parent) {
 }
 
-void SyntaxHighlighter::highlightBlock(const QString& text)
-{
+void SyntaxHighlighter::highlightBlock(const QString& text) {
     static QTextCharFormat myClassFormat;
     static const std::map<char, QColor> color {
         { 'A', QColor(0x00, 0x00, 0xFF) },
@@ -45,4 +43,4 @@ void SyntaxHighlighter::highlightBlock(const QString& text)
     }
 }
 
-}
+} // namespace Excellon

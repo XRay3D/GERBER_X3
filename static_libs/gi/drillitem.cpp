@@ -23,12 +23,10 @@
 using namespace ClipperLib;
 
 AbstractDrillItem::AbstractDrillItem(FileInterface* file)
-    : GraphicsItem(file)
-{
+    : GraphicsItem(file) {
 }
 
-void AbstractDrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void AbstractDrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
         painter->setPen(Qt::NoPen);
@@ -52,8 +50,7 @@ QPainterPath AbstractDrillItem::shape() const { return m_shape; }
 
 double AbstractDrillItem::diameter() const { return m_diameter; }
 
-void AbstractDrillItem::setDiameter(double diameter)
-{
+void AbstractDrillItem::setDiameter(double diameter) {
     if (m_diameter == diameter)
         return;
     m_diameter = diameter;
@@ -62,8 +59,7 @@ void AbstractDrillItem::setDiameter(double diameter)
     update();
 }
 
-void AbstractDrillItem::changeColor()
-{
+void AbstractDrillItem::changeColor() {
     animation.setStartValue(m_bodyColor);
 
     switch (colorState) {

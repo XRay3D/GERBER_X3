@@ -16,8 +16,7 @@
 
 AboutForm::AboutForm(QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::AboutForm)
-{
+    , ui(new Ui::AboutForm) {
     ui->setupUi(this);
 #ifdef __MINGW32__
     //__MINGW_GCC_VERSION

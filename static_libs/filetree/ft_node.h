@@ -21,8 +21,7 @@
 
 class QMenu;
 
-inline QPixmap decoration(QColor color, QChar chr = {})
-{
+inline QPixmap decoration(QColor color, QChar chr = {}) {
     //    qDebug() << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     QPixmap pixmap(22, 22);
     pixmap.fill(Qt::transparent);
@@ -107,4 +106,4 @@ protected:
     mvector<std::unique_ptr<Node>> childs;
 };
 
-}
+} // namespace FileTree

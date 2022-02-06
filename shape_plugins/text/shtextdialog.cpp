@@ -20,8 +20,7 @@ using namespace Shapes;
 ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::ShTextDialog)
-    , shapeText(text)
-{
+    , shapeText(text) {
     ui->setupUi(this);
 
     for (auto text : shapeText)
@@ -104,8 +103,7 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
 
 ShTextDialog::~ShTextDialog() { delete ui; }
 
-void ShTextDialog::updateText()
-{
+void ShTextDialog::updateText() {
     QString text_(ui->plainTextEdit->toPlainText());
     for (auto text : shapeText) {
         text->iData.text = text_;
@@ -113,8 +111,7 @@ void ShTextDialog::updateText()
     }
 }
 
-void ShTextDialog::updateFont()
-{
+void ShTextDialog::updateFont() {
     QFont font(ui->cbxFont->currentFont());
     font.setBold(ui->chbxBold->isChecked());
     font.setItalic(ui->chbxItalic->isChecked());
@@ -126,32 +123,28 @@ void ShTextDialog::updateFont()
     }
 }
 
-void ShTextDialog::updateAngle()
-{
+void ShTextDialog::updateAngle() {
     for (auto text : shapeText) {
         text->iData.angle = ui->dsbxAngle->value();
         text->redraw();
     }
 }
 
-void ShTextDialog::updateHeight()
-{
+void ShTextDialog::updateHeight() {
     for (auto text : shapeText) {
         text->iData.height = ui->dsbxHeight->value();
         text->redraw();
     }
 }
 
-void ShTextDialog::updateXY()
-{
+void ShTextDialog::updateXY() {
     for (auto text : shapeText) {
         text->iData.xy = ui->dsbxXY->value();
         text->redraw();
     }
 }
 
-void ShTextDialog::updateCenterAlign()
-{
+void ShTextDialog::updateCenterAlign() {
     int handleAlign;
     if (ui->rb_bc->isChecked()) {
         handleAlign = Text::BotCenter;
@@ -178,22 +171,19 @@ void ShTextDialog::updateCenterAlign()
     }
 }
 
-void ShTextDialog::updateSide()
-{
+void ShTextDialog::updateSide() {
     for (auto text : shapeText) {
         text->iData.side = static_cast<Side>(ui->cbxSide->currentIndex());
         text->redraw();
     }
 }
 
-void ShTextDialog::accept()
-{
+void ShTextDialog::accept() {
     shapeText.first()->ok();
     QDialog::accept();
 }
 
-void ShTextDialog::reject()
-{
+void ShTextDialog::reject() {
     for (auto text : shapeText)
         text->restore();
     QDialog::reject();

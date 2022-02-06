@@ -23,4 +23,4 @@ struct SectionTHUMBNAILIMAGE final : SectionParser {
     void parse() override { }
 };
 
-}
+} // namespace Dxf

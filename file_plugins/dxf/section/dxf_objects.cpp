@@ -15,8 +15,7 @@
 namespace Dxf {
 
 SectionOBJECTS::SectionOBJECTS(File* file, Codes::iterator from, Codes::iterator to)
-    : SectionParser(from, to, file)
-{
+    : SectionParser(from, to, file) {
 }
 
-}
+} // namespace Dxf

@@ -24,8 +24,7 @@ namespace Gerber {
 
 ComponentItem::ComponentItem(const Component& component, FileInterface* file)
     : GraphicsItem(file)
-    , m_component(component)
-{
+    , m_component(component) {
     component.setComponentitem(this);
     pathPins.resize(m_component.pins().size());
     for (auto&& poly : m_component.footprint())
@@ -35,20 +34,17 @@ ComponentItem::ComponentItem(const Component& component, FileInterface* file)
     setToolTip(m_component.toolTip());
 }
 
-QRectF ComponentItem::boundingRect() const
-{
+QRectF ComponentItem::boundingRect() const {
     return shape().boundingRect();
 }
 
-QPainterPath ComponentItem::shape() const
-{
+QPainterPath ComponentItem::shape() const {
     if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor()))
         m_scale = App::graphicsView()->scaleFactor();
     return m_shape;
 }
 
-void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale)
-{
+void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale) {
     painter->save();
     static QFont f("Consolas");
     f.setPixelSize(20);
@@ -64,8 +60,7 @@ void drawText(QPainter* painter, const QString& str, const QColor& color, QPoint
     painter->restore();
 }
 
-void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     auto color { m_file->color() };
     painter->setBrush(color);
     color.setAlpha(255);
@@ -133,4 +128,4 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
 
 Paths ComponentItem::paths(int) const { return {}; }
 
-}
+} // namespace Gerber

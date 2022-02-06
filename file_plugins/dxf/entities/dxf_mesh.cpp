@@ -13,7 +13,6 @@
 #include "mesh.h"
 namespace Dxf {
 MESH::MESH(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

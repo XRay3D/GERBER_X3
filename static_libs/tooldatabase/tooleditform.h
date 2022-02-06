@@ -53,14 +53,12 @@ private:
         QMap<DoubleSpinBox*, double> min;
         QMap<DoubleSpinBox*, double> max;
         QMap<DoubleSpinBox*, double> val;
-        void save(DoubleSpinBox* dsbx)
-        {
+        void save(DoubleSpinBox* dsbx) {
             min[dsbx] = dsbx->minimum();
             max[dsbx] = dsbx->maximum();
             val[dsbx] = dsbx->value();
         }
-        void restore(DoubleSpinBox* dsbx)
-        {
+        void restore(DoubleSpinBox* dsbx) {
             dsbx->setRange(min[dsbx], max[dsbx]);
             dsbx->setValue(val[dsbx]);
         }

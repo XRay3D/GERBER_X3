@@ -25,8 +25,7 @@
 namespace Gerber {
 
 ComponentsDialog::ComponentsDialog(QWidget* parent)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     setupUi(this);
     graphicsView->setScene(m_scene = new QGraphicsScene(graphicsView));
     graphicsView->scale(+1, -1);
@@ -39,8 +38,7 @@ ComponentsDialog::ComponentsDialog(QWidget* parent)
     connect(splitter, &QSplitter::splitterMoved, [this] { resizeEvent(); });
 }
 
-ComponentsDialog::~ComponentsDialog()
-{
+ComponentsDialog::~ComponentsDialog() {
     QSettings settings;
     settings.beginGroup("ComponentsDialog");
     settings.setValue("geometry", saveGeometry());
@@ -50,8 +48,7 @@ ComponentsDialog::~ComponentsDialog()
 
 void ComponentsDialog::setFile(int fileId) { componentsView->setFile(fileId); }
 
-void ComponentsDialog::setupUi(QDialog* dialog)
-{
+void ComponentsDialog::setupUi(QDialog* dialog) {
     if (dialog->objectName().isEmpty())
         dialog->setObjectName(QString::fromUtf8("ComponentsDialog"));
     dialog->resize(800, 600);
@@ -87,22 +84,19 @@ void ComponentsDialog::setupUi(QDialog* dialog)
     QMetaObject::connectSlotsByName(dialog);
 }
 
-void ComponentsDialog::retranslateUi(QDialog* dialog)
-{
+void ComponentsDialog::retranslateUi(QDialog* dialog) {
     dialog->setWindowTitle(QApplication::translate("ComponentsDialog", "Dialog", nullptr));
 }
 
-void ComponentsDialog::showEvent(QShowEvent* event)
-{
+void ComponentsDialog::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
     graphicsView->fitInView(graphicsView->scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
-void ComponentsDialog::resizeEvent(QResizeEvent* event)
-{
+void ComponentsDialog::resizeEvent(QResizeEvent* event) {
     if (event)
         QDialog::resizeEvent(event);
     graphicsView->fitInView(graphicsView->scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
-}
+} // namespace Gerber

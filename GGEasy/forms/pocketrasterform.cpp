@@ -22,8 +22,7 @@
 PocketRasterForm::PocketRasterForm(QWidget* parent)
     : FormsUtil(new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") }
-{
+    , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") } {
     ui->setupUi(this);
     parent->setWindowTitle(ui->label->text());
 
@@ -59,8 +58,7 @@ PocketRasterForm::PocketRasterForm(QWidget* parent)
     connect(ui->pbCreate, &QPushButton::clicked, this, &PocketRasterForm::createFile);
 }
 
-PocketRasterForm::~PocketRasterForm()
-{
+PocketRasterForm::~PocketRasterForm() {
 
     MySettings settings;
     settings.beginGroup("PocketRasterForm");
@@ -77,8 +75,7 @@ PocketRasterForm::~PocketRasterForm()
     delete ui;
 }
 
-void PocketRasterForm::createFile()
-{
+void PocketRasterForm::createFile() {
     const auto tool { ui->toolHolder->tool() };
 
     if (!tool.isValid()) {
@@ -151,8 +148,7 @@ void PocketRasterForm::createFile()
     createToolpath();
 }
 
-void PocketRasterForm::updateName()
-{
+void PocketRasterForm::updateName() {
     const auto& tool { ui->toolHolder->tool() };
     if (tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
@@ -161,13 +157,11 @@ void PocketRasterForm::updateName()
     ui->leName->setText(names[side]);
 }
 
-void PocketRasterForm::updatePixmap()
-{
+void PocketRasterForm::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void PocketRasterForm::rb_clicked()
-{
+void PocketRasterForm::rb_clicked() {
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;
@@ -183,20 +177,17 @@ void PocketRasterForm::rb_clicked()
     updatePixmap();
 }
 
-void PocketRasterForm::resizeEvent(QResizeEvent* event)
-{
+void PocketRasterForm::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void PocketRasterForm::showEvent(QShowEvent* event)
-{
+void PocketRasterForm::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
 void PocketRasterForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void PocketRasterForm::editFile(GCode::File* /*file*/)
-{
+void PocketRasterForm::editFile(GCode::File* /*file*/) {
 }

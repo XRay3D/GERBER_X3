@@ -13,12 +13,10 @@
 #include "dxf_attrib.h"
 namespace Dxf {
 Attrib::Attrib(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
-void Attrib::parse(CodeData& code)
-{
+void Attrib::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (code.code()) {
@@ -29,9 +27,8 @@ void Attrib::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-GraphicObject Attrib::toGo() const
-{
+GraphicObject Attrib::toGo() const {
     return {};
 }
 
-}
+} // namespace Dxf

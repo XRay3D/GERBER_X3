@@ -39,12 +39,10 @@ const int id1 = qRegisterMetaType<File*>("G::GFile*");
 
 Plugin::Plugin(QObject* parent)
     : QObject(parent)
-    , Parser(this)
-{
+    , Parser(this) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_)
-{
+FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file_(fileName);
@@ -57,8 +55,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     return file;
 }
 
-QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const
-{
+QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const {
     QPainterPath painterPath;
     for (QPolygonF polygon : aperture->draw(State()))
         painterPath.addPolygon(polygon);
@@ -84,8 +81,7 @@ QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const
     return QIcon(pixmap);
 }
 
-QIcon Plugin::drawRegionIcon(const GraphicObject& go) const
-{
+QIcon Plugin::drawRegionIcon(const GraphicObject& go) const {
     static QMutex m;
     QMutexLocker l(&m);
 
@@ -119,8 +115,7 @@ QIcon Plugin::drawRegionIcon(const GraphicObject& go) const
     return QIcon(pixmap);
 }
 
-bool Plugin::thisIsIt(const QString& fileName)
-{
+bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         static constexpr ctll::fixed_string pattern(R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)"); // fixed_string("%FS[LTD]?[AI]X\d{2}Y\d{2}\*");
@@ -143,8 +138,7 @@ QString Plugin::folderName() const { return tr("Gerber Files"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Gerber X3" },
         { "Version", "1.1" },
@@ -153,8 +147,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-{
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxCleanPolygons;
         QCheckBox* chbxSkipDuplicates;
@@ -163,8 +156,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 
     public:
         Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent)
-        {
+            : SettingsTabInterface(parent) {
             setObjectName(QString::fromUtf8("tabGerber"));
             auto verticalLayout = new QVBoxLayout(this);
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
@@ -205,8 +197,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             chbxSimplifyRegions->setText(QApplication::translate("SettingsDialog", "Simplify Regions", nullptr));
         }
         virtual ~Tab() override { }
-        virtual void readSettings(MySettings& settings) override
-        {
+        virtual void readSettings(MySettings& settings) override {
             settings.beginGroup("Gerber");
             m_cleanPolygons = settings.getValue(chbxCleanPolygons, m_cleanPolygons);
             m_cleanPolygonsDist = settings.getValue(dsbxCleanPolygonsDist, m_cleanPolygonsDist);
@@ -214,8 +205,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             m_skipDuplicates = settings.getValue(chbxSkipDuplicates, m_skipDuplicates);
             settings.endGroup();
         }
-        virtual void writeSettings(MySettings& settings) override
-        {
+        virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup("Gerber");
             m_cleanPolygons = settings.setValue(chbxCleanPolygons);
             m_cleanPolygonsDist = settings.setValue(dsbxCleanPolygonsDist);
@@ -229,8 +219,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
     return tab;
 }
 
-void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
-{
+void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
     if (static_cast<File*>(file)->flashedApertures()) {
         cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         QPixmap pixmap(IconSize, IconSize);
@@ -247,8 +236,7 @@ public:
     explicit DrillPrGI(const GraphicObject* go, int id, Row& row)
         : AbstractDrillPrGI(row)
         , apId(id)
-        , gbrObj(go)
-    {
+        , gbrObj(go) {
         auto ap = go->gFile()->apertures()->at(id);
         m_sourceDiameter = qFuzzyIsNull(ap->drillDiameter()) ? ap->minSize() : ap->drillDiameter();
         m_sourcePath = drawApetrure(go, id);
@@ -256,8 +244,7 @@ public:
     }
 
 private:
-    static QPainterPath drawApetrure(const GraphicObject* go, int id)
-    {
+    static QPainterPath drawApetrure(const GraphicObject* go, int id) {
         QPainterPath painterPath;
         for (QPolygonF polygon : go->paths()) {
             polygon.append(polygon.first());
@@ -273,8 +260,7 @@ private:
 
     // AbstractDrillPrGI interface
 public:
-    void updateTool() override
-    {
+    void updateTool() override {
         if (row.toolId > -1)
             colorState |= Tool;
         else
@@ -284,14 +270,12 @@ public:
     }
     IntPoint pos() const override { return gbrObj->state().curPos(); }
     Paths paths() const override { return gbrObj->paths(); }
-    bool fit(double depth) override
-    {
+    bool fit(double depth) override {
         return gbrObj->gFile()->apertures()->at(apId)->fit(App::toolHolder().tool(row.toolId).getDiameter(depth));
     }
 };
 
-DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
-{
+DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
     DrillPreviewGiMap giPeview;
     auto const gbrFile = reinterpret_cast<File*>(file);
     const ApertureMap* const m_apertures = gbrFile->apertures();
@@ -337,8 +321,7 @@ class ThermalPreviewItem final : public AbstractThermPrGi {
 public:
     ThermalPreviewItem(const GraphicObject& go, Tool& tool)
         : AbstractThermPrGi(tool)
-        , grob(go)
-    {
+        , grob(go) {
         for (QPolygonF polygon : grob.paths()) {
             polygon.append(polygon.first());
             sourcePath.addPolygon(polygon);
@@ -346,8 +329,7 @@ public:
     }
     IntPoint pos() const override { return grob.state().curPos(); }
     Paths paths() const override { return grob.paths(); }
-    void redraw() override
-    {
+    void redraw() override {
         if (double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
             diameter = d;
             ClipperOffset offset;
@@ -404,8 +386,7 @@ public:
     }
 };
 
-ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool)
-{
+ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool) {
     ThermalPreviewGiVec m_sourcePreview;
     auto gbrFile = static_cast<File*>(file);
 

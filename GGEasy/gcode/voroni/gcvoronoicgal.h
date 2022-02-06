@@ -18,4 +18,4 @@ class VoronoiCgal : public virtual Creator {
 protected:
     void cgalVoronoi();
 };
-}
+} // namespace GCode

@@ -18,12 +18,10 @@
 namespace Dxf {
 SectionHEADER::SectionHEADER(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
-    , header(file->header())
-{
+    , header(file->header()) {
 }
 
-void SectionHEADER::parse()
-{
+void SectionHEADER::parse() {
     QString key;
     do {
         CodeData code(nextCode());
@@ -36,4 +34,4 @@ void SectionHEADER::parse()
         }
     } while (hasNext());
 }
-}
+} // namespace Dxf

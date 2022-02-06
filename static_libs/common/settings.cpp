@@ -19,8 +19,7 @@
 using std::numbers::pi;
 
 /*G-Code*/
-AppSettings::AppSettings()
-{
+AppSettings::AppSettings() {
     //    if (!m_settings)
     //        m_settings = this;
 }
@@ -37,8 +36,7 @@ bool AppSettings::scalePinMarkers() { return m_scalePinMarkers; }
 int AppSettings::theme() { return m_theme; }
 
 /*Clipper*/
-int AppSettings::clpCircleSegments(double radius)
-{
+int AppSettings::clpCircleSegments(double radius) {
     const double length = m_clpMinCircleSegmentLength; // mm
     const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (radius)));
     int intSteps = m_clpMinCircleSegments;
@@ -59,8 +57,7 @@ double AppSettings::gridStep(double scale) { return m_inch ? pow(10.0, ceil(log1
 bool AppSettings::inch() { return m_inch; }
 void AppSettings::setInch(bool val) { m_inch = val; }
 
-QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
-{
+QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod) {
     if ((mod & Qt::ALT) || m_snap) {
         const double gs = AppSettings::gridStep(App::graphicsView()->getScale());
         QPointF px(pt / gs);
@@ -71,8 +68,7 @@ QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod)
     return pt;
 }
 
-void AppSettings::setSnap(bool val)
-{
+void AppSettings::setSnap(bool val) {
     m_snap = val;
 }
 

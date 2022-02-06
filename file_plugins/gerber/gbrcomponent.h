@@ -24,43 +24,37 @@ namespace Gerber {
 class ComponentItem;
 
 struct Library {
-    QString name; /* <field> Library name. */
+    QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Library& l)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Library& l) {
         stream << l.name << l.description;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Library& l)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Library& l) {
         stream >> l.name >> l.description;
         return stream;
     }
 };
 struct Manufacturer {
-    QString name; /* <field> Manufacturer. */
+    QString name;       /* <field> Manufacturer. */
     QString partNumber; /* <field> Manufacturer part number. */
-    friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m) {
         stream << m.name << m.partNumber;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m) {
         stream >> m.name >> m.partNumber;
         return stream;
     }
 };
 struct Package {
-    QString name; /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
+    QString name;        /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
     QString description; /* <field> Package description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Package& p)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Package& p) {
         stream << p.name << p.description;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Package& p)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Package& p) {
         stream >> p.name >> p.description;
         return stream;
     }
@@ -73,27 +67,23 @@ struct Pin {
     QString number;
     QString description;
     QPointF pos;
-    friend QDataStream& operator<<(QDataStream& stream, const Pin& p)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Pin& p) {
         stream << p.number << p.description << p.pos;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Pin& p)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Pin& p) {
         stream >> p.number >> p.description >> p.pos;
         return stream;
     }
 };
 struct Supplier {
-    QString name; /* <field> Library name. */
+    QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Supplier& s)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const Supplier& s) {
         stream << s.name << s.description;
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, Supplier& s)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, Supplier& s) {
         stream >> s.name >> s.description;
         return stream;
     }
@@ -218,7 +208,7 @@ public:
 
 private:
     double m_rotation = 0.0; /* <decimal> The rotation angle of the component.*/
-    double m_height = 0.0; /* <decimal> Height, in the unit of the file. */
+    double m_height = 0.0;   /* <decimal> Height, in the unit of the file. */
     mutable ComponentItem* m_componentitem = nullptr;
     Library m_library;
     Manufacturer m_manufacturer;
@@ -233,4 +223,4 @@ private:
     QString m_value; /* <field> E.g. 220nF. */
     bool m_isNull = true;
 };
-}
+} // namespace Gerber

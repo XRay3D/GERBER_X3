@@ -51,6 +51,6 @@ private:
     QPushButton* pbSelect;
     QPushButton* pbEdit;
 
-    void setupUi(QWidget* ToolSelectorForm); // setupUi
+    void setupUi(QWidget* ToolSelectorForm);       // setupUi
     void retranslateUi(QWidget* ToolSelectorForm); // retranslateUi
 };

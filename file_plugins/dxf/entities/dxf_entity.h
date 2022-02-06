@@ -242,4 +242,4 @@ public:
 
     };
 };
-}
+} // namespace Dxf

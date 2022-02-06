@@ -13,7 +13,6 @@
 #include "oleframe.h"
 namespace Dxf {
 OLEFRAME::OLEFRAME(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

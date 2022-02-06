@@ -36,8 +36,7 @@ enum class ItemsType {
 class Color : public QColor {
 public:
     Color(double r, double g, double b)
-        : QColor(r * 255, g * 255, b * 255)
-    {
+        : QColor(r * 255, g * 255, b * 255) {
     }
 };
 
@@ -54,76 +53,58 @@ class GraphicObject final : public AbstrGraphicObject {
     Paths m_paths;
     // AbstrGraphicObject interface
 public:
-    Path line() const override
-    {
+    Path line() const override {
         return {};
     }
-    Path lineW() const override
-    {
+    Path lineW() const override {
         return {};
     }
-    Path polyLine() const override
-    {
+    Path polyLine() const override {
         return {};
     }
-    Paths polyLineW() const override
-    {
+    Paths polyLineW() const override {
         return {};
     }
-    Path elipse() const override
-    {
+    Path elipse() const override {
         return {};
     }
-    Paths elipseW() const override
-    {
+    Paths elipseW() const override {
         return {};
     }
-    Path arc() const override
-    {
+    Path arc() const override {
         return {};
     }
-    Path arcW() const override
-    {
+    Path arcW() const override {
         return {};
     }
-    Path polygon() const override
-    {
+    Path polygon() const override {
         return {};
     }
-    Paths polygonWholes() const override
-    {
+    Paths polygonWholes() const override {
         return {};
     }
-    Path hole() const override
-    {
+    Path hole() const override {
         return {};
     }
-    Paths holes() const override
-    {
+    Paths holes() const override {
         return {};
     }
-    bool positive() const override
-    {
+    bool positive() const override {
         return {};
     }
-    bool closed() const override
-    {
+    bool closed() const override {
         return {};
     }
-    const Path& path() const override
-    {
+    const Path& path() const override {
         return m_path;
     }
-    const Paths& paths() const override
-    {
+    const Paths& paths() const override {
         return m_paths;
     }
-    Path& rPath() override
-    {
+    Path& rPath() override {
         return m_path;
     }
-    Paths& rPaths() override
-    {
+    Paths& rPaths() override {
         return m_paths;
     }
 };
@@ -172,4 +153,4 @@ public:
     static bool overrideFonts() { return m_overrideFonts; }
 };
 
-}
+} // namespace Hpgl

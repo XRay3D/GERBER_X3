@@ -24,7 +24,7 @@ class FilePluginInterface;
 namespace FileTree {
 class View;
 class Model;
-}
+} // namespace FileTree
 class GCodePropertiesForm;
 class GraphicsView;
 class LayoutFrames;
@@ -82,8 +82,7 @@ class App {
     QSharedMemory sm { "AppSettings" };
 
 public:
-    explicit App()
-    {
+    explicit App() {
         if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite))
             m_app = *reinterpret_cast<App**>(sm.data()) = this;
         else if (sm.attach(QSharedMemory::ReadOnly))
@@ -115,15 +114,13 @@ public:
     static void setScene(Scene* scene) { (m_app->m_scene && scene) ? exit(-9) : (m_app->m_scene = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (m_app->m_splashScreen && splashScreen) ? exit(-10) : (m_app->m_splashScreen = splashScreen, void()); }
 
-    static FilePluginInterface* filePlugin(int type)
-    {
+    static FilePluginInterface* filePlugin(int type) {
         return m_app->m_filePlugins.contains(type) ? std::get<FilePluginInterface*>(m_app->m_filePlugins[type])
                                                    : nullptr;
     }
     static FileInterfacesMap& filePlugins() { return m_app->m_filePlugins; }
 
-    static ShapePluginInterface* shapePlugin(int type)
-    {
+    static ShapePluginInterface* shapePlugin(int type) {
         return m_app->m_shapePlugin.contains(type) ? std::get<ShapePluginInterface*>(m_app->m_shapePlugin[type])
                                                    : nullptr;
     }

@@ -34,8 +34,7 @@ using ThermalPreviewGiVec = mvector<std::shared_ptr<AbstractThermPrGi>>;
 class SettingsTabInterface : public QWidget {
 public:
     SettingsTabInterface(QWidget* parent)
-        : QWidget(parent)
-    {
+        : QWidget(parent) {
     }
     virtual ~SettingsTabInterface() = default;
     virtual void readSettings(MySettings& settings) = 0;
@@ -67,8 +66,7 @@ public:
         [[maybe_unused]] QComboBox* cbx) {};
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,
-        [[maybe_unused]] FileTree::View* tv)
-    {
+        [[maybe_unused]] FileTree::View* tv) {
         menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close All Files"), [tv] {
             if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 tv->closeFiles();

@@ -15,12 +15,10 @@
 namespace Dxf {
 
 UCS::UCS(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void UCS::parse(CodeData& code)
-{
+void UCS::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void UCS::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

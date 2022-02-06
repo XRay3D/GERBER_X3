@@ -15,8 +15,7 @@
 #include <QLineF>
 #include <qmath.h>
 
-Path toPath(const QPolygonF& p)
-{
+Path toPath(const QPolygonF& p) {
     Path path;
     path.reserve(p.size());
     for (const QPointF& pt : p)
@@ -24,8 +23,7 @@ Path toPath(const QPolygonF& p)
     return path;
 }
 
-Paths toPaths(const QVector<QPolygonF>& p)
-{
+Paths toPaths(const QVector<QPolygonF>& p) {
     Paths paths;
     paths.reserve(p.size());
     for (const QPolygonF& pl : p)
@@ -33,8 +31,7 @@ Paths toPaths(const QVector<QPolygonF>& p)
     return paths;
 }
 
-QPolygonF toQPolygon(const Path& p)
-{
+QPolygonF toQPolygon(const Path& p) {
     QPolygonF polygon;
     polygon.reserve(p.size());
     for (const IntPoint& pt : p)
@@ -42,8 +39,7 @@ QPolygonF toQPolygon(const Path& p)
     return polygon;
 }
 
-QVector<QPolygonF> toQPolygons(const Paths& p)
-{
+QVector<QPolygonF> toQPolygons(const Paths& p) {
     QVector<QPolygonF> polygons;
     polygons.reserve(p.size());
     for (const Path& pl : p)
@@ -51,8 +47,7 @@ QVector<QPolygonF> toQPolygons(const Paths& p)
     return polygons;
 }
 
-double Angle(const IntPoint& pt1, const IntPoint& pt2)
-{
+double Angle(const IntPoint& pt1, const IntPoint& pt2) {
     const double dx = pt2.X - pt1.X;
     const double dy = pt2.Y - pt1.Y;
     const double theta = atan2(-dy, dx) * 360.0 / two_pi;
@@ -63,8 +58,7 @@ double Angle(const IntPoint& pt1, const IntPoint& pt2)
         return theta_normalized;
 }
 
-double Length(const IntPoint& pt1, const IntPoint& pt2)
-{
+double Length(const IntPoint& pt1, const IntPoint& pt2) {
     double x = pt2.X - pt1.X;
     double y = pt2.Y - pt1.Y;
     return sqrt(static_cast<double>(x) * static_cast<double>(x) + static_cast<double>(y) * static_cast<double>(y));
@@ -84,8 +78,7 @@ double Length(const IntPoint& pt1, const IntPoint& pt2)
 //#endif
 //}
 
-Path CirclePath(double diametr, const IntPoint& center)
-{
+Path CirclePath(double diametr, const IntPoint& center) {
     if (diametr == 0.0)
         return Path();
 
@@ -100,8 +93,7 @@ Path CirclePath(double diametr, const IntPoint& center)
     return poligon;
 }
 
-Path RectanglePath(double width, double height, const IntPoint& center)
-{
+Path RectanglePath(double width, double height, const IntPoint& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
@@ -117,8 +109,7 @@ Path RectanglePath(double width, double height, const IntPoint& center)
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const IntPoint& center)
-{
+void RotatePath(Path& poligon, double angle, const IntPoint& center) {
     const bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - Angle(center, pt));
@@ -131,8 +122,7 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center)
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const IntPoint& pos)
-{
+void TranslatePath(Path& path, const IntPoint& pos) {
     if (pos.X == 0 && pos.Y == 0)
         return;
     for (Path::size_type i = 0, size = path.size(); i < size; ++i) {
@@ -141,8 +131,7 @@ void TranslatePath(Path& path, const IntPoint& pos)
     }
 }
 
-double Perimeter(const Path& path)
-{
+double Perimeter(const Path& path) {
     double p = 0.0;
     for (int i = 0; i < path.size() - 1; ++i) {
         p += Length(path[i], path[i + 1]);
