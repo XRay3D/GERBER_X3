@@ -14,4 +14,4 @@ namespace Dxf {
 struct XLine final : Entity {
     XLine(SectionParser* sp);
 };
-}
+} // namespace Dxf

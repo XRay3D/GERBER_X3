@@ -60,8 +60,7 @@ AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
 
 AbstractThermPrGi::~AbstractThermPrGi() { thpi.clear(); }
 
-void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
-{
+void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     if (m_pathColor.alpha()) {
         //        if (isEmpty > 0) {
         //            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
@@ -112,8 +111,7 @@ int AbstractThermPrGi::type() const { return static_cast<int>(GiType::PrThermal)
 
 bool AbstractThermPrGi::isValid() const { return !previewPaths.empty() && m_node->isChecked(); }
 
-void AbstractThermPrGi::changeColor()
-{
+void AbstractThermPrGi::changeColor() {
     pa1.setStartValue(m_bodyColor);
     if (colorState & Selected) {
         pa1.setEndValue(QColor((colorState & Hovered)
@@ -137,8 +135,7 @@ void AbstractThermPrGi::changeColor()
     agr.start();
 }
 
-void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
+void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
     if (m_node->isChecked())
         menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
@@ -161,8 +158,7 @@ void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     menu.exec(event->screenPos());
 }
 
-void AbstractThermPrGi::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
+void AbstractThermPrGi::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (event) {
         QGraphicsItem::mouseDoubleClickEvent(event);
         m_node->isChecked() ? m_node->disable() : m_node->enable();
@@ -171,22 +167,19 @@ void AbstractThermPrGi::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     changeColor();
 }
 
-void AbstractThermPrGi::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
+void AbstractThermPrGi::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void AbstractThermPrGi::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
+void AbstractThermPrGi::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemSelectedChange) {
         if (value.toInt()) {
             colorState |= Selected;

@@ -36,4 +36,4 @@ private:
     SectionParser* sp;
     Blocks& blocks;
 };
-}
+} // namespace Dxf

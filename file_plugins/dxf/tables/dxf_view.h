@@ -19,4 +19,4 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return TableItem::VIEW; };
 };
-}
+} // namespace Dxf

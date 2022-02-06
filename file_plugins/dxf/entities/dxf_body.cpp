@@ -13,7 +13,6 @@
 #include "body.h"
 namespace Dxf {
 BODY::BODY(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

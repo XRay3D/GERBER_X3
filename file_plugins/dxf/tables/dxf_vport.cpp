@@ -15,12 +15,10 @@
 namespace Dxf {
 
 VPort::VPort(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void VPort::parse(CodeData& code)
-{
+void VPort::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void VPort::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

@@ -41,7 +41,7 @@ public:
         RatioOfMinorAxisToMajorAxis = 40, //	40	Соотношение малой и главной осей
 
         StartParameter = 41, //	41	Начальный параметр (значение для полного эллипса — 0,0)
-        EndParameter = 42, //	42	Конечный параметр (значение для полного эллипса — 2 пи)
+        EndParameter = 42,   //	42	Конечный параметр (значение для полного эллипса — 2 пи)
     };
 
     double startParameter = 0.0;
@@ -50,4 +50,4 @@ public:
     QPointF CenterPoint;
     QPointF EndpointOfMajorAxis;
 };
-}
+} // namespace Dxf

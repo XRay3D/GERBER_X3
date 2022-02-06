@@ -14,4 +14,4 @@ namespace Dxf {
 struct Ray final : Entity {
     Ray(SectionParser* sp);
 };
-}
+} // namespace Dxf

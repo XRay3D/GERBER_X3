@@ -91,8 +91,7 @@ private:
     Format m_format;
     QVector<int> rawIndex;
 
-    Paths merge()
-    {
+    Paths merge() {
         m_mergedPaths.clear();
         int i = 0;
         while (i < m_file.size()) {
@@ -111,5 +110,5 @@ private:
         return m_mergedPaths;
     }
 };
-}
+} // namespace Gerber
 #endif // GERBERPARSER_H

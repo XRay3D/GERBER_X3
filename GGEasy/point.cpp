@@ -33,8 +33,7 @@
 
 using namespace ClipperLib;
 
-bool updateRect()
-{
+bool updateRect() {
     QRectF rect(App::scene()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
@@ -50,8 +49,7 @@ bool updateRect()
 
 Marker::Marker(Type type)
     : QGraphicsObject(nullptr)
-    , m_type(type)
-{
+    , m_type(type) {
     m_markers[type] = this;
     setAcceptHoverEvents(true);
     if (m_type == Home) {
@@ -69,15 +67,13 @@ Marker::Marker(Type type)
 
 Marker::~Marker() { m_markers[m_type] = nullptr; }
 
-QRectF Marker::boundingRect() const
-{
+QRectF Marker::boundingRect() const {
     if (App::scene()->drawPdf())
         return QRectF();
     return m_rect;
 }
 
-void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
+void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if (App::scene()->drawPdf())
         return;
 
@@ -102,8 +98,7 @@ QPainterPath Marker::shape() const { return App::scene()->drawPdf() ? QPainterPa
 
 int Marker::type() const { return static_cast<int>(m_type ? GiType::MarkHome : GiType::MarkZero); }
 
-void Marker::resetPos(bool flUpdateRect)
-{
+void Marker::resetPos(bool flUpdateRect) {
     if (flUpdateRect && !updateRect())
         return;
 
@@ -153,8 +148,7 @@ void Marker::resetPos(bool flUpdateRect)
         App::project()->setZeroPos(pos());
 }
 
-void Marker::setPosX(double x)
-{
+void Marker::setPosX(double x) {
     QPointF point(pos());
     if (qFuzzyCompare(point.x(), x))
         return;
@@ -162,8 +156,7 @@ void Marker::setPosX(double x)
     setPos(point);
 }
 
-void Marker::setPosY(double y)
-{
+void Marker::setPosY(double y) {
     QPointF point(pos());
     if (qFuzzyCompare(point.y(), y))
         return;
@@ -175,8 +168,7 @@ void Marker::setPosY(double y)
         App::project()->setZeroPos(pos());
 }
 
-void Marker::updateGCPForm()
-{
+void Marker::updateGCPForm() {
     if (App::gCodePropertiesForm())
         App::gCodePropertiesForm()->updatePosDsbxs();
 
@@ -190,16 +182,14 @@ void Marker::updateGCPForm()
     }
 }
 
-void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
+void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     updateGCPForm();
 }
 
-void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
+void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
@@ -209,8 +199,7 @@ void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     updateGCPForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
-void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
+void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
     auto action = menu.addAction(QObject::tr("Fixed"), [this](bool fl) {
         setFlag(QGraphicsItem::ItemIsMovable, !fl);
@@ -230,8 +219,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 ///
 Pin::Pin()
     : QGraphicsObject(nullptr)
-    , m_index(m_ctr++)
-{
+    , m_index(m_ctr++) {
     setObjectName("Pin");
     setAcceptHoverEvents(true);
 
@@ -251,15 +239,13 @@ Pin::Pin()
 
 Pin::~Pin() { }
 
-QRectF Pin::boundingRect() const
-{
+QRectF Pin::boundingRect() const {
     if (App::scene()->drawPdf())
         return QRectF();
     return m_rect;
 }
 
-void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
+void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if (App::scene()->drawPdf())
         return;
 
@@ -282,15 +268,13 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath Pin::shape() const
-{
+QPainterPath Pin::shape() const {
     if (App::scene()->drawPdf())
         return QPainterPath();
     return m_shape;
 }
 
-void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
+void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
@@ -356,22 +340,19 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     App::project()->setPinsPos(pt);
 }
 
-void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
+void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
-void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
+void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     for (int i = 0; i < 4; ++i)
         m_pins[i]->m_lastPos = m_pins[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
-void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
+void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
@@ -395,16 +376,16 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
             bool ok;
             double depth = QInputDialog::getDouble(
-                nullptr, //                             parent
-                "", //                                  title
-                tr("Set Depth"), //                     label
+                nullptr,                            //                             parent
+                "",                                 //                                  title
+                tr("Set Depth"),                    //                     label
                 settings.value("depth").toDouble(), //  value
-                0, //                                   minValue
-                20, //                                  maxValue
-                1, //                                   decimals
-                &ok, //                                 ok
-                Qt::WindowFlags(), //                   flags
-                1 //                                    step
+                0,                                  //                                   minValue
+                20,                                 //                                  maxValue
+                1,                                  //                                   decimals
+                &ok,                                //                                 ok
+                Qt::WindowFlags(),                  //                   flags
+                1                                   //                                    step
             );
 
             if (!ok)
@@ -422,7 +403,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
             gcp.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File({ { dst } }, gcp);
+            GCode::File* gcode = new GCode::File(Pathss { { dst } }, gcp);
             gcode->setFileName(tr("Pin_") + tool.nameEnc());
             App::project()->addFile(gcode);
         }
@@ -449,16 +430,12 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
 int Pin::type() const { return static_cast<int>(GiType::MarkPin); }
 
-mvector<Pin*> Pin::pins() { return mvector { m_pins[0], m_pins[1], m_pins[2], m_pins[3] }; }
-
-void Pin::setPinsPos(QPointF pos[])
-{
+void Pin::setPinsPos(QPointF pos[]) {
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pos[i]);
 }
 
-void Pin::resetPos(bool fl)
-{
+void Pin::resetPos(bool fl) {
     if (fl)
         if (!updateRect())
             return;
@@ -498,14 +475,12 @@ void Pin::resetPos(bool fl)
     App::project()->setPinsPos(pt);
 }
 
-void Pin::setPos(const QPointF pos[])
-{
+void Pin::setPos(const QPointF pos[]) {
     for (int i = 0; i < 4; ++i)
         m_pins[i]->setPos(pos[i]);
 }
 
-void Pin::updateToolTip()
-{
+void Pin::updateToolTip() {
     const QPointF p(pos() - Marker::get(Marker::Zero)->pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3")
                    .arg(m_index + 1)
@@ -513,40 +488,34 @@ void Pin::updateToolTip()
                    .arg(p.y()));
 }
 
-void Pin::setPos(const QPointF& pos)
-{
+void Pin::setPos(const QPointF& pos) {
     QGraphicsItem::setPos(pos);
     updateToolTip();
 }
 
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
-    : QGraphicsObject(nullptr)
-{
+    : QGraphicsObject(nullptr) {
     setZValue(-std::numeric_limits<double>::max());
     setFlag(ItemIsSelectable, false);
     App::setLayoutFrames(this);
 }
 
-LayoutFrames::~LayoutFrames()
-{
+LayoutFrames::~LayoutFrames() {
     App::setLayoutFrames(nullptr);
 }
 
-int LayoutFrames::type() const
-{
+int LayoutFrames::type() const {
     return static_cast<int>(GiType::MarkLayoutFrames);
 }
 
-QRectF LayoutFrames::boundingRect() const
-{
+QRectF LayoutFrames::boundingRect() const {
     if (App::scene()->drawPdf())
         return QRectF();
     return m_rect;
 }
 
-void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
@@ -559,8 +528,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->restore();
 }
 
-void LayoutFrames::updateRect(bool fl)
-{
+void LayoutFrames::updateRect(bool fl) {
     QPainterPath path;
     QRectF rect(App::project()->worckRect());
     m_rect = rect;

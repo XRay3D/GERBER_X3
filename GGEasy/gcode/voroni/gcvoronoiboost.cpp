@@ -47,14 +47,12 @@ typedef VD::const_cell_iterator const_cell_iterator;
 typedef VD::const_vertex_iterator const_vertex_iterator;
 typedef VD::const_edge_iterator const_edge_iterator;
 
-segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const cell_type& cell)
-{
+segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const cell_type& cell) {
     source_index_type index = cell.source_index(); // - point_data_.size();
     return segment_data_[index];
 }
 
-point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_type& cell)
-{
+point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_type& cell) {
     source_index_type index = cell.source_index();
     source_category_type category = cell.source_category();
     //    if (category == boost::polygon::SOURCE_CATEGORY_SINGLE_POINT) {
@@ -65,8 +63,7 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
                                                                            : high(segment_data_[index]);
 }
 
-Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge)
-{
+Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
 
     std::vector<point_type> sampled_edge { point_type { edge.vertex0()->x(), edge.vertex0()->y() }, point_type { edge.vertex1()->x(), edge.vertex1()->y() } };
     coordinate_type max_dist = uScale * 0.00001; //* 1E-3* (xh(brect_) - xl(brect_));
@@ -88,8 +85,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 }
 namespace GCode {
 
-void VoronoiBoost::boostVoronoi()
-{
+void VoronoiBoost::boostVoronoi() {
     const double tolerance = m_gcp.params[GCodeParams::Tolerance].toDouble() * uScale;
 
     cInt minX = std::numeric_limits<cInt>::max(),
@@ -238,9 +234,8 @@ void VoronoiBoost::boostVoronoi()
     m_returnPs = segments;
     m_returnPs.push_back(frame);
 }
-}
+} // namespace GCode
 #else
-void GCode::VoronoiBoost::boostVoronoi()
-{
+void GCode::VoronoiBoost::boostVoronoi() {
 }
 #endif

@@ -28,19 +28,16 @@ using TreeItem = Node;
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode("rootItem", new int(-1)))
-    , mimeType(QStringLiteral("application/GCodeItem"))
-{
+    , mimeType(QStringLiteral("application/GCodeItem")) {
     App::setFileModel(this);
 }
 
-Model::~Model()
-{
+Model::~Model() {
     delete rootItem;
     App::setFileModel(nullptr);
 }
 
-void Model::addFile(FileInterface* file)
-{
+void Model::addFile(FileInterface* file) {
     if (!file)
         return;
 
@@ -66,8 +63,7 @@ void Model::addFile(FileInterface* file)
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
-void Model::addShape(ShapeInterface* shape)
-{
+void Model::addShape(ShapeInterface* shape) {
     if (!shape)
         return;
 
@@ -93,8 +89,7 @@ void Model::addShape(ShapeInterface* shape)
     emit select(createIndex(rowCount, 0, shape->node()));
 }
 
-void Model::closeProject()
-{
+void Model::closeProject() {
     Node* item;
     for (int i = 0; i < rootItem->childCount(); ++i) {
         item = rootItem->child(i);
@@ -109,8 +104,7 @@ void Model::closeProject()
     }
 }
 
-QModelIndex Model::index(int row, int column, const QModelIndex& parent) const
-{
+QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
@@ -130,8 +124,7 @@ QModelIndex Model::index(int row, int column, const QModelIndex& parent) const
     //    return QModelIndex();
 }
 
-QModelIndex Model::parent(const QModelIndex& index) const
-{
+QModelIndex Model::parent(const QModelIndex& index) const {
     //    if (!index.isValid())
     //        return QModelIndex();
     //    TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
@@ -148,23 +141,20 @@ QModelIndex Model::parent(const QModelIndex& index) const
     return createIndex(parentItem->row(), /*index.column()*/ 0, parentItem);
 }
 
-QVariant Model::data(const QModelIndex& index, int role) const
-{
+QVariant Model::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
     return getItem(index)->data(index, role);
 }
 
-bool Model::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     bool ok = getItem(index)->setData(index, value, role);
     if (ok)
         App::project()->setChanged();
     return ok;
 }
 
-QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
-{
+QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
     if ((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal)
         switch (section) {
         case 0:
@@ -179,8 +169,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     return QVariant();
 }
 
-Qt::ItemFlags Model::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     if (!index.isValid()) {
         qDebug() << index;
         return Qt::NoItemFlags;
@@ -188,8 +177,7 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const
     return getItem(index)->flags(index);
 }
 
-bool Model::removeRows(int row, int count, const QModelIndex& parent)
-{
+bool Model::removeRows(int row, int count, const QModelIndex& parent) {
     Node* item = nullptr;
     if (parent.isValid())
         item = static_cast<Node*>(parent.internalPointer());
@@ -204,13 +192,11 @@ bool Model::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-int Model::columnCount(const QModelIndex& /*parent*/) const
-{
+int Model::columnCount(const QModelIndex& /*parent*/) const {
     return int(Column::Count);
 }
 
-int Model::rowCount(const QModelIndex& parent) const
-{
+int Model::rowCount(const QModelIndex& parent) const {
     TreeItem* parentItem;
     if (parent.column() > 0)
         return 0;
@@ -345,8 +331,7 @@ int Model::rowCount(const QModelIndex& parent) const
 //    //    return true;
 //}
 
-Node* Model::getItem(const QModelIndex& index) const
-{
+Node* Model::getItem(const QModelIndex& index) const {
     if (index.isValid()) {
         auto* item = static_cast<Node*>(index.internalPointer());
         if (item)
@@ -355,4 +340,4 @@ Node* Model::getItem(const QModelIndex& index) const
     return rootItem;
 }
 
-}
+} // namespace FileTree

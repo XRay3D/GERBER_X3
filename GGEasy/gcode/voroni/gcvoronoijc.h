@@ -34,15 +34,13 @@ protected:
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;
-        inline void push_back(OrdPath* opt)
-        {
+        inline void push_back(OrdPath* opt) {
             ++count;
             Last->Next = opt;
             Last = opt->Prev->Last;
             opt->Prev = this;
         }
-        Path toPath()
-        {
+        Path toPath() {
             Path rp;
             rp.reserve(count);
             rp.push_back(Pt);
@@ -58,4 +56,4 @@ protected:
     void jcVoronoi();
     Paths toPath(const Pairs& pairs);
 };
-}
+} // namespace GCode

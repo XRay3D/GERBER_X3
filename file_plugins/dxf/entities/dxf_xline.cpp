@@ -13,7 +13,6 @@
 #include "xline.h"
 namespace Dxf {
 XLINE::XLINE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

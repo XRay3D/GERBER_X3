@@ -14,4 +14,4 @@ namespace Dxf {
 struct Sun final : Entity {
     Sun(SectionParser* sp);
 };
-}
+} // namespace Dxf

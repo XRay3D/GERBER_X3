@@ -14,4 +14,4 @@ namespace Dxf {
 struct MLine final : Entity {
     MLine(SectionParser* sp);
 };
-}
+} // namespace Dxf

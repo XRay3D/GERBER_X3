@@ -14,4 +14,4 @@ namespace Dxf {
 struct OleFrame final : Entity {
     OleFrame(SectionParser* sp);
 };
-}
+} // namespace Dxf

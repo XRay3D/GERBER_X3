@@ -24,8 +24,7 @@
 #pragma comment(lib, "Setupapi")
 #endif
 
-QSizeF GetRealSize()
-{
+QSizeF GetRealSize() {
     static QSizeF size;
     if (!size.isEmpty())
         return size;

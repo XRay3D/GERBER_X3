@@ -83,4 +83,4 @@ signals:
 //        return {};
 //    }
 //};
-}
+} // namespace Hpgl

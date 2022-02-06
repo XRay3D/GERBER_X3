@@ -5,8 +5,7 @@
 namespace Dxf {
 
 SettingsTab::SettingsTab(QWidget* parent)
-    : SettingsTabInterface(parent)
-{
+    : SettingsTabInterface(parent) {
     setObjectName(QString::fromUtf8("tabDxf"));
     auto verticalLayout = new QVBoxLayout(this);
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
@@ -70,8 +69,7 @@ SettingsTab::SettingsTab(QWidget* parent)
 
 SettingsTab::~SettingsTab() { }
 
-void SettingsTab::readSettings(MySettings& settings)
-{
+void SettingsTab::readSettings(MySettings& settings) {
     settings.beginGroup("Dxf");
     m_defaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
     m_boldFont = settings.getValue(chbxBoldFont, false);
@@ -80,8 +78,7 @@ void SettingsTab::readSettings(MySettings& settings)
     settings.endGroup();
 }
 
-void SettingsTab::writeSettings(MySettings& settings)
-{
+void SettingsTab::writeSettings(MySettings& settings) {
     settings.beginGroup("Dxf");
     m_defaultFont = settings.setValue(fcbxDxfDefaultFont);
     m_boldFont = settings.setValue(chbxBoldFont);
@@ -90,4 +87,4 @@ void SettingsTab::writeSettings(MySettings& settings)
     settings.endGroup();
 }
 
-}
+} // namespace Dxf

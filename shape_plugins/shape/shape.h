@@ -48,7 +48,7 @@ protected:
     Paths m_paths;
     Node* m_node;
     std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
-    QPointF initPos; // групповое перемещение
+    QPointF initPos;                             // групповое перемещение
     bool isFinal {};
 
     // QGraphicsItem interface
@@ -71,4 +71,4 @@ protected:
     void write_(QDataStream& stream) const override;
     void read_(QDataStream& stream) override;
 };
-}
+} // namespace Shapes

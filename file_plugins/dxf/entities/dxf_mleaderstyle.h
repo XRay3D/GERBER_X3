@@ -14,4 +14,4 @@ namespace Dxf {
 struct MLeaderStyle final : Entity {
     MLeaderStyle(SectionParser* sp);
 };
-}
+} // namespace Dxf

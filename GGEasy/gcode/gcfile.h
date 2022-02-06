@@ -32,8 +32,8 @@ public:
 
 private:
     ////////////////////////////////////////
-    Paths m_pocketPaths; /////
-    Pathss m_toolPathss; /////
+    Paths m_pocketPaths;     /////
+    Pathss m_toolPathss;     /////
     const GCodeParams m_gcp; ////
 
     mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
@@ -82,4 +82,4 @@ public:
     Tool getTool() const;
     const GCodeParams& gcp() const;
 };
-}
+} // namespace GCode

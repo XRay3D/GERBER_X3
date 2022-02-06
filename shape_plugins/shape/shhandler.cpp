@@ -28,8 +28,7 @@ namespace Shapes {
 constexpr double StickingDistance = 10;
 constexpr double Size = StickingDistance / 2;
 
-void drawPos(QPainter* painter, const QPointF& pt1)
-{
+void drawPos(QPainter* painter, const QPointF& pt1) {
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  X = %1 in\n"
@@ -59,8 +58,7 @@ void drawPos(QPainter* painter, const QPointF& pt1)
 
 Handler::Handler(Shape* shape, HType type)
     : shape(shape)
-    , m_hType(type)
-{
+    , m_hType(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
     switch (m_hType) {
@@ -78,15 +76,13 @@ Handler::Handler(Shape* shape, HType type)
     App::shapeHandlers().emplace_back(this);
 }
 
-Handler::~Handler()
-{
+Handler::~Handler() {
     App::shapeHandlers().removeOne(this);
 }
 
 QRectF Handler::boundingRect() const { return rect(); }
 
-void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
+void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
     QColor c;
     switch (m_hType) {
@@ -110,8 +106,7 @@ void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         painter->drawEllipse(rect());
 }
 
-void Handler::setPos(const QPointF& pos)
-{
+void Handler::setPos(const QPointF& pos) {
     QGraphicsItem::setPos(pos);
     if (m_hType == Center) {
         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
@@ -120,10 +115,10 @@ void Handler::setPos(const QPointF& pos)
         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
         for (Handler* h : App::shapeHandlers()) {
-            if (h != this && //
+            if (h != this &&                                          //
                 (h->shape != shape || (fl && h->hType() != Adder)) && //
-                h->shape->isVisible() && //
-                QLineF(h->pos(), pos).length() < k //
+                h->shape->isVisible() &&                              //
+                QLineF(h->pos(), pos).length() < k                    //
             ) {
                 QGraphicsItem::setPos(h->pos());
                 break;
@@ -138,16 +133,14 @@ Handler::HType Handler::hType() const { return m_hType; }
 
 void Handler::setHType(const HType& value) { m_hType = value; }
 
-QRectF Handler::rect() const
-{
+QRectF Handler::rect() const {
     const double scale = App::graphicsView()->scaleFactor();
     const double k = Size * scale;
     const double s = k * 2;
     return { QPointF(-k, -k), QSizeF(s, s) };
 }
 
-void Handler::savePos()
-{
+void Handler::savePos() {
     if (m_hType != Center)
         return;
     pt.clear();
@@ -156,13 +149,11 @@ void Handler::savePos()
         pt.push_back(item->pos());
 }
 
-void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
+void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     savePos();
     class Dialog : public QDialog {
     public:
-        Dialog(Handler* h)
-        {
+        Dialog(Handler* h) {
             setWindowFlags(Qt::Popup);
             setModal(false);
             // clang-format off
@@ -208,23 +199,20 @@ void Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnt
 
 void Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
 
-void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
+void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 }
 
-void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
+void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     savePos();
     pressed = true;
     QGraphicsItem::mousePressEvent(event);
 }
 
-void Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
+void Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     pressed = false;
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-}
+} // namespace Shapes

@@ -54,12 +54,10 @@
 //inline constexpr sort_fn sort {};
 
 namespace GCode {
-HatchingCreator::HatchingCreator()
-{
+HatchingCreator::HatchingCreator() {
 }
 
-void HatchingCreator::create()
-{
+void HatchingCreator::create() {
     createRaster(
         m_gcp.tools.front(),
         m_gcp.params[GCodeParams::Depth].toDouble(),
@@ -68,8 +66,7 @@ void HatchingCreator::create()
         m_gcp.params[GCodeParams::Pass].toInt());
 }
 
-void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass)
-{
+void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
     QElapsedTimer t;
     t.start();
 
@@ -108,7 +105,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         for (size_t i {}, last {}; i < sl.size(); ++i) {
             if (auto y = sl[i].front().Y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; }) // horizontal sort
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; })              // horizontal sort
                    : std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().X; }); // horizontal sort
 
                 for (size_t k = last; k < i; ++k) { // fix direction
@@ -306,4 +303,4 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
     }
 }
 
-}
+} // namespace GCode

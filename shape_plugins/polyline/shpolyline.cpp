@@ -18,8 +18,7 @@
 
 namespace Shapes {
 
-PolyLine::PolyLine(QPointF pt1, QPointF pt2)
-{
+PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
     m_paths.resize(1);
     handlers.reserve(4);
 
@@ -36,8 +35,7 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2)
     App::scene()->addItem(this);
 }
 
-void PolyLine::redraw()
-{
+void PolyLine::redraw() {
     Path& path = m_paths.front();
     path.clear();
     for (size_t i = 1, e = handlers.size(); i < e; ++i) {
@@ -63,8 +61,7 @@ QString PolyLine::name() const { return QObject::tr("Line"); }
 
 QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
 
-void PolyLine::updateOtherHandlers(Handler* handler)
-{
+void PolyLine::updateOtherHandlers(Handler* handler) {
     if (handler->hType() == Handler::Adder) {
         int idx = handlers.indexOf(handler);
         Handler* h;
@@ -105,15 +102,13 @@ void PolyLine::updateOtherHandlers(Handler* handler)
     }
 }
 
-void PolyLine::setPt(const QPointF& pt)
-{
+void PolyLine::setPt(const QPointF& pt) {
     handlers[handlers.size() - 2]->QGraphicsItem::setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
     handlers.back()->Handler::setPos(pt);
     redraw();
 }
 
-void PolyLine::addPt(const QPointF& pt)
-{
+void PolyLine::addPt(const QPointF& pt) {
     Handler* h1 = handlers.back().get();
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
 
@@ -129,8 +124,7 @@ void PolyLine::addPt(const QPointF& pt)
 
 bool PolyLine::closed() { return handlers[1]->pos() == handlers.back()->pos(); }
 
-QPointF PolyLine::centroid()
-{
+QPointF PolyLine::centroid() {
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area
@@ -154,8 +148,7 @@ QPointF PolyLine::centroid()
     return centroid;
 }
 
-QPointF PolyLine::centroidFast()
-{
+QPointF PolyLine::centroidFast() {
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area
@@ -197,8 +190,7 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShPolyLine); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Poly Line" },
         { "Version", "1.0" },
@@ -213,8 +205,7 @@ Shape* Plugin::createShape() { return shape = new PolyLine(); }
 
 Shape* Plugin::createShape(const QPointF& point) { return shape = new PolyLine(point, point); }
 
-bool Plugin::addShapePoint(const QPointF& point)
-{
+bool Plugin::addShapePoint(const QPointF& point) {
     if (shape->closed())
         return false;
     else
@@ -222,18 +213,16 @@ bool Plugin::addShapePoint(const QPointF& point)
     return true;
 }
 
-void Plugin::updateShape(const QPointF& point)
-{
+void Plugin::updateShape(const QPointF& point) {
     if (shape)
         shape->setPt(point);
 }
 
-void Plugin::finalizeShape()
-{
+void Plugin::finalizeShape() {
     if (shape)
         shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }
 
-}
+} // namespace Shapes

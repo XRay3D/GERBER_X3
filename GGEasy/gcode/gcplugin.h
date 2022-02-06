@@ -38,4 +38,4 @@ signals:
     void fileProgress(const QString& fileName, int max, int value) override;
     void fileReady(FileInterface* file) override;
 };
-}
+} // namespace GCode

@@ -20,8 +20,7 @@
 
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::ToolEditForm)
-{
+    , ui(new Ui::ToolEditForm) {
     ui->setupUi(this);
 
     dsbx = {
@@ -97,8 +96,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     setChanged(false);
 }
 
-ToolEditForm::~ToolEditForm()
-{
+ToolEditForm::~ToolEditForm() {
     QSettings settings;
     settings.setValue("cbxFeedSpeeds", ui->cbxFeedSpeeds->currentIndex());
     //settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
@@ -106,8 +104,7 @@ ToolEditForm::~ToolEditForm()
     ui = nullptr;
 }
 
-void ToolEditForm::setItem(ToolItem* item)
-{
+void ToolEditForm::setItem(ToolItem* item) {
     if (item == nullptr)
         return;
     m_item = item;
@@ -122,8 +119,7 @@ void ToolEditForm::setItem(ToolItem* item)
     setChanged(false);
 }
 
-void ToolEditForm::setTool(const Tool& tool)
-{
+void ToolEditForm::setTool(const Tool& tool) {
     m_tool = tool;
     setupToolWidgets(m_tool.type());
     dsbx[Tool::Angle]->setValue(tool.angle());
@@ -141,14 +137,12 @@ void ToolEditForm::setTool(const Tool& tool)
     ui->teNote->setText(tool.note());
 }
 
-void ToolEditForm::setChanged(bool fl)
-{
+void ToolEditForm::setChanged(bool fl) {
     ui->pbApply->setEnabled(fl);
     parentWidget()->setWindowModified(fl);
 }
 
-void ToolEditForm::setVisibleToolWidgets(bool visible)
-{
+void ToolEditForm::setVisibleToolWidgets(bool visible) {
     ui->cbxFeedSpeeds->setVisible(visible);
     ui->cbxToolType->setVisible(visible);
     ui->cbxUnits->setVisible(visible);
@@ -161,8 +155,7 @@ void ToolEditForm::setVisibleToolWidgets(bool visible)
     setMinimumWidth(width());
 }
 
-void ToolEditForm::setupToolWidgets(int type)
-{
+void ToolEditForm::setupToolWidgets(int type) {
     const int lastType = m_tool.type();
     m_tool.setType(type);
 
@@ -233,8 +226,7 @@ void ToolEditForm::setupToolWidgets(int type)
     updateName();
 }
 
-void ToolEditForm::valueChangedSlot(double value)
-{
+void ToolEditForm::valueChangedSlot(double value) {
     switch (dsbx.indexOf(dynamic_cast<DoubleSpinBox*>(sender()))) {
     case Tool::Angle:
         m_tool.setAngle(value);
@@ -297,8 +289,7 @@ void ToolEditForm::valueChangedSlot(double value)
     setChanged();
 }
 
-void ToolEditForm::on_pbApply_clicked()
-{
+void ToolEditForm::on_pbApply_clicked() {
     if (m_item && m_tool.isValid()) {
         m_item->setName(m_tool.name());
         m_item->setNote(m_tool.note());
@@ -337,16 +328,14 @@ void ToolEditForm::on_pbApply_clicked()
     }
 }
 
-void ToolEditForm::setDialog()
-{
+void ToolEditForm::setDialog() {
     m_dialog = false;
     ui->pbApply->setVisible(false);
     ui->cbxToolType->setEnabled(m_dialog);
     setVisibleToolWidgets(true);
 }
 
-void ToolEditForm::updateName()
-{
+void ToolEditForm::updateName() {
     if (!ui->chbxAutoName->isChecked())
         return;
     switch (ui->cbxToolType->currentIndex()) {

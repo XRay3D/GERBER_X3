@@ -17,17 +17,15 @@
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
-}
+} // namespace ClipperLib
 
 namespace GCode {
 
-inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0)
-{
+inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0) {
     return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y);
 }
 
-void VoronoiCreator::create()
-{
+void VoronoiCreator::create() {
     const auto& tool = m_gcp.tools.front();
     const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
     const auto width = m_gcp.params[GCodeParams::Width].toDouble();
@@ -84,8 +82,7 @@ void VoronoiCreator::create()
     }
 }
 
-void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width)
-{
+void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width) {
     msg = tr("Create Offset");
     m_toolDiameter = tool.getDiameter(depth) * uScale;
     m_dOffset = m_toolDiameter / 2;
@@ -133,4 +130,4 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     //m_returnPss.push_back({frame});
 }
 
-}
+} // namespace GCode

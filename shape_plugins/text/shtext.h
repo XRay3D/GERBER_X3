@@ -50,8 +50,7 @@ public:
             , angle(0.0)
             , height(10.0)
             , xy(0.0)
-            , handleAlign(BotLeft)
-        {
+            , handleAlign(BotLeft) {
         }
         QString font;
         QString text;
@@ -127,4 +126,4 @@ signals:
     void actionUncheck(bool = false) override;
 };
 
-}
+} // namespace Shapes

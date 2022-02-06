@@ -19,14 +19,12 @@ namespace FileTree {
 
 FolderNode::FolderNode(const QString& name, int* id)
     : FileTree::Node(id, Folder)
-    , name(name)
-{
+    , name(name) {
 }
 
 FolderNode::~FolderNode() { delete m_id; }
 
-QVariant FolderNode::data(const QModelIndex& index, int role) const
-{
+QVariant FolderNode::data(const QModelIndex& index, int role) const {
     if (!index.column()) {
         switch (role) {
         case Qt::DisplayRole:
@@ -49,13 +47,11 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const
-{
+Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled /*| Qt::ItemIsDropEnabled*/;
 }
 
-bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role) {
     if (index.column())
         return false;
 
@@ -68,8 +64,7 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
     }
 }
 
-void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) const
-{
+void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) const {
 }
 
-}
+} // namespace FileTree

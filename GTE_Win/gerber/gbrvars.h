@@ -115,10 +115,10 @@ enum GCode {
 };
 
 enum AttributeType {
-    AttributeA, // TF
+    AttributeA,        // TF
     ApertureAttribute, // TA
-    ObjectAttribute, // TO
-    DeleteAttribute // TD
+    ObjectAttribute,   // TO
+    DeleteAttribute    // TD
 };
 
 enum PrimitiveType {
@@ -175,8 +175,7 @@ public:
         , m_curPos(IntPoint())
         , m_mirroring(NoMirroring)
         , m_scaling(1.0)
-        , m_rotating(0.0)
-    {
+        , m_rotating(0.0) {
     }
 
     inline Format* format() const { return m_format; }
@@ -227,8 +226,7 @@ class GraphicObject {
     State m_state;
 
 public:
-    GraphicObject()
-    {
+    GraphicObject() {
     }
     GraphicObject(
         int,
@@ -238,8 +236,7 @@ public:
         const Path& path = Path())
         : m_path(path)
         , m_paths(paths)
-        , m_state(state)
-    {
+        , m_state(state) {
     }
 
     inline const Path& path() const { return m_path; }
@@ -248,8 +245,7 @@ public:
 };
 
 struct StepRepeatStr {
-    void reset()
-    {
+    void reset() {
         x = 0;
         y = 0;
         i = 0.0;

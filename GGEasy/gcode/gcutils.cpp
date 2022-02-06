@@ -21,12 +21,10 @@
 namespace GCode {
 
 GCUtils::GCUtils(const GCodeParams& gcp)
-    : m_gcp(gcp)
-{
+    : m_gcp(gcp) {
 }
 
-QString GCUtils::getLastDir()
-{
+QString GCUtils::getLastDir() {
     if (Settings::sameFolder() && !redirected)
         lastDir = QFileInfo(App::project()->name()).absolutePath();
     else if (lastDir.isEmpty()) {
@@ -39,8 +37,7 @@ QString GCUtils::getLastDir()
     return lastDir += '/';
 }
 
-void GCUtils::setLastDir(QString dirPath)
-{
+void GCUtils::setLastDir(QString dirPath) {
     dirPath = QFileInfo(dirPath).absolutePath();
     if (Settings::sameFolder() && !redirected) {
         redirected = QFileInfo(App::project()->name()).absolutePath() != dirPath;
@@ -54,8 +51,7 @@ void GCUtils::setLastDir(QString dirPath)
     }
 }
 
-mvector<double> GCUtils::getDepths()
-{
+mvector<double> GCUtils::getDepths() {
     const auto gDepth { m_gcp.getDepth() };
     if (gDepth < m_gcp.getTool().passDepth() || qFuzzyCompare(gDepth, m_gcp.getTool().passDepth()))
         return { -gDepth - m_gcp.getTool().getDepth() };
@@ -68,4 +64,4 @@ mvector<double> GCUtils::getDepths()
     depths.back() = -gDepth - m_gcp.getTool().depth();
     return depths;
 }
-}
+} // namespace GCode

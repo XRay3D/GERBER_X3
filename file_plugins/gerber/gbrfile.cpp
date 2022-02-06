@@ -41,8 +41,7 @@ Paths GraphicObject::elipseW() const { return m_state.dCode() == D03
         ? m_paths
         : Paths(); }
 
-QDebug operator<<(QDebug debug, const State& state)
-{
+QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
     debug.nospace() << "State("
                     << "D0" << state.dCode() << ", "
@@ -62,8 +61,7 @@ QDebug operator<<(QDebug debug, const State& state)
 }
 
 File::File(const QString& fileName)
-    : FileInterface()
-{
+    : FileInterface() {
     m_itemGroups.append({ new ItemGroup, new ItemGroup });
     m_name = fileName;
     m_layerTypes = {
@@ -78,8 +76,7 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &m_apertures; }
 
-Paths File::merge() const
-{
+Paths File::merge() const {
     QElapsedTimer t;
     t.start();
     m_mergedPaths.clear();
@@ -166,8 +163,7 @@ Paths File::merge() const
 
 const QList<Component>& File::components() const { return m_components; }
 
-void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
-{
+void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
     Paths paths;
     switch (group) {
@@ -202,8 +198,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
-Pathss& File::groupedPaths(File::Group group, bool fl)
-{
+Pathss& File::groupedPaths(File::Group group, bool fl) {
     if (m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
@@ -225,8 +220,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
     return m_groupedPaths;
 }
 
-bool File::flashedApertures() const
-{
+bool File::flashedApertures() const {
     for (auto [_, aperture] : m_apertures) {
         if (aperture->flashed())
             return true;
@@ -234,15 +228,13 @@ bool File::flashedApertures() const
     return false;
 }
 
-void File::setColor(const QColor& color)
-{
+void File::setColor(const QColor& color) {
     m_color = color;
     m_itemGroups[Normal]->setBrushColor(color);
     m_itemGroups[ApPaths]->setPen(QPen(color, 0.0));
 }
 
-mvector<const AbstrGraphicObject*> File::graphicObjects() const
-{
+mvector<const AbstrGraphicObject*> File::graphicObjects() const {
     mvector<const AbstrGraphicObject*> go(m_graphicObjects.size());
     size_t i = 0;
     for (auto& refGo : m_graphicObjects)
@@ -250,8 +242,7 @@ mvector<const AbstrGraphicObject*> File::graphicObjects() const
     return go;
 }
 
-void File::initFrom(FileInterface* file)
-{
+void File::initFrom(FileInterface* file) {
     FileInterface::initFrom(file);
     static_cast<Node*>(m_node)->file = this;
 
@@ -270,13 +261,11 @@ void File::initFrom(FileInterface* file)
     setItemType(file->itemsType());
 }
 
-FileTree::Node* File::node()
-{
+FileTree::Node* File::node() {
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
-void File::setItemType(int type)
-{
+void File::setItemType(int type) {
     if (m_itemsType == type)
         return;
 
@@ -291,8 +280,7 @@ void File::setItemType(int type)
 
 int File::itemsType() const { return m_itemsType; }
 
-void File::write(QDataStream& stream) const
-{
+void File::write(QDataStream& stream) const {
     stream << m_graphicObjects; // write  QList<GraphicObject>
     stream << m_apertures;
     stream << m_format;
@@ -303,9 +291,8 @@ void File::write(QDataStream& stream) const
     stream << m_components;
 }
 
-void File::read(QDataStream& stream)
-{
-    crutch = &m_format; ///////////////////
+void File::read(QDataStream& stream) {
+    crutch = &m_format;         ///////////////////
     stream >> m_graphicObjects; // read  QList<GraphicObject>
     stream >> m_apertures;
     stream >> m_format;
@@ -320,8 +307,7 @@ void File::read(QDataStream& stream)
     }
 }
 
-void File::createGi()
-{
+void File::createGi() {
     if constexpr (1) { // fill copper
         for (Paths& paths : groupedPaths()) {
             GraphicsItem* item = new GiDataSolid(paths, this);
@@ -410,4 +396,4 @@ void File::createGi()
     m_itemGroups[m_itemsType]->setVisible(m_visible);
 }
 
-}
+} // namespace Gerber

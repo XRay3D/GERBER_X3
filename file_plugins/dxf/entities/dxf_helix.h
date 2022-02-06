@@ -14,4 +14,4 @@ namespace Dxf {
 struct Helix final : Entity {
     Helix(SectionParser* sp);
 };
-}
+} // namespace Dxf

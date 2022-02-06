@@ -34,8 +34,7 @@
 //   HRESULT error code.
 //
 HRESULT SetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName,
-    PCWSTR pszData)
-{
+    PCWSTR pszData) {
     HRESULT hr;
     HKEY hKey = nullptr;
 
@@ -76,8 +75,7 @@ HRESULT SetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName,
 //   exist or the data for the specified value name was not set, the function
 //   returns COR_E_FILENOTFOUND (0x80070002).
 //
-HRESULT GetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName, PWSTR pszData, DWORD cbData)
-{
+HRESULT GetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName, PWSTR pszData, DWORD cbData) {
     HRESULT hr;
     HKEY hKey = nullptr;
 
@@ -125,8 +123,7 @@ HRESULT GetHKCRRegistryKeyAndValue(PCWSTR pszSubKey, PCWSTR pszValueName, PWSTR 
 //   }
 //
 HRESULT RegisterInprocServer(PCWSTR pszModule, const CLSID& clsid,
-    PCWSTR pszFriendlyName, PCWSTR pszThreadModel)
-{
+    PCWSTR pszFriendlyName, PCWSTR pszThreadModel) {
     if (pszModule == nullptr || pszThreadModel == nullptr) {
         return E_INVALIDARG;
     }
@@ -172,8 +169,7 @@ HRESULT RegisterInprocServer(PCWSTR pszModule, const CLSID& clsid,
 //
 //   NOTE: The function deletes the HKCR\CLSID\{<CLSID>} key in the registry.
 //
-HRESULT UnregisterInprocServer(const CLSID& clsid)
-{
+HRESULT UnregisterInprocServer(const CLSID& clsid) {
     HRESULT hr = S_OK;
 
     wchar_t szCLSID[MAX_PATH];
@@ -215,8 +211,7 @@ HRESULT UnregisterInprocServer(const CLSID& clsid)
 //      }
 //   }
 //
-HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
-{
+HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid) {
     if (pszFileType == nullptr) {
         return E_INVALIDARG;
     }
@@ -266,8 +261,7 @@ HRESULT RegisterShellExtThumbnailHandler(PCWSTR pszFileType, const CLSID& clsid)
 //   NOTE: The function removes the registry key
 //   HKCR\<File Type>\shellex\{e357fccd-a995-4576-b01f-234630154e96}.
 //
-HRESULT UnregisterShellExtThumbnailHandler(PCWSTR pszFileType)
-{
+HRESULT UnregisterShellExtThumbnailHandler(PCWSTR pszFileType) {
     if (pszFileType == nullptr) {
         return E_INVALIDARG;
     }

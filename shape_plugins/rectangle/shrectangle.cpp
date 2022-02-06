@@ -18,8 +18,7 @@
 
 namespace Shapes {
 
-Rectangle::Rectangle(QPointF pt1, QPointF pt2)
-{
+Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
     m_paths.resize(1);
     handlers.reserve(PtCount);
 
@@ -39,8 +38,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2)
 
 Rectangle::~Rectangle() { }
 
-void Rectangle::redraw()
-{
+void Rectangle::redraw() {
     handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
     m_paths.front() = {
         handlers[Point1]->pos(),
@@ -61,8 +59,7 @@ QString Rectangle::name() const { return QObject::tr("Rectangle"); }
 
 QIcon Rectangle::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-void Rectangle::updateOtherHandlers(Handler* handler)
-{
+void Rectangle::updateOtherHandlers(Handler* handler) {
     switch (handlers.indexOf(handler)) {
     case Center:
         return;
@@ -85,8 +82,7 @@ void Rectangle::updateOtherHandlers(Handler* handler)
     }
 }
 
-void Rectangle::setPt(const QPointF& pt)
-{
+void Rectangle::setPt(const QPointF& pt) {
     handlers[Point3]->setPos(pt);
     updateOtherHandlers(handlers[Point3].get());
     redraw();
@@ -103,8 +99,7 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShRectangle); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Rectangle" },
         { "Version", "1.0" },
@@ -121,18 +116,16 @@ Shape* Plugin::createShape(const QPointF& point) { return shape = new Rectangle(
 
 bool Plugin::addShapePoint(const QPointF&) { return false; }
 
-void Plugin::updateShape(const QPointF& point)
-{
+void Plugin::updateShape(const QPointF& point) {
     if (shape)
         shape->setPt(point);
 }
 
-void Plugin::finalizeShape()
-{
+void Plugin::finalizeShape() {
     if (shape)
         shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }
 
-}
+} // namespace Shapes

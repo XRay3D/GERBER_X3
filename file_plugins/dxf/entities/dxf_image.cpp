@@ -13,7 +13,6 @@
 #include "image.h"
 namespace Dxf {
 IMAGE::IMAGE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

@@ -21,8 +21,7 @@
 AbstractDrillPrGI::AbstractDrillPrGI(Row& row)
     : row(row)
     , m_bodyColor(colors[(int)Colors::Default])
-    , m_pathColor(colors[(int)Colors::UnUsed])
-{
+    , m_pathColor(colors[(int)Colors::UnUsed]) {
     connect(this, &AbstractDrillPrGI::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -30,8 +29,7 @@ AbstractDrillPrGI::AbstractDrillPrGI(Row& row)
     setZValue(std::numeric_limits<double>::max() - 10);
 }
 
-void AbstractDrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
-{
+void AbstractDrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->setPen({ m_bodyColor, 0.0 });
     painter->setBrush(m_bodyColor);
     painter->drawPath(m_sourcePath);
@@ -54,8 +52,7 @@ double AbstractDrillPrGI::sourceDiameter() const { return m_sourceDiameter; }
 
 int AbstractDrillPrGI::toolId() const { return row.toolId; }
 
-void AbstractDrillPrGI::changeColor()
-{
+void AbstractDrillPrGI::changeColor() {
     if (row.useForCalc)
         colorState |= Used;
     else
@@ -87,22 +84,19 @@ void AbstractDrillPrGI::changeColor()
     }
 }
 
-void AbstractDrillPrGI::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
+void AbstractDrillPrGI::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void AbstractDrillPrGI::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
+void AbstractDrillPrGI::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant AbstractDrillPrGI::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+QVariant AbstractDrillPrGI::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemSelectedChange) {
         if (value.toInt()) {
             colorState |= Selected;

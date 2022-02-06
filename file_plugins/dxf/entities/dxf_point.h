@@ -25,11 +25,11 @@ public:
     void read(QDataStream& stream) override;
 
     enum DataEnum {
-        SubclassMarker = 100, // Маркер подкласса (AcDbPoint)
-        Thickness = 39, // Толщина (необязательно; значение по умолчанию = 0)
-        PointX = 10, // Центральная точка (в ОСК)
-        PointY = 20, // Файл DXF: значение X; приложение: 3D-точка
-        PointZ = 30, // Файл DXF: значения Y и Z для центральной точки (в ОСК)
+        SubclassMarker = 100,      // Маркер подкласса (AcDbPoint)
+        Thickness = 39,            // Толщина (необязательно; значение по умолчанию = 0)
+        PointX = 10,               // Центральная точка (в ОСК)
+        PointY = 20,               // Файл DXF: значение X; приложение: 3D-точка
+        PointZ = 30,               // Файл DXF: значения Y и Z для центральной точки (в ОСК)
         ExtrusionDirectionX = 210, // Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)       // Файл DXF: значение X; приложение: 3D-вектор
         ExtrusionDirectionY = 220, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
@@ -40,4 +40,4 @@ public:
     double thickness = 0;
 };
 
-}
+} // namespace Dxf

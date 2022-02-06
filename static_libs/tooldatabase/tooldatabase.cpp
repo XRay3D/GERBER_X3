@@ -21,8 +21,7 @@
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     : QDialog(parent)
     , ui(new Ui::ToolDatabase)
-    , m_types(types)
-{
+    , m_types(types) {
 
     ui->setupUi(this);
     ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
@@ -71,8 +70,7 @@ ToolDatabase::~ToolDatabase() { delete ui; }
 
 Tool ToolDatabase::tool() const { return m_tool; }
 
-void ToolDatabase::keyPressEvent(QKeyEvent* evt)
-{
+void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         ui->toolEdit->on_pbApply_clicked();
         return;

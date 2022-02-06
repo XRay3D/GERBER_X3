@@ -15,12 +15,10 @@
 namespace Dxf {
 
 View::View(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void View::parse(CodeData& code)
-{
+void View::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void View::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

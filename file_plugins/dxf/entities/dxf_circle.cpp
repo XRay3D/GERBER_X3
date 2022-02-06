@@ -20,8 +20,7 @@
 
 namespace Dxf {
 Circle::Circle(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Circle::draw(const InsertEntity* const i) const
@@ -40,8 +39,7 @@ Circle::Circle(SectionParser* sp)
 //    }
 //}
 
-void Circle::parse(CodeData& code)
-{
+void Circle::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -76,8 +74,7 @@ void Circle::parse(CodeData& code)
 
 Entity::Type Circle::type() const { return Type::CIRCLE; }
 
-GraphicObject Circle::toGo() const
-{
+GraphicObject Circle::toGo() const {
     QPainterPath path;
     QPointF r(radius, radius);
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
@@ -105,18 +102,16 @@ GraphicObject Circle::toGo() const
     return { id, p.value(0), {} };
 }
 
-void Circle::write(QDataStream& stream) const
-{
+void Circle::write(QDataStream& stream) const {
     stream << centerPoint;
     stream << thickness;
     stream << radius;
 }
 
-void Circle::read(QDataStream& stream)
-{
+void Circle::read(QDataStream& stream) {
     stream >> centerPoint;
     stream >> thickness;
     stream >> radius;
 }
 
-}
+} // namespace Dxf

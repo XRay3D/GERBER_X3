@@ -15,8 +15,7 @@
 
 namespace Dxf {
 
-QDebug operator<<(QDebug debug, const CodeData& c)
-{
+QDebug operator<<(QDebug debug, const CodeData& c) {
     QDebugStateSaver saver(debug);
     //      debug.nospace() << QString("DC(%1, ").arg(c.m_code, 5).toLocal8Bit().data();
     //      debug.nospace() << '\n';
@@ -44,8 +43,7 @@ QDebug operator<<(QDebug debug, const CodeData& c)
 CodeData::CodeData(int code, const QString& value, int lineNum)
     : lineNum(lineNum)
     , m_code(code)
-    , strVal(value)
-{
+    , strVal(value) {
     bool ok = true;
     Type type;
     if (0 <= code && code <= 9) //            Строка (с появлением расширенных имен символов в AutoCAD 2000 предел в 255 символов был увеличен
@@ -177,9 +175,8 @@ QString CodeData::string() const { return strVal; }
 
 CodeData::Type CodeData::type() const { return static_cast<Type>(varVal.index()); }
 
-QVariant CodeData::value() const
-{
+QVariant CodeData::value() const {
     return std::visit([](auto&& arg) { return QVariant::fromValue(arg); }, varVal);
 }
 
-}
+} // namespace Dxf

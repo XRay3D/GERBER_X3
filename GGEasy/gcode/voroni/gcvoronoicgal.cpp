@@ -31,8 +31,7 @@ struct convert_info {
 struct merge_info {
     using Info = int;
     using result_type = Info;
-    inline Info operator()(const Info& info0, const Info& info1) const
-    {
+    inline Info operator()(const Info& info0, const Info& info1) const {
         if (info0 == info1)
             return info0;
         return info0;
@@ -58,24 +57,21 @@ struct Segment {
     IntPoint p1;
     Segment(cInt x1, cInt y1, cInt x2, cInt y2)
         : p0(x1, y1)
-        , p1(x2, y2)
-    {
+        , p1(x2, y2) {
     }
     Segment(const IntPoint& p0_, const IntPoint& p1_)
         : p0(p0_)
-        , p1(p1_)
-    {
+        , p1(p1_) {
     }
 };
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
-}
+} // namespace ClipperLib
 
 namespace GCode {
 
-void VoronoiCgal::cgalVoronoi()
-{
+void VoronoiCgal::cgalVoronoi() {
     cInt minX = std::numeric_limits<cInt>::max(),
          minY = std::numeric_limits<cInt>::max(),
          maxX = std::numeric_limits<cInt>::min(),
@@ -185,9 +181,9 @@ void VoronoiCgal::cgalVoronoi()
     m_returnPs.push_back(frame);
 }
 
-}
+} // namespace GCode
 #else
 namespace GCode {
 void VoronoiCgal::cgalVoronoi() { }
-}
+} // namespace GCode
 #endif

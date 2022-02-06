@@ -39,8 +39,7 @@ extern QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
 
 ThermalForm::ThermalForm(QWidget* parent)
     : FormsUtil(new GCode::ThermalCreator, parent)
-    , ui(new Ui::ThermalForm)
-{
+    , ui(new Ui::ThermalForm) {
     ui->setupUi(this);
 
     MySettings settings;
@@ -124,8 +123,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     }
 }
 
-ThermalForm::~ThermalForm()
-{
+ThermalForm::~ThermalForm() {
 
 #ifdef GERBER
     par = model->rootItem->child(0)->getParam();
@@ -147,8 +145,7 @@ ThermalForm::~ThermalForm()
     delete ui;
 }
 
-void ThermalForm::updateFiles()
-{
+void ThermalForm::updateFiles() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #else
@@ -167,8 +164,7 @@ void ThermalForm::updateFiles()
 #endif
 }
 
-bool ThermalForm::canToShow()
-{
+bool ThermalForm::canToShow() {
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
         App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
@@ -182,8 +178,7 @@ bool ThermalForm::canToShow()
 
 void ThermalForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void ThermalForm::createFile()
-{
+void ThermalForm::createFile() {
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -213,21 +208,18 @@ void ThermalForm::createFile()
     emit createToolpath();
 }
 
-void ThermalForm::updateName()
-{
+void ThermalForm::updateName() {
     tool = ui->toolHolder->tool();
     ui->leName->setText(tr("Thermal"));
     redraw();
 }
 
-void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
-{
+void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
     FileInterface* file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
     createTPI(file);
 }
 
-void ThermalForm::createTPI(FileInterface* file)
-{
+void ThermalForm::createTPI(FileInterface* file) {
     if (!file)
         file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
     m_sourcePreview.clear();
@@ -261,8 +253,7 @@ void ThermalForm::createTPI(FileInterface* file)
         ui->treeView->expandAll();
 }
 
-void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
-{
+void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     for (const auto& index : selected.indexes()) {
         auto* node = static_cast<ThermalNode*>(index.internalPointer());
         auto* item = node->item();
@@ -287,39 +278,34 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
     }
 }
 
-void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& deselected)
-{
+void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& deselected) {
     if (selected.isValid())
         ui->treeView->selectionModel()->select(selected, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     if (deselected.isValid())
         ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
-void ThermalForm::redraw()
-{
+void ThermalForm::redraw() {
     for (auto item : m_sourcePreview) {
         item->redraw();
     }
 }
 
-void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
-{
+void ThermalForm::on_dsbxDepth_valueChanged(double arg1) {
     m_depth = arg1;
     redraw();
 }
 
 void ThermalForm::editFile(GCode::File* /*file*/) { }
 
-void ThermalForm::on_dsbxAreaMin_editingFinished()
-{
+void ThermalForm::on_dsbxAreaMin_editingFinished() {
     if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
         lastMin = ui->dsbxAreaMin->value();
         createTPI(nullptr);
     }
 }
 
-void ThermalForm::on_dsbxAreaMax_editingFinished()
-{
+void ThermalForm::on_dsbxAreaMax_editingFinished() {
     if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
         lastMax = ui->dsbxAreaMax->value();
         createTPI(nullptr);

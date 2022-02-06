@@ -31,4 +31,4 @@ public:
     void emitCommitData();
 };
 
-}
+} // namespace FileTree

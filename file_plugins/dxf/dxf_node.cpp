@@ -32,8 +32,7 @@ class Dialog : public QDialog {
     QVBoxLayout* verticalLayout;
     QPushButton* pushButtonColorize;
     QTableView* tableView;
-    void setupUi(QDialog* dialog)
-    {
+    void setupUi(QDialog* dialog) {
         if (dialog->objectName().isEmpty())
             dialog->setObjectName(QString::fromUtf8("Dialog"));
         verticalLayout = new QVBoxLayout(dialog);
@@ -58,8 +57,7 @@ public:
     ~Dialog() { fl = true; }
     Dialog(File* file, bool& fl, QWidget* parent = nullptr)
         : QDialog(parent)
-        , fl(fl = false)
-    {
+        , fl(fl = false) {
         setupUi(this);
 
         setWindowTitle(file->shortName());
@@ -106,8 +104,7 @@ public:
 
     // QWidget interface
 protected:
-    void hideEvent(QHideEvent* event) override
-    {
+    void hideEvent(QHideEvent* event) override {
         event->accept();
         deleteLater();
     }
@@ -120,8 +117,7 @@ public:
     ~TreeWidget() { fl = true; }
     TreeWidget(File* file, bool& fl, QWidget* parent = nullptr)
         : QTreeWidget(nullptr)
-        , fl(fl = false)
-    {
+        , fl(fl = false) {
         setAlternatingRowColors(true);
         setAnimated(true);
         setUniformRowHeights(true);
@@ -174,8 +170,7 @@ public:
     }
     // QWidget interface
 protected:
-    void hideEvent(QHideEvent* event) override
-    {
+    void hideEvent(QHideEvent* event) override {
         event->accept();
         deleteLater();
     }
@@ -183,12 +178,10 @@ protected:
 
 Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
-    , file(file)
-{
+    , file(file) {
 }
 
-bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -220,8 +213,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     return {};
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -235,8 +227,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     }
 }
 
-QVariant Node::data(const QModelIndex& index, int role) const
-{
+QVariant Node::data(const QModelIndex& index, int role) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -281,8 +272,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
         auto dialog = new SourceDialog(*m_id, tv);
@@ -323,12 +313,10 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
     : FileTree::Node(nullptr, FileTree::SubFile)
     , name(name)
-    , layer(layer)
-{
+    , layer(layer) {
 }
 
-bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         if (role == Qt::CheckStateRole) {
@@ -350,8 +338,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
     }
 }
 
-Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; //| Qt::ItemIsSelectable;
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -363,8 +350,7 @@ Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const
     }
 }
 
-QVariant NodeLayer::data(const QModelIndex& index, int role) const
-{
+QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -402,8 +388,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const
-{
+void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(layer->color());
@@ -414,4 +399,4 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const
         }
     });
 }
-}
+} // namespace Dxf

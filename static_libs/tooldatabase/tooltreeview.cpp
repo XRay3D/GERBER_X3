@@ -21,8 +21,7 @@
 #include <QPushButton>
 
 ToolTreeView::ToolTreeView(QWidget* parent)
-    : QTreeView(parent)
-{
+    : QTreeView(parent) {
     setDragDropMode(QAbstractItemView::InternalMove);
     setDefaultDropAction(Qt::MoveAction);
     setAlternatingRowColors(true);
@@ -60,8 +59,7 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     }
 }
 
-void ToolTreeView::newGroup()
-{
+void ToolTreeView::newGroup() {
     QModelIndex index = selectionModel()->currentIndex();
     if (index.data(Qt::UserRole).toInt())
         index = index.parent();
@@ -73,8 +71,7 @@ void ToolTreeView::newGroup()
     updateActions();
 }
 
-void ToolTreeView::newTool()
-{
+void ToolTreeView::newTool() {
     QModelIndex index = selectionModel()->currentIndex();
     if (index.data(Qt::UserRole).toInt())
         index = index.parent();
@@ -97,8 +94,7 @@ void ToolTreeView::newTool()
     updateActions();
 }
 
-void ToolTreeView::deleteItem()
-{
+void ToolTreeView::deleteItem() {
     if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
         return;
     QModelIndex index = selectionModel()->currentIndex();
@@ -106,8 +102,7 @@ void ToolTreeView::deleteItem()
         updateActions();
 }
 
-void ToolTreeView::copyTool()
-{
+void ToolTreeView::copyTool() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
     if (!m_model->insertRows(index.row() + 1, 1, index.parent()))
@@ -123,8 +118,7 @@ void ToolTreeView::copyTool()
     updateActions();
 }
 
-void ToolTreeView::updateActions()
-{
+void ToolTreeView::updateActions() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
     m_buttons[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
@@ -136,8 +130,7 @@ void ToolTreeView::updateActions()
     expandAll();
 }
 
-void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons)
-{
+void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons) {
     m_buttons = buttons;
     connect(m_buttons[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
     connect(m_buttons[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
@@ -146,8 +139,7 @@ void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons)
     updateActions();
 }
 
-void ToolTreeView::updateItem()
-{
+void ToolTreeView::updateItem() {
     resizeColumnToContents(0);
     for (QModelIndex index : selectionModel()->selection().indexes()) {
         update(index);

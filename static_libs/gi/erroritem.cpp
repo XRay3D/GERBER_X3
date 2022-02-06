@@ -17,8 +17,7 @@
 #include <QtMath>
 
 ErrorItem::ErrorItem(const Paths& paths, double area)
-    : m_area(area)
-{
+    : m_area(area) {
     for (auto& path : paths)
         m_shape.addPolygon(path);
     setFlag(ItemIsSelectable);
@@ -28,8 +27,7 @@ double ErrorItem::area() const { return m_area; }
 
 QRectF ErrorItem::boundingRect() const { return m_shape.boundingRect(); }
 
-void ErrorItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void ErrorItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
     if (isSelected()) {
         static QTime t(QTime::currentTime());

@@ -26,8 +26,7 @@ enum {
 PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     : FormsUtil(new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
-    , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") }
-{
+    , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") } {
     ui->setupUi(this);
     ui->toolHolder->label()->setText("Tool 1:");
     ui->toolHolder2->label()->setText("Tool 2:");
@@ -71,8 +70,7 @@ PocketOffsetForm::PocketOffsetForm(QWidget* parent)
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
 
-PocketOffsetForm::~PocketOffsetForm()
-{
+PocketOffsetForm::~PocketOffsetForm() {
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
@@ -86,8 +84,7 @@ PocketOffsetForm::~PocketOffsetForm()
     delete ui;
 }
 
-void PocketOffsetForm::createFile()
-{
+void PocketOffsetForm::createFile() {
     const Tool tool[] {
         ui->toolHolder->tool(),
         ui->toolHolder2->tool(),
@@ -184,23 +181,19 @@ void PocketOffsetForm::createFile()
     createToolpath();
 }
 
-void PocketOffsetForm::on_sbxSteps_valueChanged(int arg1)
-{
+void PocketOffsetForm::on_sbxSteps_valueChanged(int arg1) {
     ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
 }
 
-void PocketOffsetForm::updateName()
-{
+void PocketOffsetForm::updateName() {
     ui->leName->setText(names[side]);
 }
 
-void PocketOffsetForm::updatePixmap()
-{
+void PocketOffsetForm::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void PocketOffsetForm::rb_clicked()
-{
+void PocketOffsetForm::rb_clicked() {
     const auto tool { ui->toolHolder->tool() };
 
     if (ui->rbOutside->isChecked())
@@ -231,20 +224,17 @@ void PocketOffsetForm::rb_clicked()
     updatePixmap();
 }
 
-void PocketOffsetForm::resizeEvent(QResizeEvent* event)
-{
+void PocketOffsetForm::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void PocketOffsetForm::showEvent(QShowEvent* event)
-{
+void PocketOffsetForm::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
 void PocketOffsetForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void PocketOffsetForm::editFile(GCode::File* /*file*/)
-{
+void PocketOffsetForm::editFile(GCode::File* /*file*/) {
 }

@@ -30,8 +30,7 @@
 
 void translation(QApplication* app);
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     //    qInstallMessageHandler(myMessageOutput);
 
 #ifdef LEAK_DETECTOR
@@ -85,7 +84,7 @@ int main(int argc, char** argv)
 
     if constexpr (0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
-        semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
+        semaphore.acquire();                              // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
@@ -97,12 +96,12 @@ int main(int argc, char** argv)
         MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasy_Memory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false; // переменную для проверки ууже запущенного приложения
+        bool is_running = false;     // переменную для проверки ууже запущенного приложения
         if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
-            is_running = true; // Если успешно, то определяем, что уже есть запущенный экземпляр
+            is_running = true;       // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
             sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем 1 байт памяти
-            is_running = false; // И определяем, что других экземпляров не запущено
+            is_running = false;                   // И определяем, что других экземпляров не запущено
         }
         semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;

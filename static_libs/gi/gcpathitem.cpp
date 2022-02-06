@@ -23,8 +23,7 @@
 //#undef QT_DEBUG
 
 GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
-    : m_gcFile(file)
-{
+    : m_gcFile(file) {
     for (const Path& path : paths)
         m_shape.addPolygon(path);
     double k;
@@ -39,8 +38,7 @@ GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
 }
 
 GcPathItem::GcPathItem(const Path& path, GCode::File* file)
-    : m_gcFile(file)
-{
+    : m_gcFile(file) {
     m_shape.addPolygon(path);
     double k;
     if (m_gcFile)
@@ -55,8 +53,7 @@ GcPathItem::GcPathItem(const Path& path, GCode::File* file)
 
 QRectF GcPathItem::boundingRect() const { return m_rect; }
 
-void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
+void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
     if (m_pnColorPrt)
@@ -98,8 +95,7 @@ int GcPathItem::type() const { return static_cast<int>(GiType::Path); }
 
 Paths GcPathItem::paths(int) const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
-void GcPathItem::updateArrows()
-{
+void GcPathItem::updateArrows() {
     m_sc = scaleFactor();
     m_arrows = QPainterPath(); //.clear();
     if (qFuzzyIsNull(m_pen.widthF())) {

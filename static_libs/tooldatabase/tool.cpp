@@ -26,8 +26,7 @@
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
-QDataStream& operator<<(QDataStream& stream, const Tool& tool)
-{
+QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
     stream << tool.m_name;
     stream << tool.m_note;
     stream << tool.m_type;
@@ -43,8 +42,7 @@ QDataStream& operator<<(QDataStream& stream, const Tool& tool)
     stream << tool.m_id;
     return stream;
 }
-QDataStream& operator>>(QDataStream& stream, Tool& tool)
-{
+QDataStream& operator>>(QDataStream& stream, Tool& tool) {
     stream >> tool.m_name;
     stream >> tool.m_note;
     stream >> tool.m_type;
@@ -61,8 +59,7 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool)
     return stream;
 }
 
-QDebug operator<<(QDebug debug, const Tool& t)
-{
+QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver(debug);
     debug.nospace() << "T(D " << t.m_diameter << ", ID " << t.m_id << ')';
     return debug;
@@ -70,8 +67,7 @@ QDebug operator<<(QDebug debug, const Tool& t)
 
 Tool::Tool() { }
 
-QString Tool::nameEnc() const
-{
+QString Tool::nameEnc() const {
     switch (m_type) {
     case Tool::Drill:
         return QString("D-D%1MM").arg(m_diameter);
@@ -125,8 +121,7 @@ void Tool::setAutoName(bool autoName) { m_hash = {}, m_autoName = autoName; }
 int Tool::id() const { return m_id; }
 
 void Tool::setId(int id) { m_hash = {}, m_id = id; }
-double Tool::getDiameter(double depth) const
-{
+double Tool::getDiameter(double depth) const {
     if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
@@ -135,8 +130,7 @@ double Tool::getDiameter(double depth) const
     return diameter();
 }
 
-double Tool::getDepth() const
-{
+double Tool::getDepth() const {
     switch (m_type) {
     case Tool::Drill:
         return m_diameter * 0.5 * tan(qDegreesToRadians((180.0 - m_angle) * 0.5));
@@ -147,8 +141,7 @@ double Tool::getDepth() const
     }
 }
 
-void Tool::read(const QJsonObject& json)
-{
+void Tool::read(const QJsonObject& json) {
     m_angle = json["angle"].toDouble();
     m_autoName = json["autoName"].toBool();
     m_diameter = json["diameter"].toDouble();
@@ -164,8 +157,7 @@ void Tool::read(const QJsonObject& json)
     m_type = static_cast<Type>(json["type"].toInt());
 }
 
-void Tool::write(QJsonObject& json) const
-{
+void Tool::write(QJsonObject& json) const {
     json["angle"] = m_angle;
     json["autoName"] = m_autoName;
     json["diameter"] = m_diameter;
@@ -181,8 +173,7 @@ void Tool::write(QJsonObject& json) const
     json["type"] = m_type;
 }
 
-bool Tool::isValid() const
-{
+bool Tool::isValid() const {
     do {
         if (qFuzzyIsNull(m_diameter))
             break;
@@ -199,8 +190,7 @@ bool Tool::isValid() const
     return false;
 }
 
-QIcon Tool::icon() const
-{
+QIcon Tool::icon() const {
     switch (m_type) {
     case Tool::Drill:
         return QIcon::fromTheme("drill");
@@ -215,8 +205,7 @@ QIcon Tool::icon() const
     }
 }
 
-QString Tool::errorStr() const
-{
+QString Tool::errorStr() const {
     QString errorString;
     if (qFuzzyIsNull(m_diameter))
         errorString += "Tool diameter = 0!\n";
@@ -235,13 +224,11 @@ QString Tool::errorStr() const
     return errorString;
 }
 
-void Tool::errorMessageBox(QWidget* parent) const
-{
+void Tool::errorMessageBox(QWidget* parent) const {
     QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr());
 }
 
-size_t Tool::hash() const
-{
+size_t Tool::hash() const {
     if (m_hash)
         return m_hash;
 
@@ -268,8 +255,7 @@ size_t Tool::hash() const
     return m_hash;
 }
 
-size_t Tool::hash2() const
-{
+size_t Tool::hash2() const {
     if (!m_hash) {
         hash();
     } else
@@ -290,8 +276,7 @@ size_t Tool::hash2() const
 
 QPainterPath Tool::path(const QPointF& pt) const { return m_path.translated(pt); }
 
-void Tool::updatePath(double depth)
-{
+void Tool::updatePath(double depth) {
     const double diameter = getDiameter(depth);
     const double lineKoeff = diameter * 0.7;
     m_path = QPainterPath();
@@ -307,8 +292,7 @@ void Tool::updatePath(double depth)
 ///
 ToolHolder::ToolHolder() { }
 
-void ToolHolder::readTools()
-{
+void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
     QFile file(settingsPath + QStringLiteral("/tools.json"));
@@ -332,8 +316,7 @@ void ToolHolder::readTools()
     readTools(loadDoc.object());
 }
 
-void ToolHolder::readTools(const QJsonObject& json)
-{
+void ToolHolder::readTools(const QJsonObject& json) {
     QJsonArray toolArray = json["tools"].toArray();
     for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;
@@ -345,8 +328,7 @@ void ToolHolder::readTools(const QJsonObject& json)
     }
 }
 
-void ToolHolder::writeTools(QJsonObject& json)
-{
+void ToolHolder::writeTools(QJsonObject& json) {
     QJsonArray toolArray;
     for (auto& [id, tool] : m_tools) {
         QJsonObject toolObject;

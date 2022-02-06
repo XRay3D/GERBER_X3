@@ -19,8 +19,7 @@
 #include <QModelIndex>
 #include <QVariant>
 
-ToolItem::ToolItem(const ToolItem& item)
-{
+ToolItem::ToolItem(const ToolItem& item) {
     if (item.m_toolId > 0) {
         m_toolId = item.m_toolId;
         item.m_toolId = 0;
@@ -33,21 +32,18 @@ ToolItem::ToolItem(const ToolItem& item)
 }
 
 ToolItem::ToolItem(int toolId)
-    : m_toolId(toolId)
-{
+    : m_toolId(toolId) {
 }
 
 ToolItem::ToolItem() { }
 
-ToolItem::~ToolItem()
-{
+ToolItem::~ToolItem() {
     if (m_toolId && m_deleteEnable)
         App::toolHolder().m_tools.erase(m_toolId);
     qDeleteAll(childItems);
 }
 
-int ToolItem::row() const
-{
+int ToolItem::row() const {
     if (parentItem != nullptr)
         return parentItem->childItems.indexOf(const_cast<ToolItem*>(this));
     return 0;
@@ -57,8 +53,7 @@ int ToolItem::childCount() const { return childItems.size(); }
 
 ToolItem* ToolItem::child(int row) const { return childItems.at(row); }
 
-ToolItem* ToolItem::lastChild() const
-{
+ToolItem* ToolItem::lastChild() const {
     if (childItems.size())
         return childItems.last();
     return nullptr;
@@ -66,8 +61,7 @@ ToolItem* ToolItem::lastChild() const
 
 ToolItem* ToolItem::takeChild(int row) { return childItems.takeAt(row); }
 
-void ToolItem::setChild(int row, ToolItem* item)
-{
+void ToolItem::setChild(int row, ToolItem* item) {
     if (item)
         item->parentItem = this;
 
@@ -77,8 +71,7 @@ void ToolItem::setChild(int row, ToolItem* item)
     }
 }
 
-bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role) {
     if (index.isValid()) {
         switch (role) {
         case Qt::EditRole:
@@ -99,8 +92,7 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
     return false;
 }
 
-QVariant ToolItem::data(const QModelIndex& index, int role) const
-{
+QVariant ToolItem::data(const QModelIndex& index, int role) const {
     switch (role) {
     case Qt::DisplayRole:
         switch (index.column()) {
@@ -134,8 +126,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const
-{
+Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const {
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
     if (!m_toolId)
         flags |= Qt::ItemIsDropEnabled;
@@ -146,8 +137,7 @@ Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const
 
 int ToolItem::toolId() const { return m_toolId; }
 
-Tool& ToolItem::tool()
-{
+Tool& ToolItem::tool() {
     if (App::toolHolder().tools().contains(m_toolId))
         return App::toolHolder().m_tools[m_toolId];
     static Tool tmp;
@@ -156,8 +146,7 @@ Tool& ToolItem::tool()
 
 bool ToolItem::isTool() const { return m_toolId > 0; }
 
-void ToolItem::setIsTool()
-{
+void ToolItem::setIsTool() {
     if (App::toolHolder().m_tools.size())
         m_toolId = App::toolHolder().m_tools.begin()->first + 1;
     else
@@ -165,13 +154,11 @@ void ToolItem::setIsTool()
     App::toolHolder().m_tools[m_toolId].setId(m_toolId);
 }
 
-QString ToolItem::note() const
-{
+QString ToolItem::note() const {
     return m_toolId ? App::toolHolder().m_tools[m_toolId].note() : m_note;
 }
 
-void ToolItem::setNote(const QString& value)
-{
+void ToolItem::setNote(const QString& value) {
     if (m_toolId)
         App::toolHolder().m_tools[m_toolId].setNote(value);
     else
@@ -182,23 +169,20 @@ void ToolItem::setDeleteEnable(bool deleteEnable) { m_deleteEnable = deleteEnabl
 
 QString ToolItem::name() const { return m_toolId ? App::toolHolder().tool(m_toolId).name() : m_name; }
 
-void ToolItem::setName(const QString& value)
-{
+void ToolItem::setName(const QString& value) {
     if (m_toolId)
         App::toolHolder().m_tools[m_toolId].setName(value);
     else
         m_name = value;
 }
 
-void ToolItem::addChild(ToolItem* item)
-{
+void ToolItem::addChild(ToolItem* item) {
     if (item)
         item->parentItem = this;
     childItems.push_back(item);
 }
 
-void ToolItem::insertChild(int row, ToolItem* item)
-{
+void ToolItem::insertChild(int row, ToolItem* item) {
     if (item)
         item->parentItem = this;
     if (row < childItems.size())
@@ -207,8 +191,7 @@ void ToolItem::insertChild(int row, ToolItem* item)
         childItems.push_back(item);
 }
 
-void ToolItem::removeChild(int row)
-{
+void ToolItem::removeChild(int row) {
     m_deleteEnable = true;
     delete childItems.at(row);
     childItems.removeAt(row);

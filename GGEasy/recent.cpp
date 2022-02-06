@@ -18,12 +18,10 @@
 Recent::Recent(MainWindow* mainWindow, QString&& recentFilesKey)
     : QObject(mainWindow)
     , mainWindow(mainWindow)
-    , recentFilesKey(std::move(recentFilesKey))
-{
+    , recentFilesKey(std::move(recentFilesKey)) {
 }
 
-void Recent::createMenu(QMenu* fileMenu, const QString& menuName)
-{
+void Recent::createMenu(QMenu* fileMenu, const QString& menuName) {
     recentMenu = fileMenu->addMenu(menuName);
     connect(recentMenu, &QMenu::aboutToShow, this, &Recent::updateRecentFileActions);
     recentFileSubMenuAct = recentMenu->menuAction();
@@ -44,8 +42,7 @@ void Recent::createMenu(QMenu* fileMenu, const QString& menuName)
     setRecentFilesVisible(hasRecentFiles());
 }
 
-QStringList Recent::readRecentFiles(QSettings& settings)
-{
+QStringList Recent::readRecentFiles(QSettings& settings) {
     QStringList result;
     const int count = settings.beginReadArray(recentFilesKey);
     for (int i = 0; i < count; ++i) {
@@ -58,8 +55,7 @@ QStringList Recent::readRecentFiles(QSettings& settings)
     return result;
 }
 
-void Recent::writeRecentFiles(const QStringList& files, QSettings& settings)
-{
+void Recent::writeRecentFiles(const QStringList& files, QSettings& settings) {
     const int count = files.size();
     settings.beginWriteArray(recentFilesKey);
     for (int i = 0; i < count; ++i) {
@@ -71,22 +67,19 @@ void Recent::writeRecentFiles(const QStringList& files, QSettings& settings)
 
 QString Recent::fileKey() { return QStringLiteral("file"); }
 
-void Recent::setRecentFilesVisible(bool visible)
-{
+void Recent::setRecentFilesVisible(bool visible) {
     recentFileSubMenuAct->setVisible(visible);
     recentFileSeparator->setVisible(visible);
 }
 
-bool Recent::hasRecentFiles()
-{
+bool Recent::hasRecentFiles() {
     QSettings settings;
     const int count = settings.beginReadArray(recentFilesKey);
     settings.endArray();
     return count > 0;
 }
 
-void Recent::prependToRecentFiles(const QString& fileName)
-{
+void Recent::prependToRecentFiles(const QString& fileName) {
     QSettings settings;
     const QStringList oldRecentFiles = readRecentFiles(settings);
     QStringList recentFiles = oldRecentFiles;
@@ -98,8 +91,7 @@ void Recent::prependToRecentFiles(const QString& fileName)
     mainWindow->documentWasModified();
 }
 
-void Recent::updateRecentFileActions()
-{
+void Recent::updateRecentFileActions() {
     QSettings settings;
 
     const QStringList recentFiles = readRecentFiles(settings);
@@ -117,8 +109,7 @@ void Recent::updateRecentFileActions()
     recentFileActs[MaxRecentFiles]->setVisible(count);
 }
 
-void Recent::openRecentFile()
-{
+void Recent::openRecentFile() {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
         mainWindow->loadFile(action->data().toString());
 }

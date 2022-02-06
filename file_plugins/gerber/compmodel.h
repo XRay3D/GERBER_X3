@@ -48,4 +48,4 @@ private:
     ComponentsNode* getItem(const QModelIndex& index) const;
 };
 
-}
+} // namespace Gerber

@@ -36,8 +36,7 @@
 //int m_frameCount2;
 
 Scene::Scene(QObject* parent)
-    : QGraphicsScene(parent)
-{
+    : QGraphicsScene(parent) {
     App::setScene(this);
     double size = 1000.0; // 4 sqare meters
     setSceneRect(-size, -size, +size * 2, +size * 2);
@@ -45,13 +44,11 @@ Scene::Scene(QObject* parent)
     startTimer(1000);
 }
 
-Scene::~Scene()
-{
+Scene::~Scene() {
     App::setScene(nullptr);
 }
 
-void Scene::RenderPdf()
-{
+void Scene::RenderPdf() {
     QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), "File", tr("File(*.pdf)"));
     if (curFile.isEmpty())
         return;
@@ -87,16 +84,14 @@ void Scene::RenderPdf()
     m_drawPdf = false;
 }
 
-QRectF Scene::itemsBoundingRect()
-{
+QRectF Scene::itemsBoundingRect() {
     m_drawPdf = true;
     QRectF rect(QGraphicsScene::itemsBoundingRect());
     m_drawPdf = false;
     return rect;
 }
 
-QRectF Scene::getSelectedBoundingRect()
-{
+QRectF Scene::getSelectedBoundingRect() {
     auto selectedItems(App::scene()->selectedItems());
 
     if (selectedItems.isEmpty())
@@ -114,25 +109,21 @@ QRectF Scene::getSelectedBoundingRect()
     return rect;
 }
 
-void Scene::setCross1(const QPointF& cross)
-{
+void Scene::setCross1(const QPointF& cross) {
     m_cross1 = cross;
     update();
 }
 
-void Scene::setCross2(const QPointF& cross2)
-{
+void Scene::setCross2(const QPointF& cross2) {
     m_cross2 = cross2;
 }
 
-void Scene::setDrawRuller(bool drawRuller)
-{
+void Scene::setDrawRuller(bool drawRuller) {
     m_drawRuller = drawRuller;
     update();
 }
 
-void Scene::drawRuller(QPainter* painter)
-{
+void Scene::drawRuller(QPainter* painter) {
     const QPointF pt1(m_cross2);
     const QPointF pt2(m_cross1);
     QLineF line(pt2, pt1);
@@ -221,16 +212,14 @@ void Scene::drawRuller(QPainter* painter)
     painter->restore();
 }
 
-void Scene::drawBackground(QPainter* painter, const QRectF& rect)
-{
+void Scene::drawBackground(QPainter* painter, const QRectF& rect) {
     if (m_drawPdf)
         return;
 
     painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
 }
 
-void Scene::drawForeground(QPainter* painter, const QRectF& rect)
-{
+void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
     if (m_drawPdf)
         return;
 
@@ -417,8 +406,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     painter->restore();
 }
 
-void Scene::timerEvent(QTimerEvent* event)
-{
+void Scene::timerEvent(QTimerEvent* event) {
     currentFps = fpsCtr;
     fpsCtr = 0;
 }

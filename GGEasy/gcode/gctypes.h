@@ -62,8 +62,7 @@ enum Grouping {
 
 struct variant {
     V var;
-    friend QDataStream& operator>>(QDataStream& stream, variant& v)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, variant& v) {
         uint8_t index;
         stream >> index;
         switch (index) {
@@ -81,8 +80,7 @@ struct variant {
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const variant& v)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const variant& v) {
         stream << uint8_t(v.index());
         std::visit([&stream](auto&& val) { stream << val; }, v.var);
         return stream;
@@ -96,8 +94,7 @@ struct variant {
 
     template <class T>
     variant(const T& val)
-        : var(val)
-    {
+        : var(val) {
     }
 
     //    template <class T>
@@ -108,8 +105,7 @@ struct variant {
 
     size_t index() const { return var.index(); }
 
-    int toInt() const
-    {
+    int toInt() const {
         return std::visit([](auto&& val) -> int {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>) {
@@ -126,8 +122,7 @@ struct variant {
         //        }
     }
 
-    bool toBool() const
-    {
+    bool toBool() const {
         return std::visit([](auto&& val) -> bool {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>) {
@@ -144,8 +139,7 @@ struct variant {
         //        }
     }
 
-    double toDouble() const
-    {
+    double toDouble() const {
         return std::visit([](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>) {
@@ -177,10 +171,10 @@ struct GCodeParams {
         Depth,
         Pass, // need for Raster and LaserHLDI profile
         UseRaster,
-        Steps, // need for Pocket
+        Steps,     // need for Pocket
         Tolerance, // need for Voronoi
-        Width, // need for Voronoi
-        VorT, // need for Voronoi
+        Width,     // need for Voronoi
+        VorT,      // need for Voronoi
         FileId,
         FrameOffset, // need for Voronoi
         AccDistance, // need for LaserHLDI
@@ -190,18 +184,17 @@ struct GCodeParams {
         PocketIndex, // need for Pocket
         GrItems,
         Node,
-        Bridges, // need for Profile
+        Bridges,   // need for Profile
         BridgeLen, // need for Profile
         NotTile,
         Trimming,
         CornerTrimming,
         IgnoreCopper, // need for Thermal
-        HathStep // need for Hatching
+        HathStep      // need for Hatching
     };
 
     GCodeParams() { }
-    GCodeParams(const Tool& tool, double depth, GCodeType type)
-    {
+    GCodeParams(const Tool& tool, double depth, GCodeType type) {
         tools.push_back(tool);
         params[GCodeParams::Depth] = depth;
         gcType = type;
@@ -212,8 +205,7 @@ struct GCodeParams {
     GCodeType gcType = Null;
     mutable int fileId = -1;
 
-    friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type) {
         //qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream >> type.tools;
@@ -222,8 +214,7 @@ struct GCodeParams {
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type) {
         //qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
         //        qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream << type.tools;
@@ -290,4 +281,4 @@ public:
     static int profileSort() { return m_profileSort; }
 };
 
-}
+} // namespace GCode

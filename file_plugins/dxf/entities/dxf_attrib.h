@@ -421,4 +421,4 @@ If group 72 and/or 74 values are nonzero then the text insertion point values ar
 
     */
 };
-}
+} // namespace Dxf

@@ -23,8 +23,7 @@
 namespace Dxf {
 
 Arc::Arc(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Arc::draw(const InsertEntity* const i) const
@@ -43,8 +42,7 @@ Arc::Arc(SectionParser* sp)
 //    }
 //}
 
-void Arc::parse(CodeData& code)
-{
+void Arc::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -85,8 +83,7 @@ void Arc::parse(CodeData& code)
 
 Entity::Type Arc::type() const { return Type::ARC; }
 
-GraphicObject Arc::toGo() const
-{
+GraphicObject Arc::toGo() const {
     if (qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
         return {};
 
@@ -131,8 +128,7 @@ GraphicObject Arc::toGo() const
     return { id, p, {} };
 }
 
-void Arc::write(QDataStream& stream) const
-{
+void Arc::write(QDataStream& stream) const {
     stream << centerPoint;
     stream << thickness;
     stream << radius;
@@ -140,8 +136,7 @@ void Arc::write(QDataStream& stream) const
     stream << endAngle;
 }
 
-void Arc::read(QDataStream& stream)
-{
+void Arc::read(QDataStream& stream) {
     stream >> centerPoint;
     stream >> thickness;
     stream >> radius;
@@ -149,4 +144,4 @@ void Arc::read(QDataStream& stream)
     stream >> endAngle;
 }
 
-}
+} // namespace Dxf

@@ -13,7 +13,6 @@
 #include "trace.h"
 namespace Dxf {
 TRACE::TRACE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

@@ -18,8 +18,7 @@
 #include <QLabel>
 
 ToolName::ToolName(QWidget* parent)
-    : QWidget(parent)
-{
+    : QWidget(parent) {
     QHBoxLayout* l = new QHBoxLayout(this);
     lblPixmap = new QLabel(this);
     l->addWidget(lblPixmap);
@@ -31,8 +30,7 @@ ToolName::ToolName(QWidget* parent)
     l->setStretch(1, 1);
 }
 
-void ToolName::setTool(const Tool& tool)
-{
+void ToolName::setTool(const Tool& tool) {
     lblPixmap->setPixmap(tool.icon().pixmap({ 22, 22 }));
     lblName->setText(tool.name());
     setToolTip(tool.note());

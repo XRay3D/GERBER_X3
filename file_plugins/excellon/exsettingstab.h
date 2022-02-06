@@ -32,4 +32,4 @@ public:
     virtual void writeSettings(MySettings& settings) override;
 };
 
-}
+} // namespace Excellon

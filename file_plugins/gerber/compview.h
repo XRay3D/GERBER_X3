@@ -28,4 +28,4 @@ private:
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 };
 
-}
+} // namespace Gerber

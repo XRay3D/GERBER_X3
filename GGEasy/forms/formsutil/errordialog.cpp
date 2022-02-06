@@ -31,8 +31,7 @@ Q_DECLARE_METATYPE(ErrorItem*)
 
 enum { IconSize = 32 };
 
-QIcon errorIcon(const QPainterPath& path)
-{
+QIcon errorIcon(const QPainterPath& path) {
 
     const QRectF rect = path.boundingRect();
 
@@ -65,8 +64,7 @@ class ErrorModel : public QAbstractTableModel {
 public:
     ErrorModel(mvector<ErrorItem*> items, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
-        , items(items)
-    {
+        , items(items) {
     }
     virtual ~ErrorModel() { qDeleteAll(items); }
 
@@ -74,8 +72,7 @@ public:
 public:
     int rowCount(const QModelIndex&) const override { return static_cast<int>(items.size()); }
     int columnCount(const QModelIndex&) const override { return 2; }
-    QVariant data(const QModelIndex& index, int role) const override
-    {
+    QVariant data(const QModelIndex& index, int role) const override {
         switch (role) {
         case Qt::DisplayRole:
             if (index.column() == 0) {
@@ -99,8 +96,7 @@ public:
         return {};
     }
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
-    {
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
         if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
             if (section == 0) {
                 return tr("Position");
@@ -111,8 +107,7 @@ public:
         return QAbstractTableModel::headerData(section, orientation, role);
     }
 
-    void updateScene()
-    {
+    void updateScene() {
         QRectF rect;
         for (auto item : items)
             if (item->isSelected())
@@ -126,8 +121,7 @@ class TableView : public QTableView {
     //    Q_OBJECT
 public:
     TableView(QWidget* parent)
-        : QTableView(parent)
-    {
+        : QTableView(parent) {
         horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -138,8 +132,7 @@ public:
 
     // QAbstractItemView interface
 protected slots:
-    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override
-    {
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override {
         QTableView::selectionChanged(selected, deselected);
         for (auto& var : selected.indexes()) {
             var.data(Qt::UserRole).value<ErrorItem*>()->setSelected(true);
@@ -152,15 +145,13 @@ protected slots:
 
     // QWidget interface
 protected:
-    void showEvent(QShowEvent* event) override
-    {
+    void showEvent(QShowEvent* event) override {
         QTableView::showEvent(event);
         resizeRowsToContents();
     }
 };
 
-void ErrorDialog::setupUi(QDialog* ErrorDialog)
-{
+void ErrorDialog::setupUi(QDialog* ErrorDialog) {
     if (ErrorDialog->objectName().isEmpty())
         ErrorDialog->setObjectName(QString::fromUtf8("ErrorDialog"));
     ErrorDialog->resize(471, 605);
@@ -181,14 +172,12 @@ void ErrorDialog::setupUi(QDialog* ErrorDialog)
     QMetaObject::connectSlotsByName(ErrorDialog);
 }
 
-void ErrorDialog::retranslateUi(QDialog* ErrorDialog)
-{
+void ErrorDialog::retranslateUi(QDialog* ErrorDialog) {
     ErrorDialog->setWindowTitle(QCoreApplication::translate("ErrorDialog", "Uncut places:", nullptr));
 }
 
 ErrorDialog::ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent)
-    : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
-{
+    : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
     verticalLayout->insertWidget(0, table = new TableView(this));
     table->setModel(new ErrorModel(items, table));
@@ -206,8 +195,7 @@ ErrorDialog::ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent)
     setGeometry({ App::mainWindow()->dockWidget()->mapToGlobal(QPoint()), App::mainWindow()->dockWidget()->size() });
 }
 
-ErrorDialog::~ErrorDialog()
-{
+ErrorDialog::~ErrorDialog() {
     //    App::mainWindow()->dockWidget()->pop();
     delete table->model();
 }

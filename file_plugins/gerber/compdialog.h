@@ -48,4 +48,4 @@ protected:
     void resizeEvent(QResizeEvent* event = nullptr) override;
 };
 
-}
+} // namespace Gerber

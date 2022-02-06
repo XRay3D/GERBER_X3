@@ -33,8 +33,7 @@
 namespace FileTree {
 
 View::View(QWidget* parent)
-    : QTreeView(parent)
-{
+    : QTreeView(parent) {
     setAlternatingRowColors(true);
     setAnimated(true);
     setUniformRowHeights(true);
@@ -42,26 +41,22 @@ View::View(QWidget* parent)
     App::setFileTreeView(this);
 }
 
-View::~View()
-{
+View::~View() {
     App::setFileTreeView(nullptr);
 }
 
-void View::updateTree()
-{
+void View::updateTree() {
     expandAll();
 }
 
-void View::updateIcons()
-{
+void View::updateIcons() {
     QModelIndex index = m_model->index(0, 0, QModelIndex());
     int rowCount = static_cast<Node*>(index.internalPointer())->childCount();
     for (int r = 0; r < rowCount; ++r)
         update(m_model->index(r, 0, index));
 }
 
-void View::on_doubleClicked(const QModelIndex& index)
-{
+void View::on_doubleClicked(const QModelIndex& index) {
     if (!index.column()) {
         m_menuIndex = index;
         if (index.data(Role::NodeType).toInt() != Type::Folder)
@@ -84,8 +79,7 @@ void View::on_doubleClicked(const QModelIndex& index)
     }
 }
 
-void View::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
-{
+void View::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     if (!selected.indexes().isEmpty()) {
         for (auto& index : selected.indexes())
             m_model->setData(index, true, Role::Select);
@@ -96,8 +90,7 @@ void View::onSelectionChanged(const QItemSelection& selected, const QItemSelecti
     }
 }
 
-void View::hideOther()
-{
+void View::hideOther() {
     const int rowCount = static_cast<Node*>(m_menuIndex.parent().internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
         QModelIndex index2 = m_menuIndex.sibling(row, 0);
@@ -113,20 +106,17 @@ void View::hideOther()
                                                    { Qt::CheckStateRole }); });
 }
 
-void View::closeFile()
-{
+void View::closeFile() {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
     //    if (App::drillForm())
     //        App::drillForm()->on_pbClose_clicked();
 }
 
-void View::closeFiles()
-{
+void View::closeFiles() {
     m_model->removeRows(0, m_childCount, m_menuIndex);
 }
 
-void View::setModel(QAbstractItemModel* model)
-{
+void View::setModel(QAbstractItemModel* model) {
     QTreeView::setModel(m_model = static_cast<Model*>(model));
 
     connect(m_model, &Model::rowsInserted, this, &View::updateTree);
@@ -177,8 +167,7 @@ void View::setModel(QAbstractItemModel* model)
 
 void View::showExcellonDialog() { }
 
-void View::contextMenuEvent(QContextMenuEvent* event)
-{
+void View::contextMenuEvent(QContextMenuEvent* event) {
     m_menuIndex = indexAt(event->pos());
     qDebug() << m_menuIndex;
     if (!m_menuIndex.isValid())
@@ -210,8 +199,7 @@ void View::contextMenuEvent(QContextMenuEvent* event)
         menu.exec(viewport()->mapToGlobal(event->pos()));
 }
 
-void View::mousePressEvent(QMouseEvent* event)
-{
+void View::mousePressEvent(QMouseEvent* event) {
     QTreeView::mousePressEvent(event);
     if (event->button() == Qt::LeftButton) {
         QModelIndex index = indexAt(event->pos());
@@ -225,12 +213,11 @@ void View::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void View::mouseDoubleClickEvent(QMouseEvent* event)
-{
+void View::mouseDoubleClickEvent(QMouseEvent* event) {
     m_menuIndex = indexAt(event->pos());
     if (m_menuIndex.isValid() && m_menuIndex.parent().row() > -1)
         hideOther();
     else
         QTreeView::mouseDoubleClickEvent(event);
 }
-}
+} // namespace FileTree

@@ -23,8 +23,7 @@
 
 namespace Dxf {
 
-QStringList keys(const Layers& layers)
-{
+QStringList keys(const Layers& layers) {
     QStringList sl;
     sl.reserve(static_cast<int>(layers.size()));
     for (auto& [key, _] : layers)
@@ -35,16 +34,14 @@ QStringList keys(const Layers& layers)
 LayerModel::LayerModel(Layers layers, QObject* parent)
     : QAbstractTableModel(parent)
     , layers(layers)
-    , names(keys(layers))
-{
+    , names(keys(layers)) {
 }
 
 int LayerModel::rowCount(const QModelIndex& /*parent*/) const { return names.size(); }
 
 int LayerModel::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 
-QVariant LayerModel::data(const QModelIndex& index, int role) const
-{
+QVariant LayerModel::data(const QModelIndex& index, int role) const {
     switch (index.column()) {
     case Visible:
         switch (role) {
@@ -93,8 +90,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const
     }
 }
 
-bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (index.column()) {
     case Visible:
         switch (role) {
@@ -127,8 +123,7 @@ bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int ro
     return false;
 }
 
-QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
+QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role == Qt::DisplayRole) {
         if (orientation == Qt::Horizontal) {
             switch (section) {
@@ -146,8 +141,7 @@ QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int ro
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
-Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const {
     auto flags = Qt::ItemIsEnabled;
     switch (index.column()) {
     case Visible:
@@ -166,12 +160,10 @@ Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const
 /// \param parent
 ///
 ItemsTypeDelegate::ItemsTypeDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
-{
+QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* comboBox = new QComboBox(parent);
     comboBox->addItems({ DxfObj::tr("Solid"), DxfObj::tr("Paths") });
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
@@ -180,8 +172,7 @@ QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionView
     return comboBox;
 }
 
-void ItemsTypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void ItemsTypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
     if (!comboBox)
         return;
@@ -189,8 +180,7 @@ void ItemsTypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index)
     comboBox->showPopup();
 }
 
-void ItemsTypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void ItemsTypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
     if (!comboBox)
         return;
@@ -199,4 +189,4 @@ void ItemsTypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
 
 void ItemsTypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-}
+} // namespace Dxf
