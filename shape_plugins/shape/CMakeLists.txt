@@ -35,8 +35,6 @@ include_directories(
     ../../static_libs/tooldatabase
     )
 
-link_directories(../../libs${SUFFIX})
-
 add_library(shape STATIC
     shape.cpp
     shape.h
@@ -52,5 +50,7 @@ target_link_libraries(shape PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     )
+
+#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
 
 #target_compile_definitions(shape PRIVATE SHAPE_LIBRARY)

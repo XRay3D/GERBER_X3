@@ -20,8 +20,8 @@ set(CMAKE_AUTORCC ON)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
@@ -53,7 +53,7 @@ add_library(excellon SHARED
     ${HEADERS}
     )
 
-link_directories(../../libs${SUFFIX})
+
 target_link_libraries(excellon PRIVATE
     clipper
     common
@@ -68,5 +68,7 @@ target_link_libraries(excellon PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     )
+
+#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
 
 #target_compile_definitions(excellon PRIVATE EXCELLON_LIBRARY)

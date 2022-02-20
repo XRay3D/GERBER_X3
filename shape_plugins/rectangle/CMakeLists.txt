@@ -18,8 +18,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
@@ -34,7 +34,6 @@ add_library(rectangle SHARED
     shrectangle.h
     )
 
-link_directories(../../libs${SUFFIX})
 target_link_libraries(rectangle PRIVATE
     clipper
     common
@@ -52,5 +51,7 @@ target_link_libraries(rectangle PRIVATE
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(rectangle PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
+
+#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
 
 #target_compile_definitions(rectangle PRIVATE RECTANGLE_LIBRARY)
