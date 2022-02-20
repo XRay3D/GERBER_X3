@@ -20,8 +20,7 @@
 
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)
-    , m_parentName(parent->objectName())
-{
+    , m_parentName(parent->objectName()) {
     setupUi(this);
     retranslateUi(this);
 
@@ -58,8 +57,7 @@ DepthForm::DepthForm(QWidget* parent)
     settings.endGroup();
 }
 
-DepthForm::~DepthForm()
-{
+DepthForm::~DepthForm() {
     MySettings settings;
     settings.beginGroup(m_parentName);
     settings.setValue("dsbxDepth", m_value);
@@ -71,14 +69,12 @@ DepthForm::~DepthForm()
 
 double DepthForm::value() const { return dsbx->value(); }
 
-void DepthForm::setValue(double value)
-{
+void DepthForm::setValue(double value) {
     rbCustom->setChecked(true);
     dsbx->setValue(value);
 }
 
-void DepthForm::setupUi(QWidget* Form)
-{
+void DepthForm::setupUi(QWidget* Form) {
     if (Form->objectName().isEmpty())
         Form->setObjectName(QString::fromUtf8("DepthForm"));
 
@@ -145,8 +141,7 @@ void DepthForm::setupUi(QWidget* Form)
     QMetaObject::connectSlotsByName(Form);
 }
 
-void DepthForm::retranslateUi(QWidget* Form)
-{
+void DepthForm::retranslateUi(QWidget* Form) {
     Form->setWindowTitle(QApplication::translate("DepthForm", "Form", nullptr));
     Form->setToolTip(QApplication::translate("DepthForm", "Cutting depth", nullptr));
 

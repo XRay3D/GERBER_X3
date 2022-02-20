@@ -84,5 +84,5 @@ private:
     void addFile(FileInterface* file);
     void addShape(ShapeInterface* shape);
 };
-}
+} // namespace FileTree
 #include "app.h"

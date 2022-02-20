@@ -13,7 +13,6 @@
 #include "table.h"
 namespace Dxf {
 TABLE::TABLE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

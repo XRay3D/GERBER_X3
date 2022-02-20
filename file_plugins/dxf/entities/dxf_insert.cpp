@@ -17,12 +17,10 @@ namespace Dxf {
 
 InsertEntity::InsertEntity(Blocks& blocks, SectionParser* sp)
     : Entity(sp)
-    , blocks(blocks)
-{
+    , blocks(blocks) {
 }
 
-void InsertEntity::draw(const InsertEntity* const i) const
-{
+void InsertEntity::draw(const InsertEntity* const i) const {
     if (!blocks.contains(blockName))
         return;
     if (blocks[blockName]->entities.empty())
@@ -57,8 +55,7 @@ void InsertEntity::draw(const InsertEntity* const i) const
     }
 }
 
-void InsertEntity::parse(CodeData& code)
-{
+void InsertEntity::parse(CodeData& code) {
     do {
         switch (code.code()) {
         case SubclassMrker:
@@ -109,12 +106,11 @@ void InsertEntity::parse(CodeData& code)
     } while (code.code() != 0);
 }
 
-void InsertEntity::transform(GraphicObject& item, QPointF tr) const
-{
+void InsertEntity::transform(GraphicObject& item, QPointF tr) const {
     item.setPos(-basePoint);
     item.setScale(scaleX, scaleY);
     item.setRotation(rotationAngle);
     item.setPos(insPos + tr);
 }
 
-}
+} // namespace Dxf

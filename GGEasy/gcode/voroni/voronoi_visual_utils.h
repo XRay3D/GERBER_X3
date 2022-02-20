@@ -58,8 +58,7 @@ namespace polygon {
                 const Point<InCT1>& point,
                 const Segment<InCT2>& segment,
                 const CT max_dist,
-                std::vector<Point<CT>>* discretization)
-        {
+                std::vector<Point<CT>>* discretization) {
             // Apply the linear transformation to move start point of the segment to
             // the point with coordinates (0, 0) and the direction of the segment to
             // coincide the positive direction of the x-axis.
@@ -124,8 +123,7 @@ namespace polygon {
 
     private:
         // Compute y(x) = ((x - a) * (x - a) + b * b) / (2 * b).
-        static CT parabola_y(CT x, CT a, CT b)
-        {
+        static CT parabola_y(CT x, CT a, CT b) {
             return ((x - a) * (x - a) + b * b) / (b + b);
         }
 
@@ -150,8 +148,7 @@ namespace polygon {
                             typename geometry_concept<Segment<long>>::type>::type>::type>::type,
                 CT>::type
             get_point_projection(
-                const Point<CT>& point, const Segment<InCT>& segment)
-        {
+                const Point<CT>& point, const Segment<InCT>& segment) {
             CT segment_vec_x = cast(x(high(segment))) - cast(x(low(segment)));
             CT segment_vec_y = cast(y(high(segment))) - cast(y(low(segment)));
             CT point_vec_x = x(point) - cast(x(low(segment)));
@@ -162,12 +159,11 @@ namespace polygon {
         }
 
         template <typename InCT>
-        static CT cast(const InCT& value)
-        {
+        static CT cast(const InCT& value) {
             return static_cast<CT>(value);
         }
     };
-}
-}
+} // namespace polygon
+} // namespace boost
 
 #endif // BOOST_POLYGON_VORONOI_VISUAL_UTILS

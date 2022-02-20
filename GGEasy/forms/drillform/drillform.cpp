@@ -31,8 +31,7 @@
 
 enum { IconSize = 24 };
 
-Paths offset(const Path& path, double offset, bool fl = false)
-{
+Paths offset(const Path& path, double offset, bool fl = false) {
     Paths tmpPpaths;
     ClipperOffset cpOffset;
     if (fl)
@@ -54,8 +53,7 @@ Paths offset(const Path& path, double offset, bool fl = false)
 ///
 DrillForm::DrillForm(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::DrillForm)
-{
+    , ui(new Ui::DrillForm) {
     ui->setupUi(this);
     {
         ui->toolTable->setIconSize(QSize(IconSize, IconSize));
@@ -193,8 +191,7 @@ DrillForm::DrillForm(QWidget* parent)
     App::setDrillForm(this);
 }
 
-DrillForm::~DrillForm()
-{
+DrillForm::~DrillForm() {
     App::setDrillForm(nullptr);
 
     MySettings settings;
@@ -213,8 +210,7 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
-void DrillForm::updateFiles()
-{
+void DrillForm::updateFiles() {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
@@ -235,8 +231,7 @@ void DrillForm::updateFiles()
 #endif
 }
 
-bool DrillForm::canToShow()
-{
+bool DrillForm::canToShow() {
     if (App::project()->files(FileType::Excellon).size() > 0)
         return true;
 
@@ -253,14 +248,12 @@ bool DrillForm::canToShow()
     return false;
 }
 
-void DrillForm::on_pbClose_clicked()
-{
+void DrillForm::on_pbClose_clicked() {
     if (parent())
         dynamic_cast<QWidget*>(parent())->close();
 }
 
-void DrillForm::on_pbCreate_clicked()
-{
+void DrillForm::on_pbCreate_clicked() {
     { //   slots only
         struct data {
             Paths paths;
@@ -444,8 +437,7 @@ void DrillForm::on_pbCreate_clicked()
     QTimer::singleShot(1, Qt::CoarseTimer, [this] { header->onChecked(); });
 }
 
-void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
-{
+void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
     clear();
     file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
     if (!file)
@@ -482,16 +474,14 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     header->onChecked();
 }
 
-void DrillForm::on_clicked(const QModelIndex& index)
-{
+void DrillForm::on_clicked(const QModelIndex& index) {
     int apertureId = model->apertureId(index.row());
     deselectAll();
     setSelected(apertureId, true);
     zoonToSelected();
 }
 
-void DrillForm::on_doubleClicked(const QModelIndex& current)
-{
+void DrillForm::on_doubleClicked(const QModelIndex& current) {
     if (current.column() == 1) {
         mvector<Tool::Type> tools;
         tools = model->isSlot(current.row())
@@ -509,8 +499,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
     }
 }
 
-void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
-{
+void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous) {
     deselectAll();
     if (previous.isValid() && previous.row() != current.row()) {
         int apertureId = model->apertureId(previous.row());
@@ -540,8 +529,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
     zoonToSelected();
 }
 
-void DrillForm::on_customContextMenuRequested(const QPoint& pos)
-{
+void DrillForm::on_customContextMenuRequested(const QPoint& pos) {
     if (ui->toolTable->selectionModel()->selectedIndexes().isEmpty())
         return;
     QMenu menu;
@@ -599,15 +587,13 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
     menu.exec(ui->toolTable->viewport()->mapToGlobal(pos));
 }
 
-void DrillForm::updateToolsOnGi(int apToolId)
-{
+void DrillForm::updateToolsOnGi(int apToolId) {
     qDebug() << apToolId;
     for (auto& item : m_giPeview[apToolId])
         item->updateTool();
 }
 
-void DrillForm::pickUpTool()
-{
+void DrillForm::pickUpTool() {
     const double k = 0.05;
     int ctr = 0;
     for (const auto& row : model->data()) {
@@ -637,26 +623,22 @@ void DrillForm::pickUpTool()
     }
 }
 
-void DrillForm::setSelected(int id, bool fl)
-{
+void DrillForm::setSelected(int id, bool fl) {
     for (auto& item : m_giPeview[id])
         item->setSelected(fl);
 }
 
-void DrillForm::zoonToSelected()
-{
+void DrillForm::zoonToSelected() {
     if (ui->chbxZoomToSelected->isChecked())
         App::graphicsView()->zoomToSelected();
 }
 
-void DrillForm::deselectAll()
-{
+void DrillForm::deselectAll() {
     for (QGraphicsItem* item : App::scene()->selectedItems())
         item->setSelected(false);
 }
 
-void DrillForm::clear()
-{
+void DrillForm::clear() {
     m_giPeview.clear();
 }
 
@@ -678,8 +660,7 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
 
 Header::~Header() { }
 
-void Header::setAll(bool ch)
-{
+void Header::setAll(bool ch) {
     for (int i = 0; i < count(); ++i) {
         if (checked(i) != ch) {
             setChecked(i, ch);
@@ -689,22 +670,19 @@ void Header::setAll(bool ch)
     emit onChecked();
 }
 
-void Header::togle(int index)
-{
+void Header::togle(int index) {
     setChecked(index, !checked(index));
     updateSection(index);
     emit onChecked(index);
 }
 
-void Header::set(int index, bool ch)
-{
+void Header::set(int index, bool ch) {
     setChecked(index, ch);
     updateSection(index);
     emit onChecked(index);
 }
 
-QRect Header::getRect(const QRect& rect)
-{
+QRect Header::getRect(const QRect& rect) {
     return QRect(
         rect.left() + XOffset,
         rect.top() + (rect.height() - DelegateSize) / 2,
@@ -712,8 +690,7 @@ QRect Header::getRect(const QRect& rect)
         DelegateSize);
 }
 
-void Header::mouseMoveEvent(QMouseEvent* event)
-{
+void Header::mouseMoveEvent(QMouseEvent* event) {
     static int index = 0;
     do {
 
@@ -734,8 +711,7 @@ void Header::mouseMoveEvent(QMouseEvent* event)
     QHeaderView::mouseMoveEvent(event);
 }
 
-void Header::mousePressEvent(QMouseEvent* event)
-{
+void Header::mousePressEvent(QMouseEvent* event) {
     int index = logicalIndexAt(event->pos());
     do {
         if (index < 0)
@@ -749,8 +725,7 @@ void Header::mousePressEvent(QMouseEvent* event)
     QHeaderView::mousePressEvent(event);
 }
 
-void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const
-{
+void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const {
     painter->save();
     QHeaderView::paintSection(painter, rect, logicalIndex);
     painter->restore();

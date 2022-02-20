@@ -26,8 +26,7 @@
 namespace Shapes {
 
 Shape::Shape()
-    : m_node(new Node(this, &m_giId))
-{
+    : m_node(new Node(this, &m_giId)) {
     m_paths.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
@@ -38,8 +37,7 @@ Shape::Shape()
 
 Shape::~Shape() { }
 
-void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*)
-{
+void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
     m_pathColor = m_bodyColor;
     m_pathColor.setAlpha(255);
     m_pen.setColor(m_pathColor);
@@ -83,15 +81,13 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
     }
 }
 
-void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
+void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu_;
     menu(menu_, App::fileTreeView());
     menu_.exec(event->screenPos());
 }
 
-QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemSelectedChange) {
         const bool selected = value.toInt();
         for (auto& item : handlers)
@@ -110,8 +106,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
 
 void Shape::updateOtherHandlers(Handler*) { }
 
-void Shape::changeColor()
-{
+void Shape::changeColor() {
     animation.setStartValue(m_bodyColor);
 
     switch (colorState) {
@@ -137,8 +132,7 @@ void Shape::changeColor()
 
 Node* Shape::node() const { return m_node; }
 
-bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -163,8 +157,7 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role)
     }
 }
 
-QVariant Shape::data(const QModelIndex& index, int role) const
-{
+QVariant Shape::data(const QModelIndex& index, int role) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -186,8 +179,7 @@ QVariant Shape::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags Shape::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -199,8 +191,7 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const
     }
 }
 
-void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
-{
+void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         App::fileModel()->removeRow(m_node->row(), m_node->index().parent());
     });
@@ -211,8 +202,7 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const
 }
 
 // write to project
-void Shape::write_(QDataStream& stream) const
-{
+void Shape::write_(QDataStream& stream) const {
     stream << qint32(handlers.size());
     for (const auto& item : handlers) {
         stream << item->pos();
@@ -222,8 +212,7 @@ void Shape::write_(QDataStream& stream) const
 }
 
 // read from project
-void Shape::read_(QDataStream& stream)
-{
+void Shape::read_(QDataStream& stream) {
     isFinal = true;
     qint32 size;
     stream >> size;
@@ -241,4 +230,4 @@ void Shape::read_(QDataStream& stream)
     redraw();
 }
 
-}
+} // namespace Shapes

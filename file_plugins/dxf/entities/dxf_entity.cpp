@@ -20,16 +20,14 @@
 
 namespace Dxf {
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& entity)
-{
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& entity) {
     stream << static_cast<int>(entity->type());
     entity->Entity::write(stream);
     entity->write(stream);
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity)
-{
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity) {
     static Blocks blocks;
     int type;
     stream >> type;
@@ -135,14 +133,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity)
 }
 
 Entity::Entity(SectionParser* sp)
-    : sp(sp)
-{
+    : sp(sp) {
 }
 
 Entity::~Entity() { }
 
-void Entity::draw(const InsertEntity* const i) const
-{
+void Entity::draw(const InsertEntity* const i) const {
     if (i) {
         for (int r = 0; r < i->rowCount; ++r) {
             for (int c = 0; c < i->colCount; ++c) {
@@ -157,8 +153,7 @@ void Entity::draw(const InsertEntity* const i) const
     }
 }
 
-void Entity::parse(CodeData& code)
-{
+void Entity::parse(CodeData& code) {
     switch (code.code()) {
         //    case LayerName:
         //        layerName = code.string();
@@ -251,8 +246,7 @@ void Entity::parse(CodeData& code)
     }
 }
 
-void Entity::write(QDataStream& stream) const
-{
+void Entity::write(QDataStream& stream) const {
     stream << layerName;
     stream << handle;
     stream << softPointerID;
@@ -260,8 +254,7 @@ void Entity::write(QDataStream& stream) const
     stream << id;
 }
 
-void Entity::read(QDataStream& stream)
-{
+void Entity::read(QDataStream& stream) {
     stream >> layerName;
     stream >> handle;
     stream >> softPointerID;
@@ -269,23 +262,19 @@ void Entity::read(QDataStream& stream)
     stream >> id;
 }
 
-Entity::Type Entity::toType(const QString& key)
-{
+Entity::Type Entity::toType(const QString& key) {
     return Type(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().toUpper().data()));
 }
 
-QString Entity::typeName(int key)
-{
+QString Entity::typeName(int key) {
     return staticMetaObject.enumerator(0).valueToKey(key);
 }
 
-QString Entity::name() const
-{
+QString Entity::name() const {
     return staticMetaObject.enumerator(0).valueToKey(type());
 }
 
-QColor Entity::color() const
-{
+QColor Entity::color() const {
     if (auto layer = sp->file->layer(layerName); layer != nullptr) {
         QColor c(dxfColors[layer->colorNumber()]);
         c.setAlpha(200);
@@ -295,8 +284,7 @@ QColor Entity::color() const
     return QColor(255, 0, 255, 100);
 }
 
-void Entity::attachToLayer(GraphicObject&& go) const
-{
+void Entity::attachToLayer(GraphicObject&& go) const {
     if (sp == nullptr)
         throw DxfObj::tr("SectionParser is null!");
     else if (sp->file == nullptr)
@@ -307,31 +295,26 @@ void Entity::attachToLayer(GraphicObject&& go) const
     sp->file->layer(layerName)->addGraphicObject(std::move(go));
 }
 
-Entity::DataEnum Entity::toDataEnum(const QString& key)
-{
+Entity::DataEnum Entity::toDataEnum(const QString& key) {
     return DataEnum(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().toUpper().data()));
 }
 
-QPointF polar(QPointF p, float angle, float distance)
-{
+QPointF polar(QPointF p, float angle, float distance) {
     // Returns the point at a specified `angle` and `distance` from point `p`.
     return p + QPointF(cos(angle) * distance, sin(angle) * distance);
 }
 
-double angle(QPointF p1, QPointF p2)
-{
+double angle(QPointF p1, QPointF p2) {
     // Returns angle a line defined by two endpoints and x-axis in radians.
     p2 -= p1;
     return atan2(p2.y(), p2.x());
 }
 
-double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge)
-{
+double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge) {
     return QLineF(start_point, end_point).length() * (1.0 + (bulge * bulge)) / 4.0 / bulge;
 }
 
-std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPointF end_point, float bulge)
-{
+std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPointF end_point, float bulge) {
     /*
     Returns arc parameters from bulge parameters.
     Based on Bulge to Arc by `Lee Mac`_.
@@ -351,4 +334,4 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
         return { c, angle(c, start_point), angle(c, end_point), abs(r) };
 }
 
-}
+} // namespace Dxf

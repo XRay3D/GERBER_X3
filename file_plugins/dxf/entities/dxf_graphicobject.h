@@ -77,4 +77,4 @@ public:
     Paths& rPaths() override;
 };
 
-}
+} // namespace Dxf

@@ -22,15 +22,13 @@ namespace Dxf {
 SectionENTITIES::SectionENTITIES(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
     , sp(this)
-    , blocks(file->blocks())
-{
+    , blocks(file->blocks()) {
 }
 
 SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* sp)
     : SectionParser(sp->from, sp->to, sp->it, sp->file)
     , sp(sp)
-    , blocks(blocks)
-{
+    , blocks(blocks) {
     do {
         file->m_entities.emplace_back(entityParse(code));
         file->m_entities.back()->parse(code);
@@ -39,12 +37,10 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
     } while (code != "ENDBLK");
 }
 
-SectionENTITIES::~SectionENTITIES()
-{
+SectionENTITIES::~SectionENTITIES() {
 }
 
-void SectionENTITIES::parse()
-{
+void SectionENTITIES::parse() {
     CodeData code = nextCode();
     code = nextCode();
     code = nextCode();
@@ -57,8 +53,7 @@ void SectionENTITIES::parse()
         e->draw();
 }
 
-std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code)
-{
+std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     key = Entity::toType(code);
     switch (key) {
     case Entity::ACAD_PROXY_ENTITY:
@@ -137,4 +132,4 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code)
     }
     throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }
-}
+} // namespace Dxf

@@ -40,4 +40,4 @@ public:
     static QTimer* decorationTimer();
 };
 
-}
+} // namespace Gerber

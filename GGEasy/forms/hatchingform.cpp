@@ -26,8 +26,7 @@ HatchingForm::HatchingForm(QWidget* parent)
     , pixmaps {
         QStringLiteral("pock_rast_climb"),
         QStringLiteral("pock_rast_conv"),
-    }
-{
+    } {
     ui->setupUi(this);
     parent->setWindowTitle(ui->label->text());
 
@@ -61,8 +60,7 @@ HatchingForm::HatchingForm(QWidget* parent)
     connect(ui->pbCreate, &QPushButton::clicked, this, &HatchingForm::createFile);
 }
 
-HatchingForm::~HatchingForm()
-{
+HatchingForm::~HatchingForm() {
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -77,8 +75,7 @@ HatchingForm::~HatchingForm()
     delete ui;
 }
 
-void HatchingForm::createFile()
-{
+void HatchingForm::createFile() {
     const auto tool { ui->toolHolder->tool() };
 
     if (!tool.isValid()) {
@@ -152,8 +149,7 @@ void HatchingForm::createFile()
     createToolpath();
 }
 
-void HatchingForm::updateName()
-{
+void HatchingForm::updateName() {
     //    const auto& tool { ui->toolHolder->tool() };
     //    if (tool.type() != Tool::Laser)
     //        ui->rbNormal->setChecked(true);
@@ -162,13 +158,11 @@ void HatchingForm::updateName()
     ui->leName->setText(names[side]);
 }
 
-void HatchingForm::updatePixmap()
-{
+void HatchingForm::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void HatchingForm::rb_clicked()
-{
+void HatchingForm::rb_clicked() {
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;
@@ -184,20 +178,17 @@ void HatchingForm::rb_clicked()
     updatePixmap();
 }
 
-void HatchingForm::resizeEvent(QResizeEvent* event)
-{
+void HatchingForm::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void HatchingForm::showEvent(QShowEvent* event)
-{
+void HatchingForm::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
 void HatchingForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void HatchingForm::editFile(GCode::File* /*file*/)
-{
+void HatchingForm::editFile(GCode::File* /*file*/) {
 }

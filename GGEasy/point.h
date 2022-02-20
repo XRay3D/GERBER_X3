@@ -14,6 +14,7 @@
 #include "scene.h"
 
 #include <QGraphicsItem>
+#include <span>
 
 bool updateRect();
 
@@ -64,7 +65,7 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    static mvector<Pin*> pins();
+    static auto pins() { return std::span(m_pins, 4); }
     static void setPinsPos(QPointF pos[4]);
 
     static double minX() { return qMin(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }

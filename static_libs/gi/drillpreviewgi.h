@@ -78,14 +78,14 @@ protected:
     static constexpr int dark = 180;
     static constexpr int light = 255;
     inline static constexpr QRgb colors[] {
-        qRgba(128, 128, 128, dark), //  Default         gray dark
+        qRgba(128, 128, 128, dark),  //  Default         gray dark
         qRgba(255, 255, 255, light), // DefaultHovered  gray light
-        qRgba(0, 255, 0, dark), //      Selected        green dark
-        qRgba(0, 255, 0, light), //     SelectedHovered green light
-        qRgba(255, 0, 0, dark), //      Used            red dark
-        qRgba(255, 0, 0, light), //     UsedHovered     red light
-        qRgba(255, 255, 255, 255), //   UnUsed          transparent
-        qRgba(255, 255, 255, dark), //  Tool            white
+        qRgba(0, 255, 0, dark),      //      Selected        green dark
+        qRgba(0, 255, 0, light),     //     SelectedHovered green light
+        qRgba(255, 0, 0, dark),      //      Used            red dark
+        qRgba(255, 0, 0, light),     //     UsedHovered     red light
+        qRgba(255, 255, 255, 255),   //   UnUsed          transparent
+        qRgba(255, 255, 255, dark),  //  Tool            white
     };
 
     enum ColorState {

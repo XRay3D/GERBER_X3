@@ -21,12 +21,10 @@
 namespace Dxf {
 
 Text::Text(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
-void Text::parse(CodeData& code)
-{
+void Text::parse(CodeData& code) {
     do {
         switch (code.code()) {
         case SubclassMarker:
@@ -90,8 +88,7 @@ void Text::parse(CodeData& code)
 
 Entity::Type Text::type() const { return Type::TEXT; }
 
-QDebug operator<<(QDebug debug, const QFontMetricsF& fm)
-{
+QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     QDebugStateSaver saver(debug);
     debug.nospace() << "FM(";
     debug.nospace() << "\n\tascent: " << fm.ascent();
@@ -113,8 +110,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm)
     return debug;
 }
 
-GraphicObject Text::toGo() const
-{
+GraphicObject Text::toGo() const {
     //    qDebug() << data.size();
     //    for (auto& code : data)
     //        qDebug() << "\t" << DataEnum(code.code()) << code;
@@ -223,8 +219,7 @@ GraphicObject Text::toGo() const
     return { id, {}, paths };
 }
 
-void Text::write(QDataStream& stream) const
-{
+void Text::write(QDataStream& stream) const {
     stream << text;
     stream << textStyleName;
 
@@ -240,8 +235,7 @@ void Text::write(QDataStream& stream) const
     stream << rotation;
 }
 
-void Text::read(QDataStream& stream)
-{
+void Text::read(QDataStream& stream) {
     stream >> text;
     stream >> textStyleName;
 
@@ -256,4 +250,4 @@ void Text::read(QDataStream& stream)
     stream >> textHeight;
     stream >> rotation;
 }
-}
+} // namespace Dxf

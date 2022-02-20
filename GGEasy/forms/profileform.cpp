@@ -80,8 +80,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     });
 }
 
-ProfileForm::~ProfileForm()
-{
+ProfileForm::~ProfileForm() {
     MySettings settings;
     settings.beginGroup("ProfileForm");
     settings.setValue(ui->dsbxBridgeLenght);
@@ -101,8 +100,7 @@ ProfileForm::~ProfileForm()
     delete ui;
 }
 
-void ProfileForm::createFile()
-{
+void ProfileForm::createFile() {
     m_usedItems.clear();
     const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
@@ -183,26 +181,22 @@ void ProfileForm::createFile()
     emit createToolpath();
 }
 
-void ProfileForm::updateName()
-{
+void ProfileForm::updateName() {
     ui->leName->setText(names[side]);
     updateBridge();
 }
 
-void ProfileForm::resizeEvent(QResizeEvent* event)
-{
+void ProfileForm::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void ProfileForm::showEvent(QShowEvent* event)
-{
+void ProfileForm::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void ProfileForm::on_pbAddBridge_clicked()
-{
+void ProfileForm::on_pbAddBridge_clicked() {
     if (brItem) {
         if (!brItem->ok())
             delete brItem;
@@ -212,8 +206,7 @@ void ProfileForm::on_pbAddBridge_clicked()
     brItem->setVisible(true);
 }
 
-void ProfileForm::updateBridge()
-{
+void ProfileForm::updateBridge() {
     m_lenght = ui->dsbxBridgeLenght->value();
     m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : App::scene()->items()) {
@@ -222,14 +215,12 @@ void ProfileForm::updateBridge()
     }
 }
 
-void ProfileForm::updatePixmap()
-{
+void ProfileForm::updatePixmap() {
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
 }
 
-void ProfileForm::rb_clicked()
-{
+void ProfileForm::rb_clicked() {
     if (ui->rbOn->isChecked()) {
         side = GCode::On;
         ui->cbxTrimming->setText(tr("Trimming"));
@@ -255,8 +246,7 @@ void ProfileForm::rb_clicked()
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void ProfileForm::editFile(GCode::File* file)
-{
+void ProfileForm::editFile(GCode::File* file) {
 
     GCode::GCodeParams gcp { file->gcp() };
 

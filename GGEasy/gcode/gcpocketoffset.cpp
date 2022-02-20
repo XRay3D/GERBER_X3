@@ -20,12 +20,10 @@
 #include <QElapsedTimer>
 
 namespace GCode {
-PocketCreator::PocketCreator()
-{
+PocketCreator::PocketCreator() {
 }
 
-void PocketCreator::create()
-{
+void PocketCreator::create() {
     if (m_gcp.tools.size() > 1) {
         createMultiTool(m_gcp.tools, m_gcp.params[GCodeParams::Depth].toDouble());
     } else if (m_gcp.params.contains(GCodeParams::Steps) && m_gcp.params[GCodeParams::Steps].toInt() > 0) {
@@ -35,8 +33,7 @@ void PocketCreator::create()
     }
 }
 
-void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const int steps)
-{
+void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const int steps) {
 
     if (m_gcp.side() == On)
         return;
@@ -113,8 +110,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
     emit fileReady(m_file);
 }
 
-void PocketCreator::createStdFull(const Tool& tool, const double depth)
-{
+void PocketCreator::createStdFull(const Tool& tool, const double depth) {
 
     if (m_gcp.side() == On)
         return;
@@ -156,7 +152,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
         Paths offsetPaths;
         do {
             incCurrent(); ////////////////////
-            getCancel(); ///////////
+            getCancel();  ///////////
             offsetPaths.append(paths);
             offset.Clear();
             offset.AddPaths(paths, jtMiter, etClosedPolygon);
@@ -186,8 +182,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth)
     emit fileReady(m_file);
 }
 
-void PocketCreator::createMultiTool(mvector<Tool>& tools, double depth)
-{
+void PocketCreator::createMultiTool(mvector<Tool>& tools, double depth) {
 
     switch (m_gcp.side()) {
     case On:
@@ -318,4 +313,4 @@ void PocketCreator::createMultiTool(mvector<Tool>& tools, double depth)
 
     } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
 }
-}
+} // namespace GCode

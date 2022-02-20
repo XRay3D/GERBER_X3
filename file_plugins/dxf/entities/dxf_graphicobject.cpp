@@ -17,8 +17,7 @@
 
 namespace Dxf {
 
-QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
-{
+QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
     stream << go.m_path;
     stream << go.m_paths;
     stream << go.m_entityId;
@@ -31,8 +30,7 @@ QDataStream& operator<<(QDataStream& stream, const GraphicObject& go)
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
-{
+QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
     stream >> go.m_path;
     stream >> go.m_paths;
     stream >> go.m_entityId;
@@ -45,8 +43,7 @@ QDataStream& operator>>(QDataStream& stream, GraphicObject& go)
     return stream;
 }
 
-size_t GraphicObject::entityId() const
-{
+size_t GraphicObject::entityId() const {
     return m_entityId;
 }
 
@@ -55,12 +52,10 @@ GraphicObject::GraphicObject() { }
 GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
     : m_entityId(entityId)
     , m_path(path)
-    , m_paths(paths)
-{
+    , m_paths(paths) {
 }
 
-void GraphicObject::setRotation(double rotationAngle)
-{
+void GraphicObject::setRotation(double rotationAngle) {
     m_rotationAngle = rotationAngle;
     RotatePath(m_path, m_rotationAngle /*, m_pos*/);
     for (auto& path : m_paths)
@@ -69,8 +64,7 @@ void GraphicObject::setRotation(double rotationAngle)
 
 double GraphicObject::rotationAngle() const { return m_rotationAngle; }
 
-void GraphicObject::setScale(double scaleX, double scaleY)
-{
+void GraphicObject::setScale(double scaleX, double scaleY) {
     m_scaleX = scaleX, m_scaleY = scaleY;
     auto scale = [](Path& path, double sx, double sy, const IntPoint& center = {}) {
         const bool fl = Area(path) < 0;
@@ -96,8 +90,7 @@ double GraphicObject::scaleX() const { return m_scaleX; }
 
 double GraphicObject::scaleY() const { return m_scaleY; }
 
-void GraphicObject::setPos(QPointF pos)
-{
+void GraphicObject::setPos(QPointF pos) {
     m_pos = pos;
     TranslatePath(m_path, m_pos);
     for (auto& path : m_paths)
@@ -146,4 +139,4 @@ Path& GraphicObject::rPath() { return m_path; }
 
 Paths& GraphicObject::rPaths() { return m_paths; }
 
-}
+} // namespace Dxf

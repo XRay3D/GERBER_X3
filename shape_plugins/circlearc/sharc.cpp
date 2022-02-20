@@ -20,8 +20,7 @@
 namespace Shapes {
 
 Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
-    : m_radius(QLineF(center, pt).length())
-{
+    : m_radius(QLineF(center, pt).length()) {
     m_paths.resize(1);
 
     handlers.reserve(PtCount);
@@ -41,8 +40,7 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
 
 Arc::~Arc() { }
 
-void Arc::redraw()
-{
+void Arc::redraw() {
     const QLineF l1(handlers[Center]->pos(), handlers[Point1]->pos());
     const QLineF l2(handlers[Center]->pos(), handlers[Point2]->pos());
 
@@ -91,8 +89,7 @@ QString Arc::name() const { return QObject::tr("Arc"); }
 
 QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-void Arc::updateOtherHandlers(Handler* handler)
-{
+void Arc::updateOtherHandlers(Handler* handler) {
     QLineF l(handlers[Center]->pos(), handler->pos());
     m_radius = l.length();
 
@@ -119,8 +116,7 @@ void Arc::updateOtherHandlers(Handler* handler)
     }
 }
 
-void Arc::setPt(const QPointF& pt)
-{
+void Arc::setPt(const QPointF& pt) {
     {
         handlers[Point1]->setPos(pt);
         QLineF l(handlers[Center]->pos(), handlers[Point1]->pos());
@@ -134,8 +130,7 @@ void Arc::setPt(const QPointF& pt)
     redraw();
 }
 
-void Arc::setPt2(const QPointF& pt)
-{
+void Arc::setPt2(const QPointF& pt) {
     QLineF l(handlers[Center]->pos(), pt);
     l.setLength(m_radius);
 
@@ -145,8 +140,7 @@ void Arc::setPt2(const QPointF& pt)
 
 double Arc::radius() const { return m_radius; }
 
-void Arc::setRadius(double radius)
-{
+void Arc::setRadius(double radius) {
     if (!qFuzzyCompare(m_radius, radius))
         return;
     m_radius = radius;
@@ -164,8 +158,7 @@ QObject* Plugin::getObject() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShCirArc); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Circle Arc" },
         { "Version", "1.0" },
@@ -182,8 +175,7 @@ Shape* Plugin::createShape(const QPointF& point) { return shape = new Arc(point,
 
 bool Plugin::addShapePoint(const QPointF&) { return ctr++ ? ctr = 0, false : true; }
 
-void Plugin::updateShape(const QPointF& point)
-{
+void Plugin::updateShape(const QPointF& point) {
     if (shape) {
         if (!ctr)
             shape->setPt(point);
@@ -192,12 +184,11 @@ void Plugin::updateShape(const QPointF& point)
     }
 }
 
-void Plugin::finalizeShape()
-{
+void Plugin::finalizeShape() {
     if (shape)
         shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }
 
-}
+} // namespace Shapes

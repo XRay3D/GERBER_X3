@@ -21,12 +21,11 @@
 
 class Result {
 public:
-    double acc; // Аккамулятор
+    double acc;   // Аккамулятор
     QString rest; // остаток строки, которую мы еще не обработали
     Result(double v = 0.0, const QString& r = "")
         : acc(v)
-        , rest(r)
-    {
+        , rest(r) {
     }
 };
 

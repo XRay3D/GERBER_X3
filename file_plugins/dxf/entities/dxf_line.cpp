@@ -18,8 +18,7 @@
 namespace Dxf {
 
 Line::Line(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Line::draw(const InsertEntity* const i) const
@@ -38,8 +37,7 @@ Line::Line(SectionParser* sp)
 //    }
 //}
 
-void Line::parse(CodeData& code)
-{
+void Line::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -81,8 +79,7 @@ void Line::parse(CodeData& code)
 
 Entity::Type Line::type() const { return Type::LINE; }
 
-GraphicObject Line::toGo() const
-{
+GraphicObject Line::toGo() const {
     QPolygonF p;
     if (p.isEmpty()) {
         p.append(startPoint);
@@ -97,18 +94,16 @@ GraphicObject Line::toGo() const
     return { id, p, paths };
 }
 
-void Line::write(QDataStream& stream) const
-{
+void Line::write(QDataStream& stream) const {
     stream << startPoint;
     stream << endPoint;
     stream << thickness;
 }
 
-void Line::read(QDataStream& stream)
-{
+void Line::read(QDataStream& stream) {
     stream >> startPoint;
     stream >> endPoint;
     stream >> thickness;
 }
 
-}
+} // namespace Dxf

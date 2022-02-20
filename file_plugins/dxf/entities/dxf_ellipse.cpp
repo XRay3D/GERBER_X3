@@ -24,8 +24,7 @@
 
 namespace Dxf {
 Ellipse::Ellipse(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Ellipse::draw(const InsertEntity* const i) const
@@ -79,31 +78,30 @@ Ellipse::Ellipse(SectionParser* sp)
 //    }
 //}
 
-void Ellipse::parse(CodeData& code)
-{
+void Ellipse::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: //100
-            break; //	100	Маркер подкласса (AcDbEllipse)
+            break;           //	100	Маркер подкласса (AcDbEllipse)
 
         case CenterPointX: //10
             CenterPoint.setX(code);
-            break; //	10	Центральная точка (в МСК)
+            break;         //	10	Центральная точка (в МСК)
         case CenterPointY: //20
             CenterPoint.setY(code);
-            break; //		Файл DXF: значение X; приложение: 3D-точка
+            break;         //		Файл DXF: значение X; приложение: 3D-точка
         case CenterPointZ: //30
-            break; //	20, 30	Файл DXF: значения Y и Z для центральной точки (в МСК)
+            break;         //	20, 30	Файл DXF: значения Y и Z для центральной точки (в МСК)
 
         case EndpointOfMajorAxisX: //11
             EndpointOfMajorAxis.setX(code);
-            break; //	11	Конечная точка главной оси относительно центральной точки (в МСК)
+            break;                 //	11	Конечная точка главной оси относительно центральной точки (в МСК)
         case EndpointOfMajorAxisY: //21
             EndpointOfMajorAxis.setY(code);
-            break; //		Файл DXF: значение X; приложение: 3D-точка
+            break;                 //		Файл DXF: значение X; приложение: 3D-точка
         case EndpointOfMajorAxisZ: //31
-            break; //	21, 31	Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
+            break;                 //	21, 31	Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
 
         case ExtrusionDirectionX: //210
         case ExtrusionDirectionY: //220
@@ -116,7 +114,7 @@ void Ellipse::parse(CodeData& code)
 
         case StartParameter: //41
             startParameter = code;
-            break; //	41	Начальный параметр (значение для полного эллипса — 0,0)
+            break;         //	41	Начальный параметр (значение для полного эллипса — 0,0)
         case EndParameter: //42
             endParameter = code;
             break; //	42	Конечный параметр (значение для полного эллипса — 2 пи)
@@ -131,8 +129,7 @@ Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
 GraphicObject Ellipse::toGo() const { return {}; }
 
-void Ellipse::write(QDataStream& stream) const
-{
+void Ellipse::write(QDataStream& stream) const {
     stream << startParameter;
     stream << endParameter;
     stream << ratioOfMinorAxisToMajorAxis;
@@ -140,8 +137,7 @@ void Ellipse::write(QDataStream& stream) const
     stream << EndpointOfMajorAxis;
 }
 
-void Ellipse::read(QDataStream& stream)
-{
+void Ellipse::read(QDataStream& stream) {
     stream >> startParameter;
     stream >> endParameter;
     stream >> ratioOfMinorAxisToMajorAxis;
@@ -149,4 +145,4 @@ void Ellipse::read(QDataStream& stream)
     stream >> EndpointOfMajorAxis;
 }
 
-}
+} // namespace Dxf

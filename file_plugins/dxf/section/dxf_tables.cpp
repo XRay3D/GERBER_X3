@@ -18,20 +18,17 @@ namespace Dxf {
 
 SectionTABLES::SectionTABLES(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
-    , layers(file->layers())
-{
+    , layers(file->layers()) {
 }
 
-SectionTABLES::~SectionTABLES()
-{
+SectionTABLES::~SectionTABLES() {
     for (const auto& [k, v] : tables) {
         (void)k;
         qDeleteAll(v);
     }
 }
 
-void SectionTABLES::parse()
-{
+void SectionTABLES::parse() {
     do {
         CodeData code(nextCode());
         if (code == "TABLE") {
@@ -84,4 +81,4 @@ void SectionTABLES::parse()
     } while (hasNext());
 }
 
-}
+} // namespace Dxf

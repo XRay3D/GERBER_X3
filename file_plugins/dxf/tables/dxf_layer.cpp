@@ -18,24 +18,20 @@
 namespace Dxf {
 
 Layer::Layer(File* sp)
-    : AbstractTable(nullptr)
-{
+    : AbstractTable(nullptr) {
     m_file = sp;
 }
 
 Layer::Layer(SectionParser* sp)
-    : AbstractTable(sp)
-{
+    : AbstractTable(sp) {
 }
 
 Layer::Layer(SectionParser* sp, const QString& name)
     : AbstractTable(sp)
-    , m_name(name)
-{
+    , m_name(name) {
 }
 
-void Layer::parse(CodeData& code)
-{
+void Layer::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (code.code()) {
@@ -78,15 +74,13 @@ const GraphicObjects& Layer::graphicObjects() const { return m_graphicObjects; }
 
 void Layer::addGraphicObject(GraphicObject&& go) { m_graphicObjects.emplace_back(go); }
 
-QColor Layer::color() const
-{
+QColor Layer::color() const {
     return m_itemsType == ItemsType::Normal
         ? m_colorNorm
         : m_colorPath;
 }
 
-void Layer::setColor(const QColor& color)
-{
+void Layer::setColor(const QColor& color) {
     m_colorNorm = color;
     m_colorNorm.setAlpha(150);
     m_colorPath = color;
@@ -94,8 +88,7 @@ void Layer::setColor(const QColor& color)
 
 bool Layer::isVisible() const { return m_visible; }
 
-void Layer::setVisible(bool visible)
-{
+void Layer::setVisible(bool visible) {
     m_visible = visible;
     if (itemGroupNorm && itemGroupPath) {
         switch (m_itemsType) {
@@ -116,8 +109,7 @@ void Layer::setVisible(bool visible)
     }
 }
 
-ItemGroup* Layer::itemGroup() const
-{
+ItemGroup* Layer::itemGroup() const {
     return m_itemsType == ItemsType::Paths
         ? itemGroupPath
         : itemGroupNorm;
@@ -127,8 +119,7 @@ bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
 
 ItemsType Layer::itemsType() const { return m_itemsType; }
 
-void Layer::setItemsType(ItemsType itemsType)
-{
+void Layer::setItemsType(ItemsType itemsType) {
     if (m_itemsType == itemsType)
         return;
     m_itemsType = itemsType;
@@ -155,4 +146,4 @@ void Layer::setItemsType(ItemsType itemsType)
     }
 }
 
-}
+} // namespace Dxf

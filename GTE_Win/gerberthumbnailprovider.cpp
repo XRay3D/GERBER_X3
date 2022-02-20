@@ -34,19 +34,16 @@ extern long g_cDllRef;
 using namespace ClipperLib;
 
 GerberThumbnailProvider::GerberThumbnailProvider()
-    : m_cRef(1)
-{
+    : m_cRef(1) {
     InterlockedIncrement(&g_cDllRef);
 }
 
-GerberThumbnailProvider::~GerberThumbnailProvider()
-{
+GerberThumbnailProvider::~GerberThumbnailProvider() {
     InterlockedDecrement(&g_cDllRef);
 }
 
 // Query to the interface the component supported.
-IFACEMETHODIMP GerberThumbnailProvider::QueryInterface(REFIID riid, void** ppv)
-{
+IFACEMETHODIMP GerberThumbnailProvider::QueryInterface(REFIID riid, void** ppv) {
     static const QITAB qit[] = {
         QITABENT(GerberThumbnailProvider, IThumbnailProvider),
         QITABENT(GerberThumbnailProvider, IInitializeWithStream),
@@ -57,15 +54,13 @@ IFACEMETHODIMP GerberThumbnailProvider::QueryInterface(REFIID riid, void** ppv)
 
 // Increase the reference count for an interface on an object.
 IFACEMETHODIMP_(ULONG)
-GerberThumbnailProvider::AddRef()
-{
+GerberThumbnailProvider::AddRef() {
     return InterlockedIncrement(&m_cRef);
 }
 
 // Decrease the reference count for an interface on an object.
 IFACEMETHODIMP_(ULONG)
-GerberThumbnailProvider::Release()
-{
+GerberThumbnailProvider::Release() {
     ULONG cRef = InterlockedDecrement(&m_cRef);
     if (0 == cRef) {
         delete this;
@@ -77,8 +72,7 @@ GerberThumbnailProvider::Release()
 // Initializes the thumbnail handler with a stream.
 IFACEMETHODIMP GerberThumbnailProvider::Initialize(
     IStream* pStream,
-    DWORD /*grfMode*/)
-{
+    DWORD /*grfMode*/) {
     //    // A handler instance should be initialized only once in its lifetime.
     //    HRESULT hr = HRESULT_FROM_WIN32(ERROR_ALREADY_INITIALIZED);
     //    if (m_pStream == NULL) {
@@ -114,16 +108,14 @@ IFACEMETHODIMP GerberThumbnailProvider::Initialize(
 // value that indicates the color format of the image and whether it has
 // valid alpha information.
 
-void SignalHandler(int signal)
-{
+void SignalHandler(int signal) {
     printf("Signal %d", signal);
     throw "!Access Violation!";
 }
 IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
     UINT cx,
     HBITMAP* phbmp,
-    WTS_ALPHATYPE* pdwAlpha)
-{
+    WTS_ALPHATYPE* pdwAlpha) {
 
     typedef void (*SignalHandlerPointer)(int);
     SignalHandlerPointer previousHandler;

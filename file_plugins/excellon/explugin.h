@@ -49,4 +49,4 @@ signals:
 private:
     QIcon drawDrillIcon();
 };
-}
+} // namespace Excellon

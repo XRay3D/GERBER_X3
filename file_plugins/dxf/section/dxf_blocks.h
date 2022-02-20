@@ -26,4 +26,4 @@ struct SectionBLOCKS final : SectionParser {
     Blocks& blocks;
 };
 
-}
+} // namespace Dxf

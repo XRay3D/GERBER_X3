@@ -18,7 +18,7 @@
 namespace GCode {
 class File;
 class Creator;
-}
+} // namespace GCode
 
 class GraphicsItem;
 class QProgressDialog;

@@ -25,20 +25,17 @@
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ToolItem())
-    , mimeType(QStringLiteral("application/ToolItem"))
-{
+    , mimeType(QStringLiteral("application/ToolItem")) {
     importTools();
 }
 
-ToolModel::~ToolModel()
-{
+ToolModel::~ToolModel() {
     exportTools();
     rootItem->setDeleteEnable(false);
     delete rootItem;
 }
 
-bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
-{
+bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
 
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -54,8 +51,7 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
-{
+bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
 
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -83,13 +79,11 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
 //    return true;
 //}
 
-int ToolModel::columnCount(const QModelIndex& /*parent*/) const
-{
+int ToolModel::columnCount(const QModelIndex& /*parent*/) const {
     return 3;
 }
 
-int ToolModel::rowCount(const QModelIndex& parent) const
-{
+int ToolModel::rowCount(const QModelIndex& parent) const {
     ToolItem* parentItem;
     if (parent.column() > 0)
         return 0;
@@ -102,8 +96,7 @@ int ToolModel::rowCount(const QModelIndex& parent) const
     return parentItem->childCount();
 }
 
-QModelIndex ToolModel::index(int row, int column, const QModelIndex& parent) const
-{
+QModelIndex ToolModel::index(int row, int column, const QModelIndex& parent) const {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
@@ -121,8 +114,7 @@ QModelIndex ToolModel::index(int row, int column, const QModelIndex& parent) con
         return QModelIndex();
 }
 
-QModelIndex ToolModel::parent(const QModelIndex& child) const
-{
+QModelIndex ToolModel::parent(const QModelIndex& child) const {
     if (!child.isValid())
         return QModelIndex();
     ToolItem* parentItem = static_cast<ToolItem*>(child.internalPointer())->parent();
@@ -131,27 +123,23 @@ QModelIndex ToolModel::parent(const QModelIndex& child) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-Qt::ItemFlags ToolModel::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags ToolModel::flags(const QModelIndex& index) const {
     if (!index.isValid())
         return rootItem->flags(index);
     return getItem(index)->flags(index);
 }
 
-bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int role) {
     return getItem(index)->setData(index, value, role);
 }
 
-QVariant ToolModel::data(const QModelIndex& index, int role) const
-{
+QVariant ToolModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
     return getItem(index)->data(index, role);
 }
 
-QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
+QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         return tr("Name|Note|Id").split('|')[section];
     if (role == Qt::TextAlignmentRole && orientation == Qt::Horizontal)
@@ -159,15 +147,13 @@ QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int rol
     return QVariant();
 }
 
-QStringList ToolModel::mimeTypes() const
-{
+QStringList ToolModel::mimeTypes() const {
     QStringList types;
     types << mimeType;
     return types;
 }
 
-QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
-{
+QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const {
     QMimeData* mimeData = new QMimeData();
     QByteArray encodedData;
     int noCopy = -1;
@@ -184,8 +170,7 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
-bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
-{
+bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
     if (action == Qt::IgnoreAction)
         return true;
 
@@ -232,8 +217,7 @@ Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction 
 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
-void ToolModel::exportTools()
-{
+void ToolModel::exportTools() {
     QFile file(settingsPath + QStringLiteral("/tools.json"));
     if (!file.open(QIODevice::WriteOnly)) {
         qDebug() << file.errorString();
@@ -287,8 +271,7 @@ void ToolModel::exportTools()
     file.write(saveDoc.toJson());
 }
 
-void ToolModel::importTools()
-{
+void ToolModel::importTools() {
     QJsonDocument loadDoc;
 
     QFile file(settingsPath + QStringLiteral("/tools.json"));

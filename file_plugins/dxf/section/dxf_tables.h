@@ -42,4 +42,4 @@ struct SectionTABLES final : SectionParser {
     Layers& layers;
 };
 
-}
+} // namespace Dxf

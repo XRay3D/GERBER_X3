@@ -13,7 +13,6 @@
 #include "underlay.h"
 namespace Dxf {
 UNDERLAY::UNDERLAY(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

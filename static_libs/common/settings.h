@@ -38,22 +38,19 @@ concept IsWidget = std::is_base_of_v<QWidget, W>;
 class MySettings : public QSettings {
 public:
     template <typename T>
-    auto setValue(const QString& key, const T& value)
-    {
+    auto setValue(const QString& key, const T& value) {
         QSettings::setValue(key, value);
         return value;
     }
 
     template <typename T>
-    auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const
-    {
+    auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
         value = QSettings::value(key, defaultValue).value<T>();
         return value;
     }
 
     template <IsWidget W>
-    auto setValue(W* widget)
-    {
+    auto setValue(W* widget) {
         const QString name { widget->objectName() };
         assert(!name.isEmpty());
 
@@ -87,8 +84,7 @@ public:
     }
 
     template <IsWidget W>
-    auto getValue(W* widget, const QVariant& defaultValue = {}) const
-    {
+    auto getValue(W* widget, const QVariant& defaultValue = {}) const {
         const QString name { widget->objectName() };
         assert(!name.isEmpty());
 
@@ -122,8 +118,7 @@ public:
     }
 
     template <typename V>
-    auto getValue(V& val, const char* name, V def = {}) const requires std::is_arithmetic_v<V>
-    {
+    auto getValue(V& val, const char* name, V def = {}) const requires std::is_arithmetic_v<V> {
         if constexpr (std::is_floating_point_v<V>) {
             val = QSettings::value(name, def).toDouble();
             return val;
@@ -136,8 +131,7 @@ public:
     }
 
     template <typename V>
-    auto setValue(V val, const char* name) requires std::is_arithmetic_v<V>
-    {
+    auto setValue(V val, const char* name) requires std::is_arithmetic_v<V> {
         QSettings::setValue(name, val);
         return val;
     }
@@ -224,17 +218,17 @@ private:
     /*GUI*/
     enum { gridColor = 100 };
     QColor m_guiColor[GuiColors::Count] {
-        QColor(Qt::black), //Background
-        QColor(255, 255, 0, 120), //Pin
-        QColor(Qt::gray), //CutArea
-        QColor(gridColor, gridColor, gridColor, 50), //Grid1
+        QColor(Qt::black),                            //Background
+        QColor(255, 255, 0, 120),                     //Pin
+        QColor(Qt::gray),                             //CutArea
+        QColor(gridColor, gridColor, gridColor, 50),  //Grid1
         QColor(gridColor, gridColor, gridColor, 100), //Grid5
         QColor(gridColor, gridColor, gridColor, 200), //Grid10
-        QColor(), //Hole
-        QColor(0, 255, 0, 120), //Home
-        QColor(Qt::white), //ToolPath
-        QColor(255, 0, 0, 120), //Zero
-        QColor(Qt::red) //G0
+        QColor(),                                     //Hole
+        QColor(0, 255, 0, 120),                       //Home
+        QColor(Qt::white),                            //ToolPath
+        QColor(255, 0, 0, 120),                       //Zero
+        QColor(Qt::red)                               //G0
     };
     bool m_animSelection = true;
     bool m_guiSmoothScSh;

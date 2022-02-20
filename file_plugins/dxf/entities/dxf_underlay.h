@@ -14,4 +14,4 @@ namespace Dxf {
 struct Underlay final : Entity {
     Underlay(SectionParser* sp);
 };
-}
+} // namespace Dxf

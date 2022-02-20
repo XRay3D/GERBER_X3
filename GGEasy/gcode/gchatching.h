@@ -36,4 +36,4 @@ private:
     IntRect rect;
 };
 
-}
+} // namespace GCode

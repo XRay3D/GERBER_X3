@@ -25,4 +25,4 @@ protected:
     void highlightBlock(const QString& text) override;
 };
 
-}
+} // namespace Gerber

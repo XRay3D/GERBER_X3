@@ -28,8 +28,7 @@
 namespace Shapes {
 
 Text::Text(QPointF pt1)
-    : iData(loadIData())
-{
+    : iData(loadIData()) {
     m_paths.resize(1);
 
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
@@ -43,8 +42,7 @@ Text::Text(QPointF pt1)
 
 int Text::type() const { return static_cast<int>(GiType::ShText); }
 
-void Text::redraw()
-{
+void Text::redraw() {
     QPainterPath painterPath;
 
     QFont font;
@@ -137,22 +135,19 @@ void Text::redraw()
 
 QString Text::text() const { return iData.text; }
 
-void Text::setText(const QString& value)
-{
+void Text::setText(const QString& value) {
     iData.text = value;
     redraw();
 }
 
 Side Text::side() const { return iData.side; }
 
-void Text::setSide(const Side& side)
-{
+void Text::setSide(const Side& side) {
     iData.side = side;
     redraw();
 }
 
-bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -176,8 +171,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role)
     return Shape::setData(index, value, role);
 }
 
-Qt::ItemFlags Text::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Text::flags(const QModelIndex& index) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return Shape::flags(index) | Qt::ItemIsEditable;
@@ -188,8 +182,7 @@ Qt::ItemFlags Text::flags(const QModelIndex& index) const
     }
 }
 
-QVariant Text::data(const QModelIndex& index, int role) const
-{
+QVariant Text::data(const QModelIndex& index, int role) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -218,8 +211,7 @@ QVariant Text::data(const QModelIndex& index, int role) const
     }
 }
 
-void Text::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Text::menu(QMenu& menu, FileTree::View* tv) const {
     Shape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
         ShTextDialog dlg({ const_cast<Text*>(this) }, tv);
@@ -231,8 +223,7 @@ void Text::write(QDataStream& stream) const { stream << iData; }
 
 void Text::read(QDataStream& stream) { stream >> iData; }
 
-void Text::saveIData()
-{
+void Text::saveIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     settings.setValue("font", lastUsedIData.font);
@@ -244,8 +235,7 @@ void Text::saveIData()
     settings.setValue("handleAlign", lastUsedIData.handleAlign);
 }
 
-Text::InternalData Text::loadIData()
-{
+Text::InternalData Text::loadIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     lastUsedIData.font = settings.value("font").toString();
@@ -260,20 +250,17 @@ Text::InternalData Text::loadIData()
 
 void Text::save() { iDataCopy = iData; }
 
-void Text::restore()
-{
+void Text::restore() {
     iData = std::move(iDataCopy);
     redraw();
 }
 
-void Text::ok()
-{
+void Text::ok() {
     lastUsedIData = iData;
     saveIData();
 }
 
-void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
+void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
     ShTextDialog dlg({ this }, nullptr);
     dlg.exec();
@@ -286,8 +273,7 @@ QString Text::name() const { return QObject::tr("Text"); }
 
 QIcon Text::icon() const { return QIcon::fromTheme("draw-text"); }
 
-QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d)
-{
+QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d) {
     stream << d.text;
     stream << d.font;
     stream << d.angle;
@@ -298,8 +284,7 @@ QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d)
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, Text::InternalData& d)
-{
+QDataStream& operator>>(QDataStream& stream, Text::InternalData& d) {
     stream >> d.text;
     stream >> d.font;
     stream >> d.angle;
@@ -321,8 +306,7 @@ QObject* PluginText::getObject() { return this; }
 
 int PluginText::type() const { return static_cast<int>(GiType::ShText); }
 
-QJsonObject PluginText::info() const
-{
+QJsonObject PluginText::info() const {
     return QJsonObject {
         { "Name", "Text" },
         { "Version", "1.0" },
@@ -335,8 +319,7 @@ QIcon PluginText::icon() const { return QIcon::fromTheme("draw-text"); }
 
 Shape* PluginText::createShape() { return new Text(); }
 
-Shape* PluginText::createShape(const QPointF& point)
-{
+Shape* PluginText::createShape(const QPointF& point) {
     QTimer::singleShot(100, [this] { emit actionUncheck(); });
     return new Text(point);
 }
@@ -345,11 +328,10 @@ bool PluginText::addShapePoint(const QPointF&) { return false; }
 
 void PluginText::updateShape(const QPointF&) { }
 
-void PluginText::finalizeShape()
-{
+void PluginText::finalizeShape() {
     if (shape)
         shape->finalize();
     shape = nullptr;
     emit actionUncheck();
 }
-}
+} // namespace Shapes

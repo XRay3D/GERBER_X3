@@ -14,4 +14,4 @@ namespace Dxf {
 struct Trace final : Entity {
     Trace(SectionParser* sp);
 };
-}
+} // namespace Dxf

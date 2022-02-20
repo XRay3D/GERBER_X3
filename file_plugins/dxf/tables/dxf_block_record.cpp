@@ -15,12 +15,10 @@
 namespace Dxf {
 
 BlockRecord::BlockRecord(SectionParser* sp)
-    : TableItem(sp)
-{
+    : TableItem(sp) {
 }
 
-void BlockRecord::parse(CodeData& code)
-{
+void BlockRecord::parse(CodeData& code) {
     do {
         data.push_back(code);
         code = sp->nextCode();
@@ -28,4 +26,4 @@ void BlockRecord::parse(CodeData& code)
     //    code = sp->prevCode();
 }
 
-}
+} // namespace Dxf

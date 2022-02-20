@@ -13,7 +13,6 @@
 #include "mline.h"
 namespace Dxf {
 MLINE::MLINE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

@@ -84,4 +84,4 @@ protected:
     Paths merge() const override;
 };
 
-}
+} // namespace Dxf

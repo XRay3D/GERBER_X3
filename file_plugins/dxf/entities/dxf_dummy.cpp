@@ -17,16 +17,13 @@ namespace Dxf {
 
 Dxf::Dummy::Dummy(Dxf::SectionParser* sp, Dxf::Entity::Type type)
     : Entity(sp)
-    , m_type(type)
-{
+    , m_type(type) {
 }
 
-void Dummy::draw(const Dxf::InsertEntity* const) const
-{
+void Dummy::draw(const Dxf::InsertEntity* const) const {
 }
 
-void Dummy::parse(Dxf::CodeData& code)
-{
+void Dummy::parse(Dxf::CodeData& code) {
     switch (m_type) {
     case Type::POLYLINE:
         do {
@@ -48,4 +45,4 @@ void Dummy::parse(Dxf::CodeData& code)
     }
 }
 
-}
+} // namespace Dxf

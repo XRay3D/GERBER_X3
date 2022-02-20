@@ -30,4 +30,4 @@ public:
     void read(QDataStream&) override { }
 };
 
-}
+} // namespace Dxf

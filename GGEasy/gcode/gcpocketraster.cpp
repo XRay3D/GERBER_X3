@@ -24,20 +24,17 @@
 //#include <QtConcurrent>
 
 namespace GCode {
-RasterCreator::RasterCreator()
-{
+RasterCreator::RasterCreator() {
 }
 
-void RasterCreator::create()
-{
+void RasterCreator::create() {
     if (m_gcp.params[GCodeParams::Fast].toBool())
         createRaster2(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
     else
         createRaster(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
 }
 
-void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass)
-{
+void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
     switch (m_gcp.side()) {
     case Outer:
         groupedPaths(CutoffPaths, static_cast<cInt>(m_toolDiameter + 5));
@@ -245,8 +242,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     }
 }
 
-void RasterCreator::createRaster2(const Tool& tool, const double depth, const double angle, const int prPass)
-{
+void RasterCreator::createRaster2(const Tool& tool, const double depth, const double angle, const int prPass) {
 
     QElapsedTimer t;
     t.start();
@@ -315,7 +311,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         Clipper c;
         c.AddPath(zPath, ptSubject, false);
         c.AddPaths(laserPath, ptClip, true);
-        c.Execute(ctIntersection, laserPath, pftNonZero); // laser on
+        c.Execute(ctIntersection, laserPath, pftNonZero);                              // laser on
         addAcc(laserPath, m_gcp.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
     }
 
@@ -342,8 +338,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     }
 }
 
-void RasterCreator::addAcc(Paths& src, const cInt accDistance)
-{
+void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
@@ -428,4 +423,4 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance)
 
     src = std::move(pPath);
 }
-}
+} // namespace GCode

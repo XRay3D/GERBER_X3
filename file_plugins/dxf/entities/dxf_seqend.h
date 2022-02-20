@@ -14,4 +14,4 @@ public:
     GraphicObject toGo() const override;
 };
 
-}
+} // namespace Dxf

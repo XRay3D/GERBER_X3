@@ -16,8 +16,7 @@
 namespace Dxf {
 
 Point::Point(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Point::draw(const Dxf::InsertEntity* const i) const
@@ -36,8 +35,7 @@ Point::Point(SectionParser* sp)
 //    }
 //}
 
-void Point::parse(Dxf::CodeData& code)
-{
+void Point::parse(Dxf::CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -69,24 +67,21 @@ void Point::parse(Dxf::CodeData& code)
 
 Entity::Type Point::type() const { return POINT; }
 
-GraphicObject Point::toGo() const
-{
+GraphicObject Point::toGo() const {
     QPolygonF p;
     p.append(point);
 
     return { id, p, {} };
 }
 
-void Point::write(QDataStream& stream) const
-{
+void Point::write(QDataStream& stream) const {
     stream << point;
     stream << thickness;
 }
 
-void Point::read(QDataStream& stream)
-{
+void Point::read(QDataStream& stream) {
     stream >> point;
     stream >> thickness;
 }
 
-}
+} // namespace Dxf

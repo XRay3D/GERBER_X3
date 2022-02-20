@@ -84,6 +84,6 @@ public:
     void createGi() override;
     const QList<Component>& components() const;
 };
-}
+} // namespace Gerber
 
 Q_DECLARE_METATYPE(Gerber::File)

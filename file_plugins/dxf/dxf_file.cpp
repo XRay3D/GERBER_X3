@@ -39,8 +39,7 @@
 namespace Dxf {
 
 File::File()
-    : FileInterface()
-{
+    : FileInterface() {
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
@@ -49,16 +48,14 @@ File::File()
     };
 }
 
-File::~File()
-{
+File::~File() {
     for (auto [k, v] : m_sections)
         delete v;
     for (const auto& [k, v] : m_blocks)
         delete v;
 }
 
-void File::setItemType(int type)
-{
+void File::setItemType(int type) {
     m_itemsType = type;
     for (const auto& [name, layer] : m_layers)
         layer->setItemsType(ItemsType(m_itemsType));
@@ -66,8 +63,7 @@ void File::setItemType(int type)
 
 int File::itemsType() const { return m_itemsType; }
 
-Pathss& File::groupedPaths(File::Group group, bool fl)
-{
+Pathss& File::groupedPaths(File::Group group, bool fl) {
     if (m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
@@ -89,8 +85,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl)
     return m_groupedPaths;
 }
 
-void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
-{
+void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
     Paths paths;
     switch (group) {
@@ -125,19 +120,16 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
     }
 }
 
-void File::initFrom(FileInterface* file)
-{
+void File::initFrom(FileInterface* file) {
     FileInterface::initFrom(file);
     static_cast<Node*>(m_node)->file = this;
 }
 
-FileTree::Node* File::node()
-{
+FileTree::Node* File::node() {
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 
-Layer* File::layer(const QString& name)
-{
+Layer* File::layer(const QString& name) {
     if (m_layers.contains(name)) {
         return m_layers[name];
     } else {
@@ -148,8 +140,7 @@ Layer* File::layer(const QString& name)
 
 FileType File::type() const { return FileType::Dxf; }
 
-void File::createGi()
-{
+void File::createGi() {
 
     for (auto& [name, layer] : m_layers)
         for (auto& go : layer->m_graphicObjects)
@@ -218,8 +209,7 @@ void File::createGi()
 
 bool File::isVisible() const { return m_visible; }
 
-void File::setVisible(bool visible)
-{
+void File::setVisible(bool visible) {
     if (visible == m_visible)
         return;
     m_visible = visible;
@@ -238,8 +228,7 @@ void File::setVisible(bool visible)
     }
 }
 
-void File::write(QDataStream& stream) const
-{
+void File::write(QDataStream& stream) const {
     stream << m_header;
     {
         stream << int(m_layers.size());
@@ -260,8 +249,7 @@ void File::write(QDataStream& stream) const
     stream << m_entities;
 }
 
-void File::read(QDataStream& stream)
-{
+void File::read(QDataStream& stream) {
     stream >> m_header;
     {
         int size;
@@ -280,4 +268,4 @@ void File::read(QDataStream& stream)
 }
 
 Paths File::merge() const { return m_mergedPaths; }
-}
+} // namespace Dxf

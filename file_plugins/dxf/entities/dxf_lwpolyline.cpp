@@ -94,8 +94,7 @@
 namespace Dxf {
 
 LwPolyline::LwPolyline(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void LwPolyline::draw(const InsertEntity* const i) const
@@ -114,8 +113,7 @@ LwPolyline::LwPolyline(SectionParser* sp)
 //    }
 //}
 
-void LwPolyline::parse(CodeData& code)
-{
+void LwPolyline::parse(CodeData& code) {
     Segment pt;
     do {
         data.push_back(code);
@@ -170,8 +168,7 @@ void LwPolyline::parse(CodeData& code)
 
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
-GraphicObject LwPolyline::toGo() const
-{
+GraphicObject LwPolyline::toGo() const {
     QPainterPath path;
     const bool dbg = false; //data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
@@ -206,10 +203,10 @@ GraphicObject LwPolyline::toGo() const
             double cy2 = c.y() * c.y();
             double d = source.x() * target.y() + source.y() * c.x() - target.y() * c.x() - source.x() * c.y() - target.x() * source.y() + target.x() * c.y();
             center = QPointF(
-                +0.5 / d * ( //
+                +0.5 / d * (                                                                                                //
                     source.y() * cx2 + source.y() * cy2 + target.y() * ax2 + target.y() * ay2 + c.y() * bx2 + c.y() * by2 - //
                     source.y() * bx2 - source.y() * by2 - target.y() * cx2 - target.y() * cy2 - c.y() * ax2 - c.y() * ay2),
-                -0.5 / d * ( //
+                -0.5 / d * (                                                                                                //
                     source.x() * cx2 + source.x() * cy2 + target.x() * ax2 + target.x() * ay2 + c.x() * bx2 + c.x() * by2 - //
                     source.x() * bx2 - source.x() * by2 - target.x() * cx2 - target.x() * cy2 - c.x() * ax2 - c.x() * ay2));
         }
@@ -262,8 +259,7 @@ GraphicObject LwPolyline::toGo() const
     return { id, p.value(0), paths };
 }
 
-void LwPolyline::write(QDataStream& stream) const
-{
+void LwPolyline::write(QDataStream& stream) const {
     stream << poly;
     stream << counter;
     stream << polylineFlag;
@@ -275,8 +271,7 @@ void LwPolyline::write(QDataStream& stream) const
     stream << thickness;
 }
 
-void LwPolyline::read(QDataStream& stream)
-{
+void LwPolyline::read(QDataStream& stream) {
     stream >> poly;
     stream >> counter;
     stream >> polylineFlag;
@@ -287,4 +282,4 @@ void LwPolyline::read(QDataStream& stream)
     stream >> elevation;
     stream >> thickness;
 }
-}
+} // namespace Dxf

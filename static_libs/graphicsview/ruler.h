@@ -15,9 +15,9 @@
 class Ruler : public QWidget {
     Q_OBJECT
     //    Q_ENUMS(RulerType)
-    //    Q_PROPERTY(qreal origin READ origin WRITE setOrigin)
-    //    Q_PROPERTY(qreal rulerUnit READ rulerUnit WRITE setRulerUnit)
-    //    Q_PROPERTY(qreal rulerZoom READ rulerZoom WRITE setRulerZoom)
+    //    Q_PROPERTY(double origin READ origin WRITE setOrigin)
+    //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
+    //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
     enum Type {
         Horizontal,
@@ -28,38 +28,38 @@ public:
 
     Ruler(Ruler::Type rulerType, QWidget* parent);
     Ruler::Type RulerType() const;
-    qreal Origin() const;
-    qreal RulerUnit() const;
-    qreal RulerZoom() const;
+    double Origin() const;
+    double RulerUnit() const;
+    double RulerZoom() const;
     QSize minimumSizeHint() const;
 
 public slots:
     void SetCursorPos(const QPoint cursorPos_);
     void SetMouseTrack(const bool track);
-    void SetOrigin(const qreal origin_);
-    void SetRulerUnit(const qreal rulerUnit_);
-    void SetRulerZoom(const qreal rulerZoom_);
+    void SetOrigin(const double origin_);
+    void SetRulerUnit(const double rulerUnit_);
+    void SetRulerZoom(const double rulerZoom_);
 
 protected:
     void mouseMoveEvent(QMouseEvent* event);
     void paintEvent(QPaintEvent* event);
 
 private:
-    void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMeter, qreal startPositoin);
-    void DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startMark, qreal endMark, int startTickNo, qreal step, qreal startPosition);
+    void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin);
+    void DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMark, double endMark, int startTickNo, double step, double startPosition);
     void DrawMousePosTick(QPainter* painter);
 
-    bool drawText;
-    bool mouseTracking;
+    bool drawText {};
+    bool mouseTracking {};
 
     QPen meterPen;
 
     QPoint cursorPos;
 
-    qreal gridStep;
-    qreal origin;
-    qreal rulerUnit;
-    qreal rulerZoom;
-    qreal tickKoef;
-    Type rulerType;
+    double gridStep { 1.0 };
+    double origin {};
+    double rulerUnit { 1.0 };
+    double rulerZoom { 1.0 };
+    double tickKoef { 1.0 };
+    const Type rulerType;
 };

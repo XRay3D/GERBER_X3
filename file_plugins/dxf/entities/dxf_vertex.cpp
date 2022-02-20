@@ -16,16 +16,14 @@
 namespace Dxf {
 
 Vertex::Vertex(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Vertex::draw(const Dxf::InsertEntity* const /*i*/) const
 //{
 //}
 
-void Vertex::parse(Dxf::CodeData& code)
-{
+void Vertex::parse(Dxf::CodeData& code) {
     do {
         switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker: // Маркер подкласса (AcDbVertex)
@@ -64,4 +62,4 @@ void Vertex::parse(Dxf::CodeData& code)
     } while (code.code() != 0);
 }
 
-}
+} // namespace Dxf

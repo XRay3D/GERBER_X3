@@ -37,8 +37,7 @@ enum class ItemsType {
 class Color : public QColor {
 public:
     Color(double r, double g, double b)
-        : QColor(r * 255, g * 255, b * 255)
-    {
+        : QColor(r * 255, g * 255, b * 255) {
     }
 };
 
@@ -96,4 +95,4 @@ public:
     static bool overrideFonts() { return m_overrideFonts; }
 };
 
-}
+} // namespace Dxf

@@ -25,20 +25,17 @@
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
     , counter { static_cast<int>(parent->findChildren<ToolSelectorForm*>().count()) }
-    , toolFileName_ { settingsPath + '/' + parent->objectName() + QString::number(counter) + ".json" }
-{
+    , toolFileName_ { settingsPath + '/' + parent->objectName() + QString::number(counter) + ".json" } {
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
 }
 
-ToolSelectorForm::~ToolSelectorForm()
-{
+ToolSelectorForm::~ToolSelectorForm() {
     writeTool();
 }
 
-void ToolSelectorForm::setTool(const Tool& tool)
-{
+void ToolSelectorForm::setTool(const Tool& tool) {
     tool_ = tool;
     label_->setStyleSheet(tool.id() < 0 ? "QLabel { color: red }" : "");
     updateForm();
@@ -46,31 +43,27 @@ void ToolSelectorForm::setTool(const Tool& tool)
 
 const Tool& ToolSelectorForm::tool() const { return tool_; }
 
-void ToolSelectorForm::on_pbSelect_clicked()
-{
+void ToolSelectorForm::on_pbSelect_clicked() {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraver, Tool::Laser });
     if (tdb.exec())
         setTool(tdb.tool());
 }
 
-void ToolSelectorForm::on_pbEdit_clicked()
-{
+void ToolSelectorForm::on_pbEdit_clicked() {
     ToolEditDialog d;
     d.setTool(tool_);
     if (d.exec())
         setTool(d.tool());
 }
 
-void ToolSelectorForm::updateForm()
-{
+void ToolSelectorForm::updateForm() {
     lblPixmap->setPixmap(tool_.icon().pixmap({ 22, 22 }));
     lblName->setText(tool_.name());
     setToolTip(tool_.note());
     emit updateName();
 }
 
-void ToolSelectorForm::readTool()
-{
+void ToolSelectorForm::readTool() {
     QFile file(toolFileName_);
     if (file.open(QIODevice::ReadOnly))
         tool_.read(QJsonDocument::fromJson(file.readAll()).object());
@@ -79,8 +72,7 @@ void ToolSelectorForm::readTool()
     updateForm();
 }
 
-void ToolSelectorForm::writeTool() const
-{
+void ToolSelectorForm::writeTool() const {
     QFile file(toolFileName_);
     if (file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
@@ -91,13 +83,11 @@ void ToolSelectorForm::writeTool() const
     }
 }
 
-QLabel* ToolSelectorForm::label() const
-{
+QLabel* ToolSelectorForm::label() const {
     return label_;
 }
 
-void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
-{
+void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     if (ToolSelectorForm->objectName().isEmpty())
         ToolSelectorForm->setObjectName(QString::fromUtf8("ToolSelectorForm"));
     ToolSelectorForm->resize(236, 180);
@@ -166,8 +156,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm)
     QMetaObject::connectSlotsByName(ToolSelectorForm);
 }
 
-void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm)
-{
+void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm) {
     ToolSelectorForm->setWindowTitle(QCoreApplication::translate("ToolSelectorForm", "Form", nullptr));
     if (counter > 1)
         label_->setText(QCoreApplication::translate("ToolSelectorForm", "Tool %1:", nullptr).arg(counter));

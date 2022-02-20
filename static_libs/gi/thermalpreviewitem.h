@@ -82,13 +82,13 @@ private:
     static constexpr int dark = 180;
     static constexpr int light = 255;
     inline static const QColor colors[] {
-        QColor(128, 128, 128, dark), //     Default         dark gray
+        QColor(128, 128, 128, dark),  //     Default         dark gray
         QColor(128, 128, 128, light), //    DefaultHovered  light gray
-        QColor(0x0, 255, 0x0, dark), //     Selected        dark green
+        QColor(0x0, 255, 0x0, dark),  //     Selected        dark green
         QColor(0x0, 255, 0x0, light), //    SelectedHovered light green
-        QColor(255, 0x0, 0x0, dark), //     Used            dark red
+        QColor(255, 0x0, 0x0, dark),  //     Used            dark red
         QColor(255, 0x0, 0x0, light), //    UsedHovered     light red
-        QColor(0x0, 0x0, 0x0, 0x0), //      UnUsed          transparent
+        QColor(0x0, 0x0, 0x0, 0x0),   //      UnUsed          transparent
     };
 
     enum ColorState {

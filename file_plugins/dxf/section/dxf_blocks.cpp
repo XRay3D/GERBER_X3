@@ -17,12 +17,10 @@
 namespace Dxf {
 SectionBLOCKS::SectionBLOCKS(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
-    , blocks(file->blocks())
-{
+    , blocks(file->blocks()) {
 }
 
-void SectionBLOCKS::parse()
-{
+void SectionBLOCKS::parse() {
     CodeData code;
     do {
         code = nextCode();
@@ -38,4 +36,4 @@ void SectionBLOCKS::parse()
     } while (code != "ENDSEC");
 }
 
-}
+} // namespace Dxf

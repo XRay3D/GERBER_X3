@@ -20,4 +20,4 @@ protected:
     void boostVoronoi();
 };
 
-}
+} // namespace GCode

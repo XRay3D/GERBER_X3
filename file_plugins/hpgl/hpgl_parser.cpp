@@ -17,18 +17,15 @@
 
 namespace Hpgl {
 
-Parser::Cmd Parser::toCmd(const QStringRef& key)
-{
+Parser::Cmd Parser::toCmd(const QStringRef& key) {
     return static_cast<Cmd>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
 Parser::Parser(FilePluginInterface* const interface)
-    : interface(interface)
-{
+    : interface(interface) {
 }
 
-FileInterface* Parser::parseFile(const QString& fileName)
-{
+FileInterface* Parser::parseFile(const QString& fileName) {
     QFile file_(fileName);
     if (!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
@@ -118,4 +115,4 @@ FileInterface* Parser::parseFile(const QString& fileName)
     //    return file;
 }
 
-}
+} // namespace Hpgl

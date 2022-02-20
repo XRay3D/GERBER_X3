@@ -35,8 +35,7 @@ QTimer Node::m_decorationTimer;
 
 Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
-    , file(file)
-{
+    , file(file) {
     if (!file->userColor()) {
         connect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
         m_decorationTimer.start(500);
@@ -45,8 +44,7 @@ Node::Node(File* file, int* id)
 
 Node::~Node() { m_decorationTimer.start(100); }
 
-bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -73,8 +71,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     return {};
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -88,8 +85,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     }
 }
 
-QVariant Node::data(const QModelIndex& index, int role) const
-{
+QVariant Node::data(const QModelIndex& index, int role) const {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -148,8 +144,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
 
 QTimer* Node::decorationTimer() { return &m_decorationTimer; }
 
-void Node::repaint() const
-{
+void Node::repaint() const {
     if (!m_parent)
         return;
     const int count = m_parent->childCount();
@@ -158,8 +153,7 @@ void Node::repaint() const
     emit App::fileModel()->dataChanged(index(0), index(0), { Qt::DecorationRole });
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.setToolTipDuration(0);
     menu.setToolTipsVisible(true);
@@ -211,4 +205,4 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), GbrObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
-}
+} // namespace Gerber

@@ -27,8 +27,7 @@ namespace Gerber {
 
 ComponentsModel::ComponentsModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new ComponentsNode(""))
-{
+    , rootItem(new ComponentsNode("")) {
     //    auto file = App::project()->file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
@@ -82,22 +81,19 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
         delete unsorted;
 }
 
-ComponentsModel::~ComponentsModel()
-{
+ComponentsModel::~ComponentsModel() {
     delete rootItem;
     //    App::app->m_ComponentsModel = nullptr;
 }
 
-QModelIndex ComponentsModel::index(int row, int column, const QModelIndex& parent) const
-{
+QModelIndex ComponentsModel::index(int row, int column, const QModelIndex& parent) const {
     ComponentsNode* childItem = getItem(parent)->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
 }
 
-QModelIndex ComponentsModel::parent(const QModelIndex& index) const
-{
+QModelIndex ComponentsModel::parent(const QModelIndex& index) const {
     if (!index.isValid())
         return QModelIndex();
     ComponentsNode* parentItem = getItem(index)->parentItem();
@@ -106,21 +102,18 @@ QModelIndex ComponentsModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-QVariant ComponentsModel::data(const QModelIndex& index, int role) const
-{
+QVariant ComponentsModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
     ComponentsNode* item = getItem(index);
     return item->data(index, role);
 }
 
-bool ComponentsModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool ComponentsModel::setData(const QModelIndex& index, const QVariant& value, int role) {
     return getItem(index)->setData(index, value, role);
 }
 
-QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
+QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         switch (section) {
         case 0: /* <field> Manufacturer. */
@@ -151,15 +144,13 @@ QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, i
     return QVariant();
 }
 
-Qt::ItemFlags ComponentsModel::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags ComponentsModel::flags(const QModelIndex& index) const {
     if (!index.isValid())
         return Qt::NoItemFlags;
     return getItem(index)->flags(index);
 }
 
-bool ComponentsModel::removeRows(int row, int count, const QModelIndex& parent)
-{
+bool ComponentsModel::removeRows(int row, int count, const QModelIndex& parent) {
     ComponentsNode* item = nullptr;
     if (parent.isValid())
         item = static_cast<ComponentsNode*>(parent.internalPointer());
@@ -174,20 +165,17 @@ bool ComponentsModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-int ComponentsModel::columnCount(const QModelIndex&) const
-{
+int ComponentsModel::columnCount(const QModelIndex&) const {
     return 8;
 }
 
-int ComponentsModel::rowCount(const QModelIndex& parent) const
-{
+int ComponentsModel::rowCount(const QModelIndex& parent) const {
     if (parent.column() > 0)
         return 0;
     return getItem(parent)->childCount();
 }
 
-ComponentsNode* ComponentsModel::getItem(const QModelIndex& index) const
-{
+ComponentsNode* ComponentsModel::getItem(const QModelIndex& index) const {
     if (index.isValid()) {
         auto* item = static_cast<ComponentsNode*>(index.internalPointer());
         if (item)
@@ -195,4 +183,4 @@ ComponentsNode* ComponentsModel::getItem(const QModelIndex& index) const
     }
     return rootItem;
 }
-}
+} // namespace Gerber

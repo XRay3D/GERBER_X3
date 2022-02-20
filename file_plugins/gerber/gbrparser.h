@@ -101,4 +101,4 @@ protected:
     File* file = nullptr;
 };
 
-}
+} // namespace Gerber

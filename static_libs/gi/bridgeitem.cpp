@@ -20,21 +20,18 @@ BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side,
     : m_ptr(ptr)
     , m_side(side)
     , m_lenght(lenght)
-    , m_size(size)
-{
+    , m_size(size) {
     connect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
 
-QRectF BridgeItem::boundingRect() const
-{
+QRectF BridgeItem::boundingRect() const {
     return m_path.boundingRect();
 }
 
-void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-{
+void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setBrush(!m_ok ? Qt::red : Qt::green);
     painter->setTransform(QTransform().rotate(-(m_angle - 360)), true);
     painter->setPen(Qt::NoPen);
@@ -71,23 +68,20 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
 
-QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value)
-{
+QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value) {
     if (change == ItemPositionChange) {
         return calculate(value.toPointF());
     } else
         return QGraphicsItem::itemChange(change, value);
 }
 
-void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
+void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     m_lastPos = pos();
     disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 
-QPointF BridgeItem::calculate(const QPointF& pos)
-{
+QPointF BridgeItem::calculate(const QPointF& pos) {
     QList<QGraphicsItem*> col(scene()->collidingItems(this));
     if (col.isEmpty())
         return pos;
@@ -99,8 +93,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && gi->isSelected()) {
             if (auto type(static_cast<GiType>(item->type()));
-                type >= GiType::ShCircle || //
-                type == GiType::Drill || //
+                type >= GiType::ShCircle ||  //
+                type == GiType::Drill ||     //
                 type == GiType::DataSolid || //
                 type == GiType::DataPath) {
                 for (const Path& path : gi->paths()) {
@@ -144,15 +138,13 @@ void BridgeItem::setOk(bool ok) { m_ok = ok; }
 
 double BridgeItem::angle() const { return m_angle; }
 
-void BridgeItem::update()
-{
+void BridgeItem::update() {
     m_path = QPainterPath();
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     QGraphicsItem::update();
 }
 
-IntPoint BridgeItem::getPoint(const int side) const
-{
+IntPoint BridgeItem::getPoint(const int side) const {
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
     switch (side) {
@@ -168,8 +160,7 @@ IntPoint BridgeItem::getPoint(const int side) const
     return IntPoint();
 }
 
-QLineF BridgeItem::getPath() const
-{
+QLineF BridgeItem::getPath() const {
     QLineF retLine(QLineF::fromPolar(m_size * 0.51, m_angle).p2(), QLineF::fromPolar(m_size * 0.51, m_angle + 180).p2());
     retLine.translate(pos());
     return retLine;
@@ -183,8 +174,7 @@ QPainterPath BridgeItem::shape() const { return m_path; }
 
 void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
 
-void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
+void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (m_ok && pos() == m_lastPos) {
         m_ptr = new BridgeItem(m_lenght, m_size, m_side, m_ptr);
         scene()->addItem(m_ptr);

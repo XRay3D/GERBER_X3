@@ -28,12 +28,10 @@ namespace Excellon {
 
 Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
-    , file(file)
-{
+    , file(file) {
 }
 
-bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -52,8 +50,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     return {};
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -65,8 +62,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     }
 }
 
-QVariant Node::data(const QModelIndex& index, int role) const
-{
+QVariant Node::data(const QModelIndex& index, int role) const {
     if (file)
         switch (FileTree::Column(index.column())) {
         case FileTree::Column::NameColorVisible:
@@ -103,8 +99,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
@@ -133,4 +128,4 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
-}
+} // namespace Excellon

@@ -13,7 +13,6 @@
 #include "leader.h"
 namespace Dxf {
 LEADER::LEADER(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

@@ -59,4 +59,4 @@ public:
     void emitCommitData();
 };
 
-}
+} // namespace Dxf

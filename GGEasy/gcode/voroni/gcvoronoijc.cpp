@@ -18,14 +18,13 @@
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
-}
+} // namespace ClipperLib
 
 namespace GCode {
 
 inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y); }
 
-void VoronoiJc::jcVoronoi()
-{
+void VoronoiJc::jcVoronoi() {
     const auto tolerance = m_gcp.params[GCodeParams::Tolerance].toDouble();
 
     mvector<jcv_point> points;
@@ -115,8 +114,7 @@ void VoronoiJc::jcVoronoi()
     }
 }
 
-Paths VoronoiJc::toPath(const Pairs& pairs)
-{
+Paths VoronoiJc::toPath(const Pairs& pairs) {
     msg = tr("Merge Segments");
 
     mvector<Pair> pairsVec;
@@ -190,4 +188,4 @@ Paths VoronoiJc::toPath(const Pairs& pairs)
     return paths;
 }
 
-}
+} // namespace GCode
