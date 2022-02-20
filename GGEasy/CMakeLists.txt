@@ -132,119 +132,19 @@ else()
     qt5_add_resources(RESOURCES res/resources.qrc)
 endif()
 
+
+# WINDOWS APP ICON
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
 
-set(SOURCE
-    ${SOURCE}
-    aboutform.cpp
-    forms/drillform/drillform.cpp
-    forms/drillform/drillmodel.cpp
-    forms/formsutil/errordialog.cpp
-    forms/formsutil/formsutil.cpp
-    forms/gcodepropertiesform.cpp
-    forms/hatchingform.cpp
-    forms/pocketoffsetform.cpp
-    forms/pocketrasterform.cpp
-    forms/profileform.cpp
-    forms/toolname.cpp
-    forms/voronoiform.cpp
-    gcode/gccreator.cpp
-    gcode/gcdrillitem.cpp
-    gcode/gcfile.cpp
-    gcode/gch.cpp
-    gcode/gchatching.cpp
-    gcode/gcnode.cpp
-    gcode/gcplugin.cpp
-    gcode/gcpocketoffset.cpp
-    gcode/gcpocketraster.cpp
-    gcode/gcprofile.cpp
-    gcode/gcthermal.cpp
-    gcode/gcutils.cpp
-    gcode/voroni/gcvoronoi.cpp
-    gcode/voroni/gcvoronoiboost.cpp
-    gcode/voroni/gcvoronoicgal.cpp
-    gcode/voroni/gcvoronoijc.cpp
-    gcode/voroni/jc_voronoi.cpp
-    main.cpp
-    mainwindow.cpp
-    plugindialog.cpp
-    point.cpp
-    recent.cpp
-    settingsdialog.cpp
-    style.cpp
-    )
-
-set(HEADERS
-    ${HEADERS}
-    aboutform.h
-    forms/drillform/drillform.h
-    forms/drillform/drillmodel.h
-    forms/formsutil/errordialog.h
-    forms/formsutil/formsutil.h
-    forms/gcodepropertiesform.h
-    forms/hatchingform.h
-    forms/pocketoffsetform.h
-    forms/pocketrasterform.h
-    forms/profileform.h
-    forms/toolname.h
-    forms/voronoiform.h
-    gcode/gccreator.h
-    gcode/gcdrillitem.h
-    gcode/gcfile.h
-    gcode/gch.h
-    gcode/gchatching.h
-    gcode/gcnode.h
-    gcode/gcode.h
-    gcode/gcplugin.h
-    gcode/gcpocketoffset.h
-    gcode/gcpocketraster.h
-    gcode/gcprofile.h
-    gcode/gcthermal.h
-    gcode/gctypes.h
-    gcode/gcutils.h
-    gcode/voroni/gcvoronoi.h
-    gcode/voroni/gcvoronoiboost.h
-    gcode/voroni/gcvoronoicgal.h
-    gcode/voroni/gcvoronoijc.h
-    gcode/voroni/jc_voronoi.h
-    gcode/voroni/voronoi_visual_utils.h
-    interfaces/file.h
-    interfaces/pluginfile.h
-    interfaces/plugintypes.h
-    interfaces/shapepluginin.h
-    mainwindow.h
-    messageoutput.h
-    openingdialog.h
-    plugindialog.h
-    point.h
-    recent.h
-    settingsdialog.h
-    splashscreen.h
-    style.h
-    version.h
-    )
-
-set(UI
-    ${UI}
-    aboutform.ui
-    forms/drillform/drillform.ui
-    forms/gcodepropertiesform.ui
-    forms/hatchingform.ui
-    forms/pocketoffsetform.ui
-    forms/pocketrasterform.ui
-    forms/profileform.ui
-    forms/voronoiform.ui
-    mainwindow.ui
-    settingsdialog.ui
-    )
-
-
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 add_executable(${PROJECT_NAME}
     ${TS_FILES}
-    ${SOURCE}
+    ${SOURCES}
     ${HEADERS}
-    ${UI}
+    ${UIS}
     ${RESOURCES}
     ${APP_ICON_RESOURCE_WINDOWS}
     ${MAGIC_GET}
@@ -283,7 +183,7 @@ if(WIN32)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E
         env PATH="${_QT_BIN_DIR}" "${WINDEPLOYQT_EXECUTABLE}"
-        --verbose 0
+        --verbose 1
         --no-compiler-runtime
         \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt..."
@@ -291,17 +191,6 @@ if(WIN32)
 elseif (UNIX)#LINUX
     #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
-
-#execute_process(
-#    COMMAND "${CMAKE_COMMAND}" -E
-#        env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
-#            --dry-run
-#            --no-compiler-runtime
-#            --list mapping
-#            \"$<TARGET_FILE:myapp>\"
-#    OUTPUT_VARIABLE _output
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
 
@@ -314,10 +203,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         )
 endif()
 
-
-set(TARGETS
-    ${PROJECT_NAME}
-    )
+set(TARGETS ${PROJECT_NAME})
 
 foreach(TNAME ${TARGETS})
     target_compile_features(${TNAME} PUBLIC  cxx_std_20)
@@ -325,54 +211,10 @@ foreach(TNAME ${TARGETS})
     #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
-############################
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::PrintSupport> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    )
-#if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::OpenGLWidgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#        )
-#endif()
-
-
-#include(../PVS-Studio.cmake)
-#pvs_studio_add_target(TARGET example1.analyze ALL
-#                      OUTPUT FORMAT errorfile
-#                      ANALYZE ${PROJECT_NAME}
-#                      MODE GA:1,2 OP
-#                      LOG target.err)
-
-#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-# set(SUFFIX "_clang")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-# set(SUFFIX "_gnu")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-# set(SUFFIX "_intel")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-# set(SUFFIX "_msvc")
-#endif()
-
-##if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-##if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-#if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-# set(SUFFIX "${SUFFIX}_x64")
-#else()
-# set(SUFFIX "${SUFFIX}_x32")
-#endif()
-
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
-# "C:/Qt/5.12.10/mingw73_64/plugins/platforms"
-# "$<TARGET_FILE_DIR::${PROJECT_NAME}>/platforms"
-# )
-
-#add_custom_command (
-# OUTPUT ${TS_FILES}
-# COMMAND lupdate -silent -I ./includes ./sources -ts ./project.ts ${CMAKE_CURRENT_BINARY_DIR}/project.ts
-# WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-# )
+# COPY TRANSLATIONS
+file(GLOB_RECURSE QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qm)
+foreach(QM_FILE ${QM_FILES})
+    get_filename_component(QM_NAME ${QM_FILE} NAME)
+    configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
+#    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
+endforeach()

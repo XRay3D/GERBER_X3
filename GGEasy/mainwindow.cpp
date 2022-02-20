@@ -49,12 +49,12 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , recentFiles(this, "recentFiles")
-    , recentProjects(this, "recentProjects")
-    , m_project(new Project(this))
-    , actionGroup(this)
-    , reloadQuestion(this) {
+    , ui { new Ui::MainWindow }
+    , recentFiles { this, "recentFiles" }
+    , recentProjects { this, "recentProjects" }
+    , m_project { new Project { this } }
+    , actionGroup { this }
+    , reloadQuestion { this } {
     App::setMainWindow(this);
 
     ui->setupUi(this);
@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // NOTE (need for debug)
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
 
         int i = 0;
         int k = 100;
@@ -576,12 +576,10 @@ void MainWindow::saveGCodeFile(int id) {
     file->save(name);
 }
 
-void MainWindow::saveGCodeFiles() {
-    qDebug();
-}
+void MainWindow::saveGCodeFiles() { qDebug(__FUNCTION__); }
 
 void MainWindow::saveSelectedGCodeFiles() {
-    qDebug();
+    qDebug(__FUNCTION__);
     if (m_project->pinsPlacedMessage())
         return;
 
@@ -947,13 +945,13 @@ QMenu* MainWindow::createPopupMenu() {
 void MainWindow::translate(const QString& locale) {
     static std::vector<std::unique_ptr<QTranslator>> translators;
     translators.clear();
-    QDir dir(qApp->applicationDirPath().contains("GERBER_X3/bin") ? qApp->applicationDirPath() + "/../GGEasy/translations" : qApp->applicationDirPath() + "/translations");
+    QDir dir(qApp->applicationDirPath() + "/translations");
     for (auto&& str : dir.entryList(QStringList { "*" + locale + ".qm" }, QDir::Files)) {
         translators.emplace_back(std::make_unique<QTranslator>());
         if (translators.back()->load(str, dir.path()))
             qApp->installTranslator(translators.back().get());
         else
-            qDebug() << "QTranslator err appTranslator";
+            qDebug() << "QTranslator err appTranslator" << str;
     }
 }
 
