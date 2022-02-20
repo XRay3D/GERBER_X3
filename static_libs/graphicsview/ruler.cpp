@@ -153,14 +153,12 @@ void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMet
     }
 }
 
-void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
+void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
     const auto isHorzRuler = (Horizontal == rulerType);
     const auto K = gridStep * tickKoef * (App::settings().inch() ? 1.0 / 25.4 : 1.0);
 
-    auto color(App::settings().guiColor(GuiColors::Background));
-    color.setRed(255 - color.red());
-    color.setGreen(255 - color.green());
-    color.setBlue(255 - color.blue());
+    QColor color(0xFFFFFFFF - App::settings().guiColor(GuiColors::Background).rgb());
+
     painter->setPen(QPen(color, 0.0));
     painter->setFont(font());
 
@@ -172,16 +170,16 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMa
     for (double current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
         double x1, y1;
         lines.emplace_back(
-            x1 = isHorzRuler ? current : rulerRect.left() + startPosition,
-            y1 = isHorzRuler ? rulerRect.top() : current,
-            /*x2*/ isHorzRuler ? current : rulerRect.right(),
-            /*y2*/ isHorzRuler ? rulerRect.bottom() - startPosition : current);
+            x1 = isHorzRuler ? current : rect.left() + startPosition,
+            y1 = isHorzRuler ? rect.top() : current,
+            /*x2*/ isHorzRuler ? current : rect.right(),
+            /*y2*/ isHorzRuler ? rect.bottom() - startPosition : current);
         if (drawText) [[unlikely]] {
             painter->save();
             auto number { QString::number(startTickNo * K) };
 
             if (startTickNo) [[likely]]
-                number = (isHorzRuler ^ (step > 0.0) ? "-" : "+") + number;
+                number = ((isHorzRuler ^ (step > 0.0)) ? "-" : "+") + number;
 
             QRectF textRect(QFontMetricsF(font()).boundingRect(number));
             textRect.setWidth(textRect.width() + 1);
