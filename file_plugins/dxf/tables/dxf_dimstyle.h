@@ -24,4 +24,4 @@ public:
     Type type() const override { return TableItem::DIMSTYLE; }
 };
 
-}
+} // namespace Dxf

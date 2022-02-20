@@ -15,13 +15,11 @@
 class SplashScreen : public QSplashScreen {
 public:
     SplashScreen(const QPixmap& pixmap, Qt::WindowFlags f = Qt::WindowFlags())
-        : QSplashScreen(pixmap, f)
-    {
+        : QSplashScreen(pixmap, f) {
         App::setSplashScreen(this);
         setObjectName("SplashScreen");
     }
-    virtual ~SplashScreen()
-    {
+    virtual ~SplashScreen() {
         App::setSplashScreen(nullptr);
     }
 };

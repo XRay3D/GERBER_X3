@@ -13,7 +13,6 @@
 #include "dimension.h"
 namespace Dxf {
 DIMENSION::DIMENSION(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

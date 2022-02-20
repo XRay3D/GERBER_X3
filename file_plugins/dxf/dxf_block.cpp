@@ -19,8 +19,7 @@ namespace Dxf {
 
 Block::Block(Blocks& blocks, SectionParser* sp)
     : sp(sp)
-    , blocks(blocks)
-{
+    , blocks(blocks) {
     CodeData code(*(sp->it - 1));
     parseHeader(code);
     parseData(code);
@@ -30,12 +29,10 @@ Block::Block(Blocks& blocks, SectionParser* sp)
     code = sp->prevCode();
 }
 
-Block::~Block()
-{
+Block::~Block() {
 }
 
-void Block::parseHeader(CodeData& code)
-{
+void Block::parseHeader(CodeData& code) {
     do { // Block header
         bData.push_back(code);
         switch (code.code()) {
@@ -79,8 +76,7 @@ void Block::parseHeader(CodeData& code)
     } while (code.code() != 0);
 }
 
-void Block::parseData(CodeData& code)
-{
+void Block::parseData(CodeData& code) {
     do {
         if (code == "ENDBLK")
             break;
@@ -92,4 +88,4 @@ void Block::parseData(CodeData& code)
         code = sp->nextCode();
     } while (code != "ENDBLK");
 }
-}
+} // namespace Dxf

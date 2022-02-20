@@ -1187,37 +1187,31 @@
 
 // jcv_point
 
-static inline int jcv_point_cmp(const void* p1, const void* p2)
-{
+static inline int jcv_point_cmp(const void* p1, const void* p2) {
     const jcv_point* s1 = (const jcv_point*)p1;
     const jcv_point* s2 = (const jcv_point*)p2;
     return (s1->y != s2->y) ? (s1->y < s2->y ? -1 : 1) : (s1->x < s2->x ? -1 : 1);
 }
 
-static inline int jcv_point_less(const jcv_point* pt1, const jcv_point* pt2)
-{
+static inline int jcv_point_less(const jcv_point* pt1, const jcv_point* pt2) {
     return (pt1->y == pt2->y) ? (pt1->x < pt2->x) : pt1->y < pt2->y;
 }
 
-static inline int jcv_point_eq(const jcv_point* pt1, const jcv_point* pt2)
-{
+static inline int jcv_point_eq(const jcv_point* pt1, const jcv_point* pt2) {
     return (pt1->y == pt2->y) && (pt1->x == pt2->x);
 }
 
-static inline int jcv_point_on_edge(const jcv_point* pt, const jcv_point* min, const jcv_point* max)
-{
+static inline int jcv_point_on_edge(const jcv_point* pt, const jcv_point* min, const jcv_point* max) {
     return pt->x == min->x || pt->y == min->y || pt->x == max->x || pt->y == max->y;
 }
 
-static inline jcv_real jcv_point_dist_sq(const jcv_point* pt1, const jcv_point* pt2)
-{
+static inline jcv_real jcv_point_dist_sq(const jcv_point* pt1, const jcv_point* pt2) {
     jcv_real diffx = pt1->x - pt2->x;
     jcv_real diffy = pt1->y - pt2->y;
     return diffx * diffx + diffy * diffy;
 }
 
-static inline jcv_real jcv_point_dist(const jcv_point* pt1, const jcv_point* pt2)
-{
+static inline jcv_real jcv_point_dist(const jcv_point* pt1, const jcv_point* pt2) {
     return (jcv_real)(JCV_SQRT(jcv_point_dist_sq(pt1, pt2)));
 }
 
@@ -1284,8 +1278,7 @@ static const int JCV_DIRECTION_LEFT = 0;
 static const int JCV_DIRECTION_RIGHT = 1;
 static const jcv_real JCV_INVALID_VALUE = (jcv_real)-JCV_FLT_MAX;
 
-void jcv_diagram_free(jcv_diagram* d)
-{
+void jcv_diagram_free(jcv_diagram* d) {
     jcv_context_internal* internal = d->internal;
     void* memctx = internal->memctx;
     FJCVFreeFn freefn = internal->free;
@@ -1298,18 +1291,15 @@ void jcv_diagram_free(jcv_diagram* d)
     freefn(memctx, internal->mem);
 }
 
-const jcv_site* jcv_diagram_get_sites(const jcv_diagram* diagram)
-{
+const jcv_site* jcv_diagram_get_sites(const jcv_diagram* diagram) {
     return diagram->internal->sites;
 }
 
-const jcv_edge* jcv_diagram_get_edges(const jcv_diagram* diagram)
-{
+const jcv_edge* jcv_diagram_get_edges(const jcv_diagram* diagram) {
     return diagram->internal->edges;
 }
 
-const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge)
-{
+const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge) {
     const jcv_edge* e = edge->next;
     while (e != nullptr && jcv_point_eq(&e->pos[0], &e->pos[1])) {
         e = e->next;
@@ -1317,8 +1307,7 @@ const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge)
     return e;
 }
 
-static void* jcv_alloc(jcv_context_internal* internal, size_t size)
-{
+static void* jcv_alloc(jcv_context_internal* internal, size_t size) {
     if (!internal->memblocks || internal->memblocks->sizefree < size) {
         size_t blocksize = 16 * 1024;
         jcv_memoryblock* block = (jcv_memoryblock*)internal->alloc(internal->memctx, blocksize);
@@ -1334,13 +1323,11 @@ static void* jcv_alloc(jcv_context_internal* internal, size_t size)
     return p;
 }
 
-static jcv_edge* jcv_alloc_edge(jcv_context_internal* internal)
-{
+static jcv_edge* jcv_alloc_edge(jcv_context_internal* internal) {
     return (jcv_edge*)jcv_alloc(internal, sizeof(jcv_edge));
 }
 
-static jcv_halfedge* jcv_alloc_halfedge(jcv_context_internal* internal)
-{
+static jcv_halfedge* jcv_alloc_halfedge(jcv_context_internal* internal) {
     if (internal->halfedgepool) {
         jcv_halfedge* edge = internal->halfedgepool;
         internal->halfedgepool = internal->halfedgepool->right;
@@ -1350,32 +1337,27 @@ static jcv_halfedge* jcv_alloc_halfedge(jcv_context_internal* internal)
     return (jcv_halfedge*)jcv_alloc(internal, sizeof(jcv_halfedge));
 }
 
-static jcv_graphedge* jcv_alloc_graphedge(jcv_context_internal* internal)
-{
+static jcv_graphedge* jcv_alloc_graphedge(jcv_context_internal* internal) {
     return (jcv_graphedge*)jcv_alloc(internal, sizeof(jcv_graphedge));
 }
 
-static void* jcv_alloc_fn(void* memctx, size_t size)
-{
+static void* jcv_alloc_fn(void* memctx, size_t size) {
     (void)memctx;
     return malloc(size);
 }
 
-static void jcv_free_fn(void* memctx, void* p)
-{
+static void jcv_free_fn(void* memctx, void* p) {
     (void)memctx;
     free(p);
 }
 
 // jcv_edge
 
-static inline int jcv_is_valid(const jcv_point* p)
-{
+static inline int jcv_is_valid(const jcv_point* p) {
     return (p->x != JCV_INVALID_VALUE || p->y != JCV_INVALID_VALUE) ? 1 : 0;
 }
 
-static void jcv_edge_create(jcv_edge* e, jcv_site* s1, jcv_site* s2)
-{
+static void jcv_edge_create(jcv_edge* e, jcv_site* s1, jcv_site* s2) {
     e->next = 0;
     e->sites[0] = s1;
     e->sites[1] = s2;
@@ -1417,8 +1399,7 @@ static void jcv_edge_create(jcv_edge* e, jcv_site* s1, jcv_site* s2)
     }
 }
 
-static int jcv_edge_clipline(jcv_edge* e, jcv_point* min, jcv_point* max)
-{
+static int jcv_edge_clipline(jcv_edge* e, jcv_point* min, jcv_point* max) {
     jcv_real pxmin = min->x;
     jcv_real pxmax = max->x;
     jcv_real pymin = min->y;
@@ -1516,8 +1497,7 @@ static int jcv_edge_clipline(jcv_edge* e, jcv_point* min, jcv_point* max)
     return (x1 == x2 && y1 == y2) ? 0 : 1;
 }
 
-static jcv_edge* jcv_edge_new(jcv_context_internal* internal, jcv_site* s1, jcv_site* s2)
-{
+static jcv_edge* jcv_edge_new(jcv_context_internal* internal, jcv_site* s1, jcv_site* s2) {
     jcv_edge* e = jcv_alloc_edge(internal);
     jcv_edge_create(e, s1, s2);
     return e;
@@ -1525,24 +1505,21 @@ static jcv_edge* jcv_edge_new(jcv_context_internal* internal, jcv_site* s1, jcv_
 
 // jcv_halfedge
 
-static void jcv_halfedge_link(jcv_halfedge* edge, jcv_halfedge* newedge)
-{
+static void jcv_halfedge_link(jcv_halfedge* edge, jcv_halfedge* newedge) {
     newedge->left = edge;
     newedge->right = edge->right;
     edge->right->left = newedge;
     edge->right = newedge;
 }
 
-static inline void jcv_halfedge_unlink(jcv_halfedge* he)
-{
+static inline void jcv_halfedge_unlink(jcv_halfedge* he) {
     he->left->right = he->right;
     he->right->left = he->left;
     he->left = 0;
     he->right = 0;
 }
 
-static inline jcv_halfedge* jcv_halfedge_new(jcv_context_internal* internal, jcv_edge* e, int direction)
-{
+static inline jcv_halfedge* jcv_halfedge_new(jcv_context_internal* internal, jcv_edge* e, int direction) {
     jcv_halfedge* he = jcv_alloc_halfedge(internal);
     he->edge = e;
     he->left = 0;
@@ -1555,24 +1532,20 @@ static inline jcv_halfedge* jcv_halfedge_new(jcv_context_internal* internal, jcv
     return he;
 }
 
-static void jcv_halfedge_delete(jcv_context_internal* internal, jcv_halfedge* he)
-{
+static void jcv_halfedge_delete(jcv_context_internal* internal, jcv_halfedge* he) {
     he->right = internal->halfedgepool;
     internal->halfedgepool = he;
 }
 
-static inline jcv_site* jcv_halfedge_leftsite(const jcv_halfedge* he)
-{
+static inline jcv_site* jcv_halfedge_leftsite(const jcv_halfedge* he) {
     return he->edge->sites[he->direction];
 }
 
-static inline jcv_site* jcv_halfedge_rightsite(const jcv_halfedge* he)
-{
+static inline jcv_site* jcv_halfedge_rightsite(const jcv_halfedge* he) {
     return he->edge ? he->edge->sites[1 - he->direction] : 0;
 }
 
-static int jcv_halfedge_rightof(const jcv_halfedge* he, const jcv_point* p)
-{
+static int jcv_halfedge_rightof(const jcv_halfedge* he, const jcv_point* p) {
     const jcv_edge* e = he->edge;
     const jcv_site* topsite = e->sites[1];
 
@@ -1619,13 +1592,11 @@ static int jcv_halfedge_rightof(const jcv_halfedge* he, const jcv_point* p)
 
 // Keeps the priority queue sorted with events sorted in ascending order
 // Return 1 if the edges needs to be swapped
-static inline int jcv_halfedge_compare(const jcv_halfedge* he1, const jcv_halfedge* he2)
-{
+static inline int jcv_halfedge_compare(const jcv_halfedge* he1, const jcv_halfedge* he2) {
     return (he1->y == he2->y) ? he1->vertex.x > he2->vertex.x : he1->y > he2->y;
 }
 
-static int jcv_halfedge_intersect(const jcv_halfedge* he1, const jcv_halfedge* he2, jcv_point* out)
-{
+static int jcv_halfedge_intersect(const jcv_halfedge* he1, const jcv_halfedge* he2, jcv_point* out) {
     const jcv_edge* e1 = he1->edge;
     const jcv_edge* e2 = he2->edge;
 
@@ -1656,8 +1627,7 @@ static int jcv_halfedge_intersect(const jcv_halfedge* he1, const jcv_halfedge* h
 
 // Priority queue
 
-static int jcv_pq_moveup(jcv_priorityqueue* pq, int pos)
-{
+static int jcv_pq_moveup(jcv_priorityqueue* pq, int pos) {
     jcv_halfedge** items = (jcv_halfedge**)pq->items;
     jcv_halfedge* node = items[pos];
 
@@ -1673,8 +1643,7 @@ static int jcv_pq_moveup(jcv_priorityqueue* pq, int pos)
     return pos;
 }
 
-static int jcv_pq_maxchild(jcv_priorityqueue* pq, int pos)
-{
+static int jcv_pq_maxchild(jcv_priorityqueue* pq, int pos) {
     int child = pos << 1;
     if (child >= pq->numitems)
         return 0;
@@ -1684,8 +1653,7 @@ static int jcv_pq_maxchild(jcv_priorityqueue* pq, int pos)
     return child;
 }
 
-static int jcv_pq_movedown(jcv_priorityqueue* pq, int pos)
-{
+static int jcv_pq_movedown(jcv_priorityqueue* pq, int pos) {
     jcv_halfedge** items = (jcv_halfedge**)pq->items;
     jcv_halfedge* node = items[pos];
 
@@ -1702,41 +1670,35 @@ static int jcv_pq_movedown(jcv_priorityqueue* pq, int pos)
     return pos;
 }
 
-static void jcv_pq_create(jcv_priorityqueue* pq, int capacity, void** buffer)
-{
+static void jcv_pq_create(jcv_priorityqueue* pq, int capacity, void** buffer) {
     pq->maxnumitems = capacity;
     pq->numitems = 1;
     pq->items = buffer;
 }
 
-static int jcv_pq_empty(jcv_priorityqueue* pq)
-{
+static int jcv_pq_empty(jcv_priorityqueue* pq) {
     return pq->numitems == 1 ? 1 : 0;
 }
 
-static int jcv_pq_push(jcv_priorityqueue* pq, void* node)
-{
+static int jcv_pq_push(jcv_priorityqueue* pq, void* node) {
     assert(pq->numitems < pq->maxnumitems);
     int n = pq->numitems++;
     pq->items[n] = node;
     return jcv_pq_moveup(pq, n);
 }
 
-static void* jcv_pq_pop(jcv_priorityqueue* pq)
-{
+static void* jcv_pq_pop(jcv_priorityqueue* pq) {
     void* node = pq->items[1];
     pq->items[1] = pq->items[--pq->numitems];
     jcv_pq_movedown(pq, 1);
     return node;
 }
 
-static void* jcv_pq_top(jcv_priorityqueue* pq)
-{
+static void* jcv_pq_top(jcv_priorityqueue* pq) {
     return pq->items[1];
 }
 
-static void jcv_pq_remove(jcv_priorityqueue* pq, jcv_halfedge* node)
-{
+static void jcv_pq_remove(jcv_priorityqueue* pq, jcv_halfedge* node) {
     if (pq->numitems == 1)
         return;
     int pos = node->pqpos;
@@ -1755,13 +1717,11 @@ static void jcv_pq_remove(jcv_priorityqueue* pq, jcv_halfedge* node)
 
 // internal functions
 
-static inline jcv_site* jcv_nextsite(jcv_context_internal* internal)
-{
+static inline jcv_site* jcv_nextsite(jcv_context_internal* internal) {
     return (internal->currentsite < internal->numsites) ? &internal->sites[internal->currentsite++] : 0;
 }
 
-static jcv_halfedge* jcv_get_edge_above_x(jcv_context_internal* internal, const jcv_point* p)
-{
+static jcv_halfedge* jcv_get_edge_above_x(jcv_context_internal* internal, const jcv_point* p) {
     // Gets the arc on the beach line at the x coordinate (i.e. right above the new site event)
 
     // A good guess it's close by (Can be optimized)
@@ -1789,8 +1749,7 @@ static jcv_halfedge* jcv_get_edge_above_x(jcv_context_internal* internal, const 
     return he;
 }
 
-static int jcv_check_circle_event(const jcv_halfedge* he1, const jcv_halfedge* he2, jcv_point* vertex)
-{
+static int jcv_check_circle_event(const jcv_halfedge* he1, const jcv_halfedge* he2, jcv_point* vertex) {
     jcv_edge* e1 = he1->edge;
     jcv_edge* e2 = he2->edge;
     if (e1 == 0 || e2 == 0 || e1->sites[1] == e2->sites[1]) {
@@ -1800,8 +1759,7 @@ static int jcv_check_circle_event(const jcv_halfedge* he1, const jcv_halfedge* h
     return jcv_halfedge_intersect(he1, he2, vertex);
 }
 
-static void jcv_site_event(jcv_context_internal* internal, jcv_site* site)
-{
+static void jcv_site_event(jcv_context_internal* internal, jcv_site* site) {
     jcv_halfedge* left = jcv_get_edge_above_x(internal, &site->p);
     jcv_halfedge* right = left->right;
     jcv_site* bottom = jcv_halfedge_rightsite(left);
@@ -1835,13 +1793,11 @@ static void jcv_site_event(jcv_context_internal* internal, jcv_site* site)
 }
 
 // https://cp-algorithms.com/geometry/oriented-triangle-area.html
-static inline jcv_real jcv_determinant(const jcv_point* a, const jcv_point* b, const jcv_point* c)
-{
+static inline jcv_real jcv_determinant(const jcv_point* a, const jcv_point* b, const jcv_point* c) {
     return (b->x - a->x) * (c->y - a->y) - (b->y - a->y) * (c->x - a->x);
 }
 
-static inline jcv_real jcv_calc_sort_metric(const jcv_site* site, const jcv_graphedge* edge)
-{
+static inline jcv_real jcv_calc_sort_metric(const jcv_site* site, const jcv_graphedge* edge) {
     // We take the average of the two points, since we can better distinguish between very small edges
     jcv_real half = 1 / (jcv_real)2;
     jcv_real x = (edge->pos[0].x + edge->pos[1].x) * half;
@@ -1853,8 +1809,7 @@ static inline jcv_real jcv_calc_sort_metric(const jcv_site* site, const jcv_grap
     return (jcv_real)angle;
 }
 
-static void jcv_sortedges_insert(jcv_site* site, jcv_graphedge* edge)
-{
+static void jcv_sortedges_insert(jcv_site* site, jcv_graphedge* edge) {
     // Special case for the head end
     if (site->edges == 0 || site->edges->angle >= edge->angle) {
         edge->next = site->edges;
@@ -1870,8 +1825,7 @@ static void jcv_sortedges_insert(jcv_site* site, jcv_graphedge* edge)
     }
 }
 
-static void jcv_finishline(jcv_context_internal* internal, jcv_edge* e)
-{
+static void jcv_finishline(jcv_context_internal* internal, jcv_edge* e) {
     if (!jcv_edge_clipline(e, &internal->min, &internal->max))
         return;
 
@@ -1899,8 +1853,7 @@ static void jcv_finishline(jcv_context_internal* internal, jcv_edge* e)
     }
 }
 
-static void jcv_endpos(jcv_context_internal* internal, jcv_edge* e, const jcv_point* p, int direction)
-{
+static void jcv_endpos(jcv_context_internal* internal, jcv_edge* e, const jcv_point* p, int direction) {
     e->pos[direction] = *p;
 
     if (!jcv_is_valid(&e->pos[1 - direction]))
@@ -1909,8 +1862,7 @@ static void jcv_endpos(jcv_context_internal* internal, jcv_edge* e, const jcv_po
     jcv_finishline(internal, e);
 }
 
-static inline void jcv_create_corner_edge(jcv_context_internal* internal, const jcv_site* site, jcv_graphedge* current, jcv_graphedge* gap)
-{
+static inline void jcv_create_corner_edge(jcv_context_internal* internal, const jcv_site* site, jcv_graphedge* current, jcv_graphedge* gap) {
     gap->neighbor = 0;
     gap->pos[0] = current->pos[1];
 
@@ -1931,8 +1883,7 @@ static inline void jcv_create_corner_edge(jcv_context_internal* internal, const 
     gap->angle = jcv_calc_sort_metric(site, gap);
 }
 
-static jcv_edge* jcv_create_gap_edge(jcv_context_internal* internal, jcv_site* site, jcv_graphedge* ge)
-{
+static jcv_edge* jcv_create_gap_edge(jcv_context_internal* internal, jcv_site* site, jcv_graphedge* ge) {
     jcv_edge* edge = jcv_alloc_edge(internal);
     edge->pos[0] = ge->pos[0];
     edge->pos[1] = ge->pos[1];
@@ -1945,8 +1896,7 @@ static jcv_edge* jcv_create_gap_edge(jcv_context_internal* internal, jcv_site* s
 }
 
 // Since the algorithm leaves gaps at the borders/corner, we want to fill them
-static void jcv_fillgaps(jcv_diagram* diagram)
-{
+static void jcv_fillgaps(jcv_diagram* diagram) {
     jcv_context_internal* internal = diagram->internal;
     for (int i = 0; i < internal->numsites; ++i) {
         ProgressCancel::incCurrent();
@@ -2019,8 +1969,7 @@ static void jcv_fillgaps(jcv_diagram* diagram)
     }
 }
 
-static void jcv_circle_event(jcv_context_internal* internal)
-{
+static void jcv_circle_event(jcv_context_internal* internal) {
     jcv_halfedge* left = (jcv_halfedge*)jcv_pq_pop(internal->eventqueue);
 
     jcv_halfedge* leftleft = left->left;
@@ -2071,20 +2020,17 @@ static void jcv_circle_event(jcv_context_internal* internal)
     }
 }
 
-static inline jcv_real jcv_floor(jcv_real v)
-{
+static inline jcv_real jcv_floor(jcv_real v) {
     jcv_real i = (jcv_real)(int)v;
     return (v < i) ? i - 1 : i;
 }
 
-static inline jcv_real jcv_ceil(jcv_real v)
-{
+static inline jcv_real jcv_ceil(jcv_real v) {
     jcv_real i = (jcv_real)(int)v;
     return (v > i) ? i + 1 : i;
 }
 
-static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv_point* min, jcv_point* max)
-{
+static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv_point* min, jcv_point* max) {
     jcv_point _min = points[0];
     jcv_point _max = points[0];
     for (int i = 1; i < num_points; ++i) {
@@ -2104,8 +2050,7 @@ static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv
     max->y = jcv_ceil(_max.y);
 }
 
-void jcv_diagram_generate(size_t num_points, const jcv_point* points, const jcv_rect* rect, void*, jcv_diagram* d)
-{
+void jcv_diagram_generate(size_t num_points, const jcv_point* points, const jcv_rect* rect, void*, jcv_diagram* d) {
     jcv_diagram_generate_useralloc(num_points, points, rect, 0, jcv_alloc_fn, jcv_free_fn, d);
 }
 
@@ -2114,8 +2059,7 @@ typedef union _jcv_cast_align_struct {
     void** voidpp;
 } jcv_cast_align_struct;
 
-void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d)
-{
+void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d) {
     if (d->internal)
         jcv_diagram_free(d);
 

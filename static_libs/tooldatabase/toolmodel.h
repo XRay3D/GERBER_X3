@@ -50,8 +50,7 @@ private:
     const QString mimeType;
     void exportTools();
     void importTools();
-    ToolItem* getItem(const QModelIndex& index) const
-    {
+    ToolItem* getItem(const QModelIndex& index) const {
         if (index.isValid()) {
             ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
             if (item)

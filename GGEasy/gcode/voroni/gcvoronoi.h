@@ -28,4 +28,4 @@ protected:
 private:
     void createOffset(const Tool& tool, double depth, const double width);
 };
-}
+} // namespace GCode

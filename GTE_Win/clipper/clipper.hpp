@@ -88,7 +88,7 @@ static cInt const hiRange = 0x7FFF;
 typedef signed /*long*/ long cInt;
 static cInt const loRange = 0x40000000;
 static cInt const hiRange = 0x40000000; //FFFFFFFFL /*L*/;
-typedef signed long long long64; //used by Int128 class
+typedef signed long long long64;        //used by Int128 class
 typedef unsigned long long ulong64;
 
 #endif
@@ -105,30 +105,24 @@ struct IntPoint {
 #else
     IntPoint(cInt x = 0, cInt y = 0)
         : X(x)
-        , Y(y)
-    {
+        , Y(y) {
     }
 #endif
-    friend inline bool operator==(const IntPoint& a, const IntPoint& b)
-    {
+    friend inline bool operator==(const IntPoint& a, const IntPoint& b) {
         return a.X == b.X && a.Y == b.Y;
     }
-    friend inline bool operator!=(const IntPoint& a, const IntPoint& b)
-    {
+    friend inline bool operator!=(const IntPoint& a, const IntPoint& b) {
         return a.X != b.X || a.Y != b.Y;
     }
-    friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt) {
         stream.writeRawData(reinterpret_cast<const char*>(&pt), sizeof(IntPoint));
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt) {
         stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(IntPoint));
         return stream;
     }
-    friend QDebug operator<<(QDebug d, const IntPoint& p)
-    {
+    friend QDebug operator<<(QDebug d, const IntPoint& p) {
         d << "IntPoint(" << p.X << ", " << p.Y << ")";
         return d;
     }
@@ -138,13 +132,11 @@ struct IntPoint {
 typedef QVector /*std::vector*/<IntPoint> Path;
 typedef QVector /*std::vector*/<Path> Paths;
 
-inline Path& operator<<(Path& poly, const IntPoint& p)
-{
+inline Path& operator<<(Path& poly, const IntPoint& p) {
     poly.push_back(p);
     return poly;
 }
-inline Paths& operator<<(Paths& polys, const Path& p)
-{
+inline Paths& operator<<(Paths& polys, const Path& p) {
     polys.push_back(p);
     return polys;
 }
@@ -158,13 +150,11 @@ struct DoublePoint {
     double Y;
     DoublePoint(double x = 0, double y = 0)
         : X(x)
-        , Y(y)
-    {
+        , Y(y) {
     }
     DoublePoint(IntPoint ip)
         : X(static_cast<double>(ip.X))
-        , Y(static_cast<double>(ip.Y))
-    {
+        , Y(static_cast<double>(ip.Y)) {
     }
 };
 //------------------------------------------------------------------------------
@@ -453,8 +443,7 @@ private:
 class clipperException : public std::exception {
 public:
     clipperException(const char* description)
-        : m_descr(description)
-    {
+        : m_descr(description) {
     }
     ~clipperException() noexcept override = default;
     const char* what() const noexcept override { return m_descr.c_str(); }
@@ -464,6 +453,6 @@ private:
 };
 //------------------------------------------------------------------------------
 
-} //ClipperLib namespace
+} // namespace ClipperLib
 
 #endif //clipper_hpp

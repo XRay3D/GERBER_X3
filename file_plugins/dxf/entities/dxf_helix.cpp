@@ -13,7 +13,6 @@
 #include "helix.h"
 namespace Dxf {
 HELIX::HELIX(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

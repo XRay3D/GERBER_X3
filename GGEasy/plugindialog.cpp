@@ -25,8 +25,7 @@
 #include <QTreeWidget>
 
 DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     setupUi(this);
     retranslateUi(this);
 
@@ -83,8 +82,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
 
 DialogAboutPlugins::~DialogAboutPlugins() { }
 
-void DialogAboutPlugins::setupUi(QDialog* Dialog)
-{
+void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     if (Dialog->objectName().isEmpty())
         Dialog->setObjectName(QString::fromUtf8("Dialog"));
     Dialog->resize(400, 300);
@@ -112,8 +110,7 @@ void DialogAboutPlugins::setupUi(QDialog* Dialog)
     QMetaObject::connectSlotsByName(Dialog);
 }
 
-void DialogAboutPlugins::retranslateUi(QDialog* Dialog)
-{
+void DialogAboutPlugins::retranslateUi(QDialog* Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
     treeWidget->setColumnCount(3);
     treeWidget->setHeaderLabels({ //

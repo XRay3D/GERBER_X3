@@ -50,4 +50,4 @@ public:
     void menu(QMenu& menu, FileTree::View* tv) const override;
 };
 
-}
+} // namespace Dxf

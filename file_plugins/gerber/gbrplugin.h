@@ -51,4 +51,4 @@ private:
     QIcon drawApertureIcon(AbstractAperture* aperture) const;
     QIcon drawRegionIcon(const GraphicObject& go) const;
 };
-}
+} // namespace Gerber

@@ -21,19 +21,16 @@
 namespace FileTree {
 
 TypeDelegate::TypeDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
-{
+QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto comboBox = new QComboBox(parent);
     connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &TypeDelegate::emitCommitData);
     return comboBox;
 }
 
-void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto comboBox = qobject_cast<QComboBox*>(editor);
     comboBox->clear();
     int ctr = 0;
@@ -49,12 +46,11 @@ void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
     comboBox->showPopup();
 }
 
-void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto comboBox = qobject_cast<QComboBox*>(editor);
     model->setData(index, comboBox->currentData());
 }
 
 void TypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-}
+} // namespace FileTree

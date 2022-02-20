@@ -120,4 +120,4 @@ protected:
     //    State m_state;
 };
 
-}
+} // namespace Hpgl

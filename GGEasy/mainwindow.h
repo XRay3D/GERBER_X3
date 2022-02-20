@@ -159,22 +159,19 @@ class DockWidget : public QDockWidget {
 
 public:
     explicit DockWidget(QWidget* parent = nullptr)
-        : QDockWidget(parent)
-    {
+        : QDockWidget(parent) {
         hide();
         setVisible(false);
     }
     ~DockWidget() override = default;
 
-    void push(QWidget* w)
-    {
+    void push(QWidget* w) {
         if (widget())
             widgets.push(widget());
         if (w)
             QDockWidget::setWidget(w);
     }
-    void pop()
-    {
+    void pop() {
         if (widget()) {
             if (widget()->objectName() == "ErrorDialog") {
                 static_cast<QDialog*>(widget())->reject();
@@ -189,13 +186,11 @@ public:
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent* event) override
-    {
+    void closeEvent(QCloseEvent* event) override {
         pop();
         event->accept();
     }
-    void showEvent(QShowEvent* event) override
-    {
+    void showEvent(QShowEvent* event) override {
         event->ignore();
         if (widget() == nullptr)
             QTimer::singleShot(1, this, &QDockWidget::close);

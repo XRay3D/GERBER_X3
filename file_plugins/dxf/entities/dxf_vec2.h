@@ -116,8 +116,7 @@ struct Vec2 {
 
     //@staticmethod
     template <class T>
-    Vec2 sum(const T items)
-    {
+    Vec2 sum(const T items) {
         /* Add all vectors in `items`. */
         Vec2 s;
         for (auto v : items)

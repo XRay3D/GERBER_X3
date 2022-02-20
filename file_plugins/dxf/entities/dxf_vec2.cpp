@@ -27,8 +27,7 @@ double Vec2::angle() const noexcept { return atan2(y, x); }
 
 double Vec2::angle_deg() noexcept { return qRadiansToDegrees(angle()); }
 
-Vec2 Vec2::orthogonal(bool ccw)
-{
+Vec2 Vec2::orthogonal(bool ccw) {
     /*
         Orthogonal vector
         Args:
@@ -40,8 +39,7 @@ Vec2 Vec2::orthogonal(bool ccw)
         return { y, -x };
 }
 
-Vec2 Vec2::lerp(Vec2 other, double factor)
-{
+Vec2 Vec2::lerp(Vec2 other, double factor) {
     /*
         Linear interpolation between `self` and `other`.
         Args:
@@ -54,8 +52,7 @@ Vec2 Vec2::lerp(Vec2 other, double factor)
     return { x, y };
 }
 
-Vec2 Vec2::project(Vec2 other)
-{
+Vec2 Vec2::project(Vec2 other) {
     //Project vector `other` onto `self`.
     Vec2 uv = normalize();
     return uv * uv.dot(other);
@@ -69,8 +66,7 @@ Vec2::operator bool() { return !is_null(); }
 
 bool Vec2::operator==(Vec2 other) { return qFuzzyCompare(x, other.x) && qFuzzyCompare(y, other.y); }
 
-bool Vec2::operator<(Vec2 other)
-{
+bool Vec2::operator<(Vec2 other) {
     //# accepts also tuples, for more convenience at testing
     if (qFuzzyCompare(x, other.x))
         return y < other.y;
@@ -80,8 +76,7 @@ bool Vec2::operator<(Vec2 other)
 
 Vec2 Vec2::operator+(Vec2 other) { return { x + other.x, y + other.y }; }
 
-Vec2& Vec2::operator+=(Vec2 other)
-{
+Vec2& Vec2::operator+=(Vec2 other) {
     x += other.x;
     y += other.y;
     return *this;
@@ -89,8 +84,7 @@ Vec2& Vec2::operator+=(Vec2 other)
 
 Vec2 Vec2::operator-(Vec2 other) { return { x - other.x, y - other.y }; }
 
-Vec2& Vec2::operator-=(Vec2 other)
-{
+Vec2& Vec2::operator-=(Vec2 other) {
     x -= other.x;
     y -= other.y;
     return *this;
@@ -98,8 +92,7 @@ Vec2& Vec2::operator-=(Vec2 other)
 
 Vec2 Vec2::operator*(double other) { return { x * other, y * other }; }
 
-Vec2& Vec2::operator*=(double other)
-{
+Vec2& Vec2::operator*=(double other) {
     x *= other;
     y *= other;
     return *this;
@@ -107,8 +100,7 @@ Vec2& Vec2::operator*=(double other)
 
 Vec2 Vec2::operator/(double other) { return { x / other, y / other }; }
 
-Vec2 Vec2::operator/=(double other)
-{
+Vec2 Vec2::operator/=(double other) {
     x /= other;
     y /= other;
     return *this;
@@ -120,8 +112,7 @@ double Vec2::det(Vec2 other) { return x * other.y - y * other.x; }
 
 double Vec2::distance(Vec2 other) { return hypot(x - other.x, y - other.y); }
 
-double Vec2::angle_between(Vec2 other)
-{
+double Vec2::angle_between(Vec2 other) {
     /*
         Calculate angle between `self` and `other` in radians. +angle is
         counter clockwise orientation.
@@ -135,8 +126,7 @@ double Vec2::angle_between(Vec2 other)
     return acos(cos_theta);
 }
 
-Vec2 Vec2::rotate(double angle)
-{
+Vec2 Vec2::rotate(double angle) {
     /*
         Rotate vector around origin.
         Args:
@@ -145,8 +135,7 @@ Vec2 Vec2::rotate(double angle)
     return from_angle(this->angle() + angle, magnitude());
 }
 
-Vec2 Vec2::rotate_deg(double angle)
-{
+Vec2 Vec2::rotate_deg(double angle) {
     /*
         Rotate vector around origin.
         Args:

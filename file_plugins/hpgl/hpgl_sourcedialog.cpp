@@ -20,8 +20,7 @@
 namespace Hpgl {
 
 SourceDialog::SourceDialog(int fileId, QWidget* parent)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     //    setObjectName(QString::fromUtf8("this"));
     //    resize(600, 600);
     //    //Dialog->resize(400, 300);
@@ -128,4 +127,4 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    verticalLayout->setSpacing(6);
 }
 
-}
+} // namespace Hpgl

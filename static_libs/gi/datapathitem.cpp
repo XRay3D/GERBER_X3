@@ -28,8 +28,7 @@ QTimer GiDataPath::timer;
 
 GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     : GraphicsItem(file)
-    , m_path(path)
-{
+    , m_path(path) {
     m_polygon = path;
 
     Paths tmpPaths;
@@ -58,8 +57,7 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     }
 }
 
-QRectF GiDataPath::boundingRect() const
-{
+QRectF GiDataPath::boundingRect() const {
     if (App::scene()->boundingRect())
         return m_boundingRect;
     if (m_selectionShape.boundingRect().isEmpty())
@@ -67,8 +65,7 @@ QRectF GiDataPath::boundingRect() const
     return m_selectionShape.boundingRect();
 }
 
-void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
-{
+void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if (m_pnColorPrt)
         m_pen.setColor(*m_pnColorPrt);
     if (m_colorPtr)
@@ -101,8 +98,7 @@ Paths GiDataPath::paths(int) const { return { m_path }; }
 
 QPainterPath GiDataPath::shape() const { return m_selectionShape; }
 
-void GiDataPath::updateSelection() const
-{
+void GiDataPath::updateSelection() const {
     const double scale = scaleFactor();
     if (m_selectionShape.boundingRect().isEmpty() || !qFuzzyCompare(m_scale, scale)) {
         m_scale = scale;
@@ -116,8 +112,7 @@ void GiDataPath::updateSelection() const
     }
 }
 
-void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
+void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
         setSelected(true);
         const double glueLen = App::project()->glue() * uScale;
@@ -149,8 +144,7 @@ void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     GraphicsItem::mouseReleaseEvent(event);
 }
 
-QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemVisibleChange && value.toBool()) {
         updateSelection();
     } else if (change == ItemSelectedChange && App::settings().animSelection()) {
@@ -165,8 +159,7 @@ QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const 
     return value;
 }
 
-void GiDataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
+void GiDataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     QGraphicsItem::hoverEnterEvent(event);
     updateSelection();
 }

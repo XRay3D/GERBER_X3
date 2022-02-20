@@ -20,8 +20,7 @@
 namespace Dxf {
 
 Solid::Solid(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void Solid::draw(const InsertEntity* const i) const
@@ -40,8 +39,7 @@ Solid::Solid(SectionParser* sp)
 //    }
 //}
 
-void Solid::parse(CodeData& code)
-{
+void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (static_cast<DataEnum>(code.code())) {
@@ -101,8 +99,7 @@ void Solid::parse(CodeData& code)
 
 Entity::Type Solid::type() const { return Type::SOLID; }
 
-GraphicObject Solid::toGo() const
-{
+GraphicObject Solid::toGo() const {
     QPolygonF poly;
     if (corners == 15) {
         poly.reserve(5);
@@ -119,8 +116,7 @@ GraphicObject Solid::toGo() const
     return { id, path, { path } };
 }
 
-void Solid::write(QDataStream& stream) const
-{
+void Solid::write(QDataStream& stream) const {
     stream << firstCorner;
     stream << secondCorner;
     stream << thirdCorner;
@@ -132,8 +128,7 @@ void Solid::write(QDataStream& stream) const
     stream << radius;
 }
 
-void Solid::read(QDataStream& stream)
-{
+void Solid::read(QDataStream& stream) {
     stream >> firstCorner;
     stream >> secondCorner;
     stream >> thirdCorner;
@@ -145,4 +140,4 @@ void Solid::read(QDataStream& stream)
     stream >> radius;
 }
 
-}
+} // namespace Dxf

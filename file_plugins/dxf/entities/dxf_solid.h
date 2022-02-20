@@ -72,4 +72,4 @@ public:
     double radius = 0;
 };
 
-}
+} // namespace Dxf

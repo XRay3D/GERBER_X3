@@ -54,8 +54,7 @@ public:
 
     // FileInterface
     template <typename T = FileInterface>
-    T* file(int id)
-    {
+    T* file(int id) {
         QMutexLocker locker(&m_mutex);
         if (m_files.contains(id))
             return static_cast<T*>(m_files[id].get());
@@ -63,8 +62,7 @@ public:
     }
 
     template <typename T = FileInterface>
-    mvector<T*> files()
-    {
+    mvector<T*> files() {
         QMutexLocker locker(&m_mutex);
         mvector<T*> rfiles;
         for (const auto& [id, sp] : m_files) {
@@ -76,8 +74,7 @@ public:
     }
 
     template <typename T>
-    mvector<T*> count()
-    {
+    mvector<T*> count() {
         QMutexLocker locker(&m_mutex);
         int count = 0;
         for (const auto& [id, sp] : m_files) {

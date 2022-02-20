@@ -26,7 +26,7 @@ public:
     void setPen(const QPen& pen);
     void setBrushColorP(QColor* col);
     void setPenColor(QColor* col);
-    void setZValue(qreal z);
+    void setZValue(double z);
 
 private:
     bool m_visible = false;

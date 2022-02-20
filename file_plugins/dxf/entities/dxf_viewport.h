@@ -14,4 +14,4 @@ namespace Dxf {
 struct Viewport final : Entity {
     Viewport(SectionParser* sp);
 };
-}
+} // namespace Dxf

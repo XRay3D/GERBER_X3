@@ -37,8 +37,7 @@ class Model : public QAbstractTableModel {
 public:
     Model(const mvector<QString>& lines, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
-        , lines(lines)
-    {
+        , lines(lines) {
     }
     ~Model() { }
 
@@ -46,8 +45,7 @@ public:
     int columnCount(const QModelIndex& = {}) const override { return 3; }
     Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEnabled | Qt::ItemIsSelectable; }
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
-    {
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
         if (role == Qt::DisplayRole)
             switch (index.column()) {
             case LineNum:
@@ -69,8 +67,7 @@ public:
         return {};
     }
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
-    {
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
         if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
             switch (section) {
             case LineNum:
@@ -83,4 +80,4 @@ public:
         return {};
     }
 };
-}
+} // namespace Dxf

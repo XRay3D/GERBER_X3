@@ -17,8 +17,7 @@ namespace GCode {
 
 DrillItem::DrillItem(double diameter, GCode::File* file)
     : AbstractDrillItem(reinterpret_cast<FileInterface*>(file))
-    , m_diameter(diameter)
-{
+    , m_diameter(diameter) {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     create();
@@ -27,15 +26,13 @@ DrillItem::DrillItem(double diameter, GCode::File* file)
 
 bool DrillItem::isSlot() { return false; }
 
-Paths DrillItem::paths(int) const
-{
+Paths DrillItem::paths(int) const {
     Path path(CirclePath(m_diameter * uScale, (pos())));
     ReversePath(path);
     return { path };
 }
 
-void DrillItem::create()
-{
+void DrillItem::create() {
     m_shape = QPainterPath();
     auto path(CirclePath(m_diameter * uScale));
     path.push_back(path.front());
@@ -43,4 +40,4 @@ void DrillItem::create()
     m_rect = m_shape.boundingRect();
 }
 
-}
+} // namespace GCode

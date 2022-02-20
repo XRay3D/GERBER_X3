@@ -13,7 +13,6 @@
 #include "wipeout.h"
 namespace Dxf {
 WIPEOUT::WIPEOUT(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

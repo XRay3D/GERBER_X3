@@ -18,8 +18,7 @@
 namespace Dxf {
 
 PolyLine::PolyLine(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
 //void PolyLine::draw(const InsertEntity* const i) const
@@ -38,8 +37,7 @@ PolyLine::PolyLine(SectionParser* sp)
 //    }
 //}
 
-void PolyLine::parse(CodeData& code)
-{
+void PolyLine::parse(CodeData& code) {
     do {
         data.push_back(code);
         if (code != "VERTEX") {
@@ -72,8 +70,7 @@ void PolyLine::parse(CodeData& code)
 
 Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 
-GraphicObject PolyLine::toGo() const
-{
+GraphicObject PolyLine::toGo() const {
     QPainterPath path;
     auto addSeg = [&path](const Vertex& source, const Vertex& target) {
         if (path.isEmpty())
@@ -128,18 +125,16 @@ GraphicObject PolyLine::toGo() const
     return { id, p.value(0), {} };
 }
 
-void PolyLine::write(QDataStream& stream) const
-{
+void PolyLine::write(QDataStream& stream) const {
     stream << polylineFlags;
     stream << startWidth;
     stream << endWidth;
 }
 
-void PolyLine::read(QDataStream& stream)
-{
+void PolyLine::read(QDataStream& stream) {
     stream >> polylineFlags;
     stream >> startWidth;
     stream >> endWidth;
 }
 
-}
+} // namespace Dxf

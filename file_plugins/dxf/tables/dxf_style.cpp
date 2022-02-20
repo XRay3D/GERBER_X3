@@ -19,12 +19,10 @@
 namespace Dxf {
 
 Style::Style(SectionParser* sp)
-    : AbstractTable(sp)
-{
+    : AbstractTable(sp) {
 }
 
-void Style::parse(CodeData& code)
-{
+void Style::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (code.code()) {
@@ -90,4 +88,4 @@ void Style::parse(CodeData& code)
     //        qDebug() << "\t" << code;
 }
 
-}
+} // namespace Dxf

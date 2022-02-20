@@ -33,12 +33,10 @@ namespace Excellon {
 
 Plugin::Plugin(QObject* parent)
     : QObject(parent)
-    , Parser(this)
-{
+    , Parser(this) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_)
-{
+FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -50,8 +48,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     return Parser::file;
 }
 
-QIcon Plugin::drawDrillIcon()
-{
+QIcon Plugin::drawDrillIcon() {
     QPixmap pixmap(IconSize, IconSize);
     pixmap.fill(Qt::transparent);
     QPainter painter;
@@ -63,8 +60,7 @@ QIcon Plugin::drawDrillIcon()
     return QIcon(pixmap);
 }
 
-bool Plugin::thisIsIt(const QString& fileName)
-{
+bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
@@ -98,8 +94,7 @@ QString Plugin::folderName() const { return tr("Excellon"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Excellon" },
         { "Version", "1.1" },
@@ -108,15 +103,13 @@ QJsonObject Plugin::info() const
     };
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-{
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab(parent);
     tab->setWindowTitle("Excellon");
     return tab;
 }
 
-void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx)
-{
+void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
@@ -126,32 +119,28 @@ class DrillPrGI final : public AbstractDrillPrGI {
 public:
     explicit DrillPrGI(const Excellon::Hole* hole, Row& row)
         : AbstractDrillPrGI(row)
-        , hole(hole)
-    {
+        , hole(hole) {
         m_sourceDiameter = hole->state.currentToolDiameter();
         m_sourcePath = hole->state.path.isEmpty() ? drawDrill() : drawSlot();
         m_type = hole->state.path.isEmpty() ? GiType::PrDrill : GiType::PrSlot;
     }
 
 private:
-    QPainterPath drawDrill() const
-    {
+    QPainterPath drawDrill() const {
         QPainterPath painterPath;
         const double radius = hole->state.currentToolDiameter() * 0.5;
         painterPath.addEllipse(hole->state.offsetedPos(), radius, radius);
         return painterPath;
     }
 
-    QPainterPath drawSlot() const
-    {
+    QPainterPath drawSlot() const {
         QPainterPath painterPath;
         for (Path& path : offset(hole->item->paths().front(), hole->state.currentToolDiameter()))
             painterPath.addPolygon(path);
         return painterPath;
     }
 
-    Paths offset(const Path& path, double offset) const
-    {
+    Paths offset(const Path& path, double offset) const {
         ClipperOffset cpOffset;
         // cpOffset.AddPath(path, jtRound, etClosedLine);
         cpOffset.AddPath(path, jtRound, etOpenRound);
@@ -166,8 +155,7 @@ private:
 
     // AbstractDrillPrGI interface
 public:
-    void updateTool() override
-    {
+    void updateTool() override {
         if (row.toolId > -1) {
             colorState |= Tool;
             if (m_type == GiType::PrSlot) {
@@ -211,21 +199,18 @@ public:
         changeColor();
     }
     IntPoint pos() const override { return hole->state.offsetedPos(); }
-    Paths paths() const override
-    {
+    Paths paths() const override {
         if (m_type == GiType::PrSlot)
             return hole->item->paths();
         Paths paths(hole->item->paths());
         return ReversePaths(paths);
     }
-    bool fit(double depth) override
-    {
+    bool fit(double depth) override {
         return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth);
     }
 };
 
-DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data)
-{
+DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
     DrillPreviewGiMap giPeview;
 
     auto const exFile = reinterpret_cast<File*>(file);
@@ -248,4 +233,4 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     return giPeview;
 }
 
-} // namespace Gerber
+} // namespace Excellon

@@ -38,4 +38,4 @@ public:
     void setSelected(bool selected) { m_selected = selected; }
 };
 
-}
+} // namespace Gerber

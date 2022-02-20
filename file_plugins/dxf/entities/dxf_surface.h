@@ -14,4 +14,4 @@ namespace Dxf {
 struct Surface final : Entity {
     Surface(SectionParser* sp);
 };
-}
+} // namespace Dxf

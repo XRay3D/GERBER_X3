@@ -18,12 +18,10 @@
 namespace Excellon {
 
 Format::Format(File* file)
-    : file(file)
-{
+    : file(file) {
 }
 
-void State::reset(Format* f)
-{
+void State::reset(Format* f) {
     format = f;
     rawPos.clear();
     gCode = G_NULL;
@@ -34,16 +32,14 @@ void State::reset(Format* f)
     path.clear();
 }
 
-void State::updatePos()
-{
+void State::updatePos() {
     pos = QPointF(Parser::parseNumber(rawPos.X, *this), Parser::parseNumber(rawPos.Y, *this));
     for (int i = 0; i < rawPosList.size(); ++i) {
         path[i] = QPointF(Parser::parseNumber(rawPosList[i].X, *this), Parser::parseNumber(rawPosList[i].Y, *this));
     }
 }
 
-double State::currentToolDiameter() const
-{
+double State::currentToolDiameter() const {
     return format->file->tool(tCode);
 }
 

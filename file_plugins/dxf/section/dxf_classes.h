@@ -23,4 +23,4 @@ struct SectionCLASSES final : SectionParser {
     void parse() override { }
 };
 
-}
+} // namespace Dxf

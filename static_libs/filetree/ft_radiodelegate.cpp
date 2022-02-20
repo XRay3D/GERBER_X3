@@ -22,12 +22,10 @@
 /// \param parent
 ///
 RadioDelegate::RadioDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
-{
+QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* radioButton = new QRadioButton(parent);
     //    radioButton->addItems({ tr("Top"), tr("Bottom") });
     //        if (index.column() == 1)
@@ -39,8 +37,7 @@ QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     return radioButton;
 }
 
-void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
     if (!radioButton)
         return;
@@ -49,16 +46,14 @@ void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) con
     radioButton->setChecked(index.model()->data(index).toInt());
 }
 
-void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
     if (!radioButton)
         return;
     model->setData(index, bool(radioButton->isChecked()));
 }
 
-void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
+void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QStyledItemDelegate::paint(painter, option, index);
     if (dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree::Node*>(index.internalPointer()))) {
 
@@ -76,8 +71,7 @@ void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     }
 }
 
-QSize RadioDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
-{
+QSize RadioDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     return { 24, 24 };
     //    if (index.data().canConvert<StarRating>()) {
     //        StarRating starRating = qvariant_cast<StarRating>(index.data());
@@ -87,8 +81,7 @@ QSize RadioDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QMod
     //    }
 }
 
-void RadioDelegate::commitAndCloseEditor()
-{
+void RadioDelegate::commitAndCloseEditor() {
     // QRadioButton* editor = qobject_cast<QRadioButton*>(sender());
     // emit commitData(editor);
     // emit closeEditor(editor);

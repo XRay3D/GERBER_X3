@@ -19,12 +19,10 @@
 #include <QSpinBox>
 
 ThermalDelegate::ThermalDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
+QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     switch (index.column()) {
     case ThermalModel::Name:
     case ThermalModel::Position:
@@ -59,8 +57,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
-void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     switch (index.column()) {
     case ThermalModel::Name:
     case ThermalModel::Position:
@@ -83,8 +80,7 @@ void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
     }
 }
 
-void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     switch (index.column()) {
     case ThermalModel::Name:
     case ThermalModel::Position:

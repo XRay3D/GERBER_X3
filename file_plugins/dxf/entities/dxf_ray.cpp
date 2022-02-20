@@ -13,7 +13,6 @@
 #include "ray.h"
 namespace Dxf {
 RAY::RAY(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

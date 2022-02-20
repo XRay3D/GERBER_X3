@@ -30,8 +30,7 @@ const Component dummy;
 ComponentsNode::ComponentsNode(const QString& name)
     : component(dummy)
     , name(name)
-    , item(nullptr)
-{
+    , item(nullptr) {
 }
 
 ComponentsNode::ComponentsNode(const Component& component)
@@ -45,13 +44,11 @@ ComponentsNode::ComponentsNode(const Component& component)
 {
 }
 
-ComponentsNode::~ComponentsNode()
-{
+ComponentsNode::~ComponentsNode() {
     childItems.clear();
 }
 
-int ComponentsNode::row() const
-{
+int ComponentsNode::row() const {
     if (m_parentItem)
         for (int i = 0, size = m_parentItem->childItems.size(); i < size; ++i)
             if (m_parentItem->childItems[i].data() == this)
@@ -63,24 +60,21 @@ ComponentsNode* ComponentsNode::child(int row) { return childItems.value(row).da
 
 ComponentsNode* ComponentsNode::parentItem() { return m_parentItem; }
 
-void ComponentsNode::setChild(int row, ComponentsNode* item)
-{
+void ComponentsNode::setChild(int row, ComponentsNode* item) {
     if (item)
         item->m_parentItem = this;
     if (row < childItems.size())
         childItems[row].reset(item);
 }
 
-void ComponentsNode::append(ComponentsNode* item)
-{
+void ComponentsNode::append(ComponentsNode* item) {
     item->m_parentItem = this;
     childItems.append(QSharedPointer<ComponentsNode>(item));
 }
 
 void ComponentsNode::remove(int row) { childItems.removeAt(row); }
 
-bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/)
-{
+bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) {
     //    switch (index.column()) {
     //        //    case Name_:
     //        //        switch (role) {
@@ -112,14 +106,12 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
     return false;
 }
 
-Qt::ItemFlags ComponentsNode::flags(const QModelIndex& /*index*/) const
-{
+Qt::ItemFlags ComponentsNode::flags(const QModelIndex& /*index*/) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled /*| Qt::ItemNeverHasChildren*/ | Qt::ItemIsSelectable;
     return itemFlag;
 }
 
-QVariant ComponentsNode::data(const QModelIndex& index, int role) const
-{
+QVariant ComponentsNode::data(const QModelIndex& index, int role) const {
     if (!name.isEmpty()) {
         if (role == Qt::DisplayRole && index.column() == 0)
             return name;
@@ -153,4 +145,4 @@ QVariant ComponentsNode::data(const QModelIndex& index, int role) const
 }
 
 int ComponentsNode::childCount() const { return childItems.count(); }
-}
+} // namespace Gerber

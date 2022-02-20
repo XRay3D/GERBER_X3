@@ -26,8 +26,7 @@ const CLSID CLSID_GerberThumbnailProvider = { 0x4D2FB08D, 0x621B, 0x4447, { 0xAF
 static HINSTANCE g_hInst = nullptr;
 static QApplication* app = nullptr;
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/)
-{
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/) {
     int c = 0;
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
@@ -64,8 +63,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/)
 //     requested interface pointer. If an error occurs, the interface pointer
 //     is NULL.
 //
-STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
-{
+STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv) {
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 
     if (IsEqualCLSID(CLSID_GerberThumbnailProvider, rclsid)) {
@@ -90,8 +88,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
 //   count is zero (i.e. nobody is still using the component).
 //
 extern long g_cDllRef;
-STDAPI DllCanUnloadNow(void)
-{
+STDAPI DllCanUnloadNow(void) {
     return g_cDllRef > 0 ? S_FALSE : S_OK;
 }
 
@@ -102,8 +99,7 @@ STDAPI DllCanUnloadNow(void)
 //
 static const QString fileFormats(".GBR|.GBL|.GBO|.GBP|.GBS|.GML|.GTL|.GTO|.GTP|.GTS|.BRD|.ART|.PHO");
 
-STDAPI DllRegisterServer(void)
-{
+STDAPI DllRegisterServer(void) {
     HRESULT hr;
 
     wchar_t szModule[MAX_PATH];
@@ -139,8 +135,7 @@ STDAPI DllRegisterServer(void)
 //
 //   PURPOSE: Unregister the COM server and the thumbnail handler.
 //
-STDAPI DllUnregisterServer(void)
-{
+STDAPI DllUnregisterServer(void) {
     HRESULT hr = S_OK;
 
     wchar_t szModule[MAX_PATH];

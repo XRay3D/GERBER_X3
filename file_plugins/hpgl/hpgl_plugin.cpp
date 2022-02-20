@@ -22,12 +22,10 @@
 namespace Hpgl {
 
 Plugin::Plugin(QObject* parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_)
-{
+FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -39,8 +37,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_)
     return Parser::file;
 }
 
-bool Plugin::thisIsIt(const QString& fileName)
-{
+bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
@@ -59,8 +56,7 @@ QString Plugin::folderName() const { return tr("Dxf Files"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "HPGL" },
         { "Version", "1.0" },
@@ -69,8 +65,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-{
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxBoldFont;
         QCheckBox* chbxItalicFont;
@@ -79,8 +74,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 
     public:
         Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent)
-        {
+            : SettingsTabInterface(parent) {
             setObjectName(QString::fromUtf8("tabDxf"));
             auto verticalLayout = new QVBoxLayout(this);
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
@@ -142,8 +136,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             labelOverrideFonts->setText(QApplication::translate("SettingsDialog", "Override declared fonts in DXF:", nullptr));
         }
         virtual ~Tab() override { }
-        virtual void readSettings(MySettings& settings) override
-        {
+        virtual void readSettings(MySettings& settings) override {
             settings.beginGroup("Dxf");
             m_defaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
             m_boldFont = settings.getValue(chbxBoldFont, false);
@@ -151,8 +144,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             m_overrideFonts = settings.getValue(chbxOverrideFonts, false);
             settings.endGroup();
         }
-        virtual void writeSettings(MySettings& settings) override
-        {
+        virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup("Dxf");
             m_defaultFont = settings.setValue(fcbxDxfDefaultFont);
             m_boldFont = settings.setValue(chbxBoldFont);
@@ -166,8 +158,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
     return nullptr;
 }
 
-void Plugin::updateFileModel(FileInterface* file)
-{
+void Plugin::updateFileModel(FileInterface* file) {
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
@@ -194,4 +185,4 @@ void Plugin::updateFileModel(FileInterface* file)
     //    fm->endInsertRows_();
 }
 
-}
+} // namespace Hpgl

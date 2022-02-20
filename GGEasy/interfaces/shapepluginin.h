@@ -23,16 +23,14 @@ class Node;
 }
 
 class ShapeInterface : public GraphicsItem {
-    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape) {
         stream << shape.type();
         stream << shape.m_giId;
         stream << shape.isVisible();
         shape.write_(stream);
         return stream;
     }
-    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape) {
         stream >> shape.m_giId;
         bool visible;
         stream >> visible;
@@ -45,8 +43,7 @@ class ShapeInterface : public GraphicsItem {
 
 public:
     ShapeInterface()
-        : GraphicsItem(nullptr)
-    {
+        : GraphicsItem(nullptr) {
     }
     virtual Shapes::Node* node() const = 0;
 
@@ -60,8 +57,7 @@ class ShapePluginInterface {
     static inline ShapeInterface* item;
 
 public:
-    static void addShapePoint_(const QPointF& point)
-    {
+    static void addShapePoint_(const QPointF& point) {
         if (sp) {
             qDebug() << sp << sp;
             if (!item) {
@@ -70,13 +66,11 @@ public:
                 finalizeShape_();
         }
     }
-    static void updateShape_(const QPointF& point)
-    {
+    static void updateShape_(const QPointF& point) {
         if (sp && item)
             sp->updateShape(point);
     }
-    static void finalizeShape_()
-    {
+    static void finalizeShape_() {
         qDebug(__FUNCTION__);
         if (item)
             item->setSelected(true);
@@ -100,8 +94,7 @@ public:
     [[nodiscard]] virtual QJsonObject info() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
     //    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
-    void createMainMenu(QMenu& menu, FileTree::View* tv)
-    {
+    void createMainMenu(QMenu& menu, FileTree::View* tv) {
         menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete All Shapes"), [tv] {
             if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 tv->closeFiles();

@@ -23,8 +23,7 @@
 class PushButton : public QPushButton {
     //    Q_OBJECT
     QColor& m_color;
-    void selectColor()
-    {
+    void selectColor() {
         QColorDialog dialog(m_color);
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
         QColor color(m_color);
@@ -37,16 +36,14 @@ class PushButton : public QPushButton {
 public:
     PushButton(QColor& color, QWidget* parent = nullptr)
         : QPushButton("", parent)
-        , m_color(color)
-    {
+        , m_color(color) {
         connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
         //        setText("ARGB " + m_color.name(QColor::HexArgb).toUpper());
     }
     virtual ~PushButton() { }
 
 protected:
-    void paintEvent(QPaintEvent* event) override
-    {
+    void paintEvent(QPaintEvent* event) override {
         QPushButton::paintEvent(event);
         QPainter p(this);
         p.setPen(Qt::NoPen);
@@ -74,8 +71,7 @@ protected:
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)
     , m_color(color)
-    , m_defaultColor(std::move(defaultColor))
-{
+    , m_defaultColor(std::move(defaultColor)) {
     if (objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
     auto horizontalLayout = new QHBoxLayout(this);
@@ -105,8 +101,7 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
 
 ColorSelector::~ColorSelector() { }
 
-void ColorSelector::resetColor()
-{
+void ColorSelector::resetColor() {
     m_color = m_defaultColor;
     pbSelectColor->update();
     updateName();

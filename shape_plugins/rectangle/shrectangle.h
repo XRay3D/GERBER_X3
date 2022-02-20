@@ -76,4 +76,4 @@ signals:
     void actionUncheck(bool = false) override;
 };
 
-}
+} // namespace Shapes

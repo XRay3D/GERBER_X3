@@ -17,8 +17,7 @@
 
 ToolEditDialog::ToolEditDialog(QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::ToolEditDialog)
-{
+    , ui(new Ui::ToolEditDialog) {
     ui->setupUi(this);
     ui->toolEdit->setDialog();
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [this] {

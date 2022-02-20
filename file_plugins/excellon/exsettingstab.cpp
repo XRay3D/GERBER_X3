@@ -4,8 +4,7 @@
 
 namespace Excellon {
 ExSettingsTab::ExSettingsTab(QWidget* parent)
-    : SettingsTabInterface(parent)
-{
+    : SettingsTabInterface(parent) {
     setObjectName(QString::fromUtf8("tabExcellon"));
 
     auto vlayTab = new QVBoxLayout(this);
@@ -211,8 +210,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
 
 ExSettingsTab::~ExSettingsTab() { }
 
-void ExSettingsTab::readSettings(MySettings& settings)
-{
+void ExSettingsTab::readSettings(MySettings& settings) {
     settings.beginGroup("Excellon");
     //  static inline Format m_format;
 
@@ -235,8 +233,7 @@ void ExSettingsTab::readSettings(MySettings& settings)
     settings.endGroup();
 }
 
-void ExSettingsTab::writeSettings(MySettings& settings)
-{
+void ExSettingsTab::writeSettings(MySettings& settings) {
     settings.beginGroup("Excellon");
 
     m_format.decimal = settings.setValue(sbxDecimal);
@@ -257,4 +254,4 @@ void ExSettingsTab::writeSettings(MySettings& settings)
 
     settings.endGroup();
 }
-}
+} // namespace Excellon

@@ -21,4 +21,4 @@ public:
     Type type() const override { return TableItem::LTYPE; };
 };
 
-}
+} // namespace Dxf

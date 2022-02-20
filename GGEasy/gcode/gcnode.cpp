@@ -27,12 +27,10 @@ namespace GCode {
 
 Node::Node(File* file, int* id)
     : FileTree::Node(id, FileTree::File)
-    , file(file)
-{
+    , file(file) {
 }
 
-bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
-{
+bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
     switch (index.column()) {
     case FileTree::Column::NameColorVisible:
@@ -61,8 +59,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role)
     }
 }
 
-QVariant Node::data(const QModelIndex& index, int role) const
-{
+QVariant Node::data(const QModelIndex& index, int role) const {
     switch (index.column()) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
@@ -99,8 +96,7 @@ QVariant Node::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags Node::flags(const QModelIndex& index) const
-{
+Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
     case FileTree::Column::NameColorVisible:
@@ -117,8 +113,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const
     }
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const
-{
+void Node::menu(QMenu& menu, FileTree::View* tv) const {
     static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(*m_id);
@@ -139,4 +134,4 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
-}
+} // namespace GCode

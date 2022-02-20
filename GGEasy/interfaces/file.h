@@ -35,8 +35,7 @@ class FileInterface {
     //    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<FileInterface>& file);
     //    friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<FileInterface>& file);
 
-    friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file)
-    {
+    friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file) {
         stream << static_cast<int>(file.type());
         file.write(stream);
         stream << file.m_id;
@@ -53,8 +52,7 @@ class FileInterface {
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, FileInterface& file)
-    {
+    friend QDataStream& operator>>(QDataStream& stream, FileInterface& file) {
         file.read(stream);
         stream >> file.m_id;
         stream >> file.m_itemsType;
@@ -77,8 +75,7 @@ class FileInterface {
 
 public:
     FileInterface()
-        : m_itemGroups(1, new ItemGroup)
-    {
+        : m_itemGroups(1, new ItemGroup) {
     }
     virtual ~FileInterface() { qDeleteAll(m_itemGroups); }
 
@@ -86,8 +83,7 @@ public:
     QString name() const { return m_name; }
     void setFileName(const QString& fileName) { m_name = fileName; }
 
-    void addToScene() const
-    {
+    void addToScene() const {
         for (const auto var : m_itemGroups) {
             if (var && var->size()) {
                 var->addToScene();
@@ -96,8 +92,7 @@ public:
         }
     }
 
-    ItemGroup* itemGroup(int type = -1) const
-    {
+    ItemGroup* itemGroup(int type = -1) const {
         const int size(static_cast<int>(m_itemGroups.size()));
         if (type == -1 && 0 <= m_itemsType && m_itemsType < size)
             return m_itemGroups[m_itemsType];
@@ -113,8 +108,7 @@ public:
 
     mvector<QString>& lines() { return m_lines; }
     const mvector<QString>& lines() const { return m_lines; }
-    const QString lines2() const
-    {
+    const QString lines2() const {
         QString rstr;
         for (auto&& str : m_lines)
             rstr.append(str).append('\n');
@@ -127,8 +121,7 @@ public:
         CutoffGroup,
     };
 
-    virtual void initFrom(FileInterface* file)
-    {
+    virtual void initFrom(FileInterface* file) {
         m_id = file->id();
         m_node = file->node();
         m_node->setId(&m_id);

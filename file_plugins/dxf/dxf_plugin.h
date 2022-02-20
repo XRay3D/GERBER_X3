@@ -52,4 +52,4 @@ private:
     QIcon drawDrillIcon(QColor color);
 };
 
-}
+} // namespace Dxf

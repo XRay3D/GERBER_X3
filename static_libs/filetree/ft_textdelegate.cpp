@@ -18,34 +18,29 @@
 namespace FileTree {
 
 TextDelegate::TextDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
-{
+QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const {
     auto* le = new QLineEdit(parent);
     m_rect = option.rect;
     connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
     return le;
 }
 
-void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* le = qobject_cast<QLineEdit*>(editor);
     le->setGeometry(m_rect);
     le->setText(index.data(Qt::EditRole).toString());
 }
 
-void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void TextDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* le = qobject_cast<QLineEdit*>(editor);
     model->setData(index, le->text());
 }
 
-void TextDelegate::emitCommitData()
-{
+void TextDelegate::emitCommitData() {
     emit commitData(qobject_cast<QWidget*>(sender()));
 }
 
-}
+} // namespace FileTree

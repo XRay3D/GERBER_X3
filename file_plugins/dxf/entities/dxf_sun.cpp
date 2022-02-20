@@ -13,7 +13,6 @@
 #include "sun.h"
 namespace Dxf {
 SUN::SUN(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

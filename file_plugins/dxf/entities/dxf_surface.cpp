@@ -13,7 +13,6 @@
 #include "surface.h"
 namespace Dxf {
 SURFACE::SURFACE(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
-}
+} // namespace Dxf

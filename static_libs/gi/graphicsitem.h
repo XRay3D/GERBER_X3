@@ -32,9 +32,9 @@ enum class GiType {
     Bridge,
 
     PrThermal = QGraphicsItem::UserType + 300, // ThermalForm
-    PrSlot, // DrillForm
-    PrDrill, // DrillForm
-    PrApetrure, // DrillForm
+    PrSlot,                                    // DrillForm
+    PrDrill,                                   // DrillForm
+    PrApetrure,                                // DrillForm
 
     Error = QGraphicsItem::UserType + 400, // ThermalForm
 

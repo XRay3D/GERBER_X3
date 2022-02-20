@@ -16,8 +16,7 @@
 
 namespace Gerber {
 
-bool Component::setMountType(const QString& key)
-{
+bool Component::setMountType(const QString& key) {
     int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
     m_mount = static_cast<MountType>(val);
     return val > -1 ? true : false;
@@ -27,8 +26,7 @@ int Component::value1(const QString& key) { return staticMetaObject.enumerator(1
 
 int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
 
-bool Component::setData(int key, const QStringList& data)
-{
+bool Component::setData(int key, const QStringList& data) {
     bool fl = false;
     switch (key) {
     case Component::Rot:
@@ -68,8 +66,7 @@ bool Component::setData(int key, const QStringList& data)
     return fl;
 }
 
-QString Component::toolTip() const
-{
+QString Component::toolTip() const {
     QString tt;
     tt += QString(GbrObj::tr("Rotation: %1\n")).arg(m_rotation);
     tt += QString(GbrObj::tr("Value: %1\n")).arg(m_value);
@@ -77,8 +74,7 @@ QString Component::toolTip() const
     return tt;
 }
 
-QDataStream& operator<<(QDataStream& stream, const Component& c)
-{
+QDataStream& operator<<(QDataStream& stream, const Component& c) {
     stream << c.m_rotation;
     stream << c.m_height;
     stream << c.m_mount;
@@ -95,8 +91,7 @@ QDataStream& operator<<(QDataStream& stream, const Component& c)
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, Component& c)
-{
+QDataStream& operator>>(QDataStream& stream, Component& c) {
     stream >> c.m_rotation;
     stream >> c.m_height;
     stream >> c.m_mount;
@@ -113,4 +108,4 @@ QDataStream& operator>>(QDataStream& stream, Component& c)
     return stream;
 }
 
-}
+} // namespace Gerber

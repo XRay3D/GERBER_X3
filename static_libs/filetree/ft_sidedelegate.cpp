@@ -18,12 +18,10 @@
 namespace FileTree {
 
 SideDelegate::SideDelegate(QObject* parent)
-    : QStyledItemDelegate(parent)
-{
+    : QStyledItemDelegate(parent) {
 }
 
-QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
-{
+QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* comboBox = new QComboBox(parent);
     comboBox->addItems(tr("Top|Bottom").split('|'));
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
@@ -32,8 +30,7 @@ QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
     return comboBox;
 }
 
-void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
-{
+void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
     if (!comboBox)
         return;
@@ -41,17 +38,15 @@ void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
     comboBox->showPopup();
 }
 
-void SideDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
-{
+void SideDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
     if (!comboBox)
         return;
     model->setData(index, bool(comboBox->currentIndex()));
 }
 
-void SideDelegate::emitCommitData()
-{
+void SideDelegate::emitCommitData() {
     emit commitData(qobject_cast<QWidget*>(sender()));
 }
 
-}
+} // namespace FileTree

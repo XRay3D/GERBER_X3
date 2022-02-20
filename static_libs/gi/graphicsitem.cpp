@@ -44,35 +44,30 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     QGraphicsItem::setVisible(false);
 }
 
-void GraphicsItem::setColor(const QColor& brush)
-{
+void GraphicsItem::setColor(const QColor& brush) {
     m_bodyColor = m_color = brush;
     colorChanged();
 }
 
-void GraphicsItem::setColorPtr(QColor* brushColor)
-{
+void GraphicsItem::setColorPtr(QColor* brushColor) {
     if (brushColor)
         m_bodyColor = *(m_colorPtr = brushColor);
     m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
     colorChanged();
 }
 
-void GraphicsItem::setPen(const QPen& pen)
-{
+void GraphicsItem::setPen(const QPen& pen) {
     m_pen = pen;
     colorChanged();
 }
 
-void GraphicsItem::setPenColorPtr(const QColor* penColor)
-{
+void GraphicsItem::setPenColorPtr(const QColor* penColor) {
     if (penColor)
         m_pnColorPrt = penColor;
     colorChanged();
 }
 
-void GraphicsItem::setVisible(bool visible)
-{
+void GraphicsItem::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
     //        return;
     visibleA.setStartValue(visible ? 0.0 : 1.0);
@@ -90,22 +85,19 @@ int GraphicsItem::id() const { return m_giId; }
 
 void GraphicsItem::setId(int id) { m_giId = id; }
 
-void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
+void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void GraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
+void GraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemSelectedChange) {
         const bool fl = value.toInt();
         fl ? colorState |= Selected : colorState &= ~Selected;
@@ -115,8 +107,7 @@ QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
     return QGraphicsItem::itemChange(change, value);
 }
 
-double GraphicsItem::scaleFactor() const
-{
+double GraphicsItem::scaleFactor() const {
     if (scene() && scene()->views().size())
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         return 1.0 / scene()->views().first()->matrix().m11();

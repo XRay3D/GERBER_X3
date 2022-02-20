@@ -27,4 +27,4 @@ struct SectionHEADER final : SectionParser {
     HeaderData& header;
 };
 
-}
+} // namespace Dxf

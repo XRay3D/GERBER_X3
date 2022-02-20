@@ -21,8 +21,7 @@
 
 GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::GCodePropertiesForm)
-{
+    , ui(new Ui::GCodePropertiesForm) {
     ui->setupUi(this);
 
     connect(ui->dsbxClearence, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
@@ -118,8 +117,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     App::setGCodePropertiesForm(this);
 }
 
-GCodePropertiesForm::~GCodePropertiesForm()
-{
+GCodePropertiesForm::~GCodePropertiesForm() {
     App::setGCodePropertiesForm(nullptr);
 
     if (Marker::get(Marker::Home))
@@ -146,30 +144,26 @@ GCodePropertiesForm::~GCodePropertiesForm()
     delete ui;
 }
 
-void GCodePropertiesForm::updatePosDsbxs()
-{
+void GCodePropertiesForm::updatePosDsbxs() {
     ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
     ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
     ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
     ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
 }
 
-void GCodePropertiesForm::updateAll()
-{
+void GCodePropertiesForm::updateAll() {
     //ui->dsbxSpaceX;
     //ui->dsbxSpaceY;
     //ui->sbxStepsX;
     //ui->sbxStepsY;
 }
 
-void GCodePropertiesForm::on_pbResetHome_clicked()
-{
+void GCodePropertiesForm::on_pbResetHome_clicked() {
     ui->dsbxHomeX->setValue(0);
     ui->dsbxHomeY->setValue(0);
 }
 
-void GCodePropertiesForm::on_pbResetZero_clicked()
-{
+void GCodePropertiesForm::on_pbResetZero_clicked() {
     ui->dsbxZeroX->setValue(0);
     ui->dsbxZeroY->setValue(0);
 }

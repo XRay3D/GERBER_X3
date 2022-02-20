@@ -21,8 +21,7 @@
 namespace GCode {
 
 Plugin::Plugin(QObject* parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
 }
 
 bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
@@ -35,8 +34,7 @@ QString Plugin::folderName() const { return tr("Tool Paths"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
-QJsonObject Plugin::info() const
-{
+QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "GCode" },
         { "Version", "1.0" },
@@ -45,8 +43,7 @@ QJsonObject Plugin::info() const
     };
 }
 
-void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv)
-{
+void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
         if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
@@ -55,8 +52,7 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv)
         tv, &FileTree::View::saveSelectedGCodeFiles);
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
-{
+SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 
     class Tab : public SettingsTabInterface, Settings {
         QCheckBox* chbxInfo;
@@ -77,8 +73,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 
     public:
         Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent)
-        {
+            : SettingsTabInterface(parent) {
             setObjectName(QString::fromUtf8("tabGCode"));
             qDebug() << this;
             auto /**/ verticalLayout1 = new QVBoxLayout(this);
@@ -271,8 +266,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             /**/ verticalLayout1->addWidget(grbxSpindle);
         }
         virtual ~Tab() override { }
-        virtual void readSettings(MySettings& settings) override
-        {
+        virtual void readSettings(MySettings& settings) override {
             settings.beginGroup("GCode");
             m_info = settings.getValue(chbxInfo, m_info);
             m_sameFolder = settings.getValue(chbxSameGFolder, m_sameFolder);
@@ -295,8 +289,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
             m_profileSort = settings.getValue(cbxProfileSort, m_profileSort);
             settings.endGroup();
         }
-        virtual void writeSettings(MySettings& settings) override
-        {
+        virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup("GCode");
             m_fileExtension = settings.setValue(leFileExtension);
             m_formatMilling = settings.setValue(leFormatMilling);
@@ -327,4 +320,4 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent)
 
 FileInterface* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
 
-}
+} // namespace GCode

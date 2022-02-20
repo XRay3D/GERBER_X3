@@ -29,4 +29,4 @@ public:
     void menu(QMenu& menu, View* tv) const override;
 };
 
-}
+} // namespace FileTree

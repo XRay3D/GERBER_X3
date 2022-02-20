@@ -18,12 +18,10 @@
 
 namespace Dxf {
 Hatch::Hatch(SectionParser* sp)
-    : Entity(sp)
-{
+    : Entity(sp) {
 }
 
-Hatch::~Hatch()
-{
+Hatch::~Hatch() {
     for (auto edge : edges)
         qDeleteAll(edge);
 }
@@ -44,8 +42,7 @@ Hatch::~Hatch()
 //    }
 //}
 
-void Hatch::parse(CodeData& code)
-{
+void Hatch::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch (code.code()) {
@@ -118,7 +115,7 @@ void Hatch::parse(CodeData& code)
         case String: // 470
             break;
             // посипроение контура
-        case PathTypeFlag: // 92
+        case PathTypeFlag:                         // 92
             pathTypeFlags.emplace_back(int(code)); // PathTypeFlags
             edges.resize(pathTypeFlags.size());
             break;
@@ -214,8 +211,7 @@ void Hatch::parse(CodeData& code)
 
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
-GraphicObject Hatch::toGo() const
-{
+GraphicObject Hatch::toGo() const {
     Paths paths(edges.size());
     for (size_t i = 0; i < edges.size(); ++i)
         for (auto edge : edges[i])
@@ -227,8 +223,7 @@ GraphicObject Hatch::toGo() const
     return { id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths };
 }
 
-void Hatch::write(QDataStream& stream) const
-{
+void Hatch::write(QDataStream& stream) const {
     //    stream << edges;
 
     stream << referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
@@ -240,8 +235,7 @@ void Hatch::write(QDataStream& stream) const
     stream << radius;
 }
 
-void Hatch::read(QDataStream& stream)
-{
+void Hatch::read(QDataStream& stream) {
     //    stream >> edges;
 
     stream >> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
@@ -252,4 +246,4 @@ void Hatch::read(QDataStream& stream)
     stream >> thickness;
     stream >> radius;
 }
-}
+} // namespace Dxf
