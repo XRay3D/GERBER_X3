@@ -14,8 +14,8 @@
 #include <project.h>
 
 #include "ft_model.h"
-#include "interfaces/file.h"
-#include "interfaces/shapepluginin.h"
+#include "file.h"
+#include "shapepluginin.h"
 #include "mainwindow.h"
 #include "shape.h"
 

@@ -23,7 +23,7 @@
 #include "drillitem.h"
 #include "drillpreviewgi.h"
 #include "ft_view.h"
-#include "interfaces/file.h"
+#include "file.h"
 #include "utils.h"
 
 #include <QComboBox>

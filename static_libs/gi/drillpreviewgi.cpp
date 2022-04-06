@@ -12,7 +12,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #include "drillpreviewgi.h"
-#include "forms/drillform/drillmodel.h"
+#include "drill/drillmodel.h"
 #include "graphicsview.h"
 #include "toolpch.h"
 #include <QPainter>

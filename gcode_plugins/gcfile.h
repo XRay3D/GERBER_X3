@@ -11,7 +11,7 @@
 #pragma once
 //#include "gctypes.h"
 #include "gcutils.h"
-#include "interfaces/file.h"
+#include "file.h"
 
 class MainWindow;
 class GcPathItem;

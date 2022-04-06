@@ -24,27 +24,14 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Gui REQUIRED)
 
 #set(TS_FILES tooldatabase_af_NA.ts)
 
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+
 add_library(tooldatabase STATIC
-    tooldatabase.ui
-    tooleditdialog.ui
-    tooleditform.ui
-    tool.h
-    tooldatabase.h
-    tooleditdialog.h
-    tooleditform.h
-    toolitem.h
-    toolmodel.h
-    tooltreeview.h
-    tool.cpp
-    tooldatabase.cpp
-    tooleditdialog.cpp
-    tooleditform.cpp
-    toolitem.cpp
-    toolmodel.cpp
-    tooltreeview.cpp
-    toolselectorform.h
-    toolselectorform.cpp
-    toolpch.h
+    ${HEADERS}
+    ${SOURCES}
+    ${UIS}
     )
 
 target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Core)

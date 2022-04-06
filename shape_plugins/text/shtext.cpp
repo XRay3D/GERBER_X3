@@ -13,6 +13,7 @@
 *******************************************************************************/
 #include "shtext.h"
 
+#include "file.h"
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
@@ -23,7 +24,6 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QTimer>
-#include <interfaces/file.h>
 
 namespace Shapes {
 

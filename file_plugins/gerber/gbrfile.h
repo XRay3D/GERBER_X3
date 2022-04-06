@@ -13,7 +13,7 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-#include "interfaces/file.h"
+#include "file.h"
 #include "itemgroup.h"
 
 #include <QDebug>

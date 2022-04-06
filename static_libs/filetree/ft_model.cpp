@@ -14,9 +14,9 @@
 #include "ft_model.h"
 
 #include "ft_foldernode.h"
-#include "interfaces/file.h"
-#include "interfaces/pluginfile.h"
-#include "interfaces/shapepluginin.h"
+#include "file.h"
+#include "pluginfile.h"
+#include "shapepluginin.h"
 #include "shheaders.h"
 
 #include <QTimer>

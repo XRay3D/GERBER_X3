@@ -2,7 +2,7 @@
 
 #include "extypes.h"
 #include <QWidget>
-#include <interfaces/pluginfile.h>
+#include "pluginfile.h"
 
 namespace Excellon {
 

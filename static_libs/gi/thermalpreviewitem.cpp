@@ -13,7 +13,7 @@
 *******************************************************************************/
 #include "thermalpreviewitem.h"
 
-#include "../thermal/thermalnode.h"
+// FIXME GC #include "../thermal/thermalnode.h"
 #include "app.h"
 
 #include "graphicsview.h"
@@ -109,7 +109,9 @@ QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
 int AbstractThermPrGi::type() const { return static_cast<int>(GiType::PrThermal); }
 
-bool AbstractThermPrGi::isValid() const { return !previewPaths.empty() && m_node->isChecked(); }
+bool AbstractThermPrGi::isValid() const {
+    return {};// FIXME GC !previewPaths.empty() && m_node->isChecked();
+}
 
 void AbstractThermPrGi::changeColor() {
     pa1.setStartValue(m_bodyColor);
@@ -136,34 +138,34 @@ void AbstractThermPrGi::changeColor() {
 }
 
 void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
-    QMenu menu;
-    if (m_node->isChecked())
-        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
-            for (auto item : thpi)
-                if ((item == this || item->isSelected()) && item->m_node->isChecked()) {
-                    item->m_node->disable();
-                    item->update();
-                    item->mouseDoubleClickEvent(nullptr);
-                }
-        });
-    else
-        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
-            for (auto item : thpi)
-                if ((item == this || item->isSelected()) && !item->m_node->isChecked()) {
-                    item->m_node->enable();
-                    item->update();
-                    item->mouseDoubleClickEvent(nullptr);
-                }
-        });
-    menu.exec(event->screenPos());
+// FIXME GC     QMenu menu;
+//    if (m_node->isChecked())
+//        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
+//            for (auto item : thpi)
+//                if ((item == this || item->isSelected()) && item->m_node->isChecked()) {
+//                    item->m_node->disable();
+//                    item->update();
+//                    item->mouseDoubleClickEvent(nullptr);
+//                }
+//        });
+//    else
+//        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
+//            for (auto item : thpi)
+//                if ((item == this || item->isSelected()) && !item->m_node->isChecked()) {
+//                    item->m_node->enable();
+//                    item->update();
+//                    item->mouseDoubleClickEvent(nullptr);
+//                }
+//        });
+//    menu.exec(event->screenPos());
 }
 
 void AbstractThermPrGi::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (event) {
         QGraphicsItem::mouseDoubleClickEvent(event);
-        m_node->isChecked() ? m_node->disable() : m_node->enable();
+// FIXME GC         m_node->isChecked() ? m_node->disable() : m_node->enable();
     }
-    m_node->isChecked() ? colorState |= Used : colorState &= ~Used;
+// FIXME GC     m_node->isChecked() ? colorState |= Used : colorState &= ~Used;
     changeColor();
 }
 
@@ -183,10 +185,10 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     if (change == ItemSelectedChange) {
         if (value.toInt()) {
             colorState |= Selected;
-            emit selectionChanged(m_node->index(), {});
+// FIXME GC             emit selectionChanged(m_node->index(), {});
         } else {
             colorState &= ~Selected;
-            emit selectionChanged({}, m_node->index());
+// FIXME GC             emit selectionChanged({}, m_node->index());
         }
         changeColor();
     } else if (change == ItemVisibleChange) {

@@ -15,6 +15,7 @@
 #include "ui_profileform.h"
 
 #include "bridgeitem.h"
+#include "gcprofile.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
@@ -72,11 +73,9 @@ ProfileForm::ProfileForm(QWidget* parent)
     connect(ui->pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
         if (side == GCode::On)
-            checked ? m_trimming |= Trimming::Line
-                    : m_trimming &= ~Trimming::Line;
+            checked ? m_trimming |= Trimming::Line : m_trimming &= ~Trimming::Line;
         else
-            checked ? m_trimming |= Trimming::Corner
-                    : m_trimming &= ~Trimming::Corner;
+            checked ? m_trimming |= Trimming::Corner : m_trimming &= ~Trimming::Corner;
     });
 }
 
@@ -158,8 +157,7 @@ void ProfileForm::createFile() {
     gcp.setSide(side);
     gcp.tools.push_back(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    (side == GCode::On) ? gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked()
-                        : gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
+    (side == GCode::On) ? gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
     gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
 
     {

@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 #include "datastream.h"
-#include "interfaces/plugintypes.h"
+#include "plugintypes.h"
 #include <QDebug>
 #include <myclipper.h>
 

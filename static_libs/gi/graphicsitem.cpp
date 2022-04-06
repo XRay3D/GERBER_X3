@@ -17,7 +17,7 @@
 * http://portal.acm.org/citation.cfm?id=129906                                 *
 *******************************************************************************/
 
-#include "interfaces/file.h"
+#include "file.h"
 #include "itemgroup.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>

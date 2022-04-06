@@ -11,8 +11,33 @@
 #pragma once
 
 #include "gccreator.h"
+#include "gcodeplugininterface.h"
+
+#include <QJsonObject>
 
 namespace GCode {
+
+class ProfilePlugin : public QObject, public GCodePlugin {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
+    Q_INTERFACES(GCodePlugin)
+
+    // GCodePlugin interface
+public:
+    ProfilePlugin(QObject* parent = nullptr)
+        : QObject(parent) { }
+
+    QObject* getObject() override { return this; }
+    int type() const override { return GCode::Profile; }
+    QJsonObject info() const override {
+        return {
+            { "Name", "Excellon" },
+            { "Version", "1.1" },
+            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+            { "Info", "Opening drill files like Excellon" },
+        };
+    }
+};
 
 class ProfileCreator : public Creator {
 public:

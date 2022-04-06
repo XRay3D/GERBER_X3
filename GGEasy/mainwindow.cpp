@@ -15,20 +15,20 @@
 #include "ui_mainwindow.h"
 
 //import "aboutform.h";
-#include "forms/drillform/drillform.h"
-#include "forms/gcodepropertiesform.h"
-#include "forms/hatchingform.h"
-#include "forms/pocketoffsetform.h"
-#include "forms/pocketrasterform.h"
-#include "forms/profileform.h"
-#include "forms/voronoiform.h"
-#include "interfaces/shapepluginin.h"
+//#include "forms/drillform/drillform.h"
+#include "gcodepropertiesform.h"
+//#include "forms/hatchingform.h"
+//#include "forms/pocketoffsetform.h"
+//#include "forms/pocketrasterform.h"
+//#include "forms/profileform.h"
+//#include "forms/voronoiform.h"
+//#include <thermalform.h>
 #include "plugindialog.h"
 #include "point.h"
 #include "settingsdialog.h"
+#include "shapepluginin.h"
 
 #include "project.h"
-#include <thermalform.h>
 #include <tooldatabase.h>
 
 #include <QPrintPreviewDialog>
@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->graphicsView->scene()->addItem(new Pin());
     ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
-    GCodePropertiesForm(); // init default vars;
+    // FIXME GC GCodePropertiesForm(); // init default vars;
 
     connect(m_project, &Project::homePosChanged, Marker::get(Marker::Home), qOverload<const QPointF&>(&Marker::setPos));
     connect(m_project, &Project::zeroPosChanged, Marker::get(Marker::Zero), qOverload<const QPointF&>(&Marker::setPos));
@@ -96,9 +96,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
 
     // Shapes::Constructor
-    connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePluginInterface::updateShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePluginInterface::finalizeShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePluginInterface::addShapePoint_);
+    connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePlugin::updateShape_);
+    connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePlugin::finalizeShape_);
+    connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePlugin::addShapePoint_);
     // status bar
     connect(ui->graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
         ui->statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
@@ -430,51 +430,52 @@ void MainWindow::createActionsToolPath() {
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
-    // Profile
-    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+F"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Profile, action);
+    // FIXME GC
+    //    // Profile
+    //    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(); });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Profile, action);
 
-    // Pocket
-    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+P"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Pocket, action);
+    //    // Pocket
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(); });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+P"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Pocket, action);
 
-    // Pocket Raster
-    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+R"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Raster, action);
+    //    // Pocket Raster
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(); });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+R"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Raster, action);
 
-    // Voronoi
-    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+V"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Voronoi, action);
+    //    // Voronoi
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(); });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+V"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Voronoi, action);
 
-    // Thermal Insulation
-    action = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
-        ThermalForm::canToShow() ? createDockWidget<ThermalForm>() : toolpathActions[GCode::Thermal]->setChecked(false);
-    });
-    action->setShortcut(QKeySequence("Ctrl+Shift+T"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Thermal, action);
+    //    // Thermal Insulation
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
+    //        ThermalForm::canToShow() ? createDockWidget<ThermalForm>() : toolpathActions[GCode::Thermal]->setChecked(false);
+    //    });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+T"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Thermal, action);
 
-    // Drilling
-    action = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
-        DrillForm::canToShow() ? createDockWidget<DrillForm>() : toolpathActions[GCode::Drill]->setChecked(false);
-    });
-    action->setShortcut(QKeySequence("Ctrl+Shift+D"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Drill, action);
+    //    // Drilling
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
+    //        DrillForm::canToShow() ? createDockWidget<DrillForm>() : toolpathActions[GCode::Drill]->setChecked(false);
+    //    });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+D"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Drill, action);
 
-    // Crosshatch
-    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(); });
-    action->setShortcut(QKeySequence("Ctrl+Shift+C"));
-    menu->addAction(action);
-    toolpathActions.emplace(GCode::Hatching, action);
+    //    // Crosshatch
+    //    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(); });
+    //    action->setShortcut(QKeySequence("Ctrl+Shift+C"));
+    //    menu->addAction(action);
+    //    toolpathActions.emplace(GCode::Hatching, action);
 
     for (auto [key, action] : toolpathActions) {
         action->setCheckable(true);
@@ -501,11 +502,11 @@ void MainWindow::createActionsShape() {
         connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = shInt, this](bool checked) {
             if (checked) {
-                ShapePluginInterface::finalizeShape_();
-                ShapePluginInterface::setShapePI(shInt);
+                ShapePlugin::finalizeShape_();
+                ShapePlugin::setShapePI(shInt);
                 createDockWidget<QPushButton>();
             } else
-                ShapePluginInterface::finalizeShape_();
+                ShapePlugin::finalizeShape_();
         });
     }
 
@@ -858,7 +859,7 @@ void MainWindow::editGcFile(GCode::File* file) {
     case GCode::Null:
     case GCode::Profile:
         toolpathActions[GCode::Profile]->triggered();
-        reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
+        // FIXME GC reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
         break;
     case GCode::Pocket:
     case GCode::Voronoi:

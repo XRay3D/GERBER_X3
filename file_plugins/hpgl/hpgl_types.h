@@ -16,7 +16,7 @@
 #include <map>
 #include <vector>
 
-#include <interfaces/plugintypes.h>
+#include "plugintypes.h"
 
 namespace Hpgl {
 

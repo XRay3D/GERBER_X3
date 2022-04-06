@@ -12,17 +12,17 @@
 
 #include "exparser.h"
 
-#include "interfaces/pluginfile.h"
+#include "pluginfile.h"
 
 #include <QObject>
 #include <QStack>
 
 namespace Excellon {
 
-class Plugin : public QObject, public FilePluginInterface, Parser {
+class Plugin : public QObject, public FilePlugin, Parser {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "excellon.json")
-    Q_INTERFACES(FilePluginInterface)
+    Q_INTERFACES(FilePlugin)
 
 public:
     Plugin(QObject* parent = nullptr);

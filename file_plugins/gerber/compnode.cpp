@@ -18,7 +18,7 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-#include "interfaces/file.h"
+#include "file.h"
 
 #include <QGraphicsScene>
 #include <QSharedPointer>

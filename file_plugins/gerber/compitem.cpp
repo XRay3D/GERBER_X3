@@ -14,7 +14,7 @@
 #include "compitem.h"
 
 #include "graphicsview.h"
-#include "interfaces/file.h"
+#include "file.h"
 
 #include <QPainter>
 #include <QTimer>

@@ -19,8 +19,8 @@
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
 
-#include <interfaces/pluginfile.h>
-#include <interfaces/shapepluginin.h>
+#include "pluginfile.h"
+#include "shapepluginin.h"
 
 #include <QFileDialog>
 #include <QHeaderView>
