@@ -23,7 +23,7 @@
 
 namespace Excellon {
 
-Parser::Parser(FilePluginInterface* const interface)
+Parser::Parser(FilePlugin* const interface)
     : interface(interface) {
 }
 

@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/pluginfile.h"
+#include "pluginfile.h"
 
 #include <QObject>
 #include <QStack>
@@ -19,15 +19,15 @@ namespace Dxf {
 
 class File;
 
-class Plugin : public QObject, public FilePluginInterface {
+class Plugin : public QObject, public FilePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
-    Q_INTERFACES(FilePluginInterface)
+    Q_INTERFACES(FilePlugin)
 
 public:
     explicit Plugin(QObject* parent = nullptr);
 
-    // FilePluginInterface interface
+    // FilePlugin interface
     bool thisIsIt(const QString& fileName) override;
     QObject* getObject() override;
     int type() const override;

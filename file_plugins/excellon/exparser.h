@@ -13,15 +13,15 @@
 #include "extypes.h"
 
 class FileInterface;
-class FilePluginInterface;
+class FilePlugin;
 
 namespace Excellon {
 
 class Parser {
-    FilePluginInterface* const interface;
+    FilePlugin* const interface;
 
 public:
-    explicit Parser(FilePluginInterface* const interface);
+    explicit Parser(FilePlugin* const interface);
     FileInterface* parseFile(const QString& fileName);
     static double parseNumber(QString Str, const State& state);
 

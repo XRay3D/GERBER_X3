@@ -12,10 +12,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-#include "gcode/gcplugin.h"
-#include "interfaces/shapepluginin.h"
+#include "gcplugin.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "shapepluginin.h"
 #include "version.h"
 #include <QCommandLineParser>
 #include <QDir>
@@ -150,21 +150,26 @@ int main(int argc, char** argv) {
             for (const auto& str : listFiles) { // Проход по всем файлам
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
-                QObject* pobj = loader.instance(); // Загрузка плагина
-                if (auto file = qobject_cast<FilePluginInterface*>(pobj); pobj && file) {
-                    App::filePlugins().emplace(file->type(), PIF { file, pobj });
-                    continue;
-                }
-                if (auto shape = qobject_cast<ShapePluginInterface*>(pobj); pobj && shape) {
-                    App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
-                    continue;
+                if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
+                    if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
+                        App::filePlugins().emplace(file->type(), PIF { file, pobj });
+                        continue;
+                    }
+                    if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
+                        App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
+                        continue;
+                    }
+                    if (auto* gCode = qobject_cast<GCodePlugin*>(pobj); gCode) {
+                        App::gCodePlugins().emplace(/*gCode->type()*/ 0, PIG { gCode, pobj });
+                        continue;
+                    }
                 }
             }
         }
-        { // add dummy gcode plugin
+        if (1) { // add dummy gcode plugin
             auto parser = new GCode::Plugin(&app);
             PIF pi {
-                static_cast<FilePluginInterface*>(parser),
+                static_cast<FilePlugin*>(parser),
                 static_cast<QObject*>(parser)
             };
             App::filePlugins().emplace(parser->type(), pi);

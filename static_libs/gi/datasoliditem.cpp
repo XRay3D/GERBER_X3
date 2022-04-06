@@ -14,7 +14,7 @@
 #include "datasoliditem.h"
 
 #include "graphicsview.h"
-#include "interfaces/file.h"
+#include "file.h"
 #include "scene.h"
 #include <QElapsedTimer>
 #include <QPainter>

@@ -14,9 +14,9 @@
 #include "point.h"
 #include "project.h"
 
-#include "gcode/gcode.h"
+#include "gcode.h"
 
-#include "forms/gcodepropertiesform.h"
+#include "gcodepropertiesform.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"

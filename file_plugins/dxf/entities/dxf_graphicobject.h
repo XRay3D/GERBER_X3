@@ -12,7 +12,7 @@
 
 #include "datastream.h"
 //#include "dxf_entity.h"
-#include <interfaces/plugintypes.h>
+#include "plugintypes.h"
 #include <myclipper.h>
 
 namespace Dxf {

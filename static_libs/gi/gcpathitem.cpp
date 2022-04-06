@@ -13,7 +13,7 @@
 *******************************************************************************/
 #include "gcpathitem.h"
 
-#include "gcode/gcode.h"
+#include "gcode.h"
 
 #include "graphicsview.h"
 #include <QPainter>

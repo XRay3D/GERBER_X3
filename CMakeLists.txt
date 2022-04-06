@@ -24,22 +24,33 @@ set(CMAKE_CXX_STANDARD 20)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Winvalid-pch)
-    add_compile_options(-H)
-    add_compile_options(-ftime-report)
+#    add_compile_options(-H)
+#    add_compile_options(-ftime-report)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
-include_directories(magic_get/)
-include_directories(magic_get/include/)
-include_directories(compile-time-regular-expressions/single-header/)
+include_directories(
+    file_plugins
+    shape_plugins
+    magic_get
+    gcode_plugins
+    magic_get/include
+    compile-time-regular-expressions/single-header
+    GGEasy
 
+    static_libs/clipper
+    static_libs/common
+    static_libs/filetree
+    static_libs/gi
+    static_libs/graphicsview
+    static_libs/tooldatabase
+
+    shape_plugins/shape
+    )
 
 # static lib
 add_subdirectory(static_libs)
-
-# main app
-add_subdirectory(GGEasy)
 
 # plugins file
 add_subdirectory(file_plugins)
@@ -47,6 +58,11 @@ add_subdirectory(file_plugins)
 # plugins shape
 add_subdirectory(shape_plugins)
 
+# plugins gcode
+add_subdirectory(gcode_plugins)
+
+# main app
+add_subdirectory(GGEasy)
 
 target_precompile_headers(gi
     #    PUBLIC
@@ -56,5 +72,5 @@ target_precompile_headers(gi
     "static_libs/tooldatabase/toolpch.h"
     )
 
-target_precompile_headers(thermal REUSE_FROM gi)
+#target_precompile_headers(thermal REUSE_FROM gi)
 target_precompile_headers(GGEasy REUSE_FROM gi)

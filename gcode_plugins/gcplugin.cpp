@@ -13,7 +13,7 @@
 #include "ft_view.h"
 #include "gcfile.h"
 #include "gcnode.h"
-#include "interfaces/file.h"
+#include "file.h"
 
 #include <QMessageBox>
 #include <QtWidgets>

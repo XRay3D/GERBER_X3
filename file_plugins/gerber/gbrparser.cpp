@@ -20,7 +20,7 @@
 
 #include <ctre.hpp> //
 
-#include "interfaces/pluginfile.h"
+#include "pluginfile.h"
 
 #include "utils.h"
 #include <QElapsedTimer>
@@ -60,7 +60,7 @@ QDebug operator<<(QDebug debug, const std::string_view& sw) {
     return debug;
 }
 
-Parser::Parser(FilePluginInterface* interface)
+Parser::Parser(FilePlugin* interface)
     : interface(interface) {
 }
 

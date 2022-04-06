@@ -135,7 +135,7 @@ using Tools = std::map<int, Tool, std::greater<int>>;
 
 class ToolHolder {
     friend class ToolItem;
-    friend class FilePluginInterface;
+    friend class FilePlugin;
 
     Tools m_tools;
     ToolHolder(const ToolHolder&) = delete;

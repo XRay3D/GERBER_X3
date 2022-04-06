@@ -10,8 +10,8 @@
 *******************************************************************************/
 #pragma once
 
-#include "interfaces/file.h"
-#include "interfaces/pluginfile.h"
+#include "file.h"
+#include "pluginfile.h"
 
 #include "recent.h"
 

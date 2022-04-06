@@ -21,15 +21,15 @@ namespace Hpgl {
 
 class File;
 
-class Plugin : public QObject, public FilePluginInterface, Parser {
+class Plugin : public QObject, public FilePlugin, Parser {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "hpgl.json")
-    Q_INTERFACES(FilePluginInterface)
+    Q_INTERFACES(FilePlugin)
 
 public:
     explicit Plugin(QObject* parent = nullptr);
 
-    // FilePluginInterface interface
+    // FilePlugin interface
     bool thisIsIt(const QString& fileName) override;
     QObject* getObject() override;
     int type() const override;

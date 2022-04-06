@@ -13,7 +13,7 @@
 #include "shape.h"
 #include <QJsonObject>
 #include <graphicsitem.h>
-#include <interfaces/shapepluginin.h>
+#include "shapepluginin.h"
 
 namespace Shapes {
 
@@ -49,10 +49,10 @@ private:
     double m_radius;
 };
 
-class Plugin : public QObject, public ShapePluginInterface {
+class Plugin : public QObject, public ShapePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "circle.json")
-    Q_INTERFACES(ShapePluginInterface)
+    Q_INTERFACES(ShapePlugin)
 
     Circle* shape = nullptr;
 
@@ -60,7 +60,7 @@ public:
     Plugin();
     virtual ~Plugin() override;
 
-    // ShapePluginInterface interface
+    // ShapePlugin interface
 public:
     QObject* getObject() override;
     int type() const override;

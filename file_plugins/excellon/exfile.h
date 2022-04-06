@@ -12,7 +12,7 @@
 
 #include "extypes.h"
 
-#include "interfaces/file.h"
+#include "file.h"
 
 namespace Excellon {
 

@@ -13,7 +13,7 @@
 #include "hpgl_types.h"
 
 class FileInterface;
-class FilePluginInterface;
+class FilePlugin;
 
 namespace Hpgl {
 
@@ -22,10 +22,10 @@ class File;
 class Parser {
     Q_GADGET
 
-    FilePluginInterface* const interface;
+    FilePlugin* const interface;
 
 public:
-    Parser(FilePluginInterface* const interface = nullptr);
+    Parser(FilePlugin* const interface = nullptr);
     FileInterface* parseFile(const QString& fileName);
 
     enum Cmd {

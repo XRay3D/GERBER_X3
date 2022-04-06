@@ -13,8 +13,8 @@
 #include "shape.h"
 #include <QJsonObject>
 #include <graphicsitem.h>
-#include <interfaces/plugintypes.h>
-#include <interfaces/shapepluginin.h>
+#include "plugintypes.h"
+#include "shapepluginin.h"
 
 class ShTextDialog;
 
@@ -99,10 +99,10 @@ private:
     void ok();
 };
 
-class PluginText : public QObject, public ShapePluginInterface {
+class PluginText : public QObject, public ShapePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "text.json")
-    Q_INTERFACES(ShapePluginInterface)
+    Q_INTERFACES(ShapePlugin)
 
     Text* shape = nullptr;
 

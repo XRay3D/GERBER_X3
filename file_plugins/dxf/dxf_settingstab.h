@@ -3,7 +3,7 @@
 #include "dxf_types.h"
 
 #include <QWidget>
-#include <interfaces/pluginfile.h>
+#include "pluginfile.h"
 
 class QCheckBox;
 class QFontComboBox;

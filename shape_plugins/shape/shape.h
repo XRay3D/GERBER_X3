@@ -13,7 +13,7 @@
 #include "graphicsitem.h"
 #include <QModelIndex>
 #include <ft_node.h>
-#include <interfaces/shapepluginin.h>
+#include "shapepluginin.h"
 #include <memory>
 
 namespace Shapes {

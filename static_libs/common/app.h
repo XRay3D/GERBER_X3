@@ -20,7 +20,7 @@
 #include <mvector.h>
 
 class DrillForm;
-class FilePluginInterface;
+class FilePlugin;
 namespace FileTree {
 class View;
 class Model;
@@ -31,7 +31,8 @@ class LayoutFrames;
 class MainWindow;
 class Project;
 class Scene;
-class ShapePluginInterface;
+class ShapePlugin;
+class GCodePlugin;
 class SplashScreen;
 namespace Shapes {
 class Handler;
@@ -39,11 +40,14 @@ class Handler;
 
 using Handlers = mvector<Shapes::Handler*>;
 
-using PIF = std::tuple<FilePluginInterface*, QObject*>;
-using PIS = std::tuple<ShapePluginInterface*, QObject*>;
+using PIF = std::tuple<FilePlugin*, QObject*>;
+using PIS = std::tuple<ShapePlugin*, QObject*>;
+using PIG = std::tuple<GCodePlugin*, QObject*>;
+
 #if _MSVC_LANG >= 201705L
 using FileInterfacesMap = std::map<int, PIF>;
 using ShapeInterfacesMap = std::map<int, PIS>;
+using GCodeInterfaceMap = std::map<int, PIG>;
 #else
 struct FileInterfacesMap : std::map<int, PIF> {
     bool contains(int key) const { return find(key) != end(); }
@@ -51,84 +55,91 @@ struct FileInterfacesMap : std::map<int, PIF> {
 struct ShapeInterfacesMap : std::map<int, PIS> {
     bool contains(int key) const { return find(key) != end(); }
 };
+struct GCodeInterfaceMap : std::map<int, PIG> {
+    bool contains(int key) const { return find(key) != end(); }
+};
 #endif
 class App {
-    inline static App* m_app = nullptr;
+    inline static App* app_ = nullptr;
 
-    DrillForm* m_drillForm = nullptr;
-    FileTree::Model* m_fileModel = nullptr;
-    FileTree::View* m_fileTreeView = nullptr;
-    GCodePropertiesForm* m_gCodePropertiesForm = nullptr;
-    GraphicsView* m_graphicsView = nullptr;
-    LayoutFrames* m_layoutFrames = nullptr;
-    MainWindow* m_mainWindow = nullptr;
-    Project* m_project = nullptr;
-    Scene* m_scene = nullptr;
-    SplashScreen* m_splashScreen = nullptr;
+    DrillForm* drillForm_ = nullptr;
+    FileTree::Model* fileModel_ = nullptr;
+    FileTree::View* fileTreeView_ = nullptr;
+    GCodePropertiesForm* gCodePropertiesForm_ = nullptr;
+    GraphicsView* graphicsView_ = nullptr;
+    LayoutFrames* layoutFrames_ = nullptr;
+    MainWindow* mainWindow_ = nullptr;
+    Project* project_ = nullptr;
+    Scene* scene_ = nullptr;
+    SplashScreen* splashScreen_ = nullptr;
 
-    FileInterfacesMap m_filePlugins;
-    ShapeInterfacesMap m_shapePlugin;
+    FileInterfacesMap filePlugins_;
+    ShapeInterfacesMap shapePlugin_;
+    GCodeInterfaceMap gCodePlugin_;
 
-    AppSettings m_appSettings;
-    ToolHolder m_toolHolder;
-    Handlers m_handlers;
-    QSettings m_s;
+    AppSettings appSettings_;
+    ToolHolder toolHolder_;
+    Handlers handlers_;
+    QSettings settings_;
 
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
     App(App&&) = delete;
     App(const App&) = delete;
 
-    QSharedMemory sm { "AppSettings" };
+    QSharedMemory sharedMemory { "AppSettings" };
 
 public:
     explicit App() {
-        if (sm.create(sizeof(nullptr), QSharedMemory::ReadWrite))
-            m_app = *reinterpret_cast<App**>(sm.data()) = this;
-        else if (sm.attach(QSharedMemory::ReadOnly))
-            m_app = *reinterpret_cast<App**>(sm.data());
+        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+            app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
+        else if (sharedMemory.attach(QSharedMemory::ReadOnly))
+            app_ = *reinterpret_cast<App**>(sharedMemory.data());
         else
-            qDebug() << m_app << sm.errorString();
+            qDebug() << app_ << sharedMemory.errorString();
     }
     ~App() { }
 
-    static DrillForm* drillForm() { return m_app->m_drillForm; }
-    static FileTree::Model* fileModel() { return m_app->m_fileModel; }
-    static FileTree::View* fileTreeView() { return m_app->m_fileTreeView; }
-    static GCodePropertiesForm* gCodePropertiesForm() { return m_app->m_gCodePropertiesForm; }
-    static GraphicsView* graphicsView() { return m_app->m_graphicsView; }
-    static LayoutFrames* layoutFrames() { return m_app->m_layoutFrames; }
-    static MainWindow* mainWindow() { return m_app->m_mainWindow; }
-    static Project* project() { return m_app->m_project; }
-    static Scene* scene() { return m_app->m_scene; }
-    static SplashScreen* splashScreen() { return m_app->m_splashScreen; }
+    static DrillForm* drillForm() { return app_->drillForm_; }
+    static FileTree::Model* fileModel() { return app_->fileModel_; }
+    static FileTree::View* fileTreeView() { return app_->fileTreeView_; }
+    static GCodePropertiesForm* gCodePropertiesForm() { return app_->gCodePropertiesForm_; }
+    static GraphicsView* graphicsView() { return app_->graphicsView_; }
+    static LayoutFrames* layoutFrames() { return app_->layoutFrames_; }
+    static MainWindow* mainWindow() { return app_->mainWindow_; }
+    static Project* project() { return app_->project_; }
+    static Scene* scene() { return app_->scene_; }
+    static SplashScreen* splashScreen() { return app_->splashScreen_; }
 
-    static void setDrillForm(DrillForm* drillForm) { (m_app->m_drillForm && drillForm) ? exit(-1) : (m_app->m_drillForm = drillForm, void()); }
-    static void setFileModel(FileTree::Model* fileModel) { (m_app->m_fileModel && fileModel) ? exit(-2) : (m_app->m_fileModel = fileModel, void()); }
-    static void setFileTreeView(FileTree::View* fileTreeView) { (m_app->m_fileTreeView && fileTreeView) ? exit(-3) : (m_app->m_fileTreeView = fileTreeView, void()); }
-    static void setGCodePropertiesForm(GCodePropertiesForm* gCodePropertiesForm) { (m_app->m_gCodePropertiesForm && gCodePropertiesForm) ? exit(-4) : (m_app->m_gCodePropertiesForm = gCodePropertiesForm, void()); }
-    static void setGraphicsView(GraphicsView* graphicsView) { (m_app->m_graphicsView && graphicsView) ? exit(-5) : (m_app->m_graphicsView = graphicsView, void()); }
-    static void setLayoutFrames(LayoutFrames* layoutFrames) { (m_app->m_layoutFrames && layoutFrames) ? exit(-6) : (m_app->m_layoutFrames = layoutFrames, void()); }
-    static void setMainWindow(MainWindow* mainWindow) { (m_app->m_mainWindow && mainWindow) ? exit(-7) : (m_app->m_mainWindow = mainWindow, void()); }
-    static void setProject(Project* project) { (m_app->m_project && project) ? exit(-8) : (m_app->m_project = project, void()); }
-    static void setScene(Scene* scene) { (m_app->m_scene && scene) ? exit(-9) : (m_app->m_scene = scene, void()); }
-    static void setSplashScreen(SplashScreen* splashScreen) { (m_app->m_splashScreen && splashScreen) ? exit(-10) : (m_app->m_splashScreen = splashScreen, void()); }
+    static void setDrillForm(DrillForm* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
+    static void setFileModel(FileTree::Model* fileModel) { (app_->fileModel_ && fileModel) ? exit(-2) : (app_->fileModel_ = fileModel, void()); }
+    static void setFileTreeView(FileTree::View* fileTreeView) { (app_->fileTreeView_ && fileTreeView) ? exit(-3) : (app_->fileTreeView_ = fileTreeView, void()); }
+    static void setGCodePropertiesForm(GCodePropertiesForm* gCodePropertiesForm) { (app_->gCodePropertiesForm_ && gCodePropertiesForm) ? exit(-4) : (app_->gCodePropertiesForm_ = gCodePropertiesForm, void()); }
+    static void setGraphicsView(GraphicsView* graphicsView) { (app_->graphicsView_ && graphicsView) ? exit(-5) : (app_->graphicsView_ = graphicsView, void()); }
+    static void setLayoutFrames(LayoutFrames* layoutFrames) { (app_->layoutFrames_ && layoutFrames) ? exit(-6) : (app_->layoutFrames_ = layoutFrames, void()); }
+    static void setMainWindow(MainWindow* mainWindow) { (app_->mainWindow_ && mainWindow) ? exit(-7) : (app_->mainWindow_ = mainWindow, void()); }
+    static void setProject(Project* project) { (app_->project_ && project) ? exit(-8) : (app_->project_ = project, void()); }
+    static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
+    static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
 
-    static FilePluginInterface* filePlugin(int type) {
-        return m_app->m_filePlugins.contains(type) ? std::get<FilePluginInterface*>(m_app->m_filePlugins[type])
-                                                   : nullptr;
+    static FilePlugin* filePlugin(int type) {
+        return app_->filePlugins_.contains(type) ? std::get<FilePlugin*>(app_->filePlugins_[type]) : nullptr;
     }
-    static FileInterfacesMap& filePlugins() { return m_app->m_filePlugins; }
+    static FileInterfacesMap& filePlugins() { return app_->filePlugins_; }
 
-    static ShapePluginInterface* shapePlugin(int type) {
-        return m_app->m_shapePlugin.contains(type) ? std::get<ShapePluginInterface*>(m_app->m_shapePlugin[type])
-                                                   : nullptr;
+    static ShapePlugin* shapePlugin(int type) {
+        return app_->shapePlugin_.contains(type) ? std::get<ShapePlugin*>(app_->shapePlugin_[type]) : nullptr;
     }
-    static ShapeInterfacesMap& shapePlugins() { return m_app->m_shapePlugin; }
+    static ShapeInterfacesMap& shapePlugins() { return app_->shapePlugin_; }
 
-    static Handlers& shapeHandlers() { return m_app->m_handlers; }
+    static GCodePlugin* gCodePlugin(int type) {
+        return app_->gCodePlugin_.contains(type) ? std::get<GCodePlugin*>(app_->gCodePlugin_[type]) : nullptr;
+    }
+    static GCodeInterfaceMap& gCodePlugins() { return app_->gCodePlugin_; }
 
-    static AppSettings& settings() { return m_app->m_appSettings; }
-    static ToolHolder& toolHolder() { return m_app->m_toolHolder; }
-    static QSettings* qSettings() { return &m_app->m_s; }
+    static Handlers& shapeHandlers() { return app_->handlers_; }
+
+    static AppSettings& settings() { return app_->appSettings_; }
+    static ToolHolder& toolHolder() { return app_->toolHolder_; }
+    static QSettings* qSettings() { return &app_->settings_; }
 };

@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "gcode/gcode.h"
+#include "gcode.h"
 
 #include <QObject>
 #include <graphicsitem.h>

@@ -13,7 +13,7 @@
 #include "shape.h"
 #include <QJsonObject>
 #include <graphicsitem.h>
-#include <interfaces/shapepluginin.h>
+#include "shapepluginin.h"
 
 namespace Shapes {
 class PolyLine final : public Shape {
@@ -47,10 +47,10 @@ private:
     QPointF centroidFast(); //??????
 };
 
-class Plugin : public QObject, public ShapePluginInterface {
+class Plugin : public QObject, public ShapePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "polyline.json")
-    Q_INTERFACES(ShapePluginInterface)
+    Q_INTERFACES(ShapePlugin)
 
     PolyLine* shape = nullptr;
 
@@ -58,7 +58,7 @@ public:
     Plugin();
     virtual ~Plugin() override;
 
-    // ShapePluginInterface interface
+    // ShapePlugin interface
 public:
     QObject* getObject() override;
     int type() const override;

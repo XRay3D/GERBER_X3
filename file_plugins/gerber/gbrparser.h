@@ -14,17 +14,17 @@
 #include "gbrcomponent.h"
 #include "gbrtypes.h"
 
-class FilePluginInterface;
+class FilePlugin;
 
 namespace Gerber {
 
 class ApBlock;
 
 class Parser {
-    FilePluginInterface* const interface;
+    FilePlugin* const interface;
 
 public:
-    Parser(FilePluginInterface* interface);
+    Parser(FilePlugin* interface);
 
 protected:
     void parseLines(const QString& gerberLines, const QString& fileName);

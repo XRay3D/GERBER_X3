@@ -14,7 +14,7 @@
 #include "datapathitem.h"
 
 #include "graphicsview.h"
-#include "interfaces/file.h"
+#include "file.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"

@@ -10,32 +10,32 @@
 *******************************************************************************/
 #pragma once
 
-#include "gccreator.h"
+#include "pluginfile.h"
+
+#include <QObject>
 
 namespace GCode {
 
-class RasterCreator : public Creator {
+class Plugin : public QObject, public FilePlugin {
+    Q_OBJECT
 public:
-    RasterCreator();
-    ~RasterCreator() override = default;
+    explicit Plugin(QObject* parent = nullptr);
+    QObject* getObject() override;
+    bool thisIsIt(const QString& fileName) override;
+    int type() const override;
+    QString folderName() const override;
 
-    // Creator interface
-protected:
-    void create() override; // Creator interface
-    GCodeType type() override { return Raster; }
+    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
+    FileInterface* createFile() override;
+    QJsonObject info() const override;
+    void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 
-private:
-    enum {
-        NoProfilePass,
-        First,
-        Last
-    };
+public slots:
+    FileInterface* parseFile(const QString& fileName, int type) override;
 
-    void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
-    void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const cInt accDistance);
-
-    IntRect rect;
+signals:
+    void fileError(const QString& fileName, const QString& error) override;
+    void fileProgress(const QString& fileName, int max, int value) override;
+    void fileReady(FileInterface* file) override;
 };
-
 } // namespace GCode
