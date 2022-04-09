@@ -69,6 +69,6 @@ target_link_libraries(excellon PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 
-#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
+
 
 #target_compile_definitions(excellon PRIVATE EXCELLON_LIBRARY)

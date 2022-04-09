@@ -26,6 +26,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Winvalid-pch)
 #    add_compile_options(-H)
 #    add_compile_options(-ftime-report)
+# -pthread
+# -ltbb
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()

@@ -74,7 +74,7 @@ void Model::addShape(ShapeInterface* shape) {
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
-        auto si = std::get<0>(App::shapePlugins().begin()->second);
+        auto si = App::shapePlugins().begin()->second.plug;
         rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), new int(mapNode[type].type)));
         endInsertRows();
     }

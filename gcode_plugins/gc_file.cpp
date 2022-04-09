@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gcfile.h"
+#include "gc_file.h"
 
 #include "datapathitem.h"
 #include "datasoliditem.h"
@@ -19,8 +19,8 @@
 #include "project.h"
 #include "settings.h"
 
-#include "gcdrillitem.h"
-#include "gcnode.h"
+#include "gc_drillitem.h"
+#include "gc_node.h"
 #include "gcpathitem.h"
 #include "graphicsview.h"
 

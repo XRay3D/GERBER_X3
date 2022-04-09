@@ -35,6 +35,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
+    QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;

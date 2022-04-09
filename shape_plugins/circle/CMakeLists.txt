@@ -53,6 +53,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(circle PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
-#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
+
 
 #target_compile_definitions(circle PRIVATE CIRCLE_LIBRARY)

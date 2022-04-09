@@ -34,6 +34,7 @@ public:
 
     FileInterface* createFile() override;
     QJsonObject info() const override;
+    QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;

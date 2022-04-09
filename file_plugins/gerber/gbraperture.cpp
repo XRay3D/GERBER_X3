@@ -23,7 +23,7 @@ namespace Gerber {
 using QMatrix = QTransform;
 #endif
 
-#if _MSVC_LANG >= 201705L
+#if __cplusplus > 201703L
 #else
 QDataStream& operator>>(QDataStream& s, ApertureMap& c) {
     //    c.clear();

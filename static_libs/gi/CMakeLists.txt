@@ -22,31 +22,19 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-add_library(gi STATIC
-    bridgeitem.cpp
-    bridgeitem.h
-    datapathitem.cpp
-    datapathitem.h
-    datasoliditem.cpp
-    datasoliditem.h
-    drillitem.cpp
-    drillitem.h
-    drillpreviewgi.cpp
-    drillpreviewgi.h
-    erroritem.cpp
-    erroritem.h
-    gcpathitem.cpp
-    gcpathitem.h
-    graphicsitem.cpp
-    graphicsitem.h
-    itemgroup.cpp
-    itemgroup.h
-    thermalpreviewitem.cpp
-    thermalpreviewitem.h
-)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-target_link_libraries(gi PRIVATE Qt${QT_VERSION_MAJOR}::Core)
-target_link_libraries(gi PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
-target_link_libraries(gi PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+add_library(${PROJECT_NAME} STATIC
+    ${HEADERS}
+    ${SOURCES}
+    )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    gcode
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+    )
 
 #target_compile_definitions(gi PRIVATE GI_LIBRARY)

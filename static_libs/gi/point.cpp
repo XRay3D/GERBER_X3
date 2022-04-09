@@ -16,7 +16,7 @@
 
 #include "gcode.h"
 
-#include "gcodepropertiesform.h"
+#include "gc_odepropertiesform.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
@@ -29,7 +29,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-#include "settingsdialog.h"
+//#include "settingsdialog.h"
 
 using namespace ClipperLib;
 
@@ -207,9 +207,9 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    });
+    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    //    });
     menu.exec(event->screenPos());
 }
 
@@ -249,8 +249,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if (App::scene()->drawPdf())
         return;
 
-    QColor c(App::project()->pinUsed(m_index) ? App::settings().guiColor(GuiColors::Pin)
-                                              : QColor(127, 127, 127, 127));
+    QColor c(App::project()->pinUsed(m_index) ? App::settings().guiColor(GuiColors::Pin) : QColor(127, 127, 127, 127));
     if (option->state & QStyle::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -422,9 +421,9 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
         action->setChecked(App::project()->pinUsed(m_index));
     }
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    });
+    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    //    });
     menu.exec(event->screenPos());
 }
 

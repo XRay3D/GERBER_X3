@@ -11,14 +11,13 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "profileform.h"
-#include "ui_profileform.h"
-
+#include "gc_profileform.h"
 #include "bridgeitem.h"
-#include "gcprofile.h"
+#include "gc_profile.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
+#include "ui_profileform.h"
 #include <QMessageBox>
 
 ProfileForm::ProfileForm(QWidget* parent)

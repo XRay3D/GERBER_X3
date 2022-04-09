@@ -33,7 +33,7 @@ class QFile;
 class QFileSystemWatcher;
 enum class FileType;
 
-#if _MSVC_LANG >= 201705L
+#if __cplusplus > 201703L
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
 using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
 #else

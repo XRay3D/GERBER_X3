@@ -16,7 +16,7 @@
 class DrillItem;
 
 namespace Excellon {
-#if _MSVC_LANG >= 201705L
+#if __cplusplus > 201703L
 using Tools = std::map<int, double>;
 #else
 struct Tools : std::map<int, double> {

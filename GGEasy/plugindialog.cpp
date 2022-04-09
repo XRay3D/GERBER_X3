@@ -14,6 +14,7 @@
 #include "plugindialog.h"
 #include "app.h"
 #include "ft_node.h"
+#include "gc_odeplugininterface.h"
 #include "pluginfile.h"
 #include "shapepluginin.h"
 
@@ -34,19 +35,17 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     treeWidget->setAlternatingRowColors(true);
     treeWidget->setIconSize({ 24, 24 });
 
-    {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
-        QFont boldFont = interfaceItem->font(0);
+    auto addRows = [](QTreeWidgetItem* twItem, char c, auto map) {
+        QFont boldFont = twItem->font(0);
         boldFont.setBold(true);
-        interfaceItem->setIcon(0, decoration(Qt::lightGray, 'F'));
-        interfaceItem->setFont(0, boldFont);
-        interfaceItem->setExpanded(true);
-        for (auto& [type, tuple] : App::filePlugins()) {
-            auto& [parser, pobj] = tuple;
-            auto json { parser->info() };
-            auto featureItem = new QTreeWidgetItem(interfaceItem);
+        twItem->setIcon(0, decoration(Qt::lightGray, c));
+        twItem->setFont(0, boldFont);
+        twItem->setExpanded(true);
+        for (auto& [type, ptr] : map) {
+            auto json { ptr.plug->info() };
+            auto featureItem = new QTreeWidgetItem(twItem);
             featureItem->setExpanded(true);
-            featureItem->setIcon(0, decoration(Qt::lightGray, json.value("Name").toString()[0]));
+            featureItem->setIcon(0, ptr.plug->icon());
             featureItem->setText(0, json.value("Name").toString());
             featureItem->setText(1, json.value("Version").toString());
             featureItem->setText(2, json.value("VendorAuthor").toString());
@@ -54,28 +53,16 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
             featureItem->setToolTip(1, json.value("Info").toString());
             featureItem->setToolTip(2, json.value("Info").toString());
         }
-    }
-    {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, { "Shape Plugins", "", "" });
-        QFont boldFont = interfaceItem->font(0);
-        boldFont.setBold(true);
-        interfaceItem->setIcon(0, decoration(Qt::lightGray, 'S'));
-        interfaceItem->setFont(0, boldFont);
-        interfaceItem->setExpanded(true);
-        for (auto& [type, tuple] : App::shapePlugins()) {
-            auto& [shape, pobj] = tuple;
-            auto json { shape->info() };
-            auto featureItem = new QTreeWidgetItem(interfaceItem);
-            featureItem->setExpanded(true);
-            featureItem->setIcon(0, shape->icon());
-            featureItem->setText(0, json.value("Name").toString());
-            featureItem->setText(1, json.value("Version").toString());
-            featureItem->setText(2, json.value("VendorAuthor").toString());
-            featureItem->setToolTip(0, json.value("Info").toString());
-            featureItem->setToolTip(1, json.value("Info").toString());
-            featureItem->setToolTip(2, json.value("Info").toString());
-        }
-    }
+    };
+
+    auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
+    addRows(interfaceItem, 'F', App::filePlugins());
+
+    interfaceItem = new QTreeWidgetItem(treeWidget, { "Shape Plugins", "", "" });
+    addRows(interfaceItem, 'S', App::shapePlugins());
+
+    interfaceItem = new QTreeWidgetItem(treeWidget, { "GCode Plugins", "", "" });
+    addRows(interfaceItem, 'G', App::gCodePlugins());
 
     resize(600, 600);
 }

@@ -14,24 +14,20 @@ project(gcprofile LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOUIC ON)
 
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets  REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
-add_library(${PROJECT_NAME}
+include_directories(${CMAKE_STATIC_LIBS_DIR})
+
+add_library(${PROJECT_NAME} SHARED
     ${HEADERS}
     ${JSONS}
     ${SOURCES}
@@ -39,17 +35,18 @@ add_library(${PROJECT_NAME}
     )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-#    clipper
-#    common
-#    filetree
-#    gi
-#    graphicsview
-#    tooldatabase
+    clipper
+    gcode
+    common
+    filetree
+    gi
+    graphicsview
+    tooldatabase
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 
-#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
+
 
 #target_compile_definitions(dxf PRIVATE DXF_LIBRARY)

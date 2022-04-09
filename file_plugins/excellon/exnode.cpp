@@ -16,7 +16,7 @@
 #include "excellondialog.h"
 #include "exfile.h"
 #include "exh.h"
-#include "drill/drillform.h"
+#include "drill/gc_drillform.h"
 #include "ft_view.h"
 
 #include <QBoxLayout>

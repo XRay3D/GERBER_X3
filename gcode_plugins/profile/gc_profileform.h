@@ -9,7 +9,8 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #pragma once
-#include "formsutil/formsutil.h"
+
+#include "gc_formsutil.h"
 
 namespace Ui {
 class ProfileForm;

@@ -10,18 +10,27 @@
 *******************************************************************************/
 #pragma once
 
-#include "gc_creator.h"
-#include "gc_file.h"
-#include "gc_h.h"
-#include "gc_node.h"
-#include "gc_plugin.h"
-#include "gc_types.h"
-#include "gc_utils.h"
-#include "voroni/gc_voronoi.h"
-#include "voroni/jc_voronoi.h"
+#include "mvector.h"
 
-//#include "gchatching.h"
-//#include "gcpocketoffset.h"
-//#include "gcpocketraster.h"
-//#include "gcprofile.h"
-//#include "gcthermal.h"
+#include <QDialog>
+
+class ErrorItem;
+class TableView;
+
+class QVBoxLayout;
+class QDialogButtonBox;
+
+class ErrorDialog : public QDialog {
+    //    Q_OBJECT
+    QDialogButtonBox* buttonBox;
+    QVBoxLayout* verticalLayout;
+    QWidget* lastWidget = nullptr;
+    TableView* table;
+
+    void setupUi(QDialog* ErrorDialog);       // setupUi
+    void retranslateUi(QDialog* ErrorDialog); // retranslateUi
+
+public:
+    explicit ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent = nullptr);
+    ~ErrorDialog();
+};
