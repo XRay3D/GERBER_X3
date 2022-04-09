@@ -16,7 +16,7 @@
 
 //import "aboutform.h";
 //#include "forms/drillform/drillform.h"
-#include "gcodepropertiesform.h"
+#include "gc_odepropertiesform.h"
 //#include "forms/hatchingform.h"
 //#include "forms/pocketoffsetform.h"
 //#include "forms/pocketrasterform.h"
@@ -79,16 +79,15 @@ MainWindow::MainWindow(QWidget* parent)
     menuBar()->installEventFilter(this);
 
     // connect plugins
-    for (auto& [type, pair] : App::filePlugins()) {
-        auto& [parser, pobj] = pair;
-        if (parser->type() == int(FileType::GCode))
+    for (auto& [type, ptr] : App::filePlugins()) {
+        if (ptr.plug->type() == int(FileType::GCode))
             continue;
-        pobj->moveToThread(&parserThread);
-        connect(pobj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
-        connect(pobj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
-        connect(pobj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
-        connect(this, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
-        connect(m_project, SIGNAL(parseFile(const QString&, int)), pobj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        ptr.obj->moveToThread(&parserThread);
+        connect(ptr.obj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
+        connect(ptr.obj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
+        connect(ptr.obj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
+        connect(this, SIGNAL(parseFile(const QString&, int)), ptr.obj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr.obj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -494,13 +493,12 @@ void MainWindow::createActionsShape() {
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    for (auto& [type, pair] : App::shapePlugins()) {
-        auto& [shInt, pobj] = pair;
-        auto action = toolBar->addAction(shInt->icon(), shInt->info().value("Name").toString());
+    for (auto& [type, ptr] : App::shapePlugins()) {
+        auto action = toolBar->addAction(ptr.plug->icon(), ptr.plug->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        connect(pobj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
-        connect(action, &QAction::toggled, [shInt = shInt, this](bool checked) {
+        connect(ptr.obj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
+        connect(action, &QAction::toggled, [shInt = ptr.plug, this](bool checked) {
             if (checked) {
                 ShapePlugin::finalizeShape_();
                 ShapePlugin::setShapePI(shInt);
@@ -972,9 +970,8 @@ void MainWindow::loadFile(const QString& fileName) {
                                                       tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
                 == QMessageBox::Cancel)
             return;
-        for (auto& [type, tuple] : App::filePlugins()) {
-            auto& [parser, pobj] = tuple;
-            if (parser->thisIsIt(fileName)) {
+        for (auto& [type, ptr] : App::filePlugins()) {
+            if (ptr.plug->thisIsIt(fileName)) {
                 emit parseFile(fileName, int(type));
                 return;
             }

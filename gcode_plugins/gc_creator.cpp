@@ -11,11 +11,11 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gccreator.h"
+#include "gc_creator.h"
 
 #include "app.h"
 #include "erroritem.h"
-#include "gcfile.h"
+#include "gc_file.h"
 #include "point.h"
 #include "project.h"
 #include "voroni/jc_voronoi.h"

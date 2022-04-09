@@ -61,7 +61,7 @@ QJsonObject Plugin::info() const {
         { "Name", "HPGL" },
         { "Version", "1.0" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Opening DXF Files" }
+        { "Info", "Opening HPGL Files" }
     };
 }
 

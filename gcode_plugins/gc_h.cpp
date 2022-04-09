@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gch.h"
+#include "gc_h.h"
 #include "mvector.h"
 #include <QBoxLayout>
 #include <QTextBrowser>

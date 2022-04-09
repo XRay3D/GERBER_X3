@@ -65,6 +65,6 @@ target_link_libraries(dxf PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     )
 
-#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
+
 
 #target_compile_definitions(dxf PRIVATE DXF_LIBRARY)

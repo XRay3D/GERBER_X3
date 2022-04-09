@@ -28,6 +28,7 @@ public:
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     FileInterface* createFile() override;
     QJsonObject info() const override;
+    QIcon icon() const override;
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 
 public slots:

@@ -10,12 +10,12 @@
 *******************************************************************************/
 #pragma once
 
-#include "gccreator.h"
-#include "gcodeplugininterface.h"
+#include "gc_creator.h"
+#include "gc_odeplugininterface.h"
 
+#include <QIcon>
 #include <QJsonObject>
-
-namespace GCode {
+#include <QPixmap>
 
 class ProfilePlugin : public QObject, public GCodePlugin {
     Q_OBJECT
@@ -31,13 +31,20 @@ public:
     int type() const override { return GCode::Profile; }
     QJsonObject info() const override {
         return {
-            { "Name", "Excellon" },
-            { "Version", "1.1" },
+            { "Name", "Profile" },
+            { "Version", "1.0" },
             { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Opening drill files like Excellon" },
+            { "Info", "Profile" },
         };
     }
+
+    virtual QIcon icon() const override { return QPixmap { 16, 16 }; }
+
+signals:
+    void actionUncheck(bool = false) override;
 };
+
+namespace GCode {
 
 class ProfileCreator : public Creator {
 public:

@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 //#include "gctypes.h"
-#include "gcutils.h"
+#include "gc_utils.h"
 #include "file.h"
 
 class MainWindow;

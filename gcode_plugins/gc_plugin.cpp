@@ -8,12 +8,11 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gcplugin.h"
-
-#include "ft_view.h"
-#include "gcfile.h"
-#include "gcnode.h"
+#include "gc_plugin.h"
 #include "file.h"
+#include "ft_view.h"
+#include "gc_file.h"
+#include "gc_node.h"
 
 #include <QMessageBox>
 #include <QtWidgets>
@@ -37,11 +36,13 @@ FileInterface* Plugin::createFile() { return new File(); }
 QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "GCode" },
-        { "Version", "1.0" },
+        { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "GCode is a static plugin always included with GGEasy." }
     };
 }
+
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 
 void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {

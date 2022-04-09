@@ -21,7 +21,8 @@ public:
     //        [[maybe_unused]] Tool& tool) { return {}; };
     //    [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     //    [[nodiscard]] virtual FileInterface* createFile() = 0;
-    virtual QJsonObject info() const = 0;
+    [[nodiscard]] virtual QJsonObject info() const = 0;
+    [[nodiscard]] virtual QIcon icon() const = 0;
 
     //    virtual void addToDrillForm(
     //        [[maybe_unused]] FileInterface* file,
@@ -44,7 +45,7 @@ public:
 
     //    // slots:
     //    virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
-signals:
+    //signals:
     virtual void actionUncheck(bool = false) = 0;
 
 protected:

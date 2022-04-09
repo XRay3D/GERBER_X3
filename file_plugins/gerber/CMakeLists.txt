@@ -13,26 +13,16 @@ cmake_minimum_required(VERSION 3.16)
 project(gerber LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOUIC ON)
 
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
-    Concurrent
-    Core
-    Gui
-    Widgets
-    REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 include_directories(${CMAKE_STATIC_LIBS_DIR})
 
-add_library(gerber SHARED
+add_library(${PROJECT_NAME} SHARED
     gerber.json
     compdialog.cpp
     compdialog.h
@@ -69,7 +59,7 @@ add_library(gerber SHARED
     mathparser.h
     )
 
-target_link_libraries(gerber PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     common
     filetree
@@ -77,12 +67,9 @@ target_link_libraries(gerber PRIVATE
     graphicsview
 #    thermal
     tooldatabase
-    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     )
-
-#install(TARGETS ${PROJECT_NAME} DESTINATION ${PLUGINS_DIR})
 
 #target_compile_definitions(gerber PRIVATE GERBER_LIBRARY)

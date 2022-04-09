@@ -12,7 +12,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-#include "gcplugin.h"
+#include "gc_plugin.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
@@ -152,27 +152,23 @@ int main(int argc, char** argv) {
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
                     if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
-                        App::filePlugins().emplace(file->type(), PIF { file, pobj });
+                        App::filePlugins().emplace(file->type(), PIF { .obj = pobj });
                         continue;
                     }
                     if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
-                        App::shapePlugins().emplace(shape->type(), PIS { shape, pobj });
+                        App::shapePlugins().emplace(shape->type(), PIS { .obj = pobj });
                         continue;
                     }
-                    if (auto* gCode = qobject_cast<GCodePlugin*>(pobj); gCode) {
-                        App::gCodePlugins().emplace(/*gCode->type()*/ 0, PIG { gCode, pobj });
+                    if (auto* gCode = reinterpret_cast<GCodePlugin*>(pobj); gCode) {
+                        App::gCodePlugins().emplace(/*gCode->type()*/ 0, PIG { .obj = pobj });
                         continue;
                     }
                 }
             }
         }
-        if (1) { // add dummy gcode plugin
+        if (0) { // add dummy gcode plugin
             auto parser = new GCode::Plugin(&app);
-            PIF pi {
-                static_cast<FilePlugin*>(parser),
-                static_cast<QObject*>(parser)
-            };
-            App::filePlugins().emplace(parser->type(), pi);
+            App::filePlugins().emplace(parser->type(), PIF { .obj = parser });
         }
 
         QSettings settings;

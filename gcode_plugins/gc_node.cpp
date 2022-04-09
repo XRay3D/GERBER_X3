@@ -11,9 +11,9 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gcnode.h"
-#include "gcfile.h"
-#include "gch.h"
+#include "gc_node.h"
+#include "gc_file.h"
+#include "gc_h.h"
 
 #include <QFileInfo>
 #include <QIcon>

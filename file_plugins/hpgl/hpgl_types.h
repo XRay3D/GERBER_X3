@@ -111,7 +111,7 @@ public:
 
 using GraphicObjects = std::vector<GraphicObject>;
 
-#if _MSVC_LANG >= 201705L
+#if __cplusplus > 201703L
 using Blocks = std::map<QString, Block*>;
 using HeaderData = std::map<QString, std::map<int, QVariant>>;
 using Layers = std::map<QString, Layer*>;

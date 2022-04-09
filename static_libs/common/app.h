@@ -21,10 +21,7 @@
 
 class DrillForm;
 class FilePlugin;
-namespace FileTree {
-class View;
-class Model;
-} // namespace FileTree
+class GCodePlugin;
 class GCodePropertiesForm;
 class GraphicsView;
 class LayoutFrames;
@@ -32,19 +29,41 @@ class MainWindow;
 class Project;
 class Scene;
 class ShapePlugin;
-class GCodePlugin;
 class SplashScreen;
+
+namespace FileTree {
+class View;
+class Model;
+} // namespace FileTree
+
 namespace Shapes {
 class Handler;
-}
+} // namespace Shapes
 
 using Handlers = mvector<Shapes::Handler*>;
 
-using PIF = std::tuple<FilePlugin*, QObject*>;
-using PIS = std::tuple<ShapePlugin*, QObject*>;
-using PIG = std::tuple<GCodePlugin*, QObject*>;
+union PIF {
+    FilePlugin* plug;
+    QObject* obj;
+};
+union PIS {
+    ShapePlugin* plug;
+    QObject* obj;
+};
+union PIG {
+    GCodePlugin* plug;
+    QObject* obj;
+};
 
-#if _MSVC_LANG >= 201705L
+template <class T>
+union Plug {
+    Plug(T* plug)
+        : plug { plug } { }
+    T* plug;
+    QObject* obj;
+};
+
+#if __cplusplus > 201703L
 using FileInterfacesMap = std::map<int, PIF>;
 using ShapeInterfacesMap = std::map<int, PIS>;
 using GCodeInterfaceMap = std::map<int, PIG>;
@@ -123,17 +142,17 @@ public:
     static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
 
     static FilePlugin* filePlugin(int type) {
-        return app_->filePlugins_.contains(type) ? std::get<FilePlugin*>(app_->filePlugins_[type]) : nullptr;
+        return app_->filePlugins_.contains(type) ? app_->filePlugins_[type].plug : nullptr;
     }
     static FileInterfacesMap& filePlugins() { return app_->filePlugins_; }
 
     static ShapePlugin* shapePlugin(int type) {
-        return app_->shapePlugin_.contains(type) ? std::get<ShapePlugin*>(app_->shapePlugin_[type]) : nullptr;
+        return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type].plug : nullptr;
     }
     static ShapeInterfacesMap& shapePlugins() { return app_->shapePlugin_; }
 
     static GCodePlugin* gCodePlugin(int type) {
-        return app_->gCodePlugin_.contains(type) ? std::get<GCodePlugin*>(app_->gCodePlugin_[type]) : nullptr;
+        return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type].plug : nullptr;
     }
     static GCodeInterfaceMap& gCodePlugins() { return app_->gCodePlugin_; }
 

@@ -205,11 +205,13 @@ FileInterface* Plugin::createFile() { return new File(); }
 QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Dxf" },
-        { "Version", "1.0" },
+        { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "Opening DXF Files" }
     };
 }
+
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
 
 SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     auto settingsTab = new SettingsTab(parent);
@@ -255,8 +257,7 @@ public:
         , go(go)
         , circle(dynamic_cast<const Circle*>(go.entity()))
         , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
-        m_sourceDiameter = circle ? circle->radius * 2
-                                  : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
+        m_sourceDiameter = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
 
         m_sourcePath = drawDrill();
         m_type = GiType::PrApetrure;
@@ -265,8 +266,7 @@ public:
 private:
     QPainterPath drawDrill() const {
         QPainterPath painterPath;
-        painterPath.addEllipse(circle ? circle->centerPoint
-                                      : go.pos(),
+        painterPath.addEllipse(circle ? circle->centerPoint : go.pos(),
             m_sourceDiameter * 0.5, m_sourceDiameter * 0.5);
         return painterPath;
     }
@@ -284,13 +284,11 @@ private:
     // AbstractDrillPrGI interface
 public:
     void updateTool() override {
-        row.toolId > -1 ? colorState |= Tool
-                        : colorState &= ~Tool;
+        row.toolId > -1 ? colorState |= Tool : colorState &= ~Tool;
         m_toolPath = {};
         changeColor();
     }
-    IntPoint pos() const override { return circle ? circle->centerPoint
-                                                  : go.pos(); }
+    IntPoint pos() const override { return circle ? circle->centerPoint : go.pos(); }
     Paths paths() const override {
         Paths paths { go.path() };
         return ReversePaths(paths);

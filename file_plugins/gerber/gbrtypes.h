@@ -27,7 +27,7 @@ public:
 
 class AbstractAperture;
 
-#if _MSVC_LANG >= 201705L
+#if __cplusplus > 201703L
 using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
 using VarMap = std::map<QString, double>;
 #else

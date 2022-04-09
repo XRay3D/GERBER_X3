@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gcutils.h"
+#include "gc_utils.h"
 #include "app.h"
 #include "math.h"
 #include "project.h"

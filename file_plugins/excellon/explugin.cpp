@@ -97,11 +97,13 @@ FileInterface* Plugin::createFile() { return new File(); }
 QJsonObject Plugin::info() const {
     return QJsonObject {
         { "Name", "Excellon" },
-        { "Version", "1.1" },
+        { "Version", "1.2" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "Opening drill files like Excellon" },
     };
 }
+
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
 
 SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab(parent);
