@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc_formsutil.h"
+#include "gc_odeplugininterface.h"
 
 namespace Ui {
 class ProfileForm;
@@ -63,4 +64,41 @@ protected:
 
 public:
     virtual void editFile(GCode::File* file) override;
+};
+
+#include <QToolBar>
+
+class GCPluginImpl : public QObject, public GCodePlugin {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
+    Q_INTERFACES(GCodePlugin)
+
+    // GCodePlugin interface
+public:
+    GCPluginImpl(QObject* parent = nullptr)
+        : QObject(parent) { }
+
+    QObject* getObject() override { return this; }
+    int type() const override { return GCode::Profile; }
+    QJsonObject info() const override {
+        return {
+            { "Name", "Pro&file" },
+            { "Version", "1.0" },
+            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
+            { "Info", "Profile" },
+        };
+    }
+    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
+        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
+            emit setDockWidget(new ProfileForm);
+        });
+        action->setShortcut(QKeySequence("Ctrl+Shift+F"));
+        menu->addAction(action);
+        return action;
+    }
+
+    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+
+signals:
+    void setDockWidget(QWidget*) override;
 };

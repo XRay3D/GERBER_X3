@@ -2,6 +2,12 @@
 
 #include "app.h"
 #include <QObject>
+#include <QJsonObject>
+
+class QAction;
+class QMenu;
+class QToolBar;
+class QWidget;
 
 class GCodePlugin {
 public:
@@ -23,6 +29,7 @@ public:
     //    [[nodiscard]] virtual FileInterface* createFile() = 0;
     [[nodiscard]] virtual QJsonObject info() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
+    [[nodiscard]] virtual QAction* addAction(QMenu* menu, QToolBar* toolbar) = 0;
 
     //    virtual void addToDrillForm(
     //        [[maybe_unused]] FileInterface* file,
@@ -46,7 +53,7 @@ public:
     //    // slots:
     //    virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
     //signals:
-    virtual void actionUncheck(bool = false) = 0;
+    virtual void setDockWidget(QWidget*) = 0;
 
 protected:
     App app;

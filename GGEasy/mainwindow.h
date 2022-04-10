@@ -28,7 +28,6 @@ namespace GCode {
 class File;
 }
 
-class DockWidget;
 class Project;
 class QProgressDialog;
 class QToolBar;
@@ -37,6 +36,51 @@ class Scene;
 namespace Ui {
 class MainWindow;
 }
+
+class DockWidget : public QDockWidget {
+    Q_OBJECT
+    QStack<QWidget*> widgets;
+    //    void setWidget(QWidget*) { }
+
+public:
+    explicit DockWidget(QWidget* parent = nullptr)
+        : QDockWidget(parent) {
+        hide();
+        setVisible(false);
+    }
+    ~DockWidget() override = default;
+
+    void push(QWidget* w) {
+        if (widget())
+            widgets.push(widget());
+        if (w)
+            QDockWidget::setWidget(w);
+    }
+    void pop() {
+        if (widget()) {
+            if (widget()->objectName() == "ErrorDialog") {
+                static_cast<QDialog*>(widget())->reject();
+                QTimer::singleShot(1, [this] { widgets.pop(); });
+            } else {
+                delete widget();
+            }
+        }
+        if (!widgets.isEmpty())
+            QDockWidget::setWidget(widgets.pop());
+    }
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent* event) override {
+        pop();
+        event->accept();
+    }
+    void showEvent(QShowEvent* event) override {
+        event->ignore();
+        if (widget() == nullptr)
+            QTimer::singleShot(1, this, &QDockWidget::close);
+    }
+};
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -57,6 +101,19 @@ public:
     void loadFile(const QString& fileName);
     static void updateTheme();
 
+    template <class T>
+    void createDockWidget() {
+        if (dynamic_cast<T*>(m_dockWidget->widget()))
+            return;
+
+        auto dwContent = new T(m_dockWidget);
+        dwContent->setObjectName(typeid(T).name());
+
+        m_dockWidget->pop();
+        m_dockWidget->push(dwContent);
+        m_dockWidget->show();
+    }
+
 signals:
     void parseFile(const QString& filename, int type);
 
@@ -64,6 +121,7 @@ private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void addFileToPro(FileInterface* file);
+    void setDockWidget(QWidget* dwContent);
 
 private:
     Ui::MainWindow* ui;
@@ -98,9 +156,6 @@ private:
 
     void about();
     bool closeProject();
-
-    template <class T>
-    void createDockWidget();
 
     void initWidgets();
 
@@ -150,49 +205,4 @@ protected:
     // QObject interface
 public:
     bool eventFilter(QObject* watched, QEvent* event) override;
-};
-
-class DockWidget : public QDockWidget {
-    Q_OBJECT
-    QStack<QWidget*> widgets;
-    //    void setWidget(QWidget*) { }
-
-public:
-    explicit DockWidget(QWidget* parent = nullptr)
-        : QDockWidget(parent) {
-        hide();
-        setVisible(false);
-    }
-    ~DockWidget() override = default;
-
-    void push(QWidget* w) {
-        if (widget())
-            widgets.push(widget());
-        if (w)
-            QDockWidget::setWidget(w);
-    }
-    void pop() {
-        if (widget()) {
-            if (widget()->objectName() == "ErrorDialog") {
-                static_cast<QDialog*>(widget())->reject();
-                QTimer::singleShot(1, [this] { widgets.pop(); });
-            } else {
-                delete widget();
-            }
-        }
-        if (!widgets.isEmpty())
-            QDockWidget::setWidget(widgets.pop());
-    }
-
-    // QWidget interface
-protected:
-    void closeEvent(QCloseEvent* event) override {
-        pop();
-        event->accept();
-    }
-    void showEvent(QShowEvent* event) override {
-        event->ignore();
-        if (widget() == nullptr)
-            QTimer::singleShot(1, this, &QDockWidget::close);
-    }
 };

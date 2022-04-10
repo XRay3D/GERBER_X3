@@ -34,7 +34,8 @@ ProfileForm::ProfileForm(QWidget* parent)
 //    }
 {
     ui->setupUi(this);
-    parent->setWindowTitle(ui->label->text());
+    ///*parent->*/setWindowTitle(ui->label->text());
+    setWindowTitle(ui->label->text());
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
@@ -307,3 +308,5 @@ void ProfileForm::editFile(GCode::File* file) {
         }
     }
 }
+
+

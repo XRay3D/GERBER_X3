@@ -25,7 +25,7 @@
 //#include "section/dxf_classes.h"
 //#include "section/dxf_objects.h"
 //#include "section/dxf_thumbnailimage.h"
-//#include "gccreator.h" //////////////////////
+//#include "gc_creator.h" //////////////////////
 
 #include "datapathitem.h"
 #include "datasoliditem.h"

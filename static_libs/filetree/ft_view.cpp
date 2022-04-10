@@ -180,7 +180,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         if (cType == Type::File) {
             App::filePlugin(type)->createMainMenu(menu, this);
         } else if (cType == Type::Shape) {
-            App::shapePlugins().begin()->second.plug->createMainMenu(menu, this);
+            App::shapePlugins().begin()->second->createMainMenu(menu, this);
         }
     } else {
         reinterpret_cast<Node*>(m_menuIndex.internalId())->menu(menu, this);

@@ -56,17 +56,17 @@ union PIG {
 };
 
 template <class T>
-union Plug {
-    Plug(T* plug)
-        : plug { plug } { }
+struct Plug {
     T* plug;
-    QObject* obj;
+    //    QObject* obj;
 };
+template <class T>
+Plug(T*, QObject*) -> Plug<T>;
 
 #if __cplusplus > 201703L
-using FileInterfacesMap = std::map<int, PIF>;
-using ShapeInterfacesMap = std::map<int, PIS>;
-using GCodeInterfaceMap = std::map<int, PIG>;
+using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/   // > ;
+using ShapeInterfacesMap = std::map<int, ShapePlugin*>; /*PIS*/ // > ;
+using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/  // > ;
 #else
 struct FileInterfacesMap : std::map<int, PIF> {
     bool contains(int key) const { return find(key) != end(); }
@@ -93,8 +93,8 @@ class App {
     SplashScreen* splashScreen_ = nullptr;
 
     FileInterfacesMap filePlugins_;
-    ShapeInterfacesMap shapePlugin_;
     GCodeInterfaceMap gCodePlugin_;
+    ShapeInterfacesMap shapePlugin_;
 
     AppSettings appSettings_;
     ToolHolder toolHolder_;
@@ -110,25 +110,27 @@ class App {
 
 public:
     explicit App() {
-        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
+            qDebug("App create");
             app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
-        else if (sharedMemory.attach(QSharedMemory::ReadOnly))
+        } else if (sharedMemory.attach(QSharedMemory::ReadOnly)) {
+            qDebug("App attach");
             app_ = *reinterpret_cast<App**>(sharedMemory.data());
-        else
+        } else {
             qDebug() << app_ << sharedMemory.errorString();
+        }
     }
-    ~App() { }
 
-    static DrillForm* drillForm() { return app_->drillForm_; }
-    static FileTree::Model* fileModel() { return app_->fileModel_; }
-    static FileTree::View* fileTreeView() { return app_->fileTreeView_; }
-    static GCodePropertiesForm* gCodePropertiesForm() { return app_->gCodePropertiesForm_; }
-    static GraphicsView* graphicsView() { return app_->graphicsView_; }
-    static LayoutFrames* layoutFrames() { return app_->layoutFrames_; }
-    static MainWindow* mainWindow() { return app_->mainWindow_; }
-    static Project* project() { return app_->project_; }
-    static Scene* scene() { return app_->scene_; }
-    static SplashScreen* splashScreen() { return app_->splashScreen_; }
+    static auto* drillForm() { return app_->drillForm_; }
+    static auto* fileModel() { return app_->fileModel_; }
+    static auto* fileTreeView() { return app_->fileTreeView_; }
+    static auto* gCodePropertiesForm() { return app_->gCodePropertiesForm_; }
+    static auto* graphicsView() { return app_->graphicsView_; }
+    static auto* layoutFrames() { return app_->layoutFrames_; }
+    static auto* mainWindow() { return app_->mainWindow_; }
+    static auto* project() { return app_->project_; }
+    static auto* scene() { return app_->scene_; }
+    static auto* splashScreen() { return app_->splashScreen_; }
 
     static void setDrillForm(DrillForm* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
     static void setFileModel(FileTree::Model* fileModel) { (app_->fileModel_ && fileModel) ? exit(-2) : (app_->fileModel_ = fileModel, void()); }
@@ -141,24 +143,18 @@ public:
     static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
 
-    static FilePlugin* filePlugin(int type) {
-        return app_->filePlugins_.contains(type) ? app_->filePlugins_[type].plug : nullptr;
-    }
-    static FileInterfacesMap& filePlugins() { return app_->filePlugins_; }
+    static auto* filePlugin(int type) { return static_cast<FilePlugin*>(app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr); }
+    static auto& filePlugins() { return app_->filePlugins_; }
 
-    static ShapePlugin* shapePlugin(int type) {
-        return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type].plug : nullptr;
-    }
-    static ShapeInterfacesMap& shapePlugins() { return app_->shapePlugin_; }
+    static auto* shapePlugin(int type) { return static_cast<ShapePlugin*>(app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr); }
+    static auto& shapePlugins() { return app_->shapePlugin_; }
 
-    static GCodePlugin* gCodePlugin(int type) {
-        return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type].plug : nullptr;
-    }
-    static GCodeInterfaceMap& gCodePlugins() { return app_->gCodePlugin_; }
+    static auto* gCodePlugin(int type) { return static_cast<GCodePlugin*>(app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr); }
+    static auto& gCodePlugins() { return app_->gCodePlugin_; }
 
-    static Handlers& shapeHandlers() { return app_->handlers_; }
+    static auto& shapeHandlers() { return app_->handlers_; }
 
-    static AppSettings& settings() { return app_->appSettings_; }
-    static ToolHolder& toolHolder() { return app_->toolHolder_; }
-    static QSettings* qSettings() { return &app_->settings_; }
+    static auto& settings() { return app_->appSettings_; }
+    static auto& toolHolder() { return app_->toolHolder_; }
+    static auto* qSettings() { return &app_->settings_; }
 };

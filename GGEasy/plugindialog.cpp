@@ -36,17 +36,18 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     treeWidget->setIconSize({ 24, 24 });
 
     auto addRows = [](QTreeWidgetItem* twItem, char c, auto map) {
+        qDebug(__FUNCSIG__);
         QFont boldFont = twItem->font(0);
         boldFont.setBold(true);
         twItem->setIcon(0, decoration(Qt::lightGray, c));
         twItem->setFont(0, boldFont);
         twItem->setExpanded(true);
-        for (auto& [type, ptr] : map) {
-            auto json { ptr.plug->info() };
+        for (const auto& [type, ptr] : map) {
+            auto json { ptr->info() };
             auto featureItem = new QTreeWidgetItem(twItem);
             featureItem->setExpanded(true);
-            featureItem->setIcon(0, ptr.plug->icon());
-            featureItem->setText(0, json.value("Name").toString());
+            featureItem->setIcon(0, ptr->icon());
+            featureItem->setText(0, json.value("Name").toString().remove('&'));
             featureItem->setText(1, json.value("Version").toString());
             featureItem->setText(2, json.value("VendorAuthor").toString());
             featureItem->setToolTip(0, json.value("Info").toString());
@@ -55,14 +56,20 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         }
     };
 
-    auto interfaceItem = new QTreeWidgetItem(treeWidget, { "File Plugins", "", "" });
-    addRows(interfaceItem, 'F', App::filePlugins());
+    if (App::filePlugins().size()) {
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("File Plugins"), "", "" });
+        addRows(interfaceItem, 'F', App::filePlugins());
+    }
 
-    interfaceItem = new QTreeWidgetItem(treeWidget, { "Shape Plugins", "", "" });
-    addRows(interfaceItem, 'S', App::shapePlugins());
+    if (App::shapePlugins().size()) {
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("Shape Plugins"), "", "" });
+        addRows(interfaceItem, 'S', App::shapePlugins());
+    }
 
-    interfaceItem = new QTreeWidgetItem(treeWidget, { "GCode Plugins", "", "" });
-    addRows(interfaceItem, 'G', App::gCodePlugins());
+    if (App::gCodePlugins().size()) {
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("GCode Plugins"), "", "" });
+        addRows(interfaceItem, 'G', App::gCodePlugins());
+    }
 
     resize(600, 600);
 }

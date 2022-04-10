@@ -124,7 +124,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     //    auto model = new ModelSettings(listView);
 
     for (auto& [type, ptr] : App::filePlugins()) {
-        auto tab = ptr.plug->createSettingsTab(this);
+        auto tab = ptr->createSettingsTab(this);
         if (!tab)
             continue;
 
@@ -134,9 +134,9 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         //        lay->addWidget(tab);
         //        verticalLayout_3->addWidget(gbx);
 
-// FIXME       tabs.push_back(tab);
-//        tabwMain->addTab(tab, tab->windowTitle());
-//        tab->readSettings(settings);
+        tabs.push_back(tab);
+        tabwMain->addTab(tab, tab->windowTitle());
+        tab->readSettings(settings);
     }
 
     //    listView->setModel(model);

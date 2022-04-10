@@ -12,7 +12,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
+#include "gc_odeplugininterface.h"
 #include "gc_plugin.h"
+
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
@@ -152,23 +154,23 @@ int main(int argc, char** argv) {
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
                     if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
-                        App::filePlugins().emplace(file->type(), PIF { .obj = pobj });
+                        App::filePlugins().emplace(file->type(), file);
                         continue;
                     }
                     if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
-                        App::shapePlugins().emplace(shape->type(), PIS { .obj = pobj });
+                        App::shapePlugins().emplace(shape->type(), shape);
                         continue;
                     }
-                    if (auto* gCode = reinterpret_cast<GCodePlugin*>(pobj); gCode) {
-                        App::gCodePlugins().emplace(/*gCode->type()*/ 0, PIG { .obj = pobj });
+                    if (auto* gCode = qobject_cast<GCodePlugin*>(pobj); gCode) {
+                        App::gCodePlugins().emplace(gCode->type(), gCode);
                         continue;
                     }
                 }
             }
         }
-        if (0) { // add dummy gcode plugin
+        if (1) { // add dummy gcode plugin
             auto parser = new GCode::Plugin(&app);
-            App::filePlugins().emplace(parser->type(), PIF { .obj = parser });
+            App::filePlugins().emplace(parser->type(), parser);
         }
 
         QSettings settings;
