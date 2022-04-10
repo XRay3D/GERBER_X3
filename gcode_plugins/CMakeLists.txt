@@ -12,8 +12,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(gcode)
 #set_property(GLOBAL PROPERTY CXX_STANDARD 20)
-#set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -75,10 +75,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     )
 
 add_subdirectory(profile)
-#add_subdirectory(hatching)
-#add_subdirectory(pocketoffset)
-#add_subdirectory(pocketraster)
-#add_subdirectory(thermal)
-#add_subdirectory(voroni)
+add_subdirectory(hatching)
+add_subdirectory(pocketoffset)
+add_subdirectory(pocketraster)
+add_subdirectory(thermal)
+add_subdirectory(voroni)
+add_subdirectory(drill)
 
 

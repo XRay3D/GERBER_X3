@@ -11,38 +11,11 @@
 #pragma once
 
 #include "gc_creator.h"
-#include "gc_odeplugininterface.h"
 
 #include <QIcon>
-#include <QJsonObject>
 #include <QPixmap>
 
-class ProfilePlugin : public QObject, public GCodePlugin {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
-    Q_INTERFACES(GCodePlugin)
 
-    // GCodePlugin interface
-public:
-    ProfilePlugin(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
-    int type() const override { return GCode::Profile; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Profile" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Profile" },
-        };
-    }
-
-    virtual QIcon icon() const override { return QPixmap { 16, 16 }; }
-
-signals:
-    void actionUncheck(bool = false) override;
-};
 
 namespace GCode {
 

@@ -20,43 +20,18 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+
 include_directories(${CMAKE_STATIC_LIBS_DIR})
 
 add_library(${PROJECT_NAME} SHARED
-    gerber.json
-    compdialog.cpp
-    compdialog.h
-    compitem.cpp
-    compitem.h
-    compmodel.cpp
-    compmodel.h
-    compnode.cpp
-    compnode.h
-    compview.cpp
-    compview.h
-    gbraperture.cpp
-    gbraperture.h
-    gbrattraperfunction.cpp
-    gbrattraperfunction.h
-    gbrattrfilefunction.cpp
-    gbrattrfilefunction.h
-    gbrattributes.cpp
-    gbrattributes.h
-    gbrcomponent.cpp
-    gbrcomponent.h
-    gbrfile.cpp
-    gbrfile.h
-    gbrh.cpp
-    gbrh.h
-    gbrnode.cpp
-    gbrnode.h
-    gbrparser.cpp
-    gbrparser.h
-    gbrplugin.cpp
-    gbrplugin.h
-    gbrtypes.h
-    mathparser.cpp
-    mathparser.h
+    ${HEADERS}
+    ${JSONS}
+    ${SOURCES}
+    ${UIS}
     )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -16,6 +16,7 @@
 
 //import "aboutform.h";
 //#include "forms/drillform/drillform.h"
+#include "gc_odeplugininterface.h"
 #include "gc_odepropertiesform.h"
 //#include "forms/hatchingform.h"
 //#include "forms/pocketoffsetform.h"
@@ -80,14 +81,14 @@ MainWindow::MainWindow(QWidget* parent)
 
     // connect plugins
     for (auto& [type, ptr] : App::filePlugins()) {
-        if (ptr.plug->type() == int(FileType::GCode))
+        if (ptr->type() == int(FileType::GCode))
             continue;
-        ptr.obj->moveToThread(&parserThread);
-        connect(ptr.obj, SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
-        connect(ptr.obj, SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
-        connect(ptr.obj, SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
-        connect(this, SIGNAL(parseFile(const QString&, int)), ptr.obj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
-        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr.obj, SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        ptr->getObject()->moveToThread(&parserThread);
+        connect(ptr->getObject(), SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
+        connect(ptr->getObject(), SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
+        connect(ptr->getObject(), SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
+        connect(this, SIGNAL(parseFile(const QString&, int)), ptr->getObject(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr->getObject(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -429,6 +430,12 @@ void MainWindow::createActionsToolPath() {
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
+    for (auto& [type, ptr] : App::gCodePlugins()) {
+        auto action = ptr->addAction(menu, toolpathToolBar);
+        toolpathActions.emplace(type, action);
+        connect(ptr->getObject(), SIGNAL(setDockWidget(QWidget*)), this, SLOT(setDockWidget(QWidget*)));
+    }
+
     // FIXME GC
     //    // Profile
     //    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(); });
@@ -494,11 +501,11 @@ void MainWindow::createActionsShape() {
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     for (auto& [type, ptr] : App::shapePlugins()) {
-        auto action = toolBar->addAction(ptr.plug->icon(), ptr.plug->info().value("Name").toString());
+        auto action = toolBar->addAction(ptr->icon(), ptr->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        connect(ptr.obj, SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
-        connect(action, &QAction::toggled, [shInt = ptr.plug, this](bool checked) {
+        connect(ptr->getObject(), SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
+        connect(action, &QAction::toggled, [shInt = ptr, this](bool checked) {
             if (checked) {
                 ShapePlugin::finalizeShape_();
                 ShapePlugin::setShapePI(shInt);
@@ -913,19 +920,6 @@ QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
-template <class T>
-void MainWindow::createDockWidget() {
-    if (dynamic_cast<T*>(m_dockWidget->widget()))
-        return;
-
-    auto dwContent = new T(m_dockWidget);
-    dwContent->setObjectName(typeid(T).name());
-
-    m_dockWidget->pop();
-    m_dockWidget->push(dwContent);
-    m_dockWidget->show();
-}
-
 QMenu* MainWindow::createPopupMenu() {
     QMenu* menu = QMainWindow::createPopupMenu();
     menu->removeAction(m_dockWidget->toggleViewAction());
@@ -971,7 +965,7 @@ void MainWindow::loadFile(const QString& fileName) {
                 == QMessageBox::Cancel)
             return;
         for (auto& [type, ptr] : App::filePlugins()) {
-            if (ptr.plug->thisIsIt(fileName)) {
+            if (ptr->thisIsIt(fileName)) {
                 emit parseFile(fileName, int(type));
                 return;
             }
@@ -1115,6 +1109,16 @@ void MainWindow::updateTheme() {
     QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
     if (App::mainWindow() && App::mainWindow()->isVisible())
         SettingsDialog().show();
+}
+
+void MainWindow::setDockWidget(QWidget* dwContent) {
+    if (m_dockWidget->widget() == dwContent)
+        return;
+
+    m_dockWidget->pop();
+    m_dockWidget->setWindowTitle(dwContent->windowTitle());
+    m_dockWidget->push(dwContent);
+    m_dockWidget->show();
 }
 
 void MainWindow::open() {

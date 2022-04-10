@@ -27,12 +27,12 @@ enum GCodeType {
     Null = -1,
     Profile,
     Pocket,
+    Raster,
+    Hatching,
     Voronoi,
     Thermal,
     Drill,
-    Raster,
     LaserHLDI,
-    Hatching,
     GCodeProperties = 100,
 };
 

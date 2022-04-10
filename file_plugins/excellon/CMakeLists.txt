@@ -25,45 +25,28 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+
 include_directories(${CMAKE_STATIC_LIBS_DIR})
 
-add_library(excellon SHARED
-    drillitem.cpp
-    drillitem.h
-    excellon.h
-    excellondialog.cpp
-    excellondialog.h
-    excellondialog.ui
-    exfile.cpp
-    exfile.h
-    exformatstate.cpp
-    exh.cpp
-    exh.h
-    exnode.cpp
-    exnode.h
-    exparser.cpp
-    exparser.h
-    explugin.cpp
-    explugin.h
-    exsettingstab.cpp
-    exsettingstab.h
-    extypes.h
-    excellon.json
-    ${SOURCE}
+add_library(${PROJECT_NAME} SHARED
     ${HEADERS}
+    ${JSONS}
+    ${SOURCES}
+    ${UIS}
     )
-
 
 target_link_libraries(excellon PRIVATE
     clipper
     common
     filetree
     gi
+    gcode
     graphicsview
     tooldatabase
-    )
-
-target_link_libraries(excellon PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

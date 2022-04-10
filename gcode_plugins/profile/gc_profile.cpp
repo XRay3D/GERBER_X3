@@ -11,9 +11,10 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #include "gc_profile.h"
-#include "gc_file.h"
-
 #include "bridgeitem.h"
+#include "gc_file.h"
+#include "gc_profileform.h"
+#include "mainwindow.h"
 #include "scene.h"
 
 namespace GCode {
