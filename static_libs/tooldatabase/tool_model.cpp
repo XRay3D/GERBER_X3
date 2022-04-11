@@ -2,18 +2,18 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
-#include "toolmodel.h"
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
+#include "tool_model.h"
 #include "app.h"
-#include "toolitem.h"
+#include "tool_item.h"
 
 #include <QApplication>
 #include <QFile>
@@ -62,22 +62,22 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
     return true;
 }
 
-//bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+// bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
 //{
-//    return false;
-//    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-//    ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
-//    ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
-//    if (!srcItem)
-//        srcItem = rootItem;
-//    if (!dstItem)
-//        dstItem = rootItem;
-//    for (int r = 0; r < count; ++r) {
-//        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-//    }
-//    endMoveRows();
-//    return true;
-//}
+//     return false;
+//     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+//     ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
+//     ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
+//     if (!srcItem)
+//         srcItem = rootItem;
+//     if (!dstItem)
+//         dstItem = rootItem;
+//     for (int r = 0; r < count; ++r) {
+//         dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+//     }
+//     endMoveRows();
+//     return true;
+// }
 
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const {
     return 3;
@@ -218,9 +218,9 @@ Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
 void ToolModel::exportTools() {
-    QFile file(settingsPath + QStringLiteral("/tools.json"));
+    QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
     if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << file.errorString();
+        qDebug() << __FUNCTION__ << file.errorString();
         return;
     }
 
@@ -274,7 +274,7 @@ void ToolModel::exportTools() {
 void ToolModel::importTools() {
     QJsonDocument loadDoc;
 
-    QFile file(settingsPath + QStringLiteral("/tools.json"));
+    QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
 
     if (!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json");
@@ -288,7 +288,7 @@ void ToolModel::importTools() {
         } else
 #endif
         {
-            qDebug() << file.errorString();
+            qDebug() << __FUNCTION__ << file.errorString();
             return;
         }
     }

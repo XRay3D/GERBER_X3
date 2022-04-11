@@ -22,7 +22,7 @@
 #include "drillpreviewgi.h"
 #include "ft_view.h"
 #include "settings.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 #include "utils.h"
 
 //#include <QtConcurrent>

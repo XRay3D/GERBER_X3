@@ -17,7 +17,7 @@ project(GERBER_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
-add_definitions("-D__cpp_consteval")# source_location
+#add_definitions("-D__cpp_consteval")# source_location
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD 20)
@@ -72,7 +72,7 @@ target_precompile_headers(gi
     #    "myclipper.h"
     #    project_header.h
     PRIVATE
-    "static_libs/tooldatabase/toolpch.h"
+    "static_libs/tooldatabase/tool_pch.h"
     )
 
 #target_precompile_headers(thermal REUSE_FROM gi)

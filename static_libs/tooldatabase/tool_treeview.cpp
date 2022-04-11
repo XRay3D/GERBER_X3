@@ -11,8 +11,8 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "tooltreeview.h"
-#include "toolitem.h"
+#include "tool_treeview.h"
+#include "tool_item.h"
 
 #include <QFile>
 #include <QHeaderView>

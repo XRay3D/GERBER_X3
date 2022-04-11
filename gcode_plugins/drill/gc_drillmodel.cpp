@@ -13,7 +13,7 @@
 *******************************************************************************/
 #include "gc_drillmodel.h"
 #include "gc_drillform.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 
 #include <QBitmap>
 #include <QDebug>

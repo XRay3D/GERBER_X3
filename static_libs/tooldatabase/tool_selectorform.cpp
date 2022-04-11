@@ -11,21 +11,22 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "toolselectorform.h"
+#include "tool_selectorform.h"
 #include "settings.h"
-#include "tooldatabase.h"
-#include "tooleditdialog.h"
+#include "tool_database.h"
+#include "tool_editdialog.h"
 #include <QDebug>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QtWidgets>
+#include <app.h>
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
     , counter { static_cast<int>(parent->findChildren<ToolSelectorForm*>().count()) }
-    , toolFileName_ { settingsPath + '/' + parent->objectName() + QString::number(counter) + ".json" } {
+    , toolFileName_ { App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json" } {
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");

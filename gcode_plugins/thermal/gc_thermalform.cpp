@@ -21,7 +21,7 @@
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 #include "ui_thermalform.h"
 #include <myclipper.h>
 

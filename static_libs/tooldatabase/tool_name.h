@@ -14,7 +14,7 @@
 
 #include <QWidget>
 
-#include "toolpch.h"
+#include "tool_pch.h"
 
 class QLabel;
 

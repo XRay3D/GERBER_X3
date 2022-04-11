@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 
 #include "../tooldatabase/tool.h"
@@ -105,6 +105,8 @@ class App {
     Handlers handlers_;
     QSettings settings_;
 
+    QString settingsPath_;
+
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
     App(App&&) = delete;
@@ -139,6 +141,7 @@ public:
     static auto* project() { return app_->project_; }
     static auto* scene() { return app_->scene_; }
     static auto* splashScreen() { return app_->splashScreen_; }
+    static auto& settingsPath() { return app_->settingsPath_; }
 
     static void setDrillForm(DrillForm* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
     static void setFileModel(FileTree::Model* fileModel) { (app_->fileModel_ && fileModel) ? exit(-2) : (app_->fileModel_ = fileModel, void()); }

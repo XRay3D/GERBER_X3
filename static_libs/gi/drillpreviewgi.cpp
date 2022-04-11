@@ -14,7 +14,7 @@
 #include "drillpreviewgi.h"
 #include "drill/gc_drillmodel.h"
 #include "graphicsview.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 #include <QPainter>
 #include <QPropertyAnimation>
 

@@ -11,10 +11,10 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "tooleditform.h"
+#include "tool_editform.h"
 #include "ui_tooleditform.h"
 
-#include "toolitem.h"
+#include "tool_item.h"
 #include <QDebug>
 #include <QSettings>
 
