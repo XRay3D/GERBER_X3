@@ -23,6 +23,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QtMath>
+#include <app.h>
 
 int toolId = qRegisterMetaType<Tool>("Tool");
 
@@ -295,7 +296,7 @@ ToolHolder::ToolHolder() { }
 void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
-    QFile file(settingsPath + QStringLiteral("/tools.json"));
+    QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
 
     if (!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path

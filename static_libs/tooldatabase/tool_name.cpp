@@ -1,3 +1,6 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 /*******************************************************************************
 * Author    :  Damir Bakiev                                                    *
 * Version   :  na                                                              *
@@ -8,37 +11,27 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#pragma once
-#include "mvector.h"
-#include "toolmodel.h"
-#include <QTreeView>
 
-class QPushButton;
+#include "tool_name.h"
+#include <QHBoxLayout>
+#include <QIcon>
+#include <QLabel>
 
-class ToolTreeView : public QTreeView {
-    Q_OBJECT
-public:
-    explicit ToolTreeView(QWidget* parent = nullptr);
-    ~ToolTreeView() override = default;
-    void updateItem();
-    void setButtons(const mvector<QPushButton*>& buttons);
+ToolName::ToolName(QWidget* parent)
+    : QWidget(parent) {
+    QHBoxLayout* l = new QHBoxLayout(this);
+    lblPixmap = new QLabel(this);
+    l->addWidget(lblPixmap);
+    lblName = new QLabel(this);
+    lblName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    l->addWidget(lblName);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->setSpacing(6);
+    l->setStretch(1, 1);
+}
 
-signals:
-    void itemSelected(ToolItem* item);
-
-private:
-    void newGroup();
-    void newTool();
-    void deleteItem();
-    void copyTool();
-
-    void updateActions();
-    ToolModel* m_model;
-    enum {
-        Copy,
-        Delete,
-        New,
-        NewGroup,
-    };
-    mvector<QPushButton*> m_buttons;
-};
+void ToolName::setTool(const Tool& tool) {
+    lblPixmap->setPixmap(tool.icon().pixmap({ 22, 22 }));
+    lblName->setText(tool.name());
+    setToolTip(tool.note());
+}

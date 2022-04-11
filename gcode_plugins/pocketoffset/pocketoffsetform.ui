@@ -382,7 +382,7 @@ tools:</string>
   <customwidget>
    <class>ToolSelectorForm</class>
    <extends>QWidget</extends>
-   <header location="global">toolselectorform.h</header>
+   <header location="global">tool_selectorform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

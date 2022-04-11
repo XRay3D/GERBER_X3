@@ -408,12 +408,12 @@ HEADERS  += \
     static_libs\thermal\thermalnode.h \
     static_libs\thermal\thvars.h \
     static_libs\tooldatabase\tool.h \
-    static_libs\tooldatabase\tooldatabase.h \
+    static_libs\tooldatabase\tool_database.h \
     static_libs\tooldatabase\tooleditdialog.h \
     static_libs\tooldatabase\tooleditform.h \
     static_libs\tooldatabase\toolitem.h \
     static_libs\tooldatabase\toolmodel.h \
-    static_libs\tooldatabase\toolselectorform.h \
+    static_libs\tooldatabase\tool_selectorform.h \
     static_libs\tooldatabase\tooltreeview.h \
 
 

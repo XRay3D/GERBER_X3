@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "tooleditdialog.h"
+#include "tool_editdialog.h"
 
 #include "ui_tooleditdialog.h"
 

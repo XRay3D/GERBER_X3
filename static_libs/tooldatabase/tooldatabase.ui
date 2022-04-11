@@ -73,13 +73,13 @@
   <customwidget>
    <class>ToolEditForm</class>
    <extends>QWidget</extends>
-   <header>tooleditform.h</header>
+   <header>tool_editform.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ToolTreeView</class>
    <extends>QTreeView</extends>
-   <header>tooltreeview.h</header>
+   <header>tool_treeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

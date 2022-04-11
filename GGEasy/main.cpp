@@ -69,13 +69,15 @@ int main(int argc, char** argv) {
     QApplication::setApplicationName("GGEasy");
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
-    settingsPath = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
-    if (QDir dir(settingsPath); !dir.exists())
-        dir.mkpath(settingsPath);
-    qDebug() << settingsPath;
+
+    [[maybe_unused]] App appSingleton;
+    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+
+    if (QDir dir(App::settingsPath()); !dir.exists())
+        dir.mkpath(App::settingsPath());
+    qDebug() << App::settingsPath();
     QSettings::setDefaultFormat(QSettings::IniFormat);
     //QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
-    [[maybe_unused]] App appSingleton;
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QGLFormat glf = QGLFormat::defaultFormat();

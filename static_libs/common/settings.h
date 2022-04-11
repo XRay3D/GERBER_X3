@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 #include <QColor>
 #include <QDebug>
@@ -16,8 +16,6 @@
 #include <QSettings>
 #include <stdexcept>
 #include <type_traits>
-
-inline QString settingsPath;
 
 class DoubleSpinBox;
 class QAbstractButton;
@@ -218,17 +216,17 @@ private:
     /*GUI*/
     enum { gridColor = 100 };
     QColor m_guiColor[GuiColors::Count] {
-        QColor(Qt::black),                            //Background
-        QColor(255, 255, 0, 120),                     //Pin
-        QColor(Qt::gray),                             //CutArea
-        QColor(gridColor, gridColor, gridColor, 50),  //Grid1
-        QColor(gridColor, gridColor, gridColor, 100), //Grid5
-        QColor(gridColor, gridColor, gridColor, 200), //Grid10
-        QColor(),                                     //Hole
-        QColor(0, 255, 0, 120),                       //Home
-        QColor(Qt::white),                            //ToolPath
-        QColor(255, 0, 0, 120),                       //Zero
-        QColor(Qt::red)                               //G0
+        QColor(Qt::black),                            // Background
+        QColor(255, 255, 0, 120),                     // Pin
+        QColor(Qt::gray),                             // CutArea
+        QColor(gridColor, gridColor, gridColor, 50),  // Grid1
+        QColor(gridColor, gridColor, gridColor, 100), // Grid5
+        QColor(gridColor, gridColor, gridColor, 200), // Grid10
+        QColor(),                                     // Hole
+        QColor(0, 255, 0, 120),                       // Home
+        QColor(Qt::white),                            // ToolPath
+        QColor(255, 0, 0, 120),                       // Zero
+        QColor(Qt::red)                               // G0
     };
     bool m_animSelection = true;
     bool m_guiSmoothScSh;

@@ -20,7 +20,7 @@
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 #include <QAction>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QInputDialog>

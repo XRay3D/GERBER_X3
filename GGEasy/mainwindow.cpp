@@ -30,7 +30,7 @@
 #include "shapepluginin.h"
 
 #include "project.h"
-#include <tooldatabase.h>
+#include <tool_database.h>
 
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -145,7 +145,7 @@ MainWindow::MainWindow(QWidget* parent)
         }
 
         if (1)
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->triggered(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->toggle(); });
     }
 }
 

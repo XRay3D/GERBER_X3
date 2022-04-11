@@ -15,7 +15,7 @@
 #include "app.h"
 #include "gc_thermalnode.h"
 #include "graphicsview.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 #include <QAnimationGroup>
 #include <QElapsedTimer>
 #include <QGraphicsSceneContextMenuEvent>

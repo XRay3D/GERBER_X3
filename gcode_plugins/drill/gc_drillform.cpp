@@ -25,7 +25,7 @@
 #include "gc_drillmodel.h"
 #include "point.h"
 #include "project.h"
-#include "toolpch.h"
+#include "tool_pch.h"
 
 #include <QMessageBox>
 #include <QPainter>
