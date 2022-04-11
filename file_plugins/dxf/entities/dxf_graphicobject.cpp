@@ -47,12 +47,13 @@ size_t GraphicObject::entityId() const {
     return m_entityId;
 }
 
-GraphicObject::GraphicObject() { }
+GraphicObject::GraphicObject()
+    : AbstrGraphicObject { {} } { }
 
 GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
-    : m_entityId(entityId)
-    , m_path(path)
-    , m_paths(paths) {
+    : AbstrGraphicObject(paths)
+    , m_entityId(entityId)
+    , m_path(path) {
 }
 
 void GraphicObject::setRotation(double rotationAngle) {

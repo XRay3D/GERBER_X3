@@ -298,12 +298,12 @@ class GraphicObject final : public AbstrGraphicObject {
 
     File* m_gFile;
     Path m_path;
-    Paths m_paths;
     State m_state;
 
 public:
     GraphicObject()
-        : m_gFile(nullptr) {
+        : AbstrGraphicObject { {} }
+        , m_gFile(nullptr) {
     }
     GraphicObject(
         int /*id*/,
@@ -311,9 +311,9 @@ public:
         const Paths& paths,
         File* gFile,
         const Path& path = Path())
-        : m_gFile(gFile)
+        : AbstrGraphicObject { paths }
+        , m_gFile(gFile)
         , m_path(path)
-        , m_paths(paths)
         , m_state(state) {
     }
     inline File* gFile() const { return m_gFile; }
@@ -343,10 +343,8 @@ public:
     Path hole() const override { return !positive() ? m_path : Path(); }
     Paths holes() const override { return !positive() ? Paths { m_paths.front() } : m_paths.mid(1); }
 
-    bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; } // not hole
-    bool closed() const override { return m_path.size()
-            ? m_path.front() == m_path.back()
-            : m_paths.front().front() == m_paths.front().back(); } // front == back
+    bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; }                                                         // not hole
+    bool closed() const override { return m_path.size() ? m_path.front() == m_path.back() : m_paths.front().front() == m_paths.front().back(); } // front == back
 };
 
 struct StepRepeatStr {

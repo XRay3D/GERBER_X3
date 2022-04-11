@@ -29,12 +29,11 @@ public:
 
     // FilePlugin interface
     bool thisIsIt(const QString& fileName) override;
-    QObject* getObject() override;
+    QObject* toObj() override;
     int type() const override;
     QString folderName() const override;
 
     FileInterface* createFile() override;
-    QJsonObject info() const override;
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
@@ -50,7 +49,6 @@ signals:
 
 private:
     File* m_file = nullptr;
-    QIcon drawDrillIcon(QColor color);
 };
 
 } // namespace Dxf

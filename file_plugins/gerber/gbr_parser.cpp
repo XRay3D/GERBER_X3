@@ -11,12 +11,12 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gbrparser.h"
+#include "gbr_parser.h"
 
-#include "gbraperture.h"
-#include "gbrattraperfunction.h"
-#include "gbrattrfilefunction.h"
-#include "gbrfile.h"
+#include "gbr_aperture.h"
+#include "gbr_attraperfunction.h"
+#include "gbr_attrfilefunction.h"
+#include "gbr_file.h"
 
 #include <ctre.hpp> //
 

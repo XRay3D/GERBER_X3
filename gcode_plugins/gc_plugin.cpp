@@ -21,26 +21,23 @@ namespace GCode {
 
 Plugin::Plugin(QObject* parent)
     : QObject(parent) {
-}
-
-bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
-
-QObject* Plugin::getObject() { return this; }
-
-int Plugin::type() const { return int(FileType::GCode); }
-
-QString Plugin::folderName() const { return tr("Tool Paths"); }
-
-FileInterface* Plugin::createFile() { return new File(); }
-
-QJsonObject Plugin::info() const {
-    return QJsonObject {
+    info_ = {
         { "Name", "GCode" },
         { "Version", "1.1" },
         { "VendorAuthor", "X-Ray aka Bakiev Damir" },
         { "Info", "GCode is a static plugin always included with GGEasy." }
     };
 }
+
+bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
+
+QObject* Plugin::toObj() { return this; }
+
+int Plugin::type() const { return int(FileType::GCode); }
+
+QString Plugin::folderName() const { return tr("Tool Paths"); }
+
+FileInterface* Plugin::createFile() { return new File(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 

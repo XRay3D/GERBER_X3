@@ -142,9 +142,9 @@ void PocketRasterForm::createFile() {
         gcp.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     }
 
-    m_tpc->setGcp(gcp);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addRawPaths(wRawPaths);
+    tpc_->setGcp(gcp);
+    tpc_->addPaths(wPaths);
+    tpc_->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }
@@ -188,7 +188,7 @@ void PocketRasterForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void PocketRasterForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void PocketRasterForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
 void PocketRasterForm::editFile(GCode::File* /*file*/) {
 }

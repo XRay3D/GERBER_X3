@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "thermalpreviewitem.h"
+#include "gc_thermalpreviewitem.h"
 
 #include "gc_thvars.h"
 

@@ -36,7 +36,6 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     treeWidget->setIconSize({ 24, 24 });
 
     auto addRows = [](QTreeWidgetItem* twItem, char c, auto map) {
-        qDebug(__FUNCSIG__);
         QFont boldFont = twItem->font(0);
         boldFont.setBold(true);
         twItem->setIcon(0, decoration(Qt::lightGray, c));

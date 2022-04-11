@@ -12,14 +12,14 @@
 
 #include "../tooldatabase/tool.h"
 #include "app.h"
+#include "drill/gc_drillmodel.h"
 #include "ft_view.h"
+#include "myclipper.h"
 #include "settings.h"
 
-#include "drill/gc_drillmodel.h"
-
+#include <QJsonObject>
 #include <QMenu>
 #include <QMessageBox>
-
 #include <memory>
 
 class FileInterface;
@@ -29,7 +29,7 @@ class AbstractThermPrGi;
 class ThParam2;
 
 using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
-using ThermalPreviewGiVec = mvector<std::shared_ptr<AbstractThermPrGi>>;
+using ThermalPreviewGiMap = std::map<int, std::map<QString, mvector<std::pair<const Paths*, IntPoint>>>>; /*mvector<std::shared_ptr<AbstractThermPrGi>>*/
 
 class SettingsTabInterface : public QWidget {
 public:
@@ -45,7 +45,7 @@ class FilePlugin {
 public:
     explicit FilePlugin() { }
     virtual ~FilePlugin() { }
-    virtual QObject* getObject() = 0;
+    virtual QObject* toObj() = 0;
     virtual bool thisIsIt(const QString& fileName) = 0;
     virtual int type() const = 0;
     virtual QString folderName() const = 0;
@@ -54,16 +54,12 @@ public:
         [[maybe_unused]] FileInterface* file,
         [[maybe_unused]] mvector<Row>& data) { return {}; };
 
-    [[nodiscard]] virtual ThermalPreviewGiVec createThermalPreviewGi(
-        [[maybe_unused]] FileInterface* file,
-        [[maybe_unused]] const ThParam2& param,
-        [[maybe_unused]] Tool& tool) { return {}; };
+    [[nodiscard]] virtual ThermalPreviewGiMap createThermalPreviewGi(FileInterface* file, const ThParam2& param) { return {}; };
 
     [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
 
     [[nodiscard]] virtual FileInterface* createFile() = 0;
 
-    [[nodiscard]] virtual QJsonObject info() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
 
     virtual void addToDrillForm(
@@ -90,9 +86,12 @@ public:
     // slots:
     virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
 
+    const QJsonObject& info() const { return info_; }
+    void setInfo(const QJsonObject& info) { info_ = info; }
+
 protected:
+    QJsonObject info_;
     App app;
-    enum { IconSize = 24 };
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.FilePlugin"

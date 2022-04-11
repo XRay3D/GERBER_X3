@@ -31,8 +31,6 @@
 #include <QPainter>
 #include <QTimer>
 
-enum { IconSize = 24 };
-
 Paths offset(const Path& path, double offset, bool fl = false) {
     Paths tmpPpaths;
     ClipperOffset cpOffset;
@@ -367,7 +365,7 @@ void DrillForm::on_pbCreate_clicked() {
 
             if (!pathsMap[toolId].drillPath.empty()) {
                 Path& path = pathsMap[toolId].drillPath;
-                IntPoint point1((Marker::get(Marker::Home)->pos()));
+                IntPoint point1((App::home()->pos()));
                 { // sort by distance
                     size_t counter = 0;
                     while (counter < path.size()) {

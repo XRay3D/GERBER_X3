@@ -9,7 +9,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #pragma once
-#include "gbrtypes.h"
+#include "gbr_types.h"
 
 #include <QtMath>
 #include <numbers>

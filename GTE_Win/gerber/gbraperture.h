@@ -12,7 +12,7 @@
 #ifndef GERBERAPERTURE_H
 #define GERBERAPERTURE_H
 
-#include "gbrvars.h"
+#include "gbr_vars.h"
 
 #include <QMap>
 #include <QtMath>

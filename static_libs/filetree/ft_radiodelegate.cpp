@@ -12,7 +12,7 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #ifdef GBR_
-#include "gbrnode.h"
+#include "gbr_node.h"
 #include "radiodelegate.h"
 #include <QApplication>
 #include <QRadioButton>

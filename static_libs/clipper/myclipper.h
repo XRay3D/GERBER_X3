@@ -12,6 +12,7 @@
 
 #include "clipper.hpp"
 #include <QDebug>
+#include <QIcon>
 #include <QPolygonF>
 
 //QDebug operator<<(QDebug debug, const IntPoint& p)
@@ -34,3 +35,7 @@ void TranslatePath(Path& path, const IntPoint& pos);
 
 void mergeSegments(Paths& paths, double glue = 0.0);
 void mergePaths(Paths& paths, const double dist = 0.0);
+
+enum { IconSize = 24 };
+QIcon drawIcon(const Paths& paths);
+QIcon drawDrillIcon(QColor color = Qt::black);

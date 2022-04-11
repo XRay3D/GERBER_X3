@@ -19,7 +19,7 @@
 #include <QtWin>
 #include <Shlwapi.h>
 #include <clipper/myclipper.h>
-#include <gerber/gbrparser.h>
+#include <gerber/gbr_parser.h>
 #include <wincrypt.h> // For CryptStringToBinary.
 
 #include <signal.h>

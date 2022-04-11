@@ -13,17 +13,16 @@
 *******************************************************************************/
 #include "gc_thermalform.h"
 #include "gc_thermal.h"
-#include "ui_thermalform.h"
-
 #include "gc_thermaldelegate.h"
 #include "gc_thermalmodel.h"
 #include "gc_thermalnode.h"
+#include "gc_thermalpreviewitem.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
-#include "thermalpreviewitem.h"
 #include "toolpch.h"
+#include "ui_thermalform.h"
 #include <myclipper.h>
 
 #include <QCheckBox>
@@ -32,6 +31,7 @@
 #include <QItemSelection>
 #include <QMessageBox>
 #include <QPicture>
+#include <QProgressDialog>
 #include <QTimer>
 
 enum { Size = 24 };
@@ -125,13 +125,9 @@ ThermalForm::ThermalForm(QWidget* parent)
 }
 
 ThermalForm::~ThermalForm() {
-
-#ifdef GERBER
-    par = model->rootItem->child(0)->getParam();
-#endif
     MySettings settings;
     settings.beginGroup("ThermalForm");
-    if (model) {
+    if (model && model->m_data.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
         settings.setValue(model->thParam().tickness, "tickness");
@@ -150,7 +146,7 @@ void ThermalForm::updateFiles() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #else
-    disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #endif
     ui->cbxFile->clear();
 
@@ -161,7 +157,7 @@ void ThermalForm::updateFiles() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #else
-    connect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 #endif
 }
 
@@ -177,7 +173,7 @@ bool ThermalForm::canToShow() {
     return false;
 }
 
-void ThermalForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void ThermalForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
 void ThermalForm::createFile() {
     if (!tool.isValid()) {
@@ -188,7 +184,7 @@ void ThermalForm::createFile() {
     Paths wPaths;
     Pathss wBridgePaths;
 
-    for (auto& item : m_sourcePreview) {
+    for (auto& item : items_) {
         if (item->isValid()) {
             wPaths.append(item->paths());
             wBridgePaths.push_back(item->bridge());
@@ -202,9 +198,9 @@ void ThermalForm::createFile() {
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    m_tpc->setGcp(gpc);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addSupportPaths(wBridgePaths);
+    tpc_->setGcp(gpc);
+    tpc_->addPaths(wPaths);
+    tpc_->addSupportPaths(wBridgePaths);
     fileCount = 1;
     emit createToolpath();
 }
@@ -223,17 +219,17 @@ void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
 void ThermalForm::createTPI(FileInterface* file) {
     if (!file)
         file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
-    m_sourcePreview.clear();
+    items_.clear();
 
     if (model)
         delete ui->treeView->model();
 
     model = new ThermalModel(ui->treeView);
+    model->appendRow(QIcon(), tr("All"), par);
+
     boardSide = file->side();
 
     ThParam2 tp2 {
-        par,
-        model,
         ui->chbxAperture->isChecked(),
         ui->chbxPath->isChecked(),
         ui->chbxPour->isChecked(),
@@ -241,9 +237,32 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->dsbxAreaMin->value() * uScale * uScale
     };
 
-    m_sourcePreview = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2, tool);
+    auto thPaths = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2);
 
-    for (auto& item : m_sourcePreview) {
+    int count {};
+    int ctr {};
+    for (const auto& [key, val] : thPaths)
+        count += val.size();
+
+    QProgressDialog pd("create th", "", 0, count, this);
+    pd.setCancelButton(nullptr);
+
+    for (const auto& [key1, val] : thPaths) {
+        for (const auto& [key, val] : val) {
+            if (!val.size())
+                continue;
+            auto icon = drawIcon(*val.front().first);
+            auto node = model->appendRow(icon, key, par);
+            for (const auto& [paths, pos] : val) {
+                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
+                node->append(new ThermalNode(key1 ? drawIcon(*paths) : QIcon(), "", par, pos, items_.back().get(), model));
+            }
+            qApp->processEvents();
+            pd.setValue(++ctr);
+        }
+    }
+
+    for (auto& item : items_) {
         App::scene()->addItem(item.get());
         connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &ThermalForm::setSelection);
     }
@@ -287,9 +306,8 @@ void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& d
 }
 
 void ThermalForm::redraw() {
-    for (auto item : m_sourcePreview) {
+    for (auto item : items_)
         item->redraw();
-    }
 }
 
 void ThermalForm::on_dsbxDepth_valueChanged(double arg1) {

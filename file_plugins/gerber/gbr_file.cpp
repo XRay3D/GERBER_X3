@@ -11,11 +11,11 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gbrfile.h"
-#include "compitem.h"
+#include "gbr_file.h"
+#include "gbrcomp_item.h"
+#include "gbrcomp_onent.h"
 
 #include "clipper.hpp"
-#include "compitem.h"
 #include "datapathitem.h"
 #include "datasoliditem.h"
 #include "ft_node.h"
@@ -27,17 +27,17 @@
 #include <QSemaphore>
 #include <QThread>
 
-#include "gbrnode.h"
+#include "gbr_node.h"
 
 namespace Gerber {
 
-Path GraphicObject::elipse() const { return m_state.dCode() == D03
-            && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle ?
+Path GraphicObject::elipse() const { return (m_state.dCode() == D03
+                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle) ?
         m_path :
         Path(); } // circle
-Paths GraphicObject::elipseW() const { return m_state.dCode() == D03
-            && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
-            && m_gFile->apertures()->at(m_state.aperture())->withHole() ?
+Paths GraphicObject::elipseW() const { return (m_state.dCode() == D03
+                                                  && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
+                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole()) ?
         m_paths :
         Paths(); }
 

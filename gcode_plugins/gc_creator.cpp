@@ -42,6 +42,8 @@
 #include <future>
 #include <thread>
 
+static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
+
 void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
     if (ps.empty()) {
         return;
@@ -711,7 +713,7 @@ void Creator::setGcp(const GCodeParams& gcp) {
 //}
 
 Paths& Creator::sortB(Paths& src) {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -730,7 +732,7 @@ Paths& Creator::sortB(Paths& src) {
 }
 
 Paths& Creator::sortBE(Paths& src) {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         //PROG //PROG .3setProgMaxAndVal(src.size(), firstIdx);
         size_t swapIdx = firstIdx;
@@ -765,7 +767,7 @@ Paths& Creator::sortBE(Paths& src) {
 }
 
 Pathss& Creator::sortB(Pathss& src) {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(App::home()->pos() + App::zero()->pos());
     for (size_t i = 0; i < src.size(); ++i) {
         if (src[i].empty())
             src.erase(src.begin() + i--);
@@ -788,7 +790,7 @@ Pathss& Creator::sortB(Pathss& src) {
 }
 
 Pathss& Creator::sortBE(Pathss& src) {
-    IntPoint startPt((Marker::get(Marker::Home)->pos() + Marker::get(Marker::Zero)->pos()));
+    IntPoint startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

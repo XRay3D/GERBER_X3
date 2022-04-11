@@ -190,7 +190,7 @@ private:
     FilesMap m_files;
     ShapesMap m_shapes;
     QMutex m_mutex;
-    QString m_fileName;
+    QString fileName_;
     QString m_name;
     bool m_isModified = false;
     bool m_isUntitled = true;

@@ -50,37 +50,15 @@ public:
 #include "gc_odeplugininterface.h"
 #include <QToolBar>
 
-class GCPluginImpl : public QObject, public GCodePlugin {
+class GCPluginImpl : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "hatching.json")
     Q_INTERFACES(GCodePlugin)
 
     // GCodePlugin interface
 public:
-    GCPluginImpl(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
-    int type() const override { return GCode::Hatching; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Crosshatch" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Crosshatch" },
-        };
-    }
-    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
-        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
-            emit setDockWidget(new HatchingForm);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+C"));
-        menu->addAction(action);
-        return action;
-    }
-
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
-
-signals:
-    void setDockWidget(QWidget*) override;
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+C" }; }
+    QWidget* createForm() const override { return new HatchingForm; };
+    int type() const override { return GCode::Hatching; }
 };

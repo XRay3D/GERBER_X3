@@ -100,7 +100,7 @@ ProfileForm::~ProfileForm() {
 }
 
 void ProfileForm::createFile() {
-    m_usedItems.clear();
+    usedItems_.clear();
     const auto tool { ui->toolHolder->tool() };
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -158,7 +158,7 @@ void ProfileForm::createFile() {
     gcp.tools.push_back(tool);
     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     (side == GCode::On) ? gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
-    gcp.params[GCode::GCodeParams::GrItems].setValue(m_usedItems);
+    gcp.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
     {
         QPolygonF brv;
@@ -172,9 +172,9 @@ void ProfileForm::createFile() {
         }
     }
 
-    m_tpc->setGcp(gcp);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addRawPaths(wRawPaths);
+    tpc_->setGcp(gcp);
+    tpc_->addPaths(wPaths);
+    tpc_->addRawPaths(wRawPaths);
     fileCount = 1;
     emit createToolpath();
 }
@@ -242,7 +242,7 @@ void ProfileForm::rb_clicked() {
     updatePixmap();
 }
 
-void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void ProfileForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
 void ProfileForm::editFile(GCode::File* file) {
 
@@ -280,7 +280,7 @@ void ProfileForm::editFile(GCode::File* file) {
     }
 
     { // GrItems
-        m_usedItems.clear();
+        usedItems_.clear();
         auto items { gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
 
         auto i = items.cbegin();

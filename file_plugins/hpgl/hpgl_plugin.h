@@ -31,7 +31,7 @@ public:
 
     // FilePlugin interface
     bool thisIsIt(const QString& fileName) override;
-    QObject* getObject() override;
+    QObject* toObj() override;
     int type() const override;
     QString folderName() const override;
 

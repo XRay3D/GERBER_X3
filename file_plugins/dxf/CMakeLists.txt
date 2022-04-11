@@ -17,39 +17,24 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 add_subdirectory(entities)
 add_subdirectory(section)
 add_subdirectory(tables)
 
-add_library(dxf SHARED
-    dxf.json
-    dxf_block.cpp
-    dxf_block.h
-    dxf_codedata.cpp
-    dxf_codedata.h
-    dxf_file.cpp
-    dxf_file.h
-    dxf_node.cpp
-    dxf_node.h
-    dxf_plugin.cpp
-    dxf_plugin.h
-    dxf_settingstab.cpp
-    dxf_settingstab.h
-    dxf_sourcedialog.cpp
-    dxf_sourcedialog.h
-    dxf_types.cpp
-    dxf_types.h
+add_library(${PROJECT_NAME} SHARED
     ${HEADERS}
+    ${JSONS}
+    ${SOURCES}
     ${SOURCE}
+    ${UIS}
     )
 
 target_link_libraries(dxf PRIVATE
@@ -61,10 +46,6 @@ target_link_libraries(dxf PRIVATE
     tooldatabase
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::OpenGL
+#    Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::Widgets
     )
-
-
-
-#target_compile_definitions(dxf PRIVATE DXF_LIBRARY)

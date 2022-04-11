@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrcomponent.h"
+#include "gbrcomp_onent.h"
 #include <graphicsitem.h>
 
 namespace Gerber {

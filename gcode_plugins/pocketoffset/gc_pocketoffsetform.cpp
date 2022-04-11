@@ -175,9 +175,9 @@ void PocketOffsetForm::createFile() {
     if (ui->sbxSteps->isVisible())
         gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
 
-    m_tpc->setGcp(gcp);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addRawPaths(wRawPaths);
+    tpc_->setGcp(gcp);
+    tpc_->addPaths(wPaths);
+    tpc_->addRawPaths(wRawPaths);
     fileCount = static_cast<int>(gcp.tools.size());
     createToolpath();
 }
@@ -235,7 +235,7 @@ void PocketOffsetForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void PocketOffsetForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void PocketOffsetForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
 void PocketOffsetForm::editFile(GCode::File* /*file*/) {
 }

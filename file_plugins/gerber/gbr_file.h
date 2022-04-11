@@ -9,9 +9,9 @@
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
 #pragma once
-#include "gbraperture.h"
-#include "gbrcomponent.h"
-#include "gbrtypes.h"
+#include "gbr_aperture.h"
+#include "gbr_types.h"
+#include "gbrcomp_onent.h"
 
 #include "file.h"
 #include "itemgroup.h"

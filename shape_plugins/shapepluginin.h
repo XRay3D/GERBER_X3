@@ -84,7 +84,7 @@ public:
 
     explicit ShapePlugin() = default;
     virtual ~ShapePlugin() = default;
-    virtual QObject* getObject() = 0;
+    virtual QObject* toObj() = 0;
     virtual int type() const = 0;
     [[nodiscard]] virtual ShapeInterface* createShape() = 0;
     [[nodiscard]] virtual ShapeInterface* createShape(const QPointF& point) = 0;

@@ -17,8 +17,9 @@ project(GERBER_X3)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
+add_definitions("-D__cpp_consteval")# source_location
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+set_property(GLOBAL PROPERTY CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD 20)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

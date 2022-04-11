@@ -154,7 +154,7 @@ Plugin::Plugin() { }
 
 Plugin::~Plugin() { }
 
-QObject* Plugin::getObject() { return this; }
+QObject* Plugin::toObj() { return this; }
 
 int Plugin::type() const { return static_cast<int>(GiType::ShCirArc); }
 

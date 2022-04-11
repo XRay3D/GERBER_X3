@@ -11,13 +11,13 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "compview.h"
-#include "compitem.h"
-#include "compmodel.h"
-#include "compnode.h"
+#include "gbrcomp_view.h"
+#include "gbrcomp_node.h"
+#include "gbrcomp_item.h"
+#include "gbrcomp_model.h"
 
 #include "app.h"
-#include "gbrcomponent.h"
+#include "gbrcomp_onent.h"
 #include "graphicsview.h"
 #include <QDebug>
 #include <QGraphicsRectItem>

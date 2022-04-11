@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrparser.h"
+#include "gbr_parser.h"
 
 #include "pluginfile.h"
 
@@ -28,17 +28,17 @@ public:
     Plugin(QObject* parent = nullptr);
 
     bool thisIsIt(const QString& fileName) override;
-    QObject* getObject() override;
+    QObject* toObj() override;
     int type() const override;
     QString folderName() const override;
 
     FileInterface* createFile() override;
-    QJsonObject info() const override;
+
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
     DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
-    ThermalPreviewGiVec createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool) override;
+    ThermalPreviewGiMap createThermalPreviewGi(FileInterface* file, const ThParam2& tp2) override;
 
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
@@ -47,9 +47,5 @@ signals:
     void fileReady(FileInterface* file) override;
     void fileProgress(const QString& fileName, int max, int value) override;
     void fileError(const QString& fileName, const QString& error) override;
-
-private:
-    QIcon drawApertureIcon(AbstractAperture* aperture) const;
-    QIcon drawRegionIcon(const GraphicObject& go) const;
 };
 } // namespace Gerber

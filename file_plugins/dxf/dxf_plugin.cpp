@@ -158,18 +158,6 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return m_file;
 }
 
-QIcon Plugin::drawDrillIcon(QColor color) {
-    QPixmap pixmap(IconSize, IconSize);
-    pixmap.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(color);
-    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
-    return QIcon(pixmap);
-}
-
 bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -194,22 +182,13 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-QObject* Plugin::getObject() { return this; }
+QObject* Plugin::toObj() { return this; }
 
 int Plugin::type() const { return int(FileType::Dxf); }
 
 QString Plugin::folderName() const { return tr("Dxf Files"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
-
-QJsonObject Plugin::info() const {
-    return QJsonObject {
-        { "Name", "Dxf" },
-        { "Version", "1.1" },
-        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Opening DXF Files" }
-    };
-}
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
 

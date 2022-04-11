@@ -335,22 +335,22 @@ HEADERS  += \
     file_plugins\excellon\exparser.h \
     file_plugins\excellon\explugin.h \
     file_plugins\excellon\extypes.h \
-    file_plugins\gerber\compdialog.h \
-    file_plugins\gerber\compitem.h \
-    file_plugins\gerber\compmodel.h \
-    file_plugins\gerber\compnode.h \
-    file_plugins\gerber\compview.h \
-    file_plugins\gerber\gbraperture.h \
-    file_plugins\gerber\gbrattraperfunction.h \
-    file_plugins\gerber\gbrattrfilefunction.h \
-    file_plugins\gerber\gbrattributes.h \
-    file_plugins\gerber\gbrcomponent.h \
-    file_plugins\gerber\gbrfile.h \
-    file_plugins\gerber\gbrh.h \
-    file_plugins\gerber\gbrnode.h \
-    file_plugins\gerber\gbrparser.h \
-    file_plugins\gerber\gbrplugin.h \
-    file_plugins\gerber\gbrtypes.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbr_aperture.h \
+    file_plugins\gerber\gbr_attraperfunction.h \
+    file_plugins\gerber\gbr_attrfilefunction.h \
+    file_plugins\gerber\gbr_attributes.h \
+    file_plugins\gerber\gbrcomp_onent.h \
+    file_plugins\gerber\gbr_file.h \
+    file_plugins\gerber\gbr_h.h \
+    file_plugins\gerber\gbr_node.h \
+    file_plugins\gerber\gbr_parser.h \
+    file_plugins\gerber\gbr_plugin.h \
+    file_plugins\gerber\gbr_types.h \
     file_plugins\gerber\mathparser.h \
     file_plugins\hpgl\hpgl_file.h \
     file_plugins\hpgl\hpgl_node.h \

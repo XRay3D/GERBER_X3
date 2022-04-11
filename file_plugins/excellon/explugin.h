@@ -28,12 +28,11 @@ public:
     Plugin(QObject* parent = nullptr);
 
     bool thisIsIt(const QString& fileName) override;
-    QObject* getObject() override;
+    QObject* toObj() override;
     int type() const override;
     QString folderName() const override;
 
     FileInterface* createFile() override;
-    QJsonObject info() const override;
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
@@ -46,8 +45,5 @@ signals:
     void fileReady(FileInterface* file) override;
     void fileProgress(const QString& fileName, int max, int value) override;
     void fileError(const QString& fileName, const QString& error) override;
-
-private:
-    QIcon drawDrillIcon();
 };
 } // namespace Excellon

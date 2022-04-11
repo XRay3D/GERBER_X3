@@ -143,9 +143,9 @@ void HatchingForm::createFile() {
     //        gcp.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    m_tpc->setGcp(gcp);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addRawPaths(wRawPaths);
+    tpc_->setGcp(gcp);
+    tpc_->addPaths(wPaths);
+    tpc_->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }
@@ -189,7 +189,7 @@ void HatchingForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void HatchingForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+void HatchingForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
 void HatchingForm::editFile(GCode::File* /*file*/) {
 }

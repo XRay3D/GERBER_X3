@@ -112,7 +112,7 @@ public:
 
     // ShapePluginTextInterface interface
 public:
-    QObject* getObject() override;
+    QObject* toObj() override;
     int type() const override;
     QJsonObject info() const override;
     QIcon icon() const override;

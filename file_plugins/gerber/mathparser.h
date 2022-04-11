@@ -14,7 +14,7 @@
  */
 #pragma once
 
-#include "gbrtypes.h"
+#include "gbr_types.h"
 
 #include <QMap>
 #include <QObject>
