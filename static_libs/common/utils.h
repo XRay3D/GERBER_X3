@@ -13,7 +13,7 @@ using minutes__ = std::ratio<60>;
 using hours__ = std::ratio<3600>;
 using std::is_same_v;
 template <class T = seconds__>
-requires                          //
+requires                            //
     is_same_v<T, nanoseconds__> ||  //
     is_same_v<T, microseconds__> || //
     is_same_v<T, milliseconds__> || //

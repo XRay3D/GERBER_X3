@@ -11,11 +11,12 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gbrplugin.h"
+#include "gbr_plugin.h"
 
-#include "gbraperture.h"
-#include "gbrfile.h"
-#include "gbrnode.h"
+#include "../gcode_plugins/thermal/gc_thvars.h"
+#include "gbr_aperture.h"
+#include "gbr_file.h"
+#include "gbr_node.h"
 
 #include "doublespinbox.h"
 #include "drillpreviewgi.h"
@@ -23,10 +24,6 @@
 #include "settings.h"
 #include "toolpch.h"
 #include "utils.h"
-
-//#include <thermalmodel.h>
-//#include <thermalnode.h>
-#include <thermalpreviewitem.h>
 
 //#include <QtConcurrent>
 #include <QtWidgets>
@@ -55,7 +52,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return file;
 }
 
-QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const {
+QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath;
     for (QPolygonF polygon : aperture->draw(State()))
         painterPath.addPolygon(polygon);
@@ -81,40 +78,6 @@ QIcon Plugin::drawApertureIcon(AbstractAperture* aperture) const {
     return QIcon(pixmap);
 }
 
-QIcon Plugin::drawRegionIcon(const GraphicObject& go) const {
-    static QMutex m;
-    QMutexLocker l(&m);
-
-    QPainterPath painterPath;
-
-    for (QPolygonF polygon : go.paths())
-        painterPath.addPolygon(polygon);
-
-    const QRectF rect = painterPath.boundingRect();
-
-    double scale = static_cast<double>(IconSize) / qMax(rect.width(), rect.height());
-
-    double ky = rect.bottom() * scale;
-    double kx = rect.left() * scale;
-    if (rect.width() > rect.height())
-        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
-    else
-        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
-
-    QPixmap pixmap(IconSize, IconSize);
-    pixmap.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::black);
-    //    painter.translate(tr);
-    painter.translate(-kx, ky);
-    painter.scale(scale, -scale);
-    painter.drawPath(painterPath);
-    return QIcon(pixmap);
-}
-
 bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
@@ -130,22 +93,13 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-QObject* Plugin::getObject() { return this; }
+QObject* Plugin::toObj() { return this; }
 
 int Plugin::type() const { return int(FileType::Gerber); }
 
 QString Plugin::folderName() const { return tr("Gerber Files"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
-
-QJsonObject Plugin::info() const {
-    return QJsonObject {
-        { "Name", "Gerber X3" },
-        { "Version", "1.2" },
-        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Opening GerberX3 files, with support for all kinds of aperture macros and components." },
-    };
-}
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 
@@ -222,7 +176,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 }
 
 void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
-    if (static_cast<File*>(file)->flashedApertures()) {
+    if (static_cast<File*>(file)->flashedApertures() && cbx) {
         cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         QPixmap pixmap(IconSize, IconSize);
         QColor color(file->color());
@@ -317,174 +271,80 @@ DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>
     return giPeview;
 }
 
-// FIXME GC class ThermalPreviewItem final : public AbstractThermPrGi {
-//    const GraphicObject& grob;
+ThermalPreviewGiMap Plugin::createThermalPreviewGi(FileInterface* file, const ThParam2& param) {
+    ThermalPreviewGiMap sourcePreview;
+    auto gbrFile = static_cast<File*>(file);
 
-//public:
-//    ThermalPreviewItem(const GraphicObject& go, Tool& tool)
-//        : AbstractThermPrGi(tool)
-//        , grob(go) {
-//        for (QPolygonF polygon : grob.paths()) {
-//            polygon.append(polygon.first());
-//            sourcePath.addPolygon(polygon);
-//        }
-//    }
-//    IntPoint pos() const override { return grob.state().curPos(); }
-//    Paths paths() const override { return grob.paths(); }
-//    void redraw() override {
-//        if (double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
-//            diameter = d;
-//            ClipperOffset offset;
-//            offset.AddPaths(grob.paths(), jtRound, etClosedPolygon);
-//            offset.Execute(cashedPath, diameter * uScale * 0.5); // toolpath
-//            offset.Clear();
-//            offset.AddPaths(cashedPath, jtMiter, etClosedLine);
-//            offset.Execute(cashedFrame, diameter * uScale * 0.1); // frame
-//            for (Path& path : cashedPath)
-//                path.push_back(path.front());
-//        }
-//        if (qFuzzyIsNull(m_node->tickness()) && m_node->count()) {
-//            m_bridge.clear();
-//        } else {
-//            Clipper clipper;
-//            clipper.AddPaths(cashedFrame, ptSubject, true);
-//            const auto rect(sourcePath.boundingRect());
-//            const IntPoint& center(rect.center());
-//            const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
-//            const auto fp(sourcePath.toFillPolygons());
-//            for (int i = 0; i < m_node->count(); ++i) { // Gaps
-//                ClipperOffset offset;
-//                double angle = i * 2 * pi / m_node->count() + qDegreesToRadians(m_node->angle());
-//                offset.AddPath({ center,
-//                                   IntPoint(
-//                                       static_cast<cInt>((cos(angle) * radius) + center.X),
-//                                       static_cast<cInt>((sin(angle) * radius) + center.Y)) },
-//                    jtSquare, etOpenButt);
-//                Paths paths;
-//                offset.Execute(paths, (m_node->tickness() + diameter) * uScale * 0.5);
-//                clipper.AddPath(paths.front(), ptClip, true);
-//            }
-//            clipper.Execute(ctIntersection, m_bridge, pftPositive);
-//        }
-//        { // cut
-//            Clipper clipper;
-//            clipper.AddPaths(cashedPath, ptSubject, false);
-//            clipper.AddPaths(m_bridge, ptClip, true);
-//            clipper.Execute(ctDifference, previewPaths, pftPositive);
-//        }
-//        painterPath = QPainterPath();
-//        for (QPolygonF polygon : previewPaths) {
-//            painterPath.moveTo(polygon.first());
-//            for (QPointF& pt : polygon)
-//                painterPath.lineTo(pt);
-//        }
-//        if (isEmpty == -1)
-//            isEmpty = previewPaths.empty();
-//        if (static_cast<bool>(isEmpty) != previewPaths.empty()) {
-//            isEmpty = previewPaths.empty();
-//            changeColor();
-//        }
-//        update();
-//    }
-//};
+    auto testArea = [&param](const Paths& paths) {
+        const double areaMax = param.areaMax;
+        const double areaMin = param.areaMin;
+        const double area = Area(paths);
+        return areaMin <= area && area <= areaMax;
+    };
 
-ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const ThParam2& param, Tool& tool) {
-    ThermalPreviewGiVec m_sourcePreview;
-    // FIXME GC     auto gbrFile = static_cast<File*>(file);
+    const ApertureMap& m_apertures = *gbrFile->apertures();
+    /////////////////////////////////////////////////////
+    if (param.aperture) {
+        std::map<int, mvector<std::pair<const Paths*, IntPoint>>*> thermalNodes;
 
-    //    const ApertureMap& m_apertures = *gbrFile->apertures();
+        for (const auto [dCode, aperture] : m_apertures) {
+            if (aperture->flashed() && testArea(aperture->draw({}))) {
+                thermalNodes.emplace(dCode, &sourcePreview[0][aperture->name()]);
+                //                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), aperture->name(), param.par);
+            }
+        }
+        for (const auto& [dCode, aperture] : m_apertures) {
+            if (aperture->flashed() && testArea(aperture->draw({}))) {
+                for (GraphicObject& go : gbrFile->m_graphicObjects) {
+                    if (thermalNodes.contains(dCode)
+                        && go.state().dCode() == D03
+                        && go.state().aperture() == dCode) {
+                        thermalNodes[dCode]->emplace_back(&go.paths(), go.state().curPos());
+                        //                            workers.emplace_back(&go, thermalNodes[dCode], "", ctr++);
+                    }
+                }
+            }
+        }
+    }
+    /////////////////////////////////////////////////////
+    if (param.path) {
+        auto& mv = sourcePreview[1][tr("Lines")];
 
-    //    struct Worker {
-    //        const GraphicObject* go;
-    //        ThermalNode* node;
-    //        QString name;
-    //        int strageIdx = -1;
-    //    };
-
-    //    param.model->appendRow(QIcon(), tr("All"), param.par);
-
-    //    mvector<Worker> workers;
-    //    auto creator = [this, &m_sourcePreview, &tool, &param](Worker w) {
-    //        static QMutex m;
-    //        auto& [go, node, name, strageIdx] = w;
-    //        auto item = std::make_shared<ThermalPreviewItem>(*go, tool);
-    //        //connect(item, &ThermalPreviewItem::selectionChanged, this, &ThermalForm::setSelection);
-    //        item->setToolTip(name);
-    //        QMutexLocker lock(&m);
-    //        m_sourcePreview.push_back(item);
-    //        node->append(new ThermalNode(drawRegionIcon(*go), name, param.par, go->state().curPos(), item.get(), param.model));
-    //    };
-
-    //    enum {
-    //        Region = -2,
-    //        Line
-    //    };
-
-    //    int ctr = 0;
-
-    //    auto testArea = [&param](const Paths& paths) {
-    //        const double areaMax = param.areaMax;
-    //        const double areaMin = param.areaMin;
-    //        const double area = Area(paths);
-    //        return areaMin <= area && area <= areaMax;
-    //    };
-
-    //    using ThermalNodes = std::map<int, ThermalNode*>;
-
-    //    ThermalNodes thermalNodes;
-    //    if (param.perture) {
-    //        for (auto [dCode, aperture] : m_apertures) {
-    //            if (aperture->flashed() && testArea(aperture->draw({}))) {
-    //                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), aperture->name(), param.par);
-    //            }
-    //        }
-    //        for (auto [dCode, aperture] : m_apertures) {
-    //            if (aperture->flashed()) {
-    //                for (const GraphicObject& go : gbrFile->m_graphicObjects) {
-    //                    if (thermalNodes.contains(dCode)
-    //                        && go.state().dCode() == D03
-    //                        && go.state().aperture() == dCode) {
-    //                        workers.emplace_back(&go, thermalNodes[dCode], "", ctr++);
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    if (param.path) {
-    //        thermalNodes[Line] = param.model->appendRow(QIcon(), tr("Lines"), param.par);
-    //        for (const GraphicObject& go : gbrFile->m_graphicObjects) {
-    //            if (go.state().type() == PrimitiveType::Line
-    //                && go.state().imgPolarity() == Positive
-    //                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
-    //                && go.path().front().distTo(go.path().back()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
-    //                && testArea(go.paths())) {
-    //                workers.emplace_back(&go, thermalNodes[Line], tr("Line"), ctr++);
-    //            }
-    //        }
-    //    }
-
-    //    if (param.pour) {
-    //        thermalNodes[Region] = param.model->appendRow(QIcon(), tr("Regions"), param.par);
-    //        mvector<const GraphicObject*> gos;
-    //        for (const GraphicObject& go : gbrFile->m_graphicObjects) {
-    //            if (go.state().type() == PrimitiveType::Region
-    //                && go.state().imgPolarity() == Positive
-    //                && testArea(go.paths())) {
-    //                gos.push_back(&go);
-    //            }
-    //        }
-    //        std::sort(gos.begin(), gos.end(), [](const GraphicObject* go1, const GraphicObject* go2) {
-    //            //            return go1->paths() < go2->paths();
-    //            return go1->state().curPos() < go2->state().curPos();
-    //        });
-    //        for (auto& go : gos) {
-    //            workers.emplace_back(go, thermalNodes[Region], tr("Region"), ctr++);
-    //        }
-    //    }
+        //            thermalNodes[Line] = param.model->appendRow(QIcon(), tr("Lines"), param.par);
+        for (/*const*/ GraphicObject& go : gbrFile->m_graphicObjects) {
+            if (go.state().type() == PrimitiveType::Line
+                && go.state().imgPolarity() == Positive
+                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
+                && go.path().front().distTo(go.path().back()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
+                && testArea(go.paths())) {
+                mv.emplace_back(&go.paths(), IntPoint {});
+                //                workers.emplace_back(&go, thermalNodes[Line], tr("Line"), ctr++);
+            }
+        }
+    }
+    /////////////////////////////////////////////////////
+    if (param.pour) {
+        auto& mv = sourcePreview[2][tr("Regions")];
+        //        thermalNodes[Region] = param.model->appendRow(QIcon(), tr("Regions"), param.par);
+        mvector<const GraphicObject*> gos;
+        for (const GraphicObject& go : gbrFile->m_graphicObjects) {
+            if (go.state().type() == PrimitiveType::Region
+                && go.state().imgPolarity() == Positive
+                && testArea(go.paths())) {
+                gos.push_back(&go);
+            }
+        }
+        std::ranges::sort(gos, {}, [](const GraphicObject* go1) {
+            //            return go1->paths() < go2->paths();
+            return go1->state().curPos();
+        });
+        for (auto& go : gos) {
+            mv.emplace_back(&go->paths(), IntPoint {});
+            //            workers.emplace_back(go, thermalNodes[Region], tr("Region"), ctr++);
+        }
+    }
 
     //    std::vector<std::future<void>> futures;
-
     //    for (size_t i = 0, c = QThread::idealThreadCount(); i < workers.size(); i += c) {
     //        futures.clear();
     //        for (auto&& wr : workers.mid(i, c))
@@ -493,7 +353,7 @@ ThermalPreviewGiVec Plugin::createThermalPreviewGi(FileInterface* file, const Th
     //            future.wait();
     //    }
 
-    return m_sourcePreview;
+    return sourcePreview;
 }
 
 } // namespace Gerber

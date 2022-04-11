@@ -17,11 +17,9 @@ struct ThParam {
 };
 
 class ThermalModel;
-class ThParam2 {
-public:
-    ThParam par;
-    ThermalModel* model = nullptr;
-    bool perture = false;
+
+struct ThParam2 {
+    bool aperture = false;
     bool path = false;
     bool pour = false;
     double areaMax = 0.0;

@@ -45,37 +45,15 @@ public:
 #include "gc_odeplugininterface.h"
 #include <QToolBar>
 
-class GCPluginImpl : public QObject, public GCodePlugin {
+class GCPluginImpl : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "voronoi.json")
     Q_INTERFACES(GCodePlugin)
 
     // GCodePlugin interface
 public:
-    GCPluginImpl(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
     int type() const override { return GCode::Voronoi; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Voronoi" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Voronoi" },
-        };
-    }
-    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
-        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
-            emit setDockWidget(new VoronoiForm);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+V"));
-        menu->addAction(action);
-        return action;
-    }
-
+    QWidget* createForm() const override { return new VoronoiForm; };
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+V" }; }
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
-
-signals:
-    void setDockWidget(QWidget*) override;
 };

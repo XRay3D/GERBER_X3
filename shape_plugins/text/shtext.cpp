@@ -302,7 +302,7 @@ PluginText::PluginText() { }
 
 PluginText::~PluginText() { }
 
-QObject* PluginText::getObject() { return this; }
+QObject* PluginText::toObj() { return this; }
 
 int PluginText::type() const { return static_cast<int>(GiType::ShText); }
 

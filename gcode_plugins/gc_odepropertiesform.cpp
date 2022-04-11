@@ -40,10 +40,10 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
 
     connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setGlue);
 
-    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Home), &Marker::setPosX);
-    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Home), &Marker::setPosY);
-    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Zero), &Marker::setPosX);
-    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), Marker::get(Marker::Zero), &Marker::setPosY);
+    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &Marker::setPosX);
+    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &Marker::setPosY);
+    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &Marker::setPosX);
+    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &Marker::setPosY);
 
     if (App::project()) {
         connect(ui->dsbxSpaceX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
@@ -75,11 +75,11 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     settings.getValue(ui->dsbxGlue, 0.05);
     settings.endGroup();
 
-    ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
-    ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
+    ui->dsbxHomeX->setValue(App::home()->pos().x());
+    ui->dsbxHomeY->setValue(App::home()->pos().y());
 
-    ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
-    ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
+    ui->dsbxZeroX->setValue(App::zero()->pos().x());
+    ui->dsbxZeroY->setValue(App::zero()->pos().y());
 
     App::project()->setSafeZ(ui->dsbxSafeZ->value());
     App::project()->setBoardThickness(ui->dsbxThickness->value());
@@ -120,10 +120,10 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
 GCodePropertiesForm::~GCodePropertiesForm() {
     App::setGCodePropertiesForm(nullptr);
 
-    if (Marker::get(Marker::Home))
-        Marker::get(Marker::Home)->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
-    if (Marker::get(Marker::Zero))
-        Marker::get(Marker::Zero)->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
+    if (App::home())
+        App::home()->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
+    if (App::zero())
+        App::zero()->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;
     settings.beginGroup("GCodePropertiesForm");
@@ -145,10 +145,10 @@ GCodePropertiesForm::~GCodePropertiesForm() {
 }
 
 void GCodePropertiesForm::updatePosDsbxs() {
-    ui->dsbxHomeX->setValue(Marker::get(Marker::Home)->pos().x());
-    ui->dsbxHomeY->setValue(Marker::get(Marker::Home)->pos().y());
-    ui->dsbxZeroX->setValue(Marker::get(Marker::Zero)->pos().x());
-    ui->dsbxZeroY->setValue(Marker::get(Marker::Zero)->pos().y());
+    ui->dsbxHomeX->setValue(App::home()->pos().x());
+    ui->dsbxHomeY->setValue(App::home()->pos().y());
+    ui->dsbxZeroX->setValue(App::zero()->pos().x());
+    ui->dsbxZeroY->setValue(App::zero()->pos().y());
 }
 
 void GCodePropertiesForm::updateAll() {

@@ -11,12 +11,12 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "compmodel.h"
-#include "compdialog.h"
-#include "compnode.h"
+#include "gbrcomp_model.h"
+#include "gbrcomp_node.h"
+#include "gbrcomp_onent.h"
 
 #include "app.h"
-#include "gbrfile.h"
+#include "gbr_file.h"
 #include "project.h"
 
 #include <ctre.hpp>

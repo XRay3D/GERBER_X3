@@ -12,8 +12,8 @@
 #ifndef GERBERPARSER_H
 #define GERBERPARSER_H
 
-#include "gbraperture.h"
-#include "gbrvars.h"
+#include "gbr_aperture.h"
+#include "gbr_vars.h"
 #include <QObject>
 #include <QStack>
 

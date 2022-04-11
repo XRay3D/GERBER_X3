@@ -38,7 +38,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <gbrvars.h>
+#include <gbr_vars.h>
 #include <ostream>
 #include <stdexcept>
 #include <vector>

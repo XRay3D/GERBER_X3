@@ -13,7 +13,9 @@
 #include <myclipper.h>
 
 struct AbstrGraphicObject {
-    AbstrGraphicObject() { }
+    Paths m_paths;
+    AbstrGraphicObject(const Paths& m_paths)
+        : m_paths { m_paths } { }
     virtual ~AbstrGraphicObject() { }
 
     virtual Path line() const = 0;  //{ return {}; }
@@ -65,4 +67,5 @@ struct LayerType {
     QString actToolTip;
     QString shortActName() const { return actName; }
 };
+
 Q_DECLARE_METATYPE(LayerType)

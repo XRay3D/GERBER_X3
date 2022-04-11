@@ -74,7 +74,8 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
             updateGuard = true;
             for (auto node : qAsConst(childItems))
                 node->setData(index, value, role);
-            emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), { role });
+            if (childItems.size())
+                emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), { role });
             updateGuard = false;
         } else {
             if (!updateGuard)

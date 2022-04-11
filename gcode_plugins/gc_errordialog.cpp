@@ -29,7 +29,7 @@
 
 Q_DECLARE_METATYPE(ErrorItem*)
 
-enum { IconSize = 32 };
+//enum { IconSize = 32 };
 
 QIcon errorIcon(const QPainterPath& path) {
 
@@ -55,7 +55,7 @@ QIcon errorIcon(const QPainterPath& path) {
     painter.translate(-kx, ky);
     painter.scale(scale, -scale);
     painter.drawPath(path);
-    return QIcon(pixmap);
+    return pixmap;
 }
 
 class ErrorModel : public QAbstractTableModel {
@@ -79,7 +79,7 @@ public:
                 auto pos { items[index.row()]->boundingRect().center() };
                 return QString("X = %1\nY = %2").arg(pos.x()).arg(pos.y());
             }
-            return {};// FIXME items[index.row()]->area();
+            return items[index.row()]->area();
         case Qt::UserRole:
             return QVariant::fromValue(items[index.row()]);
         case Qt::DecorationRole:

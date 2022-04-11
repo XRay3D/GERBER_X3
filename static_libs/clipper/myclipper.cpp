@@ -232,3 +232,54 @@ void mergePaths(Paths& paths, const double dist) {
         } while (max != paths.size());
     }
 }
+
+#include <QMutex>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
+
+QIcon drawIcon(const Paths& paths) {
+    static QMutex m;
+    QMutexLocker l(&m);
+
+    QPainterPath painterPath;
+
+    for (const QPolygonF &polygon : paths)
+        painterPath.addPolygon(polygon);
+
+    const QRectF rect = painterPath.boundingRect();
+
+    double scale = static_cast<double>(IconSize) / qMax(rect.width(), rect.height());
+
+    double ky = rect.bottom() * scale;
+    double kx = rect.left() * scale;
+    if (rect.width() > rect.height())
+        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
+    else
+        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
+
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    //    painter.translate(tr);
+    painter.translate(-kx, ky);
+    painter.scale(scale, -scale);
+    painter.drawPath(painterPath);
+    return pixmap;
+}
+
+QIcon drawDrillIcon(QColor color) {
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(color);
+    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
+    return pixmap;
+}

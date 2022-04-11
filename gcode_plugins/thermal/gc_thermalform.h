@@ -49,7 +49,7 @@ private:
 
     void createTPI(FileInterface* file);
 
-    mvector<std::shared_ptr<AbstractThermPrGi>> m_sourcePreview;
+    mvector<std::shared_ptr<AbstractThermPrGi>> items_;
 
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -76,38 +76,16 @@ public:
 #include "gc_odeplugininterface.h"
 #include <QToolBar>
 
-class GCPluginImpl : public QObject, public GCodePlugin {
+class GCPluginImpl : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
     Q_INTERFACES(GCodePlugin)
 
     // GCodePlugin interface
 public:
-    GCPluginImpl(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
-    int type() const override { return GCode::Thermal; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Thermal" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Thermal" },
-        };
-    }
-    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
-        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
-            if (ThermalForm::canToShow())
-                emit setDockWidget(new ThermalForm);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+T"));
-        menu->addAction(action);
-        return action;
-    }
-
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
-
-signals:
-    void setDockWidget(QWidget*) override;
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+T" }; }
+    QWidget* createForm() const override { return new ThermalForm; };
+    bool canToShow() const { return ThermalForm::canToShow(); }
+    int type() const override { return GCode::Thermal; }
 };

@@ -48,7 +48,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-QObject* Plugin::getObject() { return this; }
+QObject* Plugin::toObj() { return this; }
 
 int Plugin::type() const { return int(FileType::Hpgl); }
 

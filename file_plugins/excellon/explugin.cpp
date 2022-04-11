@@ -22,8 +22,8 @@
 #include "doublespinbox.h"
 #include "drillitem.h"
 #include "drillpreviewgi.h"
-#include "ft_view.h"
 #include "file.h"
+#include "ft_view.h"
 #include "utils.h"
 
 #include <QComboBox>
@@ -46,18 +46,6 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     QTextStream in(&file);
     Parser::parseFile(fileName);
     return Parser::file;
-}
-
-QIcon Plugin::drawDrillIcon() {
-    QPixmap pixmap(IconSize, IconSize);
-    pixmap.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::black);
-    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
-    return QIcon(pixmap);
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
@@ -86,22 +74,13 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-QObject* Plugin::getObject() { return this; }
+QObject* Plugin::toObj() { return this; }
 
 int Plugin::type() const { return int(FileType::Excellon); }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
-
-QJsonObject Plugin::info() const {
-    return QJsonObject {
-        { "Name", "Excellon" },
-        { "Version", "1.2" },
-        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Opening drill files like Excellon" },
-    };
-}
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
 

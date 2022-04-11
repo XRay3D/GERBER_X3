@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "compitem.h"
+#include "gbrcomp_item.h"
 
 #include "graphicsview.h"
 #include "file.h"

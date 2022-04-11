@@ -53,37 +53,15 @@ public:
 #include "gc_odeplugininterface.h"
 #include <QToolBar>
 
-class GCPluginImpl : public QObject, public GCodePlugin {
+class GCPluginImpl : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketraster.json")
     Q_INTERFACES(GCodePlugin)
 
     // GCodePlugin interface
 public:
-    GCPluginImpl(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
-    int type() const override { return GCode::Raster; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Pocket Raster" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Pocket Raster" },
-        };
-    }
-    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
-        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
-            emit setDockWidget(new PocketRasterForm);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+R"));
-        menu->addAction(action);
-        return action;
-    }
-
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
-
-signals:
-    void setDockWidget(QWidget*) override;
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+R" }; }
+    QWidget* createForm() const override { return new PocketRasterForm; };
+    int type() const override { return GCode::Raster; }
 };

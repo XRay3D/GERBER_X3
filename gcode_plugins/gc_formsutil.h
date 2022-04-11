@@ -46,14 +46,14 @@ protected:
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
 
-    GCode::Creator* const m_tpc;
+    GCode::Creator* const tpc_;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
-    UsedItems m_usedItems;
+    UsedItems usedItems_;
     Side boardSide = Top;
     void addUsedGi(GraphicsItem* gi);
 
-    QString m_fileName;
+    QString fileName_;
 
     bool m_editMode = false;
     int fileId = -1;
@@ -68,7 +68,7 @@ private:
     void stopProgress();
 
     QThread thread;
-    GCode::File* m_file;
+    GCode::File* file_;
     QProgressDialog* progressDialog;
     int progressTimerId = 0;
     int flikerTimerId = 0;

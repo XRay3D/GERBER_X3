@@ -16,6 +16,8 @@
 #include <QPropertyAnimation>
 #include <QVector>
 
+#include <gerber/gbr_types.h>
+
 //class QParallelAnimationGroup;
 class ThermalNodeI;
 class Tool;
@@ -124,4 +126,15 @@ protected:
 
     double diameter;
     int isEmpty = -1;
+};
+
+class ThermalPreviewItem final : public AbstractThermPrGi {
+    const Paths* paths_;
+    const IntPoint pos_;
+
+public:
+    ThermalPreviewItem(const Paths* paths, const IntPoint pos, Tool& tool);
+    IntPoint pos() const override;
+    Paths paths() const override;
+    void redraw() override;
 };

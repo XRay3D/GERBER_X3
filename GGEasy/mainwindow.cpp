@@ -70,10 +70,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->graphicsView->scene()->addItem(new Pin());
     ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
-    // FIXME GC GCodePropertiesForm(); // init default vars;
+    GCodePropertiesForm(); // init default vars;
 
-    connect(m_project, &Project::homePosChanged, Marker::get(Marker::Home), qOverload<const QPointF&>(&Marker::setPos));
-    connect(m_project, &Project::zeroPosChanged, Marker::get(Marker::Zero), qOverload<const QPointF&>(&Marker::setPos));
+    connect(m_project, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&Marker::setPos));
+    connect(m_project, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&Marker::setPos));
     connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Pin::setPos));
     connect(m_project, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
@@ -83,12 +83,12 @@ MainWindow::MainWindow(QWidget* parent)
     for (auto& [type, ptr] : App::filePlugins()) {
         if (ptr->type() == int(FileType::GCode))
             continue;
-        ptr->getObject()->moveToThread(&parserThread);
-        connect(ptr->getObject(), SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
-        connect(ptr->getObject(), SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
-        connect(ptr->getObject(), SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
-        connect(this, SIGNAL(parseFile(const QString&, int)), ptr->getObject(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
-        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr->getObject(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        ptr->toObj()->moveToThread(&parserThread);
+        connect(ptr->toObj(), SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
+        connect(ptr->toObj(), SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
+        connect(ptr->toObj(), SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
+        connect(this, SIGNAL(parseFile(const QString&, int)), ptr->toObj(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr->toObj(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -143,6 +143,9 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
+
+        if (1)
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->triggered(); });
     }
 }
 
@@ -331,8 +334,8 @@ void MainWindow::createActionsService() {
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
             Pin::resetPos(false);
-            Marker::get(Marker::Home)->resetPos(false);
-            Marker::get(Marker::Zero)->resetPos(false);
+            App::home()->resetPos(false);
+            App::zero()->resetPos(false);
         }
         ui->graphicsView->zoomFit();
     }));
@@ -432,60 +435,10 @@ void MainWindow::createActionsToolPath() {
 
     for (auto& [type, ptr] : App::gCodePlugins()) {
         auto action = ptr->addAction(menu, toolpathToolBar);
-        toolpathActions.emplace(type, action);
-        connect(ptr->getObject(), SIGNAL(setDockWidget(QWidget*)), this, SLOT(setDockWidget(QWidget*)));
-    }
-
-    // FIXME GC
-    //    // Profile
-    //    auto action = toolpathToolBar->addAction(QIcon::fromTheme("profile-path"), tr("Pro&file"), [this] { createDockWidget<ProfileForm>(); });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+F"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Profile, action);
-
-    //    // Pocket
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("pocket-path"), tr("&Pocket"), [this] { createDockWidget<PocketOffsetForm>(); });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+P"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Pocket, action);
-
-    //    // Pocket Raster
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("raster-path"), tr("&PocketR"), [this] { createDockWidget<PocketRasterForm>(); });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+R"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Raster, action);
-
-    //    // Voronoi
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("voronoi-path"), tr("&Voronoi"), [this] { createDockWidget<VoronoiForm>(); });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+V"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Voronoi, action);
-
-    //    // Thermal Insulation
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("thermal-path"), tr("&Thermal Insulation"), [this] {
-    //        ThermalForm::canToShow() ? createDockWidget<ThermalForm>() : toolpathActions[GCode::Thermal]->setChecked(false);
-    //    });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+T"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Thermal, action);
-
-    //    // Drilling
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("drill-path"), tr("&Drilling"), [this] {
-    //        DrillForm::canToShow() ? createDockWidget<DrillForm>() : toolpathActions[GCode::Drill]->setChecked(false);
-    //    });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+D"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Drill, action);
-
-    //    // Crosshatch
-    //    action = toolpathToolBar->addAction(QIcon::fromTheme("crosshatch-path"), tr("&Crosshatch"), [this] { createDockWidget<HatchingForm>(); });
-    //    action->setShortcut(QKeySequence("Ctrl+Shift+C"));
-    //    menu->addAction(action);
-    //    toolpathActions.emplace(GCode::Hatching, action);
-
-    for (auto [key, action] : toolpathActions) {
         action->setCheckable(true);
         actionGroup.addAction(action);
+        toolpathActions.emplace(type, action);
+        connect(ptr, &GCodePlugin::setDockWidget, this, &MainWindow::setDockWidget);
     }
 }
 
@@ -504,7 +457,7 @@ void MainWindow::createActionsShape() {
         auto action = toolBar->addAction(ptr->icon(), ptr->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        connect(ptr->getObject(), SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
+        connect(ptr->toObj(), SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = ptr, this](bool checked) {
             if (checked) {
                 ShapePlugin::finalizeShape_();
@@ -863,8 +816,8 @@ void MainWindow::editGcFile(GCode::File* file) {
     switch (file->gtype()) {
     case GCode::Null:
     case GCode::Profile:
-        toolpathActions[GCode::Profile]->triggered();
-        // FIXME GC reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
+        // FIXME toolpathActions[GCode::Profile]->triggered();
+        // FIXME reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
         break;
     case GCode::Pocket:
     case GCode::Voronoi:

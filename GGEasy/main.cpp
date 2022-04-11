@@ -154,6 +154,7 @@ int main(int argc, char** argv) {
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
                     if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
+                        file->setInfo(loader.metaData().value("MetaData").toObject());
                         App::filePlugins().emplace(file->type(), file);
                         continue;
                     }
@@ -162,6 +163,7 @@ int main(int argc, char** argv) {
                         continue;
                     }
                     if (auto* gCode = qobject_cast<GCodePlugin*>(pobj); gCode) {
+                        gCode->setInfo(loader.metaData().value("MetaData").toObject());
                         App::gCodePlugins().emplace(gCode->type(), gCode);
                         continue;
                     }

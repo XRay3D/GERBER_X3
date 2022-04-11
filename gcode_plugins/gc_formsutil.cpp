@@ -24,20 +24,20 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
 FormsUtil::FormsUtil(GCode::Creator* tps, QWidget* parent)
     : QWidget(parent)
-    , m_tpc(tps)
+    , tpc_(tps)
     , fileCount(1)
     , progressDialog(new QProgressDialog(this)) {
-    m_tpc->moveToThread(&thread);
+    tpc_->moveToThread(&thread);
 
-    connect(&thread, &QThread::finished, m_tpc, &QObject::deleteLater);
+    connect(&thread, &QThread::finished, tpc_, &QObject::deleteLater);
 
-    connect(m_tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress, Qt::QueuedConnection);
-    connect(m_tpc, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler, Qt::QueuedConnection);
-    connect(m_tpc, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler, Qt::QueuedConnection);
+    connect(tpc_, &GCode::Creator::canceled, this, &FormsUtil::stopProgress, Qt::QueuedConnection);
+    connect(tpc_, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler, Qt::QueuedConnection);
+    connect(tpc_, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler, Qt::QueuedConnection);
 
     connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
 
-    connect(this, &FormsUtil::createToolpath, m_tpc, qOverload<>(&GCode::Creator::createGc));
+    connect(this, &FormsUtil::createToolpath, tpc_, qOverload<>(&GCode::Creator::createGc));
     connect(this, &FormsUtil::createToolpath, this, &FormsUtil::startProgress);
 
     thread.start(QThread::LowPriority /*HighestPriority*/);
@@ -56,6 +56,7 @@ FormsUtil::~FormsUtil() {
 }
 
 void FormsUtil::fileHandler(GCode::File* file) {
+    qDebug() << __FUNCTION__ << file;
     if (--fileCount == 0)
         cancel();
 
@@ -64,7 +65,7 @@ void FormsUtil::fileHandler(GCode::File* file) {
         return;
     }
 
-    file->setFileName(m_fileName + "_" + file->name());
+    file->setFileName(fileName_ + "_" + file->name());
     file->setSide(boardSide);
     if (fileId > -1) {
         exit(-123456);
@@ -77,11 +78,11 @@ void FormsUtil::fileHandler(GCode::File* file) {
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && m_tpc) {
-        const auto [max, val] = m_tpc->getProgress();
+    if (event->timerId() == progressTimerId && progressDialog && tpc_) {
+        const auto [max, val] = tpc_->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-        progressDialog->setLabelText(m_tpc->msg);
+        progressDialog->setLabelText(tpc_->msg);
     }
     if (event->timerId() == flikerTimerId) {
         App::scene()->update();
@@ -96,24 +97,24 @@ void FormsUtil::addUsedGi(GraphicsItem* gi) {
             m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
 #endif
         } else {
-            m_usedItems[{ file->id(), -1 }].push_back(gi->id());
+            usedItems_[{ file->id(), -1 }].push_back(gi->id());
         }
     }
 }
 
 void FormsUtil::cancel() {
-    m_tpc->cancel();
+    tpc_->cancel();
     stopProgress();
 }
 
 void FormsUtil::errorHandler(int) {
     stopProgress();
     flikerTimerId = startTimer(32);
-    if (ErrorDialog(m_tpc->items, this).exec()) {
+    if (ErrorDialog(tpc_->items, this).exec()) {
         startProgress();
-        m_tpc->proceed();
+        tpc_->proceed();
     } else {
-        m_tpc->cancel();
+        tpc_->cancel();
     }
     killTimer(flikerTimerId);
     flikerTimerId = 0;
@@ -122,8 +123,8 @@ void FormsUtil::errorHandler(int) {
 void FormsUtil::startProgress() {
     if (!fileCount)
         fileCount = 1;
-    m_tpc->msg = m_fileName;
-    progressDialog->setLabelText(m_tpc->msg);
+    tpc_->msg = fileName_;
+    progressDialog->setLabelText(tpc_->msg);
     progressTimerId = startTimer(100);
 }
 

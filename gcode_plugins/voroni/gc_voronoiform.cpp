@@ -129,9 +129,9 @@ void VoronoiForm::createFile() {
     gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
     gpc.params[GCode::GCodeParams::FrameOffset] = ui->dsbxOffset->value();
 
-    m_tpc->setGcp(gpc);
-    m_tpc->addPaths(wPaths);
-    m_tpc->addRawPaths(wRawPaths);
+    tpc_->setGcp(gpc);
+    tpc_->addPaths(wPaths);
+    tpc_->addRawPaths(wRawPaths);
     createToolpath();
 }
 
@@ -141,7 +141,7 @@ void VoronoiForm::updateName() {
 }
 
 void VoronoiForm::on_leName_textChanged(const QString& arg1) {
-    m_fileName = arg1;
+    fileName_ = arg1;
 }
 
 void VoronoiForm::setWidth(double) {

@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrattributes.h"
+#include "gbr_attributes.h"
 
 #include <QDebug>
 #include <QMetaEnum>

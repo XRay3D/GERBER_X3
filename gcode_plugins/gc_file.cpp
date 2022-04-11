@@ -397,7 +397,7 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     //    for (auto& paths : pathss) {
     //        for (auto& path : paths) {
     //            for (QPointF& point : path) {
-    //                point -= Marker::get(Marker::Zero)->pos();
+    //                point -= App::zero()->pos();
     //            }
     //        }
     //    }
@@ -423,7 +423,7 @@ mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& pat
     }
     for (auto& path : paths) {
         for (QPointF& point : path) {
-            point -= Marker::get(Marker::Zero)->pos();
+            point -= App::zero()->pos();
         }
     }
 
@@ -555,12 +555,12 @@ void File::statFile() {
 void File::endFile() {
     if (toolType() == Tool::Laser) {
         m_lines.push_back(Settings::spindleLaserOff());
-        QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
+        QPointF home(App::home()->pos() - App::zero()->pos());
         m_lines.push_back(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
         m_lines.push_back(Settings::laserEnd());
     } else {
         m_lines.push_back(formated({ g0(), z(App::project()->safeZ()) })); //HomeZ
-        QPointF home(Marker::get(Marker::Home)->pos() - Marker::get(Marker::Zero)->pos());
+        QPointF home(App::home()->pos() - App::zero()->pos());
         m_lines.push_back(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
         m_lines.push_back(Settings::end());
     }

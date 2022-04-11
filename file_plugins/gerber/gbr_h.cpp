@@ -11,7 +11,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt *
 *******************************************************************************/
-#include "gbrh.h"
+#include "gbr_h.h"
 #include "mvector.h"
 #include <ctre.hpp>
 

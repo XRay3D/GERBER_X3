@@ -86,7 +86,11 @@ class App {
     FileTree::View* fileTreeView_ = nullptr;
     GCodePropertiesForm* gCodePropertiesForm_ = nullptr;
     GraphicsView* graphicsView_ = nullptr;
+
     LayoutFrames* layoutFrames_ = nullptr;
+    class Marker* markers[4];
+    class Pin* pins[2];
+
     MainWindow* mainWindow_ = nullptr;
     Project* project_ = nullptr;
     Scene* scene_ = nullptr;
@@ -120,6 +124,10 @@ public:
             qDebug() << app_ << sharedMemory.errorString();
         }
     }
+
+    static void setMarkers(int i, Marker* marker) { app_->markers[i] = marker; }
+    static auto* zero() { return app_->markers[0]; }
+    static auto* home() { return app_->markers[1]; }
 
     static auto* drillForm() { return app_->drillForm_; }
     static auto* fileModel() { return app_->fileModel_; }

@@ -18,16 +18,17 @@ namespace GCode {
 
 class Plugin : public QObject, public FilePlugin {
     Q_OBJECT
+
 public:
     explicit Plugin(QObject* parent = nullptr);
-    QObject* getObject() override;
+    QObject* toObj() override;
     bool thisIsIt(const QString& fileName) override;
     int type() const override;
     QString folderName() const override;
 
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     FileInterface* createFile() override;
-    QJsonObject info() const override;
+
     QIcon icon() const override;
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 

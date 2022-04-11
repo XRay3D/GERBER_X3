@@ -11,12 +11,13 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gbrnode.h"
-#include "compdialog.h"
-#include "ft_view.h"
-#include "gbrfile.h"
-#include "gbrh.h"
+#include "gbr_node.h"
+#include "gbr_file.h"
+#include "gbr_h.h"
 #include "scene.h"
+
+#include "ft_view.h"
+#include "gbrcomp_dialog.h"
 
 #include <QAction>
 #include <QColorDialog>

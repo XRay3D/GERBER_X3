@@ -10,9 +10,9 @@
 *******************************************************************************/
 #pragma once
 
-#include "gbrattributes.h"
-#include "gbrcomponent.h"
-#include "gbrtypes.h"
+#include "gbr_attributes.h"
+#include "gbrcomp_onent.h"
+#include "gbr_types.h"
 
 class FilePlugin;
 

@@ -39,14 +39,11 @@ public:
     void setPosY(double y);
     inline void setPos(const QPointF& pos) { QGraphicsItem::setPos(pos); }
 
-    static Marker* get(Type type) { return m_markers[type]; }
-
 private:
-    QRectF m_rect;
-    QPainterPath m_path;
-    QPainterPath m_shape;
-    const Type m_type;
-    static inline Marker* m_markers[2] {};
+    QRectF rect_;
+    QPainterPath path_;
+    QPainterPath shape_;
+    const Type type_;
     void updateGCPForm();
 
 protected:
@@ -65,13 +62,13 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    static auto pins() { return std::span(m_pins, 4); }
+    static auto pins() { return std::span(pins_, 4); }
     static void setPinsPos(QPointF pos[4]);
 
-    static double minX() { return qMin(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
-    static double maxX() { return qMax(m_pins[0]->pos().x(), m_pins[1]->pos().x()); }
-    static double minY() { return qMin(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
-    static double maxY() { return qMax(m_pins[0]->pos().y(), m_pins[2]->pos().y()); }
+    static double minX() { return qMin(pins_[0]->pos().x(), pins_[1]->pos().x()); }
+    static double maxX() { return qMax(pins_[0]->pos().x(), pins_[1]->pos().x()); }
+    static double minY() { return qMin(pins_[0]->pos().y(), pins_[2]->pos().y()); }
+    static double maxY() { return qMax(pins_[0]->pos().y(), pins_[2]->pos().y()); }
 
     static void resetPos(bool fl = true);
     static void setPos(const QPointF pos[4]);
@@ -79,13 +76,13 @@ public:
     void setPos(const QPointF& pos);
 
 private:
-    QPainterPath m_path;
-    QPainterPath m_shape;
-    QRectF m_rect;
-    QPointF m_lastPos;
-    const uint m_index;
-    static inline Pin* m_pins[4];
-    static inline int m_ctr = 0;
+    QPainterPath path_;
+    QPainterPath shape_;
+    QRectF rect_;
+    QPointF lastPos_;
+    const uint index_;
+    static inline Pin* pins_[4];
+    static inline int ctr_ = 0;
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -96,8 +93,8 @@ protected:
 
 class LayoutFrames : public QGraphicsObject {
     Q_OBJECT
-    QPainterPath m_path;
-    QRectF m_rect;
+    QPainterPath path_;
+    QRectF rect_;
 
 public:
     LayoutFrames();

@@ -37,7 +37,7 @@
 #include "mvector.h"
 
 #ifndef GTE
-// FIXME #include "gcode/gccreator.h"
+#include "gc_creator.h"
 #endif
 
 #include <algorithm>
@@ -858,7 +858,7 @@ ClipperBase::ClipperBase() //constructor
 
 ClipperBase::~ClipperBase() //destructor
 {
-    // FIXME ProgressCancel::setClipper(nullptr);
+    ProgressCancel::setClipper(nullptr);
     Clear();
 }
 //------------------------------------------------------------------------------
@@ -1297,7 +1297,7 @@ bool ClipperBase::PopScanbeam(cInt& Y) {
         return false;
     Y = m_Scanbeam.top();
     m_Scanbeam.pop();
-    // FIXME ProgressCancel::incCurrent();
+    ProgressCancel::incCurrent();
     while (!m_Scanbeam.empty() && Y == m_Scanbeam.top()) {
         m_Scanbeam.pop();
     } // Pop duplicates.
@@ -1534,10 +1534,10 @@ bool Clipper::ExecuteInternal() {
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
-        // FIXME ProgressCancel::setMax(static_cast<int>(m_Scanbeam.size()));
-        // FIXME ProgressCancel::setCurrent(0);
+        ProgressCancel::setMax(static_cast<int>(m_Scanbeam.size()));
+        ProgressCancel::setCurrent(0);
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-            // FIXME ProgressCancel::ifCancelThenThrow(); // terminate
+            ProgressCancel::ifCancelThenThrow(); // terminate
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {

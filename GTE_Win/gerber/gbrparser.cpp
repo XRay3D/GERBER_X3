@@ -10,7 +10,7 @@
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
 * http://www.boost.org/LICENSE_1_0.txt                                         *
 *******************************************************************************/
-#include "gbrparser.h"
+#include "gbr_parser.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QElapsedTimer>

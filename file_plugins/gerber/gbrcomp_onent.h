@@ -10,7 +10,7 @@
 *******************************************************************************/
 #pragma once
 #include "datastream.h"
-#include "gbrattributes.h"
+#include "gbr_attributes.h"
 #include <QMap>
 #include <QObject>
 #include <QPolygonF>

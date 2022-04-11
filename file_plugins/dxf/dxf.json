@@ -1,6 +1,6 @@
 {
-    "Name" : "GCode",
-    "Version" : "1.0",
+    "Name" : "DXF",
+    "Version" : "1.2",
     "VendorAuthor" : "X-Ray aka Bakiev Damir",
-    "Info" : "Info"
+    "Info" : "Opening DXF Files"
 }

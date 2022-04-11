@@ -11,7 +11,7 @@
 #pragma once
 #ifdef GBR_
 #include "extypes.h"
-#include "gbrtypes.h"
+#include "gbr_types.h"
 #endif
 
 #include "gc_odeplugininterface.h"
@@ -119,40 +119,18 @@ private:
     DrillModel* model() const;
 };
 
-class GCPluginImpl : public QObject, public GCodePlugin {
+class GCPluginImpl : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
     Q_INTERFACES(GCodePlugin)
 
     // GCodePlugin interface
 public:
-    GCPluginImpl(QObject* parent = nullptr)
-        : QObject(parent) { }
-
-    QObject* getObject() override { return this; }
-    int type() const override { return GCode::Drill; }
-    QJsonObject info() const override {
-        return {
-            { "Name", "Drill" },
-            { "Version", "1.0" },
-            { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-            { "Info", "Drill" },
-        };
-    }
-    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
-        auto action = toolbar->addAction(icon(), info()["Name"].toString(), [this] {
-            if (DrillForm::canToShow())
-                emit setDockWidget(new DrillForm);
-        });
-        action->setShortcut(QKeySequence("Ctrl+Shift+D"));
-        menu->addAction(action);
-        return action;
-    }
-
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
-
-signals:
-    void setDockWidget(QWidget*) override;
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+D" }; }
+    QWidget* createForm() const override { return new DrillForm; };
+    bool canToShow() const override { return DrillForm::canToShow(); }
+    int type() const override { return GCode::Drill; }
 };
 
 #include "app.h"
