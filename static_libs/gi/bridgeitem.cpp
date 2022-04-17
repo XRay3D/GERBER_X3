@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "bridgeitem.h"
 
 #include "graphicsview.h"
@@ -104,8 +104,8 @@ QPointF BridgeItem::calculate(const QPointF& pos) {
                         const QLineF l1(pos, pt1);
                         const QLineF l2(pos, pt2);
                         const QLineF l3(pt2, pt1);
-                        //pvs   if (lastAngle == 0.0)
-                        //pvs        lastAngle = l3.normalVector().angle();
+                        // pvs   if (lastAngle == 0.0)
+                        // pvs        lastAngle = l3.normalVector().angle();
                         const double p = (l1.length() + l2.length() + l3.length()) / 2;
                         if (l1.length() < l3.length() && l2.length() < l3.length()) {
                             const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));

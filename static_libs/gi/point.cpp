@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "point.h"
 #include "project.h"
 
@@ -254,7 +254,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
-    //c.setAlpha(50);
+    // c.setAlpha(50);
     if (App::settings().scalePinMarkers()) {
         auto sf = App::graphicsView()->scaleFactor() * 10;
         painter->scale(sf, sf);
@@ -285,7 +285,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     };
 
     const QPointF center(App::layoutFrames()->boundingRect().center());
-    //const QPointF center(App::project()->worckRect().center());
+    // const QPointF center(App::project()->worckRect().center());
 
     switch (index_) {
     case 0:
@@ -440,7 +440,7 @@ void Pin::resetPos(bool fl) {
             return;
 
     const QPointF offset(App::settings().mkrPinOffset());
-    const QRectF rect(App::layoutFrames()->boundingRect()); //App::project()->worckRect()
+    const QRectF rect(App::layoutFrames()->boundingRect()); // App::project()->worckRect()
 
     QPointF pt[] {
         QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),

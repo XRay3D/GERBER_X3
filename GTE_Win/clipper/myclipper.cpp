@@ -1,15 +1,15 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  01 February 2020                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2020                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "myclipper.h"
 #include <QElapsedTimer>
 #include <QLineF>
@@ -64,19 +64,19 @@ double Length(const IntPoint& pt1, const IntPoint& pt2) {
     return sqrt(static_cast<double>(x) * static_cast<double>(x) + static_cast<double>(y) * static_cast<double>(y));
 }
 
-//static inline bool qt_is_finite(double d)
+// static inline bool qt_is_finite(double d)
 //{
-//    uchar* ch = (uchar*)&d;
+//     uchar* ch = (uchar*)&d;
 //#ifdef QT_ARMFPA
-//    return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
+//     return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
 //#else
-//    if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-//        return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
-//    } else {
-//        return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
-//    }
+//     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+//         return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
+//     } else {
+//         return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
+//     }
 //#endif
-//}
+// }
 
 Path CirclePath(double diametr, const IntPoint& center) {
     if (diametr == 0.0)

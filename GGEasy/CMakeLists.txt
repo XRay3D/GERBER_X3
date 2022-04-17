@@ -14,6 +14,8 @@ cmake_minimum_required(VERSION 3.16)
 
 #project(${PROJECT_NAME} LANGUAGES CXX)
 project(GGEasy)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -80,21 +82,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}")
 
-find_package(Boost)
-if(Boost_FOUND)
-    include_directories(${INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
-    add_definitions(-D_USE_BOOST_)
-endif()
-
-find_package(Boost)
-if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIR})
-    message(${Boost_INCLUDE_DIR})
-    add_definitions( "-D_USE_BOOST_" )
-else()
-    message("Boost not found!!!" FATAL_ERROR)
-endif()
-
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     #    Concurrent
@@ -113,7 +100,7 @@ endif()
 
 include_directories (
     ${INCLUDE_DIRECTORIES}
-    ../shape_plugins/shape
+    ../plugins/shape/shape
     ../static_libs/clipper
     ../static_libs/common
     ../static_libs/filetree

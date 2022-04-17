@@ -1,16 +1,48 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 
 #include <myclipper.h>
+
+// struct Circle {
+//     QPointF center;
+//     double radius;
+// };
+// struct Ellipse {
+//     QPointF center;
+//     QPointF focus;
+// };
+// struct ArcCircle {
+//     QPointF center;
+//     double radius;
+//     double angle1;
+//     double angle2;
+// };
+// struct ArcEllipse {
+//     QPointF center;
+//     QPointF focus;
+//     double angle1;
+//     double angle2;
+// };
+
+// struct Polygon {
+//     QPolygonF points;
+//     bool open{};
+// };
+
+// struct Rectangle {
+//     QPointF p1;
+//     QPointF p2;
+//     double angle;
+// };
 
 struct AbstrGraphicObject {
     Paths m_paths;

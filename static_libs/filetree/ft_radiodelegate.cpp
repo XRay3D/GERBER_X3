@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #ifdef GBR_
 #include "gbr_node.h"
 #include "radiodelegate.h"
@@ -32,7 +32,7 @@ QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     //            comboBox->addItems(IconPreviewArea::iconModeNames());
     //        else if (index.column() == 2)
     //            comboBox->addItems(IconPreviewArea::iconStateNames());
-    //connect(comboBox, qOverload<int>(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
+    // connect(comboBox, qOverload<int>(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
     connect(radioButton, &QRadioButton::clicked, this, &RadioDelegate::commitAndCloseEditor);
     return radioButton;
 }
@@ -63,11 +63,11 @@ void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
         //            painter->fillRect(option.rect, option.palette.highlight());
 
         //        starRating.paint(painter, option.rect, option.palette, StarRating::ReadOnly);
-        //QStyleOptionButton progressBarOption;
-        //progressBarOption.rect = option.rect;
+        // QStyleOptionButton progressBarOption;
+        // progressBarOption.rect = option.rect;
         QApplication::style()->drawControl(QStyle::CE_RadioButton, &option, painter);
-        //QRadioButton rb;
-        //option2.init(&rb);
+        // QRadioButton rb;
+        // option2.init(&rb);
     }
 }
 

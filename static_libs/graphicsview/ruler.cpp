@@ -17,9 +17,9 @@ Ruler::Ruler(Ruler::Type rulerType, QWidget* parent)
     : QWidget { parent }
     , rulerType { rulerType } {
     setMouseTracking(mouseTracking);
-    //QFont txtFont("Vrinda");
-    //txtFont.setStyleHint(QFont::TypeWriter, QFont::PreferOutline);
-    //setFont(txtFont);
+    // QFont txtFont("Vrinda");
+    // txtFont.setStyleHint(QFont::TypeWriter, QFont::PreferOutline);
+    // setFont(txtFont);
 }
 
 QSize Ruler::minimumSizeHint() const { return QSize(Ruler::Breadth, Ruler::Breadth); }
@@ -54,8 +54,8 @@ void Ruler::SetRulerZoom(const double rulerZoom_) {
 }
 
 void Ruler::SetCursorPos(const QPoint cursorPos_) {
-    cursorPos = cursorPos_; //this->mapFromGlobal(cursorPos_);
-    //cursorPos += QPoint(RulerBreadth, RulerBreadth);
+    cursorPos = cursorPos_; // this->mapFromGlobal(cursorPos_);
+    // cursorPos += QPoint(RulerBreadth, RulerBreadth);
     update();
 }
 
@@ -117,7 +117,7 @@ void Ruler::paintEvent(QPaintEvent* event) {
     // drawing no man's land between the ruler & view
     if (/* DISABLES CODE */ (0)) {
         QPointF starPt((Horizontal == rulerType) ? rulerRect.bottomLeft() : rulerRect.topRight());
-        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight()); //same branches!!!!!!
+        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight()); // same branches!!!!!!
         painter.setPen(QPen(Qt::red, 2));
         painter.drawLine(starPt, endPt);
     }

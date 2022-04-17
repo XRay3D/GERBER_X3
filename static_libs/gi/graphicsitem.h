@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 
 #include <myclipper.h>
@@ -49,15 +49,15 @@ class FileInterface;
 class ItemGroup;
 class ShapeInterface;
 
-//namespace Dxf {
-//class LayerModel;
-//}
-//namespace Excellon {
-//class File;
-//}
-//namespace Gerber {
-//class File;
-//}
+// namespace Dxf {
+// class LayerModel;
+// }
+// namespace Excellon {
+// class File;
+// }
+// namespace Gerber {
+// class File;
+// }
 
 class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
     //    friend class Excellon::File;
@@ -138,4 +138,3 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
-

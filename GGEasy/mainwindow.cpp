@@ -2,19 +2,19 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//import "aboutform.h";
+// import "aboutform.h";
 //#include "forms/drillform/drillform.h"
 #include "gc_odeplugininterface.h"
 #include "gc_odepropertiesform.h"
@@ -41,8 +41,8 @@
 
 #include "aboutform.h"
 
-//import std.core;
-//import std;
+// import std.core;
+// import std;
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -83,12 +83,12 @@ MainWindow::MainWindow(QWidget* parent)
     for (auto& [type, ptr] : App::filePlugins()) {
         if (ptr->type() == int(FileType::GCode))
             continue;
-        ptr->toObj()->moveToThread(&parserThread);
-        connect(ptr->toObj(), SIGNAL(fileError(const QString&, const QString&)), this, SLOT(fileError(const QString&, const QString&)), Qt::QueuedConnection);
-        connect(ptr->toObj(), SIGNAL(fileProgress(const QString&, int, int)), this, SLOT(fileProgress(const QString&, int, int)), Qt::QueuedConnection);
-        connect(ptr->toObj(), SIGNAL(fileReady(FileInterface*)), this, SLOT(addFileToPro(FileInterface*)), Qt::QueuedConnection);
-        connect(this, SIGNAL(parseFile(const QString&, int)), ptr->toObj(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
-        connect(m_project, SIGNAL(parseFile(const QString&, int)), ptr->toObj(), SLOT(parseFile(const QString&, int)), Qt::QueuedConnection);
+        ptr->moveToThread(&parserThread);
+        connect(ptr, &FilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
+        connect(ptr, &FilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+        connect(ptr, &FilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
+        connect(this, &MainWindow::parseFile, ptr, &FilePlugin::parseFile, Qt::QueuedConnection);
+        connect(m_project, &Project::parseFile, ptr, &FilePlugin::parseFile, Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -123,15 +123,15 @@ MainWindow::MainWindow(QWidget* parent)
 
         if (1) {
             QDir dir(R"(C:\Users\bakiev\Downloads\1_низ)");
-            //QDir dir("D:/Gerber Test Files/CopperCAM/");
-            //QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
-            //QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
+            // QDir dir("D:/Gerber Test Files/CopperCAM/");
+            // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
+            // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if (dir.exists())
                 for (QString str : dir.entryList({ "*.gbr" }, QDir::Files)) {
                     str = dir.path() + '/' + str;
                     qDebug() << str;
                     QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                    //break;
+                    // break;
                 }
         }
         if (0)
@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
-        if (1)
+        if (0)
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->toggle(); });
     }
 }
@@ -320,7 +320,7 @@ void MainWindow::createActionsService() {
     auto action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));
     // Separator
-    //toolpathToolBar->addSeparator();
+    // toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] { createDockWidget<GCodePropertiesForm>(); }));
@@ -330,7 +330,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    //Autoplace All Refpoints
+    // Autoplace All Refpoints
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
             Pin::resetPos(false);
@@ -457,7 +457,7 @@ void MainWindow::createActionsShape() {
         auto action = toolBar->addAction(ptr->icon(), ptr->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        connect(ptr->toObj(), SIGNAL(actionUncheck(bool)), action, SLOT(setChecked(bool)));
+        // FIXME connect(ptr, &FilePlugin::actionUncheck(bool)), action, SLOT(setChecked(bool)));
         connect(action, &QAction::toggled, [shInt = ptr, this](bool checked) {
             if (checked) {
                 ShapePlugin::finalizeShape_();
@@ -1035,7 +1035,7 @@ void MainWindow::updateTheme() {
         palette.setColor(QPalette::Window, windowColor);
         qApp->setPalette(palette);
     } else {
-        //qApp->setStyle(QStyleFactory::create("windowsvista"));
+        // qApp->setStyle(QStyleFactory::create("windowsvista"));
     }
 
     //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
@@ -1111,7 +1111,7 @@ bool MainWindow::saveAs() {
 }
 
 void MainWindow::showEvent(QShowEvent* event) {
-    //toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
+    // toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
 }
 

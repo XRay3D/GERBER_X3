@@ -240,7 +240,7 @@ HEADERS  += \
     GGEasy\gcode\voroni\gcvoronoijc.h \
     GGEasy\gcode\voroni\jc_voronoi.h \
     GGEasy\interfaces\file.h \
-    GGEasy\interfaces\pluginfile.h \
+    GGEasy\interfaces\file_plugin.h \
     GGEasy\interfaces\plugintypes.h \
     GGEasy\interfaces\shapepluginin.h \
     GGEasy\mainwindow.h \
@@ -346,7 +346,7 @@ HEADERS  += \
     file_plugins\gerber\gbr_attributes.h \
     file_plugins\gerber\gbrcomp_onent.h \
     file_plugins\gerber\gbr_file.h \
-    file_plugins\gerber\gbr_h.h \
+    file_plugins\gerber\gbr_highlighter.h \
     file_plugins\gerber\gbr_node.h \
     file_plugins\gerber\gbr_parser.h \
     file_plugins\gerber\gbr_plugin.h \

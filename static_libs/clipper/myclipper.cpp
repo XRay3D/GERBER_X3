@@ -2,34 +2,34 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "app.h"
 #include "qmath.h"
 #include <QElapsedTimer>
 #include <QLineF>
 #include <myclipper.h>
 
-//static inline bool qt_is_finite(double d)
+// static inline bool qt_is_finite(double d)
 //{
-//    uchar* ch = (uchar*)&d;
+//     uchar* ch = (uchar*)&d;
 //#ifdef QT_ARMFPA
-//    return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
+//     return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
 //#else
-//    if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-//        return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
-//    } else {
-//        return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
-//    }
+//     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+//         return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
+//     } else {
+//         return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
+//     }
 //#endif
-//}
+// }
 
 Path CirclePath(double diametr, const IntPoint& center) {
     if (diametr == 0.0)
@@ -244,7 +244,7 @@ QIcon drawIcon(const Paths& paths) {
 
     QPainterPath painterPath;
 
-    for (const QPolygonF &polygon : paths)
+    for (const QPolygonF& polygon : paths)
         painterPath.addPolygon(polygon);
 
     const QRectF rect = painterPath.boundingRect();

@@ -77,7 +77,7 @@ struct CtreCapTo {
     auto toInt() const { return QString(*this).toInt(); }
 
     operator QString() const {
-        //qDebug("QString  D%d S%d", cap.data(), cap.size());
+        // qDebug("QString  D%d S%d", cap.data(), cap.size());
         return QString(reinterpret_cast<const QChar*>(cap.data()), static_cast<size_t>(cap.size()));
     }
 

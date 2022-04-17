@@ -1,15 +1,15 @@
 //// This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  01 February 2020                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2020                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "mathparser.h"
 #include <QDebug>
 #include <QtMath>
@@ -41,7 +41,7 @@ double MathParser::parse(const QString& s) {
     return result.acc;
 }
 
-Result MathParser::plusMinus(QString s) //throws Exception
+Result MathParser::plusMinus(QString s) // throws Exception
 {
     Result current = mulDiv(s);
     double acc = current.acc;
@@ -62,7 +62,7 @@ Result MathParser::plusMinus(QString s) //throws Exception
     return Result(acc, current.rest);
 }
 
-Result MathParser::bracket(QString s) //throws Exception
+Result MathParser::bracket(QString s) // throws Exception
 {
     QChar zeroChar = s.at(0);
     if (zeroChar == '(') {
@@ -76,7 +76,7 @@ Result MathParser::bracket(QString s) //throws Exception
     return functionVariable(s);
 }
 
-Result MathParser::functionVariable(QString s) //throws Exception
+Result MathParser::functionVariable(QString s) // throws Exception
 {
     QString f;
     int i = 0;
@@ -88,7 +88,7 @@ Result MathParser::functionVariable(QString s) //throws Exception
     // ищем название функции или переменной
     // имя обязательно должна начинаться с буквы
     while (i < s.length() && ((s.at(i).isLetter() || s.at(i) == '$') || (s.at(i).isDigit() && i > 0))) {
-        //while (i < s.length() && (s.at(i).isLetter() || (s.at(i).isDigit() && i > 0))) {
+        // while (i < s.length() && (s.at(i).isLetter() || (s.at(i).isDigit() && i > 0))) {
         f += s.at(i);
         i++;
     }
@@ -102,7 +102,7 @@ Result MathParser::functionVariable(QString s) //throws Exception
     return num(s);
 }
 
-Result MathParser::mulDiv(QString s) //throws Exception
+Result MathParser::mulDiv(QString s) // throws Exception
 {
     Result current = bracket(s);
 
@@ -127,7 +127,7 @@ Result MathParser::mulDiv(QString s) //throws Exception
     }
 }
 
-Result MathParser::num(QString s) //throws Exception
+Result MathParser::num(QString s) // throws Exception
 {
     int i = 0;
     int dot_cnt = 0;

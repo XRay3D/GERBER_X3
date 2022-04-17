@@ -1,15 +1,15 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  01 February 2020                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2020                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "gbr_aperture.h"
 #include "mathparser.h"
 #include <QDebug>
@@ -46,7 +46,7 @@ Paths AbstractAperture::draw(const State& state, bool fl) {
 
         transform(path, state);
 
-        //if (state.curPos().X != 0 || state.curPos().Y != 0)
+        // if (state.curPos().X != 0 || state.curPos().Y != 0)
         TranslatePath(path, state.curPos());
     }
     //    Paths tmpPpaths;
@@ -125,7 +125,7 @@ ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
     // GerberAperture interface
 }
 
-QString ApCircle::name() const { return QString("C(Ø%1)").arg(m_diam); } //CIRCLE
+QString ApCircle::name() const { return QString("C(Ø%1)").arg(m_diam); } // CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
@@ -149,7 +149,7 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fo
     m_drillDiam = drillDiam;
 }
 
-QString ApRectangle::name() const //RECTANGLE
+QString ApRectangle::name() const // RECTANGLE
 {
     if (qFuzzyCompare(m_width, m_height))
         return QString("R(SQ %1)").arg(m_width);
@@ -180,7 +180,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const Format
     m_drillDiam = drillDiam;
 }
 
-QString ApObround::name() const { return QString("O(%1 x %2)").arg(m_width).arg(m_height); } //OBROUND
+QString ApObround::name() const { return QString("O(%1 x %2)").arg(m_width).arg(m_height); } // OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
@@ -226,7 +226,7 @@ double ApPolygon::rotation() const { return m_rotation; }
 
 int ApPolygon::verticesCount() const { return m_verticesCount; }
 
-QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } //POLYGON
+QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } // POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
@@ -264,7 +264,7 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QM
     m_coefficients = coefficients;
 }
 
-QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } //MACRO
+QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } // MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 
@@ -642,7 +642,7 @@ void ApBlock::draw() {
     }
     m_size = 1;
     qDebug() << m_paths.size();
-    //CleanPolygons(m_paths, 0.0009 * uScale);
+    // CleanPolygons(m_paths, 0.0009 * uScale);
 }
 
 } // namespace Gerber

@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 
 #include "clipper.hpp"
@@ -15,12 +15,12 @@
 #include <QIcon>
 #include <QPolygonF>
 
-//QDebug operator<<(QDebug debug, const IntPoint& p)
+// QDebug operator<<(QDebug debug, const IntPoint& p)
 //{
-//    //QDebugStateSaver saver(debug);
-//    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-//    return debug;
-//}
+//     //QDebugStateSaver saver(debug);
+//     debug.nospace() << '(' << p.X << ", " << p.Y << ')';
+//     return debug;
+// }
 
 using namespace ClipperLib;
 

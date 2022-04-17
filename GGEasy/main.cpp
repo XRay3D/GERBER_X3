@@ -42,10 +42,14 @@ int main(int argc, char** argv) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-//QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-//QApplication::setAttribute(Qt::AA_Use96Dpi);
+// QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+// QApplication::setAttribute(Qt::AA_Use96Dpi);
 #else
     QApplication::setAttribute(Qt::AA_Use96Dpi);
+    //    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Unset);
+    //    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+    qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
+//    qputenv("QT_SCREEN_SCALE_FACTORS", QByteArray("1;1;1"));
 #endif
 
     Q_INIT_RESOURCE(resources);
@@ -77,7 +81,7 @@ int main(int argc, char** argv) {
         dir.mkpath(App::settingsPath());
     qDebug() << App::settingsPath();
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    //QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
+    // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QGLFormat glf = QGLFormat::defaultFormat();
@@ -161,6 +165,7 @@ int main(int argc, char** argv) {
                         continue;
                     }
                     if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
+                        shape->setInfo(loader.metaData().value("MetaData").toObject());
                         App::shapePlugins().emplace(shape->type(), shape);
                         continue;
                     }

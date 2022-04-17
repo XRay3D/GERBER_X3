@@ -2,19 +2,19 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "settingsdialog.h"
 #include "colorselector.h"
+#include "file_plugin.h"
 #include "graphicsview.h"
-#include "pluginfile.h"
 
 #include <QDesktopServices>
 #include <QtWidgets>
@@ -23,17 +23,17 @@
 const int gridColor = 100;
 
 const QColor defaultColor[GuiColors::Count] {
-    QColor(),                                     //Background
-    QColor(255, 255, 0, 120),                     //Pin
-    QColor(Qt::gray),                             //CutArea
-    QColor(gridColor, gridColor, gridColor, 50),  //Grid1
-    QColor(gridColor, gridColor, gridColor, 100), //Grid5
-    QColor(gridColor, gridColor, gridColor, 200), //Grid10
-    QColor(),                                     //Hole
-    QColor(0, 255, 0, 120),                       //Home
-    QColor(Qt::black),                            //ToolPath
-    QColor(255, 0, 0, 120),                       //Zero
-    QColor(Qt::red)                               //G0
+    QColor(),                                     // Background
+    QColor(255, 255, 0, 120),                     // Pin
+    QColor(Qt::gray),                             // CutArea
+    QColor(gridColor, gridColor, gridColor, 50),  // Grid1
+    QColor(gridColor, gridColor, gridColor, 100), // Grid5
+    QColor(gridColor, gridColor, gridColor, 200), // Grid10
+    QColor(),                                     // Hole
+    QColor(0, 255, 0, 120),                       // Home
+    QColor(Qt::black),                            // ToolPath
+    QColor(255, 0, 0, 120),                       // Zero
+    QColor(Qt::red)                               // G0
 };
 
 const QString colorName[GuiColors::Count] {
@@ -146,7 +146,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     if (tab > -1)
         tabwMain->setCurrentIndex(tab);
 
-    { //Open Settings Folder
+    { // Open Settings Folder
         button = new QPushButton(tr("Open Settings Folder"), buttonBox);
         button->setIcon(QIcon::fromTheme("folder"));
         button->setMinimumWidth(QFontMetrics(font()).boundingRect(button->text()).width() + 32);
