@@ -2,20 +2,20 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "ft_model.h"
 
-#include "ft_foldernode.h"
 #include "file.h"
-#include "pluginfile.h"
+#include "file_plugin.h"
+#include "ft_foldernode.h"
 #include "shapepluginin.h"
 #include "shheaders.h"
 
@@ -211,53 +211,53 @@ int Model::rowCount(const QModelIndex& parent) const {
     //    return getItem(parent)->childCount();
 }
 
-//QStringList FileModel::mimeTypes() const
+// QStringList FileModel::mimeTypes() const
 //{
-//    QStringList types;
-//    types << mimeType;
-//    return types;
-//}
+//     QStringList types;
+//     types << mimeType;
+//     return types;
+// }
 
-//QMimeData* FileModel::mimeData(const QModelIndexList& indexes) const
+// QMimeData* FileModel::mimeData(const QModelIndexList& indexes) const
 //{
-//    //    QMimeData* mimeData = new QMimeData();
-//    //    QByteArray encodedData;
-//    //    int noCopy = -1;
-//    //    for (const QModelIndex& index : indexes) {
-//    //        if (noCopy != index.row()) {
-//    //            noCopy = index.row();
-//    //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
-//    //            if (!item)
-//    //                item = rootItem;
-//    //            if (index.isValid()) {
-//    //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
-//    //                encodedData.push_back("|");
-//    //            }
-//    //        }
-//    //    }
-//    //    mimeData->setData(myModelMimeType(), encodedData);
-//    //    return mimeData;
-//    QMimeData* mimeData = new QMimeData();
-//    QByteArray encodedData;
-//    int noCopy = -1;
-//    for (const QModelIndex& index : indexes) {
-//        if (noCopy != index.row()) {
-//            noCopy = index.row();
-//            if (index.isValid()) {
-//                encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
-//                encodedData.push_back("|");
-//            }
-//        }
-//    }
-//    mimeData->setData(mimeType, encodedData);
-//    return mimeData;
-//}
+//     //    QMimeData* mimeData = new QMimeData();
+//     //    QByteArray encodedData;
+//     //    int noCopy = -1;
+//     //    for (const QModelIndex& index : indexes) {
+//     //        if (noCopy != index.row()) {
+//     //            noCopy = index.row();
+//     //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
+//     //            if (!item)
+//     //                item = rootItem;
+//     //            if (index.isValid()) {
+//     //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+//     //                encodedData.push_back("|");
+//     //            }
+//     //        }
+//     //    }
+//     //    mimeData->setData(myModelMimeType(), encodedData);
+//     //    return mimeData;
+//     QMimeData* mimeData = new QMimeData();
+//     QByteArray encodedData;
+//     int noCopy = -1;
+//     for (const QModelIndex& index : indexes) {
+//         if (noCopy != index.row()) {
+//             noCopy = index.row();
+//             if (index.isValid()) {
+//                 encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
+//                 encodedData.push_back("|");
+//             }
+//         }
+//     }
+//     mimeData->setData(mimeType, encodedData);
+//     return mimeData;
+// }
 
-//bool FileModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+// bool FileModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
 //{
-//    return false;
-//    //    if (action == Qt::IgnoreAction)
-//    //        return true;
+//     return false;
+//     //    if (action == Qt::IgnoreAction)
+//     //        return true;
 
 //    //    if (!data->hasFormat(mimeType))
 //    //        return false;
@@ -304,32 +304,32 @@ int Model::rowCount(const QModelIndex& parent) const {
 //    //    return true;
 //}
 
-//Qt::DropActions FileModel::supportedDragActions() const
+// Qt::DropActions FileModel::supportedDragActions() const
 //{
-//    return Qt::MoveAction | Qt::TargetMoveAction;
-//}
+//     return Qt::MoveAction | Qt::TargetMoveAction;
+// }
 
-//Qt::DropActions FileModel::supportedDropActions() const
+// Qt::DropActions FileModel::supportedDropActions() const
 //{
-//    return Qt::MoveAction | Qt::TargetMoveAction;
-//}
+//     return Qt::MoveAction | Qt::TargetMoveAction;
+// }
 
-//bool FileModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+// bool FileModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
 //{
-//    return false;
-//    //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-//    //    Node* srcItem = static_cast<Node*>(sourceParent.internalPointer());
-//    //    Node* dstItem = static_cast<Node*>(destinationParent.internalPointer());
-//    //    if (!srcItem)
-//    //        srcItem = rootItem;
-//    //    if (!dstItem)
-//    //        dstItem = rootItem;
-//    //    for (int r = 0; r < count; ++r) {
-//    //        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-//    //    }
-//    //    endMoveRows();
-//    //    return true;
-//}
+//     return false;
+//     //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+//     //    Node* srcItem = static_cast<Node*>(sourceParent.internalPointer());
+//     //    Node* dstItem = static_cast<Node*>(destinationParent.internalPointer());
+//     //    if (!srcItem)
+//     //        srcItem = rootItem;
+//     //    if (!dstItem)
+//     //        dstItem = rootItem;
+//     //    for (int r = 0; r < count; ++r) {
+//     //        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+//     //    }
+//     //    endMoveRows();
+//     //    return true;
+// }
 
 Node* Model::getItem(const QModelIndex& index) const {
     if (index.isValid()) {

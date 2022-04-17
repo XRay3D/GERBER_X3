@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "settings.h"
 #include "app.h"
 #include "graphicsview.h"
@@ -24,8 +24,8 @@ AppSettings::AppSettings() {
     //        m_settings = this;
 }
 
-//void AppSettings::set(AppSettings* appSettings) { m_settings = appSettings; }
-//AppSettings* AppSettings::ptr() { return m_settings; }
+// void AppSettings::set(AppSettings* appSettings) { m_settings = appSettings; }
+// AppSettings* AppSettings::ptr() { return m_settings; }
 
 /*GUI*/
 QColor& AppSettings::guiColor(int id) { return m_guiColor[id]; }

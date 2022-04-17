@@ -1,32 +1,32 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 //#pragma once
 //
 //
 
 //#include "clipper.hpp"
 //#include <QPolygonF>
-//using namespace ClipperLib;
+// using namespace ClipperLib;
 
 ///*******************************************************************************
 // * class IntLine
 // *******************************************************************************/
 
-//class IntLine {
-//public:
-//    enum IntersectType {
-//        NoIntersection,
-//        BoundedIntersection,
-//        UnboundedIntersection
-//    };
+// class IntLine {
+// public:
+//     enum IntersectType {
+//         NoIntersection,
+//         BoundedIntersection,
+//         UnboundedIntersection
+//     };
 
 //    inline IntLine();
 //    inline IntLine(const IntPoint& pt1, const IntPoint& pt2);
@@ -92,75 +92,75 @@
 //    inline bool operator==(const IntLine& d) const;
 //    inline bool operator!=(const IntLine& d) const { return !(*this == d); }
 
-//private:
-//    IntPoint pt1, pt2;
-//};
-//Q_DECLARE_TYPEINFO(IntLine, Q_MOVABLE_TYPE);
+// private:
+//     IntPoint pt1, pt2;
+// };
+// Q_DECLARE_TYPEINFO(IntLine, Q_MOVABLE_TYPE);
 
 ///*******************************************************************************
 // * class IntLine inline members
 // *******************************************************************************/
 
-//inline IntLine::IntLine()
+// inline IntLine::IntLine()
 //{
-//}
+// }
 
-//inline IntLine::IntLine(const IntPoint& apt1, const IntPoint& apt2)
-//    : pt1(apt1)
-//    , pt2(apt2)
+// inline IntLine::IntLine(const IntPoint& apt1, const IntPoint& apt2)
+//     : pt1(apt1)
+//     , pt2(apt2)
 //{
-//}
+// }
 
-//inline IntLine::IntLine(double x1pos, double y1pos, double x2pos, double y2pos)
-//    : pt1(x1pos, y1pos)
-//    , pt2(x2pos, y2pos)
+// inline IntLine::IntLine(double x1pos, double y1pos, double x2pos, double y2pos)
+//     : pt1(x1pos, y1pos)
+//     , pt2(x2pos, y2pos)
 //{
-//}
+// }
 
-//inline cInt IntLine::x1() const
+// inline cInt IntLine::x1() const
 //{
-//    return pt1.X;
-//}
+//     return pt1.X;
+// }
 
-//inline cInt IntLine::y1() const
+// inline cInt IntLine::y1() const
 //{
-//    return pt1.Y;
-//}
+//     return pt1.Y;
+// }
 
-//inline cInt IntLine::x2() const
+// inline cInt IntLine::x2() const
 //{
-//    return pt2.X;
-//}
+//     return pt2.X;
+// }
 
-//inline cInt IntLine::y2() const
+// inline cInt IntLine::y2() const
 //{
-//    return pt2.Y;
-//}
+//     return pt2.Y;
+// }
 
-//inline bool IntLine::isNull() const
+// inline bool IntLine::isNull() const
 //{
-//    return pt1.X == pt2.X && pt1.Y == pt2.Y;
-//}
+//     return pt1.X == pt2.X && pt1.Y == pt2.Y;
+// }
 
-//inline IntPoint IntLine::p1() const
+// inline IntPoint IntLine::p1() const
 //{
-//    return pt1;
-//}
+//     return pt1;
+// }
 
-//inline IntPoint IntLine::p2() const
+// inline IntPoint IntLine::p2() const
 //{
-//    return pt2;
-//}
+//     return pt2;
+// }
 
-//inline cInt IntLine::dx() const
+// inline cInt IntLine::dx() const
 //{
-//    return pt2.X - pt1.X;
-//}
+//     return pt2.X - pt1.X;
+// }
 
-//inline cInt IntLine::dy() const
+// inline cInt IntLine::dy() const
 //{
-//    return pt2.Y - pt1.Y;
-//}
+//     return pt2.Y - pt1.Y;
+// }
 
 ////inline IntLine IntLine::normalVector() const
 ////{
@@ -183,54 +183,54 @@
 ////    return IntLine(pt1 + p, pt2 + p);
 ////}
 
-//inline IntLine IntLine::translated(double adx, double ady) const
+// inline IntLine IntLine::translated(double adx, double ady) const
 //{
-//    return translated(IntPoint(adx, ady));
-//}
+//     return translated(IntPoint(adx, ady));
+// }
 
-//inline IntPoint IntLine::center() const
+// inline IntPoint IntLine::center() const
 //{
-//    return IntPoint(0.5 * pt1.X + 0.5 * pt2.X, 0.5 * pt1.Y + 0.5 * pt2.Y);
-//}
+//     return IntPoint(0.5 * pt1.X + 0.5 * pt2.X, 0.5 * pt1.Y + 0.5 * pt2.Y);
+// }
 
-//inline void IntLine::setLength(double len)
+// inline void IntLine::setLength(double len)
 //{
-//    if (isNull())
-//        return;
-//    IntLine v = unitVector();
-//    pt2 = IntPoint(pt1.X + v.dx() * len, pt1.Y + v.dy() * len);
-//}
+//     if (isNull())
+//         return;
+//     IntLine v = unitVector();
+//     pt2 = IntPoint(pt1.X + v.dx() * len, pt1.Y + v.dy() * len);
+// }
 
-//inline IntPoint IntLine::pointAt(double t) const
+// inline IntPoint IntLine::pointAt(double t) const
 //{
-//    return IntPoint(pt1.X + (pt2.X - pt1.X) * t, pt1.Y + (pt2.Y - pt1.Y) * t);
-//}
+//     return IntPoint(pt1.X + (pt2.X - pt1.X) * t, pt1.Y + (pt2.Y - pt1.Y) * t);
+// }
 
-//inline void IntLine::setP1(const IntPoint& aP1)
+// inline void IntLine::setP1(const IntPoint& aP1)
 //{
-//    pt1 = aP1;
-//}
+//     pt1 = aP1;
+// }
 
-//inline void IntLine::setP2(const IntPoint& aP2)
+// inline void IntLine::setP2(const IntPoint& aP2)
 //{
-//    pt2 = aP2;
-//}
+//     pt2 = aP2;
+// }
 
-//inline void IntLine::setPoints(const IntPoint& aP1, const IntPoint& aP2)
+// inline void IntLine::setPoints(const IntPoint& aP1, const IntPoint& aP2)
 //{
-//    pt1 = aP1;
-//    pt2 = aP2;
-//}
+//     pt1 = aP1;
+//     pt2 = aP2;
+// }
 
-//inline void IntLine::setLine(double aX1, double aY1, double aX2, double aY2)
+// inline void IntLine::setLine(double aX1, double aY1, double aX2, double aY2)
 //{
-//    pt1 = IntPoint(aX1, aY1);
-//    pt2 = IntPoint(aX2, aY2);
-//}
+//     pt1 = IntPoint(aX1, aY1);
+//     pt2 = IntPoint(aX2, aY2);
+// }
 
-//inline bool IntLine::operator==(const IntLine& d) const
+// inline bool IntLine::operator==(const IntLine& d) const
 //{
-//    return pt1 == d.pt1 && pt2 == d.pt2;
-//}
+//     return pt1 == d.pt1 && pt2 == d.pt2;
+// }
 
 //

@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 #ifndef MYCLIPPER_H
 #define MYCLIPPER_H
@@ -16,12 +16,12 @@
 #include <QDebug>
 #include <QPolygonF>
 
-//QDebug operator<<(QDebug debug, const IntPoint& p)
+// QDebug operator<<(QDebug debug, const IntPoint& p)
 //{
-//    //QDebugStateSaver saver(debug);
-//    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-//    return debug;
-//}
+//     //QDebugStateSaver saver(debug);
+//     debug.nospace() << '(' << p.X << ", " << p.Y << ')';
+//     return debug;
+// }
 
 using namespace ClipperLib;
 
@@ -43,10 +43,10 @@ double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);
 double Perimeter(const Path& path);
 
-//IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)
+// IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)
 //{
-//    return IntPoint(int((qint64(pt1.X) + pt2.X) / 2), int((qint64(pt1.Y) + pt2.Y) / 2));
-//}
+//     return IntPoint(int((qint64(pt1.X) + pt2.X) / 2), int((qint64(pt1.Y) + pt2.Y) / 2));
+// }
 
 Path CirclePath(double diametr, const IntPoint& center = IntPoint());
 Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());

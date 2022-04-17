@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 
 #include "mvector.h"
@@ -48,42 +48,42 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
 ////////////////////////////////////////////////////////////////
 /// std::map<Key, T, std::greater<int>>
 ///
-//template <class Key, class T>
-//inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, std::greater<int>>& map)
+// template <class Key, class T>
+// inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, std::greater<int>>& map)
 //{
-//    //StreamStateSaver stateSaver(&s);
-//    using Container = std::map<Key, T>;
-//    map.clear();
-//    quint32 n;
-//    s >> n;
-//    for (quint32 i = 0; i < n; ++i) {
-//        typename Container::key_type k;
-//        typename Container::mapped_type t;
-//        s >> k >> t;
-//        if (s.status() != QDataStream::Ok) {
-//            map.clear();
-//            break;
-//        }
-//        map.emplace(k, t);
-//    }
-//    return s;
-//}
+//     //StreamStateSaver stateSaver(&s);
+//     using Container = std::map<Key, T>;
+//     map.clear();
+//     quint32 n;
+//     s >> n;
+//     for (quint32 i = 0; i < n; ++i) {
+//         typename Container::key_type k;
+//         typename Container::mapped_type t;
+//         s >> k >> t;
+//         if (s.status() != QDataStream::Ok) {
+//             map.clear();
+//             break;
+//         }
+//         map.emplace(k, t);
+//     }
+//     return s;
+// }
 
-//template <class Key, class T>
-//inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, std::greater<int>>& map)
+// template <class Key, class T>
+// inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, std::greater<int>>& map)
 //{
-//    s << quint32(map.size());
-//    // Deserialization should occur in the reverse order.
-//    // Otherwise, value() will return the least recently inserted
-//    // value instead of the most recently inserted one.
-//    auto it = map.cend();
-//    auto begin = map.cbegin();
-//    while (it != begin) {
-//        --it;
-//        s << it->first << it->second;
-//    }
-//    return s;
-//}
+//     s << quint32(map.size());
+//     // Deserialization should occur in the reverse order.
+//     // Otherwise, value() will return the least recently inserted
+//     // value instead of the most recently inserted one.
+//     auto it = map.cend();
+//     auto begin = map.cbegin();
+//     while (it != begin) {
+//         --it;
+//         s << it->first << it->second;
+//     }
+//     return s;
+// }
 #endif
 
 template <typename T>
@@ -119,7 +119,7 @@ inline QDataStream& operator<<(QDataStream& s, const mvector<T>& c) {
 ///
 template <class Key, class T, class C>
 inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, C>& map) {
-    //StreamStateSaver stateSaver(&s);
+    // StreamStateSaver stateSaver(&s);
     using Container = std::map<Key, T>;
     map.clear();
     quint32 n;
@@ -152,7 +152,7 @@ inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, C>& map) {
     return s;
 }
 ////////////////////////////////////////////////////////////////
-///std::vector<T>
+/// std::vector<T>
 ///
 template <typename T>
 inline QDataStream& operator>>(QDataStream& s, std::vector<T>& c) {

@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "gcpathitem.h"
 
 #include "gcode.h"
@@ -33,7 +33,7 @@ GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
         k = m_pen.widthF() * 0.5;
     m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
-    //setAcceptHoverEvents(true);
+    // setAcceptHoverEvents(true);
 #endif
 }
 
@@ -47,7 +47,7 @@ GcPathItem::GcPathItem(const Path& path, GCode::File* file)
         k = m_pen.widthF() * 0.5;
     m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
-    //setAcceptHoverEvents(true);
+    // setAcceptHoverEvents(true);
 #endif
 }
 
@@ -112,11 +112,11 @@ void GcPathItem::updateArrows() {
                 line.setAngle(angle + 10);
                 m_arrows.moveTo(line.p1());
                 m_arrows.lineTo(line.p2());
-                //painter->drawLine(line);
+                // painter->drawLine(line);
                 line.setAngle(angle - 10);
                 m_arrows.moveTo(line.p1());
                 m_arrows.lineTo(line.p2());
-                //painter->drawLine(line);
+                // painter->drawLine(line);
             }
         }
     }

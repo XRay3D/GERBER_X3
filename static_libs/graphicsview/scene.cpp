@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "scene.h"
 
 #include "graphicsview.h"
@@ -30,10 +30,10 @@
 #include <QTime>
 #include <QtMath>
 
-//QTime m_time;
-//int m_time2;
-//int m_frameCount = 0;
-//int m_frameCount2;
+// QTime m_time;
+// int m_time2;
+// int m_frameCount = 0;
+// int m_frameCount2;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent) {
@@ -61,7 +61,7 @@ void Scene::RenderPdf() {
         if (item->isVisible() && !item->boundingRect().isNull())
             rect |= item->boundingRect();
 
-    //QRectF rect(QGraphicsScene::itemsBoundingRect());
+    // QRectF rect(QGraphicsScene::itemsBoundingRect());
 
     QPdfWriter pdfWriter(curFile);
 #if QT_VERSION > QT_VERSION_CHECK(5, 99, 99)
@@ -189,8 +189,8 @@ void Scene::drawRuller(QPainter* painter) {
         painter->drawLine(line);
     }
     // draw text
-    //painter->setFont(font);
-    //painter->drawText(textRect, Qt::AlignLeft, text);
+    // painter->setFont(font);
+    // painter->drawText(textRect, Qt::AlignLeft, text);
     QPointF pt(pt2);
     if ((pt.x() + textRect.width() * scaleFactor) > m_rect.right())
         pt.rx() -= textRect.width() * scaleFactor;
@@ -301,7 +301,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
         QElapsedTimer t;
         t.start();
         const double k2 = 0.5 / m_scale;
-        //painter->setCompositionMode(QPainter::CompositionMode_Lighten);
+        // painter->setCompositionMode(QPainter::CompositionMode_Lighten);
 
         for (int i = 0; i < 3; ++i) {
             painter->setPen(QPen(color[i], 0.0));

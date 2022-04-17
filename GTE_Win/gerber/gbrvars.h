@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #pragma once
 #ifndef GERBER_H
 #define GERBER_H
@@ -66,19 +66,19 @@ enum DCode {
     D03 = 3
 };
 
-//enum Layer {
-//    Assy,
-//    Silk,
-//    Paste,
-//    Mask,
-//    Copper,
-//    Board,
-//};
+// enum Layer {
+//     Assy,
+//     Silk,
+//     Paste,
+//     Mask,
+//     Copper,
+//     Board,
+// };
 
-//enum Miror {
-//    Vertical,
-//    Horizontal
-//};
+// enum Miror {
+//     Vertical,
+//     Horizontal
+// };
 
 enum Mirroring {
     NoMirroring,

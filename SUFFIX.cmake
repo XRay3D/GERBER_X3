@@ -32,9 +32,10 @@ set(PLUGINS_DIR "${OUTPUT_DIRECTORY}/plugins")
 
 set(STATIC_LIBS_DIR "${CMAKE_SOURCE_DIR}/bin/libs${SUFFIX}")
 
-message(${CMAKE_SOURCE_DIR})
-message(${STATIC_LIBS_DIR})
-message(${PLUGINS_DIR})
-message(${SUFFIX})
+message(${PROJECT_NAME})
+message("    ${CMAKE_SOURCE_DIR}")
+message("    ${STATIC_LIBS_DIR}")
+message("    ${PLUGINS_DIR}")
+message("    ${SUFFIX}")
 
 link_directories(STATIC_LIBS_DIR)

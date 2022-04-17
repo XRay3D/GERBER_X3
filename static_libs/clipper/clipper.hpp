@@ -1,52 +1,52 @@
 /*******************************************************************************
-*                                                                              *
-* Author    :  Angus Johnson                                                   *
-* Version   :  6.4.2                                                           *
-* Date      :  27 February 2017                                                *
-* Website   :  http://www.angusj.com                                           *
-* Copyright :  Angus Johnson 2010-2017                                         *
-*                                                                              *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
-* Attributions:                                                                *
-* The code in this library is an extension of Bala Vatti's clipping algorithm: *
-* "A generic solution to polygon clipping"                                     *
-* Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
-* http://portal.acm.org/citation.cfm?id=129906                                 *
-*                                                                              *
-* Computer graphics and geometric modeling: implementation and algorithms      *
-* By Max K. Agoston                                                            *
-* Springer; 1 edition (January 4, 2005)                                        *
-* http://books.google.com/books?q=vatti+clipping+agoston                       *
-*                                                                              *
-* See also:                                                                    *
-* "Polygon Offsetting by Computing Winding Numbers"                            *
-* Paper no. DETC2005-85513 pp. 565-575                                         *
-* ASME 2005 International Design Engineering Technical Conferences             *
-* and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
-* September 24-28, 2005 , Long Beach, California, USA                          *
-* http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
-*                                                                              *
-*******************************************************************************/
+ *                                                                              *
+ * Author    :  Angus Johnson                                                   *
+ * Version   :  6.4.2                                                           *
+ * Date      :  27 February 2017                                                *
+ * Website   :  http://www.angusj.com                                           *
+ * Copyright :  Angus Johnson 2010-2017                                         *
+ *                                                                              *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *                                                                              *
+ * Attributions:                                                                *
+ * The code in this library is an extension of Bala Vatti's clipping algorithm: *
+ * "A generic solution to polygon clipping"                                     *
+ * Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
+ * http://portal.acm.org/citation.cfm?id=129906                                 *
+ *                                                                              *
+ * Computer graphics and geometric modeling: implementation and algorithms      *
+ * By Max K. Agoston                                                            *
+ * Springer; 1 edition (January 4, 2005)                                        *
+ * http://books.google.com/books?q=vatti+clipping+agoston                       *
+ *                                                                              *
+ * See also:                                                                    *
+ * "Polygon Offsetting by Computing Winding Numbers"                            *
+ * Paper no. DETC2005-85513 pp. 565-575                                         *
+ * ASME 2005 International Design Engineering Technical Conferences             *
+ * and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
+ * September 24-28, 2005 , Long Beach, California, USA                          *
+ * http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
+ *                                                                              *
+ *******************************************************************************/
 
 #ifndef clipper_hpp
 #define clipper_hpp
 
 #define CLIPPER_VERSION "6.4.2"
 
-//use_int32: When enabled 32bit ints are used instead of 64bit ints. This
-//improve performance but coordinate values are limited to the range +/- 46340
+// use_int32: When enabled 32bit ints are used instead of 64bit ints. This
+// improve performance but coordinate values are limited to the range +/- 46340
 //#define use_int32
 
-//use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
+// use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
 //#define use_xyz
 
-//use_lines: Enables line clipping. Adds a very minor cost to performance.
+// use_lines: Enables line clipping. Adds a very minor cost to performance.
 #define use_lines
 
-//use_deprecated: Enables temporary support for the obsolete functions
+// use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated
 
 #include "mvector.h"
@@ -85,10 +85,10 @@ enum PolyType {
     ptClip
 };
 
-//By far the most widely used winding rules for polygon filling are
-//EvenOdd & NonZero (GDI, GDI+, XLib, OpenGL, Cairo, AGG, Quartz, SVG, Gr32)
-//Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
-//see http://glprogramming.com/red/chapter11.html
+// By far the most widely used winding rules for polygon filling are
+// EvenOdd & NonZero (GDI, GDI+, XLib, OpenGL, Cairo, AGG, Quartz, SVG, Gr32)
+// Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
+// see http://glprogramming.com/red/chapter11.html
 enum PolyFillType {
     pftEvenOdd,
     pftNonZero,
@@ -104,7 +104,7 @@ static cInt const hiRange = 0x7FFF;
 typedef int32_t cInt;
 static cInt constexpr loRange = std::numeric_limits<int32_t>::max();
 static cInt constexpr hiRange = std::numeric_limits<int32_t>::max(); // 0x40000000; //FFFFFFFFL /*L*/;
-typedef signed long long long64;                                     //used by Int128 class
+typedef signed long long long64;                                     // used by Int128 class
 typedef unsigned long long ulong64;
 
 constexpr cInt uScale = 100000;
@@ -282,16 +282,16 @@ struct Paths : mvector<Path> {
     //    int id {};
 };
 
-//inline Path& operator<<(Path& poly, const IntPoint& p)
+// inline Path& operator<<(Path& poly, const IntPoint& p)
 //{
-//    poly.push_back(p);
-//    return poly;
-//}
-//inline Paths& operator<<(Paths& polys, const Path& p)
+//     poly.push_back(p);
+//     return poly;
+// }
+// inline Paths& operator<<(Paths& polys, const Path& p)
 //{
-//    polys.push_back(p);
-//    return polys;
-//}
+//     polys.push_back(p);
+//     return polys;
+// }
 
 std::ostream& operator<<(std::ostream& s, const IntPoint& p);
 std::ostream& operator<<(std::ostream& s, const Path& p);
@@ -344,14 +344,14 @@ public:
     int Nesting = 0;
 
 private:
-    //PolyNode& operator =(PolyNode& other);
-    size_t Index; //node index in Parent.Childs
+    // PolyNode& operator =(PolyNode& other);
+    size_t Index; // node index in Parent.Childs
     bool m_IsOpen;
     JoinType m_jointype;
     EndType m_endtype;
     PolyNode* GetNextSiblingUp() const;
     void AddChild(PolyNode& child);
-    friend class Clipper; //to access Index
+    friend class Clipper; // to access Index
     friend class ClipperOffset;
 };
 
@@ -363,9 +363,9 @@ public:
     int Total() const;
 
 private:
-    //PolyTree& operator =(PolyTree& other);
+    // PolyTree& operator =(PolyTree& other);
     PolyNodes AllNodes;
-    friend class Clipper; //to access AllNodes
+    friend class Clipper; // to access AllNodes
 };
 
 bool Orientation(const Path& poly);
@@ -407,7 +407,7 @@ enum EdgeSide {
     esRight = 2
 };
 
-//forward declarations (for stuff used internally) ...
+// forward declarations (for stuff used internally) ...
 struct TEdge;
 struct IntersectNode;
 struct LocalMinimum;
@@ -422,9 +422,9 @@ typedef mvector /*mvector*/<IntersectNode*> IntersectList;
 
 //------------------------------------------------------------------------------
 
-//ClipperBase is the ancestor to the Clipper class. It should not be
-//instantiated directly. This class simply abstracts the conversion of sets of
-//polygon coordinates into edge objects that are stored in a LocalMinima list.
+// ClipperBase is the ancestor to the Clipper class. It should not be
+// instantiated directly. This class simply abstracts the conversion of sets of
+// polygon coordinates into edge objects that are stored in a LocalMinima list.
 class ClipperBase {
 public:
     ClipperBase();
@@ -502,7 +502,7 @@ public:
     void ReverseSolution(bool value) { m_ReverseOutput = value; }
     bool StrictlySimple() { return m_StrictSimple; }
     void StrictlySimple(bool value) { m_StrictSimple = value; }
-//set the callback function for z value filling on intersections (otherwise Z is 0)
+// set the callback function for z value filling on intersections (otherwise Z is 0)
 #ifdef use_xyz
     void ZFillFunction(ZFillCallback zFillFunc);
 #endif
@@ -524,7 +524,7 @@ private:
     bool m_UsingPolyTree;
     bool m_StrictSimple;
 #ifdef use_xyz
-    ZFillCallback m_ZFill; //custom callback
+    ZFillCallback m_ZFill; // custom callback
 #endif
     void SetWindingCount(TEdge& edge);
     bool IsEvenOddFillType(const TEdge& edge) const;
@@ -624,4 +624,4 @@ private:
 
 } // namespace ClipperLib
 
-#endif //clipper_hpp
+#endif // clipper_hpp

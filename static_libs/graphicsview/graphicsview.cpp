@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
 #include "ruler.h"
@@ -110,7 +110,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::updateRuler);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::updateRuler);
 
-    scale(1.0, -1.0); //flip vertical
+    scale(1.0, -1.0); // flip vertical
     zoom100();
 
     {
@@ -316,7 +316,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
                 sbUpdate(QAbstractScrollArea::verticalScrollBar());
             break;
         default:
-            //QGraphicsView::wheelEvent(event);
+            // QGraphicsView::wheelEvent(event);
             return;
         }
     }
@@ -327,7 +327,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
 
 void GraphicsView::updateRuler() {
     // layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
-    updateSceneRect(QRectF()); //actualize mapFromScene
+    updateSceneRect(QRectF()); // actualize mapFromScene
     QPoint p = mapFromScene(QPointF());
     vRuler->SetOrigin(p.y());
     hRuler->SetOrigin(p.x());
@@ -382,7 +382,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         setInteractive(false);
-        //Ruler
+        // Ruler
         if (ruler_) {
             m_scene->setDrawRuller(true);
             const QPointF point(mappedPos(event));

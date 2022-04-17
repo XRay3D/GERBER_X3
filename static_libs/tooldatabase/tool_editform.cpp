@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "tool_editform.h"
 #include "ui_tooleditform.h"
 
@@ -91,7 +91,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     QSettings settings;
     ui->cbxFeedSpeeds->setCurrentIndex(settings.value("cbxFeedSpeeds").toInt());
-    //ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
+    // ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
     setVisibleToolWidgets(false);
     setChanged(false);
 }
@@ -99,7 +99,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 ToolEditForm::~ToolEditForm() {
     QSettings settings;
     settings.setValue("cbxFeedSpeeds", ui->cbxFeedSpeeds->currentIndex());
-    //settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
+    // settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
     delete ui;
     ui = nullptr;
 }
@@ -262,7 +262,7 @@ void ToolEditForm::valueChangedSlot(double value) {
         m_tool.setPlungeRate(value / m_feed);
         break;
     case Tool::SpindleSpeed:
-        m_tool.setSpindleSpeed(value); //rpm
+        m_tool.setSpindleSpeed(value); // rpm
         if (ui->chbxFeedRate->isChecked())
             ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         if (ui->chbxPlungeRate->isChecked())

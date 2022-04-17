@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 //#pragma once
 //
 //
@@ -23,54 +23,54 @@
 //#include <QtWidgets/QProgressBar>
 //#include <QtWidgets/QVBoxLayout>
 
-//QT_BEGIN_NAMESPACE
+// QT_BEGIN_NAMESPACE
 
-//class OpeningDialog : public QDialog {
-//    Q_OBJECT
+// class OpeningDialog : public QDialog {
+//     Q_OBJECT
 
-//public:
-//    explicit OpeningDialog(QWidget* parent = Q_NULLPTR)
-//        : QDialog(parent)
-//    {
-//        setupUi(this);
-//        connect(buttonBox, &QDialogButtonBox::rejected, [&] { cancel = true; hide(); });
-//    }
-//    ~OpeningDialog()
-//    {
-//    }
-//    void setFileName(const QString& fileName)
-//    {
-//        label->setText("Reading: " + fileName);
-//        progressBar->setValue(0);
-//        show();
-//    }
-//    void setMaximum(int maximum)
-//    {
-//        progressBar->setMaximum(maximum);
-//    }
-//    void setValue(int value)
-//    {
-//        progressBar->setValue(value);
-//    }
+// public:
+//     explicit OpeningDialog(QWidget* parent = Q_NULLPTR)
+//         : QDialog(parent)
+//     {
+//         setupUi(this);
+//         connect(buttonBox, &QDialogButtonBox::rejected, [&] { cancel = true; hide(); });
+//     }
+//     ~OpeningDialog()
+//     {
+//     }
+//     void setFileName(const QString& fileName)
+//     {
+//         label->setText("Reading: " + fileName);
+//         progressBar->setValue(0);
+//         show();
+//     }
+//     void setMaximum(int maximum)
+//     {
+//         progressBar->setMaximum(maximum);
+//     }
+//     void setValue(int value)
+//     {
+//         progressBar->setValue(value);
+//     }
 
 //    bool cancel = false;
 
-//private:
-//    QVBoxLayout* verticalLayout;
-//    QLabel* label;
-//    QProgressBar* progressBar;
-//    QDialogButtonBox* buttonBox;
-//    void setupUi(QDialog* Dialog)
-//    {
-//        if (Dialog->objectName().isEmpty())
-//            Dialog->setObjectName(QStringLiteral("Dialog"));
-//        Dialog->resize(408, 109);
-//        Dialog->setSizeGripEnabled(false);
-//        Dialog->setModal(true);
-//        verticalLayout = new QVBoxLayout(Dialog);
-//        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-//        label = new QLabel(Dialog);
-//        label->setObjectName(QStringLiteral("label"));
+// private:
+//     QVBoxLayout* verticalLayout;
+//     QLabel* label;
+//     QProgressBar* progressBar;
+//     QDialogButtonBox* buttonBox;
+//     void setupUi(QDialog* Dialog)
+//     {
+//         if (Dialog->objectName().isEmpty())
+//             Dialog->setObjectName(QStringLiteral("Dialog"));
+//         Dialog->resize(408, 109);
+//         Dialog->setSizeGripEnabled(false);
+//         Dialog->setModal(true);
+//         verticalLayout = new QVBoxLayout(Dialog);
+//         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+//         label = new QLabel(Dialog);
+//         label->setObjectName(QStringLiteral("label"));
 
 //        verticalLayout->addWidget(label);
 

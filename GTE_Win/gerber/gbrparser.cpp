@@ -1,15 +1,15 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  01 February 2020                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2020                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  01 February 2020                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2020                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "gbr_parser.h"
 #include <QDateTime>
 #include <QDebug>
@@ -41,7 +41,7 @@ Paths Parser::parseLines(const QString& gerberLines) {
 
         static const QRegExp match(QStringLiteral("FS([L|T]?)([A|I]?)X(\\d)(\\d)Y(\\d)(\\d)\\*"));
         if (match.indexIn(gerberLines) == -1) {
-            //emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
+            // emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!\nNot contains format.");
             return Paths();
         }
 
@@ -132,10 +132,10 @@ Paths Parser::parseLines(const QString& gerberLines) {
         } else {
             return merge();
             /*mergedPaths();*/
-            //m_file->itemGroup()->setVisible(true);
-            //emit fileReady(m_file);
+            // m_file->itemGroup()->setVisible(true);
+            // emit fileReady(m_file);
         }
-        //emit fileProgress(m_file->shortName(), 1, 1);
+        // emit fileProgress(m_file->shortName(), 1, 1);
         m_currentGerbLine.clear();
         m_apertureMacro.clear();
         m_path.clear();
@@ -263,7 +263,7 @@ QList<QString> Parser::format(QString data) {
                 gerberLinesAppend(state, line);
                 continue;
             case Data:
-                //qWarning() << "Хрен его знает:" << line;
+                // qWarning() << "Хрен его знает:" << line;
                 continue;
             }
         }
@@ -316,12 +316,12 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
             switch (m_state.format()->zeroOmisMode) {
             case OmitLeadingZeros:
                 Str = QString(integer + decimal - Str.length(), '0') + Str;
-                //Str = "0" + Str;
+                // Str = "0" + Str;
                 break;
 #ifdef DEPRECATED
             case OmitTrailingZeros:
                 Str += QString(integer + decimal - Str.length(), '0');
-                //Str += "0";
+                // Str += "0";
                 break;
 #endif
             }
@@ -438,7 +438,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
 
-    const int intSteps = 18; //MinStepsPerCircle;
+    const int intSteps = 18; // MinStepsPerCircle;
 
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * pi;
@@ -682,36 +682,36 @@ bool Parser::parseApertureMacros(const QString& gLine) {
 bool Parser::parseAttributes(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
     if (match.exactMatch(gLine)) {
-        //const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
-        // switch (slAttributeType.indexOf(match.cap(1))) {
-        // case ATTRIBUTE:
-        // //FileFunction
-        // gerberFile.attributesStrings.push_back(match.cap(2));
-        // break;
-        // case APERTURE_ATTRIBUTE:
-        // gerberFile.apertureAttributesStrings.push_back(match.cap(2));
-        // break;
-        // case OBJECT_ATTRIBUTE:
-        // gerberFile.objectAttributesStrings.push_back(match.cap(2));
-        // break;
-        // case DELETE_ATTRIBUTE:
-        // for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
-        // if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.attributesStrings.removeAt(i);
-        // }
-        // }
-        // for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
-        // if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.apertureAttributesStrings.removeAt(i);
-        // }
-        // }
-        // for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
-        // if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        // gerberFile.objectAttributesStrings.removeAt(i);
-        // }
-        // }
-        // break;
-        // }
+        // const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
+        //  switch (slAttributeType.indexOf(match.cap(1))) {
+        //  case ATTRIBUTE:
+        //  //FileFunction
+        //  gerberFile.attributesStrings.push_back(match.cap(2));
+        //  break;
+        //  case APERTURE_ATTRIBUTE:
+        //  gerberFile.apertureAttributesStrings.push_back(match.cap(2));
+        //  break;
+        //  case OBJECT_ATTRIBUTE:
+        //  gerberFile.objectAttributesStrings.push_back(match.cap(2));
+        //  break;
+        //  case DELETE_ATTRIBUTE:
+        //  for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
+        //  if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        //  gerberFile.attributesStrings.removeAt(i);
+        //  }
+        //  }
+        //  for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
+        //  if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        //  gerberFile.apertureAttributesStrings.removeAt(i);
+        //  }
+        //  }
+        //  for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
+        //  if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        //  gerberFile.objectAttributesStrings.removeAt(i);
+        //  }
+        //  }
+        //  break;
+        //  }
         return true;
     }
     return false;
@@ -795,7 +795,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         m_path.push_back(m_state.curPos());
         Path arcPolygon;
         switch (m_state.quadrant()) {
-        case Multi: //G75
+        case Multi: // G75
         {
             const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             const double start = atan2(-j, -i); // Start angle
@@ -806,16 +806,16 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
             arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
-            //arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
-            // Последняя точка в вычисленной дуге может иметь числовые ошибки.
-            // Точной конечной точкой является указанная (x, y). Заменить.
+            // arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
+            //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
+            //  Точной конечной точкой является указанная (x, y). Заменить.
             m_state.curPos() = { x, y };
             if (arcPolygon.size())
                 arcPolygon.last() = m_state.curPos();
             else
                 arcPolygon.push_back(m_state.curPos());
         } break;
-        case Single: //G74
+        case Single: // G74
             for (int c = 0; c < 4; ++c) {
                 const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
                 const double radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));

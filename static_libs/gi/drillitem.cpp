@@ -2,17 +2,17 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include "drillitem.h"
-//#include "excellon.h"
+//#include "ex_cellon.h"
 //#include "gcode.h"
 
 #include "graphicsview.h"
@@ -95,25 +95,25 @@ void AbstractDrillItem::changeColor() {
     animation.start();
 }
 
-//namespace GCode {
+// namespace GCode {
 
-//DrillItem::DrillItem(double diameter, GCode::File* file)
-//    : AbstractDrillItem(reinterpret_cast<FileInterface*>(file))
-//    , m_diameter(diameter)
+// DrillItem::DrillItem(double diameter, GCode::File* file)
+//     : AbstractDrillItem(reinterpret_cast<FileInterface*>(file))
+//     , m_diameter(diameter)
 //{
-//    setAcceptHoverEvents(true);
-//    setFlag(ItemIsSelectable, true);
-//    create();
-//    changeColor();
-//}
+//     setAcceptHoverEvents(true);
+//     setFlag(ItemIsSelectable, true);
+//     create();
+//     changeColor();
+// }
 
-//DrillItem::~DrillItem() { }
+// DrillItem::~DrillItem() { }
 
-//QRectF DrillItem::boundingRect() const { return m_rect; }
+// QRectF DrillItem::boundingRect() const { return m_rect; }
 
-//QPainterPath DrillItem::shape() const { return m_shape; }
+// QPainterPath DrillItem::shape() const { return m_shape; }
 
-//void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+// void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 //{
 
 //    if (App::scene()->drawPdf()) {
@@ -131,44 +131,44 @@ void AbstractDrillItem::changeColor() {
 //    painter->strokePath(m_shape, m_pen);
 //}
 
-//int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
+// int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
 
-//bool DrillItem::isSlot()
+// bool DrillItem::isSlot()
 //{
-//    if (m_hole)
-//        return !m_hole->state.path.isEmpty();
-//    return false;
-//}
+//     if (m_hole)
+//         return !m_hole->state.path.isEmpty();
+//     return false;
+// }
 
-//double DrillItem::diameter() const { return m_diameter; }
+// double DrillItem::diameter() const { return m_diameter; }
 
-//void DrillItem::setDiameter(double diameter)
+// void DrillItem::setDiameter(double diameter)
 //{
-//    if (m_diameter == diameter)
-//        return;
-//    m_diameter = diameter;
+//     if (m_diameter == diameter)
+//         return;
+//     m_diameter = diameter;
 
 //    create();
 //    update();
 //}
 
-//Paths DrillItem::paths() const
+// Paths DrillItem::paths() const
 //{
-//    Path path;
-//    if (m_hole) {
-//        if (m_hole->state.path.isEmpty())
-//            path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-//        else
-//            return { m_hole->state.path.translated(m_hole->state.format->offsetPos) };
-//    } else
-//        path = CirclePath(m_diameter * uScale, (pos()));
-//    ReversePath(path);
-//    return { path };
-//}
+//     Path path;
+//     if (m_hole) {
+//         if (m_hole->state.path.isEmpty())
+//             path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
+//         else
+//             return { m_hole->state.path.translated(m_hole->state.format->offsetPos) };
+//     } else
+//         path = CirclePath(m_diameter * uScale, (pos()));
+//     ReversePath(path);
+//     return { path };
+// }
 
-//void DrillItem::changeColor()
+// void DrillItem::changeColor()
 //{
-//    animation.setStartValue(m_bodyColor);
+//     animation.setStartValue(m_bodyColor);
 
 //    switch (colorState) {
 //    case Default:
@@ -203,49 +203,49 @@ void AbstractDrillItem::changeColor() {
 //    animation.start();
 //}
 
-//void DrillItem::updateHole()
+// void DrillItem::updateHole()
 //{
-//    if (!m_hole)
-//        return;
-//    setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
-//    m_diameter = m_hole->state.currentToolDiameter();
-//    create();
-//    update();
+//     if (!m_hole)
+//         return;
+//     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
+//     m_diameter = m_hole->state.currentToolDiameter();
+//     create();
+//     update();
 
 //    auto p(pos());
 //    setPos(1, 1);
 //    setPos(p);
 //}
 
-//void DrillItem::create()
+// void DrillItem::create()
 //{
-//    m_shape = QPainterPath();
-//    if (!m_hole) {
-//        //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
-//        auto p = CirclePath(m_diameter * uScale);
-//        p.push_back(p.first());
-//        m_shape.addPolygon(p);
-//        m_rect = m_shape.boundingRect();
-//    } else if (m_hole->state.path.isEmpty()) {
-//        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-//        //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
-//        auto p = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-//        p.push_back(p.first());
-//        m_shape.addPolygon(p);
-//        m_rect = m_shape.boundingRect();
-//    } else {
-//        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-//        Paths tmpPpath;
-//        ClipperOffset offset;
-//        offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
-//        offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
-//        for (Path& path : tmpPpath) {
-//            path.push_back(path.first());
-//            m_shape.addPolygon(path);
-//        }
-//        m_rect = m_shape.boundingRect();
-//        fillPolygon = m_shape.toFillPolygon();
-//    }
-//}
+//     m_shape = QPainterPath();
+//     if (!m_hole) {
+//         //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
+//         auto p = CirclePath(m_diameter * uScale);
+//         p.push_back(p.first());
+//         m_shape.addPolygon(p);
+//         m_rect = m_shape.boundingRect();
+//     } else if (m_hole->state.path.isEmpty()) {
+//         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+//         //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
+//         auto p = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
+//         p.push_back(p.first());
+//         m_shape.addPolygon(p);
+//         m_rect = m_shape.boundingRect();
+//     } else {
+//         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+//         Paths tmpPpath;
+//         ClipperOffset offset;
+//         offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
+//         offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
+//         for (Path& path : tmpPpath) {
+//             path.push_back(path.first());
+//             m_shape.addPolygon(path);
+//         }
+//         m_rect = m_shape.boundingRect();
+//         fillPolygon = m_shape.toFillPolygon();
+//     }
+// }
 
 //}

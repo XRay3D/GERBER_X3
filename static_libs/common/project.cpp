@@ -2,22 +2,22 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /*******************************************************************************
-* Author    :  Damir Bakiev                                                    *
-* Version   :  na                                                              *
-* Date      :  11 November 2021                                                *
-* Website   :  na                                                              *
-* Copyright :  Damir Bakiev 2016-2022                                          *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*******************************************************************************/
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  11 November 2021                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
 #include <project.h>
 
-#include "ft_model.h"
 #include "file.h"
-#include "shapepluginin.h"
+#include "ft_model.h"
 #include "mainwindow.h"
 #include "shape.h"
+#include "shapepluginin.h"
 
 #include <scene.h>
 
@@ -43,6 +43,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
         stream >> *file;
         file->addToScene();
         App::project()->watcher->addPath(file->name());
+        qDebug() << App::project()->watcher->files();
     }
     return stream;
 }
@@ -269,7 +270,7 @@ QString Project::fileNames() {
 }
 
 int Project::contains(const QString& name) {
-    //QMutexLocker locker(&m_mutex);
+    // QMutexLocker locker(&m_mutex);
     if (m_reloadFile)
         return -1;
     for (const auto& [id, sp] : m_files) {
@@ -336,14 +337,13 @@ int Project::addFile(FileInterface* file) {
     if (id > -1 && m_files[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {
-        const int newId = m_files.size()
-            ? (--m_files.end())->first + 1
-            : 0;
+        const int newId = m_files.size() ? (--m_files.end())->first + 1 : 0;
         file->setId(newId);
         m_files.emplace(newId, file);
         App::fileModel()->addFile(file);
         setChanged();
         watcher->addPath(file->name());
+        qDebug() << watcher->files();
     }
     return file->id();
 }
@@ -353,9 +353,7 @@ int Project::addShape(ShapeInterface* const shape) {
     if (!shape)
         return -1;
     m_isPinsPlaced = false;
-    const int newId = m_shapes.size()
-        ? (--m_shapes.end())->first + 1
-        : 0;
+    const int newId = m_shapes.size() ? (--m_shapes.end())->first + 1 : 0;
     shape->m_giId = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
