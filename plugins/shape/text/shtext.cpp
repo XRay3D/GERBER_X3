@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "shtext.h"
 
 #include "file.h"
@@ -101,10 +101,10 @@ void Text::redraw() {
         //        matrix.scale(
         //            -scale * iData.xy > 0.0 ? 1 * iData.xy : 1,
         //            -scale * iData.xy < 0.0 ? 1 / iData.xy : 1);
-        matrix.scale(-scale, -scale);
+        matrix.scale(-scale * (100 / iData.xy), -scale);
     } else {
         // matrix.scale(+scale * xyScale, -scale);
-        matrix.scale(+scale, -scale);
+        matrix.scale(+scale * (100 / iData.xy), -scale);
     }
     {
         QPainterPath tmpPainterPath;
@@ -123,14 +123,23 @@ void Text::redraw() {
     matrix.rotate(iData.angle - 360);
 
     m_paths.clear();
-    m_shape = QPainterPath();
+    m_shape = {};
 
+    Clipper clipper;
     for (auto& sp : painterPath.toSubpathPolygons(matrix)) {
-        m_paths.push_back(sp);
+        clipper.AddPath(sp, ClipperLib::ptClip);
+        //        m_paths.push_back(sp);
+        //        m_shape.addPolygon(sp);
+    }
+    clipper.Execute(ClipperLib::ctUnion, m_paths, ClipperLib::pftNonZero);
+    for (auto& sp : m_paths) {
+        sp.emplace_back(sp.front());
         m_shape.addPolygon(sp);
     }
+
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
+    //    update();
 }
 
 QString Text::text() const { return iData.text; }
