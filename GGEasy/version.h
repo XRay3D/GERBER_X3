@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,11 +7,11 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 
-#define VER_FILEVERSION     0, 8, 5, 0
-#define VER_FILEVERSION_STR "0.8.5.0"
+#define VER_FILEVERSION     0, 8, 6, 0
+#define VER_FILEVERSION_STR "0.8.6.0"
 
 #define VER_PRODUCTVERSION     VER_FILEVERSION
 #define VER_PRODUCTVERSION_STR VER_FILEVERSION_STR

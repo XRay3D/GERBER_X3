@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 #include "gc_formsutil.h"
 
@@ -51,7 +51,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#include "gc_odeplugininterface.h"
+#include "gc_plugin.h"
 #include <QToolBar>
 
 class GCPluginImpl : public GCodePlugin {

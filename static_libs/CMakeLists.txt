@@ -7,14 +7,11 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(Static_Libs)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
@@ -37,7 +34,7 @@ include_directories(
     ../static_libs/tooldatabase
     ../static_libs/tooldatabase
     ../shape_plugins/shape
-    )
+)
 
 
 # static lib

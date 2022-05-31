@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "gc_creator.h"
 
 #include "app.h"
@@ -291,7 +291,7 @@ void Creator::stacking(Paths& paths) {
     }
     sortPolyNodeByNesting(polyTree);
     m_returnPss.clear();
-    /***********************************************************************************************/
+    /***************************************************************************8********************/
     t.start();
 
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
@@ -359,7 +359,7 @@ void Creator::stacking(Paths& paths) {
         }
         // PROG setProgInc();
     };
-    /***********************************************************************************************/
+    /***************************************************************************8********************/
     // PROG .3setProgMax(polyTree.Total());
     stacker({ polyTree.GetFirst(), false });
 

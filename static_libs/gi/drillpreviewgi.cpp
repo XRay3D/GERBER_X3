@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "drillpreviewgi.h"
 #include "drill/gc_drillmodel.h"
 #include "graphicsview.h"
@@ -18,8 +18,8 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 
-AbstractDrillPrGI::AbstractDrillPrGI(Row& row)
-    : row(row)
+AbstractDrillPrGI::AbstractDrillPrGI(int toolId)
+    : toolId_(toolId)
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed]) {
     connect(this, &AbstractDrillPrGI::colorChanged, [this] { update(); });
@@ -32,28 +32,30 @@ AbstractDrillPrGI::AbstractDrillPrGI(Row& row)
 void AbstractDrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->setPen({ m_bodyColor, 0.0 });
     painter->setBrush(m_bodyColor);
-    painter->drawPath(m_sourcePath);
+    painter->drawPath(sourcePath_);
     // draw tool
-    if (row.toolId > -1) {
+    if (toolId_ > -1) {
         painter->setPen(QPen(m_pathColor, 2 * App::graphicsView()->scaleFactor()));
         painter->setBrush(Qt::NoBrush);
-        if (m_toolPath.isEmpty())
-            painter->drawPath(App::toolHolder().tool(row.toolId).path(pos()));
+        if (toolPath_.isEmpty())
+            painter->drawPath(App::toolHolder().tool(toolId_).path(pos()));
         else
-            painter->drawPath(m_toolPath);
+            painter->drawPath(toolPath_);
     }
 }
 
-QRectF AbstractDrillPrGI::boundingRect() const { return m_sourcePath.boundingRect(); }
+QRectF AbstractDrillPrGI::boundingRect() const { return sourcePath_.boundingRect(); }
 
-int AbstractDrillPrGI::type() const { return static_cast<int>(m_type); }
+QPainterPath AbstractDrillPrGI::shape() const { return sourcePath_; }
 
-double AbstractDrillPrGI::sourceDiameter() const { return m_sourceDiameter; }
+int AbstractDrillPrGI::type() const { return static_cast<int>(type_); }
 
-int AbstractDrillPrGI::toolId() const { return row.toolId; }
+double AbstractDrillPrGI::sourceDiameter() const { return sourceDiameter_; }
+
+//int AbstractDrillPrGI::toolId() const { return toolId_<0?ro; }
 
 void AbstractDrillPrGI::changeColor() {
-    if (row.useForCalc)
+    if (isEnabled())
         colorState |= Used;
     else
         colorState &= ~Used;
@@ -77,9 +79,7 @@ void AbstractDrillPrGI::changeColor() {
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(m_pathColor);
-        animation->setEndValue(QColor((colorState & Tool)
-                ? ((colorState & Used) ? QRgb(colors[(int)Colors::Tool] ^ App::settings().guiColor(GuiColors::Background).rgba()) : colors[(int)Colors::Default])
-                : colors[(int)Colors::UnUsed]));
+        animation->setEndValue(QColor((colorState & Tool) ? ((colorState & Used) ? QRgb(colors[(int)Colors::Tool] ^ App::settings().guiColor(GuiColors::Background).rgba()) : colors[(int)Colors::Default]) : colors[(int)Colors::UnUsed]));
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

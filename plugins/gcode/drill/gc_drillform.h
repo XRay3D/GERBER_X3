@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,14 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 #ifdef GBR_
 #include "ex_types.h"
 #include "gbr_types.h"
 #endif
 
-#include "gc_odeplugininterface.h"
+#include "gc_plugin.h"
 #include "gcode.h"
 
 #include <QHeaderView>
@@ -22,16 +22,16 @@
 #include <QToolBar>
 #include <QWidget>
 
+using HV = std::variant<const QPolygonF*, const QPointF>;
+using HK = std::tuple<int, double, bool>;
+using HoleMap = std::map<HK, mvector<HV>>;
+
 namespace Ui {
 class DrillForm;
 }
 
-namespace Gerber {
-class AbstractAperture;
-}
-
-class DrillModel;
 class AbstractDrillPrGI;
+class DrillModel;
 class Header;
 class QCheckBox;
 
@@ -55,8 +55,8 @@ private slots:
     void on_pbCreate_clicked();
 
 private:
-    GCode::GCodeType m_worckType = GCode::Drill;
-    GCode::SideOfMilling m_side = GCode::Inner;
+    GCode::GCodeType worckType_ = GCode::Drill;
+    GCode::SideOfMilling side_ = GCode::Inner;
 
     void on_cbxFileCurrentIndexChanged(int index);
     void on_clicked(const QModelIndex& index);
@@ -74,12 +74,13 @@ private:
     DrillModel* model = nullptr;
     Ui::DrillForm* ui;
 
-    int m_type;
+    int type_;
 #ifdef GBR_
     Gerber::ApertureMap m_apertures;
     Excellon::Tools m_tools;
 #endif
-    // FIXME DrillPreviewGiMap m_giPeview;
+    HoleMap peview_;
+    std::map<int, mvector<std::unique_ptr<AbstractDrillPrGI>>> giPeview_;
     FileInterface* file = nullptr;
     QCheckBox* checkBox;
     Header* header;
@@ -128,7 +129,7 @@ class GCPluginImpl : public GCodePlugin {
 public:
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     QKeySequence keySequence() const override { return { "Ctrl+Shift+D" }; }
-    QWidget* createForm()  override { return new DrillForm; };
+    QWidget* createForm() override { return new DrillForm; };
     bool canToShow() const override { return DrillForm::canToShow(); }
     int type() const override { return GCode::Drill; }
 };

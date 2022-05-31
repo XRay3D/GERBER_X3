@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(dxf LANGUAGES CXX)
@@ -35,7 +35,7 @@ add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
     ${SOURCE}
     ${UIS}
-    )
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -47,6 +47,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     File_Plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
-#    Qt${QT_VERSION_MAJOR}::OpenGL
+    #    Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::Widgets
-    )
+)

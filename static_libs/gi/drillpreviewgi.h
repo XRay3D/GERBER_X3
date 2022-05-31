@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 
 #include <graphicsitem.h>
@@ -33,17 +33,18 @@ signals:
     void colorChanged();
 
 public:
-    AbstractDrillPrGI(Row& row);
+    AbstractDrillPrGI(int toolId);
     ~AbstractDrillPrGI() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 
     //////////////////////////////////////////
     int type() const override;
     double sourceDiameter() const;
-    int toolId() const;
+    virtual int toolId() const = 0;
 
     virtual void updateTool() = 0;
     virtual IntPoint pos() const = 0;
@@ -53,13 +54,12 @@ public:
     void changeColor();
 
 protected:
-    QPainterPath m_sourcePath;
-    QPainterPath m_toolPath;
+    QPainterPath sourcePath_;
+    QPainterPath toolPath_;
 
-    struct Row& row;
-
-    double m_sourceDiameter;
-    GiType m_type;
+    int toolId_ { -1 };
+    double sourceDiameter_;
+    GiType type_;
 
     QColor m_bodyColor;
     QColor m_pathColor;

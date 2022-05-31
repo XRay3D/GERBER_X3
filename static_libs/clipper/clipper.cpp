@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Angus Johnson                                                   *
  * Version   :  6.4.2                                                           *
  * Date      :  27 February 2017                                                *
@@ -26,12 +26,12 @@
  * and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
  * September 24-28, 2005 , Long Beach, California, USA                          *
  * http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
- *******************************************************************************/
+ ***********************************************************8********************/
 
-/*******************************************************************************
+/********************************************************************************
  * This is a translation of the Delphi Clipper library and the naming style     *
  * used has retained a Delphi flavour.                                          *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "clipper.hpp"
 #include "app.h"
 #include "mvector.h"
@@ -852,7 +852,7 @@ ClipperBase::ClipperBase() // constructor
 {
     m_CurrentLM = m_MinimaList.begin(); // begin() == end() here
     m_UseFullRange = false;
-    // FIXME ProgressCancel::setClipper(this);
+    ProgressCancel::setClipper(this);
 }
 //------------------------------------------------------------------------------
 
@@ -2512,7 +2512,7 @@ void GetHorzDirection(TEdge& HorzEdge, Direction& Dir, cInt& Left, cInt& Right) 
 }
 //------------------------------------------------------------------------
 
-/*******************************************************************************
+/********************************************************************************
  * Notes: Horizontal edges (HEs) at scanline intersections (ie at the Top or    *
  * Bottom of a scanbeam) are processed as if layered. The order in which HEs    *
  * are processed doesn't matter. HEs intersect with other HE Bot.Xs only [#]    *
@@ -2520,7 +2520,7 @@ void GetHorzDirection(TEdge& HorzEdge, Direction& Dir, cInt& Left, cInt& Right) 
  * and with other non-horizontal edges [*]. Once these intersections are        *
  * processed, intermediate HEs then 'promote' the Edge above (NextInLML) into   *
  * the AEL. These 'promoted' edges may in turn intersect [%] with other HEs.    *
- *******************************************************************************/
+ ***********************************************************8********************/
 
 void Clipper::ProcessHorizontal(TEdge* horzEdge) {
     Direction dir;

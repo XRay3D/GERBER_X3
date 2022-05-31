@@ -7,28 +7,24 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
-#include <QWidget>
 
-namespace Ui {
-class GCodePropertiesForm;
-}
+#include "gc_creator.h"
 
-class GCodePropertiesForm : public QWidget {
-    Q_OBJECT
+class FileInterface;
 
+namespace GCode {
+class ThermalCreator : public Creator {
 public:
-    explicit GCodePropertiesForm(QWidget* parent = nullptr);
-    ~GCodePropertiesForm() override;
-
-    void updatePosDsbxs();
-    void updateAll();
-
-private slots:
-    void on_pbResetHome_clicked();
-    void on_pbResetZero_clicked();
+    ThermalCreator();
+    ~ThermalCreator() override = default;
 
 private:
-    Ui::GCodePropertiesForm* ui;
+    void createThermal(FileInterface* file, const Tool& tool, const double depth);
+
+protected:
+    void create() override; // Creator interface
+    GCodeType type() override { return Thermal; }
 };
+} // namespace GCode

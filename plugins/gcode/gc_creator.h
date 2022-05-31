@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,17 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 #include "gc_types.h"
 #include <QMutex>
 #include <QObject>
+#include <QProperty>
 #include <QWaitCondition>
 #include <myclipper.h>
-//#include <QThread>
-//#include <QThreadPool>
-//#include <QtConcurrent>
-//#include "tool_pch.h"
 #include <source_location>
 #include <sstream>
 

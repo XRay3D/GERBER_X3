@@ -1,38 +1,43 @@
-/*******************************************************************************
- * Author    :  Damir Bakiev                                                    *
- * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
- * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
- * Use, modification & distribution is subject to Boost Software License Ver 1. *
- * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
 #pragma once
 
-#include "file_plugin.h"
+#include "app.h"
 
-#include <QObject>
+#include <QJsonObject>
 
-namespace GCode {
+class QAction;
+class QMenu;
+class QToolBar;
+class QWidget;
 
-class Plugin : public FilePlugin {
+class GCodePlugin : public QObject {
     Q_OBJECT
 
 public:
-    explicit Plugin(QObject* parent = nullptr);
+    explicit GCodePlugin(QObject* parent = nullptr);
+    virtual ~GCodePlugin() = default;
 
-    bool thisIsIt(const QString& fileName) override;
-    int type() const override;
-    QString folderName() const override;
+    [[nodiscard]] virtual QIcon icon() const = 0;
+    [[nodiscard]] virtual QKeySequence keySequence() const = 0;
+    [[nodiscard]] virtual QWidget* createForm()  = 0;
+    [[nodiscard]] virtual bool canToShow() const;
+    [[nodiscard]] virtual int type() const = 0;
 
-    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    FileInterface* createFile() override;
+    [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);
 
-    QIcon icon() const override;
-    void createMainMenu(QMenu& menu, FileTree::View* tv) override;
+    const QJsonObject& info() const;
+    void setInfo(const QJsonObject& info);
 
-public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
+signals:
+    void setDockWidget(QWidget* w);
+
+protected:
+    QJsonObject info_;
+    enum { IconSize = 24 };
+
+private:
+    bool fl {};
 };
-} // namespace GCode
+
+#define GCodeInterface_iid "ru.xray3d.XrSoft.GGEasy.GCodePlugin"
+
+Q_DECLARE_INTERFACE(GCodePlugin, GCodeInterface_iid)

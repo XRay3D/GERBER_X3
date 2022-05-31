@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 #set(PROJECT_NAME "GGEasy")
@@ -92,7 +92,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     PrintSupport
     Widgets
     REQUIRED
-    )
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
@@ -109,7 +109,7 @@ include_directories (
     ../static_libs/graphicsview
     ../static_libs/thermal
     ../static_libs/tooldatabase
-    )
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
@@ -135,7 +135,7 @@ add_executable(${PROJECT_NAME}
     ${RESOURCES}
     ${APP_ICON_RESOURCE_WINDOWS}
     ${MAGIC_GET}
-    )
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -144,7 +144,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
     graphicsview
     shape
-#    thermal
+    #    thermal
     tooldatabase
     gcode
     #    Qt${QT_VERSION_MAJOR}::Concurrent
@@ -153,7 +153,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
-    )
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
@@ -175,7 +175,7 @@ if(WIN32)
         --no-compiler-runtime
         \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt..."
-        )
+    )
 elseif (UNIX)#LINUX
     #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
@@ -188,7 +188,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
         LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
         LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-        )
+    )
 endif()
 
 set(TARGETS ${PROJECT_NAME})
@@ -204,5 +204,5 @@ file(GLOB_RECURSE QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qm)
 foreach(QM_FILE ${QM_FILES})
     get_filename_component(QM_NAME ${QM_FILE} NAME)
     configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
-#    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
+    #    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
 endforeach()

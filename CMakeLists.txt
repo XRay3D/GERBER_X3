@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
@@ -26,10 +26,10 @@ set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Winvalid-pch)
-#    add_compile_options(-H)
-#    add_compile_options(-ftime-report)
-# -pthread
-# -ltbb
+    #    add_compile_options(-H)
+    #    add_compile_options(-ftime-report)
+    # -pthread
+    # -ltbb
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
@@ -49,7 +49,7 @@ include_directories(
     static_libs/gi
     static_libs/graphicsview
     static_libs/tooldatabase
-    )
+)
 
 # plugins
 add_subdirectory(static_libs)

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -10,14 +10,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 // import "aboutform.h";
 //#include "forms/drillform/drillform.h"
-#include "gc_odeplugininterface.h"
-#include "gc_odepropertiesform.h"
+#include "gc_plugin.h"
+#include "gc_propertiesform.h"
 //#include "forms/hatchingform.h"
 //#include "forms/pocketoffsetform.h"
 //#include "forms/pocketrasterform.h"
@@ -116,12 +116,12 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
+    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
 
-        int i = 0;
+        int i = 100;
         int k = 100;
 
-        if (1) {
+        if (0) {
             QDir dir(R"(C:\Users\bakiev\Downloads\1_низ)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
@@ -137,15 +137,15 @@ MainWindow::MainWindow(QWidget* parent)
         if (0)
             QTimer::singleShot(i += k, [this] { loadFile(R"(D:\Downloads\Gerber_p2xsdrr_brd (1)\_Gerber_BottomLayer.GBL)"); });
 
-        if (0) {
+        if (1) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->triggered(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
             QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
         if (0)
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->toggle(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
     }
 }
 

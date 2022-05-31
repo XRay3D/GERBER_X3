@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "gbr_plugin.h"
 
 #include "gbr_aperture.h"
@@ -185,49 +185,49 @@ void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
     }
 }
 
-class DrillPrGI final : public AbstractDrillPrGI {
-public:
-    explicit DrillPrGI(const GraphicObject* go, int id, Row& row)
-        : AbstractDrillPrGI(row)
-        , apId(id)
-        , gbrObj(go) {
-        auto ap = go->gFile()->apertures()->at(id);
-        m_sourceDiameter = qFuzzyIsNull(ap->drillDiameter()) ? ap->minSize() : ap->drillDiameter();
-        m_sourcePath = drawApetrure(go, id);
-        m_type = GiType::PrApetrure;
-    }
+//class DrillPrGI final : public AbstractDrillPrGI {
+//public:
+//    explicit DrillPrGI(const GraphicObject* go, int id, Row& row)
+//        : AbstractDrillPrGI(row)
+//        , apId(id)
+//        , gbrObj(go) {
+//        auto ap = go->gFile()->apertures()->at(id);
+//        sourceDiameter_ = qFuzzyIsNull(ap->drillDiameter()) ? ap->minSize() : ap->drillDiameter();
+//        m_sourcePath = drawApetrure(go, id);
+//        type_ = GiType::PrApetrure;
+//    }
 
-private:
-    static QPainterPath drawApetrure(const GraphicObject* go, int id) {
-        QPainterPath painterPath;
-        for (QPolygonF polygon : go->paths()) {
-            polygon.append(polygon.first());
-            painterPath.addPolygon(polygon);
-        }
-        const double hole = go->gFile()->apertures()->at(id)->drillDiameter() * 0.5;
-        if (hole != 0.0)
-            painterPath.addEllipse(go->state().curPos(), hole, hole);
-        return painterPath;
-    }
-    const int apId;
-    const GraphicObject* const gbrObj = nullptr;
+//private:
+//    static QPainterPath drawApetrure(const GraphicObject* go, int id) {
+//        QPainterPath painterPath;
+//        for (QPolygonF polygon : go->paths()) {
+//            polygon.append(polygon.first());
+//            painterPath.addPolygon(polygon);
+//        }
+//        const double hole = go->gFile()->apertures()->at(id)->drillDiameter() * 0.5;
+//        if (hole != 0.0)
+//            painterPath.addEllipse(go->state().curPos(), hole, hole);
+//        return painterPath;
+//    }
+//    const int apId;
+//    const GraphicObject* const gbrObj = nullptr;
 
-    // AbstractDrillPrGI interface
-public:
-    void updateTool() override {
-        if (row.toolId > -1)
-            colorState |= Tool;
-        else
-            colorState &= ~Tool;
+//    // AbstractDrillPrGI interface
+//public:
+//    void updateTool() override {
+//        if (toolId_ > -1)
+//            colorState |= Tool;
+//        else
+//            colorState &= ~Tool;
 
-        changeColor();
-    }
-    IntPoint pos() const override { return gbrObj->state().curPos(); }
-    Paths paths() const override { return gbrObj->paths(); }
-    bool fit(double depth) override {
-        return gbrObj->gFile()->apertures()->at(apId)->fit(App::toolHolder().tool(row.toolId).getDiameter(depth));
-    }
-};
+//        changeColor();
+//    }
+//    IntPoint pos() const override { return gbrObj->state().curPos(); }
+//    Paths paths() const override { return gbrObj->paths(); }
+//    bool fit(double depth) override {
+//        return gbrObj->gFile()->apertures()->at(apId)->fit(App::toolHolder().tool(toolId_).getDiameter(depth));
+//    }
+//};
 
 // FIXME DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
 //    DrillPreviewGiMap giPeview;

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -10,19 +10,19 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
-#include "gc_h.h"
+ ***********************************************************8********************/
+#include "gc_highlighter.h"
 #include "mvector.h"
 #include <QBoxLayout>
 #include <QTextBrowser>
 #include <ctre.hpp>
 
-GCH::GCH(QTextDocument* parent)
+GCHighlighter::GCHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent) {
     // myClassFormat.setFontWeight(QFont::Bold);
 }
 
-void GCH::highlightBlock(const QString& text) {
+void GCHighlighter::highlightBlock(const QString& text) {
     //    qDebug(__FUNCTION__);
 
     static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
@@ -101,7 +101,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     auto textBrowser = new QTextBrowser(this);
     textBrowser->setFontFamily("JetBrains Mono");
     textBrowser->setFontPointSize(16);
-    new GCH(textBrowser->document());
+    new GCHighlighter(textBrowser->document());
     textBrowser->setPlainText(text);
 
     auto verticalLayout = new QVBoxLayout(this);

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 
 #include "../tooldatabase/tool.h"
@@ -48,7 +48,7 @@ public:
     virtual int type() const = 0;
     virtual QString folderName() const = 0;
 
-    [[nodiscard]] virtual std::any createPreviewGi(GCodePlugin* plugin) { return {}; };
+    [[nodiscard]] virtual std::any createPreviewGi(FileInterface *file, GCodePlugin* plugin) { return {}; };
 
     [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual FileInterface* createFile() = 0;
