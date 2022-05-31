@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(filetree LANGUAGES CXX)
@@ -16,9 +16,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
-
-
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
@@ -39,13 +36,13 @@ add_library(filetree STATIC
     ft_typedelegate.h
     ft_view.cpp
     ft_view.h
-    )
+)
 
 target_link_libraries(filetree PRIVATE
     gi
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
-    )
+)
 
 #target_compile_definitions(filetree PRIVATE FILETREE_LIBRARY)

@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 set(SOURCE
@@ -60,7 +60,7 @@ set(SOURCE
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_xline.cpp
     PARENT_SCOPE
-    )
+)
 
 set(HEADERS
     ${HEADERS}
@@ -113,4 +113,4 @@ set(HEADERS
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_xline.h
     PARENT_SCOPE
-    )
+)

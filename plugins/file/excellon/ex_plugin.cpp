@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "ex_plugin.h"
 #include "ex_file.h"
 #include "ex_node.h"
@@ -26,8 +26,11 @@
 #include "ft_view.h"
 #include "utils.h"
 
+#include "drill/gc_drillform.h"
+
 #include <QComboBox>
 #include <QJsonObject>
+#include <variant>
 
 namespace Excellon {
 
@@ -46,6 +49,46 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     QTextStream in(&file);
     Parser::parseFile(fileName);
     return Parser::file;
+}
+
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+
+    HoleMap retData;
+
+    auto const exFile = reinterpret_cast<File*>(file);
+
+    for (const Excellon::Hole& hole : *exFile) {
+        if (bool slot = hole.state.path.size(); slot)
+            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(&hole.state.path);
+        else
+            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(hole.state.pos);
+    }
+
+    //    if (0) {
+    //        using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
+
+    //        DrillPreviewGiMap giPeview;
+
+    //        auto const exFile = reinterpret_cast<File*>(file);
+
+    //        std::map<int, mvector<const Excellon::Hole*>> cacheHoles;
+    //        for (const Excellon::Hole& hole : *exFile)
+    //            cacheHoles[hole.state.tCode] << &hole;
+
+    //        data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
+
+    //        for (auto [toolNum, diameter] : exFile->tools()) {
+    //            QString name(tr("Tool Ø%1mm").arg(diameter));
+    //            data.emplace_back(std::move(name), drawDrillIcon(), toolNum, diameter);
+    //            for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
+    //                if (!hole->state.path.isEmpty())
+    //                    data.back().isSlot = true;
+    //                giPeview[toolNum].emplace_back(std::make_shared<DrillPrGI>(hole, data.back()));
+    //            }
+    //        }
+    //    }
+
+    return retData;
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
@@ -93,123 +136,5 @@ void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
 }
-
-class DrillPrGI final : public AbstractDrillPrGI {
-public:
-    explicit DrillPrGI(const Excellon::Hole* hole, Row& row)
-        : AbstractDrillPrGI(row)
-        , hole(hole) {
-        m_sourceDiameter = hole->state.currentToolDiameter();
-        m_sourcePath = hole->state.path.isEmpty() ? drawDrill() : drawSlot();
-        m_type = hole->state.path.isEmpty() ? GiType::PrDrill : GiType::PrSlot;
-    }
-
-private:
-    QPainterPath drawDrill() const {
-        QPainterPath painterPath;
-        const double radius = hole->state.currentToolDiameter() * 0.5;
-        painterPath.addEllipse(hole->state.offsetedPos(), radius, radius);
-        return painterPath;
-    }
-
-    QPainterPath drawSlot() const {
-        QPainterPath painterPath;
-        for (Path& path : offset(hole->item->paths().front(), hole->state.currentToolDiameter()))
-            painterPath.addPolygon(path);
-        return painterPath;
-    }
-
-    Paths offset(const Path& path, double offset) const {
-        ClipperOffset cpOffset;
-        // cpOffset.AddPath(path, jtRound, etClosedLine);
-        cpOffset.AddPath(path, jtRound, etOpenRound);
-        Paths tmpPpaths;
-        cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
-        for (Path& path : tmpPpaths)
-            path.push_back(path.front());
-        return tmpPpaths;
-    }
-
-    const Hole* hole;
-
-    // AbstractDrillPrGI interface
-public:
-    void updateTool() override {
-        if (row.toolId > -1) {
-            colorState |= Tool;
-            if (m_type == GiType::PrSlot) {
-                m_toolPath = {};
-
-                auto& tool(App::toolHolder().tool(row.toolId));
-                const double diameter = tool.getDiameter(tool.getDepth());
-                const double lineKoeff = diameter * 0.7;
-
-                Paths tmpPpath;
-
-                ClipperOffset offset;
-                offset.AddPath(hole->item->paths().front(), jtRound, etOpenRound);
-                offset.Execute(tmpPpath, diameter * 0.5 * uScale);
-
-                for (Path& path : tmpPpath) {
-                    path.push_back(path.front());
-                    m_toolPath.addPolygon(path);
-                }
-
-                Path path(hole->item->paths().front());
-
-                if (path.size()) {
-                    for (IntPoint& pt : path) {
-                        m_toolPath.moveTo(pt - QPointF(0.0, lineKoeff));
-                        m_toolPath.lineTo(pt + QPointF(0.0, lineKoeff));
-                        m_toolPath.moveTo(pt - QPointF(lineKoeff, 0.0));
-                        m_toolPath.lineTo(pt + QPointF(lineKoeff, 0.0));
-                    }
-                    m_toolPath.moveTo(path.front());
-                    for (IntPoint& pt : path) {
-                        m_toolPath.lineTo(pt);
-                    }
-                }
-            }
-        } else {
-            colorState &= ~Tool;
-            m_toolPath = {};
-        }
-
-        changeColor();
-    }
-    IntPoint pos() const override { return hole->state.offsetedPos(); }
-    Paths paths() const override {
-        if (m_type == GiType::PrSlot)
-            return hole->item->paths();
-        Paths paths(hole->item->paths());
-        return ReversePaths(paths);
-    }
-    bool fit(double depth) override {
-        return m_sourceDiameter > App::toolHolder().tool(row.toolId).getDiameter(depth);
-    }
-};
-
-// DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
-//     DrillPreviewGiMap giPeview;
-
-//    auto const exFile = reinterpret_cast<File*>(file);
-
-//    std::map<int, mvector<const Excellon::Hole*>> cacheHoles;
-//    for (const Excellon::Hole& hole : *exFile)
-//        cacheHoles[hole.state.tCode] << &hole;
-
-//    data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
-
-//    for (auto [toolNum, diameter] : exFile->tools()) {
-//        QString name(tr("Tool Ø%1mm").arg(diameter));
-//        data.emplace_back(std::move(name), drawDrillIcon(), toolNum, diameter);
-//        for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
-//            if (!hole->state.path.isEmpty())
-//                data.back().isSlot = true;
-//            giPeview[toolNum].emplace_back(std::make_shared<DrillPrGI>(hole, data.back()));
-//        }
-//    }
-//    return giPeview;
-//}
 
 } // namespace Excellon

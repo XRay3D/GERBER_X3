@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #pragma once
 
 #include "../tooldatabase/tool.h"
@@ -42,42 +42,42 @@ class Handler;
 
 using Handlers = mvector<Shapes::Handler*>;
 
-union PIF {
-    FilePlugin* plug;
-    QObject* obj;
-};
-union PIS {
-    ShapePlugin* plug;
-    QObject* obj;
-};
-union PIG {
-    GCodePlugin* plug;
-    QObject* obj;
-};
+// union PIF {
+//     FilePlugin* plug;
+//     QObject* obj;
+// };
+// union PIS {
+//     ShapePlugin* plug;
+//     QObject* obj;
+// };
+// union PIG {
+//     GCodePlugin* plug;
+//     QObject* obj;
+// };
 
-template <class T>
-struct Plug {
-    T* plug;
-    //    QObject* obj;
-};
-template <class T>
-Plug(T*, QObject*) -> Plug<T>;
+// template <class T>
+// struct Plug {
+//     T* plug;
+//     //    QObject* obj;
+// };
+// template <class T>
+// Plug(T*, QObject*) -> Plug<T>;
 
-#if __cplusplus > 201703L
+//#if __cplusplus > 201703L
 using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/   // > ;
 using ShapeInterfacesMap = std::map<int, ShapePlugin*>; /*PIS*/ // > ;
 using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/  // > ;
-#else
-struct FileInterfacesMap : std::map<int, PIF> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-struct ShapeInterfacesMap : std::map<int, PIS> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-struct GCodeInterfaceMap : std::map<int, PIG> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-#endif
+//#else
+// struct FileInterfacesMap : std::map<int, PIF> {
+//    bool contains(int key) const { return find(key) != end(); }
+//};
+// struct ShapeInterfacesMap : std::map<int, PIS> {
+//    bool contains(int key) const { return find(key) != end(); }
+//};
+// struct GCodeInterfaceMap : std::map<int, PIG> {
+//    bool contains(int key) const { return find(key) != end(); }
+//};
+//#endif
 class App {
     inline static App* app_ = nullptr;
 
@@ -154,13 +154,13 @@ public:
     static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
 
-    static auto* filePlugin(int type) { return static_cast<FilePlugin*>(app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr); }
+    static FilePlugin* filePlugin(int type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app_->filePlugins_; }
 
-    static auto* shapePlugin(int type) { return static_cast<ShapePlugin*>(app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr); }
+    static ShapePlugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app_->shapePlugin_; }
 
-    static auto* gCodePlugin(int type) { return static_cast<GCodePlugin*>(app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr); }
+    static GCodePlugin* gCodePlugin(int type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
     static auto& gCodePlugins() { return app_->gCodePlugin_; }
 
     static auto& shapeHandlers() { return app_->handlers_; }

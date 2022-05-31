@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(tooldatabase LANGUAGES CXX)
@@ -29,7 +29,7 @@ add_library(tooldatabase STATIC
     ${HEADERS}
     ${SOURCES}
     ${UIS}
-    )
+)
 
 target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Gui)

@@ -7,12 +7,10 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(gcode)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -39,32 +37,33 @@ add_library(${PROJECT_NAME} STATIC
     ${HEADERS}
     ${SOURCES}
     ${UIS}
-    )
+)
 
 link_directories(
     ${CMAKE_SOURCE_DIR}/libs${SUFFIX}
-    )
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
-#    common
-#    filetree
+    #    common
+    #    filetree
     gi
-#    graphicsview
-#    shape
-#    tooldatabase
+    #    graphicsview
+    #    shape
+    #    tooldatabase
     File_Plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
-    )
+)
 
-add_subdirectory(profile)
+add_subdirectory(drill)
 add_subdirectory(hatching)
 add_subdirectory(pocketoffset)
 add_subdirectory(pocketraster)
+add_subdirectory(profile)
 add_subdirectory(thermal)
+add_subdirectory(thermal2)
 add_subdirectory(voroni)
-add_subdirectory(drill)
 
 

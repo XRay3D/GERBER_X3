@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*******************************************************************************
+/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ***********************************************************8********************/
 #include "dxf_plugin.h"
 #include "dxf_file.h"
 #include "dxf_node.h"
@@ -223,55 +223,55 @@ void Plugin::updateFileModel(FileInterface* file) {
     fm->endInsertRows_();
 }
 
-class DrillPrGI final : public AbstractDrillPrGI {
-    const GraphicObject& go;
-    const Circle* circle;
-    const LwPolyline* lwpline;
+//class DrillPrGI final : public AbstractDrillPrGI {
+//    const GraphicObject& go;
+//    const Circle* circle;
+//    const LwPolyline* lwpline;
 
-public:
-    explicit DrillPrGI(const GraphicObject& go, Row& row)
-        : AbstractDrillPrGI(row)
-        , go(go)
-        , circle(dynamic_cast<const Circle*>(go.entity()))
-        , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
-        m_sourceDiameter = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
+//public:
+//    explicit DrillPrGI(const GraphicObject& go, Row& row)
+//        : AbstractDrillPrGI(row)
+//        , go(go)
+//        , circle(dynamic_cast<const Circle*>(go.entity()))
+//        , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
+//        sourceDiameter_ = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
 
-        m_sourcePath = drawDrill();
-        m_type = GiType::PrApetrure;
-    }
+//        m_sourcePath = drawDrill();
+//        type_ = GiType::PrApetrure;
+//    }
 
-private:
-    QPainterPath drawDrill() const {
-        QPainterPath painterPath;
-        painterPath.addEllipse(circle ? circle->centerPoint : go.pos(),
-            m_sourceDiameter * 0.5, m_sourceDiameter * 0.5);
-        return painterPath;
-    }
+//private:
+//    QPainterPath drawDrill() const {
+//        QPainterPath painterPath;
+//        painterPath.addEllipse(circle ? circle->centerPoint : go.pos(),
+//            sourceDiameter_ * 0.5, sourceDiameter_ * 0.5);
+//        return painterPath;
+//    }
 
-    Paths offset(const Path& path, double offset) const {
-        ClipperOffset cpOffset;
-        cpOffset.AddPath(path, jtRound, etOpenRound);
-        Paths tmpPpaths;
-        cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
-        for (Path& path : tmpPpaths)
-            path.push_back(path.front());
-        return tmpPpaths;
-    }
+//    Paths offset(const Path& path, double offset) const {
+//        ClipperOffset cpOffset;
+//        cpOffset.AddPath(path, jtRound, etOpenRound);
+//        Paths tmpPpaths;
+//        cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
+//        for (Path& path : tmpPpaths)
+//            path.push_back(path.front());
+//        return tmpPpaths;
+//    }
 
-    // AbstractDrillPrGI interface
-public:
-    void updateTool() override {
-        row.toolId > -1 ? colorState |= Tool : colorState &= ~Tool;
-        m_toolPath = {};
-        changeColor();
-    }
-    IntPoint pos() const override { return circle ? circle->centerPoint : go.pos(); }
-    Paths paths() const override {
-        Paths paths { go.path() };
-        return ReversePaths(paths);
-    }
-    bool fit(double depth) override { return m_sourceDiameter >= App::toolHolder().tool(row.toolId).getDiameter(depth); }
-};
+//    // AbstractDrillPrGI interface
+//public:
+//    void updateTool() override {
+//        toolId_ > -1 ? colorState |= Tool : colorState &= ~Tool;
+//        toolPath_ = {};
+//        changeColor();
+//    }
+//    IntPoint pos() const override { return circle ? circle->centerPoint : go.pos(); }
+//    Paths paths() const override {
+//        Paths paths { go.path() };
+//        return ReversePaths(paths);
+//    }
+//    bool fit(double depth) override { return sourceDiameter_ >= App::toolHolder().tool(toolId_).getDiameter(depth); }
+//};
 
 // FIXME DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
 //    auto const dxfFile = static_cast<File*>(file);

@@ -7,12 +7,10 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#***********************************************************8********************/
 cmake_minimum_required(VERSION 3.16)
 
 project(shape)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -38,26 +36,26 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_library(${PROJECT_NAME} STATIC
     ${HEADERS}
     ${SOURCES}
-#    ${UIS}
-    )
+    #    ${UIS}
+)
 
 link_directories(
     ${CMAKE_SOURCE_DIR}/libs${SUFFIX}
-    )
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-#    clipper
-#    common
-#    filetree
-#    gi
-#    graphicsview
-#    shape
-#    tooldatabase
-#    File_Plugins
+    #    clipper
+    #    common
+    #    filetree
+    #    gi
+    #    graphicsview
+    #    shape
+    #    tooldatabase
+    #    File_Plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
-    )
+)
 
 add_subdirectory(circle)
 add_subdirectory(circlearc)

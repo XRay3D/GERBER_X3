@@ -1,4 +1,4 @@
-/*******************************************************************************
+/********************************************************************************
  *                                                                              *
  * Author    :  Angus Johnson                                                   *
  * Version   :  6.4.2                                                           *
@@ -122,51 +122,51 @@ struct IntPoint {
           Z(z) {};
 #else
 #endif
-    IntPoint(cInt x = 0, cInt y = 0) noexcept
+    constexpr IntPoint(cInt x = 0, cInt y = 0) noexcept
         : X(x)
         , Y(y) {
     }
 
-    IntPoint(IntPoint&& p) noexcept = default;
-    IntPoint(const IntPoint& p) noexcept = default;
-    IntPoint& operator=(IntPoint&& p) noexcept = default;
-    IntPoint& operator=(const IntPoint& p) noexcept = default;
-    IntPoint(QPointF&& p) noexcept
+    constexpr IntPoint(IntPoint&& p) noexcept = default;
+    constexpr IntPoint(const IntPoint& p) noexcept = default;
+    constexpr IntPoint& operator=(IntPoint&& p) noexcept = default;
+    constexpr IntPoint& operator=(const IntPoint& p) noexcept = default;
+    constexpr IntPoint(QPointF&& p) noexcept
         : X(p.x() * uScale)
         , Y(p.y() * uScale) {
     }
-    IntPoint(const QPointF& p) noexcept
+    constexpr IntPoint(const QPointF& p) noexcept
         : X(p.x() * uScale)
         , Y(p.y() * uScale) {
     }
-    IntPoint& operator=(QPointF&& p) noexcept {
+    constexpr IntPoint& operator=(QPointF&& p) noexcept {
         X = p.x() * uScale;
         Y = p.y() * uScale;
         return *this;
     }
-    IntPoint& operator=(const QPointF& p) noexcept {
+    constexpr IntPoint& operator=(const QPointF& p) noexcept {
         X = p.x() * uScale;
         Y = p.y() * uScale;
         return *this;
     }
 
-    bool isNull() const noexcept {
+    constexpr bool isNull() const noexcept {
         return X == 0 && Y == 0;
     }
 
-    IntPoint& operator*=(double s) noexcept {
+    constexpr IntPoint& operator*=(double s) noexcept {
         return X *= s, Y *= s, *this;
     }
 
-    IntPoint& operator+=(const IntPoint& pt) noexcept {
+    constexpr IntPoint& operator+=(const IntPoint& pt) noexcept {
         return X += pt.X, Y += pt.Y, *this;
     }
 
-    IntPoint& operator-=(const IntPoint& pt) noexcept {
+    constexpr IntPoint& operator-=(const IntPoint& pt) noexcept {
         return X -= pt.X, Y -= pt.Y, *this;
     }
 
-    operator QPointF() const noexcept {
+    constexpr operator QPointF() const noexcept {
         return { X * dScale, Y * dScale };
     }
 
@@ -181,7 +181,7 @@ struct IntPoint {
         return std::tuple { X, Y } < std::tuple { L.X, L.Y };
     }
 #else
-    auto operator<=>(const IntPoint&) const noexcept = default;
+    constexpr auto operator<=>(const IntPoint&) const noexcept = default;
 #endif
 
     friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt) {
@@ -199,7 +199,7 @@ struct IntPoint {
         return d;
     }
 
-    double angleTo(const IntPoint& pt2) const noexcept {
+    /*constexpr*/ double angleTo(const IntPoint& pt2) const noexcept {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
         const double theta = atan2(-dy, dx) * 360.0 / (M_PI * 2);
@@ -210,7 +210,7 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double angleRadTo(const IntPoint& pt2) const noexcept {
+    /*constexpr*/ double angleRadTo(const IntPoint& pt2) const noexcept {
         const double dx = pt2.X - X;
         const double dy = pt2.Y - Y;
         const double theta = atan2(-dy, dx);
@@ -222,12 +222,13 @@ struct IntPoint {
             return theta_normalized;
     }
 
-    double distTo(const IntPoint& pt2) const noexcept {
+    /*constexpr*/ double distTo(const IntPoint& pt2) const noexcept {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return sqrt(x * x + y * y);
     }
-    double distToSq(const IntPoint& pt2) const noexcept {
+
+    constexpr double distToSq(const IntPoint& pt2) const noexcept {
         double x = pt2.X - X;
         double y = pt2.Y - Y;
         return (x * x + y * y);
@@ -315,17 +316,25 @@ struct DoublePoint {
 typedef void (*ZFillCallback)(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top, IntPoint& pt);
 #endif
 
-enum InitOptions { ioReverseSolution = 1,
+enum InitOptions {
+    ioReverseSolution = 1,
     ioStrictlySimple = 2,
-    ioPreserveCollinear = 4 };
-enum JoinType { jtSquare,
+    ioPreserveCollinear = 4
+};
+
+enum JoinType {
+    jtSquare,
     jtRound,
-    jtMiter };
-enum EndType { etClosedPolygon,
+    jtMiter
+};
+
+enum EndType {
+    etClosedPolygon,
     etClosedLine,
     etOpenButt,
     etOpenSquare,
-    etOpenRound };
+    etOpenRound
+};
 
 class PolyNode;
 typedef mvector<PolyNode*> PolyNodes;
