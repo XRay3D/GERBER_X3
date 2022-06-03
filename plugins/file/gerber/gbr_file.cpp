@@ -32,14 +32,14 @@
 namespace Gerber {
 
 Path GraphicObject::elipse() const { return (m_state.dCode() == D03
-                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle)
-        ? m_path
-        : Path(); } // circle
+                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle) ?
+        m_path :
+        Path(); } // circle
 Paths GraphicObject::elipseW() const { return (m_state.dCode() == D03
                                                   && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
-                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole())
-        ? m_paths
-        : Paths(); }
+                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole()) ?
+        m_paths :
+        Paths(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
@@ -288,6 +288,7 @@ void File::write(QDataStream& stream) const {
     stream << rawIndex;
     stream << m_itemsType;
     stream << components_;
+    stream << offset_;
 }
 
 void File::read(QDataStream& stream) {
@@ -300,6 +301,9 @@ void File::read(QDataStream& stream) {
     stream >> rawIndex;
     stream >> m_itemsType;
     stream >> components_;
+    if (App::project()->ver() >= ProVer_6)
+        stream >> offset_;
+
     for (GraphicObject& go : graphicObjects_) {
         go.m_gFile = this;
         go.m_state.m_format = format();
@@ -393,6 +397,15 @@ void File::createGi() {
     m_itemGroups[Normal]->setVisible(false);
 
     m_itemGroups[m_itemsType]->setVisible(m_visible);
+    if (!offset_.isNull())
+        setOffset(offset_);
 }
 
 } // namespace Gerber
+
+void Gerber::File::setOffset(QPointF offset) {
+    offset_ = offset;
+    m_itemGroups[ApPaths]->setPos(offset);
+    m_itemGroups[Components]->setPos(offset);
+    m_itemGroups[Normal]->setPos(offset);
+}

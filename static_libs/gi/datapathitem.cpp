@@ -94,7 +94,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
 int GiDataPath::type() const { return static_cast<int>(GiType::DataPath); }
 
-Paths GiDataPath::paths(int) const { return { m_path }; }
+Paths GiDataPath::paths(int) const { return { m_path + pos() }; }
 
 QPainterPath GiDataPath::shape() const { return m_selectionShape; }
 

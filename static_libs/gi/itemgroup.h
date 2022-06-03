@@ -27,7 +27,7 @@ public:
     void setBrushColorP(QColor* col);
     void setPenColor(QColor* col);
     void setZValue(double z);
-
+    void setPos(QPointF offset);
 private:
     bool m_visible = false;
     QPen m_pen;

@@ -74,7 +74,7 @@ void GiDataSolid::redraw() {
     // update();
 }
 
-Paths GiDataSolid::paths(int) const { return m_paths; }
+Paths GiDataSolid::paths(int) const { return m_paths + pos(); }
 
 Paths* GiDataSolid::rPaths() { return &m_paths; }
 

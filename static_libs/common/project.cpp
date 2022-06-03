@@ -97,7 +97,7 @@ bool Project::save(const QString& fileName) {
     }
     QDataStream out(&file);
     try {
-        out << (m_ver = ProVer_5);
+        out << (m_ver = ProVer_6);
         // ProVer_5:
         out << m_isPinsPlaced;
         // ProVer_4:
@@ -142,6 +142,11 @@ bool Project::open(const QString& fileName) {
     try {
         in >> m_ver;
         switch (m_ver) {
+        case ProVer_6:
+            [[fallthrough
+
+            ds
+            ]];
         case ProVer_5:
             in >> m_isPinsPlaced;
             [[fallthrough]];

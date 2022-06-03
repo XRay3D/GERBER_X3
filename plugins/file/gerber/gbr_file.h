@@ -46,6 +46,7 @@ public:
         ApPaths,
         Components,
     };
+    // FileInterface interface
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(FileInterface* file) override;
@@ -54,6 +55,8 @@ public:
     FileType type() const override { return FileType::Gerber; }
 
     void setColor(const QColor& color) override;
+
+    void setOffset(QPointF offset) override;
     mvector<const AbstrGraphicObject*> graphicObjects() const override;
 
 protected:
@@ -65,7 +68,7 @@ private:
     ApertureMap apertures_;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
     Format m_format;
-
+    QPointF offset_ {};
     // Layer layer = Copper;
     // Miror miror = Vertical;
     // QPointf offset;

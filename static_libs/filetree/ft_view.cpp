@@ -19,16 +19,20 @@
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
 
+#include "file.h"
 #include "file_plugin.h"
 #include "shapepluginin.h"
 
+#include <QBoxLayout>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
+#include <doublespinbox.h>
 
 namespace FileTree {
 
@@ -191,6 +195,48 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 std::ranges::sort(selectedRows, std::greater {}, &QModelIndex::row);
                 for (auto&& index : selectedRows)
                     m_model->removeRow(index.row(), index.parent());
+            });
+        }
+        {
+            auto selectedRows { selectionModel()->selectedRows().toVector() };
+            menu.addSeparator();
+            menu.addAction(QIcon::fromTheme(""), tr("Set Offset"), [selectedRows, this]() mutable {
+                QDialog d(this);
+                QLabel lx("X", &d);
+                QLabel ly("Y", &d);
+                DoubleSpinBox dsbxX(&d);
+                DoubleSpinBox dsbxY(&d);
+                dsbxX.setRange(-1000, +1000);
+                dsbxY.setRange(-1000, +1000);
+                QVBoxLayout layout(&d);
+                layout.addWidget(&lx);
+                layout.addWidget(&dsbxX);
+                layout.addWidget(&ly);
+                layout.addWidget(&dsbxY);
+                d.resize({ 100, 0 });
+
+                auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+                if (file->itemGroup()->size()) {
+                    auto pos = file->itemGroup()->front()->pos();
+                    dsbxX.setValue(pos.x());
+                    dsbxY.setValue(pos.y());
+                }
+
+                connect(&dsbxX, &QDoubleSpinBox::valueChanged, [&dsbxY, &selectedRows](double x) {
+                    for (auto&& index : selectedRows) {
+                        auto file = App::project()->file(index.data(FileTree::Id).toInt());
+                        file->setOffset({ x, dsbxY.value() });
+                    }
+                });
+
+                connect(&dsbxY, &QDoubleSpinBox::valueChanged, [&dsbxX, &selectedRows](double y) {
+                    for (auto&& index : selectedRows) {
+                        auto file = App::project()->file(index.data(FileTree::Id).toInt());
+                        file->setOffset({ dsbxX.value(), y });
+                    }
+                });
+
+                d.exec();
             });
         }
     }
