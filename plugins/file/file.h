@@ -133,7 +133,7 @@ public:
     virtual void createGi() = 0;
     //    virtual void selected() = 0;
 
-    virtual void setItemType(int type) { Q_UNUSED(type) };
+    virtual void setItemType([[maybe_unused]] int type) {};
     virtual int itemsType() const { return m_itemsType; };
 
     Side side() const { return m_side; }
@@ -144,6 +144,7 @@ public:
 
     const QColor& color() const { return m_color; }
     virtual void setColor(const QColor& color) { m_color = color; }
+    virtual void setOffset([[maybe_unused]] QPointF offset) { }
 
     int id() const { return m_id; }
     void setId(int id) { m_id = id; }

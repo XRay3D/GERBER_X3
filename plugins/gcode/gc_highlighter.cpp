@@ -28,12 +28,12 @@ void GCHighlighter::highlightBlock(const QString& text) {
     static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
     static const mvector<Qt::GlobalColor> color {
         Qt::darkMagenta, // 'F',
-        Qt::black,       //       'G',
-        Qt::darkYellow,  //  'M',
-        Qt::gray,        //        'S',
-        Qt::red,         //         'X',
-        Qt::darkGreen,   //   'Y',
-        Qt::blue,        //        'Z',
+        Qt::black,       // 'G',
+        Qt::darkYellow,  // 'M',
+        Qt::gray,        // 'S',
+        Qt::red,         // 'X',
+        Qt::darkGreen,   // 'Y',
+        Qt::blue,        // 'Z',
     };
 
     using namespace std::string_view_literals;

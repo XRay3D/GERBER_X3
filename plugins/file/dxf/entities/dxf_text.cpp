@@ -89,6 +89,7 @@ void Text::parse(CodeData& code) {
 Entity::Type Text::type() const { return Type::TEXT; }
 
 QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
+    return debug; // NOTE QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     QDebugStateSaver saver(debug);
     debug.nospace() << "FM(";
     debug.nospace() << "\n\tascent: " << fm.ascent();

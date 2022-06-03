@@ -116,13 +116,12 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
-
+    if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
         int i = 100;
         int k = 100;
 
         if (0) {
-            QDir dir(R"(C:\Users\bakiev\Downloads\1_низ)");
+            QDir dir(R"(C:\Users\X-Ray\YandexDisk\Табуретка2\Фрагмент3_)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
@@ -134,10 +133,13 @@ MainWindow::MainWindow(QWidget* parent)
                     // break;
                 }
         }
-        if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\Downloads\Gerber_p2xsdrr_brd (1)\_Gerber_BottomLayer.GBL)"); });
+        //    file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
+        //    file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (1) {
+        if (0)
+            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf)"); });
+
+        if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
             QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
@@ -670,12 +672,12 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::selectAll() {
-    if /*  */ (toolpathActions[GCode::Thermal]->isChecked()) {
+    if /*  */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
             if (const auto type = static_cast<GiType>(item->type());
                 type == GiType::PrThermal)
                 item->setSelected(true);
-    } else if (toolpathActions[GCode::Drill]->isChecked()) {
+    } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
             if (const auto type = static_cast<GiType>(item->type());
                 type == GiType::PrApetrure || type == GiType::PrDrill || type == GiType::PrSlot)

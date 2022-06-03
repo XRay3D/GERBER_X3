@@ -61,7 +61,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
         if (bool slot = hole.state.path.size(); slot)
             retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(&hole.state.path);
         else
-            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(hole.state.pos);
+            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(hole.state.offsetedPos());
     }
 
     //    if (0) {

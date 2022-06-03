@@ -255,6 +255,19 @@ struct Path : mvector<IntPoint> {
         return poly;
     }
     //    int id {};
+
+    auto friend operator+(const Path& path, QPointF pt) noexcept {
+        Path ret(path);
+        for (auto&& point : ret)
+            point += pt;
+        return ret;
+    }
+
+    auto& operator+=(QPointF pt) noexcept {
+        for (auto&& point : *this)
+            point += pt;
+        return *this;
+    }
 };
 
 struct Paths : mvector<Path> {
@@ -278,6 +291,19 @@ struct Paths : mvector<Path> {
         for (const auto& poly : *this)
             polys.emplace_back(poly);
         return polys;
+    }
+
+    auto friend operator+(const Paths& paths, QPointF pt) noexcept {
+        Paths ret(paths);
+        for (auto&& point : ret)
+            point += pt;
+        return ret;
+    }
+
+    auto& operator+=(QPointF pt) noexcept {
+        for (auto&& path : *this)
+            path += pt;
+        return *this;
     }
 
     //    int id {};

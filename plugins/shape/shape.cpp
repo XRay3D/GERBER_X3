@@ -38,9 +38,15 @@ Shape::Shape()
 Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    m_pathColor = m_bodyColor;
-    m_pathColor.setAlpha(255);
-    m_pen.setColor(m_pathColor);
+    if (App::scene()->drawPdf()) [[unlikely]] {
+        m_pathColor = Qt::black;
+        m_pathColor.setAlpha(255);
+        m_pen.setColor(m_pathColor);
+    } else [[likely]] {
+        m_pathColor = m_bodyColor;
+        m_pathColor.setAlpha(255);
+        m_pen.setColor(m_pathColor);
+    }
 
     painter->setPen(m_pen);
     painter->setBrush(m_bodyColor);
@@ -94,8 +100,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
             item->setVisible(selected);
         if (m_node->index().isValid()) {
             App::fileTreeView()->selectionModel()->select(m_node->index(),
-                (selected ? QItemSelectionModel::Select
-                          : QItemSelectionModel::Deselect)
+                (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
@@ -198,11 +203,18 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
     auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
     action->setCheckable(true);
     action->setChecked(isVisible());
+
+    action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<Shape*>(this)](bool fl) {
+        item->setFlag(ItemIsSelectable, fl);
+    });
+    action->setCheckable(true);
+    action->setChecked(GraphicsItem::flags() & ItemIsSelectable);
     //    action->connect(action, &QAction::toggled );
 }
 
 // write to project
 void Shape::write_(QDataStream& stream) const {
+    stream << bool(GraphicsItem::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
     for (const auto& item : handlers) {
         stream << item->pos();
@@ -214,6 +226,11 @@ void Shape::write_(QDataStream& stream) const {
 // read from project
 void Shape::read_(QDataStream& stream) {
     isFinal = true;
+    {
+        bool fl;
+        stream >> fl;
+        setFlag(ItemIsSelectable, fl);
+    }
     qint32 size;
     stream >> size;
     handlers.reserve(size);

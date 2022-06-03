@@ -75,3 +75,8 @@ void ItemGroup::setZValue(double z) {
     for (GraphicsItem* item : *this)
         item->setZValue(z);
 }
+
+void ItemGroup::setPos(QPointF offset) {
+    for (GraphicsItem* item : *this)
+        item->setPos(offset);
+}
