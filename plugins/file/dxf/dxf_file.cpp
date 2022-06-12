@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "dxf_file.h"
 
 #include "section/dxf_blocks.h"
@@ -27,10 +27,10 @@
 //#include "section/dxf_thumbnailimage.h"
 //#include "gc_creator.h" //////////////////////
 
-#include "datapathitem.h"
-#include "datasoliditem.h"
+#include "gi_datapath.h"
+#include "gi_datasolid.h"
 #include "dxf_node.h"
-#include "gcpathitem.h"
+#include "gi_gcpath.h"
 #include "settings.h"
 
 #include <QDebug>
@@ -146,8 +146,8 @@ void File::createGi() {
         for (auto& go : layer->m_graphicObjects)
             go.m_file = this;
 
-    ItemGroup* igNorm = m_itemGroups.back();
-    ItemGroup* igPath = new ItemGroup;
+    GiGroup* igNorm = m_itemGroups.back();
+    GiGroup* igPath = new GiGroup;
     m_itemGroups.push_back(igPath);
 
     int i = 0;
@@ -155,8 +155,8 @@ void File::createGi() {
     for (auto& [name, layer] : m_layers) {
         if (layer->m_graphicObjects.size()) {
             if (i++) {
-                m_itemGroups.push_back(igNorm = new ItemGroup);
-                m_itemGroups.push_back(igPath = new ItemGroup);
+                m_itemGroups.push_back(igNorm = new GiGroup);
+                m_itemGroups.push_back(igPath = new GiGroup);
             }
 
             Clipper clipper; // Clipper

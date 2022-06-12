@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 #ifdef GBR_
 #include "ex_types.h"
@@ -30,7 +30,7 @@ namespace Ui {
 class DrillForm;
 }
 
-class AbstractDrillPrGI;
+class GiAbstractDrillPr;
 class DrillModel;
 class Header;
 class QCheckBox;
@@ -80,7 +80,7 @@ private:
     Excellon::Tools m_tools;
 #endif
     HoleMap peview_;
-    std::map<int, mvector<std::unique_ptr<AbstractDrillPrGI>>> giPeview_;
+    std::map<int, mvector<std::unique_ptr<GiAbstractDrillPr>>> giPeview_;
     FileInterface* file = nullptr;
     QCheckBox* checkBox;
     Header* header;

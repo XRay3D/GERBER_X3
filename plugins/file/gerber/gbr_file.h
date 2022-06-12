@@ -7,14 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 #include "gbr_aperture.h"
 #include "gbr_types.h"
 #include "gbrcomp_onent.h"
 
 #include "file.h"
-#include "itemgroup.h"
+#include "gi_group.h"
 
 #include <QDebug>
 #include <forward_list>

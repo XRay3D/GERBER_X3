@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 #include "ex_types.h"
 #include <QDialog>

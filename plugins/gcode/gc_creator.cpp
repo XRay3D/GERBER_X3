@@ -10,13 +10,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_creator.h"
 
 #include "app.h"
-#include "erroritem.h"
+#include "gi_error.h"
 #include "gc_file.h"
-#include "point.h"
+#include "gi_point.h"
 #include "project.h"
 #include "voroni/jc_voronoi.h"
 //#include "errno.h"
@@ -291,7 +291,7 @@ void Creator::stacking(Paths& paths) {
     }
     sortPolyNodeByNesting(polyTree);
     m_returnPss.clear();
-    /***************************************************************************8********************/
+    /***********************************************************************************************/
     t.start();
 
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
@@ -359,7 +359,7 @@ void Creator::stacking(Paths& paths) {
         }
         // PROG setProgInc();
     };
-    /***************************************************************************8********************/
+    /***********************************************************************************************/
     // PROG .3setProgMax(polyTree.Total());
     stacker({ polyTree.GetFirst(), false });
 
@@ -659,7 +659,7 @@ bool Creator::createability(bool side) {
                     paths.push_back(std::move(node->Childs[i]->Contour));
                 }
                 incCurrent();
-                items.push_back(new ErrorItem(paths, area * dScale * dScale));
+                items.push_back(new GiError(paths, area * dScale * dScale));
                 for (size_t i = 0; i < node->ChildCount(); ++i) {
                     creator(node->Childs[i], area);
                 }

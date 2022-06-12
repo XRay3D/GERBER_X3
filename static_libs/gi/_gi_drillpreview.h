@@ -7,32 +7,39 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
-#include <graphicsitem.h>
 
-namespace Gerber {
-class File;
+#include "gi.h"
+
+namespace Excellon {
+class Hole;
 }
 
-class GiDataSolid final : public GraphicsItem {
-public:
-    explicit GiDataSolid(Paths& m_paths, FileInterface* file);
-    ~GiDataSolid() override;
+class Hole;
 
+class DrillPreview : public GraphicsItem {
+public:
+    DrillPreview(Excellon::Hole* hole, FileInterface* file);
+    DrillPreview(double diameter, FileInterface* file);
+    ~DrillPreview() override;
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // GraphicsItem interface
-    void redraw() override;
     Paths paths(int alternate = {}) const override;
-    Paths* rPaths() override;
-    // GraphicsItem interface
     void changeColor() override;
 
+    bool isSlot();
+    double diameter() const;
+    void setDiameter(double diameter);
+    void updateHole();
+
 private:
-    Paths& m_paths;
+    void create();
+    double m_diameter = 0.0;
+    Excellon::Hole* const m_hole = nullptr;
     QPolygonF fillPolygon;
 };

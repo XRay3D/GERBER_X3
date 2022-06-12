@@ -7,16 +7,16 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
-#include "drillitem.h"
+#include "gi_drill.h"
 
 namespace GCode {
 
 class File;
 
-class DrillItem final : public AbstractDrillItem {
+class DrillItem final : public GiAbstractDrill {
 public:
     DrillItem(double diameter, GCode::File* file);
     ~DrillItem() override = default;

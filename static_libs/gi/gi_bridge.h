@@ -7,23 +7,23 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "gcode.h"
 
 #include <QObject>
-#include <graphicsitem.h>
+#include "gi.h"
 
 class GraphicsView;
 
-class BridgeItem final : public GraphicsItem {
+class GiBridge final : public GraphicsItem {
     Q_OBJECT
     friend class ProfileForm;
 
 public:
-    explicit BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr);
-    ~BridgeItem() override { m_ptr = nullptr; }
+    explicit GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiBridge*& ptr);
+    ~GiBridge() override { m_ptr = nullptr; }
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
@@ -53,7 +53,7 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    BridgeItem*& m_ptr;
+    GiBridge*& m_ptr;
     GCode::SideOfMilling& m_side;
     QPainterPath m_path;
     QPointF calculate(const QPointF& pos);

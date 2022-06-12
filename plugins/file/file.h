@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "datastream.h"
@@ -15,7 +15,7 @@
 #include "file_plugin.h"
 #include "plugintypes.h"
 
-#include "itemgroup.h"
+#include "gi_group.h"
 #include "splashscreen.h"
 #include <ft_node.h>
 #include <myclipper.h>
@@ -75,7 +75,7 @@ class FileInterface {
 
 public:
     FileInterface()
-        : m_itemGroups(1, new ItemGroup) {
+        : m_itemGroups(1, new GiGroup) {
     }
     virtual ~FileInterface() { qDeleteAll(m_itemGroups); }
 
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    ItemGroup* itemGroup(int type = -1) const {
+    GiGroup* itemGroup(int type = -1) const {
         const int size(static_cast<int>(m_itemGroups.size()));
         if (type == -1 && 0 <= m_itemsType && m_itemsType < size)
             return m_itemGroups[m_itemsType];
@@ -101,7 +101,7 @@ public:
         return m_itemGroups.front();
     }
 
-    const mvector<ItemGroup*>& itemGroups() const { return m_itemGroups; }
+    const mvector<GiGroup*>& itemGroups() const { return m_itemGroups; }
 
     Paths mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
     Pathss groupedPaths() const { return m_groupedPaths; }
@@ -171,7 +171,7 @@ protected:
     int m_itemsType = -1;
     mutable Paths m_mergedPaths;
     mutable bool m_visible = false;
-    mvector<ItemGroup*> m_itemGroups;
+    mvector<GiGroup*> m_itemGroups;
     mvector<QString> m_lines;
 };
 

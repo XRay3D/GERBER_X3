@@ -10,26 +10,26 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "drillpreviewgi.h"
+ *******************************************************************************/
+#include "gi_drillpreview.h"
 #include "drill/gc_drillmodel.h"
 #include "graphicsview.h"
 #include "tool_pch.h"
 #include <QPainter>
 #include <QPropertyAnimation>
 
-AbstractDrillPrGI::AbstractDrillPrGI(int toolId)
+GiAbstractDrillPr::GiAbstractDrillPr(int toolId)
     : toolId_(toolId)
     , m_bodyColor(colors[(int)Colors::Default])
     , m_pathColor(colors[(int)Colors::UnUsed]) {
-    connect(this, &AbstractDrillPrGI::colorChanged, [this] { update(); });
+    connect(this, &GiAbstractDrillPr::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
 }
 
-void AbstractDrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void GiAbstractDrillPr::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->setPen({ m_bodyColor, 0.0 });
     painter->setBrush(m_bodyColor);
     painter->drawPath(sourcePath_);
@@ -44,17 +44,17 @@ void AbstractDrillPrGI::paint(QPainter* painter, const QStyleOptionGraphicsItem*
     }
 }
 
-QRectF AbstractDrillPrGI::boundingRect() const { return sourcePath_.boundingRect(); }
+QRectF GiAbstractDrillPr::boundingRect() const { return sourcePath_.boundingRect(); }
 
-QPainterPath AbstractDrillPrGI::shape() const { return sourcePath_; }
+QPainterPath GiAbstractDrillPr::shape() const { return sourcePath_; }
 
-int AbstractDrillPrGI::type() const { return static_cast<int>(type_); }
+int GiAbstractDrillPr::type() const { return static_cast<int>(type_); }
 
-double AbstractDrillPrGI::sourceDiameter() const { return sourceDiameter_; }
+double GiAbstractDrillPr::sourceDiameter() const { return sourceDiameter_; }
 
 //int AbstractDrillPrGI::toolId() const { return toolId_<0?ro; }
 
-void AbstractDrillPrGI::changeColor() {
+void GiAbstractDrillPr::changeColor() {
     if (isEnabled())
         colorState |= Used;
     else
@@ -84,19 +84,19 @@ void AbstractDrillPrGI::changeColor() {
     }
 }
 
-void AbstractDrillPrGI::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+void GiAbstractDrillPr::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void AbstractDrillPrGI::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
+void GiAbstractDrillPr::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant AbstractDrillPrGI::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+QVariant GiAbstractDrillPr::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if (change == ItemSelectedChange) {
         if (value.toInt()) {
             colorState |= Selected;

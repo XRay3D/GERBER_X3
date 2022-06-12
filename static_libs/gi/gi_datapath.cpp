@@ -10,8 +10,8 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "datapathitem.h"
+ *******************************************************************************/
+#include "gi_datapath.h"
 
 #include "file.h"
 #include "graphicsview.h"

@@ -10,14 +10,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gbr_file.h"
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
 
 #include "clipper.hpp"
-#include "datapathitem.h"
-#include "datasoliditem.h"
+#include "gi_datapath.h"
+#include "gi_datasolid.h"
 #include "ft_node.h"
 #include "myclipper.h"
 #include "project.h"
@@ -62,7 +62,7 @@ QDebug operator<<(QDebug debug, const State& state) {
 
 File::File(const QString& fileName)
     : FileInterface() {
-    m_itemGroups.append({ new ItemGroup, new ItemGroup });
+    m_itemGroups.append({ new GiGroup, new GiGroup });
     m_name = fileName;
     m_layerTypes = {
         { Normal, GbrObj::tr("Normal"), GbrObj::tr("Normal view") },

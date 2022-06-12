@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "mvector.h"
@@ -18,7 +18,7 @@
 
 bool updateRect();
 
-class Marker : public QGraphicsObject {
+class GiMarker : public QGraphicsObject {
     Q_OBJECT
 public:
     enum Type {
@@ -26,8 +26,8 @@ public:
         Home
     };
 
-    Marker(Type type);
-    ~Marker() override;
+    GiMarker(Type type);
+    ~GiMarker() override;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -52,11 +52,11 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
 
-class Pin : public QGraphicsObject {
+class GiPin : public QGraphicsObject {
     Q_OBJECT
 public:
-    Pin();
-    ~Pin() override;
+    GiPin();
+    ~GiPin() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
@@ -81,7 +81,7 @@ private:
     QRectF rect_;
     QPointF lastPos_;
     const uint index_;
-    static inline Pin* pins_[4];
+    static inline GiPin* pins_[4];
     static inline int ctr_ = 0;
 
 protected:

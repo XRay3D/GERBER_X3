@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "dxf_vec2.h"
 
 Vec2 Vec2::from_angle(double angle, double length) { return { cos(angle) * length, sin(angle) * length }; }

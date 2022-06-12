@@ -7,13 +7,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "shape.h"
 #include "shapepluginin.h"
 #include <QJsonObject>
-#include <graphicsitem.h>
+#include "gi.h"
 
 namespace Shapes {
 

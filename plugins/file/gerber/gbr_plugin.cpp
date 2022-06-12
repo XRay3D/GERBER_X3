@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gbr_plugin.h"
 
 #include "gbr_aperture.h"
@@ -18,7 +18,7 @@
 #include "gbr_node.h"
 
 #include "doublespinbox.h"
-#include "drillpreviewgi.h"
+#include "gi_drillpreview.h"
 #include "ft_view.h"
 #include "settings.h"
 #include "thermal/gc_thvars.h"

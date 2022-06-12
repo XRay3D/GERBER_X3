@@ -10,39 +10,25 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// import "aboutform.h";
-//#include "forms/drillform/drillform.h"
+#include "aboutform.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
-//#include "forms/hatchingform.h"
-//#include "forms/pocketoffsetform.h"
-//#include "forms/pocketrasterform.h"
-//#include "forms/profileform.h"
-//#include "forms/voronoiform.h"
-//#include <thermalform.h>
+#include "gi_bridge.h"
+#include "gi_datasolid.h"
+#include "gi_point.h"
 #include "plugindialog.h"
-#include "point.h"
+#include "project.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
-
-#include "project.h"
-#include <tool_database.h>
-
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
-#include <bridgeitem.h>
-#include <datasoliditem.h>
 #include <forward_list>
-
-#include "aboutform.h"
-
-// import std.core;
-// import std;
+#include <tool_database.h>
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -62,19 +48,19 @@ MainWindow::MainWindow(QWidget* parent)
 
     initWidgets();
     LayoutFrames* lfp;
-    ui->graphicsView->scene()->addItem(new Marker(Marker::Home));
-    ui->graphicsView->scene()->addItem(new Marker(Marker::Zero));
-    ui->graphicsView->scene()->addItem(new Pin());
-    ui->graphicsView->scene()->addItem(new Pin());
-    ui->graphicsView->scene()->addItem(new Pin());
-    ui->graphicsView->scene()->addItem(new Pin());
+    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
+    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
+    ui->graphicsView->scene()->addItem(new GiPin());
+    ui->graphicsView->scene()->addItem(new GiPin());
+    ui->graphicsView->scene()->addItem(new GiPin());
+    ui->graphicsView->scene()->addItem(new GiPin());
     ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
     GCodePropertiesForm(); // init default vars;
 
-    connect(m_project, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&Marker::setPos));
-    connect(m_project, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&Marker::setPos));
-    connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Pin::setPos));
+    connect(m_project, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(m_project, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
     connect(m_project, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
     menuBar()->installEventFilter(this);
@@ -335,7 +321,7 @@ void MainWindow::createActionsService() {
     // Autoplace All Refpoints
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
-            Pin::resetPos(false);
+            GiPin::resetPos(false);
             App::home()->resetPos(false);
             App::zero()->resetPos(false);
         }

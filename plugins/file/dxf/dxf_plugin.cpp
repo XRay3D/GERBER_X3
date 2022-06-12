@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "dxf_plugin.h"
 #include "dxf_file.h"
 #include "dxf_node.h"
@@ -30,7 +30,7 @@
 #include "ft_view.h"
 
 #include <QtWidgets>
-#include <drillpreviewgi.h>
+#include <gi_drillpreview.h>
 
 namespace Dxf {
 

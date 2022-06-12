@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "dxf_layer.h"
 #include "dxf_file.h"
 #include "dxf_types.h"
@@ -109,7 +109,7 @@ void Layer::setVisible(bool visible) {
     }
 }
 
-ItemGroup* Layer::itemGroup() const {
+GiGroup* Layer::itemGroup() const {
     return m_itemsType == ItemsType::Paths
         ? itemGroupPath
         : itemGroupNorm;

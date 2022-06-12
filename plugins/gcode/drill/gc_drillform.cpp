@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_drillform.h"
 #include "gc_drillmodel.h"
 #include "pocketoffset/gc_pocketoffset.h"
@@ -21,9 +21,9 @@
 #include "scene.h"
 #include "settings.h"
 
-#include "drillpreviewgi.h"
+#include "gi_drillpreview.h"
 #include "gc_drillmodel.h"
-#include "point.h"
+#include "gi_point.h"
 #include "project.h"
 #include "tool_pch.h"
 
@@ -41,13 +41,13 @@ Paths offset(const Path& path, double offset, bool fl = false) {
     return tmpPpaths;
 }
 
-class DrillPrGI final : public AbstractDrillPrGI {
+class DrillPrGI final : public GiAbstractDrillPr {
     HV& hv;
     Row& row;
 
 public:
     explicit DrillPrGI(HV& hv, double diameter, int toolId, Row& row)
-        : AbstractDrillPrGI(toolId)
+        : GiAbstractDrillPr(toolId)
         , hv { hv }
         , row { row } {
         sourceDiameter_ = diameter;

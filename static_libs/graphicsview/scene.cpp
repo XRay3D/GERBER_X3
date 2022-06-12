@@ -10,13 +10,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "scene.h"
 
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
-#include <graphicsitem.h>
+#include "gi.h"
 
 #include <QDebug>
 #include <QElapsedTimer>

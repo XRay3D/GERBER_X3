@@ -10,8 +10,8 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "gcpathitem.h"
+ *******************************************************************************/
+#include "gi_gcpath.h"
 
 #include "gcode.h"
 
@@ -22,7 +22,7 @@
 #define QT_DEBUG
 //#undef QT_DEBUG
 
-GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
+GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
     : m_gcFile(file) {
     for (const Path& path : paths)
         m_shape.addPolygon(path);
@@ -37,7 +37,7 @@ GcPathItem::GcPathItem(const Paths& paths, GCode::File* file)
 #endif
 }
 
-GcPathItem::GcPathItem(const Path& path, GCode::File* file)
+GiGcPath::GiGcPath(const Path& path, GCode::File* file)
     : m_gcFile(file) {
     m_shape.addPolygon(path);
     double k;
@@ -51,9 +51,9 @@ GcPathItem::GcPathItem(const Path& path, GCode::File* file)
 #endif
 }
 
-QRectF GcPathItem::boundingRect() const { return m_rect; }
+QRectF GiGcPath::boundingRect() const { return m_rect; }
 
-void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
     if (m_pnColorPrt)
@@ -91,11 +91,11 @@ void GcPathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 #endif
 }
 
-int GcPathItem::type() const { return static_cast<int>(GiType::Path); }
+int GiGcPath::type() const { return static_cast<int>(GiType::Path); }
 
-Paths GcPathItem::paths(int) const { return {} /*m_paths*/; }
+Paths GiGcPath::paths(int) const { return {} /*m_paths*/; }
 #ifdef QT_DEBUG
-void GcPathItem::updateArrows() {
+void GiGcPath::updateArrows() {
     m_sc = scaleFactor();
     m_arrows = QPainterPath(); //.clear();
     if (qFuzzyIsNull(m_pen.widthF())) {

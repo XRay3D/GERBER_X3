@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "gc_formsutil.h"
@@ -16,7 +16,7 @@
 namespace Ui {
 class ProfileForm;
 }
-class BridgeItem;
+class GiBridge;
 
 class ProfileForm : public FormsUtil {
     Q_OBJECT
@@ -45,7 +45,7 @@ private:
         QStringLiteral("prof_in_conv"),
     };
     void rb_clicked();
-    BridgeItem* brItem = nullptr;
+    GiBridge* brItem = nullptr;
 
     enum Trimming {
         Line = 1,

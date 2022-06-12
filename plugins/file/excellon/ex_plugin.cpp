@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "ex_plugin.h"
 #include "ex_file.h"
 #include "ex_node.h"
@@ -20,8 +20,8 @@
 #include "app.h"
 #include "ctre.hpp"
 #include "doublespinbox.h"
-#include "drillitem.h"
-#include "drillpreviewgi.h"
+#include "gi_drill.h"
+#include "gi_drillpreview.h"
 #include "file.h"
 #include "ft_view.h"
 #include "utils.h"

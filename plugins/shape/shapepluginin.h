@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include <QJsonObject>
@@ -16,7 +16,7 @@
 #include <QObject>
 #include <app.h>
 #include <ft_view.h>
-#include <graphicsitem.h>
+#include "gi.h"
 #include <project.h>
 
 namespace Shapes {

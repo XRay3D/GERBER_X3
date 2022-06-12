@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 #include "gc_types.h"
 #include <QMutex>
@@ -22,7 +22,7 @@ using namespace ClipperLib;
 
 void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {});
 
-class ErrorItem;
+class GiError;
 
 // namespace GCode {
 // class Creator;
@@ -118,7 +118,7 @@ public:
 
     QString msg;
 
-    mvector<ErrorItem*> items;
+    mvector<GiError*> items;
 
 signals:
     void fileReady(GCode::File* file);

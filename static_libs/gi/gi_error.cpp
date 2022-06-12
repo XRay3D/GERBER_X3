@@ -10,24 +10,24 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "erroritem.h"
+ *******************************************************************************/
+#include "gi_error.h"
 #include <QPainter>
 #include <QTime>
 #include <QtMath>
 
-ErrorItem::ErrorItem(const Paths& paths, double area)
+GiError::GiError(const Paths& paths, double area)
     : m_area(area) {
     for (auto& path : paths)
         m_shape.addPolygon(path);
     setFlag(ItemIsSelectable);
 }
 
-double ErrorItem::area() const { return m_area; }
+double GiError::area() const { return m_area; }
 
-QRectF ErrorItem::boundingRect() const { return m_shape.boundingRect(); }
+QRectF GiError::boundingRect() const { return m_shape.boundingRect(); }
 
-void ErrorItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
     if (isSelected()) {
         static QTime t(QTime::currentTime());
@@ -44,4 +44,4 @@ void ErrorItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*optio
     painter->drawPath(m_shape);
 }
 
-QPainterPath ErrorItem::shape() const { return m_shape; }
+QPainterPath GiError::shape() const { return m_shape; }

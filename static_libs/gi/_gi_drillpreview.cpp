@@ -10,19 +10,17 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "drillitem.h"
-#include "ex_cellon.h"
-
+ *******************************************************************************/
+#include "_gi_drillpreview.h"
+#include "excellon/ex_types.h"
 #include "scene.h"
-#include <graphicsview.h>
-
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <graphicsview.h>
 
 using namespace ClipperLib;
 
-DrillItem::DrillItem(Excellon::Hole* hole, FileInterface* file)
+DrillPreview::DrillPreview(Excellon::Hole* hole, FileInterface* file)
     : GraphicsItem(file)
     , m_diameter(hole->state.currentToolDiameter())
     , m_hole(hole) {
@@ -32,7 +30,7 @@ DrillItem::DrillItem(Excellon::Hole* hole, FileInterface* file)
     changeColor();
 }
 
-DrillItem::DrillItem(double diameter, FileInterface* file)
+DrillPreview::DrillPreview(double diameter, FileInterface* file)
     : GraphicsItem(file)
     , m_diameter(diameter) {
     setAcceptHoverEvents(true);
@@ -41,13 +39,13 @@ DrillItem::DrillItem(double diameter, FileInterface* file)
     changeColor();
 }
 
-DrillItem::~DrillItem() { }
+DrillPreview::~DrillPreview() { }
 
-QRectF DrillItem::boundingRect() const { return m_rect; }
+QRectF DrillPreview::boundingRect() const { return m_rect; }
 
-QPainterPath DrillItem::shape() const { return m_shape; }
+QPainterPath DrillPreview::shape() const { return m_shape; }
 
-void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DrillPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
 
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
@@ -64,17 +62,17 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*optio
     painter->strokePath(m_shape, m_pen);
 }
 
-int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
+int DrillPreview::type() const { return static_cast<int>(GiType::Drill); }
 
-bool DrillItem::isSlot() {
+bool DrillPreview::isSlot() {
     if (m_hole)
         return !m_hole->state.path.isEmpty();
     return false;
 }
 
-double DrillItem::diameter() const { return m_diameter; }
+double DrillPreview::diameter() const { return m_diameter; }
 
-void DrillItem::setDiameter(double diameter) {
+void DrillPreview::setDiameter(double diameter) {
     if (m_diameter == diameter)
         return;
     m_diameter = diameter;
@@ -83,7 +81,7 @@ void DrillItem::setDiameter(double diameter) {
     update();
 }
 
-Paths DrillItem::paths(int alternate) const {
+Paths DrillPreview::paths(int alternate) const {
     Path path;
     if (m_hole) {
         if (m_hole->state.path.isEmpty())
@@ -106,7 +104,7 @@ Paths DrillItem::paths(int alternate) const {
     return { path };
 }
 
-void DrillItem::changeColor() {
+void DrillPreview::changeColor() {
     animation.setStartValue(m_bodyColor);
 
     switch (colorState) {
@@ -142,7 +140,7 @@ void DrillItem::changeColor() {
     animation.start();
 }
 
-void DrillItem::updateHole() {
+void DrillPreview::updateHole() {
     if (!m_hole)
         return;
     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
@@ -155,7 +153,7 @@ void DrillItem::updateHole() {
     setPos(p);
 }
 
-void DrillItem::create() {
+void DrillPreview::create() {
     m_shape = QPainterPath();
     if (!m_hole) {
         // m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);

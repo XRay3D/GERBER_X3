@@ -15,14 +15,14 @@
  * "A generic solution to polygon clipping"                                     *
  * Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
  * http://portal.acm.org/citation.cfm?id=129906                                 *
- ***********************************************************8********************/
+ *******************************************************************************/
 
 #include "file.h"
-#include "itemgroup.h"
+#include "gi_group.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
-#include <graphicsitem.h>
+#include "gi.h"
 
 GraphicsItem::GraphicsItem(FileInterface* file)
     : animation(this, "bodyColor")

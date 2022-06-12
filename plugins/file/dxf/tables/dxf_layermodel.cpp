@@ -10,12 +10,12 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "dxf_layermodel.h"
 #include "dxf_file.h"
 #include "dxf_layer.h"
 #include "ft_node.h"
-#include "itemgroup.h"
+#include "gi_group.h"
 
 #include <QComboBox>
 #include <QGraphicsScene>
