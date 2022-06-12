@@ -7,10 +7,10 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_errordialog.h"
 
-#include "erroritem.h"
+#include "gi_error.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "scene.h"
@@ -27,7 +27,7 @@
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QVBoxLayout>
 
-Q_DECLARE_METATYPE(ErrorItem*)
+Q_DECLARE_METATYPE(GiError*)
 
 // enum { IconSize = 32 };
 
@@ -59,10 +59,10 @@ QIcon errorIcon(const QPainterPath& path) {
 }
 
 class ErrorModel : public QAbstractTableModel {
-    mvector<ErrorItem*> items;
+    mvector<GiError*> items;
 
 public:
-    ErrorModel(mvector<ErrorItem*> items, QObject* parent = nullptr)
+    ErrorModel(mvector<GiError*> items, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
         , items(items) {
     }
@@ -135,10 +135,10 @@ protected slots:
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override {
         QTableView::selectionChanged(selected, deselected);
         for (auto& var : selected.indexes()) {
-            var.data(Qt::UserRole).value<ErrorItem*>()->setSelected(true);
+            var.data(Qt::UserRole).value<GiError*>()->setSelected(true);
         }
         for (auto& var : deselected.indexes()) {
-            var.data(Qt::UserRole).value<ErrorItem*>()->setSelected(false);
+            var.data(Qt::UserRole).value<GiError*>()->setSelected(false);
         }
         static_cast<ErrorModel*>(model())->updateScene();
     }
@@ -176,7 +176,7 @@ void ErrorDialog::retranslateUi(QDialog* ErrorDialog) {
     ErrorDialog->setWindowTitle(QCoreApplication::translate("ErrorDialog", "Uncut places:", nullptr));
 }
 
-ErrorDialog::ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent)
+ErrorDialog::ErrorDialog(const mvector<GiError*>& items, QWidget* parent)
     : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
     verticalLayout->insertWidget(0, table = new TableView(this));

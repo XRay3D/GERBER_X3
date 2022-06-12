@@ -7,20 +7,32 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
-#include <graphicsitem.h>
+#include "gi.h"
 
-class ErrorItem : public QGraphicsItem {
-    QPainterPath m_shape;
-    const double m_area;
+namespace Gerber {
+class File;
+}
 
+class GiDataSolid final : public GraphicsItem {
 public:
-    ErrorItem(const Paths& paths, double area);
-    double area() const;
+    explicit GiDataSolid(Paths& m_paths, FileInterface* file);
+    ~GiDataSolid() override;
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    int type() const override;
+    // GraphicsItem interface
+    void redraw() override;
+    Paths paths(int alternate = {}) const override;
+    Paths* rPaths() override;
+    // GraphicsItem interface
+    void changeColor() override;
+
+private:
+    Paths& m_paths;
+    QPolygonF fillPolygon;
 };

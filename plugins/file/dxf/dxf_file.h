@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
@@ -15,7 +15,7 @@
 #include "dxf_codedata.h"
 #include "dxf_types.h"
 #include "file.h"
-#include "itemgroup.h"
+#include "gi_group.h"
 
 #include <QDebug>
 #include <QFile>

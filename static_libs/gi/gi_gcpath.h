@@ -7,39 +7,33 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
-#include <graphicsitem.h>
-
-namespace Excellon {
-class Hole;
+#include "gi.h"
+#define QT_DEBUG
+namespace GCode {
+class File;
 }
 
-class Hole;
-
-class DrillItem : public GraphicsItem {
+class GiGcPath : public GraphicsItem {
 public:
-    DrillItem(Excellon::Hole* hole, FileInterface* file);
-    DrillItem(double diameter, FileInterface* file);
-    ~DrillItem() override;
-    // QGraphicsItem interface
+    GiGcPath(const Paths& paths, GCode::File* file = nullptr);
+    GiGcPath(const Path& path, GCode::File* file = nullptr);
+    ~GiGcPath() override = default;
     QRectF boundingRect() const override;
-    QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    // GraphicsItem interface
     Paths paths(int alternate = {}) const override;
-    void changeColor() override;
-
-    bool isSlot();
-    double diameter() const;
-    void setDiameter(double diameter);
-    void updateHole();
 
 private:
-    void create();
-    double m_diameter = 0.0;
-    Excellon::Hole* const m_hole = nullptr;
-    QPolygonF fillPolygon;
+    GCode::File* m_gcFile;
+#ifdef QT_DEBUG
+    QPainterPath m_arrows;
+    double m_sc = 0;
+    void updateArrows();
+#endif
+protected:
+    void changeColor() override { }
 };
+#undef QT_DEBUG

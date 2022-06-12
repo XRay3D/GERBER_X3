@@ -10,13 +10,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_drillitem.h"
 
 namespace GCode {
 
 DrillItem::DrillItem(double diameter, GCode::File* file)
-    : AbstractDrillItem(reinterpret_cast<FileInterface*>(file))
+    : GiAbstractDrill(reinterpret_cast<FileInterface*>(file))
     , m_diameter(diameter) {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);

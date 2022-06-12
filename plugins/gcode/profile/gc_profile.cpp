@@ -9,9 +9,9 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_profile.h"
-#include "bridgeitem.h"
+#include "gi_bridge.h"
 #include "gc_file.h"
 #include "gc_profileform.h"
 #include "mainwindow.h"
@@ -164,19 +164,19 @@ void ProfileCreator::cornerTrimming() {
 
 void ProfileCreator::makeBridges() {
     // find Bridges
-    mvector<BridgeItem*> bridgeItems;
+    mvector<GiBridge*> bridgeItems;
     for (QGraphicsItem* item : App::scene()->items()) {
         if (static_cast<GiType>(item->type()) == GiType::Bridge)
-            bridgeItems.push_back(static_cast<BridgeItem*>(item));
+            bridgeItems.push_back(static_cast<GiBridge*>(item));
     }
     // create Bridges
     if (bridgeItems.size()) {
         for (auto& m_returnPs : m_returnPss) {
             const Path& path = m_returnPs.front();
-            std::vector<std::pair<BridgeItem*, IntPoint>> biStack;
+            std::vector<std::pair<GiBridge*, IntPoint>> biStack;
             biStack.reserve(bridgeItems.size());
             IntPoint pt;
-            for (BridgeItem* bi : bridgeItems) {
+            for (GiBridge* bi : bridgeItems) {
                 if (pointOnPolygon(bi->getPath(), path, &pt))
                     biStack.emplace_back(bi, pt);
             }

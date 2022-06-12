@@ -10,9 +10,9 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_profileform.h"
-#include "bridgeitem.h"
+#include "gi_bridge.h"
 #include "gc_profile.h"
 #include "project.h"
 #include "scene.h"
@@ -199,7 +199,7 @@ void ProfileForm::on_pbAddBridge_clicked() {
         if (!brItem->ok())
             delete brItem;
     }
-    brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+    brItem = new GiBridge(m_lenght, m_size, side, brItem);
     App::scene()->addItem(brItem);
     brItem->setVisible(true);
 }
@@ -209,7 +209,7 @@ void ProfileForm::updateBridge() {
     m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : App::scene()->items()) {
         if (static_cast<GiType>(item->type()) == GiType::Bridge)
-            static_cast<BridgeItem*>(item)->update();
+            static_cast<GiBridge*>(item)->update();
     }
 }
 
@@ -303,7 +303,7 @@ void ProfileForm::editFile(GCode::File* file) {
             //                brItem->m_lastPos = pos;
             //            }
             updateBridge();
-            brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+            brItem = new GiBridge(m_lenght, m_size, side, brItem);
             //        delete item;
         }
     }

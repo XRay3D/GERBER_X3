@@ -10,7 +10,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include <project.h>
 
 #include "file.h"
@@ -143,10 +143,7 @@ bool Project::open(const QString& fileName) {
         in >> m_ver;
         switch (m_ver) {
         case ProVer_6:
-            [[fallthrough
-
-            ds
-            ]];
+            [[fallthrough]];
         case ProVer_5:
             in >> m_isPinsPlaced;
             [[fallthrough]];

@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include <myclipper.h>
@@ -46,7 +46,7 @@ enum class GiType {
 };
 
 class FileInterface;
-class ItemGroup;
+class GiGroup;
 class ShapeInterface;
 
 // namespace Dxf {
@@ -62,7 +62,7 @@ class ShapeInterface;
 class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
     //    friend class Excellon::File;
     //    friend class Gerber::File;
-    friend class ItemGroup;
+    friend class GiGroup;
     friend class Project;
 
     Q_OBJECT
@@ -111,7 +111,7 @@ protected:
     QRectF m_rect;
 
     const FileInterface* m_file;
-    ItemGroup* itemGroup = nullptr;
+    GiGroup* itemGroup = nullptr;
     QPainterPath m_shape;
 
     QPen m_pen;

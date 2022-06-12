@@ -10,28 +10,28 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
-#include "bridgeitem.h"
+ *******************************************************************************/
+#include "gi_bridge.h"
 
 #include "graphicsview.h"
 #include <QPainter>
 
-BridgeItem::BridgeItem(double& lenght, double& size, GCode::SideOfMilling& side, BridgeItem*& ptr)
+GiBridge::GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiBridge*& ptr)
     : m_ptr(ptr)
     , m_side(side)
     , m_lenght(lenght)
     , m_size(size) {
-    connect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    connect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
 
-QRectF BridgeItem::boundingRect() const {
+QRectF GiBridge::boundingRect() const {
     return m_path.boundingRect();
 }
 
-void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setBrush(!m_ok ? Qt::red : Qt::green);
     painter->setTransform(QTransform().rotate(-(m_angle - 360)), true);
     painter->setPen(Qt::NoPen);
@@ -66,22 +66,22 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
     drawEllipse(l.p2(), true);
 }
 
-void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
+void GiBridge::setNewPos(const QPointF& pos) { setPos(pos); }
 
-QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value) {
+QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) {
     if (change == ItemPositionChange) {
         return calculate(value.toPointF());
     } else
         return QGraphicsItem::itemChange(change, value);
 }
 
-void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     m_lastPos = pos();
-    disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 
-QPointF BridgeItem::calculate(const QPointF& pos) {
+QPointF GiBridge::calculate(const QPointF& pos) {
     QList<QGraphicsItem*> col(scene()->collidingItems(this));
     if (col.isEmpty())
         return pos;
@@ -134,17 +134,17 @@ QPointF BridgeItem::calculate(const QPointF& pos) {
     return pos;
 }
 
-void BridgeItem::setOk(bool ok) { m_ok = ok; }
+void GiBridge::setOk(bool ok) { m_ok = ok; }
 
-double BridgeItem::angle() const { return m_angle; }
+double GiBridge::angle() const { return m_angle; }
 
-void BridgeItem::update() {
+void GiBridge::update() {
     m_path = QPainterPath();
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     QGraphicsItem::update();
 }
 
-IntPoint BridgeItem::getPoint(const int side) const {
+IntPoint GiBridge::getPoint(const int side) const {
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
     switch (side) {
@@ -160,23 +160,23 @@ IntPoint BridgeItem::getPoint(const int side) const {
     return IntPoint();
 }
 
-QLineF BridgeItem::getPath() const {
+QLineF GiBridge::getPath() const {
     QLineF retLine(QLineF::fromPolar(m_size * 0.51, m_angle).p2(), QLineF::fromPolar(m_size * 0.51, m_angle + 180).p2());
     retLine.translate(pos());
     return retLine;
 }
 
-double BridgeItem::lenght() const { return m_lenght; }
+double GiBridge::lenght() const { return m_lenght; }
 
-bool BridgeItem::ok() const { return m_ok; }
+bool GiBridge::ok() const { return m_ok; }
 
-QPainterPath BridgeItem::shape() const { return m_path; }
+QPainterPath GiBridge::shape() const { return m_path; }
 
-void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
+void GiBridge::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
 
-void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (m_ok && pos() == m_lastPos) {
-        m_ptr = new BridgeItem(m_lenght, m_size, m_side, m_ptr);
+        m_ptr = new GiBridge(m_lenght, m_size, m_side, m_ptr);
         scene()->addItem(m_ptr);
         m_ptr->setPos(pos());
         m_ptr->setVisible(true);
@@ -186,6 +186,6 @@ void BridgeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths BridgeItem::paths(int) const { return Paths(); }
+Paths GiBridge::paths(int) const { return Paths(); }
 
-int BridgeItem::type() const { return static_cast<int>(GiType::Bridge); }
+int GiBridge::type() const { return static_cast<int>(GiType::Bridge); }

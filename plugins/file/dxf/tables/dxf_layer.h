@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "dxf_abstracttable.h"
@@ -17,7 +17,7 @@
 
 #include "datastream.h"
 
-class ItemGroup;
+class GiGroup;
 
 namespace Dxf {
 
@@ -70,7 +70,7 @@ public:
     const GraphicObjects& graphicObjects() const;
     void addGraphicObject(GraphicObject&& go);
 
-    ItemGroup* itemGroup() const;
+    GiGroup* itemGroup() const;
     bool isEmpty() const;
 
     ItemsType itemsType() const;
@@ -84,8 +84,8 @@ public:
     void setVisible(bool visible);
 
 private:
-    ItemGroup* itemGroupNorm = nullptr;
-    ItemGroup* itemGroupPath = nullptr;
+    GiGroup* itemGroupNorm = nullptr;
+    GiGroup* itemGroupPath = nullptr;
     //    File* m_fiGle = nullptr;
     Pathss m_groupedPaths;
 

@@ -7,14 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
-#include <graphicsitem.h>
+#include "gi.h"
 
-class ItemGroup : public mvector<GraphicsItem*> {
+class GiGroup : public mvector<GraphicsItem*> {
 public:
-    ~ItemGroup();
+    ~GiGroup();
     void push_back(GraphicsItem* item);
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);

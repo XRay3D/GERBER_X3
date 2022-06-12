@@ -7,14 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
 #include "mvector.h"
 
 #include <QDialog>
 
-class ErrorItem;
+class GiError;
 class TableView;
 
 class QVBoxLayout;
@@ -31,6 +31,6 @@ class ErrorDialog : public QDialog {
     void retranslateUi(QDialog* ErrorDialog); // retranslateUi
 
 public:
-    explicit ErrorDialog(const mvector<ErrorItem*>& items, QWidget* parent = nullptr);
+    explicit ErrorDialog(const mvector<GiError*>& items, QWidget* parent = nullptr);
     ~ErrorDialog();
 };

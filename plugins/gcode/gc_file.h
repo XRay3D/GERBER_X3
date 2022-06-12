@@ -7,19 +7,19 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 //#include "gctypes.h"
 #include "file.h"
 #include "gc_utils.h"
 
 class MainWindow;
-class GcPathItem;
+class GiGcPath;
 
 namespace GCode {
 
 class File : private GCUtils, public FileInterface {
-    friend class ::GcPathItem;
+    friend class ::GiGcPath;
     friend class ::MainWindow;
 
 public:

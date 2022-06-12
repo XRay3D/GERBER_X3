@@ -7,33 +7,20 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
+#include "gi.h"
 
-#include <graphicsitem.h>
-#define QT_DEBUG
-namespace GCode {
-class File;
-}
+class GiError : public QGraphicsItem {
+    QPainterPath m_shape;
+    const double m_area;
 
-class GcPathItem : public GraphicsItem {
 public:
-    GcPathItem(const Paths& paths, GCode::File* file = nullptr);
-    GcPathItem(const Path& path, GCode::File* file = nullptr);
-    ~GcPathItem() override = default;
+    GiError(const Paths& paths, double area);
+    double area() const;
+
+    // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    Paths paths(int alternate = {}) const override;
-
-private:
-    GCode::File* m_gcFile;
-#ifdef QT_DEBUG
-    QPainterPath m_arrows;
-    double m_sc = 0;
-    void updateArrows();
-#endif
-protected:
-    void changeColor() override { }
+    QPainterPath shape() const override;
 };
-#undef QT_DEBUG

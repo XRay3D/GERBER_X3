@@ -9,11 +9,11 @@
  * Copyright :  Damir Bakiev 2016-2022                                          *
  * License:                                                                     * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_propertiesform.h"
 #include "ui_gcodepropertiesform.h"
 
-#include "point.h"
+#include "gi_point.h"
 #include "project.h"
 #include "settings.h"
 #include <QMessageBox>
@@ -39,10 +39,10 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
 
     connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setGlue);
 
-    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &Marker::setPosX);
-    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &Marker::setPosY);
-    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &Marker::setPosX);
-    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &Marker::setPosY);
+    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &GiMarker::setPosX);
+    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &GiMarker::setPosY);
+    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &GiMarker::setPosX);
+    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &GiMarker::setPosY);
 
     if (App::project()) {
         connect(ui->dsbxSpaceX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);

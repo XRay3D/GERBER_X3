@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #include "gc_hatching.h"
 
 #include "gc_file.h"
@@ -18,7 +18,7 @@
 #ifndef __GNUC__
 #include <execution>
 #endif
-#include "point.h"
+#include "gi_point.h"
 //#include <QFuture>
 //#include <QtConcurrent>
 #include <algorithm>

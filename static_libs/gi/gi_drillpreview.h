@@ -7,14 +7,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- ***********************************************************8********************/
+ *******************************************************************************/
 #pragma once
 
-#include <graphicsitem.h>
+#include "gi.h"
 
 struct Row;
 
-class AbstractDrillPrGI : public QGraphicsObject {
+class GiAbstractDrillPr : public QGraphicsObject {
     friend class ThermalNode;
 
     Q_OBJECT
@@ -33,8 +33,8 @@ signals:
     void colorChanged();
 
 public:
-    AbstractDrillPrGI(int toolId);
-    ~AbstractDrillPrGI() override = default;
+    GiAbstractDrillPr(int toolId);
+    ~GiAbstractDrillPr() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
