@@ -26,7 +26,7 @@
 namespace Shapes {
 
 Shape::Shape()
-    : m_node(new Node(this, &m_giId)) {
+    : m_node(new Node(this, &id_)) {
     m_paths.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
@@ -39,23 +39,23 @@ Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
     if (App::scene()->drawPdf()) [[unlikely]] {
-        m_pathColor = Qt::black;
-        m_pathColor.setAlpha(255);
-        m_pen.setColor(m_pathColor);
+        pathColor_ = Qt::black;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
     } else [[likely]] {
-        m_pathColor = m_bodyColor;
-        m_pathColor.setAlpha(255);
-        m_pen.setColor(m_pathColor);
+        pathColor_ = bodyColor_;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
     }
 
-    painter->setPen(m_pen);
-    painter->setBrush(m_bodyColor);
-    painter->drawPath(m_shape);
+    painter->setPen(pen_);
+    painter->setBrush(bodyColor_);
+    painter->drawPath(shape_);
 }
 
-QRectF Shape::boundingRect() const { return m_shape.boundingRect(); }
+QRectF Shape::boundingRect() const { return shape_.boundingRect(); }
 
-QPainterPath Shape::shape() const { return m_shape; }
+QPainterPath Shape::shape() const { return shape_; }
 
 Paths Shape::paths(int) const { return m_paths; }
 
@@ -112,26 +112,26 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
 void Shape::updateOtherHandlers(Handler*) { }
 
 void Shape::changeColor() {
-    animation.setStartValue(m_bodyColor);
+    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
-        m_bodyColor = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        m_bodyColor.setAlpha(50);
+        bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        bodyColor_.setAlpha(50);
         break;
     case Hovered:
-        m_bodyColor = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        m_bodyColor.setAlpha(100);
+        bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        bodyColor_.setAlpha(100);
         break;
     case Selected:
-        m_bodyColor = QColor(255, 0x0, 0x0, 100);
+        bodyColor_ = QColor(255, 0x0, 0x0, 100);
         break;
     case Hovered | Selected:
-        m_bodyColor = QColor(255, 0x0, 0x0, 150);
+        bodyColor_ = QColor(255, 0x0, 0x0, 150);
         break;
     }
 
-    animation.setEndValue(m_bodyColor);
+    animation.setEndValue(bodyColor_);
     animation.start();
 }
 
@@ -149,7 +149,7 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
         // case Qt::DecorationRole:
         //     return icon();
         case FileTree::Id:
-            m_giId = value.toInt();
+            id_ = value.toInt();
             return true;
         case FileTree::Select:
             setSelected(value.toBool());
@@ -167,13 +167,13 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
-            return QString("%1 (%2)").arg(name()).arg(m_giId);
+            return QString("%1 (%2)").arg(name()).arg(id_);
         case Qt::CheckStateRole:
             return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return icon();
         case FileTree::Id:
-            return m_giId;
+            return id_;
         case FileTree::Select:
             return isSelected();
         default:

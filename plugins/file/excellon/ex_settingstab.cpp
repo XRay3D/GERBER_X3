@@ -217,9 +217,6 @@ void ExSettingsTab::readSettings(MySettings& settings) {
     m_format.decimal = settings.getValue(sbxDecimal, m_format.decimal);
     m_format.integer = settings.getValue(sbxInteger, m_format.integer);
 
-    m_format.offsetPos.rx() = settings.getValue(dsbxX, m_format.offsetPos.x());
-    m_format.offsetPos.ry() = settings.getValue(dsbxY, m_format.offsetPos.y());
-
     m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbInches, bool(m_format.unitMode == Inches)));
     m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbMillimeters, bool(m_format.unitMode == Millimeters)));
 
@@ -238,9 +235,6 @@ void ExSettingsTab::writeSettings(MySettings& settings) {
 
     m_format.decimal = settings.setValue(sbxDecimal);
     m_format.integer = settings.setValue(sbxInteger);
-
-    m_format.offsetPos.rx() = settings.setValue(dsbxX);
-    m_format.offsetPos.ry() = settings.setValue(dsbxY);
 
     settings.setValue(rbInches);
     m_format.unitMode = static_cast<UnitMode>(settings.setValue(rbMillimeters));

@@ -26,18 +26,18 @@ class Node;
 class ShapeInterface : public GraphicsItem {
     friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape) {
         stream << shape.type();
-        stream << shape.m_giId;
+        stream << shape.id_;
         stream << shape.isVisible();
         shape.write_(stream);
         return stream;
     }
     friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape) {
-        stream >> shape.m_giId;
+        stream >> shape.id_;
         bool visible;
         stream >> visible;
-        shape.setZValue(shape.m_giId);
+        shape.setZValue(shape.id_);
         shape.setVisible(visible);
-        shape.setToolTip(QString::number(shape.m_giId));
+        shape.setToolTip(QString::number(shape.id_));
         shape.read_(stream);
         return stream;
     }

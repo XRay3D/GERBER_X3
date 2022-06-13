@@ -86,7 +86,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 namespace GCode {
 
 void VoronoiBoost::boostVoronoi() {
-    const double tolerance = m_gcp.params[GCodeParams::Tolerance].toDouble() * uScale;
+    const double tolerance = gcp_.params[GCodeParams::Tolerance].toDouble() * uScale;
 
     cInt minX = std::numeric_limits<cInt>::max(),
          minY = std::numeric_limits<cInt>::max(),
@@ -98,7 +98,7 @@ void VoronoiBoost::boostVoronoi() {
     msg = tr("Calc BOOST Voronoi");
 
     size_t max {};
-    for (const Paths& paths : m_groupedPss)
+    for (const Paths& paths : groupedPss)
         for (const Path& path : paths)
             max += path.size();
     max *= 1.5;
@@ -109,7 +109,7 @@ void VoronoiBoost::boostVoronoi() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for (const Paths& paths : m_groupedPss) {
+    for (const Paths& paths : groupedPss) {
         ++id;
         for (const Path& path : paths) {
             for (size_t i = 0; i < path.size(); ++i) {
@@ -203,7 +203,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const cInt fo = m_gcp.params[GCodeParams::FrameOffset].toDouble() * uScale;
+    const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
         { minX - fo, minY - fo },
         { minX - fo, maxY + fo },
@@ -231,8 +231,8 @@ void VoronoiBoost::boostVoronoi() {
     std::ranges::for_each(segments, clean);
     std::ranges::for_each(segments, clean);
 
-    m_returnPs = segments;
-    m_returnPs.push_back(frame);
+    returnPs = segments;
+    returnPs.push_back(frame);
 }
 } // namespace GCode
 #else

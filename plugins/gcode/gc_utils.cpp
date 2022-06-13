@@ -20,8 +20,8 @@
 
 namespace GCode {
 
-GCUtils::GCUtils(const GCodeParams& gcp)
-    : m_gcp(gcp) {
+GCUtils::GCUtils(const GCodeParams& gcp_)
+    : m_gcp(gcp_) {
 }
 
 QString GCUtils::getLastDir() {

@@ -13,10 +13,9 @@
  *******************************************************************************/
 #include "ex_node.h"
 
-#include "drill/gc_drillform.h"
-#include "ex_cellondialog.h"
 #include "ex_file.h"
-#include "ex_h.h"
+#include "ex_formatdialog.h"
+#include "ex_highlighter.h"
 #include "ft_view.h"
 
 #include <QBoxLayout>
@@ -119,9 +118,9 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         delete dialog;
     });
     menu.addSeparator();
-    if (!ExcellonDialog::showed()) {
+    if (!FormatDialog::showed()) {
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
-            (new ExcellonDialog(file))->show();
+            (new FormatDialog(file))->show();
         });
     }
     menu.addSeparator();

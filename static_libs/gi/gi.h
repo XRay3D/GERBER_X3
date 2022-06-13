@@ -31,10 +31,10 @@ enum class GiType {
     Path = QGraphicsItem::UserType + 200,
     Bridge,
 
-    PrThermal = QGraphicsItem::UserType + 300, // ThermalForm
-    PrSlot,                                    // DrillForm
-    PrDrill,                                   // DrillForm
-    PrApetrure,                                // DrillForm
+    Preview = QGraphicsItem::UserType + 300, // ThermalForm
+    // PrSlot,                                    // DrillForm
+    // PrDrill,                                   // DrillForm
+    // PrApetrure,                                // DrillForm
 
     Error = QGraphicsItem::UserType + 400, // ThermalForm
 
@@ -49,19 +49,8 @@ class FileInterface;
 class GiGroup;
 class ShapeInterface;
 
-// namespace Dxf {
-// class LayerModel;
-// }
-// namespace Excellon {
-// class File;
-// }
-// namespace Gerber {
-// class File;
-// }
+class GraphicsItem : public QGraphicsObject {
 
-class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
-    //    friend class Excellon::File;
-    //    friend class Gerber::File;
     friend class GiGroup;
     friend class Project;
 
@@ -69,11 +58,8 @@ class GraphicsItem : public QGraphicsObject /*QGraphicsItem*/ {
 
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
 
-    // clang-format off
-    inline QColor bodyColor() { return m_bodyColor; }
-    inline void setBodyColor(const QColor& c) { m_bodyColor = c; colorChanged(); }
-
-    // clang-format on
+    inline QColor bodyColor() { return bodyColor_; }
+    inline void setBodyColor(const QColor& c) { bodyColor_ = c, colorChanged(); }
 
 signals:
     void colorChanged();
@@ -82,11 +68,11 @@ public:
     explicit GraphicsItem(FileInterface* file = nullptr);
     ~GraphicsItem() override = default;
 
-    QColor color() const { return m_color; }
+    QColor color() const { return color_; }
     void setColor(const QColor& brush);
     void setColorPtr(QColor* brushColor);
 
-    QPen pen() const { return m_pen; }
+    QPen pen() const { return pen_; }
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
@@ -98,7 +84,7 @@ public:
 
     const FileInterface* file() const;
     template <typename T>
-    const T* typedFile() const { return dynamic_cast<const T* const>(m_file); }
+    const T* typedFile() const { return dynamic_cast<const T* const>(file_); }
 
     int id() const;
     void setId(int id);
@@ -108,22 +94,22 @@ protected:
     QPropertyAnimation animation;
     QPropertyAnimation visibleA;
 
-    QRectF m_rect;
+    QRectF rect_;
 
-    const FileInterface* m_file;
+    const FileInterface* file_;
     GiGroup* itemGroup = nullptr;
-    QPainterPath m_shape;
+    QPainterPath shape_;
 
-    QPen m_pen;
+    QPen pen_;
 
-    const QColor* m_pnColorPrt = nullptr;
-    const QColor* m_colorPtr = nullptr;
+    const QColor* pnColorPrt_ = nullptr;
+    const QColor* colorPtr_ = nullptr;
 
-    QColor m_color;
-    QColor m_bodyColor;
-    QColor m_pathColor;
+    QColor color_;
+    QColor bodyColor_;
+    QColor pathColor_;
 
-    int m_giId = -1;
+    int id_ = -1;
     double scaleFactor() const;
     enum ColorState {
         Default,
@@ -137,4 +123,9 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+
+public:
+    // QGraphicsItem interface
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 };

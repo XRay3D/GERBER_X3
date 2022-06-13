@@ -17,22 +17,23 @@
  * http://portal.acm.org/citation.cfm?id=129906                                 *
  *******************************************************************************/
 
+#include "gi.h"
 #include "file.h"
 #include "gi_group.h"
+#include "scene.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
-#include "gi.h"
 
 GraphicsItem::GraphicsItem(FileInterface* file)
     : animation(this, "bodyColor")
     , visibleA(this, "opacity")
-    , m_file(file)
-    , m_pen(QPen(Qt::white, 0.0))
-    , m_colorPtr(file ? &file->color() : nullptr)
-    , m_color(Qt::white)
-    , m_bodyColor(m_colorPtr ? *m_colorPtr : m_color)
-    , m_pathColor(Qt::transparent)
+    , file_(file)
+    , pen_(QPen(Qt::white, 0.0))
+    , colorPtr_(file ? &file->color() : nullptr)
+    , color_(Qt::white)
+    , bodyColor_(colorPtr_ ? *colorPtr_ : color_)
+    , pathColor_(Qt::transparent)
 
 {
     animation.setDuration(100);
@@ -42,28 +43,30 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     visibleA.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     connect(&visibleA, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleA.currentValue().toDouble() > 0.9); });
     QGraphicsItem::setVisible(false);
+
+    //    connect(this, &QGraphicsObject::rotationChanged, [] { qDebug("rotationChanged"); });
 }
 
 void GraphicsItem::setColor(const QColor& brush) {
-    m_bodyColor = m_color = brush;
+    bodyColor_ = color_ = brush;
     colorChanged();
 }
 
 void GraphicsItem::setColorPtr(QColor* brushColor) {
     if (brushColor)
-        m_bodyColor = *(m_colorPtr = brushColor);
-    m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
+        bodyColor_ = *(colorPtr_ = brushColor);
+    pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     colorChanged();
 }
 
 void GraphicsItem::setPen(const QPen& pen) {
-    m_pen = pen;
+    pen_ = pen;
     colorChanged();
 }
 
 void GraphicsItem::setPenColorPtr(const QColor* penColor) {
     if (penColor)
-        m_pnColorPrt = penColor;
+        pnColorPrt_ = penColor;
     colorChanged();
 }
 
@@ -79,11 +82,11 @@ void GraphicsItem::setVisible(bool visible) {
     }
 }
 
-const FileInterface* GraphicsItem::file() const { return m_file; }
+const FileInterface* GraphicsItem::file() const { return file_; }
 
-int GraphicsItem::id() const { return m_giId; }
+int GraphicsItem::id() const { return id_; }
 
-void GraphicsItem::setId(int id) { m_giId = id; }
+void GraphicsItem::setId(int id) { id_ = id; }
 
 void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
@@ -116,3 +119,11 @@ double GraphicsItem::scaleFactor() const {
 #endif
     return 1.0;
 };
+
+QRectF GraphicsItem::boundingRect() const {
+    if (App::scene()->boundingRect())
+        return shape_.toFillPolygon(transform()).boundingRect();
+    return shape_.boundingRect();
+}
+
+QPainterPath GraphicsItem::shape() const { return shape_; }

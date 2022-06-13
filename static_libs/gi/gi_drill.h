@@ -12,61 +12,36 @@
 
 #include "gi.h"
 
-class GiAbstractDrill : public GraphicsItem {
+class GiDrill final : public GraphicsItem {
+    using GraphicsItem::update;
+
 public:
-    //    DrillItem(Excellon::Hole* hole, Excellon::File* file);
-    //    DrillItem(double diameter, GCode::File* file);
-    GiAbstractDrill(FileInterface* file = nullptr);
-    ~GiAbstractDrill() override = default;
+    GiDrill(const Path& path, double diameter, FileInterface* file, int toolId);
+    ~GiDrill() override { }
 
     // QGraphicsItem interface
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override; // QGraphicsItem
-    int type() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    int type() const override { return int(GiType::Drill); }
 
     // GraphicsItem interface
+    Paths paths(int alternate = {}) const override;
     void changeColor() override;
 
-    double diameter() const;
+    bool isSlot();
+    double diameter() const { return diameter_; }
     void setDiameter(double diameter);
+    void update(const Path& path, double diameter);
 
-    virtual bool isSlot() = 0;
-    virtual void updateHole() {};
+    int toolId() const { return toolId_; }
+    void setToolId(int newToolId) {
+        toolId_ = newToolId;
+        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(toolId_).arg(diameter_));
+    }
 
-protected:
-    virtual void create() = 0;
-    double m_diameter = 0.0;
+private:
+    void create();
+    double diameter_ = 0.0;
+    Path path_;
+    QPolygonF fillPolygon;
+    int toolId_ = -1;
 };
-
-// namespace Excellon {
-
-// class File;
-// class Hole;
-
-// class DrillItem : public AbstractDrillItem {
-// public:
-//     DrillItem(double diameter, GCode::File* file);
-//     ~DrillItem() override;
-//     // QGraphicsItem interface
-//     QRectF boundingRect() const override; // QGraphicsItem
-//     QPainterPath shape() const override; // QGraphicsItem
-//     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override; //QGraphicsItem
-//     int type() const override;
-//     // GraphicsItem interface
-//     Paths paths(int alternate = {}) const override;
-//     void changeColor() override;
-
-//    bool isSlot() override; // AbstractDrillItem
-//    double diameter() const;
-//    void setDiameter(double diameter);
-//    void updateHole() override; //AbstractDrillItem
-
-// private:
-//     void create() override; // AbstractDrillItem
-//     double m_diameter = 0.0;
-//     Excellon::Hole* const m_hole = nullptr;
-//     QPolygonF fillPolygon;
-// };
-
-//}

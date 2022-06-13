@@ -101,11 +101,11 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
     painter->drawPath(sourcePath);
 }
 
-QRectF AbstractThermPrGi::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
+//QRectF AbstractThermPrGi::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
 
 QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
-int AbstractThermPrGi::type() const { return static_cast<int>(GiType::PrThermal); }
+int AbstractThermPrGi::type() const { return static_cast<int>(GiType::Preview); }
 
 bool AbstractThermPrGi::isValid() const {
     return !previewPaths.empty() && m_node->isChecked();

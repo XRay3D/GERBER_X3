@@ -4,7 +4,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  01 February 2020                                                *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
  * License:                                                                     *
@@ -12,240 +12,128 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gi_drill.h"
-//#include "ex_cellon.h"
-//#include "gcode.h"
 
-#include "graphicsview.h"
 #include "scene.h"
+#include <graphicsview.h>
+
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
 using namespace ClipperLib;
 
-GiAbstractDrill::GiAbstractDrill(FileInterface* file)
-    : GraphicsItem(file) {
+GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int toolId)
+    : GraphicsItem { file }
+    , diameter_ { diameter }
+    , path_ { path }
+    , toolId_ { toolId } {
+    setAcceptHoverEvents(true);
+    setFlag(ItemIsSelectable, true);
+    setToolId(toolId_);
+    create();
+    changeColor();
 }
 
-void GiAbstractDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
         painter->setPen(Qt::NoPen);
-        painter->drawPath(m_shape);
+        painter->drawPath(shape_);
         return;
     }
 
-    painter->setBrush(m_bodyColor);
+    painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
-    painter->drawPolygon(m_shape.toFillPolygon());
+    painter->drawPolygon(shape_.toFillPolygon());
 
-    m_pen.setColor(m_pathColor);
-    painter->strokePath(m_shape, m_pen);
+    pen_.setColor(pathColor_);
+    painter->strokePath(shape_, pen_);
 }
 
-int GiAbstractDrill::type() const { return static_cast<int>(GiType::Drill); }
+bool GiDrill::isSlot() { return path_.size() > 1; }
 
-QRectF GiAbstractDrill::boundingRect() const { return m_rect; }
-
-QPainterPath GiAbstractDrill::shape() const { return m_shape; }
-
-double GiAbstractDrill::diameter() const { return m_diameter; }
-
-void GiAbstractDrill::setDiameter(double diameter) {
-    if (m_diameter == diameter)
+void GiDrill::setDiameter(double diameter) {
+    if (diameter_ == diameter)
         return;
-    m_diameter = diameter;
+    diameter_ = diameter;
 
     create();
     update();
 }
 
-void GiAbstractDrill::changeColor() {
-    animation.setStartValue(m_bodyColor);
+void GiDrill::update(const Path& path, double diameter) {
+    diameter_ = diameter;
+    path_ = path;
+    create();
+    update();
+}
+
+Paths GiDrill::paths(int alternate) const {
+    return { transform().map(path_) };
+}
+
+void GiDrill::changeColor() {
+    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
-        m_bodyColor = QColor(100, 100, 100);
+        bodyColor_ = QColor(100, 100, 100);
         break;
     case Hovered:
-        m_bodyColor = QColor(150, 0x0, 150);
+        bodyColor_ = QColor(150, 0x0, 150);
         break;
     case Selected:
-        m_bodyColor = QColor(255, 0x0, 255);
+        bodyColor_ = QColor(255, 0x0, 255);
         break;
     case Hovered | Selected:
-        m_bodyColor = QColor(127, 0x0, 255);
+        bodyColor_ = QColor(127, 0x0, 255);
         break;
     }
 
-    m_pathColor = m_bodyColor;
+    pathColor_ = bodyColor_;
     switch (colorState) {
     case Default:
         break;
     case Hovered:
         break;
     case Selected:
-        m_pathColor = Qt::white;
+        pathColor_ = Qt::white;
         break;
     case Hovered | Selected:
-        m_pathColor = Qt::white;
+        pathColor_ = Qt::white;
         break;
     }
 
-    animation.setEndValue(m_bodyColor);
+    animation.setEndValue(bodyColor_);
     animation.start();
 }
 
-// namespace GCode {
+void GiDrill::create() {
+    shape_ = QPainterPath();
 
-// DrillItem::DrillItem(double diameter, GCode::File* file)
-//     : AbstractDrillItem(reinterpret_cast<FileInterface*>(file))
-//     , m_diameter(diameter)
-//{
-//     setAcceptHoverEvents(true);
-//     setFlag(ItemIsSelectable, true);
-//     create();
-//     changeColor();
-// }
+    switch (path_.size()) {
+    case 0:
+        break;
+    case 1: {
+        path_ = CirclePath(diameter_ * uScale, path_.front());
+        ReversePath(path_);
+        path_.push_back(path_.front());
+        shape_.addPolygon(path_);
+    } break;
+    case 2:
+    default: {
+        rect_ = shape_.boundingRect();
+        Paths paths;
+        ClipperOffset offset;
+        offset.AddPath(path_, jtRound, etOpenRound);
+        offset.Execute(paths, diameter_ * 0.5 * uScale);
+        for (Path& path : paths) {
+            path.push_back(path.front());
+            shape_.addPolygon(path);
+        }
+    }
+    }
 
-// DrillItem::~DrillItem() { }
-
-// QRectF DrillItem::boundingRect() const { return m_rect; }
-
-// QPainterPath DrillItem::shape() const { return m_shape; }
-
-// void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
-//{
-
-//    if (App::scene()->drawPdf()) {
-//        painter->setBrush(Qt::black);
-//        painter->setPen(Qt::NoPen);
-//        painter->drawPath(m_shape);
-//        return;
-//    }
-
-//    painter->setBrush(m_bodyColor);
-//    painter->setPen(Qt::NoPen);
-//    painter->drawPolygon(m_shape.toFillPolygon());
-
-//    m_pen.setColor(m_pathColor);
-//    painter->strokePath(m_shape, m_pen);
-//}
-
-// int DrillItem::type() const { return static_cast<int>(GiType::Drill); }
-
-// bool DrillItem::isSlot()
-//{
-//     if (m_hole)
-//         return !m_hole->state.path.isEmpty();
-//     return false;
-// }
-
-// double DrillItem::diameter() const { return m_diameter; }
-
-// void DrillItem::setDiameter(double diameter)
-//{
-//     if (m_diameter == diameter)
-//         return;
-//     m_diameter = diameter;
-
-//    create();
-//    update();
-//}
-
-// Paths DrillItem::paths() const
-//{
-//     Path path;
-//     if (m_hole) {
-//         if (m_hole->state.path.isEmpty())
-//             path = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-//         else
-//             return { m_hole->state.path.translated(m_hole->state.format->offsetPos) };
-//     } else
-//         path = CirclePath(m_diameter * uScale, (pos()));
-//     ReversePath(path);
-//     return { path };
-// }
-
-// void DrillItem::changeColor()
-//{
-//     animation.setStartValue(m_bodyColor);
-
-//    switch (colorState) {
-//    case Default:
-//        m_bodyColor = QColor(100, 100, 100);
-//        break;
-//    case Hovered:
-//        m_bodyColor = QColor(150, 0x0, 150);
-//        break;
-//    case Selected:
-//        m_bodyColor = QColor(255, 0x0, 255);
-//        break;
-//    case Hovered | Selected:
-//        m_bodyColor = QColor(127, 0x0, 255);
-//        break;
-//    }
-
-//    m_pathColor = m_bodyColor;
-//    switch (colorState) {
-//    case Default:
-//        break;
-//    case Hovered:
-//        break;
-//    case Selected:
-//        m_pathColor = Qt::white;
-//        break;
-//    case Hovered | Selected:
-//        m_pathColor = Qt::white;
-//        break;
-//    }
-
-//    animation.setEndValue(m_bodyColor);
-//    animation.start();
-//}
-
-// void DrillItem::updateHole()
-//{
-//     if (!m_hole)
-//         return;
-//     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
-//     m_diameter = m_hole->state.currentToolDiameter();
-//     create();
-//     update();
-
-//    auto p(pos());
-//    setPos(1, 1);
-//    setPos(p);
-//}
-
-// void DrillItem::create()
-//{
-//     m_shape = QPainterPath();
-//     if (!m_hole) {
-//         //m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
-//         auto p = CirclePath(m_diameter * uScale);
-//         p.push_back(p.first());
-//         m_shape.addPolygon(p);
-//         m_rect = m_shape.boundingRect();
-//     } else if (m_hole->state.path.isEmpty()) {
-//         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-//         //m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
-//         auto p = CirclePath(m_diameter * uScale, (m_hole->state.offsetedPos()));
-//         p.push_back(p.first());
-//         m_shape.addPolygon(p);
-//         m_rect = m_shape.boundingRect();
-//     } else {
-//         setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-//         Paths tmpPpath;
-//         ClipperOffset offset;
-//         offset.AddPath(m_hole->state.path.translated(m_hole->state.format->offsetPos), jtRound, etOpenRound);
-//         offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
-//         for (Path& path : tmpPpath) {
-//             path.push_back(path.first());
-//             m_shape.addPolygon(path);
-//         }
-//         m_rect = m_shape.boundingRect();
-//         fillPolygon = m_shape.toFillPolygon();
-//     }
-// }
-
-//}
+    rect_ = shape_.boundingRect();
+    fillPolygon = shape_.toFillPolygon();
+}

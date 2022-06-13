@@ -38,7 +38,7 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tps, QWidget* parent)
 
     connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
 
-    connect(this, &FormsUtil::createToolpath, tpc_, qOverload<>(&GCode::Creator::createGc));
+    connect(this, &FormsUtil::createToolpath, tpc_, &GCode::Creator::createGc);
     connect(this, &FormsUtil::createToolpath, this, &FormsUtil::startProgress);
 
     thread.start(QThread::LowPriority /*HighestPriority*/);

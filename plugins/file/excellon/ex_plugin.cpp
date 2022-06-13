@@ -20,10 +20,9 @@
 #include "app.h"
 #include "ctre.hpp"
 #include "doublespinbox.h"
-#include "gi_drill.h"
-#include "gi_drillpreview.h"
 #include "file.h"
 #include "ft_view.h"
+#include "gi_drill.h"
 #include "utils.h"
 
 #include "drill/gc_drillform.h"
@@ -52,41 +51,15 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
-
     HoleMap retData;
-
-    auto const exFile = reinterpret_cast<File*>(file);
-
+    auto const exFile = static_cast<File*>(file);
     for (const Excellon::Hole& hole : *exFile) {
+        auto name { QString("T%1").arg(hole.state.toolId) };
         if (bool slot = hole.state.path.size(); slot)
-            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(&hole.state.path);
+            retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.path));
         else
-            retData[{ hole.state.tCode, exFile->tools()[hole.state.tCode], slot }].emplace_back(hole.state.offsetedPos());
+            retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.pos));
     }
-
-    //    if (0) {
-    //        using DrillPreviewGiMap = std::map<int, mvector<std::shared_ptr<AbstractDrillPrGI>>>;
-
-    //        DrillPreviewGiMap giPeview;
-
-    //        auto const exFile = reinterpret_cast<File*>(file);
-
-    //        std::map<int, mvector<const Excellon::Hole*>> cacheHoles;
-    //        for (const Excellon::Hole& hole : *exFile)
-    //            cacheHoles[hole.state.tCode] << &hole;
-
-    //        data.reserve(cacheHoles.size()); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
-
-    //        for (auto [toolNum, diameter] : exFile->tools()) {
-    //            QString name(tr("Tool Ø%1mm").arg(diameter));
-    //            data.emplace_back(std::move(name), drawDrillIcon(), toolNum, diameter);
-    //            for (const Excellon::Hole* hole : cacheHoles[toolNum]) {
-    //                if (!hole->state.path.isEmpty())
-    //                    data.back().isSlot = true;
-    //                giPeview[toolNum].emplace_back(std::make_shared<DrillPrGI>(hole, data.back()));
-    //            }
-    //        }
-    //    }
 
     return retData;
 }

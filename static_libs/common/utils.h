@@ -86,3 +86,18 @@ struct CtreCapTo {
 };
 template <class T>
 CtreCapTo(T) -> CtreCapTo<T>;
+
+struct ScopedTrue {
+    bool& fl;
+    ScopedTrue(bool& fl)
+        : fl { fl } { fl = true; }
+    ~ScopedTrue() { fl = false; }
+};
+
+template <typename... Ts>
+struct Overload : Ts... {
+    using Ts::operator()...;
+};
+
+template <typename... Ts>
+Overload(Ts...) -> Overload<Ts...>;

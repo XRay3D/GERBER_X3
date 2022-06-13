@@ -23,7 +23,6 @@ public:
     ~ToolModel();
 
     // QAbstractItemModel interface
-
     bool insertRows(int row, int count, const QModelIndex& parent) override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
     int columnCount(const QModelIndex& parent) const override;
@@ -38,6 +37,8 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    // QAbstractItemModel interface
+    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 
     // Drag and Drop
     QStringList mimeTypes() const override;
@@ -48,12 +49,11 @@ public:
 
 private:
     const QString mimeType;
-    void exportTools();
-    void importTools();
-    ToolItem* getItem(const QModelIndex& index) const {
+    void saveTools();
+    void loadTools();
+    auto* getItem(const QModelIndex& index) const {
         if (index.isValid()) {
-            ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-            if (item)
+            if (auto* item = static_cast<ToolItem*>(index.internalPointer()); item)
                 return item;
         }
         return rootItem;

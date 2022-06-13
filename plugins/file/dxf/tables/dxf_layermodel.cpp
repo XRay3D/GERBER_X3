@@ -96,7 +96,7 @@ bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int ro
         switch (role) {
         case Qt::CheckStateRole:
             layers[names[index.row()]]->itemGroup()->setVisible(value.toInt());
-            layers[names[index.row()]]->file()->m_visible = value.value<Qt::CheckState>() == Qt::Checked;
+            layers[names[index.row()]]->file()->visible_ = value.value<Qt::CheckState>() == Qt::Checked;
             return true;
         case Qt::DecorationRole:
             layers[names[index.row()]]->setColor(value.value<QColor>());

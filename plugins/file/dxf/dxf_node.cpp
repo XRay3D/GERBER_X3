@@ -324,7 +324,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->setVisible(visible);
             layer->file()->m_layersVisible[name] = visible;
             if (visible) {
-                layer->file()->m_visible = visible;
+                layer->file()->visible_ = visible;
                 emit App::fileModel()->dataChanged(m_parent->index(index.column()), m_parent->index(index.column()), { role });
             }
         }

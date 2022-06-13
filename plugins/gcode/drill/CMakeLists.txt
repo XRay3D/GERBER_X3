@@ -36,9 +36,11 @@ add_library(${PROJECT_NAME} SHARED
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
-    gcode
     common
     filetree
+    gcode
+    gc_pocketoffset  #[[G-Code]]
+    gc_profile       #[[G-Code]]
     gi
     graphicsview
     tooldatabase

@@ -28,16 +28,16 @@ RasterCreator::RasterCreator() {
 }
 
 void RasterCreator::create() {
-    if (m_gcp.params[GCodeParams::Fast].toBool())
-        createRaster2(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
+    if (gcp_.params[GCodeParams::Fast].toBool())
+        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
     else
-        createRaster(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble(), m_gcp.params[GCodeParams::UseAngle].toDouble(), m_gcp.params[GCodeParams::Pass].toInt());
+        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
-    switch (m_gcp.side()) {
+    switch (gcp_.side()) {
     case Outer:
-        groupedPaths(CutoffPaths, static_cast<cInt>(m_toolDiameter + 5));
+        groupedPaths(CutoffPaths, static_cast<cInt>(toolDiameter + 5));
         break;
     case Inner:
         groupedPaths(CopperPaths);
@@ -47,9 +47,9 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         return;
     }
 
-    m_toolDiameter = tool.getDiameter(depth) * uScale;
-    m_dOffset = m_toolDiameter / 2;
-    m_stepOver = tool.stepover() * uScale;
+    toolDiameter = tool.getDiameter(depth) * uScale;
+    dOffset = toolDiameter / 2;
+    stepOver = tool.stepover() * uScale;
 
     Paths profilePaths;
     Paths fillPaths;
@@ -108,7 +108,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         Clipper clipper;
         clipper.AddPaths(src, ptClip, true);
         IntRect rect(clipper.GetBounds());
-        cInt o = uScale - (rect.height() % m_stepOver) / 2;
+        cInt o = uScale - (rect.height() % stepOver) / 2;
         rect.top -= o;
         rect.bottom += o;
         rect.left -= uScale;
@@ -117,7 +117,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         cInt start = rect.top;
         bool fl {};
 
-        for (; start <= rect.bottom || fl; fl = !fl, start += m_stepOver) {
+        for (; start <= rect.bottom || fl; fl = !fl, start += stepOver) {
             if (!fl) {
                 zigzag.emplace_back(rect.left, start);
                 zigzag.emplace_back(rect.right, start);
@@ -127,8 +127,8 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
             }
         }
 
-        zigzag.front().X -= m_stepOver;
-        zigzag.back().X -= m_stepOver;
+        zigzag.front().X -= stepOver;
+        zigzag.back().X -= stepOver;
         return zigzag;
     };
     auto merge = [](const Paths& scanLines, const Paths& frames) {
@@ -179,10 +179,10 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         return merged;
     };
 
-    for (Paths src : m_groupedPss) {
+    for (Paths src : groupedPss) {
         ClipperOffset offset(uScale);
         offset.AddPaths(src, jtRound, etClosedPolygon);
-        offset.Execute(src, -m_dOffset);
+        offset.Execute(src, -dOffset);
         for (auto& path : src)
             path.push_back(path.front());
         if (prPass)
@@ -198,17 +198,17 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
                 auto merged { merge(scanLines, frames) };
                 for (auto& path : merged)
                     RotatePath(path, -angle);
-                m_returnPs.append(merged);
+                returnPs.append(merged);
             }
         }
     }
 
-    mergeSegments(m_returnPs);
+    mergeSegments(returnPs);
 
-    sortB(m_returnPs);
+    sortB(returnPs);
     if (!profilePaths.empty() && prPass) {
         sortB(profilePaths);
-        if (m_gcp.convent())
+        if (gcp_.convent())
             ReversePaths(profilePaths);
         for (Path& path : profilePaths)
             path.push_back(path.front());
@@ -216,29 +216,29 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
 
     switch (prPass) {
     case NoProfilePass:
-        m_returnPss.prepend(m_returnPs);
+        returnPss.prepend(returnPs);
         break;
     case First:
         if (!profilePaths.empty())
-            m_returnPss.prepend(profilePaths);
-        m_returnPss.prepend(m_returnPs);
+            returnPss.prepend(profilePaths);
+        returnPss.prepend(returnPs);
         break;
     case Last:
-        m_returnPss.prepend(m_returnPs);
+        returnPss.prepend(returnPs);
         if (!profilePaths.empty())
-            m_returnPss.push_back(profilePaths);
+            returnPss.push_back(profilePaths);
         break;
     default:
         break;
     }
 
-    if (m_returnPss.empty()) {
+    if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        m_gcp.gcType = Raster;
-        m_file = new File(m_returnPss, m_gcp, fillPaths);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        gcp_.gcType = Raster;
+        file_ = new File(returnPss, gcp_, fillPaths);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
     }
 }
 
@@ -247,7 +247,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     QElapsedTimer t;
     t.start();
 
-    switch (m_gcp.side()) {
+    switch (gcp_.side()) {
     case Outer:
         groupedPaths(CutoffPaths, uScale);
         break;
@@ -259,15 +259,15 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         return;
     }
 
-    m_toolDiameter = tool.getDiameter(depth) * uScale;
-    m_dOffset = m_toolDiameter / 2;
-    m_stepOver = static_cast<cInt>(tool.stepover() * uScale);
+    toolDiameter = tool.getDiameter(depth) * uScale;
+    dOffset = toolDiameter / 2;
+    stepOver = static_cast<cInt>(tool.stepover() * uScale);
 
     Paths profilePaths;
 
     { // create exposure frames
         ClipperOffset o;
-        for (auto& p : m_groupedPss)
+        for (auto& p : groupedPss)
             o.AddPaths(p, jtRound, etClosedPolygon);
         o.Execute(profilePaths, -tool.diameter() * uScale * 0.5);
     }
@@ -299,9 +299,9 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         cInt y = rect.top;
         while (y < rect.bottom) {
             zPath.append({ { rect.left, y }, { rect.right, y } });
-            y += m_stepOver;
+            y += stepOver;
             zPath.append({ { rect.right, y }, { rect.left, y } });
-            y += m_stepOver;
+            y += stepOver;
         }
     }
 
@@ -312,7 +312,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         c.AddPath(zPath, ptSubject, false);
         c.AddPaths(laserPath, ptClip, true);
         c.Execute(ctIntersection, laserPath, pftNonZero);                              // laser on
-        addAcc(laserPath, m_gcp.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
+        addAcc(laserPath, gcp_.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
     }
 
     if (!qFuzzyIsNull(angle)) { // Rotate Paths
@@ -320,21 +320,21 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
             RotatePath(path, -angle, center);
     }
 
-    m_returnPss.push_back(laserPath);
+    returnPss.push_back(laserPath);
 
     if (!profilePaths.empty() && prPass != NoProfilePass) {
         for (auto& p : profilePaths)
             p.push_back(p.front());
-        m_returnPss.push_back(sortB(profilePaths));
+        returnPss.push_back(sortB(profilePaths));
     }
 
-    if (m_returnPss.empty()) {
+    if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        m_gcp.gcType = LaserHLDI;
-        m_file = new File(m_returnPss, m_gcp);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        gcp_.gcType = LaserHLDI;
+        file_ = new File(returnPss, gcp_);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
     }
 }
 

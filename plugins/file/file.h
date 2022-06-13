@@ -21,6 +21,7 @@
 #include <myclipper.h>
 
 #include "app.h"
+#include "project.h"
 
 #include <QApplication>
 #include <QDateTime>
@@ -38,79 +39,83 @@ class FileInterface {
     friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file) {
         stream << static_cast<int>(file.type());
         file.write(stream);
-        stream << file.m_id;
-        stream << file.m_itemsType;
-        stream << file.m_lines;
-        stream << file.m_name;
-        stream << file.m_mergedPaths;
-        stream << file.m_groupedPaths;
-        stream << file.m_side;
-        stream << file.m_color;
-        stream << file.m_userColor;
-        stream << file.m_date;
+        stream << file.id_;
+        stream << file.itemsType_;
+        stream << file.lines_;
+        stream << file.name_;
+        stream << file.mergedPaths_;
+        stream << file.groupedPaths_;
+        stream << file.side_;
+        stream << file.color_;
+        stream << file.userColor_;
+        stream << file.date_;
+        stream << file.transform_; // NOTE file version
         stream << file.isVisible();
         return stream;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, FileInterface& file) {
         file.read(stream);
-        stream >> file.m_id;
-        stream >> file.m_itemsType;
-        stream >> file.m_lines;
-        stream >> file.m_name;
-        stream >> file.m_mergedPaths;
-        stream >> file.m_groupedPaths;
-        stream >> file.m_side;
-        stream >> file.m_color;
-        stream >> file.m_userColor;
-        stream >> file.m_date;
+        stream >> file.id_;
+        stream >> file.itemsType_;
+        stream >> file.lines_;
+        stream >> file.name_;
+        stream >> file.mergedPaths_;
+        stream >> file.groupedPaths_;
+        stream >> file.side_;
+        stream >> file.color_;
+        stream >> file.userColor_;
+        stream >> file.date_;
+        if (App::project()->ver() >= ProVer_6)
+            stream >> file.transform_;
         if (App::splashScreen())
             App::splashScreen()->showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         bool visible;
         stream >> visible;
         file.createGi();
+        file.setTransform(file.transform_);
         file.setVisible(visible);
         return stream;
     }
 
 public:
     FileInterface()
-        : m_itemGroups(1, new GiGroup) {
+        : itemGroups_(1, new GiGroup) {
     }
-    virtual ~FileInterface() { qDeleteAll(m_itemGroups); }
+    virtual ~FileInterface() { qDeleteAll(itemGroups_); }
 
-    QString shortName() const { return QFileInfo(m_name).fileName(); }
-    QString name() const { return m_name; }
-    void setFileName(const QString& fileName) { m_name = fileName; }
+    QString shortName() const { return QFileInfo(name_).fileName(); }
+    QString name() const { return name_; }
+    void setFileName(const QString& fileName) { name_ = fileName; }
 
     void addToScene() const {
-        for (const auto var : m_itemGroups) {
+        for (const auto var : itemGroups_) {
             if (var && var->size()) {
                 var->addToScene();
-                var->setZValue(-m_id);
+                var->setZValue(-id_);
             }
         }
     }
 
     GiGroup* itemGroup(int type = -1) const {
-        const int size(static_cast<int>(m_itemGroups.size()));
-        if (type == -1 && 0 <= m_itemsType && m_itemsType < size)
-            return m_itemGroups[m_itemsType];
+        const int size(static_cast<int>(itemGroups_.size()));
+        if (type == -1 && 0 <= itemsType_ && itemsType_ < size)
+            return itemGroups_[itemsType_];
         else if (0 <= type && type < size)
-            return m_itemGroups[type];
-        return m_itemGroups.front();
+            return itemGroups_[type];
+        return itemGroups_.front();
     }
 
-    const mvector<GiGroup*>& itemGroups() const { return m_itemGroups; }
+    const mvector<GiGroup*>& itemGroups() const { return itemGroups_; }
 
-    Paths mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
-    Pathss groupedPaths() const { return m_groupedPaths; }
+    Paths mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
+    Pathss groupedPaths() const { return groupedPaths_; }
 
-    mvector<QString>& lines() { return m_lines; }
-    const mvector<QString>& lines() const { return m_lines; }
+    mvector<QString>& lines() { return lines_; }
+    const mvector<QString>& lines() const { return lines_; }
     const QString lines2() const {
         QString rstr;
-        for (auto&& str : m_lines)
+        for (auto&& str : lines_)
             rstr.append(str).append('\n');
         return rstr;
     }
@@ -122,57 +127,65 @@ public:
     };
 
     virtual void initFrom(FileInterface* file) {
-        m_id = file->id();
-        m_node = file->node();
-        m_node->setId(&m_id);
+        id_ = file->id();
+        node_ = file->node();
+        node_->setId(&id_);
     }
 
     virtual FileType type() const = 0;
-    const LayerTypes& displayedTypes() const { return m_layerTypes; }
+    const LayerTypes& displayedTypes() const { return layerTypes_; }
 
     virtual void createGi() = 0;
     //    virtual void selected() = 0;
 
     virtual void setItemType([[maybe_unused]] int type) {};
-    virtual int itemsType() const { return m_itemsType; };
+    virtual int itemsType() const { return itemsType_; };
 
-    Side side() const { return m_side; }
-    void setSide(Side side) { m_side = side; }
+    Side side() const { return side_; }
+    void setSide(Side side) { side_ = side; }
 
-    virtual bool isVisible() const { return (m_visible = itemGroup()->isVisible()); }
-    virtual void setVisible(bool visible) { itemGroup()->setVisible(m_visible = visible); }
+    virtual bool isVisible() const { return (visible_ = itemGroup()->isVisible()); }
+    virtual void setVisible(bool visible) { itemGroup()->setVisible(visible_ = visible); }
 
-    const QColor& color() const { return m_color; }
-    virtual void setColor(const QColor& color) { m_color = color; }
-    virtual void setOffset([[maybe_unused]] QPointF offset) { }
+    const QColor& color() const { return color_; }
+    virtual void setColor(const QColor& color) { color_ = color; }
 
-    int id() const { return m_id; }
-    void setId(int id) { m_id = id; }
+    void setTransform([[maybe_unused]] const QTransform& transform) {
+        transform_ = transform;
+        for (auto* ig : itemGroups_)
+            for (auto* gi : *ig)
+                gi->setTransform(transform);
+    }
+    const QTransform& transform() const { return transform_; }
+
+    int id() const { return id_; }
+    void setId(int id) { id_ = id; }
 
     virtual FileTree::Node* node() = 0;
 
-    bool userColor() const { return m_userColor; }
-    void setUserColor(bool userColor) { m_userColor = userColor; }
+    bool userColor() const { return userColor_; }
+    void setUserColor(bool userColor) { userColor_ = userColor; }
 
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual Paths merge() const = 0;
 
-    LayerTypes m_layerTypes;
-    FileTree::Node* m_node = nullptr;
-    Pathss m_groupedPaths;
-    QColor m_color;
-    bool m_userColor {};
-    QDateTime m_date;
-    QString m_name;
-    Side m_side = Top;
-    int m_id = -1;
-    int m_itemsType = -1;
-    mutable Paths m_mergedPaths;
-    mutable bool m_visible = false;
-    mvector<GiGroup*> m_itemGroups;
-    mvector<QString> m_lines;
+    LayerTypes layerTypes_;
+    FileTree::Node* node_ = nullptr;
+    Pathss groupedPaths_;
+    QColor color_;
+    bool userColor_ {};
+    QDateTime date_;
+    QString name_;
+    Side side_ = Top;
+    int id_ = -1;
+    int itemsType_ = -1;
+    mutable Paths mergedPaths_;
+    mutable bool visible_ = false;
+    mvector<GiGroup*> itemGroups_;
+    mvector<QString> lines_;
+    QTransform transform_;
 };
 
 #define FileInterface_iid "ru.xray3d.XrSoft.GGEasy.FileInterface"

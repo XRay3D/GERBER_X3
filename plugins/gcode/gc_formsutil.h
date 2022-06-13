@@ -17,7 +17,7 @@
 
 namespace GCode {
 class File;
-class Creator;
+class file_;
 } // namespace GCode
 
 class GraphicsItem;
@@ -33,7 +33,7 @@ class FormsUtil : public QWidget, protected FormsUtilI {
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator* tps, QWidget* parent = nullptr);
+    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator *tps, QWidget* parent = nullptr);
     ~FormsUtil() override;
     virtual void editFile(GCode::File* file) = 0;
 

@@ -23,14 +23,15 @@
 #include "file_plugin.h"
 #include "shapepluginin.h"
 
-#include <QBoxLayout>
 #include <QFileDialog>
+#include <QFormLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPushButton>
 #include <QTimer>
 #include <doublespinbox.h>
 
@@ -200,41 +201,51 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         {
             auto selectedRows { selectionModel()->selectedRows().toVector() };
             menu.addSeparator();
-            menu.addAction(QIcon::fromTheme(""), tr("Set Offset"), [selectedRows, this]() mutable {
+            menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                 QDialog d(this);
-                QLabel lx("X", &d);
-                QLabel ly("Y", &d);
+                d.setWindowTitle(tr("Transform"));
+                QLabel la("A:", &d);
+                QLabel lx("X:", &d);
+                QLabel ly("Y:", &d);
+                DoubleSpinBox dsbxA(&d);
                 DoubleSpinBox dsbxX(&d);
                 DoubleSpinBox dsbxY(&d);
+                dsbxA.setRange(0, 360);
                 dsbxX.setRange(-1000, +1000);
                 dsbxY.setRange(-1000, +1000);
-                QVBoxLayout layout(&d);
-                layout.addWidget(&lx);
-                layout.addWidget(&dsbxX);
-                layout.addWidget(&ly);
-                layout.addWidget(&dsbxY);
-                d.resize({ 100, 0 });
+                QFormLayout layout(&d);
+                layout.addRow(&la, &dsbxA);
+                layout.addRow(&lx, &dsbxX);
+                layout.addRow(&ly, &dsbxY);
+                // QPushButton button(tr("Apply"), &d);
+                // layout.addRow(new QWidget(&d), &button);
+                d.resize({ 0, 0 });
 
                 auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+
                 if (file->itemGroup()->size()) {
-                    auto pos = file->itemGroup()->front()->pos();
-                    dsbxX.setValue(pos.x());
-                    dsbxY.setValue(pos.y());
+                    auto transform = file->transform();
+                    dsbxA.setValue(qRadiansToDegrees(asin(transform.m12())));
+                    transform = transform.rotateRadians(-transform.m12());
+                    dsbxX.setValue(transform.dx());
+                    dsbxY.setValue(transform.dy());
                 }
 
-                connect(&dsbxX, &QDoubleSpinBox::valueChanged, [&dsbxY, &selectedRows](double x) {
+                auto setTransform = [&](double) {
+                    QTransform transform;
+                    transform.translate(dsbxX.value(), dsbxY.value());
+                    transform.rotate(dsbxA.value());
                     for (auto&& index : selectedRows) {
                         auto file = App::project()->file(index.data(FileTree::Id).toInt());
-                        file->setOffset({ x, dsbxY.value() });
+                        file->setTransform(transform);
                     }
-                });
+                };
 
-                connect(&dsbxY, &QDoubleSpinBox::valueChanged, [&dsbxX, &selectedRows](double y) {
-                    for (auto&& index : selectedRows) {
-                        auto file = App::project()->file(index.data(FileTree::Id).toInt());
-                        file->setOffset({ dsbxX.value(), y });
-                    }
-                });
+                connect(&dsbxA, &QDoubleSpinBox::valueChanged, setTransform);
+                connect(&dsbxX, &QDoubleSpinBox::valueChanged, setTransform);
+                connect(&dsbxY, &QDoubleSpinBox::valueChanged, setTransform);
+                // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
+                // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
 
                 d.exec();
             });

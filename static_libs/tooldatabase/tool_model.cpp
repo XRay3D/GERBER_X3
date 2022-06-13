@@ -26,17 +26,18 @@ ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ToolItem())
     , mimeType(QStringLiteral("application/ToolItem")) {
-    importTools();
+    loadTools();
 }
 
 ToolModel::~ToolModel() {
-    exportTools();
+    saveTools();
     rootItem->setDeleteEnable(false);
     delete rootItem;
 }
 
 bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
-
+    qDebug(__FUNCTION__);
+    //    return false;
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
@@ -52,7 +53,8 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
 }
 
 bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
-
+    qDebug(__FUNCTION__);
+    //    return false;
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
@@ -62,26 +64,30 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
     return true;
 }
 
-// bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
-//{
-//     return false;
-//     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-//     ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
-//     ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
-//     if (!srcItem)
-//         srcItem = rootItem;
-//     if (!dstItem)
-//         dstItem = rootItem;
-//     for (int r = 0; r < count; ++r) {
-//         dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-//     }
-//     endMoveRows();
-//     return true;
-// }
+bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) {
+    qDebug(__FUNCTION__);
+    qDebug() << "sourceParent" << sourceParent;
+    qDebug() << "sourceRow" << sourceRow;
+    qDebug() << "count" << count;
+    qDebug() << "destinationParen" << destinationParent;
+    qDebug() << "destinationChild" << destinationChild;
 
-int ToolModel::columnCount(const QModelIndex& /*parent*/) const {
-    return 3;
+    return false;
+    //     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+    //     ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
+    //     ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
+    //     if (!srcItem)
+    //         srcItem = rootItem;
+    //     if (!dstItem)
+    //         dstItem = rootItem;
+    //     for (int r = 0; r < count; ++r) {
+    //         dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+    //     }
+    //     endMoveRows();
+    //     return true;
 }
+
+int ToolModel::columnCount(const QModelIndex& /*parent*/) const { return 3; }
 
 int ToolModel::rowCount(const QModelIndex& parent) const {
     ToolItem* parentItem;
@@ -217,7 +223,7 @@ Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction 
 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
-void ToolModel::exportTools() {
+void ToolModel::saveTools() {
     QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
     if (!file.open(QIODevice::WriteOnly)) {
         qDebug() << __FUNCTION__ << file.errorString();
@@ -271,7 +277,7 @@ void ToolModel::exportTools() {
     file.write(saveDoc.toJson());
 }
 
-void ToolModel::importTools() {
+void ToolModel::loadTools() {
     QJsonDocument loadDoc;
 
     QFile file(App::settingsPath() + QStringLiteral("/tools.json"));

@@ -22,7 +22,7 @@ class GCUtils {
     friend class ::Project;
 
 public:
-    GCUtils(const GCodeParams& gcp);
+    GCUtils(const GCodeParams& gcp_);
 
     inline double feedRate() { return m_feedRate; }
     inline double plungeRate() { return m_plungeRate; }

@@ -17,9 +17,9 @@
 namespace Excellon {
 
 class File : public FileInterface, public QList<Hole> {
-    Tools m_tools;
+    Tools tools_;
     friend class Parser;
-    Format m_format;
+    Format format_;
 
 public:
     explicit File();

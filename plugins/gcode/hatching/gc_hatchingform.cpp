@@ -129,21 +129,21 @@ void HatchingForm::createFile() {
         return;
     }
 
-    GCode::GCodeParams gcp;
-    gcp.setConvent(ui->rbConventional->isChecked());
-    gcp.setSide(side);
-    gcp.tools.push_back(tool);
+    GCode::GCodeParams gcp_;
+    gcp_.setConvent(ui->rbConventional->isChecked());
+    gcp_.setSide(side);
+    gcp_.tools.push_back(tool);
 
-    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    gcp.params[GCode::GCodeParams::HathStep] = ui->dsbxHathStep->value();
-    gcp.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
-    gcp.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
+    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.params[GCode::GCodeParams::HathStep] = ui->dsbxHathStep->value();
+    gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
+    gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
     //    if (ui->rbFast->isChecked()) {
-    //        gcp.params[GCode::GCodeParams::Fast] = true;
-    //        gcp.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    //        gcp_.params[GCode::GCodeParams::Fast] = true;
+    //        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    tpc_->setGcp(gcp);
+    tpc_->setGcp(gcp_);
     tpc_->addPaths(wPaths);
     tpc_->addRawPaths(wRawPaths);
     fileCount = 1;

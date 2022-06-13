@@ -117,10 +117,10 @@ class App {
 public:
     explicit App() {
         if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
-            qDebug("App create");
+            // qDebug("App create");
             app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
         } else if (sharedMemory.attach(QSharedMemory::ReadOnly)) {
-            qDebug("App attach");
+            // qDebug("App attach");
             app_ = *reinterpret_cast<App**>(sharedMemory.data());
         } else {
             qDebug() << app_ << sharedMemory.errorString();

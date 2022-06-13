@@ -26,12 +26,12 @@ inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0) {
 }
 
 void VoronoiCreator::create() {
-    const auto& tool = m_gcp.tools.front();
-    const auto depth = m_gcp.params[GCodeParams::Depth].toDouble();
-    const auto width = m_gcp.params[GCodeParams::Width].toDouble();
+    const auto& tool = gcp_.tools.front();
+    const auto depth = gcp_.params[GCodeParams::Depth].toDouble();
+    const auto width = gcp_.params[GCodeParams::Width].toDouble();
 
     groupedPaths(CopperPaths);
-    switch (m_gcp.params[GCodeParams::VorT].toInt()) {
+    switch (gcp_.params[GCodeParams::VorT].toInt()) {
     case 0:
         boostVoronoi();
         break;
@@ -41,92 +41,92 @@ void VoronoiCreator::create() {
     }
 
     if (width < tool.getDiameter(depth)) {
-        m_returnPs.resize(m_returnPs.size() - 1); // remove frame
-        m_gcp.gcType = Voronoi;
-        m_file = new File({ sortBE(m_returnPs) }, m_gcp);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        returnPs.resize(returnPs.size() - 1); // remove frame
+        gcp_.gcType = Voronoi;
+        file_ = new File({ sortBE(returnPs) }, gcp_);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
     } else {
-        Paths copy { m_returnPs };
+        Paths copy { returnPs };
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
-        m_gcp.gcType = Voronoi;
+        gcp_.gcType = Voronoi;
         { // создание пермычек.
             Clipper clipper;
-            clipper.AddPaths(m_workingRawPs, ptClip, true);
+            clipper.AddPaths(workingRawPs, ptClip, true);
             clipper.AddPaths(copy, ptSubject, false);
             clipper.Execute(ctDifference, copy, pftNonZero);
             sortBE(copy);
             for (auto&& p : copy)
-                m_returnPss.push_back({ p });
+                returnPss.push_back({ p });
         }
-        dbgPaths(m_returnPs, "создание пермычек");
+        dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.
             ClipperOffset offset(uScale);
-            offset.AddPaths(m_workingRawPs, jtRound, etClosedPolygon);
+            offset.AddPaths(workingRawPs, jtRound, etClosedPolygon);
             offset.AddPaths(copy, jtRound, etOpenRound);
-            offset.Execute(m_workingRawPs, m_dOffset + 10);
+            offset.Execute(workingRawPs, dOffset + 10);
         }
         // erase empty paths
-        auto begin = m_returnPss.begin();
-        while (begin != m_returnPss.end()) {
+        auto begin = returnPss.begin();
+        while (begin != returnPss.end()) {
             if (begin->empty())
-                m_returnPss.erase(begin);
+                returnPss.erase(begin);
             else
                 ++begin;
         }
 
-        m_file = new File(m_returnPss, m_gcp, m_workingRawPs);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        file_ = new File(returnPss, gcp_, workingRawPs);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
     }
 }
 
 void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width) {
     msg = tr("Create Offset");
-    m_toolDiameter = tool.getDiameter(depth) * uScale;
-    m_dOffset = m_toolDiameter / 2;
-    m_stepOver = tool.stepover() * uScale;
-    const Path frame(m_returnPs.takeLast());
+    toolDiameter = tool.getDiameter(depth) * uScale;
+    dOffset = toolDiameter / 2;
+    stepOver = tool.stepover() * uScale;
+    const Path frame(returnPs.takeLast());
     { // create offset
         ClipperOffset offset;
-        offset.AddPaths(m_returnPs, jtRound /*jtMiter*/, etOpenRound);
-        offset.Execute(m_returnPs, width * uScale * 0.5);
+        offset.AddPaths(returnPs, jtRound /*jtMiter*/, etOpenRound);
+        offset.Execute(returnPs, width * uScale * 0.5);
     }
     { // fit offset to copper
         Clipper clipper;
-        clipper.AddPaths(m_returnPs, ptSubject, true);
-        for (const Paths& paths : m_groupedPss)
+        clipper.AddPaths(returnPs, ptSubject, true);
+        for (const Paths& paths : groupedPss)
             clipper.AddPaths(paths, ptClip, true);
-        clipper.Execute(ctDifference, m_returnPs, pftPositive, pftNegative);
+        clipper.Execute(ctDifference, returnPs, pftPositive, pftNegative);
     }
     if (0) { // cut to copper rect
         Clipper clipper;
-        clipper.AddPaths(m_returnPs, ptSubject, true);
+        clipper.AddPaths(returnPs, ptSubject, true);
         clipper.AddPath(frame, ptClip, true);
-        clipper.Execute(ctIntersection, m_returnPs, pftNonZero);
-        CleanPolygons(m_returnPs, 0.001 * uScale);
+        clipper.Execute(ctIntersection, returnPs, pftNonZero);
+        CleanPolygons(returnPs, 0.001 * uScale);
     }
     { // create pocket
         ClipperOffset offset(uScale);
-        offset.AddPaths(m_returnPs, jtRound, etClosedPolygon);
+        offset.AddPaths(returnPs, jtRound, etClosedPolygon);
         Paths tmpPaths1;
-        offset.Execute(tmpPaths1, -m_dOffset);
-        m_workingRawPs = tmpPaths1;
+        offset.Execute(tmpPaths1, -dOffset);
+        workingRawPs = tmpPaths1;
         Paths tmpPaths;
         do {
             tmpPaths.append(tmpPaths1);
             offset.Clear();
             offset.AddPaths(tmpPaths1, jtMiter, etClosedPolygon);
-            offset.Execute(tmpPaths1, -m_stepOver);
+            offset.Execute(tmpPaths1, -stepOver);
         } while (tmpPaths1.size());
-        m_returnPs = tmpPaths;
+        returnPs = tmpPaths;
     }
-    if (m_returnPs.empty()) {
+    if (returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
-    stacking(m_returnPs);
+    stacking(returnPs);
     // m_returnPss.push_back({frame});
 }
 

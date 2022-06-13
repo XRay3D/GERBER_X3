@@ -398,11 +398,11 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.setValue("depth", depth);
             settings.endGroup();
 
-            GCode::GCodeParams gcp(tool, depth, GCode::Drill);
+            GCode::GCodeParams gcp_(tool, depth, GCode::Drill);
 
-            gcp.params[GCode::GCodeParams::NotTile];
+            gcp_.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File(Pathss { { dst } }, gcp);
+            GCode::File* gcode = new GCode::File(Pathss { { dst } }, gcp_);
             gcode->setFileName(tr("Pin_") + tool.nameEnc());
             App::project()->addFile(gcode);
         }
