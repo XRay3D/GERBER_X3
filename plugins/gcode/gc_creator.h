@@ -110,7 +110,7 @@ public:
     void proceed();
 
     GCodeParams getGcp() const;
-    void setGcp(const GCodeParams& gcp);
+    void setGcp(const GCodeParams& gcp_);
 
     //    static void //PROG .3setProgMax(int progressMax);
     //    static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
@@ -145,18 +145,18 @@ protected:
     //    static inline int //PROG  m_progressMax;
     //    static inline int //PROG m_progressVal;
 
-    File* m_file = nullptr;
-    Paths m_workingPs;
-    Paths m_workingRawPs;
-    Paths m_returnPs;
-    Pathss m_returnPss;
-    Pathss m_supportPss;
-    Pathss m_groupedPss;
+    File* file_ = nullptr;
+    Paths workingPs;
+    Paths workingRawPs;
+    Paths returnPs;
+    Pathss returnPss;
+    Pathss supportPss;
+    Pathss groupedPss;
 
-    double m_toolDiameter = 0.0;
-    double m_dOffset = 0.0;
-    cInt m_stepOver = 0;
-    GCodeParams m_gcp;
+    double toolDiameter {};
+    double dOffset {};
+    cInt stepOver {};
+    GCodeParams gcp_;
 
     void isContinueCalc();
 

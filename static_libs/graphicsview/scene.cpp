@@ -13,10 +13,10 @@
  *******************************************************************************/
 #include "scene.h"
 
+#include "gi.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
-#include "gi.h"
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -29,6 +29,7 @@
 #include <QPdfWriter>
 #include <QTime>
 #include <QtMath>
+#include <utils.h>
 
 // QTime m_time;
 // int m_time2;
@@ -48,12 +49,12 @@ Scene::~Scene() {
     App::setScene(nullptr);
 }
 
-void Scene::RenderPdf() {
+void Scene::renderPdf() {
     QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), "File", tr("File(*.pdf)"));
     if (curFile.isEmpty())
         return;
 
-    m_drawPdf = true;
+    ScopedTrue sTrue(drawPdf_);
 
     QRectF rect;
 
@@ -80,14 +81,11 @@ void Scene::RenderPdf() {
     render(&painter,
         QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
         rect, Qt::IgnoreAspectRatio);
-
-    m_drawPdf = false;
 }
 
 QRectF Scene::itemsBoundingRect() {
-    m_drawPdf = true;
+    ScopedTrue sTrue(drawPdf_);
     QRectF rect(QGraphicsScene::itemsBoundingRect());
-    m_drawPdf = false;
     return rect;
 }
 
@@ -97,11 +95,14 @@ QRectF Scene::getSelectedBoundingRect() {
     if (selectedItems.isEmpty())
         return {};
 
-    m_boundingRect = true;
-    QRectF rect(selectedItems.takeFirst()->boundingRect());
-    for (auto gi : selectedItems)
-        rect = rect.united(gi->boundingRect());
-    m_boundingRect = true;
+    QRectF rect;
+
+    {
+        ScopedTrue sTrue(boundingRect_);
+        rect = selectedItems.front()->boundingRect();
+        for (auto gi : selectedItems)
+            rect = rect.united(gi->boundingRect());
+    }
 
     if (!rect.isEmpty())
         App::project()->setWorckRect(rect);
@@ -110,22 +111,22 @@ QRectF Scene::getSelectedBoundingRect() {
 }
 
 void Scene::setCross1(const QPointF& cross) {
-    m_cross1 = cross;
+    cross1 = cross;
     update();
 }
 
-void Scene::setCross2(const QPointF& cross2) {
-    m_cross2 = cross2;
+void Scene::setCross2(const QPointF& cross) {
+    cross2 = cross;
 }
 
 void Scene::setDrawRuller(bool drawRuller) {
-    m_drawRuller = drawRuller;
+    drawRuller = drawRuller;
     update();
 }
 
 void Scene::drawRuller(QPainter* painter) {
-    const QPointF pt1(m_cross2);
-    const QPointF pt2(m_cross1);
+    const QPointF pt1(cross2);
+    const QPointF pt2(cross1);
     QLineF line(pt2, pt1);
     const QRectF rect(
         QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
@@ -139,8 +140,8 @@ void Scene::drawRuller(QPainter* painter) {
                                                           "  ∆Y: %2 in\n"
                                                           "  ∆/: %3 in\n"
                                                           "  Area: %4 in²\n"
-                                                          "  Angle: %5°"
-                                                        : "  ∆X: %1 mm\n"
+                                                          "  Angle: %5°" :
+                                                          "  ∆X: %1 mm\n"
                                                           "  ∆Y: %2 mm\n"
                                                           "  ∆/: %3 mm\n"
                                                           "  Area: %4 mm²\n"
@@ -192,9 +193,9 @@ void Scene::drawRuller(QPainter* painter) {
     // painter->setFont(font);
     // painter->drawText(textRect, Qt::AlignLeft, text);
     QPointF pt(pt2);
-    if ((pt.x() + textRect.width() * scaleFactor) > m_rect.right())
+    if ((pt.x() + textRect.width() * scaleFactor) > rect.right())
         pt.rx() -= textRect.width() * scaleFactor;
-    if ((pt.y() - textRect.height() * scaleFactor) < m_rect.top())
+    if ((pt.y() - textRect.height() * scaleFactor) < rect.top())
         pt.ry() += textRect.height() * scaleFactor;
     painter->translate(pt);
     painter->scale(scaleFactor, -scaleFactor);
@@ -213,14 +214,14 @@ void Scene::drawRuller(QPainter* painter) {
 }
 
 void Scene::drawBackground(QPainter* painter, const QRectF& rect) {
-    if (m_drawPdf)
+    if (drawPdf_)
         return;
 
     painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
 }
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
-    if (m_drawPdf)
+    if (drawPdf_)
         return;
 
     ++fpsCtr;
@@ -235,19 +236,21 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
             in = App::settings().inch();
             m_scale = views().first()->matrix().m11();
 #else
-        if (!qFuzzyCompare(m_scale, views().first()->transform().m11()) || m_rect != rect || in != App::settings().inch()) {
+        if (!qFuzzyCompare(scale, views().first()->transform().m11()) || lastRect != rect || in != App::settings().inch()) {
+
             in = App::settings().inch();
-            m_scale = views().first()->transform().m11();
+            scale = views().first()->transform().m11();
 #endif
-            if (qFuzzyIsNull(m_scale))
+            if (qFuzzyIsNull(scale))
                 return;
 
-            m_rect = rect;
+            lastRect = rect;
+
             hGrid.clear();
             vGrid.clear();
 
             // Grid Step 0.1
-            double gridStep = App::settings().gridStep(m_scale);
+            double gridStep = App::settings().gridStep(scale);
             for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
                       right = static_cast<long>(rect.right() * upScale),
                       step = static_cast<long>(gridStep * upScale), nlp = 0;
@@ -300,7 +303,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
         painter->setRenderHint(QPainter::Antialiasing, false);
         QElapsedTimer t;
         t.start();
-        const double k2 = 0.5 / m_scale;
+        const double k2 = 0.5 / scale;
         // painter->setCompositionMode(QPainter::CompositionMode_Lighten);
 
         for (int i = 0; i < 3; ++i) {
@@ -322,7 +325,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
     }
 
     if (1) { // screen mouse cross
-        QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
+        QList<QGraphicsItem*> items = QGraphicsScene::items(cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
         bool fl = false;
         for (QGraphicsItem* item : items) {
             if (item && static_cast<GiType>(item->type()) != GiType::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
@@ -338,11 +341,11 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
             painter->setPen(QPen(c, 0.0));
         }
 
-        painter->drawLine(QLineF(m_cross1.x(), rect.top(), m_cross1.x(), rect.bottom()));
-        painter->drawLine(QLineF(rect.left(), m_cross1.y(), rect.right(), m_cross1.y()));
+        painter->drawLine(QLineF(cross1.x(), rect.top(), cross1.x(), rect.bottom()));
+        painter->drawLine(QLineF(rect.left(), cross1.y(), rect.right(), cross1.y()));
     }
 
-    if (m_drawRuller)
+    if (drawRuller_)
         drawRuller(painter);
 
     //    if (0) {

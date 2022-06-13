@@ -59,18 +59,18 @@ HatchingCreator::HatchingCreator() {
 
 void HatchingCreator::create() {
     createRaster(
-        m_gcp.tools.front(),
-        m_gcp.params[GCodeParams::Depth].toDouble(),
-        m_gcp.params[GCodeParams::UseAngle].toDouble(),
-        m_gcp.params[GCodeParams::HathStep].toDouble(),
-        m_gcp.params[GCodeParams::Pass].toInt());
+        gcp_.tools.front(),
+        gcp_.params[GCodeParams::Depth].toDouble(),
+        gcp_.params[GCodeParams::UseAngle].toDouble(),
+        gcp_.params[GCodeParams::HathStep].toDouble(),
+        gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
     QElapsedTimer t;
     t.start();
 
-    switch (m_gcp.side()) {
+    switch (gcp_.side()) {
     case Outer:
         groupedPaths(CutoffPaths, uScale /*static_cast<cInt>(m_toolDiameter + 5)*/);
         break;
@@ -82,9 +82,9 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         return;
     }
 
-    m_toolDiameter = tool.getDiameter(depth) * uScale;
-    m_dOffset = m_toolDiameter / 2;
-    m_stepOver = tool.stepover() * uScale;
+    toolDiameter = tool.getDiameter(depth) * uScale;
+    dOffset = toolDiameter / 2;
+    stepOver = tool.stepover() * uScale;
 
     Paths profilePaths;
 
@@ -220,11 +220,11 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         return merged;
     };
 
-    for (Paths src : m_groupedPss) {
+    for (Paths src : groupedPss) {
         {
             ClipperOffset offset(uScale);
             offset.AddPaths(src, jtRound, etClosedPolygon);
-            offset.Execute(src, -m_dOffset);
+            offset.Execute(src, -dOffset);
             for (auto& path : src)
                 path.push_back(path.front());
             if (prPass)
@@ -244,7 +244,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                     auto merged { merge(scanLines, frames) };
                     for (auto& path : merged)
                         RotatePath(path, -angle);
-                    m_returnPs.append(merged);
+                    returnPs.append(merged);
                 }
             }
             {
@@ -257,49 +257,49 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                     auto merged { merge(scanLines, frames) };
                     for (auto& path : merged)
                         RotatePath(path, -(angle + 90));
-                    m_returnPs.append(merged);
+                    returnPs.append(merged);
                 }
             }
         }
     }
 
-    mergeSegments(m_returnPs);
-    sortB(m_returnPs);
+    mergeSegments(returnPs);
+    sortB(returnPs);
 
     if (!profilePaths.empty() && prPass) {
         sortB(profilePaths);
-        if (m_gcp.convent())
+        if (gcp_.convent())
             ReversePaths(profilePaths);
         for (Path& path : profilePaths)
             path.push_back(path.front());
     }
 
-    m_returnPss.clear();
+    returnPss.clear();
     switch (prPass) {
     case NoProfilePass:
-        m_returnPss.push_back(m_returnPs);
+        returnPss.push_back(returnPs);
         break;
     case First:
         if (!profilePaths.empty())
-            m_returnPss.push_back(profilePaths);
-        m_returnPss.push_back(m_returnPs);
+            returnPss.push_back(profilePaths);
+        returnPss.push_back(returnPs);
         break;
     case Last:
-        m_returnPss.push_back(m_returnPs);
+        returnPss.push_back(returnPs);
         if (!profilePaths.empty())
-            m_returnPss.push_back(profilePaths);
+            returnPss.push_back(profilePaths);
         break;
     default:
         break;
     }
 
-    if (m_returnPss.empty()) {
+    if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        m_gcp.gcType = Hatching;
-        m_file = new File(m_returnPss, m_gcp);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        gcp_.gcType = Hatching;
+        file_ = new File(returnPss, gcp_);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
     }
 }
 

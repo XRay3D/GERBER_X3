@@ -150,10 +150,10 @@ void PocketOffsetForm::createFile() {
         return;
     }
 
-    GCode::GCodeParams gcp;
+    GCode::GCodeParams gcp_;
     for (const Tool& t : tool) {
-        gcp.tools.push_back(t);
-        if (gcp.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
+        gcp_.tools.push_back(t);
+        if (gcp_.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 
@@ -164,21 +164,21 @@ void PocketOffsetForm::createFile() {
         auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
             return qFuzzyCompare(t1.getDiameter(ui->dsbxDepth->value()), t2.getDiameter(ui->dsbxDepth->value()));
         };
-        std::sort(gcp.tools.begin(), gcp.tools.end(), cmp);
-        auto last = std::unique(gcp.tools.begin(), gcp.tools.end(), cmp2);
-        gcp.tools.erase(last, gcp.tools.end());
+        std::sort(gcp_.tools.begin(), gcp_.tools.end(), cmp);
+        auto last = std::unique(gcp_.tools.begin(), gcp_.tools.end(), cmp2);
+        gcp_.tools.erase(last, gcp_.tools.end());
     }
 
-    gcp.setConvent(ui->rbConventional->isChecked());
-    gcp.setSide(side);
-    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.setConvent(ui->rbConventional->isChecked());
+    gcp_.setSide(side);
+    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
-        gcp.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
+        gcp_.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
 
-    tpc_->setGcp(gcp);
+    tpc_->setGcp(gcp_);
     tpc_->addPaths(wPaths);
     tpc_->addRawPaths(wRawPaths);
-    fileCount = static_cast<int>(gcp.tools.size());
+    fileCount = static_cast<int>(gcp_.tools.size());
     createToolpath();
 }
 

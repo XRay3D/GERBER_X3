@@ -132,8 +132,10 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
-        if (0)
+        if (1) {
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
+            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+        }
     }
 }
 
@@ -251,9 +253,9 @@ void MainWindow::createActionsFile() {
         fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
     }
     { // Export PDF
-        auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
+        auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
         action->setStatusTip(tr("Export to PDF file"));
-        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::RenderPdf);
+        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
     }
 
     fileMenu->addSeparator();
@@ -421,12 +423,12 @@ void MainWindow::createActionsToolPath() {
     connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 
-    for (auto& [type, ptr] : App::gCodePlugins()) {
-        auto action = ptr->addAction(menu, toolpathToolBar);
+    for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
+        auto action = gCodePlugin->addAction(menu, toolpathToolBar);
         action->setCheckable(true);
         actionGroup.addAction(action);
         toolpathActions.emplace(type, action);
-        connect(ptr, &GCodePlugin::setDockWidget, this, &MainWindow::setDockWidget);
+        connect(gCodePlugin, &GCodePlugin::setDockWidget, this, &MainWindow::setDockWidget);
     }
 }
 
@@ -661,12 +663,12 @@ void MainWindow::selectAll() {
     if /*  */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
             if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::PrThermal)
+                type == GiType::Preview)
                 item->setSelected(true);
     } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
             if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::PrApetrure || type == GiType::PrDrill || type == GiType::PrSlot)
+                type == GiType::Preview)
                 item->setSelected(true);
     } else {
         for (QGraphicsItem* item : App::scene()->items())
@@ -685,7 +687,7 @@ void MainWindow::printDialog() {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
-        App::scene()->m_drawPdf = true;
+        ScopedTrue sTrue(App::scene()->drawPdf_);
         QRectF rect;
         for (QGraphicsItem* item : App::scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
@@ -712,7 +714,6 @@ void MainWindow::printDialog() {
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
-        App::scene()->m_drawPdf = false;
     });
     preview.exec();
 }
@@ -1057,9 +1058,12 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
         return;
 
     m_dockWidget->pop();
-    m_dockWidget->setWindowTitle(dwContent->windowTitle());
-    m_dockWidget->push(dwContent);
-    m_dockWidget->show();
+
+    if (dwContent) {
+        m_dockWidget->setWindowTitle(dwContent->windowTitle());
+        m_dockWidget->push(dwContent);
+        m_dockWidget->show();
+    }
 }
 
 void MainWindow::open() {

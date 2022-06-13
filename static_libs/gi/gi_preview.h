@@ -11,10 +11,9 @@
 #pragma once
 
 #include "gi.h"
+#include "qparallelanimationgroup.h"
 
-struct Row;
-
-class GiAbstractDrillPr : public QGraphicsObject {
+class GiAbstractPreview : public QGraphicsObject {
     friend class ThermalNode;
 
     Q_OBJECT
@@ -22,19 +21,21 @@ class GiAbstractDrillPr : public QGraphicsObject {
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(QColor pathColor READ pathColor WRITE setPathColor NOTIFY colorChanged FINAL)
 
-    // clang-format off
     QColor bodyColor() { return m_bodyColor; }
-    void setBodyColor(const QColor& c) { m_bodyColor = c; colorChanged();  }
+    void setBodyColor(const QColor& c) { m_bodyColor = c, colorChanged(); }
     QColor pathColor() { return m_pathColor; }
-    void setPathColor(const QColor& c) { m_pathColor = c; colorChanged(); }
-    // clang-format on
+    void setPathColor(const QColor& c) { m_pathColor = c, colorChanged(); }
+
+    QParallelAnimationGroup propAnimGr;
+    QPropertyAnimation propAnimBr;
+    QPropertyAnimation propAnimPn;
 
 signals:
     void colorChanged();
 
 public:
-    GiAbstractDrillPr(int toolId);
-    ~GiAbstractDrillPr() override = default;
+    GiAbstractPreview();
+    ~GiAbstractPreview() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -57,9 +58,8 @@ protected:
     QPainterPath sourcePath_;
     QPainterPath toolPath_;
 
-    int toolId_ { -1 };
-    double sourceDiameter_;
-    GiType type_;
+    bool used {};
+    double sourceDiameter_ {};
 
     QColor m_bodyColor;
     QColor m_pathColor;
@@ -77,15 +77,15 @@ protected:
 
     static constexpr int dark = 180;
     static constexpr int light = 255;
-    inline static constexpr QRgb colors[] {
-        qRgba(128, 128, 128, dark),  //  Default         gray dark
-        qRgba(255, 255, 255, light), // DefaultHovered  gray light
-        qRgba(0, 255, 0, dark),      //      Selected        green dark
-        qRgba(0, 255, 0, light),     //     SelectedHovered green light
-        qRgba(255, 0, 0, dark),      //      Used            red dark
-        qRgba(255, 0, 0, light),     //     UsedHovered     red light
-        qRgba(255, 255, 255, 255),   //   UnUsed          transparent
-        qRgba(255, 255, 255, dark),  //  Tool            white
+    inline static const QColor colors[] {
+        QColor(128, 128, 128, dark),  // 0 Default         gray dark
+        QColor(255, 255, 255, light), // 1 DefaultHovered  gray light
+        QColor(0, 255, 0, dark),      // 2 Selected        green dark
+        QColor(0, 255, 0, light),     // 3 SelectedHovered green light
+        QColor(255, 0, 0, dark),      // 4 Used            red dark
+        QColor(255, 0, 0, light),     // 5 UsedHovered     red light
+        QColor(255, 255, 255, 255),   // 6 UnUsed          transparent
+        QColor(255, 255, 255, dark),  // 7 Tool            white
     };
 
     enum ColorState {
@@ -96,6 +96,18 @@ protected:
         Tool = 8,
     };
     int colorState = Default;
+
+    //    std::unordered_map<int, QColor> colors {
+    //        { Default, QColor(128, 128, 128, dark) },            // 0 Default         gray dark
+    //        { Default | Hovered, QColor(255, 255, 255, light) }, // 1 DefaultHovered  gray light
+    //        { Selected, QColor(0, 255, 0, dark) },               // 2 Selected        green dark
+    //        { Selected | Hovered, QColor(0, 255, 0, light) },    // 3 SelectedHovered green light
+    //        { Used, QColor(255, 0, 0, dark) },                   // 4 Used            red dark
+    //        { Used | Hovered, QColor(255, 0, 0, light) },        // 5 UsedHovered     red light
+    //        { Default, QColor(255, 255, 255, 255) },             // 6 UnUsed          transparent
+    //        { Default | Hovered, QColor(255, 255, 255, dark) },  // 7 Tool            white
+    //    };
+    //};
 
     // QGraphicsItem interface
 protected:

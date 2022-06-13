@@ -46,3 +46,21 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+add_library(gc_profile STATIC
+    gc_profile.cpp
+    gc_profile.h
+)
+
+target_link_libraries(gc_profile PRIVATE
+    clipper
+    gcode
+    common
+    filetree
+#    gi
+#    graphicsview
+#    tooldatabase
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)

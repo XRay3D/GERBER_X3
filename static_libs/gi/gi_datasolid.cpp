@@ -27,28 +27,28 @@ GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
     for (Path path : qAsConst(m_paths)) {
         if (path.size())
             path.push_back(path.front());
-        m_shape.addPolygon(path);
+        shape_.addPolygon(path);
     }
-    fillPolygon = m_shape.toFillPolygon();
+    fillPolygon = shape_.toFillPolygon();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
 GiDataSolid::~GiDataSolid() { }
 
-QRectF GiDataSolid::boundingRect() const { return m_shape.boundingRect(); }
+// QRectF GiDataSolid::boundingRect() const { return m_shape.boundingRect(); }
 
-QPainterPath GiDataSolid::shape() const { return m_shape; }
+QPainterPath GiDataSolid::shape() const { return shape_; }
 
 void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     if (App::scene()->drawPdf()) {
         painter->setBrush(Qt::black);
         painter->setPen(Qt::NoPen);
-        painter->drawPath(m_shape);
+        painter->drawPath(shape_);
         return;
     }
 
-    painter->setBrush(m_bodyColor);
+    painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
     painter->drawPolygon(fillPolygon);
 
@@ -56,19 +56,19 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
     //                || option->state & QStyle::State_MouseOver
     //            ? 2.0 * scaleFactor()
     //            : 0);
-    m_pen.setColor(m_pathColor);
-    painter->strokePath(m_shape, m_pen);
+    pen_.setColor(pathColor_);
+    painter->strokePath(shape_, pen_);
 }
 
 int GiDataSolid::type() const { return static_cast<int>(GiType::DataSolid); }
 
 void GiDataSolid::redraw() {
-    m_shape = QPainterPath();
+    shape_ = QPainterPath();
     for (Path path : qAsConst(m_paths)) {
         path.push_back(path.front());
-        m_shape.addPolygon(path);
+        shape_.addPolygon(path);
     }
-    fillPolygon = m_shape.toFillPolygon();
+    fillPolygon = shape_.toFillPolygon();
     setPos({ 1, 1 }); // костыли
     setPos({ 0, 0 });
     // update();
@@ -83,44 +83,44 @@ void GiDataSolid::changeColor() {
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
 
-    animation.setStartValue(m_bodyColor);
+    animation.setStartValue(bodyColor_);
 
-    m_bodyColor = m_colorPtr ? *m_colorPtr : m_color;
+    bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
 
     switch (colorState) {
     case Default:
         break;
     case Hovered:
-        m_bodyColor.setAlpha(255);
+        bodyColor_.setAlpha(255);
         break;
     case Selected:
-        m_bodyColor.setAlpha(255);
+        bodyColor_.setAlpha(255);
         break;
     case Hovered | Selected:
-        m_bodyColor.setAlpha(255);
-        m_bodyColor = m_bodyColor.lighter(150);
+        bodyColor_.setAlpha(255);
+        bodyColor_ = bodyColor_.lighter(150);
         break;
     }
 
-    m_pathColor = m_colorPtr ? *m_colorPtr : m_color;
-    m_pathColor.setAlpha(100);
+    pathColor_ = colorPtr_ ? *colorPtr_ : color_;
+    pathColor_.setAlpha(100);
     switch (colorState) {
     case Default:
         //        m_pathColor.setAlpha(100);
         break;
     case Hovered:
-        m_pathColor.setAlpha(255);
+        pathColor_.setAlpha(255);
         //        m_pathColor = m_pathColor.darker(125);
         break;
     case Selected:
-        m_pathColor.setAlpha(150);
+        pathColor_.setAlpha(150);
         break;
     case Hovered | Selected:
-        m_pathColor.setAlpha(255);
-        m_pathColor = m_pathColor.lighter(150);
+        pathColor_.setAlpha(255);
+        pathColor_ = pathColor_.lighter(150);
         break;
     }
 
-    animation.setEndValue(m_bodyColor);
+    animation.setEndValue(bodyColor_);
     animation.start();
 }

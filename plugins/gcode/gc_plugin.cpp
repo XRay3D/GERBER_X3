@@ -19,6 +19,9 @@ QAction* GCodePlugin::addAction(QMenu* menu, QToolBar* toolbar) {
         qDebug() << sender() << action->isChecked() << this << checked;
         if (!fl && checked && canToShow())
             emit setDockWidget(createForm());
+        else
+            emit setDockWidget(nullptr);
+
         fl = checked;
     });
     action->setShortcut(keySequence());

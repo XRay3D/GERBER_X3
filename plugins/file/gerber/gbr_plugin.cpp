@@ -18,7 +18,6 @@
 #include "gbr_node.h"
 
 #include "doublespinbox.h"
-#include "gi_drillpreview.h"
 #include "ft_view.h"
 #include "settings.h"
 #include "thermal/gc_thvars.h"
@@ -54,7 +53,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 
 QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath;
-    for (QPolygonF polygon : aperture->draw(State()))
+    for (const auto &polygon : aperture->draw(State()))
         painterPath.addPolygon(polygon);
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
     const QRectF rect = painterPath.boundingRect();

@@ -24,13 +24,9 @@
 //#include "section/dxf_classes.h"
 //#include "section/dxf_objects.h"
 //#include "section/dxf_thumbnailimage.h"
-
-#include "tables/dxf_layer.h"
-
 #include "ft_view.h"
-
+#include "tables/dxf_layer.h"
 #include <QtWidgets>
-#include <gi_drillpreview.h>
 
 namespace Dxf {
 
@@ -223,30 +219,30 @@ void Plugin::updateFileModel(FileInterface* file) {
     fm->endInsertRows_();
 }
 
-//class DrillPrGI final : public AbstractDrillPrGI {
-//    const GraphicObject& go;
-//    const Circle* circle;
-//    const LwPolyline* lwpline;
+// class DrillPrGI final : public AbstractDrillPrGI {
+//     const GraphicObject& go;
+//     const Circle* circle;
+//     const LwPolyline* lwpline;
 
-//public:
-//    explicit DrillPrGI(const GraphicObject& go, Row& row)
-//        : AbstractDrillPrGI(row)
-//        , go(go)
-//        , circle(dynamic_cast<const Circle*>(go.entity()))
-//        , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
-//        sourceDiameter_ = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
+// public:
+//     explicit DrillPrGI(const GraphicObject& go, Row& row)
+//         : AbstractDrillPrGI(row)
+//         , go(go)
+//         , circle(dynamic_cast<const Circle*>(go.entity()))
+//         , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
+//         sourceDiameter_ = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
 
 //        m_sourcePath = drawDrill();
 //        type_ = GiType::PrApetrure;
 //    }
 
-//private:
-//    QPainterPath drawDrill() const {
-//        QPainterPath painterPath;
-//        painterPath.addEllipse(circle ? circle->centerPoint : go.pos(),
-//            sourceDiameter_ * 0.5, sourceDiameter_ * 0.5);
-//        return painterPath;
-//    }
+// private:
+//     QPainterPath drawDrill() const {
+//         QPainterPath painterPath;
+//         painterPath.addEllipse(circle ? circle->centerPoint : go.pos(),
+//             sourceDiameter_ * 0.5, sourceDiameter_ * 0.5);
+//         return painterPath;
+//     }
 
 //    Paths offset(const Path& path, double offset) const {
 //        ClipperOffset cpOffset;
@@ -259,7 +255,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //    }
 
 //    // AbstractDrillPrGI interface
-//public:
+// public:
 //    void updateTool() override {
 //        toolId_ > -1 ? colorState |= Tool : colorState &= ~Tool;
 //        toolPath_ = {};

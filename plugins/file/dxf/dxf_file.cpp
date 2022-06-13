@@ -40,8 +40,8 @@ namespace Dxf {
 
 File::File()
     : FileInterface() {
-    m_itemsType = int(ItemsType::Normal);
-    m_layerTypes = {
+    itemsType_ = int(ItemsType::Normal);
+    layerTypes_ = {
         { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
         { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
         { int(ItemsType::Both), DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.") },
@@ -56,15 +56,15 @@ File::~File() {
 }
 
 void File::setItemType(int type) {
-    m_itemsType = type;
+    itemsType_ = type;
     for (const auto& [name, layer] : m_layers)
-        layer->setItemsType(ItemsType(m_itemsType));
+        layer->setItemsType(ItemsType(itemsType_));
 }
 
-int File::itemsType() const { return m_itemsType; }
+int File::itemsType() const { return itemsType_; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if (m_groupedPaths.empty()) {
+    if (groupedPaths_.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -80,9 +80,9 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftNonZero);
-        grouping(polyTree.GetFirst(), &m_groupedPaths, group);
+        grouping(polyTree.GetFirst(), &groupedPaths_, group);
     }
-    return m_groupedPaths;
+    return groupedPaths_;
 }
 
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
@@ -122,11 +122,11 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
 
 void File::initFrom(FileInterface* file) {
     FileInterface::initFrom(file);
-    static_cast<Node*>(m_node)->file = this;
+    static_cast<Node*>(node_)->file = this;
 }
 
 FileTree::Node* File::node() {
-    return m_node ? m_node : m_node = new Node(this, &m_id);
+    return node_ ? node_ : node_ = new Node(this, &id_);
 }
 
 Layer* File::layer(const QString& name) {
@@ -146,17 +146,17 @@ void File::createGi() {
         for (auto& go : layer->m_graphicObjects)
             go.m_file = this;
 
-    GiGroup* igNorm = m_itemGroups.back();
+    GiGroup* igNorm = itemGroups_.back();
     GiGroup* igPath = new GiGroup;
-    m_itemGroups.push_back(igPath);
+    itemGroups_.push_back(igPath);
 
     int i = 0;
 
     for (auto& [name, layer] : m_layers) {
         if (layer->m_graphicObjects.size()) {
             if (i++) {
-                m_itemGroups.push_back(igNorm = new GiGroup);
-                m_itemGroups.push_back(igPath = new GiGroup);
+                itemGroups_.push_back(igNorm = new GiGroup);
+                itemGroups_.push_back(igPath = new GiGroup);
             }
 
             Clipper clipper; // Clipper
@@ -179,12 +179,12 @@ void File::createGi() {
             }
 
             if (layer->m_groupedPaths.empty()) {
-                clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
+                clipper.Execute(ctUnion, mergedPaths_, pftNonZero); // Clipper
                 //                dbgPaths(m_mergedPaths, "m_mergedPaths", true);
                 layer->m_groupedPaths = std::move(groupedPaths());
                 for (auto& paths : layer->m_groupedPaths)
                     CleanPolygons(paths, uScale * 0.0005);
-                m_mergedPaths.clear();
+                mergedPaths_.clear();
             }
 
             for (Paths& paths : layer->m_groupedPaths) {
@@ -202,18 +202,18 @@ void File::createGi() {
                 layer->setItemsType(ItemsType::Normal);
                 layer->setVisible(true);
             } else
-                layer->setVisible(m_visible);
+                layer->setVisible(visible_);
         }
     }
 }
 
-bool File::isVisible() const { return m_visible; }
+bool File::isVisible() const { return visible_; }
 
 void File::setVisible(bool visible) {
-    if (visible == m_visible)
+    if (visible == visible_)
         return;
-    m_visible = visible;
-    if (m_visible) {
+    visible_ = visible;
+    if (visible_) {
         for (const auto& [name, vis] : m_layersVisible) {
             m_layers[name]->setVisible(vis);
         }
@@ -237,8 +237,8 @@ void File::write(QDataStream& stream) const {
             stream << *layer;
         }
     }
-    stream << m_itemsType;
-    if (!m_layersVisible.size() && m_visible) {
+    stream << itemsType_;
+    if (!m_layersVisible.size() && visible_) {
         for (const auto& [name, layer] : m_layers) {
             if (!layer->isEmpty()) {
                 m_layersVisible[name] = layer->isVisible();
@@ -262,10 +262,10 @@ void File::read(QDataStream& stream) {
             m_layers[name] = layer;
         }
     }
-    stream >> m_itemsType;
+    stream >> itemsType_;
     stream >> m_layersVisible;
     stream >> m_entities;
 }
 
-Paths File::merge() const { return m_mergedPaths; }
+Paths File::merge() const { return mergedPaths_; }
 } // namespace Dxf

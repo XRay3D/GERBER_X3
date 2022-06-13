@@ -32,7 +32,7 @@ public:
     GiDataPath(const Path& path, FileInterface* file);
 
     // QGraphicsItem interface
-    QRectF boundingRect() const override;
+//   QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths(int alternate = {}) const override;

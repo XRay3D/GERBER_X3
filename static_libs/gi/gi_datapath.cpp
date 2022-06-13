@@ -57,22 +57,22 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     }
 }
 
-QRectF GiDataPath::boundingRect() const {
-    if (App::scene()->boundingRect())
-        return m_boundingRect;
-    if (m_selectionShape.boundingRect().isEmpty())
-        updateSelection();
-    return m_selectionShape.boundingRect();
-}
+//QRectF GiDataPath::boundingRect() const {
+//    if (App::scene()->boundingRect())
+//        return m_boundingRect;
+//    if (m_selectionShape.boundingRect().isEmpty())
+//        updateSelection();
+//    return m_selectionShape.boundingRect();
+//}
 
 void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_colorPtr)
-        m_color = *m_colorPtr;
+    if (pnColorPrt_)
+        pen_.setColor(*pnColorPrt_);
+    if (colorPtr_)
+        color_ = *colorPtr_;
 
-    QColor color(m_pen.color());
-    QPen pen(m_pen);
+    QColor color(pen_.color());
+    QPen pen(pen_);
     constexpr double dl = 3;
 
     if (option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {

@@ -25,13 +25,13 @@
 GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
     : m_gcFile(file) {
     for (const Path& path : paths)
-        m_shape.addPolygon(path);
+        shape_.addPolygon(path);
     double k;
     if (m_gcFile)
-        k = m_gcFile->m_gcp.getToolDiameter() * 0.5;
+        k = m_gcFile->gcp_.getToolDiameter() * 0.5;
     else
-        k = m_pen.widthF() * 0.5;
-    m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
+        k = pen_.widthF() * 0.5;
+    rect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
     // setAcceptHoverEvents(true);
 #endif
@@ -39,37 +39,37 @@ GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
 
 GiGcPath::GiGcPath(const Path& path, GCode::File* file)
     : m_gcFile(file) {
-    m_shape.addPolygon(path);
+    shape_.addPolygon(path);
     double k;
     if (m_gcFile)
-        k = m_gcFile->m_gcp.getToolDiameter() * 0.5;
+        k = m_gcFile->gcp_.getToolDiameter() * 0.5;
     else
-        k = m_pen.widthF() * 0.5;
-    m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
+        k = pen_.widthF() * 0.5;
+    rect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
     // setAcceptHoverEvents(true);
 #endif
 }
 
-QRectF GiGcPath::boundingRect() const { return m_rect; }
+QRectF GiGcPath::boundingRect() const { return rect_; }
 
 void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
-    if (m_pnColorPrt)
-        m_pen.setColor(*m_pnColorPrt);
-    if (m_colorPtr)
-        m_color = *m_colorPtr;
+    if (pnColorPrt_)
+        pen_.setColor(*pnColorPrt_);
+    if (colorPtr_)
+        color_ = *colorPtr_;
 
-    if (m_pen.widthF() == 0) {
-        QPen pen(m_pen);
+    if (pen_.widthF() == 0) {
+        QPen pen(pen_);
         pen.setWidthF(1.5 * scaleFactor());
         painter->setPen(pen);
     } else
-        painter->setPen(m_pen);
+        painter->setPen(pen_);
 #ifdef QT_DEBUG
     if (option->state & QStyle::State_MouseOver) {
-        QPen pen(m_pen);
+        QPen pen(pen_);
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
@@ -78,7 +78,7 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     }
 #endif
     painter->setBrush(QBrush(Qt::NoBrush));
-    painter->drawPath(m_shape);
+    painter->drawPath(shape_);
 
     //    painter->setPen(QPen(Qt::magenta, 0.0));
     //    painter->drawRect(m_rect);
@@ -98,8 +98,8 @@ Paths GiGcPath::paths(int) const { return {} /*m_paths*/; }
 void GiGcPath::updateArrows() {
     m_sc = scaleFactor();
     m_arrows = QPainterPath(); //.clear();
-    if (qFuzzyIsNull(m_pen.widthF())) {
-        for (const QPolygonF& path : m_shape.toSubpathPolygons()) {
+    if (qFuzzyIsNull(pen_.widthF())) {
+        for (const QPolygonF& path : shape_.toSubpathPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
                 double length = 30 * scaleFactor();

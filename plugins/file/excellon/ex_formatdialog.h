@@ -9,37 +9,48 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+#include "ex_types.h"
+#include <QDialog>
 
-#include "gi.h"
-
-namespace Excellon {
-class Hole;
+namespace Ui {
+class ExcellonDialog;
 }
 
-class Hole;
+namespace Excellon {
+class File;
 
-class DrillItem : public GraphicsItem {
+class FormatDialog : public QDialog {
+    Q_OBJECT
+    static inline bool m_showed;
+    bool accepted;
+
 public:
-    DrillItem(Excellon::Hole* hole, FileInterface* file);
-    DrillItem(double diameter, FileInterface* file);
-    ~DrillItem() override;
-    // QGraphicsItem interface
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    // GraphicsItem interface
-    Paths paths(int alternate = {}) const override;
-    void changeColor() override;
+    explicit FormatDialog(Excellon::File* file);
+    ~FormatDialog() override;
 
-    bool isSlot();
-    double diameter() const;
-    void setDiameter(double diameter);
-    void updateHole();
+    static bool showed() { return m_showed; }
+
+private slots:
+    void on_pushButton_clicked();
+    void on_pbSetAsDefault_clicked();
 
 private:
-    void create();
-    double m_diameter = 0.0;
-    Excellon::Hole* const m_hole = nullptr;
-    QPolygonF fillPolygon;
+    Ui::ExcellonDialog* ui;
+    Excellon::File* m_file;
+    const Excellon::Format m_format;
+    Excellon::Format m_tmpFormat;
+
+    void updateFormat();
+
+    void acceptFormat();
+    void rejectFormat();
+
+    void resetFormat();
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
 };
+
+} // namespace Excellon

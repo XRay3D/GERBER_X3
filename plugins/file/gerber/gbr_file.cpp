@@ -16,9 +16,9 @@
 #include "gbrcomp_onent.h"
 
 #include "clipper.hpp"
+#include "ft_node.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
-#include "ft_node.h"
 #include "myclipper.h"
 #include "project.h"
 #include "settings.h"
@@ -62,9 +62,9 @@ QDebug operator<<(QDebug debug, const State& state) {
 
 File::File(const QString& fileName)
     : FileInterface() {
-    m_itemGroups.append({ new GiGroup, new GiGroup });
-    m_name = fileName;
-    m_layerTypes = {
+    itemGroups_.append({ new GiGroup, new GiGroup });
+    name_ = fileName;
+    layerTypes_ = {
         { Normal, GbrObj::tr("Normal"), GbrObj::tr("Normal view") },
         { ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
                                                             "without width and without contacts") },
@@ -79,7 +79,7 @@ const ApertureMap* File::apertures() const { return &apertures_; }
 Paths File::merge() const {
     QElapsedTimer t;
     t.start();
-    m_mergedPaths.clear();
+    mergedPaths_.clear();
     size_t i = 0;
 
     if constexpr (1) {
@@ -119,7 +119,7 @@ Paths File::merge() const {
 
         while (i < graphicObjects_.size()) {
             Clipper clipper;
-            clipper.AddPaths(m_mergedPaths, ptSubject, true);
+            clipper.AddPaths(mergedPaths_, ptSubject, true);
             const auto exp = graphicObjects_.at(i).state().imgPolarity();
             do {
                 if (graphicObjects_[i].state().type() == Line) {
@@ -136,29 +136,29 @@ Paths File::merge() const {
             pathList.pop_front();
 
             if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
-                clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
+                clipper.Execute(ctUnion, mergedPaths_, pftPositive);
             else
-                clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
+                clipper.Execute(ctDifference, mergedPaths_, pftNonZero);
         }
     } else {
         while (i < graphicObjects_.size()) {
             Clipper clipper;
-            clipper.AddPaths(m_mergedPaths, ptSubject, true);
+            clipper.AddPaths(mergedPaths_, ptSubject, true);
             const auto exp = graphicObjects_.at(i).state().imgPolarity();
             do {
                 const GraphicObject& go = graphicObjects_.at(i++);
                 clipper.AddPaths(go.paths(), ptClip, true);
             } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity());
             if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
-                clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
+                clipper.Execute(ctUnion, mergedPaths_, pftPositive);
             else
-                clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
+                clipper.Execute(ctDifference, mergedPaths_, pftNonZero);
         }
     }
 
     if (Settings::cleanPolygons())
-        CleanPolygons(m_mergedPaths, Settings::cleanPolygonsDist() * uScale);
-    return m_mergedPaths;
+        CleanPolygons(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
+    return mergedPaths_;
 }
 
 const QList<Component>& File::components() const { return components_; }
@@ -199,7 +199,7 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
 }
 
 Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if (m_groupedPaths.empty()) {
+    if (groupedPaths_.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -215,9 +215,9 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftNonZero);
-        grouping(polyTree.GetFirst(), &m_groupedPaths, group);
+        grouping(polyTree.GetFirst(), &groupedPaths_, group);
     }
-    return m_groupedPaths;
+    return groupedPaths_;
 }
 
 bool File::flashedApertures() const {
@@ -228,9 +228,9 @@ bool File::flashedApertures() const {
 }
 
 void File::setColor(const QColor& color) {
-    m_color = color;
-    m_itemGroups[Normal]->setBrushColor(color);
-    m_itemGroups[ApPaths]->setPen(QPen(color, 0.0));
+    color_ = color;
+    itemGroups_[Normal]->setBrushColor(color);
+    itemGroups_[ApPaths]->setPen(QPen(color, 0.0));
 }
 
 mvector<const AbstrGraphicObject*> File::graphicObjects() const {
@@ -243,7 +243,7 @@ mvector<const AbstrGraphicObject*> File::graphicObjects() const {
 
 void File::initFrom(FileInterface* file) {
     FileInterface::initFrom(file);
-    static_cast<Node*>(m_node)->file = this;
+    static_cast<Node*>(node_)->file = this;
 
     setColor(file->color());
     // Normal
@@ -261,23 +261,23 @@ void File::initFrom(FileInterface* file) {
 }
 
 FileTree::Node* File::node() {
-    return m_node ? m_node : m_node = new Node(this, &m_id);
+    return node_ ? node_ : node_ = new Node(this, &id_);
 }
 
 void File::setItemType(int type) {
-    if (m_itemsType == type)
+    if (itemsType_ == type)
         return;
 
-    m_itemsType = type;
+    itemsType_ = type;
 
-    m_itemGroups[Normal]->setVisible(false);
-    m_itemGroups[ApPaths]->setVisible(false);
-    m_itemGroups[Components]->setVisible(false);
+    itemGroups_[Normal]->setVisible(false);
+    itemGroups_[ApPaths]->setVisible(false);
+    itemGroups_[Components]->setVisible(false);
 
-    m_itemGroups[m_itemsType]->setVisible(true /*m_visible*/);
+    itemGroups_[itemsType_]->setVisible(true /*m_visible*/);
 }
 
-int File::itemsType() const { return m_itemsType; }
+int File::itemsType() const { return itemsType_; }
 
 void File::write(QDataStream& stream) const {
     stream << graphicObjects_; // write  QList<GraphicObject>
@@ -286,9 +286,8 @@ void File::write(QDataStream& stream) const {
     // stream << layer;
     // stream << miror;
     stream << rawIndex;
-    stream << m_itemsType;
+    stream << itemsType_;
     stream << components_;
-    stream << offset_;
 }
 
 void File::read(QDataStream& stream) {
@@ -299,8 +298,9 @@ void File::read(QDataStream& stream) {
     // stream >> layer;
     // stream >> miror;
     stream >> rawIndex;
-    stream >> m_itemsType;
+    stream >> itemsType_;
     stream >> components_;
+    QPointF offset_;
     if (App::project()->ver() >= ProVer_6)
         stream >> offset_;
 
@@ -314,16 +314,16 @@ void File::createGi() {
     if constexpr (1) { // fill copper
         for (Paths& paths : groupedPaths()) {
             GraphicsItem* item = new GiDataSolid(paths, this);
-            m_itemGroups[Normal]->push_back(item);
+            itemGroups_[Normal]->push_back(item);
         }
-        m_itemGroups[Normal]->shrink_to_fit();
+        itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr (1) { // add components
         for (const Component& component : qAsConst(components_)) {
             if (!component.referencePoint().isNull())
-                m_itemGroups[Components]->push_back(new ComponentItem(component, this));
+                itemGroups_[Components]->push_back(new ComponentItem(component, this));
         }
-        m_itemGroups[Components]->shrink_to_fit();
+        itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr (1) { // add aperture paths
         auto contains = [&](const Path& path) -> bool {
@@ -355,23 +355,23 @@ void File::createGi() {
                         path.push_back(path.front());
                         if (!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
                         } else if (!contains(path)) {
                             checkList.push_front(path);
-                            m_itemGroups[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
                         }
                     }
                 } else {
                     if (!Settings::skipDuplicates()) {
-                        m_itemGroups[ApPaths]->push_back(new GiDataPath(go.path(), this));
+                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path(), this));
                     } else if (!contains(go.path())) {
-                        m_itemGroups[ApPaths]->push_back(new GiDataPath(go.path(), this));
+                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path(), this));
                         checkList.push_front(go.path());
                     }
                 }
             }
         }
-        m_itemGroups[ApPaths]->shrink_to_fit();
+        itemGroups_[ApPaths]->shrink_to_fit();
     }
 
     bool zeroLine = false;
@@ -379,33 +379,24 @@ void File::createGi() {
         if (zeroLine = (qFuzzyIsNull(ap->minSize()) && ap->used()); zeroLine)
             break;
 
-    if (m_itemsType == NullType) {
-        if /**/ (m_itemGroups[Components]->size())
-            m_itemsType = Components;
-        else if (m_itemGroups[Normal]->size()) // && !zeroLine)
-            m_itemsType = Normal;
+    if (itemsType_ == NullType) {
+        if /**/ (itemGroups_[Components]->size())
+            itemsType_ = Components;
+        else if (itemGroups_[Normal]->size()) // && !zeroLine)
+            itemsType_ = Normal;
         else
-            m_itemsType = ApPaths;
+            itemsType_ = ApPaths;
     }
 
-    m_layerTypes[Normal].id = m_itemGroups[Normal]->size() ? Normal : NullType;
-    m_layerTypes[ApPaths].id = m_itemGroups[ApPaths]->size() ? ApPaths : NullType;
-    m_layerTypes[Components].id = m_itemGroups[Components]->size() ? Components : NullType;
+    layerTypes_[Normal].id = itemGroups_[Normal]->size() ? Normal : NullType;
+    layerTypes_[ApPaths].id = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
+    layerTypes_[Components].id = itemGroups_[Components]->size() ? Components : NullType;
 
-    m_itemGroups[ApPaths]->setVisible(false);
-    m_itemGroups[Components]->setVisible(false);
-    m_itemGroups[Normal]->setVisible(false);
+    itemGroups_[ApPaths]->setVisible(false);
+    itemGroups_[Components]->setVisible(false);
+    itemGroups_[Normal]->setVisible(false);
 
-    m_itemGroups[m_itemsType]->setVisible(m_visible);
-    if (!offset_.isNull())
-        setOffset(offset_);
+    itemGroups_[itemsType_]->setVisible(visible_);
 }
 
 } // namespace Gerber
-
-void Gerber::File::setOffset(QPointF offset) {
-    offset_ = offset;
-    m_itemGroups[ApPaths]->setPos(offset);
-    m_itemGroups[Components]->setPos(offset);
-    m_itemGroups[Normal]->setPos(offset);
-}

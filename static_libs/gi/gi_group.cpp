@@ -20,8 +20,8 @@ GiGroup::~GiGroup() {
 }
 
 void GiGroup::push_back(GraphicsItem* item) {
-    item->m_giId = mvector::size() ? mvector::back()->m_giId + 1 : 0;
-    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->m_giId));
+    item->id_ = mvector::size() ? mvector::back()->id_ + 1 : 0;
+    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->id_));
     item->setVisible(m_visible);
     item->itemGroup = this;
     mvector::push_back(item);

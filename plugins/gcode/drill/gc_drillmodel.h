@@ -14,36 +14,35 @@
 #include <QAbstractTableModel>
 #include <QIcon>
 
-enum {
-    tAperture,
-    tTool,
-};
+class GiDrillPreview;
 
 struct Row {
-    Row(QString&& name = {},
-        QIcon&& icon = {},
-        int id = {},
-        double diameter = {})
-        : icon(icon)
-        , name(name)
-        , diameter(diameter)
-        , apertureId(id)
-        , toolId(-1) {
-    }
+    //    Row(QString&& name = {},
+    //        QIcon&& icon = {},
+    //        int id = {},
+    //        double diameter = {})
+    //        : icon(icon)
+    //        , name(name)
+    //        , diameter(diameter)
+    //        , apertureId(id)
+    //        , toolId(-1) {
+    //    }
+    ~Row() { qDeleteAll(items); }
     const QIcon icon;
     const QString name;
     const double diameter;
     const int apertureId;
-    bool isSlot = false;
-    bool useForCalc = false;
-    int toolId;
+    const bool isSlot;
+    bool useForCalc {};
+    int toolId { -1 };
+    mvector<GiDrillPreview*> items;
 };
 
 class DrillModel : public QAbstractTableModel {
     Q_OBJECT
 
-    mvector<Row> m_data;
-    int m_type;
+    mvector<Row> data_;
+    QString type;
 
     enum {
         Name,
@@ -55,13 +54,11 @@ signals:
     void set(int, bool);
 
 public:
-    DrillModel(int type, int rowCount, QObject* parent = nullptr);
+    DrillModel(QString type, int rowCount, QObject* parent = nullptr);
     DrillModel(QObject* parent = nullptr);
 
-    //    Row& appendRow(const QString& name, const QIcon& icon, int id);
     void setToolId(int row, int id);
     int toolId(int row);
-    void setSlot(int row, bool slot);
     bool isSlot(int row);
     int apertureId(int row);
     bool useForCalc(int row) const;
@@ -74,8 +71,10 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-    void setType(int type) { m_type = type; }
+    void setType(int type) { type = type; }
 
-    mvector<Row>& data() { return m_data; }
-    const mvector<Row>& data() const { return m_data; }
+    mvector<Row>& data() { return data_; }
+    const mvector<Row>& data() const { return data_; }
+    auto begin() { return data_.begin(); }
+    auto end() { return data_.end(); }
 };

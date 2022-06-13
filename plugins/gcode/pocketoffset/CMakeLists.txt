@@ -46,3 +46,22 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+add_library(gc_pocketoffset STATIC
+    gc_pocketoffset.h
+    gc_pocketoffset.cpp
+)
+
+target_link_libraries(gc_pocketoffset PRIVATE
+    clipper
+    gcode
+    common
+    filetree
+#    gi
+#    graphicsview
+#    tooldatabase
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)
+

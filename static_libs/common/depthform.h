@@ -27,7 +27,7 @@ signals:
     void valueChanged(double);
 
 private:
-    double m_value = 0.0;
+    double value_ = 0.0;
 
     DoubleSpinBox* dsbx;
     QLabel* label;

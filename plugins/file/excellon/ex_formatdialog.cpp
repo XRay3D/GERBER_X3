@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "ex_cellondialog.h"
+#include "ex_formatdialog.h"
 #include "ui_excellondialog.h"
 
 #include "ex_file.h"
@@ -21,11 +21,9 @@
 
 #include "ex_settingstab.h"
 
-using namespace Excellon;
+namespace Excellon {
 
-bool ExcellonDialog::showed() { return m_showed; }
-
-ExcellonDialog::ExcellonDialog(Excellon::File* file)
+FormatDialog::FormatDialog(Excellon::File* file)
     : ui(new Ui::ExcellonDialog)
     , m_file(file)
     , m_format(file->format())
@@ -41,17 +39,11 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     ui->sbxInteger->setValue(m_format.integer);
     ui->sbxDecimal->setValue(m_format.decimal);
 
-    ui->dsbxX->setValue(m_format.offsetPos.x());
-    ui->dsbxY->setValue(m_format.offsetPos.y());
-
     ui->rbInches->setChecked(!m_format.unitMode);
     ui->rbMillimeters->setChecked(m_format.unitMode);
 
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ExcellonDialog::rejectFormat);
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ExcellonDialog::acceptFormat);
-
-    connect(ui->dsbxX, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setX(val); m_file->setFormat(m_tmpFormat); });
-    connect(ui->dsbxY, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setY(val); m_file->setFormat(m_tmpFormat); });
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &FormatDialog::rejectFormat);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &FormatDialog::acceptFormat);
 
     connect(ui->sbxInteger, qOverload<int>(&QSpinBox::valueChanged), [&] { updateFormat(); });
     connect(ui->sbxDecimal, qOverload<int>(&QSpinBox::valueChanged), [&] { updateFormat(); });
@@ -63,26 +55,15 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
 
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);
-
-    on_pbStep_clicked();
 }
 
-ExcellonDialog::~ExcellonDialog() {
+FormatDialog::~FormatDialog() {
     m_showed = false;
     resetFormat();
     delete ui;
 }
 
-void ExcellonDialog::on_pbStep_clicked() {
-    if (++m_step == 4)
-        m_step = -1;
-    const double singleStep = pow(0.1, m_step);
-    ui->pbStep->setText("x" + QString::number(singleStep));
-    ui->dsbxX->setSingleStep(singleStep);
-    ui->dsbxY->setSingleStep(singleStep);
-}
-
-void ExcellonDialog::on_pushButton_clicked() {
+void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
     for (QGraphicsItem* item : App::scene()->selectedItems()) {
@@ -95,22 +76,17 @@ void ExcellonDialog::on_pushButton_clicked() {
             ++c;
         }
         if (c == 2) {
-            QPointF p(pair.second - (pair.first - m_tmpFormat.offsetPos));
+            QPointF p(pair.second - pair.first);
             if (QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
-            ui->dsbxX->setValue(p.x());
-            ui->dsbxY->setValue(p.y());
+
             App::graphicsView()->zoomFit();
             return;
         }
     }
 }
 
-void ExcellonDialog::updateFormat() {
-
-    m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
-    m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
-
+void FormatDialog::updateFormat() {
     m_tmpFormat.integer = ui->sbxInteger->value();
     m_tmpFormat.decimal = ui->sbxDecimal->value();
 
@@ -121,30 +97,27 @@ void ExcellonDialog::updateFormat() {
     App::graphicsView()->zoomFit();
 }
 
-void ExcellonDialog::acceptFormat() {
+void FormatDialog::acceptFormat() {
     accepted = true;
     App::graphicsView()->zoomFit();
 }
 
-void ExcellonDialog::rejectFormat() { deleteLater(); }
+void FormatDialog::rejectFormat() { deleteLater(); }
 
-void ExcellonDialog::resetFormat() {
+void FormatDialog::resetFormat() {
     if (accepted)
         return;
     m_file->setFormat(m_format);
     App::graphicsView()->zoomFit();
 }
 
-void ExcellonDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
+void FormatDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
 
-void ExcellonDialog::hideEvent(QHideEvent* event) { deleteLater(); }
+void FormatDialog::hideEvent(QHideEvent* event) { deleteLater(); }
 
-void ExcellonDialog::on_pbSetAsDefault_clicked() {
+void FormatDialog::on_pbSetAsDefault_clicked() {
     QSettings settings;
     settings.beginGroup("Excellon");
-
-    settings.setValue("dsbxX", m_tmpFormat.offsetPos.x());
-    settings.setValue("dsbxY", m_tmpFormat.offsetPos.y());
 
     settings.setValue("rbInches", m_tmpFormat.unitMode == Inches);
     settings.setValue("rbMillimeters", m_tmpFormat.unitMode == Millimeters);
@@ -158,3 +131,5 @@ void ExcellonDialog::on_pbSetAsDefault_clicked() {
 
     Settings::setformat(m_tmpFormat);
 }
+
+} // namespace Excellon

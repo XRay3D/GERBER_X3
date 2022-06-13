@@ -12,8 +12,8 @@
 
 #include "gcode.h"
 
-#include <QObject>
 #include "gi.h"
+#include <QObject>
 
 class GraphicsView;
 

@@ -25,11 +25,11 @@ namespace GCode {
 inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y); }
 
 void VoronoiJc::jcVoronoi() {
-    const auto tolerance = m_gcp.params[GCodeParams::Tolerance].toDouble();
+    const auto tolerance = gcp_.params[GCodeParams::Tolerance].toDouble();
 
     mvector<jcv_point> points;
     points.reserve(100000);
-    CleanPolygons(m_workingPs, tolerance * 0.1 * uScale);
+    CleanPolygons(workingPs, tolerance * 0.1 * uScale);
     groupedPaths(CopperPaths);
     int id = 0;
     auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
@@ -43,7 +43,7 @@ void VoronoiJc::jcVoronoi() {
         }
     };
     // PROG //PROG .3setProgMaxAndVal(7, 1); // progress
-    for (const Paths& paths : m_groupedPss) {
+    for (const Paths& paths : groupedPss) {
         for (const Path& path : paths) {
             IntPoint tmp(path.front());
             for (const IntPoint& point : path) {
@@ -56,7 +56,7 @@ void VoronoiJc::jcVoronoi() {
         ++id;
     }
     // PROG //PROG .3setProgMaxAndVal(7, 2); // progress
-    for (const Path& path : m_workingRawPs) {
+    for (const Path& path : workingRawPs) {
         IntPoint tmp(path.front());
         for (const IntPoint& point : path) {
             condei(tmp, point);
@@ -68,15 +68,15 @@ void VoronoiJc::jcVoronoi() {
     }
 
     Clipper clipper;
-    for (const Paths& paths : m_groupedPss) {
+    for (const Paths& paths : groupedPss) {
         clipper.AddPaths(paths, ptClip, true);
     }
-    clipper.AddPaths(m_workingRawPs, ptClip, true);
+    clipper.AddPaths(workingRawPs, ptClip, true);
     const IntRect r(clipper.GetBounds());
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const cInt fo = m_gcp.params[GCodeParams::FrameOffset].toDouble() * uScale;
+        const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo), static_cast<jcv_real>(r.top - fo) },
             { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
@@ -103,14 +103,14 @@ void VoronoiJc::jcVoronoi() {
     }
 
     for (const auto& [key, edge] : edges) {
-        m_returnPs.append(toPath(edge));
+        returnPs.append(toPath(edge));
         // PROG //PROG .3setProgMaxAndVal(edges.size(), m_returnPs.size()); // progress
     }
-    mergePaths(m_returnPs, 0.005 * uScale);
-    m_returnPs.append(toPath(frame));
-    for (size_t i = 0; i < m_returnPs.size(); ++i) { // remove verry short paths
-        if (m_returnPs[i].size() < 4 && m_returnPs[i].front().distTo(m_returnPs[i].back()) < tolerance * 0.5 * uScale)
-            m_returnPs.remove(i--);
+    mergePaths(returnPs, 0.005 * uScale);
+    returnPs.append(toPath(frame));
+    for (size_t i = 0; i < returnPs.size(); ++i) { // remove verry short paths
+        if (returnPs[i].size() < 4 && returnPs[i].front().distTo(returnPs[i].back()) < tolerance * 0.5 * uScale)
+            returnPs.remove(i--);
     }
 }
 
@@ -169,7 +169,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     auto clean = [this, kAngle = 2.0](Path& path) {
         for (size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line(path[i], path[i + 1]);
-            if (line.length() < m_gcp.params[GCodeParams::Tolerance].toDouble()) {
+            if (line.length() < gcp_.params[GCodeParams::Tolerance].toDouble()) {
                 path[i] = (line.center());
                 path.remove(i + 1);
                 --i;

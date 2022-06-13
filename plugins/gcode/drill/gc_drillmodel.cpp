@@ -13,62 +13,64 @@
  *******************************************************************************/
 #include "gc_drillmodel.h"
 #include "gc_drillform.h"
+#include "gc_gidrillpreview.h"
+#include "gc_header.h"
 #include "tool_pch.h"
 
 #include <QBitmap>
 #include <QDebug>
 #include <QPainter>
 
-DrillModel::DrillModel(int type, int rowCount, QObject* parent)
+DrillModel::DrillModel(QString type, int rowCount, QObject* parent)
     : QAbstractTableModel(parent)
-    , m_type(type) {
-    m_data.reserve(rowCount);
+    , type(type) {
+    data_.reserve(rowCount);
 }
 
 DrillModel::DrillModel(QObject* parent)
     : QAbstractTableModel(parent) {
 }
 
-// Row& DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
-//{
-//     m_data.emplace_back(name, icon, id);
-//     return m_data.back();
-// }
-
 void DrillModel::setToolId(int row, int id) {
-    if (m_data[row].toolId != id)
-        m_data[row].useForCalc = id > -1;
-    m_data[row].toolId = id;
+    if (data_[row].toolId != id)
+        data_[row].useForCalc = id > -1;
+    data_[row].toolId = id;
+    for (auto item : data_[row].items) {
+        item->updateTool();
+        item->setFlag(QGraphicsItem::ItemIsSelectable, id > -1);
+    }
     emit set(row, id > -1);
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
-int DrillModel::toolId(int row) { return m_data[row].toolId; }
+int DrillModel::toolId(int row) { return data_[row].toolId; }
 
-void DrillModel::setSlot(int row, bool slot) { m_data[row].isSlot = slot; }
+bool DrillModel::isSlot(int row) { return data_[row].isSlot; }
 
-bool DrillModel::isSlot(int row) { return m_data[row].isSlot; }
+int DrillModel::apertureId(int row) { return data_[row].apertureId; }
 
-int DrillModel::apertureId(int row) { return m_data[row].apertureId; }
-
-bool DrillModel::useForCalc(int row) const { return m_data[row].useForCalc; }
+bool DrillModel::useForCalc(int row) const { return data_[row].useForCalc; }
 
 void DrillModel::setCreate(int row, bool create) {
-    if (m_data[row].toolId == -1)
+    if (data_[row].toolId == -1)
         return;
-    m_data[row].useForCalc = create;
+    data_[row].useForCalc = create;
+    for (auto item : data_[row].items) {
+        item->setFlag(QGraphicsItem::ItemIsSelectable, create);
+        item->changeColor();
+    }
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));
     emit headerDataChanged(Qt::Vertical, row, row);
 }
 
 void DrillModel::setCreate(bool create) {
     for (int row = 0; row < rowCount(); ++row) {
-        m_data[row].useForCalc = create && m_data[row].toolId != -1;
+        data_[row].useForCalc = create && data_[row].toolId != -1;
     }
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
-int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(m_data.size()); }
+int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(data_.size()); }
 
 int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 
@@ -77,27 +79,27 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const {
     if (index.column() == Name) {
         switch (role) {
         case Qt::DisplayRole:
-            if (m_data[row].isSlot)
-                return QString(m_data[row].name).replace(tr("Tool"), tr("Slot"));
+            if (data_[row].isSlot)
+                return QString(data_[row].name).replace(tr("Tool"), tr("Slot"));
             else
-                return m_data[row].name;
+                return data_[row].name;
         case Qt::DecorationRole: {
-            if (m_data[index.row()].toolId > -1 && m_data[row].isSlot) {
-                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
+            if (data_[index.row()].toolId > -1 && data_[row].isSlot) {
+                QImage image(data_[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
-            } else if (m_data[index.row()].toolId > -1) {
-                return m_data[row].icon;
-            } else if (m_data[row].isSlot) {
-                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
+            } else if (data_[index.row()].toolId > -1) {
+                return data_[row].icon;
+            } else if (data_[row].isSlot) {
+                QImage image(data_[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else {
-                QImage image(m_data[row].icon.pixmap(24, 24).toImage());
+                QImage image(data_[row].icon.pixmap(24, 24).toImage());
                 for (int x = 0; x < 24; ++x)
                     for (int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
@@ -105,30 +107,30 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const {
             }
         }
         case Qt::UserRole:
-            return m_data[row].apertureId;
+            return data_[row].apertureId;
         default:
             break;
         }
     } else {
-        if (m_data[row].toolId == -1)
+        if (data_[row].toolId == -1)
             switch (role) {
             case Qt::DisplayRole:
                 return tr("Select Tool");
             case Qt::TextAlignmentRole:
                 return Qt::AlignCenter;
             case Qt::UserRole:
-                return m_data[row].toolId;
+                return data_[row].toolId;
             default:
                 break;
             }
         else
             switch (role) {
             case Qt::DisplayRole:
-                return App::toolHolder().tool(m_data[row].toolId).name();
+                return App::toolHolder().tool(data_[row].toolId).name();
             case Qt::DecorationRole:
-                return App::toolHolder().tool(m_data[row].toolId).icon();
+                return App::toolHolder().tool(data_[row].toolId).icon();
             case Qt::UserRole:
-                return m_data[row].toolId;
+                return data_[row].toolId;
             default:
                 break;
             }
@@ -142,12 +144,13 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
         if (orientation == Qt::Horizontal) {
             switch (section) {
             case Name:
-                return m_type == tAperture ? tr("Aperture") : tr("Tool");
-            case Tool:
-                return tr("Tool");
+                // BUG return type == tAperture ? tr("Aperture") : tr("Tool");
+            case Tool:;
+                // BUG return tr("Tool");
             }
         }
-        return QString(m_type == tAperture ? "D%1" : "T%1").arg(m_data[section].apertureId);
+        return {};
+        // BUG return QString(m_type == tAperture ? "D%1" : "T%1").arg(m_data[section].apertureId);
     case Qt::SizeHintRole:
         if (orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);

@@ -22,7 +22,7 @@ ProfileCreator::ProfileCreator() {
 }
 
 void ProfileCreator::create() {
-    createProfile(m_gcp.tools.front(), m_gcp.params[GCodeParams::Depth].toDouble());
+    createProfile(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
 }
 
 GCodeType ProfileCreator::type() { return Profile; }
@@ -30,76 +30,76 @@ GCodeType ProfileCreator::type() { return Profile; }
 void ProfileCreator::createProfile(const Tool& tool, const double depth) {
     do {
 
-        m_toolDiameter = tool.getDiameter(depth);
+        toolDiameter = tool.getDiameter(depth);
 
-        const double dOffset = (m_gcp.side() == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (gcp_.side() == Outer) ? +toolDiameter * uScale * 0.5 : -toolDiameter * uScale * 0.5;
 
-        if (m_gcp.side() == On) {
-            if (m_gcp.params[GCodeParams::Trimming].toBool())
-                trimmingOpenPaths(m_workingRawPs);
-            m_returnPs = m_workingPs;
+        if (gcp_.side() == On) {
+            if (gcp_.params[GCodeParams::Trimming].toBool())
+                trimmingOpenPaths(workingRawPs);
+            returnPs = std::move(workingPs);
         } else {
-            if (!m_workingPs.empty()) {
+            if (workingPs.size()) {
                 ClipperOffset offset;
                 for (Paths& paths : groupedPaths(CopperPaths))
                     offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(m_returnPs, dOffset);
+                offset.Execute(returnPs, dOffset);
             }
-            if (!m_workingRawPs.empty()) {
+            if (workingRawPs.size()) {
                 ClipperOffset offset;
-                offset.AddPaths(m_workingRawPs, jtRound, etOpenRound);
-                offset.Execute(m_workingRawPs, dOffset);
-                if (!m_workingRawPs.empty())
-                    m_returnPs.append(m_workingRawPs);
+                offset.AddPaths(workingRawPs, jtRound, etOpenRound);
+                offset.Execute(workingRawPs, dOffset);
+                if (!workingRawPs.empty())
+                    returnPs.append(workingRawPs);
             }
         }
 
-        if (m_returnPs.empty() && m_workingRawPs.empty())
+        if (returnPs.empty() && workingRawPs.empty())
             break;
 
         reorder();
 
-        if (m_gcp.side() == On && m_workingRawPs.size()) {
-            m_returnPss.reserve(m_returnPss.size() + m_workingRawPs.size());
-            mergePaths(m_workingRawPs);
-            sortBE(m_workingRawPs);
-            for (auto&& path : m_workingRawPs)
-                m_returnPss.push_back({ std::move(path) });
+        if (gcp_.side() == On && workingRawPs.size()) {
+            returnPss.reserve(returnPss.size() + workingRawPs.size());
+            mergePaths(workingRawPs);
+            sortBE(workingRawPs);
+            for (auto&& path : workingRawPs)
+                returnPss.push_back({ std::move(path) });
         }
 
         makeBridges();
 
-        if (m_gcp.params.contains(GCodeParams::CornerTrimming) && m_gcp.params[GCodeParams::CornerTrimming].toInt())
+        if (gcp_.params.contains(GCodeParams::CornerTrimming) && gcp_.params[GCodeParams::CornerTrimming].toInt())
             cornerTrimming();
 
-        if (m_returnPss.empty())
+        if (returnPss.empty())
             break;
 
-        m_gcp.gcType = Profile;
-        m_file = new File(m_returnPss, m_gcp);
-        m_file->setFileName(tool.nameEnc());
-        emit fileReady(m_file);
+        gcp_.gcType = Profile;
+        file_ = new File(returnPss, gcp_);
+        file_->setFileName(tool.nameEnc());
+        emit fileReady(file_);
         return;
     } while (0);
     emit fileReady(nullptr);
 }
 
 void ProfileCreator::trimmingOpenPaths(Paths& paths) {
-    const double dOffset = m_toolDiameter * uScale * 0.5;
+    const double dOffset = toolDiameter * uScale * 0.5;
     for (size_t i = 0; i < paths.size(); ++i) {
         auto& p = paths[i];
         if (p.size() == 2) {
             double l = p.front().distTo(p.back());
-            if (l <= m_toolDiameter * uScale) {
+            if (l <= toolDiameter * uScale) {
                 paths.remove(i--);
                 continue;
             }
             QLineF b(p.front(), p.back());
             QLineF e(p.back(), p.front());
-            b.setLength(b.length() - m_toolDiameter * 0.5);
-            e.setLength(e.length() - m_toolDiameter * 0.5);
+            b.setLength(b.length() - toolDiameter * 0.5);
+            e.setLength(e.length() - toolDiameter * 0.5);
             p = { (b.p2()), (e.p2()) };
-        } else if (double l = Perimeter(p); l <= m_toolDiameter * uScale) {
+        } else if (double l = Perimeter(p); l <= toolDiameter * uScale) {
             paths.remove(i--);
             continue;
         } else {
@@ -131,12 +131,12 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
 }
 
 void ProfileCreator::cornerTrimming() {
-    const double bulge = (m_toolDiameter - m_toolDiameter * M_SQRT1_2) * M_SQRT1_2;
-    const double sqareSide = m_toolDiameter * M_SQRT1_2 * 0.5;
-    const double testAngle = m_gcp.convent() ? 90.0 : 270.0;
-    const double trimAngle = m_gcp.convent() ? -45.0 : +45;
+    const double bulge = (toolDiameter - toolDiameter * M_SQRT1_2) * M_SQRT1_2;
+    const double sqareSide = toolDiameter * M_SQRT1_2 * 0.5;
+    const double testAngle = gcp_.convent() ? 90.0 : 270.0;
+    const double trimAngle = gcp_.convent() ? -45.0 : +45;
 
-    for (auto& paths : m_returnPss) {
+    for (auto& paths : returnPss) {
         for (auto& path : paths) {
             path.reserve(path.size() * 3);
             for (size_t i = 1, size = path.size() - 1; i < size; size = path.size() - 1, ++i) {
@@ -171,7 +171,7 @@ void ProfileCreator::makeBridges() {
     }
     // create Bridges
     if (bridgeItems.size()) {
-        for (auto& m_returnPs : m_returnPss) {
+        for (auto& m_returnPs : returnPss) {
             const Path& path = m_returnPs.front();
             std::vector<std::pair<GiBridge*, IntPoint>> biStack;
             biStack.reserve(bridgeItems.size());
@@ -186,12 +186,12 @@ void ProfileCreator::makeBridges() {
                 {
                     ClipperOffset offset;
                     offset.AddPath(path, jtMiter, etClosedLine);
-                    offset.Execute(paths, +m_toolDiameter * uScale * 0.1);
+                    offset.Execute(paths, +toolDiameter * uScale * 0.1);
 
                     Clipper clipper;
                     clipper.AddPaths(paths, ptSubject, true);
                     for (const auto& bip : biStack) {
-                        clipper.AddPath(CirclePath((bip.first->lenght() + m_toolDiameter) * uScale, bip.second), ptClip, true);
+                        clipper.AddPath(CirclePath((bip.first->lenght() + toolDiameter) * uScale, bip.second), ptClip, true);
                     }
                     clipper.Execute(ctIntersection, paths, pftPositive);
                 }
@@ -241,7 +241,7 @@ void ProfileCreator::reorder() {
     PolyTree polyTree;
     {
         Clipper clipper;
-        clipper.AddPaths(m_returnPs, ptSubject);
+        clipper.AddPaths(returnPs, ptSubject);
         IntRect r(clipper.GetBounds());
         int k = uScale;
         Path outer = {
@@ -252,21 +252,21 @@ void ProfileCreator::reorder() {
         };
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-        m_returnPs.clear();
+        returnPs.clear();
     }
 
-    polyTreeToPaths(polyTree, m_returnPs);
+    polyTreeToPaths(polyTree, returnPs);
 
-    std::reverse(m_returnPs.begin(), m_returnPs.end());
+    std::reverse(returnPs.begin(), returnPs.end());
 
-    if ((m_gcp.side() == Inner) ^ m_gcp.convent())
-        ReversePaths(m_returnPs);
+    if ((gcp_.side() == Inner) ^ gcp_.convent())
+        ReversePaths(returnPs);
 
-    m_returnPss.reserve(m_returnPs.size());
+    returnPss.reserve(returnPs.size());
 
-    for (auto&& path : m_returnPs) {
+    for (auto&& path : returnPs) {
         path.push_back(path.front());
-        m_returnPss.push_back({ path });
+        returnPss.push_back({ path });
     }
 }
 

@@ -13,7 +13,7 @@
 #include <QPolygonF>
 #include <type_traits>
 
-class DrillItem;
+class GiDrill;
 
 namespace Excellon {
 #if __cplusplus > 201703L
@@ -172,12 +172,12 @@ class File;
 #pragma pack(push, 1)
 
 struct Format {
-    Format(File* file = nullptr);
+    Format(File* file = nullptr)
+        : file { file } { }
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
     int decimal = 0;
     int integer = 0;
-    QPointF offsetPos;
     File* /*const*/ file = nullptr;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& fmt) {
@@ -185,7 +185,6 @@ struct Format {
         stream << fmt.unitMode;
         stream << fmt.decimal;
         stream << fmt.integer;
-        stream << fmt.offsetPos;
         return stream;
     }
     friend QDataStream& operator>>(QDataStream& stream, Format& fmt) {
@@ -193,7 +192,6 @@ struct Format {
         stream >> fmt.unitMode;
         stream >> fmt.decimal;
         stream >> fmt.integer;
-        stream >> fmt.offsetPos;
         return stream;
     }
 };
@@ -203,7 +201,16 @@ struct Format {
 struct State {
     double currentToolDiameter() const;
 
-    void reset(Format* f);
+    void reset(Format* f) {
+        format = f;
+        gCode = G_NULL;
+        mCode = M_NULL;
+        path.clear();
+        pos = QPointF();
+        rawPos.clear();
+        toolId = 0;
+        wm = DrillMode;
+    }
     void updatePos();
 
     struct Pos {
@@ -235,9 +242,8 @@ struct State {
     GCode gCode = G05 /*G_NULL*/;
     MCode mCode = M_NULL;
     WorkMode wm = DrillMode;
-    int tCode = -1;
+    int toolId = -1;
     QPointF pos;
-    QPointF offsetedPos() const { return pos + format->offsetPos; }
     QPolygonF path;
 
     friend QDataStream& operator<<(QDataStream& stream, const State& stt) {
@@ -246,7 +252,7 @@ struct State {
         stream << stt.gCode;
         stream << stt.mCode;
         stream << stt.wm;
-        stream << stt.tCode;
+        stream << stt.toolId;
         stream << stt.pos;
         stream << stt.path;
         return stream;
@@ -257,7 +263,7 @@ struct State {
         stream >> stt.gCode;
         stream >> stt.mCode;
         stream >> stt.wm;
-        stream >> stt.tCode;
+        stream >> stt.toolId;
         stream >> stt.pos;
         stream >> stt.path;
         return stream;
@@ -278,7 +284,7 @@ public:
     // const File* const file = nullptr;
     File* file = nullptr;
     State state;
-    DrillItem* item = nullptr;
+    GiDrill* item = nullptr;
 
     friend QDataStream& operator<<(QDataStream& stream, const Hole& hole) {
         stream << hole.state;

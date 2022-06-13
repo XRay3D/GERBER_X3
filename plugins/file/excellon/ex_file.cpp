@@ -13,7 +13,6 @@
  *******************************************************************************/
 #include "ex_file.h"
 
-#include "drillitem.h"
 #include "gi_drill.h"
 
 #include "ex_node.h"
@@ -48,82 +47,78 @@ QDataStream& operator<<(QDataStream& s, const Tools& c) {
 
 File::File()
     : FileInterface()
-    , m_format(Settings::format()) {
-    m_format.file = this;
+    , format_(Settings::format()) {
+    format_.file = this;
 }
 
 File::~File() { }
 
 Format File::format() const {
-    return m_format;
+    return format_;
 }
 
 void File::setFormat(const Format& value) {
     qDebug(__FUNCTION__);
-    m_format = value;
-    m_format.file = this;
+    (format_ = value).file = this;
     for (Hole& hole : *this) {
         hole.state.updatePos();
-        hole.item->updateHole();
+        hole.item->update(hole.state.path.size() ? Path { hole.state.path } : Path { hole.state.pos }, hole.state.currentToolDiameter());
+
     }
 }
 
 double File::tool(int t) const {
-    if (m_tools.contains(t)) {
-        return m_format.unitMode == Inches ? m_tools.at(t) * 25.4
-                                           : m_tools.at(t);
+    if (tools_.contains(t)) {
+        return format_.unitMode == Inches ? tools_.at(t) * 25.4 : tools_.at(t);
     }
     return {};
 }
 
 Tools File::tools() const {
-    Tools tools(m_tools);
-    if (m_format.unitMode == Inches)
+    Tools tools(tools_);
+    if (format_.unitMode == Inches)
         for (auto& [_, tool] : tools)
             tool *= 25.4;
     return tools;
 }
 
 Paths Excellon::File::merge() const {
-    for (GraphicsItem* item : *m_itemGroups.back())
-        m_mergedPaths.append(item->paths());
-    return m_mergedPaths;
+    for (GraphicsItem* item : *itemGroups_.back())
+        mergedPaths_.append(item->paths());
+    return mergedPaths_;
 }
 
 void File::write(QDataStream& stream) const {
     stream << *static_cast<const QList<Hole>*>(this);
-    stream << m_tools;
-    stream << m_format;
+    stream << tools_;
+    stream << format_;
 }
 
 void File::read(QDataStream& stream) {
     stream >> *static_cast<QList<Hole>*>(this);
-    stream >> m_tools;
-    stream >> m_format;
-    m_format.file = this;
+    stream >> tools_;
+    stream >> format_;
+    format_.file = this;
     for (Hole& hole : *this) {
         hole.file = this;
-        hole.state.format = &m_format;
+        hole.state.format = &format_;
     }
 }
 
 void File::createGi() {
-    for (Hole& hole : *this) {
-        DrillItem* item = new DrillItem(&hole, this);
-        hole.item = item;
-        itemGroup()->push_back(item);
-    }
+    for (Hole& hole : *this)
+        itemGroup()->push_back(hole.item = new GiDrill(hole.state.path.size() ? Path { hole.state.path } : Path { hole.state.pos }, hole.state.currentToolDiameter(), this, hole.state.toolId));
     itemGroup()->setVisible(true);
 }
 
 void File::initFrom(FileInterface* file) {
     FileInterface::initFrom(file);
     setFormat(static_cast<File*>(file)->format());
-    static_cast<Excellon::Node*>(m_node)->file = this;
+    static_cast<Excellon::Node*>(node_)->file = this;
 }
 
 FileTree::Node* File::node() {
-    return m_node ? m_node : m_node = new Excellon::Node(this, &m_id);
+    return node_ ? node_ : node_ = new Excellon::Node(this, &id_);
 }
 
 } //  namespace Excellon

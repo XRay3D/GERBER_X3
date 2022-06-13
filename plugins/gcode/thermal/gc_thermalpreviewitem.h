@@ -28,13 +28,10 @@ class AbstractThermPrGi : public QGraphicsObject {
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)
     Q_PROPERTY(QColor pathColor READ pathColor WRITE setPathColor)
 
-    // clang-format off
     QColor bodyColor() { return m_bodyColor; }
-    void setBodyColor(const QColor& c) { m_bodyColor = c; update();  }
+    void setBodyColor(const QColor& c) { m_bodyColor = c, update(); }
     QColor pathColor() { return m_pathColor; }
-    void setPathColor(const QColor& c) { m_pathColor = c; update(); }
-    // clang-format on
-    // static QPainterPath drawPoly(const GerberAbstrGraphicObject& go);
+    void setPathColor(const QColor& c) { m_pathColor = c, update(); }
     friend class ThermalNode;
 
     QParallelAnimationGroup agr;
@@ -51,7 +48,7 @@ public:
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
-    QRectF boundingRect() const override;
+    // QRectF boundingRect() const override;
     QPainterPath shape() const override;
 
     //////////////////////////////////////////
@@ -84,13 +81,13 @@ private:
     static constexpr int dark = 180;
     static constexpr int light = 255;
     inline static const QColor colors[] {
-        QColor(128, 128, 128, dark),  //     Default         dark gray
-        QColor(128, 128, 128, light), //    DefaultHovered  light gray
-        QColor(0x0, 255, 0x0, dark),  //     Selected        dark green
-        QColor(0x0, 255, 0x0, light), //    SelectedHovered light green
-        QColor(255, 0x0, 0x0, dark),  //     Used            dark red
-        QColor(255, 0x0, 0x0, light), //    UsedHovered     light red
-        QColor(0x0, 0x0, 0x0, 0x0),   //      UnUsed          transparent
+        QColor(128, 128, 128, dark),  // Default         dark gray
+        QColor(128, 128, 128, light), // DefaultHovered  light gray
+        QColor(0x0, 255, 0x0, dark),  // Selected        dark green
+        QColor(0x0, 255, 0x0, light), // SelectedHovered light green
+        QColor(255, 0x0, 0x0, dark),  // Used            dark red
+        QColor(255, 0x0, 0x0, light), // UsedHovered     light red
+        QColor(0x0, 0x0, 0x0, 0x0),   // UnUsed          transparent
     };
 
     enum ColorState {

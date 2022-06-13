@@ -24,17 +24,17 @@ class File : private GCUtils, public FileInterface {
 
 public:
     explicit File();
-    explicit File(const Pathss& toolPathss, const GCodeParams& gcp, const Paths& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, const GCodeParams& gcp_, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
-    QIcon icon() const { return m_icon; }
+    QIcon icon() const { return icon_; }
 
 private:
     ////////////////////////////////////////
-    Paths m_pocketPaths;     /////
-    Pathss m_toolPathss;     /////
-    const GCodeParams m_gcp; ////
+    Paths pocketPaths_;     /////
+    Pathss toolPathss_;     /////
+    const GCodeParams gcp_; ////
 
     mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
     mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
@@ -52,7 +52,7 @@ private:
     void createGiProfile();
     void createGiRaster();
     void createGiLaser();
-    QIcon m_icon;
+    QIcon icon_;
     //////////////
     void saveDrill(const QPointF& offset);
 

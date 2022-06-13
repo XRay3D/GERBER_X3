@@ -356,7 +356,7 @@ int Project::addShape(ShapeInterface* const shape) {
         return -1;
     m_isPinsPlaced = false;
     const int newId = m_shapes.size() ? (--m_shapes.end())->first + 1 : 0;
-    shape->m_giId = newId;
+    shape->id_ = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
     m_shapes.emplace(newId, shape);

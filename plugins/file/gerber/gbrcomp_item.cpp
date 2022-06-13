@@ -28,7 +28,7 @@ ComponentItem::ComponentItem(const Component& component, FileInterface* file)
     component.setComponentitem(this);
     pathPins.resize(m_component.pins().size());
     for (auto&& poly : m_component.footprint())
-        m_shape.addPolygon(poly);
+        shape_.addPolygon(poly);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolTip(m_component.toolTip());
@@ -41,7 +41,7 @@ QRectF ComponentItem::boundingRect() const {
 QPainterPath ComponentItem::shape() const {
     if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor()))
         m_scale = App::graphicsView()->scaleFactor();
-    return m_shape;
+    return shape_;
 }
 
 void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale) {
@@ -61,23 +61,23 @@ void drawText(QPainter* painter, const QString& str, const QColor& color, QPoint
 }
 
 void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    auto color { m_file->color() };
+    auto color { file_->color() };
     painter->setBrush(color);
     color.setAlpha(255);
     painter->setPen({ m_selected ? Qt::red : color, 2 * m_scale });
-    auto fillPolygons { m_shape.toFillPolygons() };
+    auto fillPolygons { shape_.toFillPolygons() };
     if (fillPolygons.size()) {
         for (auto&& poly : fillPolygons)
             painter->drawPolygon(poly);
     } else {
         painter->setBrush(Qt::NoBrush);
-        painter->drawPath(m_shape);
+        painter->drawPath(shape_);
     }
 
     constexpr int s = 10;
 
     painter->setBrush(Qt::NoBrush);
-    double min = std::min(m_shape.boundingRect().width(), m_shape.boundingRect().height());
+    double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
     double k = std::min(min, m_scale * s);
     painter->drawLine(
         m_component.referencePoint() + QPointF { k, k },
@@ -116,7 +116,7 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     drawText(painter,
         m_component.refdes(),
         Qt::red,
-        m_shape.boundingRect().center(),
+        shape_.boundingRect().center(),
         m_scale);
 
     if (m_scale < 0.05)

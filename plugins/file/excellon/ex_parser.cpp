@@ -34,7 +34,7 @@ FileInterface* Parser::parseFile(const QString& fileName) {
 
     file = new File;
     file->setFileName(fileName);
-    m_state.reset(&file->m_format);
+    m_state.reset(&file->format_);
 
     QTextStream in(&file_);
     in.setAutoDetectUnicode(true);
@@ -105,14 +105,14 @@ bool Parser::parseComment(const QString& line) {
             if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
                 qDebug() << "regexTool" << matchTool.data();
                 const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
-                file->m_tools[tCode] = CtreCapTo(diam).toDouble();
-                file->m_tools[tCode] *= 0.0254 * (1.0 / 25.4);
-                m_state.tCode = tCode; // m_state.tCode = file->m_tools.firstKey();
+                file->tools_[tCode] = CtreCapTo(diam).toDouble();
+                file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
+                m_state.toolId = tCode; // m_state.tCode = file->m_tools.firstKey();
             }
 
             if (auto [match, integer, decimal] = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment); match) {
-                file->m_format.integer = CtreCapTo(integer).toInt();
-                file->m_format.decimal = CtreCapTo(decimal).toInt();
+                file->format_.integer = CtreCapTo(integer).toInt();
+                file->format_.decimal = CtreCapTo(decimal).toInt();
             }
 
             return true;
@@ -167,11 +167,11 @@ bool Parser::parseMCode(const QString& line) {
         if (auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
             switch (CtreCapTo(c1).toInt()) {
             case M00: {
-                auto tools = file->m_tools;
+                auto tools = file->tools_;
                 QList<int> keys;
                 std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
-                if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
-                    m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+                if (keys.indexOf(m_state.toolId) < (keys.size() - 1))
+                    m_state.toolId = keys[keys.indexOf(m_state.toolId) + 1];
                 //            QList<int> keys(file->m_tools.keys());
                 //            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
                 //                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
@@ -199,11 +199,11 @@ bool Parser::parseMCode(const QString& line) {
                 break;
             case M71:
                 m_state.mCode = M71;
-                file->m_format.unitMode = Millimeters;
+                file->format_.unitMode = Millimeters;
                 break;
             case M72:
                 m_state.mCode = M72;
-                file->m_format.unitMode = Inches;
+                file->format_.unitMode = Inches;
                 break;
             case M95:
                 m_state.mCode = M95;
@@ -232,9 +232,9 @@ bool Parser::parseTCode(const QString& line) {
                                                   R"(.*$)");
         static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
         if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(toU16StrView(line)); whole) {
-            m_state.tCode = CtreCapTo(tool).toInt();
+            m_state.toolId = CtreCapTo(tool).toInt();
             if (auto [whole, diam] = *ctre::range<regex2>(toU16StrView(line)).begin(); whole) {
-                file->m_tools[m_state.tCode] = CtreCapTo(diam).toDouble();
+                file->tools_[m_state.toolId] = CtreCapTo(diam).toDouble();
                 return true;
             }
             return true;
@@ -376,10 +376,10 @@ bool Parser::parseFormat(const QString& line) {
         if (C1)
             switch (unitMode.indexOf(CtreCapTo(C1))) {
             case Inches:
-                file->m_format.unitMode = Inches;
+                file->format_.unitMode = Inches;
                 break;
             case Millimeters:
-                file->m_format.unitMode = Millimeters;
+                file->format_.unitMode = Millimeters;
                 break;
             default:
                 break;
@@ -387,10 +387,10 @@ bool Parser::parseFormat(const QString& line) {
         if (C2)
             switch (zeroMode.indexOf(CtreCapTo(C2))) {
             case LeadingZeros:
-                file->m_format.zeroMode = LeadingZeros;
+                file->format_.zeroMode = LeadingZeros;
                 break;
             case TrailingZeros:
-                file->m_format.zeroMode = TrailingZeros;
+                file->format_.zeroMode = TrailingZeros;
                 break;
             default:
                 break;
@@ -399,8 +399,8 @@ bool Parser::parseFormat(const QString& line) {
     }
     static constexpr ctll::fixed_string regex2(R"(^(FMAT).*(2)?$)"); // fixed_string("^(FMAT).*(2)?$");
     if (auto [whole, C1, C2] = ctre::match<regex2>(toU16StrView(line)); whole) {
-        file->m_format.unitMode = Inches;
-        file->m_format.zeroMode = LeadingZeros;
+        file->format_.unitMode = Inches;
+        file->format_.zeroMode = LeadingZeros;
         return true;
     }
     return false;
@@ -421,19 +421,19 @@ bool Parser::parseNumber(QString Str, double& val) {
                 Str.remove(0, 1);
                 sign = -1;
             }
-            if (Str.length() < file->m_format.integer + file->m_format.decimal) {
-                switch (file->m_format.zeroMode) {
+            if (Str.length() < file->format_.integer + file->format_.decimal) {
+                switch (file->format_.zeroMode) {
                 case LeadingZeros:
-                    Str = Str + QString(file->m_format.integer + file->m_format.decimal - Str.length(), '0');
+                    Str = Str + QString(file->format_.integer + file->format_.decimal - Str.length(), '0');
                     break;
                 case TrailingZeros:
-                    Str = QString(file->m_format.integer + file->m_format.decimal - Str.length(), '0') + Str;
+                    Str = QString(file->format_.integer + file->format_.decimal - Str.length(), '0') + Str;
                     break;
                 }
             }
-            val = Str.toDouble() * pow(10.0, -file->m_format.decimal) * sign;
+            val = Str.toDouble() * pow(10.0, -file->format_.decimal) * sign;
         }
-        if (file->m_format.unitMode == Inches)
+        if (file->format_.unitMode == Inches)
             val *= 25.4;
 
         val = std::clamp(val, -1000.0, +1000.0); // one meter

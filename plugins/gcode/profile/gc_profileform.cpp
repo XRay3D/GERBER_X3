@@ -12,8 +12,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gc_profileform.h"
-#include "gi_bridge.h"
 #include "gc_profile.h"
+#include "gi_bridge.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
@@ -152,27 +152,25 @@ void ProfileForm::createFile() {
         return;
     }
 
-    GCode::GCodeParams gcp;
-    gcp.setConvent(ui->rbConventional->isChecked());
-    gcp.setSide(side);
-    gcp.tools.push_back(tool);
-    gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    (side == GCode::On) ? gcp.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
-    gcp.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
+    GCode::GCodeParams gcp_;
+    gcp_.setConvent(ui->rbConventional->isChecked());
+    gcp_.setSide(side);
+    gcp_.tools.push_back(tool);
+    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    (side == GCode::On) ? gcp_.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp_.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
+    gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
-    {
-        QPolygonF brv;
-        for (QGraphicsItem* item : App::scene()->items()) {
-            if (static_cast<GiType>(item->type()) == GiType::Bridge)
-                brv.push_back(item->pos());
-        }
-        if (!brv.isEmpty()) {
-            // gcp.params[GCode::GCodeParams::Bridges].fromValue(brv);
-            gcp.params[GCode::GCodeParams::BridgeLen] = ui->dsbxBridgeLenght->value();
-        }
+    QPolygonF brv;
+    for (QGraphicsItem* item : App::scene()->items()) {
+        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+            brv.push_back(item->pos());
+    }
+    if (!brv.isEmpty()) {
+        // gcp_.params[GCode::GCodeParams::Bridges].fromValue(brv);
+        gcp_.params[GCode::GCodeParams::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    tpc_->setGcp(gcp);
+    tpc_->setGcp(gcp_);
     tpc_->addPaths(wPaths);
     tpc_->addRawPaths(wRawPaths);
     fileCount = 1;
@@ -246,16 +244,16 @@ void ProfileForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1;
 
 void ProfileForm::editFile(GCode::File* file) {
 
-    GCode::GCodeParams gcp { file->gcp() };
+    GCode::GCodeParams gcp_ { file->gcp() };
 
-    fileId = gcp.fileId;
+    fileId = gcp_.fileId;
     m_editMode = true;
 
     { // GUI
-        side = gcp.side();
-        direction = static_cast<GCode::Direction>(gcp.convent());
-        ui->toolHolder->setTool(gcp.tools.front());
-        ui->dsbxDepth->setValue(gcp.params[GCode::GCodeParams::Depth].toDouble());
+        side = gcp_.side();
+        direction = static_cast<GCode::Direction>(gcp_.convent());
+        ui->toolHolder->setTool(gcp_.tools.front());
+        ui->dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
 
         switch (side) {
         case GCode::On:
@@ -281,7 +279,7 @@ void ProfileForm::editFile(GCode::File* file) {
 
     { // GrItems
         usedItems_.clear();
-        auto items { gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
+        auto items { gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
 
         auto i = items.cbegin();
         while (i != items.cend()) {
@@ -294,9 +292,9 @@ void ProfileForm::editFile(GCode::File* file) {
     }
 
     { // Bridges
-        if (gcp.params.contains(GCode::GCodeParams::Bridges)) {
-            ui->dsbxBridgeLenght->setValue(gcp.params[GCode::GCodeParams::BridgeLen].toDouble());
-            //            for (auto& pos : gcp.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
+        if (gcp_.params.contains(GCode::GCodeParams::Bridges)) {
+            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
+            //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
             //                brItem = new BridgeItem(m_lenght, m_size, side, brItem);
             //                App::scene()->addItem(brItem);
             //                brItem->setPos(pos);
