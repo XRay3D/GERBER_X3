@@ -13,6 +13,7 @@
  *******************************************************************************/
 #include "gc_drillform.h"
 #include "gc_drillmodel.h"
+#include "gc_errordialog.h"
 #include "pocketoffset/gc_pocketoffset.h"
 #include "profile/gc_profile.h"
 #include "ui_drillform.h"
@@ -31,6 +32,7 @@
 
 #include <QMessageBox>
 #include <QPainter>
+#include <QThread>
 #include <QTimer>
 
 Paths offset(const Path& path, double offset, bool fl = false) {
@@ -300,6 +302,8 @@ void DrillForm::on_pbCreate_clicked() {
             if (row.toolId > -1 && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(row.apertureId);
                 for (auto& item : row.items) {
+                    if (item->isSlot())
+                        continue;
                     switch (worckType) {
                     case GCode::Profile:
                         if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
@@ -365,6 +369,8 @@ void DrillForm::on_pbCreate_clicked() {
             }
             if (val.paths.size()) {
                 GCode::File* gcode = nullptr;
+
+                QThread thread;
                 switch (worckType) {
                 case GCode::Profile: {
                     GCode::GCodeParams gcp;
@@ -374,9 +380,20 @@ void DrillForm::on_pbCreate_clicked() {
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
 
                     GCode::ProfileCreator tpc;
+                    tpc.moveToThread(&thread);
+                    connect(
+                        &tpc, &GCode::ProfileCreator ::errorOccurred, this, [&](int) {
+                            if (ErrorDialog(tpc.items, this).exec())
+                                tpc.proceed();
+                            else
+                                tpc.cancel();
+                        },
+                        Qt::QueuedConnection);
+                    thread.start();
                     tpc.setGcp(gcp);
                     tpc.addPaths(val.paths);
                     tpc.createGc();
+
                     gcode = tpc.file();
                 } break;
                 case GCode::Pocket: {
@@ -390,6 +407,8 @@ void DrillForm::on_pbCreate_clicked() {
                     gcp.params[GCode::GCodeParams::Steps] = 0;
 
                     GCode::PocketCreator tpc;
+                    tpc.moveToThread(&thread);
+                    thread.start();
                     tpc.setGcp(gcp);
                     tpc.addPaths(val.paths);
                     tpc.createGc();
@@ -402,7 +421,8 @@ void DrillForm::on_pbCreate_clicked() {
                 if (!gcode)
                     //                    exit(-999);
                     continue;
-
+                thread.quit();
+                thread.wait();
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + "_T" + indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);

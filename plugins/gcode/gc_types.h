@@ -166,6 +166,7 @@ struct variant {
 };
 
 struct GCodeParams {
+    Q_GADGET
     enum Param {
         UseAngle, // need for Raster and LaserHLDI
         Depth,
@@ -192,6 +193,7 @@ struct GCodeParams {
         IgnoreCopper, // need for Thermal
         HathStep      // need for Hatching
     };
+    Q_ENUM(Param)
 
     GCodeParams() { }
     GCodeParams(const Tool& tool, double depth, GCodeType type) {

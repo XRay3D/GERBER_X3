@@ -11,9 +11,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gc_profile.h"
-#include "gi_bridge.h"
 #include "gc_file.h"
 #include "gc_profileform.h"
+#include "gi_bridge.h"
 #include "mainwindow.h"
 #include "scene.h"
 
@@ -238,6 +238,8 @@ void ProfileCreator::makeBridges() {
 }
 
 void ProfileCreator::reorder() {
+//    returnPss = { returnPs };
+//    return;
     PolyTree polyTree;
     {
         Clipper clipper;

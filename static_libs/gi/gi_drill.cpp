@@ -111,17 +111,14 @@ void GiDrill::changeColor() {
 void GiDrill::create() {
     shape_ = QPainterPath();
 
-    switch (path_.size()) {
-    case 0:
-        break;
-    case 1: {
+    if (!path_.size()) {
+        return;
+    } else if (path_.size() == 1) {
         path_ = CirclePath(diameter_ * uScale, path_.front());
         ReversePath(path_);
         path_.push_back(path_.front());
         shape_.addPolygon(path_);
-    } break;
-    case 2:
-    default: {
+    } else {
         rect_ = shape_.boundingRect();
         Paths paths;
         ClipperOffset offset;
@@ -131,7 +128,6 @@ void GiDrill::create() {
             path.push_back(path.front());
             shape_.addPolygon(path);
         }
-    }
     }
 
     rect_ = shape_.boundingRect();
