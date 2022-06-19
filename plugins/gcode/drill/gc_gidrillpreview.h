@@ -6,12 +6,12 @@
 #include "qpainterpath.h"
 
 class GiDrillPreview final : public GiAbstractPreview {
-    HV hv;
+    PosPath hv;
     Row& row;
     int toolId_ { -1 };
 
 public:
-    explicit GiDrillPreview(HV&& hv, double diameter, int toolId, Row& row);
+    explicit GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
 
     // GiAbstractPreview interface
     void updateTool() override;

@@ -26,7 +26,7 @@ public:
     static double parseNumber(QString Str, const State& state);
 
 private:
-    bool parseComment(const QString& line);
+    bool parseComment(QString line);
     bool parseGCode(const QString& line);
     bool parseMCode(const QString& line);
     bool parseTCode(const QString& line);
@@ -39,6 +39,8 @@ private:
     void circularRout();
 
     QPolygonF arc(QPointF p1, QPointF p2, QPointF center);
+
+    Tools::iterator toolIt {};
 
 protected:
     File* file = nullptr;

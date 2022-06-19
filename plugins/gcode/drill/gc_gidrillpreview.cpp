@@ -1,7 +1,7 @@
 #include "gc_gidrillpreview.h"
 #include "utils.h"
 
-GiDrillPreview::GiDrillPreview(HV&& hv, double diameter, int toolId, Row& row)
+GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
     : hv { std::move(hv) }
     , row { row }
     , toolId_ { toolId } {
@@ -22,7 +22,12 @@ GiDrillPreview::GiDrillPreview(HV&& hv, double diameter, int toolId, Row& row)
             return painterPath;
         },
     };
-    sourcePath_ = std::visit(draw, hv);
+    if (draw_.size()) {
+        for (auto&& path : draw_)
+            sourcePath_.addPolygon(path);
+        sourcePath_.translate(std::get<const QPointF>(hv));
+    } else
+        sourcePath_ = std::visit(draw, hv);
     row.items.emplace_back(this);
     update();
 }

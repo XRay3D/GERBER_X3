@@ -1,7 +1,9 @@
 #pragma once
 
+#include <QDebug>
 #include <QString>
 #include <chrono>
+#include <concepts>
 #include <map>
 #include <string_view>
 
@@ -69,20 +71,31 @@ inline auto toU16StrView(const QString& str) {
 template <class T>
 struct CtreCapTo {
     T& cap;
-    CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
+    constexpr CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
         : cap { cap } {
     }
 
-    auto toDouble() const { return QString(*this).toDouble(); }
-    auto toInt() const { return QString(*this).toInt(); }
-
-    operator QString() const {
+    auto toDouble() const { return toString().toDouble(); }
+    auto toInt() const { return toString().toInt(); }
+    auto toString() const {
         // qDebug("QString  D%d S%d", cap.data(), cap.size());
         return QString(reinterpret_cast<const QChar*>(cap.data()), static_cast<size_t>(cap.size()));
     }
 
+    operator QString() const { return toString(); }
     operator double() const { return toDouble(); }
     operator int() const { return toInt(); }
+    //    template <typename Ty>
+    //    operator Ty() const {
+    //        qDebug() << __FUNCSIG__;
+    //        if constexpr (std::is_enum_v<Ty>)
+    //            return static_cast<Ty>(toInt());
+    //        if constexpr (std::is_integral_v<Ty>)
+    //            return toInt();
+    //        if constexpr (std::is_floating_point_v<Ty>)
+    //            return toDouble();
+    //        return toString();
+    //    }
 };
 template <class T>
 CtreCapTo(T) -> CtreCapTo<T>;
@@ -101,3 +114,17 @@ struct Overload : Ts... {
 
 template <typename... Ts>
 Overload(Ts...) -> Overload<Ts...>;
+
+template <typename Cap>
+concept CapContent = requires(Cap a) {
+    std::is_pointer_v<decltype(a.data())>;
+    { a.size() } -> std::convertible_to<size_t>;
+    { a.operator bool() } -> std::convertible_to<bool>;
+};
+
+template <CapContent Cap>
+QDebug operator<<(QDebug debug, Cap& cap) {
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "captured_content(" << QStringView(cap.data(), cap.size()) << ')';
+    return debug;
+}

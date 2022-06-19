@@ -57,6 +57,7 @@ public:
     void setColor(const QColor& color) override;
 
     mvector<const AbstrGraphicObject*> graphicObjects() const override;
+    const auto& graphicObjects2() const { return graphicObjects_; };
 
 protected:
     Paths merge() const override;

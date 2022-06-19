@@ -37,16 +37,3 @@ private:
     DrillModel* model() const;
 };
 
-class GCPluginImpl : public GCodePlugin {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
-    Q_INTERFACES(GCodePlugin)
-
-    // GCodePlugin interface
-public:
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+D" }; }
-    QWidget* createForm() override { return new DrillForm(this); };
-    bool canToShow() const override { return DrillForm::canToShow(); }
-    int type() const override { return GCode::Drill; }
-};
