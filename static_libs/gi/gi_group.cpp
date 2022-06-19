@@ -15,7 +15,7 @@
 #include "scene.h"
 
 GiGroup::~GiGroup() {
-    if (App::scene()->items().size())
+    if (App::scene() && App::scene()->items().size())
         qDeleteAll(*this);
 }
 

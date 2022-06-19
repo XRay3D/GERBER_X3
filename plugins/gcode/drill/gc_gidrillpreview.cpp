@@ -90,14 +90,18 @@ IntPoint GiDrillPreview::pos() const {
 Paths GiDrillPreview::paths() const {
     auto getPath = Overload {
         [this](const QPointF& val) {
-            auto path { CirclePath(sourceDiameter_, val) };
-            path.emplace_back(path.front());
-            return path;
+            auto path { CirclePath(sourceDiameter_ * uScale, val) };
+            // path.emplace_back(path.front());
+            qDebug() << __FUNCSIG__ << sourceDiameter_ << path.size();
+            return ReversePath(path);
         },
-        [](const QPolygonF& val) { return Path { val }; },
+        [this](const QPolygonF& val) {
+            qDebug() << __FUNCSIG__ << sourceDiameter_ << val.size();
+            return Path { val };
+        },
     };
-    Path path({ std::visit(getPath, hv) });
-    return { path }; //{ ReversePath(path) };
+    //    Path path({ std::visit(getPath, hv) });
+    return { std::visit(getPath, hv) }; //{ ReversePath(path) };
 }
 
 bool GiDrillPreview::fit(double depth) { return sourceDiameter_ > App::toolHolder().tool(toolId()).getDiameter(depth); }
