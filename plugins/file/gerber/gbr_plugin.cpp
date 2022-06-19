@@ -13,6 +13,7 @@
  *******************************************************************************/
 #include "gbr_plugin.h"
 
+#include "drill/gc_drillform.h"
 #include "gbr_aperture.h"
 #include "gbr_file.h"
 #include "gbr_node.h"
@@ -51,9 +52,35 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return file;
 }
 
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+    if (plugin->type() == ::GCode::Drill) {
+        Drills retData;
+        auto const gbrFile = static_cast<File*>(file);
+        for (auto gbrObj : gbrFile->graphicObjects2()) {
+            auto& ap = *gbrFile->apertures_[gbrObj.state().aperture()];
+            if (gbrObj.state().dCode() == D03 && ap.flashed())
+                retData[{ gbrObj.state().aperture(), ap.apertureSize(), false, ap.name() }].posOrPath.emplace_back(gbrObj.state().curPos());
+            if (!retData[{ gbrObj.state().aperture(), ap.apertureSize(), false, ap.name() }].draw.size()) {
+                auto state = gbrObj.state();
+                state.setCurPos({});
+                retData[{ gbrObj.state().aperture(), ap.apertureSize(), false, ap.name() }].draw = ap.draw(state);
+            }
+        }
+        //        for (const Excellon::Hole& hole : *exFile) {
+        //            auto name { QString("T%1").arg(hole.state.toolId) };
+        //            if (bool slot = hole.state.path.size(); slot)
+        //                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.path));
+        //            else
+        //                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.pos));
+        //        }
+        return retData;
+    }
+    return {};
+}
+
 QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath;
-    for (const auto &polygon : aperture->draw(State()))
+    for (const auto& polygon : aperture->draw(State()))
         painterPath.addPolygon(polygon);
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
     const QRectF rect = painterPath.boundingRect();

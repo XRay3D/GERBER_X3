@@ -33,6 +33,7 @@ FileInterface* Parser::parseFile(const QString& fileName) {
         return nullptr;
 
     file = new File;
+    toolIt = file->tools_.end();
     file->setFileName(fileName);
     m_state.reset(&file->format_);
 
@@ -91,30 +92,32 @@ FileInterface* Parser::parseFile(const QString& fileName) {
     return file;
 }
 
-bool Parser::parseComment(const QString& line) {
+bool Parser::parseComment(QString line) {
     if (line.startsWith(';')) {
-        qDebug() << "line" << line;
-        static constexpr ctll::fixed_string regexComment(R"(^;(.*)$)"); // fixed_string("^;(.*)$");
-        //        static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))"); // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
-        static constexpr ctll::fixed_string regexTool(R"(\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)"); // fixed_string("\s*(?:HOLESIZE|holesize)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*");
-        if (auto [match, comment] = ctre::match<regexComment>(toU16StrView(line)); match) {
-            //            if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-            //                file->m_format.integer = CtreCapTo(integer).toInt();
-            //                file->m_format.decimal = CtreCapTo(decimal).toInt();
-            //            }
-            if (auto [matchTool, tool, diam] = ctre::match<regexTool>(comment); matchTool) {
-                qDebug() << "regexTool" << matchTool.data();
+        line = line.toUpper();
+        if (auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) { // regexComment
+
+            if (auto [matchTool, tool, diam] = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment); matchTool) { // tool
+                qDebug() << __FUNCTION__ << tool << diam;
                 const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
-                file->tools_[tCode] = CtreCapTo(diam).toDouble();
-                file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
-                m_state.toolId = tCode; // m_state.tCode = file->m_tools.firstKey();
+                if (toolIt == file->tools_.end()) {
+                    toolIt = file->tools_.begin();
+                    m_state.toolId = tCode; // m_state.tCode = file->m_tools.firstKey();
+                }
+                file->tools_[tCode] = CtreCapTo(diam).toDouble() * (file->format_.unitMode == Inches ? (0.0254 * 1 / 25.4) : 1.0);
+                //                file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
             }
 
+            // static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))");
+            // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
+            // if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
+            //     file->m_format.integer = CtreCapTo(integer).toInt();
+            //     file->m_format.decimal = CtreCapTo(decimal).toInt();
+            // }
             if (auto [match, integer, decimal] = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment); match) {
                 file->format_.integer = CtreCapTo(integer).toInt();
                 file->format_.decimal = CtreCapTo(decimal).toInt();
             }
-
             return true;
         }
     }
@@ -167,14 +170,12 @@ bool Parser::parseMCode(const QString& line) {
         if (auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
             switch (CtreCapTo(c1).toInt()) {
             case M00: {
-                auto tools = file->tools_;
-                QList<int> keys;
-                std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
-                if (keys.indexOf(m_state.toolId) < (keys.size() - 1))
-                    m_state.toolId = keys[keys.indexOf(m_state.toolId) + 1];
-                //            QList<int> keys(file->m_tools.keys());
-                //            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
-                //                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+                //                auto tools = file->tools_;
+                //                QList<int> keys;
+                //                std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
+                //                if (keys.indexOf(m_state.toolId) < (keys.size() - 1))
+                //                    m_state.toolId = keys[keys.indexOf(m_state.toolId) + 1];
+                m_state.toolId = (++toolIt)->first;
             } break;
             case M15:
                 m_state.mCode = M15;
@@ -263,15 +264,15 @@ bool Parser::parsePos(const QString& line) {
             return false;
 
         if (X) {
-            m_state.rawPos.X = QString { CtreCapTo(X) };
+            m_state.rawPos.X = CtreCapTo(X);
             parseNumber(CtreCapTo(X), m_state.pos.rx());
         }
         if (Y) {
-            m_state.rawPos.Y = QString { CtreCapTo(Y) };
+            m_state.rawPos.Y = CtreCapTo(Y);
             parseNumber(CtreCapTo(Y), m_state.pos.ry());
         }
         if (A)
-            m_state.rawPos.A = QString { CtreCapTo(A) };
+            m_state.rawPos.A = CtreCapTo(A);
 
         switch (m_state.wm) {
         case DrillMode:

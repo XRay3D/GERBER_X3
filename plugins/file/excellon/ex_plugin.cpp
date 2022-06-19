@@ -51,17 +51,19 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
-    HoleMap retData;
-    auto const exFile = static_cast<File*>(file);
-    for (const Excellon::Hole& hole : *exFile) {
-        auto name { QString("T%1").arg(hole.state.toolId) };
-        if (bool slot = hole.state.path.size(); slot)
-            retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.path));
-        else
-            retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.pos));
+    if (plugin->type() == ::GCode::Drill) {
+        Drills retData;
+        auto const exFile = static_cast<File*>(file);
+        for (const Excellon::Hole& hole : *exFile) {
+            auto name { QString("T%1").arg(hole.state.toolId) };
+            if (bool slot = hole.state.path.size(); slot)
+                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(exFile->transform().map(hole.state.path));
+            else
+                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(exFile->transform().map(hole.state.pos));
+        }
+        return retData;
     }
-
-    return retData;
+    return {};
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {

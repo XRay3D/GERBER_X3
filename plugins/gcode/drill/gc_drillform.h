@@ -18,9 +18,13 @@
 #include <QToolBar>
 #include <QWidget>
 
-using HV = std::variant<const QPointF, const QPolygonF>;
-using HK = std::tuple<int, double, bool, QString>;
-using HoleMap = std::map<HK, mvector<HV>>;
+using PosPath = std::variant<const QPointF, const QPolygonF>;
+using DrillKey = std::tuple<int, double, bool, QString>;
+struct DrillVal {
+    mvector<PosPath> posOrPath;
+    Paths draw;
+};
+using Drills = std::map<DrillKey, DrillVal>;
 
 namespace Ui {
 class DrillForm;
@@ -67,6 +71,20 @@ private:
     QModelIndexList selectedIndexes() const;
 
     inline void zoomToSelected();
+};
+
+class GCPluginImpl : public GCodePlugin {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
+    Q_INTERFACES(GCodePlugin)
+
+    // GCodePlugin interface
+public:
+    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
+    QKeySequence keySequence() const override { return { "Ctrl+Shift+D" }; }
+    QWidget* createForm() override { return new DrillForm(this); };
+    bool canToShow() const override { return DrillForm::canToShow(); }
+    int type() const override { return GCode::Drill; }
 };
 
 #include "app.h"

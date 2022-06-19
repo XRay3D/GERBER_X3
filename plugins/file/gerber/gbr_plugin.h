@@ -42,5 +42,8 @@ public:
 
     // public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
+
+    // FilePlugin interface
+    std::any createPreviewGi(FileInterface *file, GCodePlugin* plugin) override;
 };
 } // namespace Gerber

@@ -114,7 +114,7 @@ void GiDrill::create() {
     if (!path_.size()) {
         return;
     } else if (path_.size() == 1) {
-        path_ = CirclePath(diameter_ * uScale, path_.front());
+        path_ = CirclePath(diameter_ ? diameter_ * uScale : uScale, path_.front());
         ReversePath(path_);
         path_.push_back(path_.front());
         shape_.addPolygon(path_);

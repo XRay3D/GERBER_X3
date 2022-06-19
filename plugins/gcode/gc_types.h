@@ -167,6 +167,7 @@ struct variant {
 
 struct GCodeParams {
     Q_GADGET
+public:
     enum Param {
         UseAngle, // need for Raster and LaserHLDI
         Depth,

@@ -300,9 +300,6 @@ void File::read(QDataStream& stream) {
     stream >> rawIndex;
     stream >> itemsType_;
     stream >> components_;
-    QPointF offset_;
-    if (App::project()->ver() >= ProVer_6)
-        stream >> offset_;
 
     for (GraphicObject& go : graphicObjects_) {
         go.m_gFile = this;

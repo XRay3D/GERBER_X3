@@ -450,7 +450,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
     }
 
     try {
-        auto peview = std::any_cast<HoleMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, plugin));
+        auto peview = std::any_cast<Drills>(App::filePlugin(int(file->type()))->createPreviewGi(file, plugin));
 
         model = new DrillModel(type_, peview.size(), ui->toolTable);
 
@@ -459,13 +459,13 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
         for (auto& [key, val] : peview) {
             auto [id, diametr, isSlot, name] = key;
             data.emplace_back(
-                drawDrillIcon(isSlot ? Qt::red : Qt::black),
+                val.draw.size() ? drawIcon(val.draw) : drawDrillIcon(isSlot ? Qt::red : Qt::black),
                 name + ": Ø" + QString::number(diametr),
                 diametr,
                 id,
                 isSlot);
-            for (auto&& val : val)
-                auto gi = new GiDrillPreview(std::move(val), diametr, data.back().toolId, data.back());
+            for (auto&& pos : val.posOrPath)
+                auto gi = new GiDrillPreview(std::move(pos), diametr, data.back().toolId, data.back(), val.draw);
         }
 
         App::scene()->update();
