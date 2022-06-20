@@ -22,6 +22,7 @@ add_definitions(-DCTRE)
 #add_definitions("-D__cpp_consteval")# source_location
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -29,7 +30,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     #    add_compile_options(-H)
     #    add_compile_options(-ftime-report)
     # -pthread
-    # -ltbb
+    # -ltbbD
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
