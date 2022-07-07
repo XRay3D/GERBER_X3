@@ -76,7 +76,7 @@ public:
 #include "gc_plugin.h"
 #include <QToolBar>
 
-class GCPluginImpl : public GCodePlugin {
+class GCPluginImpl final : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
     Q_INTERFACES(GCodePlugin)

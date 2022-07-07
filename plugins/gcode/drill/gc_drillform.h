@@ -73,7 +73,7 @@ private:
     inline void zoomToSelected();
 };
 
-class GCPluginImpl : public GCodePlugin {
+class GCPluginImpl final : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
     Q_INTERFACES(GCodePlugin)
