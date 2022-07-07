@@ -68,7 +68,7 @@ public:
 
 #include <QToolBar>
 
-class GCPluginImpl : public GCodePlugin {
+class GCPluginImpl final : public GCodePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
     Q_INTERFACES(GCodePlugin)
