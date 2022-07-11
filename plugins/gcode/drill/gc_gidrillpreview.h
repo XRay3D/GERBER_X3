@@ -15,9 +15,8 @@ public:
 
     // GiAbstractPreview interface
     void updateTool() override;
-    IntPoint pos() const override;
     Paths paths() const override;
-    bool fit(double depth) override;
+    bool fit(double depth) const override;
 
     // AbstractDrillPrGI interface
     int toolId() const override;

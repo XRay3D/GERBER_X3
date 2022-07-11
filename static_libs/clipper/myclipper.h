@@ -39,3 +39,5 @@ void mergePaths(Paths& paths, const double dist = 0.0);
 enum { IconSize = 24 };
 QIcon drawIcon(const Paths& paths);
 QIcon drawDrillIcon(QColor color = Qt::black);
+
+Paths& normalize(Paths& paths);

@@ -32,14 +32,14 @@
 namespace Gerber {
 
 Path GraphicObject::elipse() const { return (m_state.dCode() == D03
-                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle) ?
-        m_path :
-        Path(); } // circle
+                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle)
+        ? m_path
+        : Path(); } // circle
 Paths GraphicObject::elipseW() const { return (m_state.dCode() == D03
                                                   && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
-                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole()) ?
-        m_paths :
-        Paths(); }
+                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole())
+        ? m_paths
+        : Paths(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
@@ -282,7 +282,7 @@ int File::itemsType() const { return itemsType_; }
 void File::write(QDataStream& stream) const {
     stream << graphicObjects_; // write  QList<GraphicObject>
     stream << apertures_;
-    stream << m_format;
+    stream << format_;
     // stream << layer;
     // stream << miror;
     stream << rawIndex;
@@ -291,10 +291,10 @@ void File::write(QDataStream& stream) const {
 }
 
 void File::read(QDataStream& stream) {
-    crutch = &m_format;        ///////////////////
+    crutch = this;             ///////////////////
     stream >> graphicObjects_; // read  QList<GraphicObject>
     stream >> apertures_;
-    stream >> m_format;
+    stream >> format_;
     // stream >> layer;
     // stream >> miror;
     stream >> rawIndex;
@@ -303,7 +303,7 @@ void File::read(QDataStream& stream) {
 
     for (GraphicObject& go : graphicObjects_) {
         go.m_gFile = this;
-        go.m_state.m_format = format();
+        go.m_state.file_ = this;
     }
 }
 

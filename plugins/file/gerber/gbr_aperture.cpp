@@ -86,25 +86,26 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
     return stream;
 }
 
-AbstractAperture::AbstractAperture(const Format* format)
-    : m_format(format) {
+AbstractAperture::AbstractAperture(const File* file)
+    : file_(file) {
 }
 
 AbstractAperture::~AbstractAperture() { }
 
-Paths AbstractAperture::draw(const State& state, bool fl) {
-    if (state.dCode() == D03 && state.imgPolarity() == Positive && fl)
-        m_isFlashed = true;
-    if (m_paths.empty())
+Paths AbstractAperture::draw(const State& state, bool notApBlock) {
+    if (state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
+        isFlashed_ = true;
+
+    if (paths_.empty())
         draw();
 
-    Paths tmpPpaths(m_paths);
+    Paths retPaths(paths_);
 
-    for (Path& path : tmpPpaths) {
+    for (Path& path : retPaths) {
         if (state.imgPolarity() == Negative)
             ReversePath(path);
 
-        if (m_format->unitMode == Inches && type() == Macro) {
+        if (file_->format().unitMode == Inches && type() == Macro) {
             for (IntPoint& pt : path)
                 pt *= 25.4;
         }
@@ -115,20 +116,20 @@ Paths AbstractAperture::draw(const State& state, bool fl) {
             TranslatePath(path, state.curPos());
     }
 
-    return tmpPpaths;
+    return retPaths;
 }
 
 double AbstractAperture::apertureSize() {
-    if (m_paths.empty())
+    if (paths_.empty())
         draw();
-    return m_size;
+    return size_;
 }
 
 Path AbstractAperture::drawDrill(const State& state) {
-    if (qFuzzyIsNull(m_drillDiam))
+    if (qFuzzyIsNull(drillDiam_))
         return Path();
 
-    Path drill = CirclePath(m_drillDiam * uScale);
+    Path drill = CirclePath(drillDiam_ * uScale);
 
     if (state.imgPolarity() == Positive)
         ReversePath(drill);
@@ -138,7 +139,7 @@ Path AbstractAperture::drawDrill(const State& state) {
 }
 
 void AbstractAperture::transform(Path& poligon, const State& state) {
-    QMatrix m;
+    QTransform m;
     if (!qFuzzyIsNull(state.rotating()))
         m.rotate(state.rotating());
     if (!qFuzzyCompare(state.scaling(), 1.0))
@@ -162,37 +163,37 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
 /// \param drillDiam
 /// \param format
 ///
-ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
+ApCircle::ApCircle(double diam, double drillDiam, const File* format)
     : AbstractAperture(format) {
-    m_diam = diam;
-    m_drillDiam = drillDiam;
+    diam_ = diam;
+    drillDiam_ = drillDiam;
     // GerberAperture interface
 }
 
-QString ApCircle::name() const { return QString("C(Ø%1)").arg(m_diam); } // CIRCLE
+QString ApCircle::name() const { return QString("C(Ø%1)").arg(diam_); } // CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
-bool ApCircle::fit(double toolDiam) const { return m_diam > toolDiam; }
+bool ApCircle::fit(double toolDiam) const { return diam_ > toolDiam; }
 
 void ApCircle::read(QDataStream& stream) {
-    stream >> m_diam;
-    stream >> m_drillDiam;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> diam_;
+    stream >> drillDiam_;
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApCircle::write(QDataStream& stream) const {
-    stream << m_diam;
-    stream << m_drillDiam;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << diam_;
+    stream << drillDiam_;
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApCircle::draw() {
-    m_paths.push_back(CirclePath(m_diam * uScale));
-    m_size = m_diam;
+    paths_.push_back(CirclePath(diam_ * uScale));
+    size_ = diam_;
 }
 /////////////////////////////////////////////////////
 /// \brief ApRectangle::ApRectangle
@@ -201,45 +202,45 @@ void ApCircle::draw() {
 /// \param drillDiam
 /// \param format
 ///
-ApRectangle::ApRectangle(double width, double height, double drillDiam, const Format* format)
+ApRectangle::ApRectangle(double width, double height, double drillDiam, const File* format)
     : AbstractAperture(format) {
-    m_width = width;
-    m_height = height;
-    m_drillDiam = drillDiam;
+    width_ = width;
+    height_ = height;
+    drillDiam_ = drillDiam;
 }
 
 QString ApRectangle::name() const // RECTANGLE
 {
-    if (qFuzzyCompare(m_width, m_height))
-        return QString("R(SQ %1)").arg(m_width);
+    if (qFuzzyCompare(width_, height_))
+        return QString("R(SQ %1)").arg(width_);
     else
-        return QString("R(%1 x %2)").arg(m_width).arg(m_height);
+        return QString("R(%1 x %2)").arg(width_).arg(height_);
 }
 
 ApertureType ApRectangle::type() const { return Rectangle; }
 
-bool ApRectangle::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
+bool ApRectangle::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApRectangle::read(QDataStream& stream) {
-    stream >> m_height;
-    stream >> m_width;
-    stream >> m_drillDiam;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> height_;
+    stream >> width_;
+    stream >> drillDiam_;
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApRectangle::write(QDataStream& stream) const {
-    stream << m_height;
-    stream << m_width;
-    stream << m_drillDiam;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << height_;
+    stream << width_;
+    stream << drillDiam_;
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApRectangle::draw() {
-    m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
-    m_size = qSqrt(m_width * m_width + m_height * m_height);
+    paths_.push_back(RectanglePath(width_ * uScale, height_ * uScale));
+    size_ = qSqrt(width_ * width_ + height_ * height_);
 }
 /////////////////////////////////////////////////////
 /// \brief ApObround::ApObround
@@ -248,43 +249,43 @@ void ApRectangle::draw() {
 /// \param drillDiam
 /// \param format
 ///
-ApObround::ApObround(double width, double height, double drillDiam, const Format* format)
+ApObround::ApObround(double width, double height, double drillDiam, const File* format)
     : AbstractAperture(format) {
 
-    m_width = width;
-    m_height = height;
-    m_drillDiam = drillDiam;
+    width = width;
+    height = height;
+    drillDiam_ = drillDiam;
 }
 
-QString ApObround::name() const { return QString("O(%1 x %2)").arg(m_width).arg(m_height); } // OBROUND
+QString ApObround::name() const { return QString("O(%1 x %2)").arg(width_).arg(height_); } // OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
-bool ApObround::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
+bool ApObround::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApObround::read(QDataStream& stream) {
-    stream >> m_height;
-    stream >> m_width;
-    stream >> m_drillDiam;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> height_;
+    stream >> width_;
+    stream >> drillDiam_;
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApObround::write(QDataStream& stream) const {
-    stream << m_height;
-    stream << m_width;
-    stream << m_drillDiam;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << height_;
+    stream << width_;
+    stream << drillDiam_;
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApObround::draw() {
     Clipper clipper;
-    const cInt h = static_cast<cInt>(m_height * uScale);
-    const cInt w = static_cast<cInt>(m_width * uScale);
+    const cInt h = static_cast<cInt>(height_ * uScale);
+    const cInt w = static_cast<cInt>(width_ * uScale);
     if (qFuzzyCompare(w + 1.0, h + 1.0)) {
-        m_paths.push_back(CirclePath(w));
+        paths_.push_back(CirclePath(w));
     } else {
         if (w > h) {
             clipper.AddPath(CirclePath(h, IntPoint(-(w - h) / 2, 0)), ptClip, true);
@@ -295,9 +296,9 @@ void ApObround::draw() {
             clipper.AddPath(CirclePath(w, IntPoint(0, (h - w) / 2)), ptClip, true);
             clipper.AddPath(RectanglePath(w, h - w), ptClip, true);
         }
-        clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
+        clipper.Execute(ctUnion, paths_, pftNonZero, pftNonZero);
     }
-    m_size = qMax(w, h);
+    size_ = qMax(w, h);
 }
 /////////////////////////////////////////////////////
 /// \brief ApPolygon::ApPolygon
@@ -307,57 +308,57 @@ void ApObround::draw() {
 /// \param drillDiam
 /// \param format
 ///
-ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format)
+ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* format)
     : AbstractAperture(format) {
-    m_diam = diam;
-    m_verticesCount = nVertices;
-    m_rotation = rotation;
-    m_drillDiam = drillDiam;
+    diam_ = diam;
+    verticesCount_ = nVertices;
+    rotation_ = rotation;
+    drillDiam_ = drillDiam;
 }
 
-double ApPolygon::rotation() const { return m_rotation; }
+double ApPolygon::rotation() const { return rotation_; }
 
-int ApPolygon::verticesCount() const { return m_verticesCount; }
+int ApPolygon::verticesCount() const { return verticesCount_; }
 
-QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } // POLYGON
+QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(diam_).arg(verticesCount_); } // POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
-bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(pi / m_verticesCount) > toolDiam; }
+bool ApPolygon::fit(double toolDiam) const { return diam_ * cos(pi / verticesCount_) > toolDiam; }
 
 void ApPolygon::read(QDataStream& stream) {
-    stream >> m_diam;
-    stream >> m_rotation;
-    stream >> m_verticesCount;
-    stream >> m_drillDiam;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> diam_;
+    stream >> rotation_;
+    stream >> verticesCount_;
+    stream >> drillDiam_;
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApPolygon::write(QDataStream& stream) const {
-    stream << m_diam;
-    stream << m_rotation;
-    stream << m_verticesCount;
-    stream << m_drillDiam;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << diam_;
+    stream << rotation_;
+    stream << verticesCount_;
+    stream << drillDiam_;
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApPolygon::draw() {
     Path poligon;
-    const double step = 360.0 / m_verticesCount;
-    const double diam = this->m_diam * uScale;
-    for (int i = 0; i < m_verticesCount; ++i) {
+    const double step = 360.0 / verticesCount_;
+    const double diam = diam_ * uScale;
+    for (int i = 0; i < verticesCount_; ++i) {
         poligon.push_back(IntPoint(
             static_cast<cInt>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<cInt>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     }
-    if (m_rotation > 0.1) {
-        RotatePath(poligon, m_rotation);
+    if (rotation_ > 0.1) {
+        RotatePath(poligon, rotation_);
     }
-    m_paths.push_back(poligon);
-    m_size = diam;
+    paths_.push_back(poligon);
+    size_ = diam;
 }
 /////////////////////////////////////////////////////
 /// \brief ApMacro::ApMacro
@@ -366,37 +367,37 @@ void ApPolygon::draw() {
 /// \param coefficients
 /// \param format
 ///
-ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const Format* format)
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* format)
     : AbstractAperture(format)
-    , m_macro(macro)
-    , m_modifiers(modifiers)
-    , m_coefficients(coefficients) {
-    while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
-        m_modifiers.removeLast();
+    , macro_(macro)
+    , modifiers_(modifiers)
+    , coefficients_(coefficients) {
+    while (modifiers_.size() && modifiers_.last().isEmpty()) {
+        modifiers_.removeLast();
     }
 }
 
-QString ApMacro::name() const { return QString("M(%1)").arg(m_macro); } // MACRO
+QString ApMacro::name() const { return QString("M(%1)").arg(macro_); } // MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 
 bool ApMacro::fit(double) const { return true; }
 
 void ApMacro::read(QDataStream& stream) {
-    stream >> m_modifiers;
-    stream >> m_coefficients;
-    stream >> m_macro;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> modifiers_;
+    stream >> coefficients_;
+    stream >> macro_;
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApMacro::write(QDataStream& stream) const {
-    stream << m_modifiers;
-    stream << m_coefficients;
-    stream << m_macro;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << modifiers_;
+    stream << coefficients_;
+    stream << macro_;
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApMacro::draw() {
@@ -411,11 +412,11 @@ void ApMacro::draw() {
         CenterLine = 21,
     };
 
-    VarMap macroCoefficients { m_coefficients };
+    VarMap macroCoefficients { coefficients_ };
     QVector<QPair<bool, Path>> items;
     try {
-        for (int i = 0; i < m_modifiers.size(); ++i) {
-            QString var(m_modifiers[i]);
+        for (int i = 0; i < modifiers_.size(); ++i) {
+            QString var(modifiers_[i]);
             if (var.at(0) == '0') { // Skip Comment
 
                 continue;
@@ -484,26 +485,28 @@ void ApMacro::draw() {
         Clipper clipper;
         for (int i = 0; i < items.size();) {
             clipper.Clear();
-            clipper.AddPaths(m_paths, ptSubject, true);
+            clipper.AddPaths(paths_, ptSubject, true);
             bool exp = items[i].first;
             while (i < items.size() && exp == items[i].first)
                 clipper.AddPath(items[i++].second, ptClip, true);
             if (exp)
-                clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
+                clipper.Execute(ctUnion, paths_, pftNonZero, pftNonZero);
             else
-                clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
+                clipper.Execute(ctDifference, paths_, pftNonZero, pftNonZero);
         }
     } else
-        m_paths.push_back(items.first().second);
+        paths_.push_back(items.first().second);
 
     ClipperBase clipperBase;
-    clipperBase.AddPaths(m_paths, ptSubject, true);
+    clipperBase.AddPaths(paths_, ptSubject, true);
     IntRect rect = clipperBase.GetBounds();
     rect.right -= rect.left;
     rect.top -= rect.bottom;
     const double x = rect.right * dScale;
     const double y = rect.top * dScale;
-    m_size = qSqrt(x * x + y * y);
+    size_ = qSqrt(x * x + y * y);
+
+    normalize(paths_);
 }
 
 Path ApMacro::drawCenterLine(const QList<double>& mod) {
@@ -586,14 +589,14 @@ void ApMacro::drawMoire(const QList<double>& mod) {
             clipper.AddPath(RectanglePath(cl, ct), ptClip, true);
             clipper.AddPath(RectanglePath(ct, cl), ptClip, true);
         }
-        clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
+        clipper.Execute(ctUnion, paths_, pftPositive, pftPositive);
     }
 
-    for (Path& path : m_paths)
+    for (Path& path : paths_)
         TranslatePath(path, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
-        for (Path& path : m_paths)
+        for (Path& path : paths_)
             RotatePath(path, mod[RotationAngle]);
     }
 }
@@ -680,14 +683,14 @@ void ApMacro::drawThermal(const QList<double>& mod) {
         clipper.AddPath(CirclePath(inner), ptClip, true);
         clipper.AddPath(RectanglePath(gap, outer), ptClip, true);
         clipper.AddPath(RectanglePath(outer, gap), ptClip, true);
-        clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
+        clipper.Execute(ctDifference, paths_, pftNonZero, pftNonZero);
     }
 
-    for (Path& path : m_paths)
+    for (Path& path : paths_)
         TranslatePath(path, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
-        for (Path& path : m_paths)
+        for (Path& path : paths_)
             RotatePath(path, mod[RotationAngle]);
     }
 }
@@ -729,7 +732,7 @@ Path ApMacro::drawVectorLine(const QList<double>& mod) {
 /// \param coefficients
 /// \param format
 ///
-ApBlock::ApBlock(const Format* format)
+ApBlock::ApBlock(const File* format)
     : AbstractAperture(format) {
 }
 
@@ -740,35 +743,35 @@ ApertureType ApBlock::type() const { return Block; }
 bool ApBlock::fit(double) const { return true; }
 
 void ApBlock::read(QDataStream& stream) {
-    stream >> *this;
-    stream >> m_isFlashed;
-    stream >> m_size;
+    stream >> *this; // list
+    stream >> isFlashed_;
+    stream >> size_;
     draw();
 }
 
 void ApBlock::write(QDataStream& stream) const {
-    stream << *this;
-    stream << m_isFlashed;
-    stream << m_size;
+    stream << *this; // list
+    stream << isFlashed_;
+    stream << size_;
 }
 
 void ApBlock::draw() {
-    m_paths.clear();
+    paths_.clear();
     int i = 0;
     while (i < size()) {
         Clipper clipper; //(ioStrictlySimple);
-        clipper.AddPaths(m_paths, ptSubject, true);
+        clipper.AddPaths(paths_, ptSubject, true);
         const int exp = at(i).state().imgPolarity();
         do {
-            m_paths.append(at(i).paths());
+            paths_.append(at(i).paths());
             clipper.AddPaths(at(i++).paths(), ptClip, true);
         } while (i < size() && exp == at(i).state().imgPolarity());
         if (at(i - 1).state().imgPolarity() == Positive)
-            clipper.Execute(ctUnion, m_paths, pftPositive);
+            clipper.Execute(ctUnion, paths_, pftPositive);
         else
-            clipper.Execute(ctDifference, m_paths, pftNonZero);
+            clipper.Execute(ctDifference, paths_, pftNonZero);
     }
-    m_size = 1;
+    size_ = 1;
 
     // CleanPolygons(m_paths, 0.0009 * uScale);
 }
