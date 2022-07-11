@@ -349,7 +349,7 @@ double Parser::arcAngle(double start, double stop) {
 double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     bool ok;
     double d = Str.toDouble(&ok);
-    if (m_state.format()->unitMode == Inches && inchControl)
+    if (m_state.file()->format().unitMode == Inches && inchControl)
         d *= 25.4;
     if (scale)
         d *= uScale;
@@ -361,10 +361,10 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
     int sign = 1;
     if (!Str.isEmpty()) {
         if (!decimal)
-            decimal = m_state.format()->xDecimal;
+            decimal = file->format().xDecimal;
 
         if (!integer)
-            integer = m_state.format()->xInteger;
+            integer = file->format().xInteger;
 
         if (Str.indexOf("+") == 0) {
             Str.remove(0, 1);
@@ -380,7 +380,7 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
             Str.setNum(Str.split('.').first().toInt() + ("0." + Str.split('.').last()).toDouble());
 
         while (Str.length() < integer + decimal) {
-            switch (m_state.format()->zeroOmisMode) {
+            switch (file->format().zeroOmisMode) {
             case OmitLeadingZeros:
                 Str = QByteArray(integer + decimal - Str.length(), '0') + Str;
                 // Str = "0" + Str;
@@ -495,7 +495,7 @@ void Parser::reset(const QString& fileName) {
     m_currentGerbLine.clear();
     m_goId = 0;
     m_path.clear();
-    m_state = State(file->format());
+    m_state = State(file);
     m_stepRepeat.reset();
     refDes.clear();
 }
@@ -511,19 +511,18 @@ IntPoint Parser::parsePosition(const QString& xyStr) {
     static constexpr ctll::fixed_string ptrnPosition(R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"); // fixed_string("(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+");
     if (auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
         cInt tmp = 0;
-        if (x && parseNumber(CtreCapTo(x), tmp, m_state.format()->xInteger, m_state.format()->xDecimal))
-            m_state.format()->coordValueNotation == AbsoluteNotation ? m_state.curPos().X = tmp : m_state.curPos().X += tmp;
+        if (x && parseNumber(CtreCapTo(x), tmp, file->format().xInteger, file->format().xDecimal))
+            file->format().coordValueNotation == AbsoluteNotation ? m_state.curPos().X = tmp : m_state.curPos().X += tmp;
         tmp = 0;
-        if (y && parseNumber(CtreCapTo(y), tmp, m_state.format()->yInteger, m_state.format()->yDecimal))
-            m_state.format()->coordValueNotation == AbsoluteNotation ? m_state.curPos().Y = tmp : m_state.curPos().Y += tmp;
+        if (y && parseNumber(CtreCapTo(y), tmp, file->format().yInteger, file->format().yDecimal))
+            file->format().coordValueNotation == AbsoluteNotation ? m_state.curPos().Y = tmp : m_state.curPos().Y += tmp;
     }
 
-    if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0) {
+    if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(m_lineNum), QString(m_currentGerbLine));
-    }
-    if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0) {
+    if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(m_lineNum), QString(m_currentGerbLine));
-    }
+
     return m_state.curPos();
 }
 
@@ -571,9 +570,9 @@ Paths Parser::createLine() {
 
     if (file->apertures_[m_state.aperture()]->type() == Rectangle) {
         auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[m_state.aperture()]);
-        if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
+        if (!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
             throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
-        double size = rect->m_width * uScale * 0.5 * m_state.scaling();
+        double size = rect->width_ * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
@@ -627,19 +626,19 @@ bool Parser::parseAperture(const QString& gLine) {
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            apertures[aperture] = std::make_shared<ApCircle>(toDouble(paramList[0]), hole, file->format());
+            apertures[aperture] = std::make_shared<ApCircle>(toDouble(paramList[0]), hole, file);
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
             if (paramList.size() < 2)
                 paramList << paramList[0];
-            apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
+            apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file->format()));
+            apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
 
             break;
         case Polygon:
@@ -647,14 +646,14 @@ bool Parser::parseAperture(const QString& gLine) {
                 rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file->format()));
+            apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file));
             break;
         case Macro:
         default:
             VarMap macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
-            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), m_apertureMacro[CtreCapTo(apType)].split('*'), macroCoeff, file->format()));
+            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), m_apertureMacro[CtreCapTo(apType)].split('*'), macroCoeff, file));
             break;
         }
         if (attAper.m_function)
@@ -669,7 +668,7 @@ bool Parser::parseApertureBlock(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnApertureBlock(R"(^%ABD(\d+)\*%$)"); // fixed_string("^%ABD(\d+)\*%$");
     if (auto [whole, id] = ctre::match<ptrnApertureBlock>(data); whole) {
         m_abSrIdStack.push({ WorkingType::ApertureBlock, int(CtreCapTo(id)) });
-        file->apertures_.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file->format()));
+        file->apertures_.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file));
         return true;
     }
     if (gLine == "%AB*%") {
@@ -737,7 +736,7 @@ bool Parser::parseStepRepeat(const QString& gLine) {
         m_stepRepeat.y = CtreCapTo(sry);
         m_stepRepeat.i = CtreCapTo(sri), m_stepRepeat.i *= uScale;
         m_stepRepeat.j = CtreCapTo(srj), m_stepRepeat.j *= uScale;
-        if (m_state.format()->unitMode == Inches) {
+        if (file->format().unitMode == Inches) {
             m_stepRepeat.i *= 25.4;
             m_stepRepeat.j *= 25.4;
         }
@@ -907,10 +906,10 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         if (!cg.size() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
         cInt x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(CtreCapTo(cx), x, m_state.format()->xInteger, m_state.format()->xDecimal) : x = m_state.curPos().X;
-        cy.size() ? parseNumber(CtreCapTo(cy), y, m_state.format()->yInteger, m_state.format()->yDecimal) : y = m_state.curPos().Y;
-        parseNumber(CtreCapTo(ci), i, m_state.format()->xInteger, m_state.format()->xDecimal);
-        parseNumber(CtreCapTo(cj), j, m_state.format()->yInteger, m_state.format()->yDecimal);
+        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = m_state.curPos().X;
+        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = m_state.curPos().Y;
+        parseNumber(CtreCapTo(ci), i, file->format().xInteger, file->format().xDecimal);
+        parseNumber(CtreCapTo(cj), j, file->format().yInteger, file->format().yDecimal);
         // Set operation code if provided
         if (cd.size())
             m_state.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
@@ -1050,42 +1049,42 @@ bool Parser::parseFormat(const QString& gLine) {
     if (auto [whole, c1, c2, c3, c4, c5, c6] = ctre::match<ptrnFormat>(data); whole) {
         switch (zeroOmissionModeList.indexOf(CtreCapTo(c1).operator QString()[0])) {
         case OmitLeadingZeros:
-            m_state.format()->zeroOmisMode = OmitLeadingZeros;
+            file->format().zeroOmisMode = OmitLeadingZeros;
             break;
 #ifdef DEPRECATED
         case OmitTrailingZeros:
-            m_state.format()->zeroOmisMode = OmitTrailingZeros;
+            file->format().zeroOmisMode = OmitTrailingZeros;
             break;
 #endif
         }
         switch (coordinateValuesNotationList.indexOf(CtreCapTo(c2).operator QString()[0])) {
         case AbsoluteNotation:
-            m_state.format()->coordValueNotation = AbsoluteNotation;
+            file->format().coordValueNotation = AbsoluteNotation;
             break;
 #ifdef DEPRECATED
         case IncrementalNotation:
-            m_state.format()->coordValueNotation = IncrementalNotation;
+            file->format().coordValueNotation = IncrementalNotation;
             break;
 #endif
         }
-        m_state.format()->xInteger = CtreCapTo(c3);
-        m_state.format()->xDecimal = CtreCapTo(c4);
-        m_state.format()->yInteger = CtreCapTo(c5);
-        m_state.format()->yDecimal = CtreCapTo(c6);
+        file->format().xInteger = CtreCapTo(c3);
+        file->format().xDecimal = CtreCapTo(c4);
+        file->format().yInteger = CtreCapTo(c5);
+        file->format().yDecimal = CtreCapTo(c6);
 
-        int intVal = m_state.format()->xInteger;
+        int intVal = file->format().xInteger;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
-        intVal = m_state.format()->xDecimal;
+        intVal = file->format().xDecimal;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
-        intVal = m_state.format()->yInteger;
+        intVal = file->format().yInteger;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
-        intVal = m_state.format()->yDecimal;
+        intVal = file->format().yDecimal;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
@@ -1127,11 +1126,11 @@ bool Parser::parseGCode(const QString& gLine) {
             break;
 #ifdef DEPRECATED
         case G70:
-            m_state.format()->unitMode = Inches;
+            file->format().unitMode = Inches;
             m_state.setGCode(G70);
             break;
         case G71:
-            m_state.format()->unitMode = Millimeters;
+            file->format().unitMode = Millimeters;
             m_state.setGCode(G71);
             break;
 #endif
@@ -1145,11 +1144,11 @@ bool Parser::parseGCode(const QString& gLine) {
             break;
 #ifdef DEPRECATED
         case G90:
-            m_state.format()->coordValueNotation = AbsoluteNotation;
+            file->format().coordValueNotation = AbsoluteNotation;
             m_state.setGCode(G90);
             break;
         case G91:
-            m_state.format()->coordValueNotation = IncrementalNotation;
+            file->format().coordValueNotation = IncrementalNotation;
             m_state.setGCode(G91);
 #endif
             break;
@@ -1272,10 +1271,10 @@ bool Parser::parseUnitMode(const QString& gLine) {
     if (auto [whole, c1] = ctre::match<ptrnUnitMode>(data); whole) {
         switch (slUnitType.indexOf(QString { CtreCapTo(c1) })) {
         case Inches:
-            m_state.format()->unitMode = Inches;
+            file->format().unitMode = Inches;
             break;
         case Millimeters:
-            m_state.format()->unitMode = Millimeters;
+            file->format().unitMode = Millimeters;
             break;
         }
         return true;

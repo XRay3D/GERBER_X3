@@ -35,7 +35,8 @@ public:
         CutoffGroup,
     };
 
-    Format* format() { return &m_format; }
+    const Format& format() const { return format_; }
+    Format& format() { return format_; }
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
     const ApertureMap* apertures() const;
@@ -67,14 +68,14 @@ private:
     mvector<GraphicObject> graphicObjects_;
     ApertureMap apertures_;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
-    Format m_format;
+    Format format_;
     // Layer layer = Copper;
     // Miror miror = Vertical;
     // QPointf offset;
 
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;
-    static inline Format* crutch;
+    static inline File* crutch;
 
     // FileTree::Node interface
 protected:

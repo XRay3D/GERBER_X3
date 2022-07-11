@@ -207,7 +207,7 @@ class State {
         return stream;
     }
 
-    Format* m_format = nullptr;
+    File* file_ = nullptr;
     Operation m_dCode = D02;
     GCode m_gCode = G01;
     ImagePolarity m_imgPolarity = Positive;
@@ -223,8 +223,8 @@ class State {
     double m_rotating = 0.0;
 
 public:
-    State(Format* const format = nullptr)
-        : m_format(format)
+    State(File* const file = nullptr)
+        : file_(file)
         , m_dCode(D02)
         , m_gCode(G01)
         , m_imgPolarity(Positive)
@@ -240,7 +240,7 @@ public:
         , m_rotating(0.0) {
     }
 
-    inline Format* format() const { return m_format; }
+    inline File* file() const { return file_; }
 
     inline Operation dCode() const { return m_dCode; }
     inline void setDCode(Operation dCode) { m_dCode = dCode; }

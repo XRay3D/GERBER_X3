@@ -18,16 +18,25 @@ GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& r
             qDebug(__FUNCTION__);
             QPainterPath painterPath;
             const double radius = sourceDiameter_ * 0.5;
-            painterPath.addEllipse(val, radius, radius);
+            painterPath.addEllipse({}, radius, radius);
             return painterPath;
         },
     };
+
+    auto setPos_ = Overload {
+        [this](const QPolygonF& val) {},
+        [this](const QPointF& val) { setPos(val); },
+    };
+
     if (draw_.size()) {
         for (auto&& path : draw_)
             sourcePath_.addPolygon(path);
-        sourcePath_.translate(std::get<const QPointF>(hv));
-    } else
+    } else {
         sourcePath_ = std::visit(draw, hv);
+    }
+
+    std::visit(setPos_, hv);
+
     row.items.emplace_back(this);
     update();
 }
@@ -68,11 +77,11 @@ void GiDrillPreview::updateTool() {
                 auto& tool(App::toolHolder().tool(toolId()));
                 const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                painterPath.moveTo(val - QPointF(0.0, lineKoeff));
-                painterPath.lineTo(val + QPointF(0.0, lineKoeff));
-                painterPath.moveTo(val - QPointF(lineKoeff, 0.0));
-                painterPath.lineTo(val + QPointF(lineKoeff, 0.0));
-                painterPath.addEllipse(val, diameter * .5, diameter * .5);
+                painterPath.moveTo(-QPointF(0.0, lineKoeff));
+                painterPath.lineTo(+QPointF(0.0, lineKoeff));
+                painterPath.moveTo(-QPointF(lineKoeff, 0.0));
+                painterPath.lineTo(+QPointF(lineKoeff, 0.0));
+                painterPath.addEllipse({}, diameter * .5, diameter * .5);
                 return painterPath;
             },
         };
@@ -84,34 +93,27 @@ void GiDrillPreview::updateTool() {
     changeColor();
 }
 
-IntPoint GiDrillPreview::pos() const {
-    auto getPos = Overload {
-        [](const QPointF& val) { return val; },
-        [](const QPolygonF& val) { return val.front(); },
-    };
-    return std::visit(getPos, hv);
-}
-
 Paths GiDrillPreview::paths() const {
     auto getPath = Overload {
         [this](const QPointF& val) {
             auto path { CirclePath(sourceDiameter_ * uScale, val) };
-            // path.emplace_back(path.front());
-            qDebug() << __FUNCSIG__ << sourceDiameter_ << path.size();
             return ReversePath(path);
         },
         [this](const QPolygonF& val) {
-            qDebug() << __FUNCSIG__ << sourceDiameter_ << val.size();
             return Path { val };
         },
     };
-    //    Path path({ std::visit(getPath, hv) });
-    return { std::visit(getPath, hv) }; //{ ReversePath(path) };
+    return { std::visit(getPath, hv) };
 }
 
-bool GiDrillPreview::fit(double depth) { return sourceDiameter_ > App::toolHolder().tool(toolId()).getDiameter(depth); }
+bool GiDrillPreview::fit(double depth) const {
+    const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth);
+    return sourceDiameter_ > diameter && !qFuzzyCompare(sourceDiameter_, diameter);
+}
 
-int GiDrillPreview::toolId() const { return toolId_ < 0 ? row.toolId : toolId_; }
+int GiDrillPreview::toolId() const {
+    return toolId_ < 0 ? row.toolId : toolId_;
+}
 
 Paths GiDrillPreview::offset(const Path& path, double offset) {
     ClipperOffset cpOffset;

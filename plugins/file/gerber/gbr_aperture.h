@@ -41,39 +41,39 @@ class AbstractAperture {
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
 
 public:
-    AbstractAperture(const Format* m_format);
+    AbstractAperture(const File* file);
     virtual ~AbstractAperture();
 
-    bool withHole() const noexcept { return m_drillDiam != 0.0; }
-    bool flashed() const noexcept { return m_isFlashed; }
+    bool withHole() const noexcept { return drillDiam_ > 0.0; }
+    bool flashed() const noexcept { return isFlashed_; }
 
-    double drillDiameter() const { return m_drillDiam; }
+    double drillDiameter() const { return drillDiam_; }
     double apertureSize();
 
     Path drawDrill(const State& state);
-    Paths draw(const State& state, bool fl = false);
+    Paths draw(const State& state, bool notApBlock = {});
 
     virtual QString name() const = 0;
     virtual ApertureType type() const = 0;
 
-    double minSize() const noexcept { return m_size; }
+    double minSize() const noexcept { return size_; }
 
     virtual bool fit(double toolDiam) const = 0;
 
-    bool used() const noexcept { return m_isUsed; }
-    void setUsed(bool isUsed = true) noexcept { m_isUsed = isUsed; }
+    bool used() const noexcept { return isUsed_; }
+    void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
 protected:
-    bool m_isFlashed = false;
-    bool m_isUsed = false;
-    double m_drillDiam = 0.0;
-    double m_size = 0.0;
+    bool isFlashed_ {};
+    bool isUsed_ {};
+    double drillDiam_ {};
+    double size_ {};
 
-    Paths m_paths;
+    Paths paths_;
     virtual void draw() = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
-    const Format* m_format;
+    const File* file_;
 
     void transform(Path& poligon, const State& state);
 };
@@ -83,9 +83,9 @@ protected:
 ///
 class ApCircle final : public AbstractAperture {
 public:
-    ApCircle(double diam, double drillDiam, const Format* format);
-    ApCircle(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApCircle(double diam, double drillDiam, const File* file);
+    ApCircle(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     QString name() const;
@@ -98,7 +98,7 @@ protected:
     virtual void write(QDataStream& stream) const;
 
 private:
-    double m_diam = 0.0;
+    double diam_ {};
 };
 
 /////////////////////////////////////////////////////
@@ -108,9 +108,9 @@ class ApRectangle final : public AbstractAperture {
     friend class Parser;
 
 public:
-    ApRectangle(double width, double height, double drillDiam, const Format* format);
-    ApRectangle(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApRectangle(double width, double height, double drillDiam, const File* file);
+    ApRectangle(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     QString name() const;
@@ -123,8 +123,8 @@ protected:
     virtual void write(QDataStream& stream) const;
 
 private:
-    double m_height = 0.0;
-    double m_width = 0.0;
+    double height_ {};
+    double width_ {};
 };
 
 /////////////////////////////////////////////////////
@@ -132,9 +132,9 @@ private:
 ///
 class ApObround final : public AbstractAperture {
 public:
-    ApObround(double width, double height, double drillDiam, const Format* format);
-    ApObround(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApObround(double width, double height, double drillDiam, const File* file);
+    ApObround(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     QString name() const;
@@ -147,8 +147,8 @@ protected:
     virtual void write(QDataStream& stream) const;
 
 private:
-    double m_height = 0.0;
-    double m_width = 0.0;
+    double height_ {};
+    double width_ {};
 };
 
 /////////////////////////////////////////////////////
@@ -156,9 +156,9 @@ private:
 ///
 class ApPolygon final : public AbstractAperture {
 public:
-    ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format);
-    ApPolygon(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* file);
+    ApPolygon(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     double rotation() const;
@@ -174,9 +174,9 @@ protected:
     virtual void write(QDataStream& stream) const;
 
 private:
-    double m_diam = 0.0;
-    double m_rotation = 0.0;
-    int m_verticesCount = 0;
+    double diam_ {};
+    double rotation_ {};
+    int verticesCount_ = 0;
 };
 
 /////////////////////////////////////////////////////
@@ -184,9 +184,9 @@ private:
 ///
 class ApMacro final : public AbstractAperture {
 public:
-    ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const Format* format);
-    ApMacro(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* file);
+    ApMacro(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     QString name() const;
@@ -199,9 +199,9 @@ protected:
     virtual void write(QDataStream& stream) const;
 
 private:
-    QString m_macro;
-    QList<QString> m_modifiers;
-    VarMap m_coefficients;
+    QString macro_;
+    QList<QString> modifiers_;
+    VarMap coefficients_;
 
     double Angle(const IntPoint& pt1, const IntPoint& pt2) {
         const double dx = pt2.X - pt1.X;
@@ -227,9 +227,9 @@ private:
 ///
 class ApBlock final : public AbstractAperture, public QList<GraphicObject> {
 public:
-    ApBlock(const Format* format);
-    ApBlock(QDataStream& stream, const Format* format)
-        : AbstractAperture(format) {
+    ApBlock(const File* file);
+    ApBlock(QDataStream& stream, const File* file)
+        : AbstractAperture(file) {
         read(stream);
     }
     QString name() const;

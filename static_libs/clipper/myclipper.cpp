@@ -283,3 +283,47 @@ QIcon drawDrillIcon(QColor color) {
     painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
     return pixmap;
 }
+
+Paths& normalize(Paths& paths) {
+    PolyTree polyTree;
+    Clipper clipper;
+    clipper.AddPaths(paths, ptSubject, true);
+    IntRect r(clipper.GetBounds());
+    Path outer = {
+        IntPoint(r.left - uScale, r.top - uScale),
+        IntPoint(r.right + uScale, r.top - uScale),
+        IntPoint(r.right + uScale, r.bottom + uScale),
+        IntPoint(r.left - uScale, r.bottom + uScale),
+    };
+    // ReversePath(outer);
+    clipper.AddPath(outer, ptSubject, true);
+    clipper.Execute(ctDifference, paths, pftEvenOdd);
+    paths.erase(paths.begin());
+    ReversePaths(paths);
+    //    /****************************/
+    //    std::function<void(PolyNode*)> grouping = [&grouping](PolyNode* node) {
+    //        Paths paths;
+
+    //        if (node->IsHole()) {
+    //            Path& path = node->Contour;
+    //            paths.push_back(path);
+    //            for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
+    //                path = node->Childs[i]->Contour;
+    //                paths.push_back(path);
+    //            }
+    //            groupedPss.push_back(paths);
+    //        }
+    //        for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
+    //            grouping(node->Childs[i], group);
+    //    };
+    //    /*********************************/
+    //    groupedPss.clear();
+    //    grouping(polyTree.GetFirst(), group);
+
+    //    if (group == CutoffPaths) {
+    //        if (groupedPss.size() > 1 && groupedPss.front().size() == 2)
+    //            groupedPss.erase(groupedPss.begin());
+    //    }
+
+    return paths;
+}

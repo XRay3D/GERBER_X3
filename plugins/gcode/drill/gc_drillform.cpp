@@ -418,11 +418,11 @@ void DrillForm::on_pbCreate_clicked() {
                     continue;
                 }
 
-                if (!gcode)
-                    //                    exit(-999);
-                    continue;
                 thread.quit();
                 thread.wait();
+
+                if (!gcode)
+                    continue;
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + "_T" + indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -464,12 +464,15 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
                 diametr,
                 id,
                 isSlot);
-            for (auto&& pos : val.posOrPath)
-                auto gi = new GiDrillPreview(std::move(pos), diametr, data.back().toolId, data.back(), val.draw);
+            for (auto&& posOrPath : val.posOrPath)
+                auto gi = new GiDrillPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
         }
 
         App::scene()->update();
+    } catch (const std::exception& exc) {
+        qDebug("%s: %s", __FUNCTION__, exc.what());
     } catch (...) {
+        exit(-99);
         // delete ui->toolTable->model();
         return;
     }
@@ -528,8 +531,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos) {
         if (flag)
             tools = mvector<Tool::Type> { Tool::EndMill };
         else
-            tools = (worckType == GCode::Drill) ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill } :
-                                                  mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser };
+            tools = (worckType == GCode::Drill) ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill } : mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser };
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
