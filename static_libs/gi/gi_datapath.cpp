@@ -21,55 +21,32 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <ranges>
 
 #ifdef __GNUC__
 QTimer GiDataPath::timer;
 #endif
 
 GiDataPath::GiDataPath(const Path& path, FileInterface* file)
-    : GraphicsItem(file)
-    , m_path(path) {
-    m_polygon = path;
-
-    Paths tmpPaths;
-    ClipperOffset offset;
-    offset.AddPath(path, jtSquare, etOpenButt);
-    offset.Execute(tmpPaths, 0.01 * uScale);
-    for (const Path& tmpPath : qAsConst(tmpPaths))
-        m_selectionShape.addPolygon(tmpPath);
-    {
-        IntPoint min { std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max() };
-        IntPoint max { std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min() };
-        for (auto pt : path) {
-            min.X = std::min(min.X, pt.X);
-            min.Y = std::min(min.Y, pt.Y);
-            max.X = std::max(max.X, pt.X);
-            max.Y = std::max(max.Y, pt.Y);
-        }
-        m_boundingRect = QRectF(min.X * dScale, min.Y * dScale, (max.X - min.X) * dScale, (max.Y - min.Y) * dScale);
-    }
+    : GraphicsItem(file) {
+    shape_.addPolygon(path);
+    updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
     if (!timer.isActive()) {
         timer.start(50);
-        connect(&timer, &QTimer::timeout, [] { ++GiDataPath::d; });
+        connect(&timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
     }
 }
-
-//QRectF GiDataPath::boundingRect() const {
-//    if (App::scene()->boundingRect())
-//        return m_boundingRect;
-//    if (m_selectionShape.boundingRect().isEmpty())
-//        updateSelection();
-//    return m_selectionShape.boundingRect();
-//}
 
 void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if (pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
     if (colorPtr_)
         color_ = *colorPtr_;
+
+    updateSelection();
 
     QColor color(pen_.color());
     QPen pen(pen_);
@@ -79,7 +56,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         if (option->state & QStyle::State_Selected) {
             color.setAlpha(255);
             pen.setColor(color);
-            pen.setDashOffset(d);
+            pen.setDashOffset(dashOffset);
         }
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
@@ -89,59 +66,42 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(m_path);
+    painter->drawPath(shape_);
 }
 
 int GiDataPath::type() const { return static_cast<int>(GiType::DataPath); }
 
-Paths GiDataPath::paths(int) const { return { m_path + pos() }; }
-
-QPainterPath GiDataPath::shape() const { return m_selectionShape; }
+QPainterPath GiDataPath::shape() const { return selectionShape_; }
 
 void GiDataPath::updateSelection() const {
-    const double scale = scaleFactor();
-    if (m_selectionShape.boundingRect().isEmpty() || !qFuzzyCompare(m_scale, scale)) {
-        m_scale = scale;
-        m_selectionShape = QPainterPath();
+    if (const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
+        scale_ = scale;
+        selectionShape_ = QPainterPath();
         Paths tmpPpath;
         ClipperOffset offset;
-        offset.AddPath(m_path, jtSquare, etOpenButt);
-        offset.Execute(tmpPpath, 5 * uScale * m_scale);
+        offset.AddPath(shape_.toSubpathPolygons().front(), jtSquare, ClipperLib::etOpenButt);
+        offset.Execute(tmpPpath, 5 * uScale * scale_);
         for (const Path& path : qAsConst(tmpPpath))
-            m_selectionShape.addPolygon(path);
+            selectionShape_.addPolygon(path);
+        boundingRect_ = selectionShape_.boundingRect();
     }
 }
 
 void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    if (event->modifiers() & Qt::ShiftModifier && itemGroup) {
-        setSelected(true);
-        const double glueLen = App::project()->glue() * uScale;
-        IntPoint dest(m_path.back());
-        IntPoint init(m_path.front());
-        for (size_t i = 0; i < itemGroup->size(); ++i) {
-            auto item = itemGroup->at(i);
-            if (item->isSelected())
-                continue;
-            const IntPoint& first = item->paths().front().front();
-            const IntPoint& last = item->paths().front().back();
-            if (dest.distTo(first) < glueLen) {
-                dest = last;
+    GraphicsItem::mouseReleaseEvent(event);
+    std::set<void*> set;
+    std::function<void(QGraphicsItem*)> selector = [&](QGraphicsItem* item) {
+        auto collidingItems = scene()->collidingItems(item, Qt::IntersectsItemShape);
+        for (auto* item : collidingItems) {
+            if (item->type() == int(GiType::DataPath) && itemGroup->contains((GraphicsItem*)item) && set.emplace(item).second) {
                 item->setSelected(true);
-                if (init.distTo(dest) < glueLen)
-                    break;
-                i = -1;
-            } else if (dest.distTo(last) < glueLen) {
-                dest = first;
-                item->setSelected(true);
-                if (init.distTo(dest) < glueLen)
-                    break;
-                i = -1;
+                selector(item);
             }
         }
-        event->accept();
-        return;
-    }
-    GraphicsItem::mouseReleaseEvent(event);
+    };
+
+    if (event->modifiers() & Qt::ShiftModifier && itemGroup)
+        selector(this);
 }
 
 QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {

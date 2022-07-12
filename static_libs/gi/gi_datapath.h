@@ -9,45 +9,39 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+#include "gi.h"
 #include <QTimer>
 #include <cmath>
-#include "gi.h"
 
 namespace Gerber {
 class File;
 }
 
 class GiDataPath : public GraphicsItem {
-    QRectF m_boundingRect;
+    //    QRectF m_boundingRect;
     int timerId = 0;
 #ifdef __GNUC__
     static QTimer timer;
 #else
     static inline QTimer timer;
 #endif
-    static inline int d;
+    static inline int dashOffset;
+    mutable QPainterPath selectionShape_;
+    mutable double scale_ = std::numeric_limits<double>::max();
+    void updateSelection() const;
+
     void redraw() override { update(); }
+    void changeColor() override { }
 
 public:
     GiDataPath(const Path& path, FileInterface* file);
 
-    // QGraphicsItem interface
-//   QRectF boundingRect() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    Paths paths(int alternate = {}) const override;
-    QPainterPath shape() const override;
-    void changeColor() override { }
-
 protected:
-    QPolygonF m_polygon;
-    const Path& m_path;
-    mutable QPainterPath m_selectionShape;
-    mutable double m_scale = std::numeric_limits<double>::max();
-    void updateSelection() const;
-
     // QGraphicsItem interface
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    QPainterPath shape() const override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    int type() const override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 };
