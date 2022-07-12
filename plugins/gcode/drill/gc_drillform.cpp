@@ -596,7 +596,7 @@ void DrillForm::pickUpTool() {
 void DrillForm::errorOccurred() {
     qDebug(__FUNCTION__);
     auto tpc = (GCode::Creator*)sender();
-    tpc->continueCalc(ErrorDialog(tpc->items, this).exec());
+    tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
 QModelIndexList DrillForm::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }

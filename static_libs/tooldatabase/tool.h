@@ -23,6 +23,8 @@ class Tool {
 
 public:
     Tool();
+    Tool(int)
+        : m_diameter(0) { }
 
     enum Type {
         Drill,
