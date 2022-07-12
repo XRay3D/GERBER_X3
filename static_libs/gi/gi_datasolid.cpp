@@ -22,23 +22,18 @@
 #include <QStyleOptionGraphicsItem>
 
 GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
-    : GraphicsItem(file)
-    , m_paths(paths) {
-    for (Path path : qAsConst(m_paths)) {
-        if (path.size())
+    : GraphicsItem(file) {
+    for (Path path : paths) {
+        if (path.size() && path.back() != path.front())
             path.push_back(path.front());
         shape_.addPolygon(path);
     }
-    fillPolygon = shape_.toFillPolygon();
+    boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
 GiDataSolid::~GiDataSolid() { }
-
-// QRectF GiDataSolid::boundingRect() const { return m_shape.boundingRect(); }
-
-QPainterPath GiDataSolid::shape() const { return shape_; }
 
 void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     if (App::scene()->drawPdf()) {
@@ -50,7 +45,7 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
-    painter->drawPolygon(fillPolygon);
+    painter->drawPath(shape_);
 
     //    m_pen.setWidthF(option->state & QStyle::State_Selected
     //                || option->state & QStyle::State_MouseOver
@@ -63,20 +58,15 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
 int GiDataSolid::type() const { return static_cast<int>(GiType::DataSolid); }
 
 void GiDataSolid::redraw() {
-    shape_ = QPainterPath();
-    for (Path path : qAsConst(m_paths)) {
-        path.push_back(path.front());
-        shape_.addPolygon(path);
-    }
-    fillPolygon = shape_.toFillPolygon();
-    setPos({ 1, 1 }); // костыли
-    setPos({ 0, 0 });
+    //    shape_ = QPainterPath();
+    //    for (Path path : qAsConst(paths_)) {
+    //        path.push_back(path.front());
+    //        shape_.addPolygon(path);
+    //    }
+    //    setPos({ 1, 1 }); // костыли
+    //    setPos({ 0, 0 });
     // update();
 }
-
-Paths GiDataSolid::paths(int) const { return m_paths + pos(); }
-
-Paths* GiDataSolid::rPaths() { return &m_paths; }
 
 void GiDataSolid::changeColor() {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
