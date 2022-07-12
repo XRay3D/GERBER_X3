@@ -14,7 +14,7 @@
 namespace GCode {
 class PocketCreator : public Creator {
 public:
-    PocketCreator();
+    using Creator::Creator;
 
 private:
     void createFixedSteps(const Tool& tool, const double depth, const int steps);

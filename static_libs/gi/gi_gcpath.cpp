@@ -31,7 +31,7 @@ GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
         k = m_gcFile->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
-    rect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
+    boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
     // setAcceptHoverEvents(true);
 #endif
@@ -45,13 +45,13 @@ GiGcPath::GiGcPath(const Path& path, GCode::File* file)
         k = m_gcFile->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
-    rect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
+    boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
     // setAcceptHoverEvents(true);
 #endif
 }
 
-QRectF GiGcPath::boundingRect() const { return rect_; }
+QRectF GiGcPath::boundingRect() const { return boundingRect_; }
 
 void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)

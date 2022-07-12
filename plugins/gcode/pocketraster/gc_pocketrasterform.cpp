@@ -142,9 +142,9 @@ void PocketRasterForm::createFile() {
         gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     }
 
-    tpc_->setGcp(gcp_);
-    tpc_->addPaths(wPaths);
-    tpc_->addRawPaths(wRawPaths);
+    creator->setGcp(gcp_);
+    creator->addPaths(wPaths);
+    creator->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }

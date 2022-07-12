@@ -255,7 +255,7 @@ void DrillForm::on_pbCreate_clicked() {
         return indexes;
     };
 
-    { //   slots only
+    if (worckType == GCode::Drill) { //   slots only
         struct Data {
             Paths paths;
             mvector<int> toolsApertures;
@@ -297,35 +297,41 @@ void DrillForm::on_pbCreate_clicked() {
 
         std::map<int, Data> pathsMap;
 
+        auto itemToPaths = [](auto* item) {
+            return item->isSlot() ? item->offset() : item->paths();
+        };
+
         for (int i {}; auto&& row : *model) {
             bool created {};
             if (row.toolId > -1 && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(row.apertureId);
                 for (auto& item : row.items) {
-                    if (item->isSlot())
-                        continue;
+                    //                    if (item->isSlot())
+                    //                        continue;
                     switch (worckType) {
                     case GCode::Profile:
                         if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             switch (side) {
                             case GCode::On:
                             case GCode::Outer:
-                                pathsMap[row.toolId].paths.append(item->paths());
+                                pathsMap[row.toolId].paths.append(itemToPaths(item));
                                 created = true;
                                 break;
                             case GCode::Inner:
-                                if (item->fit(ui->dsbxDepth->value())) {
-                                    pathsMap[row.toolId].paths.append(item->paths());
-                                    created = true;
-                                }
+                                //                                if (item->fit(ui->dsbxDepth->value())) {
+                                pathsMap[row.toolId].paths.append(itemToPaths(item));
+                                created = true;
+                                //                                }
                                 break;
                             }
                         }
                         break;
                     case GCode::Pocket:
-                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
-                            pathsMap[row.toolId].paths.append(item->paths());
+                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
+                            //                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
+                            pathsMap[row.toolId].paths.append(itemToPaths(item));
                             created = true;
+                            //   }
                         }
                         break;
                     case GCode::Drill:
@@ -381,14 +387,7 @@ void DrillForm::on_pbCreate_clicked() {
 
                     GCode::ProfileCreator tpc;
                     tpc.moveToThread(&thread);
-                    connect(
-                        &tpc, &GCode::ProfileCreator ::errorOccurred, this, [&](int) {
-                            if (ErrorDialog(tpc.items, this).exec())
-                                tpc.proceed();
-                            else
-                                tpc.cancel();
-                        },
-                        Qt::QueuedConnection);
+                    connect(&tpc, &GCode::Creator::errorOccurred, this, &DrillForm::errorOccurred);
                     thread.start();
                     tpc.setGcp(gcp);
                     tpc.addPaths(val.paths);
@@ -408,6 +407,7 @@ void DrillForm::on_pbCreate_clicked() {
 
                     GCode::PocketCreator tpc;
                     tpc.moveToThread(&thread);
+                    connect(&tpc, &GCode::Creator::errorOccurred, this, &DrillForm::errorOccurred);
                     thread.start();
                     tpc.setGcp(gcp);
                     tpc.addPaths(val.paths);
@@ -569,6 +569,8 @@ void DrillForm::pickUpTool() {
     const double k = 0.05; // 5%
     int ctr = 0;
     for (const auto& row : model->data()) {
+        model->setToolId(ctr++, 3);
+        continue;
         const double drillDiameterMin = row.diameter * (1.0 - k);
         const double drillDiameterMax = row.diameter * (1.0 + k);
 
@@ -589,6 +591,12 @@ void DrillForm::pickUpTool() {
         }
         ++ctr;
     }
+}
+
+void DrillForm::errorOccurred() {
+    qDebug(__FUNCTION__);
+    auto tpc = (GCode::Creator*)sender();
+    tpc->continueCalc(ErrorDialog(tpc->items, this).exec());
 }
 
 QModelIndexList DrillForm::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }

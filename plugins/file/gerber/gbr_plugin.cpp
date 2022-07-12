@@ -59,7 +59,13 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
 
         auto const gbrFile = static_cast<File*>(file);
         for (auto gbrObj : gbrFile->graphicObjects2()) {
+            if (!gbrFile->apertures_.contains(gbrObj.state().aperture()) || gbrObj.state().dCode() != D03)
+                continue;
+
             auto& ap = *gbrFile->apertures_[gbrObj.state().aperture()];
+
+            if (!ap.flashed())
+                continue;
 
             auto name { ap.name() };
             if (ap.withHole()) {
@@ -69,8 +75,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
                 drillDiameter = ap.apertureSize();
             }
 
-            if (gbrObj.state().dCode() == D03 && ap.flashed())
-                retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].posOrPath.emplace_back(file->transform().map(gbrObj.state().curPos()));
+            retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].posOrPath.emplace_back(file->transform().map(gbrObj.state().curPos()));
 
             // draw aperture
             if (!retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw.size()) {
@@ -84,55 +89,44 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
             }
         }
 
-        //        for (const Excellon::Hole& hole : *exFile) {
-        //            auto name { QString("T%1").arg(hole.state.toolId) };
-        //            if (bool slot = hole.state.path.size(); slot)
-        //                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.path));
-        //            else
-        //                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].emplace_back(exFile->transform().map(hole.state.pos));
-        //        }
-        /*
+        return retData;
+    }
+    if (plugin->type() == ::GCode::Thermal) {
+        Drills retData;
+        double drillDiameter {};
 
-        DrillPreviewGiMap giPeview;
-        auto const gbrFile = reinterpret_cast<File*>(file);
-        const ApertureMap* const m_apertures = gbrFile->apertures();
+        auto const gbrFile = static_cast<File*>(file);
+        for (auto gbrObj : gbrFile->graphicObjects2()) {
+            if (!gbrFile->apertures_.contains(gbrObj.state().aperture()) || gbrObj.state().dCode() != D03)
+                continue;
 
-        uint count = 0;
-        for (auto [dCode, aperture] : *m_apertures) {
-            (void)dCode;
-            if (ap.flashed())
-                ++count;
-        }
+            auto& ap = *gbrFile->apertures_[gbrObj.state().aperture()];
 
-        std::map<int, std::vector<const GraphicObject*>> cacheApertures;
-        for (auto& go : gbrFile->m_graphicObjects)
-            if (go.state().dCode() == D03)
-                cacheApertures[go.state().aperture()].push_back(&go);
+            if (!ap.flashed())
+                continue;
 
-        assert(count == cacheApertures.size()); // assert on != - false
+            auto name { ap.name() };
+            if (ap.withHole()) {
+                drillDiameter = ap.drillDiameter();
+                name += tr(", drill Ø%1mm").arg(drillDiameter);
+            } else if (ap.type() == Circle) {
+                drillDiameter = ap.apertureSize();
+            }
 
-        data.reserve(count); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
-        for (auto [apDCode, aperture] : *m_apertures) {
-            if (aperture && ap.flashed()) {
-                double drillDiameter = 0;
-                QString name(ap.name());
-                if (ap.withHole()) {
-                    drillDiameter = ap.drillDiameter();
-                    name += tr(", drill Ø%1mm").arg(drillDiameter);
-                } else if (ap.type() == Circle) {
-                    drillDiameter = ap.apertureSize();
-                }
+            retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].posOrPath.emplace_back(file->transform().map(gbrObj.state().curPos()));
 
-                data.emplace_back(std::move(name), drawApertureIcon(aperture.get()), apDCode, drillDiameter);
-                for (const GraphicObject* go : cacheApertures[apDCode])
-                    giPeview[apDCode].push_back(std::make_shared<DrillPrGI>(go, apDCode, data.back()));
+            // draw aperture
+            if (!retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw.size()) {
+                auto state = gbrObj.state();
+                state.setCurPos({});
+                retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw = ap.draw(state);
+                QTransform transform {};
+                transform.rotateRadians(asin(file->transform().m12()));
+                for (auto&& path : retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw)
+                    path = transform.map(path);
             }
         }
 
-        return giPeview;
-
-
-        */
         return retData;
     }
     return {};

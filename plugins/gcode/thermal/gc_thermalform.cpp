@@ -198,9 +198,9 @@ void ThermalForm::createFile() {
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    tpc_->setGcp(gpc);
-    tpc_->addPaths(wPaths);
-    tpc_->addSupportPaths(wBridgePaths);
+    creator->setGcp(gpc);
+    creator->addPaths(wPaths);
+    creator->addSupportPaths(wBridgePaths);
     fileCount = 1;
     emit createToolpath();
 }

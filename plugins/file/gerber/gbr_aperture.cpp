@@ -413,7 +413,7 @@ void ApMacro::draw() {
     };
 
     VarMap macroCoefficients { coefficients_ };
-    QVector<QPair<bool, Path>> items;
+    mvector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < modifiers_.size(); ++i) {
             QString var(modifiers_[i]);
@@ -474,7 +474,7 @@ void ApMacro::draw() {
             else if (area > 0 && !exposure)
                 ReversePath(path);
 
-            items.append({ exposure, path });
+            items.emplace_back(exposure, path);
         }
     } catch (...) {
         qWarning() << "Macro draw error";
@@ -495,7 +495,9 @@ void ApMacro::draw() {
                 clipper.Execute(ctDifference, paths_, pftNonZero, pftNonZero);
         }
     } else
-        paths_.push_back(items.first().second);
+        paths_.push_back(items.front().second);
+
+    /// ReversePaths(paths_);
 
     ClipperBase clipperBase;
     clipperBase.AddPaths(paths_, ptSubject, true);
@@ -506,7 +508,7 @@ void ApMacro::draw() {
     const double y = rect.top * dScale;
     size_ = qSqrt(x * x + y * y);
 
-    normalize(paths_);
+    /// normalize(paths_);
 }
 
 Path ApMacro::drawCenterLine(const QList<double>& mod) {

@@ -20,8 +20,6 @@
 #include <QElapsedTimer>
 
 namespace GCode {
-PocketCreator::PocketCreator() {
-}
 
 void PocketCreator::create() {
     if (gcp_.tools.size() > 1) {
@@ -136,12 +134,12 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         Clipper clipper;
         clipper.AddPaths(paths, ptClip);
         auto rect = clipper.GetBounds();
-        setMax(getMax() + std::min(rect.right - rect.left, rect.bottom - rect.top));
+        setMax(max() + std::min(rect.right - rect.left, rect.bottom - rect.top));
     }
 
-    setMax(getMax() / (stepOver * 2)); /////////////////////////
+    setMax(max() / (stepOver * 2)); /////////////////////////
 
-    qDebug() << "getMax" << getMax();
+    qDebug() << "getMax" << max();
     for (Paths paths : groupedPss) {
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, jtRound, etClosedPolygon);
@@ -160,7 +158,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         } while (paths.size());
         returnPs.append(offsetPaths);
     }
-    qDebug() << "getCurrent" << getCurrent();
+    qDebug() << "getCurrent" << current();
     if (returnPs.empty()) {
         emit fileReady(nullptr);
         return;

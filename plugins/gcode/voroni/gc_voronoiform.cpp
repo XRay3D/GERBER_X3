@@ -131,9 +131,9 @@ void VoronoiForm::createFile() {
     gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
     gpc.params[GCode::GCodeParams::FrameOffset] = ui->dsbxOffset->value();
 
-    tpc_->setGcp(gpc);
-    tpc_->addPaths(wPaths);
-    tpc_->addRawPaths(wRawPaths);
+    creator->setGcp(gpc);
+    creator->addPaths(wPaths);
+    creator->addRawPaths(wRawPaths);
     createToolpath();
 }
 
