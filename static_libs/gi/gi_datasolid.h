@@ -21,18 +21,11 @@ public:
     ~GiDataSolid() override;
 
     // QGraphicsItem interface
-//   QRectF boundingRect() const override;
-    QPainterPath shape() const override;
+    //   QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
-    Paths paths(int alternate = {}) const override;
-    Paths* rPaths() override;
     // GraphicsItem interface
     void changeColor() override;
-
-private:
-    Paths& m_paths;
-    QPolygonF fillPolygon;
 };
