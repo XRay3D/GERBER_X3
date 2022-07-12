@@ -62,9 +62,9 @@ class ErrorModel : public QAbstractTableModel {
     mvector<GiError*> items;
 
 public:
-    ErrorModel(mvector<GiError*> items, QObject* parent = nullptr)
+    ErrorModel(mvector<GiError*>&& items, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
-        , items(items) {
+        , items(std::move(items)) {
     }
     virtual ~ErrorModel() { qDeleteAll(items); }
 
@@ -176,17 +176,36 @@ void ErrorDialog::retranslateUi(QDialog* ErrorDialog) {
     ErrorDialog->setWindowTitle(QCoreApplication::translate("ErrorDialog", "Uncut places:", nullptr));
 }
 
-ErrorDialog::ErrorDialog(const mvector<GiError*>& items, QWidget* parent)
+ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
     : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint) {
-    setupUi(this);
-    verticalLayout->insertWidget(0, table = new TableView(this));
-    table->setModel(new ErrorModel(items, table));
-    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+
+    mvector<GiError*> tmp;
 
     for (auto item : items) {
         App::scene()->addItem(item);
         item->setZValue(std::numeric_limits<double>::max());
+
+        mvector<QGraphicsItem*> ci;
+
+        {
+            auto tmp = App::scene()->collidingItems(item);
+            ci.reserve(tmp.size());
+            ci.insert(ci.begin(), tmp.begin(), tmp.end());
+        }
+        std::erase_if(ci, [](QGraphicsItem* item) { return item->type() != int(GiType::DataSolid) && item->type() != int(GiType::DataPath) && item->type() != int(GiType::Drill); });
+        qDebug() << __FUNCTION__ << ci.size();
+        if (ci.size() >= 2) {
+            tmp.emplace_back(item);
+        } else
+            delete item;
     }
+    qDebug() << __FUNCTION__ << tmp.size();
+
+    setupUi(this);
+
+    verticalLayout->insertWidget(0, table = new TableView(this));
+    table->setModel(new ErrorModel(std::move(tmp), table));
+    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
     buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
@@ -202,5 +221,13 @@ ErrorDialog::~ErrorDialog() {
 }
 
 void ErrorDialog::timerEvent(QTimerEvent* event) {
+    if (!table->model()->rowCount())
+        accept();
     App::scene()->update();
+}
+
+void ErrorDialog::showEvent(QShowEvent* event) {
+    QDialog::showEvent(event);
+    //    if (!table->model()->rowCount())
+    //        accept();
 }

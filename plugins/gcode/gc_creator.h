@@ -22,7 +22,7 @@
 
 using namespace ClipperLib;
 
-void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {});
+void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
 
 class GiError;
 

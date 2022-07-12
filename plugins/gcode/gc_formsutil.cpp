@@ -32,11 +32,11 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
 
     connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);
 
-    connect(tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress, Qt::QueuedConnection);
-    connect(tpc, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler, Qt::QueuedConnection);
-    connect(tpc, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler, Qt::QueuedConnection);
+    connect(tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress);
+    connect(tpc, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler);
+    connect(tpc, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler);
 
-    connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel, Qt::DirectConnection);
+    connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel);
 
     connect(this, &FormsUtil::createToolpath, tpc, &GCode::Creator::createGc);
     connect(this, &FormsUtil::createToolpath, this, &FormsUtil::startProgress);
@@ -107,7 +107,7 @@ void FormsUtil::cancel() {
 
 void FormsUtil::errorHandler(int) {
     stopProgress();
-    if (bool fl = ErrorDialog(creator->items, this).exec(); fl) {
+    if (bool fl = ErrorDialog(std::move(creator->items), this).exec(); fl) {
         startProgress();
         creator->continueCalc(fl);
     } else
