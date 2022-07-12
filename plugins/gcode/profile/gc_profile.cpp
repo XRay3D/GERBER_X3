@@ -16,6 +16,7 @@
 #include "gi_bridge.h"
 #include "mainwindow.h"
 #include "scene.h"
+#include <numbers>
 
 namespace GCode {
 ProfileCreator::ProfileCreator() {
@@ -131,10 +132,15 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
 }
 
 void ProfileCreator::cornerTrimming() {
-    const double bulge = (toolDiameter - toolDiameter * M_SQRT1_2) * M_SQRT1_2;
-    const double sqareSide = toolDiameter * M_SQRT1_2 * 0.5;
+    const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
+    const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
     const double trimAngle = gcp_.convent() ? -45.0 : +45;
+
+    auto test = [&](QLineF l1, QLineF l2) {
+        const bool fl = abs(l1.angleTo(l2) - testAngle) < 1.e-4;
+        return fl && sqareSide <= l1.length() && sqareSide <= l2.length();
+    };
 
     for (auto& paths : returnPss) {
         for (auto& path : paths) {
@@ -143,17 +149,18 @@ void ProfileCreator::cornerTrimming() {
                 const auto curCorner = path[i];
                 const QLineF l1(path[i - 1], curCorner);
                 const QLineF l2(curCorner, path[i + 1]);
-                if (qFuzzyCompare(l1.angleTo(l2), testAngle) && sqareSide <= l1.length() && sqareSide <= l2.length()) {
-                    path.insert(path.begin() + i, QLineF::fromPolar(bulge, l1.angle() + trimAngle).translated(curCorner).p2());
+                if (test(l1, l2)) {
+                    path.insert(path.begin() + i, QLineF::fromPolar(trimDepth, l1.angle() + trimAngle).translated(curCorner).p2());
                     path.insert(path.begin() + i, curCorner);
+                    i += 2;
                 }
             }
             if (path.front() == path.back()) { // for trimming between the beginning and the end of the path
                 const auto curCorner = path.front();
                 const QLineF l1(*(path.end() - 2), curCorner);
                 const QLineF l2(curCorner, path[1]);
-                if (qFuzzyCompare(l1.angleTo(l2), testAngle) && sqareSide <= l1.length() && sqareSide <= l2.length()) {
-                    path.insert(path.end(), QLineF::fromPolar(bulge, l1.angle() + trimAngle).translated(curCorner).p2());
+                if (test(l1, l2)) {
+                    path.insert(path.end(), QLineF::fromPolar(trimDepth, l1.angle() + trimAngle).translated(curCorner).p2());
                     path.insert(path.end(), curCorner);
                 }
             }
@@ -238,8 +245,8 @@ void ProfileCreator::makeBridges() {
 }
 
 void ProfileCreator::reorder() {
-//    returnPss = { returnPs };
-//    return;
+    //    returnPss = { returnPs };
+    //    return;
     PolyTree polyTree;
     {
         Clipper clipper;
