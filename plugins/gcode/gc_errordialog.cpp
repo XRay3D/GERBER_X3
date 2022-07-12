@@ -193,9 +193,14 @@ ErrorDialog::ErrorDialog(const mvector<GiError*>& items, QWidget* parent)
     lastWidget = App::mainWindow()->dockWidget()->widget();
     //    App::mainWindow()->dockWidget()->push(this);
     setGeometry({ App::mainWindow()->dockWidget()->mapToGlobal(QPoint()), App::mainWindow()->dockWidget()->size() });
+    startTimer(32);
 }
 
 ErrorDialog::~ErrorDialog() {
     //    App::mainWindow()->dockWidget()->pop();
     delete table->model();
+}
+
+void ErrorDialog::timerEvent(QTimerEvent* event) {
+    App::scene()->update();
 }

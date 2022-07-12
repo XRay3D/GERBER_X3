@@ -69,7 +69,9 @@
 
 #include <numbers>
 using std::numbers::pi;
+
 constexpr auto two_pi = pi * 2;
+constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 
 namespace ClipperLib {
 

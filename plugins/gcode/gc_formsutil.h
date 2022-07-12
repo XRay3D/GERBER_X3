@@ -33,7 +33,7 @@ class FormsUtil : public QWidget, protected FormsUtilI {
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator *tps, QWidget* parent = nullptr);
+    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator *tpc, QWidget* parent = nullptr);
     ~FormsUtil() override;
     virtual void editFile(GCode::File* file) = 0;
 
@@ -46,7 +46,7 @@ protected:
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
 
-    GCode::Creator* const tpc_;
+    GCode::Creator* const creator;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
     UsedItems usedItems_;
@@ -72,5 +72,4 @@ private:
     GCode::File* file_;
     QProgressDialog* progressDialog;
     int progressTimerId = 0;
-    int flikerTimerId = 0;
 };

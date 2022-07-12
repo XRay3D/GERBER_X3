@@ -27,7 +27,7 @@
 
 GraphicsItem::GraphicsItem(FileInterface* file)
     : animation(this, "bodyColor")
-    , visibleA(this, "opacity")
+    , visibleAnim(this, "opacity")
     , file_(file)
     , pen_(QPen(Qt::white, 0.0))
     , colorPtr_(file ? &file->color() : nullptr)
@@ -39,9 +39,9 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     animation.setDuration(100);
     animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     connect(this, &GraphicsItem::colorChanged, [this] { update(); });
-    visibleA.setDuration(100);
-    visibleA.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(&visibleA, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleA.currentValue().toDouble() > 0.9); });
+    visibleAnim.setDuration(100);
+    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
     QGraphicsItem::setVisible(false);
 
     //    connect(this, &QGraphicsObject::rotationChanged, [] { qDebug("rotationChanged"); });
@@ -73,9 +73,9 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor) {
 void GraphicsItem::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
     //        return;
-    visibleA.setStartValue(visible ? 0.0 : 1.0);
-    visibleA.setEndValue(visible ? 1.0 : 0.0);
-    visibleA.start();
+    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
+    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
+    visibleAnim.start();
     if (visible) {
         setOpacity(0.0);
         QGraphicsObject::setVisible(visible);
@@ -123,7 +123,7 @@ double GraphicsItem::scaleFactor() const {
 QRectF GraphicsItem::boundingRect() const {
     if (App::scene()->boundingRect())
         return shape_.toFillPolygon(transform()).boundingRect();
-    return shape_.boundingRect();
+    return boundingRect_;
 }
 
 QPainterPath GraphicsItem::shape() const { return shape_; }

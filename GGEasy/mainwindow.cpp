@@ -133,9 +133,11 @@ MainWindow::MainWindow(QWidget* parent)
         }
 
         if (1) {
+            //            i = 1000;
             //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
-            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(i += k, [this] { selectAll(); });
+            //            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
 }
@@ -462,31 +464,33 @@ void MainWindow::createActionsShape() {
     toolBar->addSeparator();
 
     auto executor = [](ClipType type) {
-        auto selectedItems(App::scene()->selectedItems());
-        Paths clipPaths;
-        for (QGraphicsItem* clipItem : selectedItems) {
-            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
-                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
-        }
+        qDebug("На переделке");
 
-        QList<GraphicsItem*> rmi;
-        for (QGraphicsItem* item : selectedItems) {
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
-                auto gitem = static_cast<GiDataSolid*>(item);
-                Clipper clipper;
-                clipper.AddPaths(gitem->paths(), ptSubject, true);
-                clipper.AddPaths(clipPaths, ptClip, true);
-                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-                if (gitem->rPaths()->empty()) {
-                    rmi.push_back(gitem);
-                } else {
-                    ReversePaths(*gitem->rPaths()); //??
-                    gitem->redraw();
-                }
-            }
-        }
-        for (GraphicsItem* item : rmi)
-            delete item->file()->itemGroup()->takeAt(item);
+        //  FIXME      auto selectedItems(App::scene()->selectedItems());
+        //        Paths clipPaths;
+        //        for (QGraphicsItem* clipItem : selectedItems) {
+        //            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+        //                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
+        //        }
+
+        //        QList<GraphicsItem*> rmi;
+        //        for (QGraphicsItem* item : selectedItems) {
+        //            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+        //                auto gitem = static_cast<GiDataSolid*>(item);
+        //                Clipper clipper;
+        //                clipper.AddPaths(gitem->paths(), ptSubject, true);
+        //                clipper.AddPaths(clipPaths, ptClip, true);
+        //                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+        //                if (gitem->rPaths()->empty()) {
+        //                    rmi.push_back(gitem);
+        //                } else {
+        //                    ReversePaths(*gitem->rPaths()); //??
+        //                    gitem->redraw();
+        //                }
+        //            }
+        //        }
+        //        for (GraphicsItem* item : rmi)
+        //            delete item->file()->itemGroup()->takeAt(item);
     };
     toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ctUnion); });
     toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ctDifference); });
@@ -673,7 +677,7 @@ void MainWindow::selectAll() {
                 item->setSelected(true);
     } else {
         for (QGraphicsItem* item : App::scene()->items())
-            if (item->isVisible())
+            if (item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
 }

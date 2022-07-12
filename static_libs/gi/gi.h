@@ -76,8 +76,7 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int alternate = {}) const = 0;
-    virtual Paths* rPaths() { return nullptr; }
+    virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
     virtual void redraw() { }
 
     void setVisible(bool visible);
@@ -92,9 +91,9 @@ public:
 
 protected:
     QPropertyAnimation animation;
-    QPropertyAnimation visibleA;
+    QPropertyAnimation visibleAnim;
 
-    QRectF rect_;
+    mutable QRectF boundingRect_;
 
     const FileInterface* file_;
     GiGroup* itemGroup = nullptr;

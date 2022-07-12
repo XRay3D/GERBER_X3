@@ -13,7 +13,9 @@
 #include <QMutex>
 #include <QObject>
 #include <QProperty>
+#include <QSemaphore>
 #include <QWaitCondition>
+#include <mutex>
 #include <myclipper.h>
 #include <source_location>
 #include <sstream>
@@ -24,55 +26,48 @@ void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool
 
 class GiError;
 
-// namespace GCode {
-// class Creator;
-// }
-
 class ProgressCancel {
-    static inline size_t m_max = 0;
-    static inline size_t m_current = 0;
-    static inline bool m_cancel = false;
-    //    static inline GCode::Creator* m_creator = nullptr;
-    static inline ClipperLib::ClipperBase* m_clipper = nullptr;
+    static inline size_t max_ = 0;
+    static inline size_t current_ = 0;
+    //    static inline ClipperLib::ClipperBase* clipper_ = nullptr;
+    static inline bool cancel_ = false;
 
 public:
-    ProgressCancel() { }
-
     static void reset() {
-        m_max = 0;
-        m_current = 0;
-        m_cancel = false;
-        //        m_creator = nullptr;
-        m_clipper = nullptr;
+        current_ = {};
+        max_ = {};
+        //        clipper_ = {};
+        cancel_ = {};
     }
 
     //    static GCode::Creator* creator() { return m_creator; }
     //    static void setCreator(GCode::Creator* creator) { m_creator = creator; }
 
-    static void setClipper(ClipperLib::ClipperBase* clipper) { m_clipper = clipper; }
-    static ClipperLib::ClipperBase* clipper() { return m_clipper; }
+    //    static void setClipper(ClipperLib::ClipperBase* clipper) { clipper_ = clipper; }
+    //    static ClipperLib::ClipperBase* clipper() { return clipper_; }
 
-    static size_t getMax() { return m_max; }
-    static void setMax(size_t max) { m_max = max; }
+    static size_t max() { return max_; }
+    static void setMax(size_t max) { max_ = max; }
 
-    static size_t getCurrent() { return m_current; }
-    static void setCurrent(size_t current = 0) { m_current = current; }
-    static void incCurrent() { ++m_current; }
+    static size_t current() { return current_; }
+    static void setCurrent(size_t current = 0) { current_ = current; }
+    static void incCurrent() { ++current_; }
 
-    static bool getCancel() { return m_cancel; }
+    static bool getCancel() { return cancel_; }
     static void ifCancelThenThrow(const std::source_location location = std::source_location::current()) {
         static std::stringstream ss;
-        if (m_cancel) {
-            ss.clear();
-            ss << "file: "
-               << location.file_name() << "("
-               << location.line() << ":"
-               << location.column() << ") `"
-               << location.function_name();
-            throw cancelException(ss.str().data() /*__FUNCTION__*/);
+        if (cancel_) {
+            //            ss.clear();
+            //            ss << "file: "
+            //               << location.file_name() << "("
+            //               << location.line() << ":"
+            //               << location.column() << ") `"
+            //               << location.function_name();
+            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
+            throw cancelException(__FUNCTION__);
         }
     }
-    static void setCancel(bool cancel) { m_cancel = cancel; }
+    static void setCancel(bool cancel) { cancel_ = cancel; }
 };
 
 namespace GCode {
@@ -106,8 +101,7 @@ public:
 
     void createGc();
 
-    void cancel();
-    void proceed();
+    void continueCalc(bool fl = true);
 
     GCodeParams getGcp() const;
     void setGcp(const GCodeParams& gcp_);
@@ -161,8 +155,8 @@ protected:
     void isContinueCalc();
 
 private:
-    QMutex mutex;
-    QWaitCondition condition;
+    std::mutex mutex;
+    std::condition_variable cv;
 };
 
 } // namespace GCode

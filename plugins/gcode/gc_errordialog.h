@@ -29,8 +29,13 @@ class ErrorDialog : public QDialog {
 
     void setupUi(QDialog* ErrorDialog);       // setupUi
     void retranslateUi(QDialog* ErrorDialog); // retranslateUi
+    int flikerTimerId = 0;
 
 public:
     explicit ErrorDialog(const mvector<GiError*>& items, QWidget* parent = nullptr);
     ~ErrorDialog();
+
+    // QObject interface
+protected:
+    void timerEvent(QTimerEvent* event) override;
 };

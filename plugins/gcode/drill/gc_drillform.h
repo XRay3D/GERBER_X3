@@ -68,6 +68,10 @@ private:
     void on_customContextMenuRequested(const QPoint& pos);
 
     void pickUpTool();
+
+    //////////
+    void errorOccurred();
+
     QModelIndexList selectedIndexes() const;
 
     inline void zoomToSelected();

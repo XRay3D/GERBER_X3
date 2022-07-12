@@ -119,7 +119,7 @@ void GiDrill::create() {
         path_.push_back(path_.front());
         shape_.addPolygon(path_);
     } else {
-        rect_ = shape_.boundingRect();
+        boundingRect_ = shape_.boundingRect();
         Paths paths;
         ClipperOffset offset;
         offset.AddPath(path_, jtRound, etOpenRound);
@@ -130,6 +130,6 @@ void GiDrill::create() {
         }
     }
 
-    rect_ = shape_.boundingRect();
+    boundingRect_ = shape_.boundingRect();
     fillPolygon = shape_.toFillPolygon();
 }

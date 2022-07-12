@@ -25,6 +25,8 @@ public:
     int type() const override;
     bool isSlot() const;
 
+    Paths offset() const;
+
 private:
     static Paths offset(const Path& path, double offset);
 };

@@ -79,7 +79,7 @@ void GiDataPath::updateSelection() const {
         selectionShape_ = QPainterPath();
         Paths tmpPpath;
         ClipperOffset offset;
-        offset.AddPath(shape_.toSubpathPolygons().front(), jtSquare, ClipperLib::etOpenButt);
+        offset.AddPath(shape_.toSubpathPolygons().front(), jtSquare, ClipperLib::etOpenSquare);
         offset.Execute(tmpPpath, 5 * uScale * scale_);
         for (const Path& path : qAsConst(tmpPpath))
             selectionShape_.addPolygon(path);

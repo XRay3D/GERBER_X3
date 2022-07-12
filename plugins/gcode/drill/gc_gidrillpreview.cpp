@@ -17,8 +17,7 @@ GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& r
         [this](const QPointF& val) {
             qDebug(__FUNCTION__);
             QPainterPath painterPath;
-            const double radius = sourceDiameter_ * 0.5;
-            painterPath.addEllipse({}, radius, radius);
+            painterPath.addPolygon( CirclePath(sourceDiameter_ * uScale));
             return painterPath;
         },
     };
@@ -96,14 +95,15 @@ void GiDrillPreview::updateTool() {
 Paths GiDrillPreview::paths() const {
     auto getPath = Overload {
         [this](const QPointF& val) {
-            auto path { CirclePath(sourceDiameter_ * uScale, val) };
-            return ReversePath(path);
+            //            auto path { CirclePath(sourceDiameter_ * uScale, val) };
+            //            return ReversePath(path);
+
+            Paths paths { sourcePath_.translated(val).toSubpathPolygons() };
+            return ReversePaths(paths);
         },
-        [this](const QPolygonF& val) {
-            return Path { val };
-        },
+        [](const QPolygonF& val) { return Paths { val }; },
     };
-    return { std::visit(getPath, hv) };
+    return std::visit(getPath, hv);
 }
 
 bool GiDrillPreview::fit(double depth) const {
@@ -116,16 +116,22 @@ int GiDrillPreview::toolId() const {
 }
 
 Paths GiDrillPreview::offset(const Path& path, double offset) {
-    ClipperOffset cpOffset;
+    ClipperOffset cOffset;
+    Paths retPaths;
     // cpOffset.AddPath(path, jtRound, etClosedLine);
-    cpOffset.AddPath(path, jtRound, etOpenRound);
-    Paths tmpPpaths;
-    cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
-    for (Path& path : tmpPpaths)
+    cOffset.AddPath(path, jtRound, etOpenRound);
+    cOffset.Execute(retPaths, offset * 0.5 * uScale);
+    for (Path& path : retPaths)
         path.push_back(path.front());
-    return tmpPpaths;
+    qDebug() << __FUNCTION__ << retPaths.size();
+    ReversePaths(retPaths);
+    return retPaths;
 }
 
 int GiDrillPreview::type() const { return int(GiType::Preview) + hv.index(); }
 
 bool GiDrillPreview::isSlot() const { return hv.index(); }
+
+Paths GiDrillPreview::offset() const {
+    return offset(paths().front(), sourceDiameter_);
+}

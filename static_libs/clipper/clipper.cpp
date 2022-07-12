@@ -852,13 +852,13 @@ ClipperBase::ClipperBase() // constructor
 {
     m_CurrentLM = m_MinimaList.begin(); // begin() == end() here
     m_UseFullRange = false;
-    ProgressCancel::setClipper(this);
+    //    ProgressCancel::setClipper(this);
 }
 //------------------------------------------------------------------------------
 
 ClipperBase::~ClipperBase() // destructor
 {
-    ProgressCancel::setClipper(nullptr);
+    //    ProgressCancel::setClipper(nullptr);
     Clear();
 }
 //------------------------------------------------------------------------------

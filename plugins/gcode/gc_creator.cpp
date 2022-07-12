@@ -14,8 +14,8 @@
 #include "gc_creator.h"
 
 #include "app.h"
-#include "gi_error.h"
 #include "gc_file.h"
+#include "gi_error.h"
 #include "gi_point.h"
 #include "project.h"
 #include "voroni/jc_voronoi.h"
@@ -92,7 +92,6 @@ Creator::Creator() { }
 
 void Creator::reset() {
     ProgressCancel::reset();
-    //    setCreator(this);
 
     file_ = nullptr;
 
@@ -254,22 +253,10 @@ void Creator::createGc() {
     }
 }
 
-void Creator::cancel() // direct connection!!
-{
-    setCancel(true);
-    condition.wakeAll();
-}
-
-void Creator::proceed() // direct connection!!
-{
-    setCancel(false);
-    condition.wakeAll();
-}
-
 GCode::File* Creator::file() const { return file_; }
 
 std::pair<int, int> Creator::getProgress() {
-    return { static_cast<int>(getMax()), static_cast<int>(getCurrent()) };
+    return { static_cast<int>(max()), static_cast<int>(current()) };
 }
 
 void Creator::stacking(Paths& paths) {
@@ -553,28 +540,35 @@ void Creator::sortPolyNodeByNesting(PolyNode& polynode) {
     sorter(polynode);
 }
 
+static int i = 0;
+
 void Creator::isContinueCalc() {
     emit errorOccurred();
-    mutex.lock();
-    condition.wait(&mutex);
-    mutex.unlock();
+    std::unique_lock lk(mutex);
+    cv.wait(lk, [] { return i == 1; });
     items.clear();
-    //    if (m_cancel)
-    //        throw cancelException("canceled by user");
+    lk.unlock();
+}
+
+void Creator::continueCalc(bool fl) { // direct connection!!
+    setCancel(!fl);
+    i = 1;
+    cv.notify_all();
+    qDebug(__FUNCTION__);
 }
 
 bool Creator::createability(bool side) {
     QElapsedTimer t;
     t.start();
-    //    Paths wpe;
+
     const double d = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
     const double r = d * 0.5;
     const double testArea = d * d - pi * r * r;
 
     Paths srcPaths;
-    for (size_t pIdx = 0; pIdx < groupedPss.size(); ++pIdx) {
+    for (size_t pIdx = 0; pIdx < groupedPss.size(); ++pIdx)
         srcPaths.append(groupedPss[pIdx]);
-    }
+
     qDebug() << "insert" << t.elapsed();
 
     Paths frPaths;
@@ -588,7 +582,9 @@ bool Creator::createability(bool side) {
         offset.AddPaths(frPaths, jtRound, etClosedPolygon);
         offset.Execute(frPaths, r + 100);
     }
+
     qDebug() << "offset" << t.elapsed();
+
     if (side == CopperPaths)
         ReversePaths(srcPaths);
     {
@@ -597,7 +593,9 @@ bool Creator::createability(bool side) {
         clipper.AddPaths(srcPaths, ptSubject);
         clipper.Execute(ctDifference, frPaths, pftPositive);
     }
+
     qDebug() << "clipper1" << t.elapsed();
+
     QString last(msg);
     if (!frPaths.empty()) {
         PolyTree polyTree;
@@ -680,37 +678,6 @@ void Creator::setGcp(const GCodeParams& gcp) {
     gcp_ = gcp;
     reset();
 }
-
-// void Creator:://PROG .3setProgMax(int progressMax)
-//{
-//     //        if (App::set_creator != nullptr)
-//     //PROG  m_progressMax += progressMax;
-// }
-
-// void Creator:: //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal)
-//{
-//     //        if (m_cancel) {
-//     //            m_cancel = false;
-//     //            throw cancelException("canceled by user");
-//     //        }
-//     //PROG m_progressVal = progressVal;
-//     //PROG  m_progressMax = progressMax;
-// }
-
-// void Creator:://PROG setProgInc()
-//{
-//     //        if (m_cancel) {
-//     //            m_cancel = false;
-//     //            throw cancelException("canceled by user");
-//     //        }
-//     if (App::set_creator != nullptr)
-//         if (//PROG  m_progressMax < ++//PROG m_progressVal) {
-//             if (//PROG  m_progressMax == 0)
-//                 //PROG  m_progressMax = 100;
-//             else
-//                 //PROG  m_progressMax *= 2;
-//         }
-// }
 
 Paths& Creator::sortB(Paths& src) {
     IntPoint startPt(App::home()->pos() + App::zero()->pos());
