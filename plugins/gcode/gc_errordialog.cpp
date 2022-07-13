@@ -179,32 +179,36 @@ void ErrorDialog::retranslateUi(QDialog* ErrorDialog) {
 ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
     : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint) {
 
-    mvector<GiError*> tmp;
+    //    mvector<GiError*> tmp;
 
-    for (auto item : items) {
-        App::scene()->addItem(item);
-        item->setZValue(std::numeric_limits<double>::max());
+    //    for (auto item : items) {
+    //        App::scene()->addItem(item);
+    //        item->setZValue(std::numeric_limits<double>::max());
 
-        mvector<QGraphicsItem*> ci;
+    //        mvector<QGraphicsItem*> ci;
 
-        {
-            auto tmp = App::scene()->collidingItems(item);
-            ci.reserve(tmp.size());
-            ci.insert(ci.begin(), tmp.begin(), tmp.end());
-        }
-        std::erase_if(ci, [](QGraphicsItem* item) { return item->type() != int(GiType::DataSolid) && item->type() != int(GiType::DataPath) && item->type() != int(GiType::Drill); });
-        qDebug() << __FUNCTION__ << ci.size();
-        if (ci.size() >= 2) {
-            tmp.emplace_back(item);
-        } else
-            delete item;
-    }
-    qDebug() << __FUNCTION__ << tmp.size();
+    //        {
+    //            auto tmp = App::scene()->collidingItems(item);
+    //            ci.reserve(tmp.size());
+    //            ci.insert(ci.begin(), tmp.begin(), tmp.end());
+    //        }
+    //        std::erase_if(ci, [](QGraphicsItem* item) { return item->type() != int(GiType::DataSolid) && item->type() != int(GiType::DataPath) && item->type() != int(GiType::Drill); });
+    //        qDebug() << __FUNCTION__ << ci.size();
+    //        if (ci.size() >= 2) {
+    //            tmp.emplace_back(item);
+    //        } else
+    //            delete item;
+    //    }
+    //    qDebug() << __FUNCTION__ << tmp.size();
+    //    items = tmp;
 
     setupUi(this);
 
+    for (auto item : items)
+        App::scene()->addItem(item);
+
     verticalLayout->insertWidget(0, table = new TableView(this));
-    table->setModel(new ErrorModel(std::move(tmp), table));
+    table->setModel(new ErrorModel(std::move(items), table));
     table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
     buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
@@ -217,7 +221,7 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
 
 ErrorDialog::~ErrorDialog() {
     //    App::mainWindow()->dockWidget()->pop();
-    delete table->model();
+    //    delete table->model();
 }
 
 void ErrorDialog::timerEvent(QTimerEvent* event) {
@@ -228,6 +232,9 @@ void ErrorDialog::timerEvent(QTimerEvent* event) {
 
 void ErrorDialog::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
+    setModal(false);                       // FIXME Dialog specific
+    setAttribute(Qt::WA_ShowModal, false); // FIXME Set the WA_ShowModal property
+    setWindowModality(Qt::NonModal);       // FIXME Set the blocking mode
     //    if (!table->model()->rowCount())
     //        accept();
 }

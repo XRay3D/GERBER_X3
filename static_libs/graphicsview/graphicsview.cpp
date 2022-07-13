@@ -199,7 +199,7 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
     if (dstRect.isNull())
         return;
     if (withBorders)
-        dstRect += QMarginsF(5, 5, 5, 5); // 5 mm
+        dstRect += QMarginsF(dstRect.width() / 5, dstRect.height() / 5, dstRect.width() / 5, dstRect.height() / 5); // 5 mm
     //    const auto r1(getViewRect().toRect());
     //    const auto r2(dstRect.toRect());
     //    if (r1 == r2)

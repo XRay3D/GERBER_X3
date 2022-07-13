@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget* parent)
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
-            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget* parent)
             //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { m_dockWidget->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
 }
@@ -151,7 +151,7 @@ MainWindow::~MainWindow() {
 void MainWindow::closeEvent(QCloseEvent* event) {
     if (qApp->applicationDirPath().contains("GERBER_X3/bin") || maybeSave()) {
         writeSettings();
-        delete m_dockWidget; //->close();
+        delete dockWidget_;
         qApp->closeAllWindows();
         App::fileModel()->closeProject();
         event->accept();
@@ -162,7 +162,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
 bool MainWindow::closeProject() {
     if (maybeSave()) {
-        m_dockWidget->close();
+        dockWidget_->close();
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         m_project->close();
@@ -183,9 +183,9 @@ void MainWindow::initWidgets() {
 }
 
 void MainWindow::createActions() {
-    m_dockWidget = new DockWidget(this);
-    m_dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    m_dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
+    dockWidget_ = new DockWidget(this);
+    dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockWidget_->setObjectName(QStringLiteral("dwCreatePath"));
     // fileMenu
     createActionsFile();
     // zoomToolBar
@@ -423,8 +423,8 @@ void MainWindow::createActionsToolPath() {
     //    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     //    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    connect(m_dockWidget, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
-    addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
+    connect(dockWidget_, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
 
     for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
         auto action = gCodePlugin->addAction(menu, toolpathToolBar);
@@ -869,7 +869,7 @@ QString MainWindow::strippedName(const QString& fullFileName) {
 
 QMenu* MainWindow::createPopupMenu() {
     QMenu* menu = QMainWindow::createPopupMenu();
-    menu->removeAction(m_dockWidget->toggleViewAction());
+    menu->removeAction(dockWidget_->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
     menu->removeAction(ui->treeDockWidget->toggleViewAction());
 
@@ -1059,15 +1059,15 @@ void MainWindow::updateTheme() {
 }
 
 void MainWindow::setDockWidget(QWidget* dwContent) {
-    if (m_dockWidget->widget() == dwContent)
+    if (dockWidget_->widget() == dwContent)
         return;
 
-    m_dockWidget->pop();
+    dockWidget_->pop();
 
     if (dwContent) {
-        m_dockWidget->setWindowTitle(dwContent->windowTitle());
-        m_dockWidget->push(dwContent);
-        m_dockWidget->show();
+        dockWidget_->setWindowTitle(dwContent->windowTitle());
+        dockWidget_->push(dwContent);
+        dockWidget_->show();
     }
 }
 
