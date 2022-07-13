@@ -94,8 +94,8 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
-    const DockWidget* dockWidget() const { return m_dockWidget; }
-    DockWidget* dockWidget() { return m_dockWidget; }
+    const DockWidget* dockWidget() const { return dockWidget_; }
+    DockWidget* dockWidget() { return dockWidget_; }
 
     static void translate(const QString& locale);
     void loadFile(const QString& fileName);
@@ -103,15 +103,15 @@ public:
 
     template <class T>
     void createDockWidget() {
-        if (dynamic_cast<T*>(m_dockWidget->widget()))
+        if (dynamic_cast<T*>(dockWidget_->widget()))
             return;
 
-        auto dwContent = new T(m_dockWidget);
+        auto dwContent = new T(dockWidget_);
         dwContent->setObjectName(typeid(T).name());
 
-        m_dockWidget->pop();
-        m_dockWidget->push(dwContent);
-        m_dockWidget->show();
+        dockWidget_->pop();
+        dockWidget_->push(dwContent);
+        dockWidget_->show();
     }
 
 signals:
@@ -125,7 +125,7 @@ private slots:
 
 private:
     Ui::MainWindow* ui;
-    DockWidget* m_dockWidget = nullptr;
+    DockWidget* dockWidget_ = nullptr;
     Recent recentFiles;
     Recent recentProjects;
 

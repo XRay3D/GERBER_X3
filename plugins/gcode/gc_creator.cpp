@@ -29,6 +29,7 @@
 //#include "settings.h"
 //#include "stdio.h"
 //#include "string.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -109,7 +110,7 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, cInt k) {
+Pathss& Creator::groupedPaths(Grouping group, cInt k, bool fl) {
     PolyTree polyTree;
     Clipper clipper;
     clipper.AddPaths(workingPs, ptSubject, true);
@@ -124,42 +125,23 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k) {
     clipper.AddPath(outer, ptSubject, true);
     clipper.Execute(ctUnion, polyTree, pftNonZero);
     /****************************/
-    std::function<void(PolyNode*, Grouping)> grouping = [&grouping, this](PolyNode* node, Grouping group) {
-        Paths paths;
-        switch (group) {
-        case CutoffPaths:
-            if (!node->IsHole()) {
-                Path& path = node->Contour;
-                paths.push_back(path);
-                for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
-                    path = node->Childs[i]->Contour;
-                    paths.push_back(path);
-                }
-                groupedPss.push_back(paths);
-            }
-            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-                grouping(node->Childs[i], group);
-            break;
-        case CopperPaths:
-            if (node->IsHole()) {
-                Path& path = node->Contour;
-                paths.push_back(path);
-                for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
-                    path = node->Childs[i]->Contour;
-                    paths.push_back(path);
-                }
-                groupedPss.push_back(paths);
-            }
-            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-                grouping(node->Childs[i], group);
-            break;
+    std::function<void(PolyNode*)> grouping = [&grouping, group, this](PolyNode* node) {
+        if ((group == CutoffPaths) ^ node->IsHole()) {
+            Paths paths;
+            paths.reserve(node->ChildCount() + 1);
+            paths.emplace_back(std::move(node->Contour));
+            for (auto&& child : node->Childs)
+                paths.emplace_back(std::move(child->Contour));
+            groupedPss.emplace_back(std::move(paths));
         }
+        for (auto&& child : node->Childs)
+            grouping(child);
     };
     /*********************************/
     groupedPss.clear();
-    grouping(polyTree.GetFirst(), group);
+    grouping(polyTree.GetFirst());
 
-    if (group == CutoffPaths) {
+    if (!fl && group == CutoffPaths) {
         if (groupedPss.size() > 1 && groupedPss.front().size() == 2)
             groupedPss.erase(groupedPss.begin());
     }
@@ -230,11 +212,12 @@ void Creator::createGc() {
             type() == Raster) {
             switch (gcp_.side()) {
             case Outer:
-                groupedPaths(CutoffPaths, gcp_.tools.front().getDiameter(gcp_.getDepth()) * uScale + 100);
+                groupedPaths(CopperPaths, uScale);
                 createability(CutoffPaths);
                 break;
             case Inner:
-                groupedPaths(CopperPaths);
+                groupedPaths(CopperPaths, uScale);
+                // groupedPaths(CutoffPaths, gcp_.tools.front().getDiameter(gcp_.getDepth()) * uScale + 100, true);
                 createability(CopperPaths);
                 break;
             case On:
@@ -558,118 +541,129 @@ void Creator::continueCalc(bool fl) { // direct connection!!
 }
 
 bool Creator::createability(bool side) {
-    QElapsedTimer t;
-    t.start();
+    Timer t("createability");
 
     const double toolDiameter = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
     const double toolRadius = toolDiameter * 0.5;
     const double testArea = toolDiameter * toolDiameter - pi * toolRadius * toolRadius;
-
-    Paths srcPaths;
-    for (auto&& paths : groupedPss)
-        srcPaths.append(paths);
-
-    qDebug() << __FUNCTION__ << "insert" << t.elapsed();
-
     Paths frPaths;
-    {
+
+    constexpr auto k = 10;
+
+    auto mill = [](Paths& srcPaths, double offset1, double offset2) {
+        Timer t("mill");
+        Paths retPaths;
+
+        ReversePaths(srcPaths);
+
         ClipperOffset offset(uScale);
         offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
-        offset.Execute(frPaths, -toolRadius);
+        offset.Execute(retPaths, offset1);
+
         offset.Clear();
-        offset.AddPaths(frPaths, jtRound, etClosedPolygon);
-        offset.Execute(frPaths, toolRadius + 10);
-        qDebug() << __FUNCTION__ << "offset" << t.elapsed();
+        offset.AddPaths(retPaths, jtRound, etClosedPolygon);
+        offset.Execute(retPaths, offset2);
+        return retPaths;
+    };
+
+    auto nonCuts = [](const Paths& subject, const Paths& clip) {
+        Timer t("nonCuts");
+        Paths retPaths;
+
+        Clipper clipper;
+        clipper.AddPaths(subject, ptSubject);
+        clipper.AddPaths(clip, ptClip);
+        clipper.Execute(ctDifference, retPaths, pftPositive);
+
+        ClipperOffset offset(uScale);
+        offset.AddPaths(retPaths, ClipperLib::jtMiter, etClosedPolygon);
+        offset.Execute(retPaths, k);
+        return retPaths;
+    };
+
+    if (side == CutoffPaths) {
+        Paths srcPaths;
+        mvector<QPainterPath> painterPaths;
+        mvector<QPainterPath> painterPathsFr;
+        painterPaths.reserve(groupedPss.size());
+        for (auto&& paths : groupedPss) {
+            srcPaths.append(paths);
+            painterPaths.push_back({});
+            for (auto&& path : paths)
+                painterPaths.back().addPolygon(path);
+        }
+
+        frPaths = mill(srcPaths, +toolRadius, -toolRadius - k);
+        frPaths = nonCuts(frPaths, srcPaths);
+
+        painterPathsFr.reserve(frPaths.size());
+        for (auto&& frPath : frPaths) {
+            painterPathsFr.push_back({});
+            painterPathsFr.back().addPolygon(frPath);
+        }
+
+        for (auto&& frPath : painterPathsFr) { // frames
+            std::set<QPainterPath*> set;
+            for (auto&& srcPath : painterPaths) { // frames
+                if (frPath.intersects(srcPath))
+                    set.emplace(&srcPath);
+            }
+            if (set.size() < 2 && Area(frPath.toFillPolygon()) < testArea)
+                frPath.clear();
+        }
+
+        frPaths.clear();
+        for (auto&& frPath : painterPathsFr) // frames
+            if (!frPath.isEmpty())
+                frPaths.emplace_back(frPath.toFillPolygon());
+
+    } else {
+        for (auto srcPaths : groupedPss) {
+            Paths frPaths_;
+            mvector<QPainterPath> painterPaths;
+            mvector<QPainterPath> painterPathsFr;
+
+            frPaths_ = mill(srcPaths, -toolRadius, +toolRadius + k);
+
+            for (auto&& path : frPaths_) {
+                painterPaths.push_back({});
+                painterPaths.back().addPolygon(path);
+            }
+
+            frPaths_ = nonCuts(srcPaths, frPaths_);
+
+            painterPathsFr.reserve(frPaths_.size());
+
+            for (auto&& frPath : frPaths_) {
+                painterPathsFr.push_back({});
+                painterPathsFr.back().addPolygon(frPath);
+            }
+
+            for (auto&& frPath : painterPathsFr) { // frames
+                std::set<QPainterPath*> set;
+                for (auto&& srcPath : painterPaths) { // frames
+                    if (frPath.intersects(srcPath))
+                        set.emplace(&srcPath);
+                }
+                if (set.size() < 2 && Area(frPath.toFillPolygon()) < testArea)
+                    frPath.clear();
+            }
+
+            for (auto&& frPath : painterPathsFr) // frames
+                if (!frPath.isEmpty())
+                    frPaths.emplace_back(frPath.toFillPolygon());
+
+            break;
+        }
     }
 
-    if (side == CopperPaths)
-        ReversePaths(srcPaths);
-    {
-        Clipper clipper;
-        clipper.AddPaths(frPaths, ptClip);
-        clipper.AddPaths(srcPaths, ptSubject);
-        clipper.Execute(ctDifference, frPaths, pftPositive);
-        qDebug() << __FUNCTION__ << "clipper1" << t.elapsed();
-        ClipperOffset offset(uScale);
-        offset.AddPaths(frPaths, ClipperLib::jtMiter, etClosedPolygon);
-        offset.Execute(frPaths, 10);
-        dbgPaths(frPaths, "frPaths2");
-    }
+    std::erase_if(frPaths, [](Path& path) { return !path.size(); }); //убрать пустые
 
     for (auto&& path : frPaths)
         items.push_back(new GiError({ path }, Area(path) * dScale * dScale));
 
     QString last(msg);
-    //    if (!frPaths.empty()) {
-    //        PolyTree polyTree;
-    //        {
-    //            Clipper clipper;
-    //            clipper.AddPaths(frPaths, ptSubject, true);
-    //            IntRect rect(clipper.GetBounds());
-    //            int k = uScale;
-    //            Path outer = { IntPoint(rect.left - k, rect.bottom + k), IntPoint(rect.right + k, rect.bottom + k),
-    //                IntPoint(rect.right + k, rect.top - k), IntPoint(rect.left - k, rect.top - k) };
-    //            clipper.AddPath(outer, ptSubject, true);
-    //            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-    //            qDebug() << __FUNCTION__ << "clipper2" << t.elapsed();
-    //        }
 
-    //        auto test = [&srcPaths, side](PolyNode* node) -> bool {
-    //            if (node->ChildCount() > 0) {
-    //                qDebug() << __FUNCTION__ << 1;
-    //                return true;
-    //            } else {
-    //                QSet<size_t> skip;
-    //                for (auto& point : node->Contour) {
-    //                    for (size_t i = 0; i < srcPaths.size(); ++i) {
-    //                        if (skip.contains(i))
-    //                            continue;
-    //                        const auto& path = srcPaths[i];
-    //                        if (int fl = PointInPolygon(point, path); side == CopperPaths || fl == -1) {
-    //                            skip.insert(i);
-    //                            qDebug() << __FUNCTION__ << 4;
-    //                            break;
-    //                        }
-    //                    }
-    //                }
-    //                if (skip.size() > 1) {
-    //                    qDebug() << __FUNCTION__ << 2;
-    //                    return true;
-    //                }
-    //            }
-    //            qDebug() << __FUNCTION__ << 3;
-    //            return false;
-    //        };
-
-    //        setMax(frPaths.size());
-    //        setCurrent();
-
-    //        msg = tr("Creativity check");
-    //        const std::function<void(PolyNode*, double)> creator = [&creator, test, testArea, this](PolyNode* node, double area) {
-    //            if (node && !node->IsHole()) { // init run
-    //                for (auto&& child : node->Childs) {
-    //                    if (area = -Area(child->Contour); testArea < area && test(child))
-    //                        creator(child, area);
-    //                }
-    //            } else {
-    //                static Paths paths;
-    //                paths.clear();
-    //                paths.reserve(node->ChildCount() + 1);
-    //                paths.push_back(std::move(node->Contour)); // init path
-    //                for (size_t i = 0; i < node->ChildCount(); ++i) {
-    //                    area += Area(node->Childs[i]->Contour);
-    //                    paths.push_back(std::move(node->Childs[i]->Contour));
-    //                }
-    //                incCurrent();
-    //                items.push_back(new GiError(paths, area * dScale * dScale));
-    //                for (size_t i = 0; i < node->ChildCount(); ++i) {
-    //                    creator(node->Childs[i], area);
-    //                }
-    //            }
-    //        };
-    //        creator(polyTree.GetFirst(), 0);
-    //    }
-    qDebug() << __FUNCTION__ << "creator" << t.elapsed();
     msg = last;
     if (!items.empty())
         isContinueCalc();

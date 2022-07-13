@@ -22,7 +22,7 @@
 
 using namespace ClipperLib;
 
-void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
+void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = { 1 });
 
 class GiError;
 
@@ -91,7 +91,7 @@ public:
     void addSupportPaths(Pathss supportPaths);
     void addPaths(const Paths& paths);
 
-    Pathss& groupedPaths(Grouping group, cInt k = uScale);
+    Pathss& groupedPaths(Grouping group, cInt k = uScale, bool fl = {});
 
     /*static*/ Paths& sortB(Paths& src);
     /*static*/ Paths& sortBE(Paths& src);
