@@ -29,10 +29,8 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
         QStringLiteral("pock_rast_conv"),
     } {
     ui->setupUi(this);
-    /*parent->*/ setWindowTitle(ui->label->text());
-
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    label->setText(tr("Crosshatch Toolpath"));
+    /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
@@ -57,8 +55,8 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &HatchingForm::updateName);
 
-    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(ui->pbCreate, &QPushButton::clicked, this, &HatchingForm::createFile);
+    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(pbCreate, &QPushButton::clicked, this, &HatchingForm::createFile);
 }
 
 HatchingForm::~HatchingForm() {
@@ -134,7 +132,7 @@ void HatchingForm::createFile() {
     gcp_.setSide(side);
     gcp_.tools.push_back(tool);
 
-    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     gcp_.params[GCode::GCodeParams::HathStep] = ui->dsbxHathStep->value();
     gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
     gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
@@ -156,7 +154,7 @@ void HatchingForm::updateName() {
     //        ui->rbNormal->setChecked(true);
     //    ui->rbFast->setEnabled(tool.type() == Tool::Laser);
     ui->dsbxHathStep->setMinimum(ui->toolHolder->tool().diameter());
-    ui->leName->setText(names[side]);
+    leName->setText(names[side]);
 }
 
 void HatchingForm::updatePixmap() {

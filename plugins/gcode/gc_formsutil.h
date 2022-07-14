@@ -10,10 +10,11 @@
  *******************************************************************************/
 #pragma once
 
+#include "depthform.h"
 #include "gcode.h"
 
 #include <QThread>
-#include <QWidget>
+#include <QtWidgets>
 
 namespace GCode {
 class File;
@@ -33,7 +34,7 @@ class FormsUtil : public QWidget, protected FormsUtilI {
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator *tpc, QWidget* parent = nullptr);
+    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent = nullptr);
     ~FormsUtil() override;
     virtual void editFile(GCode::File* file) = 0;
 
@@ -60,6 +61,13 @@ protected:
 
     int fileCount;
     GCodePlugin* const plugin;
+
+    DepthForm* dsbxDepth;
+    QLabel* label;
+    QLineEdit* leName;
+    QPushButton* pbClose;
+    QPushButton* pbCreate;
+    QWidget* content;
 
 private:
     void cancel();

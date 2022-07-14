@@ -33,12 +33,11 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
 //        "prof_in_conv",
 //    }
 {
-    ui->setupUi(this);
+    ui->setupUi(content);
     ///*parent->*/setWindowTitle(ui->label->text());
-    setWindowTitle(ui->label->text());
+    label->setText(tr("Profile"));
+    setWindowTitle(label->text());
 
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
     for (QPushButton* button : findChildren<QPushButton*>())
@@ -65,12 +64,12 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->rbOutside, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
 
     connect(ui->dsbxBridgeLenght, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ProfileForm::updateBridge);
-    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &ProfileForm::updateBridge);
+    connect(dsbxDepth, &DepthForm::valueChanged, this, &ProfileForm::updateBridge);
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
 
-    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(ui->pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
+    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
         if (side == GCode::On)
             checked ? m_trimming |= Trimming::Line : m_trimming &= ~Trimming::Line;
@@ -156,7 +155,7 @@ void ProfileForm::createFile() {
     gcp_.setConvent(ui->rbConventional->isChecked());
     gcp_.setSide(side);
     gcp_.tools.push_back(tool);
-    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     (side == GCode::On) ? gcp_.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp_.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
     gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
@@ -178,7 +177,7 @@ void ProfileForm::createFile() {
 }
 
 void ProfileForm::updateName() {
-    ui->leName->setText(names[side]);
+    leName->setText(names[side]);
     updateBridge();
 }
 
@@ -204,7 +203,7 @@ void ProfileForm::on_pbAddBridge_clicked() {
 
 void ProfileForm::updateBridge() {
     m_lenght = ui->dsbxBridgeLenght->value();
-    m_size = ui->toolHolder->tool().getDiameter(ui->dsbxDepth->value());
+    m_size = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
     for (QGraphicsItem* item : App::scene()->items()) {
         if (static_cast<GiType>(item->type()) == GiType::Bridge)
             static_cast<GiBridge*>(item)->update();
@@ -253,7 +252,7 @@ void ProfileForm::editFile(GCode::File* file) {
         side = gcp_.side();
         direction = static_cast<GCode::Direction>(gcp_.convent());
         ui->toolHolder->setTool(gcp_.tools.front());
-        ui->dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
+        dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
 
         switch (side) {
         case GCode::On:

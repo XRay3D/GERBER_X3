@@ -195,7 +195,7 @@ void ThermalForm::createFile() {
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
-    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     creator->setGcp(gpc);

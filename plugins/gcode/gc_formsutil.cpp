@@ -30,6 +30,58 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     , progressDialog(new QProgressDialog(this)) {
     tpc->moveToThread(&thread);
 
+    auto grid = new QGridLayout(this);
+    grid->setContentsMargins(6, 6, 6, 6);
+    grid->setSpacing(6);
+    {
+        auto frame = new QFrame(this);
+        frame->setFrameShadow(QFrame::Plain);
+        frame->setFrameShape(QFrame::Box);
+        label = new QLabel("Label", frame);
+        auto layout = new QVBoxLayout(frame);
+        layout->setContentsMargins(6, 6, 6, 6);
+        layout->addWidget(label);
+
+        grid->addWidget(frame, 0, 0, 1, 2); // 0
+        dsbxDepth = new DepthForm(this);
+        grid->addWidget(dsbxDepth, 1, 0, 1, 2); // 1
+    }
+
+    {
+        auto line = new QFrame(this);
+        line->setFrameShadow(QFrame::Plain);
+        line->setFrameShape(QFrame::HLine);
+        grid->addWidget(line, 2, 0, 1, 2); // 2
+    }
+
+    {
+        content = new QWidget(this);
+        grid->addWidget(content, 3, 0, 1, 2); // 3
+    }
+
+    {
+        auto line = new QFrame(this);
+        line->setFrameShadow(QFrame::Plain);
+        line->setFrameShape(QFrame::HLine);
+        grid->addWidget(line, 4, 0, 1, 2); // 4
+    }
+    {
+        auto label = new QLabel("Name:", this);
+        leName = new QLineEdit(this);
+        pbClose = new QPushButton("Close ", this);
+        pbCreate = new QPushButton("Create", this);
+
+        pbClose->setIcon(QIcon::fromTheme("window-close"));
+        pbCreate->setIcon(QIcon::fromTheme("document-export"));
+
+        grid->addWidget(label, 5, 0);                   // 5
+        grid->addWidget(leName, 5, 1);                  // 5
+        grid->addWidget(pbCreate, 6, 0, 1, 2);          // 6
+        grid->addWidget(pbClose, 7, 0, 1, 2);           // 7
+        grid->addWidget(new QWidget(this), 9, 0, 1, 2); // 9
+    }
+    grid->setRowStretch(8, 1);
+
     connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);
 
     connect(tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress);

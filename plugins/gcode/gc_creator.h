@@ -53,7 +53,7 @@ public:
     static void setCurrent(size_t current = 0) { current_ = current; }
     static void incCurrent() { ++current_; }
 
-    static bool getCancel() { return cancel_; }
+    static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(const std::source_location location = std::source_location::current()) {
         static std::stringstream ss;
         if (cancel_) {

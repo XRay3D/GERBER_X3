@@ -47,18 +47,20 @@ struct Timer {
         avg += timeout.count();
         ++ctr;
 
+
+
         /**/ if constexpr (std::is_same_v<T, nanoseconds__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) nanoseconds", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) nS", stringView.data(), timeout.count(), avg / ctr);
         else if constexpr (std::is_same_v<T, microseconds__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) microseconds", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) uS", stringView.data(), timeout.count(), avg / ctr);
         else if constexpr (std::is_same_v<T, milliseconds__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) milliseconds", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) mS", stringView.data(), timeout.count(), avg / ctr);
         else if constexpr (std::is_same_v<T, seconds__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) seconds", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) S", stringView.data(), timeout.count(), avg / ctr);
         else if constexpr (std::is_same_v<T, minutes__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) minutes", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) M", stringView.data(), timeout.count(), avg / ctr);
         else if constexpr (std::is_same_v<T, hours__>)
-            qDebug("%s\n-> %1.3f (avg %1.3f) hours", stringView.data(), timeout.count(), avg / ctr);
+            qDebug("%10s -> %1.3f (avg %1.3f) H", stringView.data(), timeout.count(), avg / ctr);
     }
 };
 template <class T>
