@@ -24,10 +24,8 @@ VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(this);
 
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-
-    /*parent->*/ setWindowTitle(ui->label->text());
+    label->setText(tr("Voronoi Toolpath"));
+    /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
@@ -47,12 +45,12 @@ VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
 #endif
     settings.endGroup();
 
-    connect(ui->pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
-    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
+    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
 
-    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
+    connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
     connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
 
     updateName();
@@ -125,7 +123,7 @@ void VoronoiForm::createFile() {
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
-    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     gpc.params[GCode::GCodeParams::Tolerance] = ui->dsbxPrecision->value();
     gpc.params[GCode::GCodeParams::Width] = ui->dsbxWidth->value() + 0.001;
     gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
@@ -138,7 +136,7 @@ void VoronoiForm::createFile() {
 }
 
 void VoronoiForm::updateName() {
-    ui->leName->setText(tr("Voronoi"));
+    leName->setText(tr("Voronoi"));
     setWidth(0.0);
 }
 
@@ -148,7 +146,7 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1) {
 
 void VoronoiForm::setWidth(double) {
     const auto tool { ui->toolHolder->tool() };
-    const double d = tool.getDiameter(ui->dsbxDepth->value());
+    const double d = tool.getDiameter(dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));
         ui->dsbxWidth->setValue(d + 0.05);

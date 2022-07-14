@@ -204,8 +204,6 @@ void Creator::addSupportPaths(Pathss supportPaths) { supportPss.append(supportPa
 void Creator::addPaths(const Paths& paths) { workingPs.append(paths); }
 
 void Creator::createGc() {
-    QElapsedTimer t;
-    t.start();
     try {
         if (type() == Profile || //
             type() == Pocket ||  //
@@ -224,15 +222,17 @@ void Creator::createGc() {
                 break;
             }
         }
-        if (!getCancel())
+        if (!isCancel()) {
+            Timer t("createGc");
             create();
-        qWarning() << "Creator::createGc() finish:" << t.elapsed();
+        }
+        qWarning() << "Creator::createGc() finish";
     } catch (const cancelException& e) {
-        qWarning() << "Creator::createGc() canceled:" << e.what() << t.elapsed();
+        qWarning() << "Creator::createGc() canceled:" << e.what();
     } catch (const std::exception& e) {
-        qWarning() << "Creator::createGc() exeption:" << e.what() << t.elapsed();
+        qWarning() << "Creator::createGc() exeption:" << e.what();
     } catch (...) {
-        qWarning() << "Creator::createGc() exeption:" << errno << t.elapsed();
+        qWarning() << "Creator::createGc() exeption:" << errno;
     }
 }
 
@@ -343,20 +343,6 @@ void Creator::stacking(Paths& paths) {
             path.push_back(path.front());
     }
     sortB(returnPss);
-    //    for (auto& paths : m_returnPss) {
-    //        bool ff, fl;
-    //        for (size_t f = 0, l = paths.size() - 1; f < l; ++f, --l) {
-    //            if (f) {
-    //                if (!(m_gcp.convent() ^ (ff ? Area(paths[f]) > 0 : Area(paths[f]) < 0)) ^ (m_gcp.side() == Outer))
-    //                    ReversePath(paths[f]);
-    //                if (!(m_gcp.convent() ^ (fl ? Area(paths[l]) > 0 : Area(paths[l]) < 0)) ^ (m_gcp.side() == Outer))
-    //                    ReversePath(paths[l]);
-    //            } else {
-    //                ff = Area(paths[f]) > 0;
-    //                fl = Area(paths[l]) > 0;
-    //            }
-    //        }
-    //    }
 }
 
 void Creator::mergeSegments(Paths& paths, double glue) {
@@ -434,6 +420,12 @@ void Creator::mergeSegments(Paths& paths, double glue) {
 void Creator::mergePaths(Paths& paths, const double dist) {
     msg = tr("Merge Paths");
     size_t max;
+
+    auto append = [&](size_t& i, size_t& j) {
+        paths[i].append(paths[j].mid(1));
+        paths.remove(j--);
+    };
+
     do {
         max = paths.size();
         for (size_t i = 0; i < paths.size(); ++i) {
@@ -445,40 +437,32 @@ void Creator::mergePaths(Paths& paths, const double dist) {
                     continue;
                 else if (paths[i].front() == paths[j].front()) {
                     ReversePath(paths[j]);
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    append(j, i);
                     break;
                 } else if (paths[i].back() == paths[j].back()) {
                     ReversePath(paths[j]);
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    append(i, j);
                     break;
                 } else if (paths[i].front() == paths[j].back()) {
-                    paths[j].append(paths[i].mid(1));
-                    paths.remove(i--);
+                    append(j, i);
                     break;
                 } else if (paths[j].front() == paths[i].back()) {
-                    paths[i].append(paths[j].mid(1));
-                    paths.remove(j--);
+                    append(i, j);
                     break;
-                } else if (dist != 0.0) {
-                    /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
+                } else if (dist > 0.0) {
+                    if /*  */ (paths[i].back().distTo(paths[j].back()) < dist) {
                         ReversePath(paths[j]);
-                        paths[i].append(paths[j].mid(1));
-                        paths.remove(j--);
+                        append(i, j);
                         break; //
                     } else if (paths[i].back().distTo(paths[j].front()) < dist) {
-                        paths[i].append(paths[j].mid(1));
-                        paths.remove(j--);
+                        append(i, j);
                         break; //
                     } else if (paths[i].front().distTo(paths[j].back()) < dist) {
-                        paths[j].append(paths[i].mid(1));
-                        paths.remove(i--);
+                        append(j, i);
                         break;
                     } else if (paths[i].front().distTo(paths[j].front()) < dist) {
                         ReversePath(paths[j]);
-                        paths[j].append(paths[i].mid(1));
-                        paths.remove(i--);
+                        append(j, i);
                         break;
                     }
                 }
@@ -546,18 +530,18 @@ bool Creator::createability(bool side) {
     const double toolDiameter = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
     const double toolRadius = toolDiameter * 0.5;
     const double testArea = toolDiameter * toolDiameter - pi * toolRadius * toolRadius;
-    Paths frPaths;
+    Paths nonCutPaths;
 
-    constexpr auto k = 10;
+    constexpr auto k = 1;
 
-    auto mill = [](Paths& srcPaths, double offset1, double offset2) {
+    auto mill = [](Paths& paths, double offset1, double offset2) {
         Timer t("mill");
         Paths retPaths;
 
-        ReversePaths(srcPaths);
+        ReversePaths(paths);
 
         ClipperOffset offset(uScale);
-        offset.AddPaths(srcPaths, jtRound, etClosedPolygon);
+        offset.AddPaths(paths, jtRound, etClosedPolygon);
         offset.Execute(retPaths, offset1);
 
         offset.Clear();
@@ -583,65 +567,64 @@ bool Creator::createability(bool side) {
 
     if (side == CutoffPaths) {
         Paths srcPaths;
-        mvector<QPainterPath> painterPaths;
-        mvector<QPainterPath> painterPathsFr;
-        painterPaths.reserve(groupedPss.size());
+        mvector<QPainterPath> srcPPaths;
+        mvector<QPainterPath> nonCutPPaths;
+        srcPPaths.reserve(groupedPss.size());
         for (auto&& paths : groupedPss) {
             srcPaths.append(paths);
-            painterPaths.push_back({});
+            srcPPaths.push_back({});
             for (auto&& path : paths)
-                painterPaths.back().addPolygon(path);
+                srcPPaths.back().addPolygon(path);
         }
 
-        frPaths = mill(srcPaths, +toolRadius, -toolRadius - k);
-        frPaths = nonCuts(frPaths, srcPaths);
+        nonCutPaths = nonCuts(mill(srcPaths, +toolRadius, -toolRadius - k), srcPaths);
 
-        painterPathsFr.reserve(frPaths.size());
-        for (auto&& frPath : frPaths) {
-            painterPathsFr.push_back({});
-            painterPathsFr.back().addPolygon(frPath);
+        nonCutPPaths.reserve(nonCutPaths.size());
+        for (auto&& frPath : nonCutPaths) {
+            nonCutPPaths.push_back({});
+            nonCutPPaths.back().addPolygon(frPath);
         }
 
-        for (auto&& frPath : painterPathsFr) { // frames
+        for (auto&& nonCut : nonCutPPaths) {
             std::set<QPainterPath*> set;
-            for (auto&& srcPath : painterPaths) { // frames
-                if (frPath.intersects(srcPath))
+            for (auto&& srcPath : srcPPaths) {
+                if (nonCut.intersects(srcPath))
                     set.emplace(&srcPath);
             }
-            if (set.size() < 2 && Area(frPath.toFillPolygon()) < testArea)
-                frPath.clear();
+            if (set.size() < 2 && Area(nonCut.toFillPolygon()) < testArea)
+                nonCut.clear();
         }
 
-        frPaths.clear();
-        for (auto&& frPath : painterPathsFr) // frames
+        nonCutPaths.clear();
+        for (auto&& frPath : nonCutPPaths)
             if (!frPath.isEmpty())
-                frPaths.emplace_back(frPath.toFillPolygon());
+                nonCutPaths.emplace_back(frPath.toFillPolygon());
 
     } else {
         for (auto srcPaths : groupedPss) {
-            Paths frPaths_;
-            mvector<QPainterPath> painterPaths;
-            mvector<QPainterPath> painterPathsFr;
+            Paths nonCutPaths_;
+            mvector<QPainterPath> srcPPaths;
+            mvector<QPainterPath> nonCutPPaths;
 
-            frPaths_ = mill(srcPaths, -toolRadius, +toolRadius + k);
+            nonCutPaths_ = mill(srcPaths, -toolRadius, +toolRadius + k);
 
-            for (auto&& path : frPaths_) {
-                painterPaths.push_back({});
-                painterPaths.back().addPolygon(path);
+            for (auto&& path : nonCutPaths_) {
+                srcPPaths.push_back({});
+                srcPPaths.back().addPolygon(path);
             }
 
-            frPaths_ = nonCuts(srcPaths, frPaths_);
+            nonCutPaths_ = nonCuts(srcPaths, nonCutPaths_);
 
-            painterPathsFr.reserve(frPaths_.size());
+            nonCutPPaths.reserve(nonCutPaths_.size());
 
-            for (auto&& frPath : frPaths_) {
-                painterPathsFr.push_back({});
-                painterPathsFr.back().addPolygon(frPath);
+            for (auto&& frPath : nonCutPaths_) {
+                nonCutPPaths.push_back({});
+                nonCutPPaths.back().addPolygon(frPath);
             }
 
-            for (auto&& frPath : painterPathsFr) { // frames
+            for (auto&& frPath : nonCutPPaths) {
                 std::set<QPainterPath*> set;
-                for (auto&& srcPath : painterPaths) { // frames
+                for (auto&& srcPath : srcPPaths) {
                     if (frPath.intersects(srcPath))
                         set.emplace(&srcPath);
                 }
@@ -649,18 +632,19 @@ bool Creator::createability(bool side) {
                     frPath.clear();
             }
 
-            for (auto&& frPath : painterPathsFr) // frames
+            for (auto&& frPath : nonCutPPaths) // frames
                 if (!frPath.isEmpty())
-                    frPaths.emplace_back(frPath.toFillPolygon());
+                    nonCutPaths.emplace_back(frPath.toFillPolygon());
 
             break;
         }
     }
 
-    std::erase_if(frPaths, [](Path& path) { return !path.size(); }); //убрать пустые
+    std::erase_if(nonCutPaths, [](Path& path) { return !path.size(); }); // убрать пустые
 
-    for (auto&& path : frPaths)
+    std::ranges::for_each(nonCutPaths, [this](auto&& path) {
         items.push_back(new GiError({ path }, Area(path) * dScale * dScale));
+    });
 
     QString last(msg);
 

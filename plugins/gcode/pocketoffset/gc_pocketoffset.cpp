@@ -150,7 +150,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         Paths offsetPaths;
         do {
             incCurrent(); ////////////////////
-            getCancel();  ///////////
+            isCancel();  ///////////
             offsetPaths.append(paths);
             offset.Clear();
             offset.AddPaths(paths, jtMiter, etClosedPolygon);

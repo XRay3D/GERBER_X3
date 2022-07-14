@@ -25,10 +25,9 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
     , ui(new Ui::PocketRasterForm)
     , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") } {
     ui->setupUi(this);
-    /*parent->*/ setWindowTitle(ui->label->text());
 
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    label->setText(tr("Pocket Raster Toolpath"));
+    setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
@@ -55,8 +54,8 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
 
-    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(ui->pbCreate, &QPushButton::clicked, this, &PocketRasterForm::createFile);
+    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(pbCreate, &QPushButton::clicked, this, &PocketRasterForm::createFile);
 }
 
 PocketRasterForm::~PocketRasterForm() {
@@ -135,7 +134,7 @@ void PocketRasterForm::createFile() {
     gcp_.tools.push_back(tool);
 
     gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
-    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
         gcp_.params[GCode::GCodeParams::Fast] = true;
@@ -155,7 +154,7 @@ void PocketRasterForm::updateName() {
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);
 
-    ui->leName->setText(names[side]);
+    leName->setText(names[side]);
 }
 
 void PocketRasterForm::updatePixmap() {

@@ -34,10 +34,10 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     ui->toolHolder3->label()->setText("Tool 3:");
     ui->toolHolder4->label()->setText("Tool 4:");
 
-    /*parent->*/ setWindowTitle(ui->label->text());
 
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    label->setText(tr("Pocket Offset Toolpath"));
+    /*parent->*/ setWindowTitle(label->text());
+
 
     for (QPushButton* button : findChildren<QPushButton*>())
         button->setIconSize({ 16, 16 });
@@ -65,8 +65,8 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
 
-    connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(ui->pbCreate, &QPushButton::clicked, this, &PocketOffsetForm::createFile);
+    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
+    connect(pbCreate, &QPushButton::clicked, this, &PocketOffsetForm::createFile);
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
@@ -159,10 +159,10 @@ void PocketOffsetForm::createFile() {
 
     { // sort and unique
         auto cmp = [this](const Tool& t1, const Tool& t2) -> bool {
-            return t1.getDiameter(ui->dsbxDepth->value()) > t2.getDiameter(ui->dsbxDepth->value());
+            return t1.getDiameter(dsbxDepth->value()) > t2.getDiameter(dsbxDepth->value());
         };
         auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
-            return qFuzzyCompare(t1.getDiameter(ui->dsbxDepth->value()), t2.getDiameter(ui->dsbxDepth->value()));
+            return qFuzzyCompare(t1.getDiameter(dsbxDepth->value()), t2.getDiameter(dsbxDepth->value()));
         };
         std::sort(gcp_.tools.begin(), gcp_.tools.end(), cmp);
         auto last = std::unique(gcp_.tools.begin(), gcp_.tools.end(), cmp2);
@@ -171,7 +171,7 @@ void PocketOffsetForm::createFile() {
 
     gcp_.setConvent(ui->rbConventional->isChecked());
     gcp_.setSide(side);
-    gcp_.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
+    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
         gcp_.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
 
@@ -187,7 +187,7 @@ void PocketOffsetForm::on_sbxSteps_valueChanged(int arg1) {
 }
 
 void PocketOffsetForm::updateName() {
-    ui->leName->setText(names[side]);
+    leName->setText(names[side]);
 }
 
 void PocketOffsetForm::updatePixmap() {
