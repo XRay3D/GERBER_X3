@@ -10,9 +10,9 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_thermalpreviewitem.h"
+#include "thermal_previewitem.h"
 
-#include "gc_thvars.h"
+#include "thermal_vars.h"
 
 #include <QIcon>
 #include <QModelIndex>

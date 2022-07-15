@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_pocketoffset.h"
+#include "pocketoffset.h"
 #include "gc_file.h"
 #include "project.h"
 #include "scene.h"

@@ -13,7 +13,6 @@
  *******************************************************************************/
 #include "gbr_plugin.h"
 
-#include "drill/gc_drillform.h"
 #include "gbr_aperture.h"
 #include "gbr_file.h"
 #include "gbr_node.h"
@@ -21,13 +20,14 @@
 #include "doublespinbox.h"
 #include "ft_view.h"
 #include "settings.h"
-#include "thermal/gc_thvars.h"
 #include "tool_pch.h"
 #include "utils.h"
 
+#include "drill/drill_form.h"
+#include "thermal/thermal_vars.h"
+
 //#include <QtConcurrent>
 #include <QtWidgets>
-
 #include <ctre.hpp> //
 
 namespace Gerber {

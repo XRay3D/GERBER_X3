@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_voronoiboost.h"
+#include "voronoi_boost.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
 #include "mvector.h"
@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "gc_voronoi_visual_utils.h"
+#include "voronoi__visual_utils.h"
 #include <boost/polygon/polygon.hpp>
 #include <boost/polygon/voronoi.hpp>
 

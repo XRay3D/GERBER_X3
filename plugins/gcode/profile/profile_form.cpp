@@ -11,13 +11,14 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_profileform.h"
-#include "gc_profile.h"
+#include "profile_form.h"
+#include "profile.h"
+#include "ui_profileform.h"
+
 #include "gi_bridge.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
-#include "ui_profileform.h"
 #include <QMessageBox>
 
 ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
@@ -35,7 +36,7 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
 {
     ui->setupUi(content);
     ///*parent->*/setWindowTitle(ui->label->text());
-    label->setText(tr("Profile"));
+    label->setText(tr("Profile Toolpath"));
     setWindowTitle(label->text());
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));

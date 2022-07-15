@@ -45,6 +45,8 @@ class DockWidget : public QDockWidget {
 public:
     explicit DockWidget(QWidget* parent = nullptr)
         : QDockWidget(parent) {
+        setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+        setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
         hide();
         setVisible(false);
     }
@@ -61,9 +63,9 @@ public:
             if (widget()->objectName() == "ErrorDialog") {
                 static_cast<QDialog*>(widget())->reject();
                 QTimer::singleShot(1, [this] { widgets.pop(); });
-            } else {
-                delete widget();
-            }
+            } /* else if (widget()) {
+                 delete widget();
+             }*/
         }
         if (!widgets.isEmpty())
             QDockWidget::setWidget(widgets.pop());
@@ -80,7 +82,7 @@ protected:
         if (widget() == nullptr)
             QTimer::singleShot(1, this, &QDockWidget::close);
     }
-};
+}; ///// end DockWidget
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

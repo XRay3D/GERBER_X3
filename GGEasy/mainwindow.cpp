@@ -114,7 +114,6 @@ MainWindow::MainWindow(QWidget* parent)
             if (dir.exists())
                 for (QString str : dir.entryList({ "*.gbr" }, QDir::Files)) {
                     str = dir.path() + '/' + str;
-                    qDebug() << str;
                     QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                     // break;
                 }
@@ -137,7 +136,7 @@ MainWindow::MainWindow(QWidget* parent)
             //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-//            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
 }
@@ -423,7 +422,6 @@ void MainWindow::createActionsToolPath() {
     //    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     //    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    connect(dockWidget_, &DockWidget::visibilityChanged, [this](bool visible) { if (!visible) resetToolPathsActions(); });
     addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
 
     for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
@@ -516,7 +514,6 @@ void MainWindow::customContextMenuForToolBar(const QPoint& pos) {
 }
 
 void MainWindow::saveGCodeFile(int id) {
-    qDebug();
     if (m_project->pinsPlacedMessage())
         return;
     auto* file = m_project->file<GCode::File>(id);
@@ -530,7 +527,9 @@ void MainWindow::saveGCodeFile(int id) {
     file->save(name);
 }
 
-void MainWindow::saveGCodeFiles() { qDebug(__FUNCTION__); }
+void MainWindow::saveGCodeFiles() {
+    qDebug(__FUNCTION__);
+}
 
 void MainWindow::saveSelectedGCodeFiles() {
     qDebug(__FUNCTION__);
@@ -778,6 +777,7 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::resetToolPathsActions() {
+    dockWidget_->setVisible(false);
     for (auto [key, action] : toolpathActions)
         action->setChecked(false);
 }
@@ -1068,6 +1068,7 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
         dockWidget_->setWindowTitle(dwContent->windowTitle());
         dockWidget_->push(dwContent);
         dockWidget_->show();
+        connect(dwContent, &QWidget::destroyed, this, &MainWindow::resetToolPathsActions);
     }
 }
 

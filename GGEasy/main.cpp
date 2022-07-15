@@ -79,7 +79,6 @@ int main(int argc, char** argv) {
 
     if (QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
-    qDebug() << App::settingsPath();
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 

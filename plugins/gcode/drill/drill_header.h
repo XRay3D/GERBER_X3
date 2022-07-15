@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gc_drillform.h"
+#include "drill_form.h"
 #include "qtmetamacros.h"
 #include "qwidget.h"
 

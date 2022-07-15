@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gc_drillform.h"
-#include "gc_drillmodel.h"
+#include "drill_form.h"
+#include "drill_model.h"
 #include "gi_preview.h"
 #include "qpainterpath.h"
 

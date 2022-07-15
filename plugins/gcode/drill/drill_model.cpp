@@ -11,10 +11,10 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_drillmodel.h"
-#include "gc_drillform.h"
+#include "drill_model.h"
+#include "drill_form.h"
+#include "drill_header.h"
 #include "gc_gidrillpreview.h"
-#include "gc_header.h"
 #include "tool_pch.h"
 
 #include <QBitmap>

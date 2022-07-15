@@ -25,7 +25,7 @@
 #include "gi_drill.h"
 #include "utils.h"
 
-#include "drill/gc_drillform.h"
+#include "drill/drill_form.h"
 
 #include <QComboBox>
 #include <QJsonObject>

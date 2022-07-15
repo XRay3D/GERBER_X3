@@ -12,7 +12,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-#include "gc_voronoiform.h"
+#include "voronoi_form.h"
+#include "voronoi.h"
 #include "ui_voronoiform.h"
 
 #include "scene.h"
@@ -22,7 +23,7 @@
 VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm) {
-    ui->setupUi(this);
+    ui->setupUi(content);
 
     label->setText(tr("Voronoi Toolpath"));
     /*parent->*/ setWindowTitle(label->text());

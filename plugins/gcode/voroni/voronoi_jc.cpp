@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_voronoijc.h"
+#include "voronoi_jc.h"
 
 #undef _USE_CGAL_
 #include "jc_voronoi.h"

@@ -18,9 +18,9 @@
 #include "gc_plugin.h"
 #include "gc_types.h"
 #include "gc_utils.h"
-#include "voroni/gc_voronoi.h"
-#include "voroni/jc_voronoi.h"
 
+//#include "voroni/voronoi.h"
+//#include "voroni/jc_voronoi.h"
 //#include "gchatching.h"
 //#include "gcpocketoffset.h"
 //#include "gcpocketraster.h"

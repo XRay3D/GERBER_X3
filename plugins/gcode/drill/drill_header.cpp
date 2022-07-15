@@ -1,4 +1,5 @@
-#include "gc_header.h"
+#include "drill_header.h"
+#include "drill_model.h"
 
 #include <QTableView>
 

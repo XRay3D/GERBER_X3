@@ -44,6 +44,7 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
 
         grid->addWidget(frame, 0, 0, 1, 2); // 0
         dsbxDepth = new DepthForm(this);
+        dsbxDepth->setObjectName("dsbxDepth");
         grid->addWidget(dsbxDepth, 1, 0, 1, 2); // 1
     }
 
@@ -66,12 +67,18 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
         grid->addWidget(line, 4, 0, 1, 2); // 4
     }
     {
-        auto label = new QLabel("Name:", this);
-        leName = new QLineEdit(this);
-        pbClose = new QPushButton("Close ", this);
-        pbCreate = new QPushButton("Create", this);
+        auto label = new QLabel(tr("Name:"), this);
 
+        leName = new QLineEdit(this);
+        leName->setObjectName("leName");
+
+        pbClose = new QPushButton(tr("Close"), this);
+        pbClose->setObjectName("pbClose");
         pbClose->setIcon(QIcon::fromTheme("window-close"));
+        connect(pbClose, &QPushButton::clicked, this, &QObject::deleteLater);
+
+        pbCreate = new QPushButton(tr("Create"), this);
+        pbCreate->setObjectName("pbCreate");
         pbCreate->setIcon(QIcon::fromTheme("document-export"));
 
         grid->addWidget(label, 5, 0);                   // 5

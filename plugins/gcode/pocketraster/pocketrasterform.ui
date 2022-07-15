@@ -13,10 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="labelAlignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
+  <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,10 +26,51 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="2">
-    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
+   <item row="6" column="1">
+    <widget class="QLabel" name="labelPass">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Profile Pass:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="7" column="2">
+    <widget class="DoubleSpinBox" name="dsbxAcc">
+     <property name="suffix">
+      <string> mm/c²</string>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="minimum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>10000.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" rowspan="2" colspan="3">
+    <widget class="Line" name="line_3">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout">
      <item row="2" column="0">
       <widget class="QGroupBox" name="groupBox_4">
@@ -184,136 +222,86 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="Line" name="line_3">
+   <item row="0" column="0" colspan="3">
+    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
+   </item>
+   <item row="6" column="2">
+    <widget class="QComboBox" name="cbxPass">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>No Profile Pass</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>First</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Last</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="labelAcc">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Acceleration:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QFormLayout" name="formLayout_2">
-     <property name="labelAlignment">
+   <item row="5" column="1">
+    <widget class="QLabel" name="labelAngle">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Raster Angle:</string>
+     </property>
+     <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
-     <property name="leftMargin">
-      <number>0</number>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="DoubleSpinBox" name="dsbxAngle">
+     <property name="enabled">
+      <bool>true</bool>
      </property>
-     <property name="topMargin">
-      <number>0</number>
+     <property name="suffix">
+      <string> °</string>
      </property>
-     <property name="rightMargin">
-      <number>0</number>
+     <property name="maximum">
+      <double>180.000000000000000</double>
      </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="labelAngle">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Raster Angle:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="labelPass">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Profile Pass:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="labelAcc">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Acceleration:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="DoubleSpinBox" name="dsbxAngle">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="suffix">
-        <string> °</string>
-       </property>
-       <property name="maximum">
-        <double>180.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cbxPass">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <item>
-        <property name="text">
-         <string>No Profile Pass</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>First</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Last</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="DoubleSpinBox" name="dsbxAcc">
-       <property name="suffix">
-        <string> mm/c²</string>
-       </property>
-       <property name="decimals">
-        <number>0</number>
-       </property>
-       <property name="minimum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>10000.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
    </item>
   </layout>
  </widget>

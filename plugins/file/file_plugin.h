@@ -12,7 +12,7 @@
 
 #include "../tooldatabase/tool.h"
 #include "app.h"
-#include "drill/gc_drillmodel.h"
+//#include "drill/drill_model.h"
 #include "ft_view.h"
 #include "myclipper.h"
 #include "settings.h"

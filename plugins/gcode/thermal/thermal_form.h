@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 #include "gc_formsutil.h"
-#include "gc_thvars.h"
+#include "thermal_vars.h"
 
 class ThermalModel;
 class AbstractThermPrGi;

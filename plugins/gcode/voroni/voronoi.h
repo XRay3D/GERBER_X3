@@ -10,9 +10,9 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_voronoiboost.h"
-#include "gc_voronoicgal.h"
-#include "gc_voronoijc.h"
+#include "voronoi_boost.h"
+#include "voronoi_cgal.h"
+#include "voronoi_jc.h"
 
 namespace GCode {
 class VoronoiCreator : /*public VoronoiCgal,*/ public VoronoiJc, public VoronoiBoost {
