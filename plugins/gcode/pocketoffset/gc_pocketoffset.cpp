@@ -103,7 +103,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
         offset.AddPaths(fillPaths, jtRound, etClosedLine);
         offset.Execute(fillPaths, dOffset + 10);
     }
-    file_ = new GCode::File(returnPss, gcp_, fillPaths);
+    file_ = new GCode::File(returnPss,  std::move(gcp_), fillPaths);
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -175,7 +175,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         offset.AddPaths(fillPaths, jtRound, etClosedPolygon);
         offset.Execute(fillPaths, dOffset);
     }
-    file_ = new GCode::File(returnPss, gcp_, fillPaths);
+    file_ = new GCode::File(returnPss,  std::move(gcp_), fillPaths);
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -297,7 +297,7 @@ void PocketCreator::createMultiTool(mvector<Tool>& tools, double depth) {
                 offset.AddPaths(paths, jtRound, etClosedLine);
             Paths fillToolpath;
             offset.Execute(fillToolpath, dOffset);
-            file_ = new GCode::File(returnPss, gcp_, fillToolpath);
+            file_ = new GCode::File(returnPss,  std::move(gcp_), fillToolpath);
             file_->setFileName(tool.nameEnc());
             // App::project()->addFile(m_file);
             emit fileReady(file_);

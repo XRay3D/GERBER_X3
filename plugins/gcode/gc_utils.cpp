@@ -20,8 +20,8 @@
 
 namespace GCode {
 
-GCUtils::GCUtils(const GCodeParams& gcp_)
-    : m_gcp(gcp_) {
+GCUtils::GCUtils(GCodeParams&& gcp)
+    : gcp_(std::move(gcp)) {
 }
 
 QString GCUtils::getLastDir() {
@@ -52,16 +52,16 @@ void GCUtils::setLastDir(QString dirPath) {
 }
 
 mvector<double> GCUtils::getDepths() {
-    const auto gDepth { m_gcp.getDepth() };
-    if (gDepth < m_gcp.getTool().passDepth() || qFuzzyCompare(gDepth, m_gcp.getTool().passDepth()))
-        return { -gDepth - m_gcp.getTool().getDepth() };
+    const auto gDepth { gcp_.getDepth() };
+    if (gDepth < gcp_.getTool().passDepth() || qFuzzyCompare(gDepth, gcp_.getTool().passDepth()))
+        return { -gDepth - gcp_.getTool().getDepth() };
 
-    const int count = static_cast<int>(ceil(gDepth / m_gcp.getTool().passDepth()));
+    const int count = static_cast<int>(ceil(gDepth / gcp_.getTool().passDepth()));
     const double depth = gDepth / count;
     mvector<double> depths(count);
     for (int i = 0; i < count; ++i)
         depths[i] = (i + 1) * -depth;
-    depths.back() = -gDepth - m_gcp.getTool().depth();
+    depths.back() = -gDepth - gcp_.getTool().depth();
     return depths;
 }
 } // namespace GCode

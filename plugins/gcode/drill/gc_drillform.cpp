@@ -569,8 +569,8 @@ void DrillForm::pickUpTool() {
     const double k = 0.05; // 5%
     int ctr = 0;
     for (const auto& row : model->data()) {
-        model->setToolId(ctr++, 3);
-        continue;
+//        model->setToolId(ctr++, 3);
+//        continue;
         const double drillDiameterMin = row.diameter * (1.0 - k);
         const double drillDiameterMax = row.diameter * (1.0 + k);
 

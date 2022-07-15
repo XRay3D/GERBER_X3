@@ -58,12 +58,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 add_subdirectory(drill)
-add_subdirectory(hatching)
+#add_subdirectory(hatching)
 add_subdirectory(pocketoffset)
-add_subdirectory(pocketraster)
+#add_subdirectory(pocketraster)
 add_subdirectory(profile)
-add_subdirectory(thermal)
-#add_subdirectory(thermal2)
-add_subdirectory(voroni)
+#add_subdirectory(thermal)
+##add_subdirectory(thermal2)
+#add_subdirectory(voroni)
 
 

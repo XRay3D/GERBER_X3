@@ -210,7 +210,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 DoubleSpinBox dsbxA(&d);
                 DoubleSpinBox dsbxX(&d);
                 DoubleSpinBox dsbxY(&d);
-                dsbxA.setRange(0, 360);
+                dsbxA.setRange(-360, +360);
                 dsbxX.setRange(-1000, +1000);
                 dsbxY.setRange(-1000, +1000);
                 QFormLayout layout(&d);

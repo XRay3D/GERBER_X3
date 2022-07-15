@@ -24,7 +24,7 @@ class File : private GCUtils, public FileInterface {
 
 public:
     explicit File();
-    explicit File(const Pathss& toolPathss, const GCodeParams& gcp_, const Paths& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, GCodeParams &&gcp, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
@@ -34,7 +34,6 @@ private:
     ////////////////////////////////////////
     Paths pocketPaths_;     /////
     Pathss toolPathss_;     /////
-    const GCodeParams gcp_; ////
 
     mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
     mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
