@@ -12,7 +12,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gi_preview.h"
-#include "drill/gc_drillmodel.h"
+//#include "drill/drill_model.h"
 #include "graphicsview.h"
 #include "scene.h"
 #include "tool_pch.h"

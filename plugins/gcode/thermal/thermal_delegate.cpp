@@ -11,9 +11,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_thermaldelegate.h"
+#include "thermal_delegate.h"
 #include "doublespinbox.h"
-#include "gc_thermalmodel.h"
+#include "thermal_model.h"
 
 #include <QSpinBox>
 

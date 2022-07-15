@@ -11,8 +11,8 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_thermalnode.h"
-#include "gc_thermalmodel.h"
+#include "thermal_node.h"
+#include "thermal_model.h"
 
 ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, ThermalModel* model)
     : container(false)

@@ -48,8 +48,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 add_library(gc_pocketoffset STATIC
-    gc_pocketoffset.h
-    gc_pocketoffset.cpp
+    pocketoffset.h
+    pocketoffset.cpp
 )
 
 target_link_libraries(gc_pocketoffset PRIVATE

@@ -11,8 +11,8 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_pocketoffsetform.h"
-#include "gc_pocketoffset.h"
+#include "pocketoffset_form.h"
+#include "pocketoffset.h"
 #include "ui_pocketoffsetform.h"
 
 #include "scene.h"
@@ -28,7 +28,7 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
     , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") } {
-    ui->setupUi(this);
+    ui->setupUi(content);
     ui->toolHolder->label()->setText("Tool 1:");
     ui->toolHolder2->label()->setText("Tool 2:");
     ui->toolHolder3->label()->setText("Tool 3:");

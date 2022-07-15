@@ -13,10 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="labelAlignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,10 +26,20 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="2">
+   <item>
     <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item>
+    <widget class="Line" name="line_4">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="2" column="0">
       <widget class="QGroupBox" name="groupBox_4">
@@ -158,7 +165,7 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item>
     <widget class="Line" name="line_3">
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
@@ -168,7 +175,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item>
     <layout class="QFormLayout" name="formLayout_2">
      <property name="labelAlignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_profile.h"
+#include "profile.h"
 #include "gc_file.h"
-#include "gc_profileform.h"
+#include "profile_form.h"
 #include "gi_bridge.h"
 #include "mainwindow.h"
 #include "scene.h"

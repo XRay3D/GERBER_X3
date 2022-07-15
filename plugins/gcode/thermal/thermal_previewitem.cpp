@@ -11,9 +11,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_thermalpreviewitem.h"
+#include "thermal_previewitem.h"
 #include "app.h"
-#include "gc_thermalnode.h"
+#include "thermal_node.h"
 #include "graphicsview.h"
 #include "tool_pch.h"
 #include <QAnimationGroup>

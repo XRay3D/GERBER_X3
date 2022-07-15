@@ -9,8 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "gc_thermaldelegate.h"
-#include "gc_thermalform.h"
-#include "gc_thermalmodel.h"
-#include "gc_thermalnode.h"
-#include "gc_thermalpreviewitem.h"
+#include "thermal_delegate.h"
+#include "thermal_form.h"
+#include "thermal_model.h"
+#include "thermal_node.h"
+#include "thermal_previewitem.h"

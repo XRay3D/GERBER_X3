@@ -11,19 +11,20 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_thermalform.h"
-#include "gc_thermal.h"
-#include "gc_thermaldelegate.h"
-#include "gc_thermalmodel.h"
-#include "gc_thermalnode.h"
-#include "gc_thermalpreviewitem.h"
+#include "thermal_form.h"
+#include "thermal.h"
+#include "thermal_delegate.h"
+#include "thermal_model.h"
+#include "thermal_node.h"
+#include "thermal_previewitem.h"
+#include "ui_thermalform.h"
+
 #include "graphicsview.h"
+#include "myclipper.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
 #include "tool_pch.h"
-#include "ui_thermalform.h"
-#include <myclipper.h>
 
 #include <QCheckBox>
 #include <QDockWidget>
@@ -41,7 +42,7 @@ extern QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
 ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::ThermalCreator, parent)
     , ui(new Ui::ThermalForm) {
-    ui->setupUi(this);
+    ui->setupUi(content);
 
     MySettings settings;
     settings.beginGroup("ThermalForm");
@@ -55,7 +56,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     settings.getValue(ui->chbxPath);
     settings.getValue(ui->chbxPour);
     settings.endGroup();
-    label->setText(tr("ThermalForm"));
+    label->setText(tr("Thermal Insulation Toolpath"));
     /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())

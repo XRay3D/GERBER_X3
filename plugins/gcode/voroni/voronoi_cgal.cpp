@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_voronoicgal.h"
+#include "voronoi_cgal.h"
 #if __has_include(<CGAL/Algebraic_structure_traits_.h>)
 #include <CGAL/Algebraic_structure_traits.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

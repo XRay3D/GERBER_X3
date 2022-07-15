@@ -12,8 +12,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-#include "gc_pocketrasterform.h"
-#include "gc_pocketraster.h"
+#include "pocketraster_form.h"
+#include "pocketraster.h"
 #include "ui_pocketrasterform.h"
 
 #include "scene.h"
@@ -24,7 +24,7 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") } {
-    ui->setupUi(this);
+    ui->setupUi(content);
 
     label->setText(tr("Pocket Raster Toolpath"));
     setWindowTitle(label->text());

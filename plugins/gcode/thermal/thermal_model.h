@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_thvars.h"
+#include "thermal_vars.h"
 
 #include <QAbstractItemModel>
 #include <mvector.h>

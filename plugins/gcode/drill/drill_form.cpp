@@ -11,24 +11,23 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "gc_drillform.h"
-#include "gc_drillmodel.h"
-#include "gc_errordialog.h"
-#include "pocketoffset/gc_pocketoffset.h"
-#include "profile/gc_profile.h"
+#include "drill_form.h"
+#include "drill_header.h"
+#include "drill_model.h"
 #include "ui_drillform.h"
 
-#include "graphicsview.h"
-#include "scene.h"
-#include "settings.h"
-
-#include "gc_drillmodel.h"
+#include "gc_errordialog.h"
 #include "gc_gidrillpreview.h"
-#include "gc_header.h"
 #include "gi_point.h"
 #include "gi_preview.h"
+#include "graphicsview.h"
 #include "project.h"
+#include "scene.h"
+#include "settings.h"
 #include "tool_pch.h"
+
+#include "pocketoffset/pocketoffset.h"
+#include "profile/profile.h"
 
 #include <QMessageBox>
 #include <QPainter>
@@ -54,6 +53,7 @@ DrillForm::DrillForm(GCodePlugin* plugin, QWidget* parent)
     , ui(new Ui::DrillForm)
     , plugin { plugin } {
     ui->setupUi(this);
+
     {
         ui->toolTable->setIconSize(QSize(IconSize, IconSize));
         ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -166,6 +166,8 @@ DrillForm::DrillForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
     connect(ui->pbPickUpTools, &QPushButton::clicked, this, &DrillForm::pickUpTool);
+
+    connect(ui->pbClose, &QPushButton::clicked, this, &QObject::deleteLater);
 
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
@@ -569,8 +571,8 @@ void DrillForm::pickUpTool() {
     const double k = 0.05; // 5%
     int ctr = 0;
     for (const auto& row : model->data()) {
-//        model->setToolId(ctr++, 3);
-//        continue;
+        //        model->setToolId(ctr++, 3);
+        //        continue;
         const double drillDiameterMin = row.diameter * (1.0 - k);
         const double drillDiameterMax = row.diameter * (1.0 + k);
 

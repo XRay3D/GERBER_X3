@@ -12,8 +12,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-#include "gc_hatchingform.h"
-#include "gc_hatching.h"
+#include "hatching_form.h"
+#include "hatching.h"
 #include "ui_hatchingform.h"
 
 #include "scene.h"
@@ -28,7 +28,7 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
         QStringLiteral("pock_rast_climb"),
         QStringLiteral("pock_rast_conv"),
     } {
-    ui->setupUi(this);
+    ui->setupUi(content);
     label->setText(tr("Crosshatch Toolpath"));
     /*parent->*/ setWindowTitle(label->text());
 
