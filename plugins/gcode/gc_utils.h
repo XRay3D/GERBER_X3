@@ -22,7 +22,8 @@ class GCUtils {
     friend class ::Project;
 
 public:
-    GCUtils(const GCodeParams& gcp_);
+    GCUtils(GCodeParams&& gcp);
+    GCUtils(){};
 
     inline double feedRate() { return m_feedRate; }
     inline double plungeRate() { return m_plungeRate; }
@@ -42,9 +43,9 @@ private:
     double m_plungeRate = 0.0;
     int m_spindleSpeed = 0;
     int m_toolType = 0;
-    const GCodeParams& m_gcp; ////
 
 protected:
+    /*const*/ GCodeParams gcp_; ////
     enum {
         AlwaysG,
         AlwaysX,

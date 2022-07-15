@@ -402,7 +402,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             gcp_.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File(Pathss { { dst } }, gcp_);
+            GCode::File* gcode = new GCode::File(Pathss { { dst } }, std::move(gcp_));
             gcode->setFileName(tr("Pin_") + tool.nameEnc());
             App::project()->addFile(gcode);
         }

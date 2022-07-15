@@ -236,7 +236,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = Raster;
-        file_ = new File(returnPss, gcp_, fillPaths);
+        file_ = new File(returnPss, std::move(gcp_), fillPaths);
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -311,7 +311,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         Clipper c;
         c.AddPath(zPath, ptSubject, false);
         c.AddPaths(laserPath, ptClip, true);
-        c.Execute(ctIntersection, laserPath, pftNonZero);                              // laser on
+        c.Execute(ctIntersection, laserPath, pftNonZero);                             // laser on
         addAcc(laserPath, gcp_.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
     }
 
@@ -332,7 +332,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = LaserHLDI;
-        file_ = new File(returnPss, gcp_);
+        file_ = new File(returnPss, std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

@@ -297,7 +297,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = Hatching;
-        file_ = new File(returnPss, gcp_);
+        file_ = new File(returnPss, std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

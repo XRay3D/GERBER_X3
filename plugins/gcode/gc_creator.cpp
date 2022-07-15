@@ -58,8 +58,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
             p.push_back(p.front());
 
     // assert(ps.isEmpty());
-    GCode::GCodeParams gcp_ { tool, 0.0, GCode::Profile };
-    auto file = new GCode::File({ ps }, gcp_);
+    auto file = new GCode::File({ ps }, { tool, 0.0, GCode::Profile });
     file->setFileName(fileName + "_" + tool.name());
     // file->itemGroup()->setPen({ Qt::green, 0.0 });
     emit App::project()->addFileDbg(file);

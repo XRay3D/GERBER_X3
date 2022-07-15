@@ -43,7 +43,7 @@ void VoronoiCreator::create() {
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
         gcp_.gcType = Voronoi;
-        file_ = new File({ sortBE(returnPs) }, gcp_);
+        file_ = new File({ sortBE(returnPs) }, std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
@@ -76,7 +76,7 @@ void VoronoiCreator::create() {
                 ++begin;
         }
 
-        file_ = new File(returnPss, gcp_, workingRawPs);
+        file_ = new File(returnPss, std::move(gcp_), workingRawPs);
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

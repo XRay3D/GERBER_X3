@@ -198,13 +198,15 @@ public:
 
     GCodeParams() { }
     GCodeParams(const Tool& tool, double depth, GCodeType type) {
-        tools.push_back(tool);
+        tools.emplace_back(tool);
+        if (!params.contains(PocketIndex))
+            params[PocketIndex] = 0;
         params[GCodeParams::Depth] = depth;
         gcType = type;
     }
 
     mvector<Tool> tools;
-    QMap<int, variant> params;
+    std::map<int, variant> params;
     GCodeType gcType = Null;
     mutable int fileId = -1;
 
@@ -226,12 +228,12 @@ public:
         return stream;
     }
 
-    const Tool& getTool() const { return tools[params.value(PocketIndex, 0).toInt()]; }
+    const Tool& getTool() const { return tools[params.at(PocketIndex).toInt()]; }
 
-    SideOfMilling side() const { return static_cast<SideOfMilling>(params[Side].toInt()); }
-    bool convent() const { return params[Convent].toBool(); }
-    double getToolDiameter() const { return tools.at(params[PocketIndex].toInt()).getDiameter(params[Depth].toInt()); }
-    double getDepth() const { return params.value(Depth).toDouble(); }
+    SideOfMilling side() const { return static_cast<SideOfMilling>(params.at(Side).toInt()); }
+    bool convent() const { return params.at(Convent).toBool(); }
+    double getToolDiameter() const { return tools.at(params.at(PocketIndex).toInt()).getDiameter(params.at(Depth).toInt()); }
+    double getDepth() const { return params.at(Depth).toDouble(); }
 
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }

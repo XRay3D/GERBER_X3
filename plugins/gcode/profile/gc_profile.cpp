@@ -77,7 +77,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
             break;
 
         gcp_.gcType = Profile;
-        file_ = new File(returnPss, gcp_);
+        file_ = new File(returnPss,  std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
         return;
