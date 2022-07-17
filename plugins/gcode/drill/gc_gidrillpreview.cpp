@@ -8,14 +8,14 @@ GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& r
     sourceDiameter_ = diameter;
     auto draw = Overload {
         [this](const QPolygonF& val) {
-            qDebug(__FUNCTION__);
+           
             QPainterPath painterPath;
             for (auto&& path : offset(val, sourceDiameter_))
                 painterPath.addPolygon(path);
             return painterPath;
         },
         [this](const QPointF& val) {
-            qDebug(__FUNCTION__);
+           
             QPainterPath painterPath;
             painterPath.addPolygon( CirclePath(sourceDiameter_ * uScale));
             return painterPath;

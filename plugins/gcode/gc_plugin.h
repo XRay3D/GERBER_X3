@@ -1,7 +1,5 @@
 #pragma once
 
-#include "app.h"
-
 #include <QJsonObject>
 
 class QAction;
@@ -18,7 +16,7 @@ public:
 
     [[nodiscard]] virtual QIcon icon() const = 0;
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
-    [[nodiscard]] virtual QWidget* createForm()  = 0;
+    [[nodiscard]] virtual QWidget* createForm() = 0;
     [[nodiscard]] virtual bool canToShow() const;
     [[nodiscard]] virtual int type() const = 0;
 
@@ -33,9 +31,6 @@ signals:
 protected:
     QJsonObject info_;
     enum { IconSize = 24 };
-
-private:
-    bool fl {};
 };
 
 #define GCodeInterface_iid "ru.xray3d.XrSoft.GGEasy.GCodePlugin"

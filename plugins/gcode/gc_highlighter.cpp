@@ -23,7 +23,7 @@ GCHighlighter::GCHighlighter(QTextDocument* parent)
 }
 
 void GCHighlighter::highlightBlock(const QString& text) {
-    //    qDebug(__FUNCTION__);
+    //   
 
     static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
     static const mvector<Qt::GlobalColor> color {

@@ -2,14 +2,14 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 /********************************************************************************
- * Author    :  Damir Bakiev                                                    *
- * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
- * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Author : Damir Bakiev *
+ * Version : na *
+ * Date : 11 November 2021 *
+ * Website : na *
+ * Copyright : Damir Bakiev 2016-2022 *
+ * License: *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
- * http://www.boost.org/LICENSE_1_0.txt                                         *
+ * http://www.boost.org/LICENSE_1_0.txt *
  *******************************************************************************/
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -17,8 +17,7 @@
 #include "aboutform.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
-#include "gi_bridge.h"
-#include "gi_datasolid.h"
+#include "gcode.h"
 #include "gi_point.h"
 #include "plugindialog.h"
 #include "project.h"
@@ -118,8 +117,8 @@ MainWindow::MainWindow(QWidget* parent)
                     // break;
                 }
         }
-        //    file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
-        //    file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
+        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
+        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
         if (0)
             QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf)"); });
@@ -133,10 +132,10 @@ MainWindow::MainWindow(QWidget* parent)
 
         if (1) {
             i = 1000;
-            //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
+            // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
     }
 }
@@ -165,7 +164,7 @@ bool MainWindow::closeProject() {
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         m_project->close();
-        //        ui->graphicsView->scene()->clear();
+        // ui->graphicsView->scene()->clear();
         return true;
     }
     return false;
@@ -182,14 +181,15 @@ void MainWindow::initWidgets() {
 }
 
 void MainWindow::createActions() {
-    dockWidget_ = new DockWidget(this);
+    dockWidget_ = new QDockWidget(this);
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dockWidget_->setObjectName(QStringLiteral("dwCreatePath"));
+    dockWidget_->installEventFilter(this);
     // fileMenu
     createActionsFile();
     // zoomToolBar
     createActionsZoom();
-    // fileEdit    // Selection / Delete selected
+    // fileEdit // Selection / Delete selected
     createActionsEdit();
     // serviceMenu
     createActionsService();
@@ -315,9 +315,12 @@ void MainWindow::createActionsService() {
     // toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     // G-Code Properties
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties"), [this] { createDockWidget<GCodePropertiesForm>(); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
+    connect(action, &QAction::toggled, [=, this](bool checked) { if (checked) setDockWidget(new GCodePropertiesForm); });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
+    action->setCheckable(true);
     toolpathActions.emplace(GCode::GCodeProperties, action);
+    actionGroup.addAction(action);
     // Tool Base
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
     // Separator
@@ -413,14 +416,14 @@ void MainWindow::createActionsZoom() {
 }
 
 void MainWindow::createActionsToolPath() {
+    if (!App::gCodePlugins().size())
+        return;
+
     QMenu* menu = menuBar()->addMenu(tr("&Paths"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
     toolpathToolBar->setToolTip(tr("Toolpath"));
-
-    //    toolpathToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-    //    connect(toolpathToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
 
@@ -453,7 +456,7 @@ void MainWindow::createActionsShape() {
             if (checked) {
                 ShapePlugin::finalizeShape_();
                 ShapePlugin::setShapePI(shInt);
-                createDockWidget<QPushButton>();
+                setDockWidget(new QPushButton);
             } else
                 ShapePlugin::finalizeShape_();
         });
@@ -464,31 +467,31 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        //  FIXME      auto selectedItems(App::scene()->selectedItems());
-        //        Paths clipPaths;
-        //        for (QGraphicsItem* clipItem : selectedItems) {
-        //            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
-        //                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
-        //        }
+        // FIXME auto selectedItems(App::scene()->selectedItems());
+        // Paths clipPaths;
+        // for (QGraphicsItem* clipItem : selectedItems) {
+        // if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+        // clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
+        // }
 
-        //        QList<GraphicsItem*> rmi;
-        //        for (QGraphicsItem* item : selectedItems) {
-        //            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
-        //                auto gitem = static_cast<GiDataSolid*>(item);
-        //                Clipper clipper;
-        //                clipper.AddPaths(gitem->paths(), ptSubject, true);
-        //                clipper.AddPaths(clipPaths, ptClip, true);
-        //                clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-        //                if (gitem->rPaths()->empty()) {
-        //                    rmi.push_back(gitem);
-        //                } else {
-        //                    ReversePaths(*gitem->rPaths()); //??
-        //                    gitem->redraw();
-        //                }
-        //            }
-        //        }
-        //        for (GraphicsItem* item : rmi)
-        //            delete item->file()->itemGroup()->takeAt(item);
+        // QList<GraphicsItem*> rmi;
+        // for (QGraphicsItem* item : selectedItems) {
+        // if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+        // auto gitem = static_cast<GiDataSolid*>(item);
+        // Clipper clipper;
+        // clipper.AddPaths(gitem->paths(), ptSubject, true);
+        // clipper.AddPaths(clipPaths, ptClip, true);
+        // clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
+        // if (gitem->rPaths()->empty()) {
+        // rmi.push_back(gitem);
+        // } else {
+        // ReversePaths(*gitem->rPaths()); //??
+        // gitem->redraw();
+        // }
+        // }
+        // }
+        // for (GraphicsItem* item : rmi)
+        // delete item->file()->itemGroup()->takeAt(item);
     };
     toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ctUnion); });
     toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ctDifference); });
@@ -528,11 +531,10 @@ void MainWindow::saveGCodeFile(int id) {
 }
 
 void MainWindow::saveGCodeFiles() {
-    qDebug(__FUNCTION__);
 }
 
 void MainWindow::saveSelectedGCodeFiles() {
-    qDebug(__FUNCTION__);
+
     if (m_project->pinsPlacedMessage())
         return;
 
@@ -664,7 +666,7 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::selectAll() {
-    if /*  */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
+    if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
             if (const auto type = static_cast<GiType>(item->type());
                 type == GiType::Preview)
@@ -702,11 +704,11 @@ void MainWindow::printDialog() {
         pPrinter->setMargins({ 10, 10, 10, 10 });
         pPrinter->setPageSizeMM(size + QSizeF(pPrinter->margins().left + pPrinter->margins().right, pPrinter->margins().top + pPrinter->margins().bottom));
 #else
-            QMarginsF margins( 10, 10, 10, 10 );
-            pPrinter->setPageMargins(margins);
-            pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(),
-                                                          margins.top() + margins.bottom()),
-                                            QPageSize::Millimeter));
+ QMarginsF margins( 10, 10, 10, 10 );
+ pPrinter->setPageMargins(margins);
+ pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(),
+ margins.top() + margins.bottom()),
+ QPageSize::Millimeter));
 #endif
         pPrinter->setResolution(4800);
 
@@ -728,8 +730,8 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value) {
         pd->setCancelButton(nullptr);
         pd->setLabelText(fileName);
         pd->setMaximum(max);
-        //        pd->setModal(true);
-        //        pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        // pd->setModal(true);
+        // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
         m_progressDialogs[fileName] = pd;
     } else if (max == 1 && value == 1) {
@@ -777,8 +779,12 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::resetToolPathsActions() {
+    qWarning(__FUNCTION__);
+    if (dockWidget_->widget())
+        delete dockWidget_->widget();
+    dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
-    for (auto [key, action] : toolpathActions)
+    if (auto action { actionGroup.checkedAction() }; action)
         action->setChecked(false);
 }
 
@@ -890,8 +896,6 @@ void MainWindow::translate(const QString& locale) {
         translators.emplace_back(std::make_unique<QTranslator>());
         if (translators.back()->load(str, dir.path()))
             qApp->installTranslator(translators.back().get());
-        else
-            qDebug() << "QTranslator err appTranslator" << str;
     }
 }
 
@@ -922,42 +926,6 @@ void MainWindow::loadFile(const QString& fileName) {
 }
 
 void MainWindow::updateTheme() {
-    qDebug(__FUNCTION__);
-    //    class ProxyStyle : public QProxyStyle {
-    //        //Q_OBJECT
-    //    public:
-    //        ProxyStyle(QStyle* style = nullptr)
-    //            : QProxyStyle(style)
-    //        {
-    //        }
-    //        ProxyStyle(const QString& key)
-    //            : QProxyStyle(key)
-    //        {
-    //        }
-    //        virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0) const override
-    //        {
-    //            //qDebug() << metric;
-    //            //        switch (metric) {
-    //            //        case QStyle::PM_SmallIconSize:
-    //            //            return 22;
-    //            //        default:
-    //            //            return QProxyStyle::pixelMetric(metric, option, widget);
-    //            //        }
-    //            return QProxyStyle::pixelMetric(metric, option, widget);
-    //        }
-    //        //        virtual QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt = nullptr, const QWidget* widget = nullptr) const override
-    //        //        {
-    //        //            qDebug() << standardPixmap;
-    //        //            return {};
-    //        //            return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
-    //        //        }
-    //        QPixmap generatedIconPixmap(QIcon::Mode iconMode, const QPixmap& pixmap, const QStyleOption* opt) const override
-    //        {
-    //            qDebug() << iconMode;
-    //            return {};
-    //            return QProxyStyle::generatedIconPixmap(iconMode, pixmap, opt);
-    //        }
-    //    };
 
     if (App::settings().theme()) {
         qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -1032,26 +1000,26 @@ void MainWindow::updateTheme() {
         // qApp->setStyle(QStyleFactory::create("windowsvista"));
     }
 
-    //    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
-    //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
-    //                                         //"background-color: white;"
-    //                                         "border: 1px solid gray; }"
-    //                                         "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-    //                                         "QGroupBox::title {"
-    //                                         "subcontrol-origin: margin;"
-    //                                         "subcontrol-position: top center; }" /* position at the top center */
-    //        );
-    //    } else {
-    //        App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
-    //                                         //"background-color: white;"
-    //                                         "border: 1px solid gray;"
-    //                                         "border-radius: 3px; }" // Win 7 or other
-    //                                         "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-    //                                         "QGroupBox::title {"
-    //                                         "subcontrol-origin: margin;"
-    //                                         "subcontrol-position: top center; }" /* position at the top center */
-    //        );
-    //    }
+    // if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
+    // App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    // //"background-color: white;"
+    // "border: 1px solid gray; }"
+    // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
+    // "QGroupBox::title {"
+    // "subcontrol-origin: margin;"
+    // "subcontrol-position: top center; }" /* position at the top center */
+    // );
+    // } else {
+    // App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    // //"background-color: white;"
+    // "border: 1px solid gray;"
+    // "border-radius: 3px; }" // Win 7 or other
+    // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
+    // "QGroupBox::title {"
+    // "subcontrol-origin: margin;"
+    // "subcontrol-position: top center; }" /* position at the top center */
+    // );
+    // }
 
     QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
     if (App::mainWindow() && App::mainWindow()->isVisible())
@@ -1059,17 +1027,15 @@ void MainWindow::updateTheme() {
 }
 
 void MainWindow::setDockWidget(QWidget* dwContent) {
-    if (dockWidget_->widget() == dwContent)
-        return;
+    if (!dwContent)
+        exit(-66);
 
-    dockWidget_->pop();
-
-    if (dwContent) {
-        dockWidget_->setWindowTitle(dwContent->windowTitle());
-        dockWidget_->push(dwContent);
-        dockWidget_->show();
-        connect(dwContent, &QWidget::destroyed, this, &MainWindow::resetToolPathsActions);
-    }
+    if (dockWidget_->widget())
+        delete dockWidget_->widget();
+    dockWidget_->show();
+    dockWidget_->setWidget(dwContent);
+    if (auto pbClose { dwContent->findChild<QPushButton*>("pbClose") }; pbClose)
+        connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
 }
 
 void MainWindow::open() {
@@ -1089,8 +1055,8 @@ void MainWindow::open() {
             loadFile(fileName);
         }
     }
-    //    QString name(QFileInfo(files.first()).path());
-    //    setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
+    // QString name(QFileInfo(files.first()).path());
+    // setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
 }
 
 bool MainWindow::save() {
@@ -1115,9 +1081,8 @@ void MainWindow::showEvent(QShowEvent* event) {
 
 void MainWindow::changeEvent(QEvent* event) {
     // В случае получения события изменения языка приложения
-    if (event->type() == QEvent::LanguageChange) {
+    if (event->type() == QEvent::LanguageChange)
         ui->retranslateUi(this); // переведём окно заново
-    }
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -1137,6 +1102,9 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
             break;
         default:;
         }
+    }
+    if (watched == dockWidget_ && event->type() == QEvent::Close) {
+        resetToolPathsActions();
     }
     return QMainWindow::eventFilter(watched, event);
 }

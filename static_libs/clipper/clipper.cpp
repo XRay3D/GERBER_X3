@@ -34,7 +34,6 @@
  *******************************************************************************/
 #include "clipper.hpp"
 #include "app.h"
-#include "mvector.h"
 
 #ifndef GTE
 #include "gc_creator.h"

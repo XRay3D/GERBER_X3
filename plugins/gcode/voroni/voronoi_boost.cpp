@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "voronoi__visual_utils.h"
+#include "voronoi_visual_utils.h"
 #include <boost/polygon/polygon.hpp>
 #include <boost/polygon/voronoi.hpp>
 

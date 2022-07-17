@@ -1,4 +1,5 @@
 #include "gc_plugin.h"
+#include "app.h"
 
 #include <QAction>
 #include <QIcon>
@@ -16,13 +17,10 @@ bool GCodePlugin::canToShow() const { return true; }
 QAction* GCodePlugin::addAction(QMenu* menu, QToolBar* toolbar) {
     auto action = toolbar->addAction(icon(), info()["Name"].toString());
     connect(action, &QAction::toggled, [=, this](bool checked) {
-        qDebug() << sender() << action->isChecked() << this << checked;
-        if (!fl && checked && canToShow())
+        if (checked && canToShow())
             emit setDockWidget(createForm());
         else
-            emit setDockWidget(nullptr);
-
-        fl = checked;
+            action->setChecked(false);
     });
     action->setShortcut(keySequence());
     menu->addAction(action);

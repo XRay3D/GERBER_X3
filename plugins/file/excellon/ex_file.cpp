@@ -58,7 +58,7 @@ Format File::format() const {
 }
 
 void File::setFormat(const Format& value) {
-    qDebug(__FUNCTION__);
+   
     (format_ = value).file = this;
     for (Hole& hole : *this) {
         hole.state.updatePos();

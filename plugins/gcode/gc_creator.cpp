@@ -12,43 +12,25 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gc_creator.h"
+#include "gc_file.h"
+#include "gc_types.h"
 
 #include "app.h"
-#include "gc_file.h"
 #include "gi_error.h"
 #include "gi_point.h"
-#include "project.h"
-#include "voroni/jc_voronoi.h"
-//#include "errno.h"
-//#include "ft_model.h"
-//#include "forms/bridgeitem.h"
-//#include "gc_creator.h"
-//#include "gcvoronoi.h"
-//#include "locale.h"
-//#include "scene.h"
-//#include "settings.h"
-//#include "stdio.h"
-//#include "string.h"
+#include "myclipper.h"
 #include "utils.h"
 
-#include <QDebug>
-#include <QElapsedTimer>
-#include <QFile>
-#include <QSettings>
-#include <QStack>
-#include <algorithm>
-#include <limits>
 #include <stdexcept>
-
-#include <future>
-#include <thread>
 
 static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
 
+using namespace ClipperLib;
+
 void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
-    if (ps.empty()) {
+    if (ps.empty())
         return;
-    }
+
     for (size_t i = 0; i < ps.size(); ++i)
         if (ps[i].empty())
             ps.erase(ps.begin() + i--);
@@ -65,9 +47,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
 
     //    static QMutex m;
     //    m.lock();
-
     //    if (ps.isEmpty()) {
-
     //        return;
     //    }
     //    const auto polygons = toQPolygons(ps);
@@ -213,9 +193,9 @@ void Creator::createGc() {
                 createability(CutoffPaths);
                 break;
             case Inner:
-                groupedPaths(CopperPaths, uScale);
+                //                 groupedPaths(CopperPaths, uScale);
                 // groupedPaths(CutoffPaths, gcp_.tools.front().getDiameter(gcp_.getDepth()) * uScale + 100, true);
-                createability(CopperPaths);
+                // TODO    Inner           createability(CopperPaths);
                 break;
             case On:
                 break;
@@ -244,10 +224,11 @@ std::pair<int, int> Creator::getProgress() {
 void Creator::stacking(Paths& paths) {
     if (paths.empty())
         return;
-    QElapsedTimer t;
-    t.start();
+    Timer t("stacking");
+
     PolyTree polyTree;
     {
+        Timer t("stacking 1");
         Clipper clipper;
         clipper.AddPaths(paths, ptSubject, true);
         IntRect r(clipper.GetBounds());
@@ -261,7 +242,6 @@ void Creator::stacking(Paths& paths) {
     sortPolyNodeByNesting(polyTree);
     returnPss.clear();
     /***********************************************************************************************/
-    t.start();
 
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
         QList<std::iterator_traits<Path::iterator>::difference_type> list;
@@ -542,10 +522,13 @@ bool Creator::createability(bool side) {
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, jtRound, etClosedPolygon);
         offset.Execute(retPaths, offset1);
+        // dbgPaths(retPaths, "mill 1");
 
         offset.Clear();
         offset.AddPaths(retPaths, jtRound, etClosedPolygon);
         offset.Execute(retPaths, offset2);
+        // dbgPaths(retPaths, "mill 2");
+
         return retPaths;
     };
 
@@ -605,7 +588,11 @@ bool Creator::createability(bool side) {
             mvector<QPainterPath> srcPPaths;
             mvector<QPainterPath> nonCutPPaths;
 
+            dbgPaths(srcPaths, "srcPaths");
+
             nonCutPaths_ = mill(srcPaths, -toolRadius, +toolRadius + k);
+
+            dbgPaths(nonCutPaths_, "nonCutPaths 1");
 
             for (auto&& path : nonCutPaths_) {
                 srcPPaths.push_back({});
@@ -613,6 +600,8 @@ bool Creator::createability(bool side) {
             }
 
             nonCutPaths_ = nonCuts(srcPaths, nonCutPaths_);
+
+            dbgPaths(nonCutPaths_, "nonCutPaths 2");
 
             nonCutPPaths.reserve(nonCutPaths_.size());
 
@@ -632,9 +621,11 @@ bool Creator::createability(bool side) {
             }
 
             for (auto&& frPath : nonCutPPaths) // frames
+            {
                 if (!frPath.isEmpty())
                     nonCutPaths.emplace_back(frPath.toFillPolygon());
-
+                dbgPaths(frPath.toSubpathPolygons(), "toSubpathPolygons");
+            }
             break;
         }
     }

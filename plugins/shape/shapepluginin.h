@@ -74,7 +74,7 @@ public:
             sp->updateShape(point);
     }
     static void finalizeShape_() {
-        qDebug(__FUNCTION__);
+       
         if (item)
             item->setSelected(true);
         if (sp)
