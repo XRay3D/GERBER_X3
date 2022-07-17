@@ -19,7 +19,7 @@ public:
 private:
     void createFixedSteps(const Tool& tool, const double depth, const int steps);
     void createStdFull(const Tool& tool, const double depth);
-    void createMultiTool(mvector<Tool>& tools, double depth);
+    void createMultiTool(const mvector<Tool> &tools, double depth);
 
 protected:
     void create() override; // Creator interface

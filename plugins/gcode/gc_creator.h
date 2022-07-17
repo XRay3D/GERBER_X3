@@ -10,15 +10,23 @@
  *******************************************************************************/
 #pragma once
 #include "gc_types.h"
-#include <QMutex>
-#include <QObject>
-#include <QProperty>
-#include <QSemaphore>
-#include <QWaitCondition>
-#include <mutex>
 #include <myclipper.h>
+
+//#include <QMutex>
+#include <QObject>
+//#include <QProperty>
+//#include <QSemaphore>
+//#include <QWaitCondition>
+#include <condition_variable>
+#include <mutex>
 #include <source_location>
 #include <sstream>
+
+#ifdef __GNUC__
+using sl = std::source_location;
+#else
+using sl = std::source_location;
+#endif
 
 using namespace ClipperLib;
 
@@ -54,7 +62,7 @@ public:
     static void incCurrent() { ++current_; }
 
     static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(const std::source_location location = std::source_location::current()) {
+    static void ifCancelThenThrow(const sl location = sl::current()) {
         static std::stringstream ss;
         if (cancel_) {
             //            ss.clear();

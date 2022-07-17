@@ -75,7 +75,6 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
         pbClose = new QPushButton(tr("Close"), this);
         pbClose->setObjectName("pbClose");
         pbClose->setIcon(QIcon::fromTheme("window-close"));
-        connect(pbClose, &QPushButton::clicked, this, &QObject::deleteLater);
 
         pbCreate = new QPushButton(tr("Create"), this);
         pbCreate->setObjectName("pbCreate");

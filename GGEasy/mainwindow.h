@@ -10,9 +10,9 @@
  *******************************************************************************/
 #pragma once
 
+#include "dockwidget.h"
 #include "file.h"
 #include "file_plugin.h"
-
 #include "recent.h"
 
 #include <QActionGroup>
@@ -37,53 +37,6 @@ namespace Ui {
 class MainWindow;
 }
 
-class DockWidget : public QDockWidget {
-    Q_OBJECT
-    QStack<QWidget*> widgets;
-    //    void setWidget(QWidget*) { }
-
-public:
-    explicit DockWidget(QWidget* parent = nullptr)
-        : QDockWidget(parent) {
-        setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-        setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-        hide();
-        setVisible(false);
-    }
-    ~DockWidget() override = default;
-
-    void push(QWidget* w) {
-        if (widget())
-            widgets.push(widget());
-        if (w)
-            QDockWidget::setWidget(w);
-    }
-    void pop() {
-        if (widget()) {
-            if (widget()->objectName() == "ErrorDialog") {
-                static_cast<QDialog*>(widget())->reject();
-                QTimer::singleShot(1, [this] { widgets.pop(); });
-            } /* else if (widget()) {
-                 delete widget();
-             }*/
-        }
-        if (!widgets.isEmpty())
-            QDockWidget::setWidget(widgets.pop());
-    }
-
-    // QWidget interface
-protected:
-    void closeEvent(QCloseEvent* event) override {
-        pop();
-        event->accept();
-    }
-    void showEvent(QShowEvent* event) override {
-        event->ignore();
-        if (widget() == nullptr)
-            QTimer::singleShot(1, this, &QDockWidget::close);
-    }
-}; ///// end DockWidget
-
 class MainWindow : public QMainWindow {
     Q_OBJECT
     //    friend void FileTree::View::on_doubleClicked(const QModelIndex&);
@@ -96,25 +49,25 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
-    const DockWidget* dockWidget() const { return dockWidget_; }
-    DockWidget* dockWidget() { return dockWidget_; }
+    const QDockWidget* dockWidget() const { return dockWidget_; }
+    QDockWidget* dockWidget() { return dockWidget_; }
 
     static void translate(const QString& locale);
     void loadFile(const QString& fileName);
     static void updateTheme();
 
-    template <class T>
-    void createDockWidget() {
-        if (dynamic_cast<T*>(dockWidget_->widget()))
-            return;
+    //    template <class T>
+    //    void createDockWidget() {
+    //        if (dynamic_cast<T*>(dockWidget_->widget()))
+    //            return;
 
-        auto dwContent = new T(dockWidget_);
-        dwContent->setObjectName(typeid(T).name());
+    //        auto dwContent = new T(dockWidget_);
+    //        dwContent->setObjectName(typeid(T).name());
 
-        dockWidget_->pop();
-        dockWidget_->push(dwContent);
-        dockWidget_->show();
-    }
+    //        dockWidget_->pop();
+    //        dockWidget_->push(dwContent);
+    //        dockWidget_->show();
+    //    }
 
 signals:
     void parseFile(const QString& filename, int type);
@@ -127,7 +80,7 @@ private slots:
 
 private:
     Ui::MainWindow* ui;
-    DockWidget* dockWidget_ = nullptr;
+    QDockWidget* dockWidget_ = nullptr;
     Recent recentFiles;
     Recent recentProjects;
 
@@ -149,6 +102,7 @@ private:
 
     std::map<int, QAction*> toolpathActions;
     QActionGroup actionGroup;
+
     QMap<QString, QProgressDialog*> m_progressDialogs;
     QMessageBox reloadQuestion;
 

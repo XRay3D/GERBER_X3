@@ -15,15 +15,13 @@
 
 #include "file.h"
 #include "ft_model.h"
-#include "mainwindow.h"
-#include "shape.h"
+//#include "shape.h"
 #include "shapepluginin.h"
 
 #include <scene.h>
 
 #include <QElapsedTimer>
 #include <QFileDialog>
-#include <QFileSystemWatcher>
 #include <QIcon>
 #include <QLabel>
 #include <QMessageBox>
@@ -42,8 +40,8 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
         file.reset(App::filePlugin(type)->createFile());
         stream >> *file;
         file->addToScene();
-        App::project()->watcher->addPath(file->name());
-        qDebug() << App::project()->watcher->files();
+        App::project()->watcher.addPath(file->name());
+        qDebug() << "watcher" << App::project()->watcher.files();
     }
     return stream;
 }
@@ -66,8 +64,8 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& sh
 
 Project::Project(QObject* parent)
     : QObject(parent)
-    , watcher(new QFileSystemWatcher(this)) {
-    connect(watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
+    , watcher(this) {
+    connect(&watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
         const int id = m_files[contains(path)]->id();
         if (id > -1
             && QFileInfo(path).exists()
@@ -213,7 +211,7 @@ void Project::close() {
 void Project::deleteFile(int id) {
     QMutexLocker locker(&m_mutex);
     if (m_files.contains(id)) {
-        watcher->removePath(m_files[id]->name());
+        watcher.removePath(m_files[id]->name());
         m_files.erase(id);
         setChanged();
     } else
@@ -344,8 +342,8 @@ int Project::addFile(FileInterface* file) {
         m_files.emplace(newId, file);
         App::fileModel()->addFile(file);
         setChanged();
-        watcher->addPath(file->name());
-        qDebug() << watcher->files();
+        watcher.addPath(file->name());
+        qDebug() << "watcher" << watcher.files();
     }
     return file->id();
 }

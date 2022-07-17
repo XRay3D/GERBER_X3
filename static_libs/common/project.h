@@ -12,6 +12,7 @@
 
 #include "mvector.h"
 
+#include <QFileSystemWatcher>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QObject>
@@ -182,7 +183,7 @@ private:
     bool reload(int id, FileInterface* file);
 
     // File Watcher
-    QFileSystemWatcher* watcher;
+    QFileSystemWatcher watcher;
     bool m_reloadFile = false;
 
     int m_ver;

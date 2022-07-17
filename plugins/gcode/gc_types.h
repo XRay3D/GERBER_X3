@@ -60,9 +60,10 @@ enum Grouping {
     CutoffPaths,
 };
 
-struct variant {
-    V var;
-    friend QDataStream& operator>>(QDataStream& stream, variant& v) {
+struct Variant : V {
+    using V::V;
+
+    friend QDataStream& operator>>(QDataStream& stream, Variant& v) {
         uint8_t index;
         stream >> index;
         switch (index) {
@@ -76,34 +77,21 @@ struct variant {
             v = UsedItems {};
             break;
         }
-        std::visit([&stream](auto&& val) { stream >> val; }, v.var);
+        std::visit([&stream](auto&& val) { stream >> val; }, v);
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const variant& v) {
+    friend QDataStream& operator<<(QDataStream& stream, const Variant& v) {
         stream << uint8_t(v.index());
-        std::visit([&stream](auto&& val) { stream << val; }, v.var);
+        std::visit([&stream](auto&& val) { stream << val; }, v);
         return stream;
     }
-    //    variant() = default;
-    //    variant(variant&&) = default;
-    //    variant(const variant&) = default;
-    //    variant& operator=(variant&&) = default;
-    //    variant& operator=(const variant&) = default;
-    variant() { }
+
+    Variant() { }
 
     template <class T>
-    variant(const T& val)
-        : var(val) {
-    }
-
-    //    template <class T>
-    //    variant(T&& val)
-    //        : var(std::move(val))
-    //    {
-    //    }
-
-    size_t index() const { return var.index(); }
+    Variant(const T& val)
+        : V(val) { }
 
     int toInt() const {
         return std::visit([](auto&& val) -> int {
@@ -112,14 +100,7 @@ struct variant {
                 return int{};
             } else {
                 return int(val);
-            } }, var);
-        //        try {
-        //            if(index())
-        //            return std::get<int>(*this);
-        //        } catch (const std::exception& e) {
-        //            //qDebug() << e.what();
-        //            return {};
-        //        }
+            } }, *this);
     }
 
     bool toBool() const {
@@ -129,14 +110,7 @@ struct variant {
                 return bool{};
             } else {
                 return bool(val);
-            } }, var);
-        //        try {
-        //            return std::get<int>(*this);
-        //        } catch (const std::exception& e) {
-        //            //qDebug() <<
-        //            e.what();
-        //            return {};
-        //        }
+            } }, *this);
     }
 
     double toDouble() const {
@@ -146,23 +120,17 @@ struct variant {
                 return {};
             } else {
                 return double(val);
-            } }, var);
-        //        try {
-        //            return std::get<double>(*this);
-        //        } catch (const std::exception& e) {
-        //            //qDebug() << e.what();
-        //            return {};
-        //        }
+            } }, *this);
     }
 
     template <class T>
-    void setValue(const T& val) { var = val; }
+    void setValue(const T& val) { *this = val; }
 
     template <class T>
-    void setValue(T&& val) { var = val; }
+    void setValue(T&& val) { *this = val; }
 
     template <class T>
-    decltype(auto) value() const { return std::get<std::decay_t<T>>(var); }
+    decltype(auto) value() const { return std::get<std::decay_t<T>>(*this); }
 };
 
 struct GCodeParams {
@@ -196,23 +164,23 @@ public:
     };
     Q_ENUM(Param)
 
-    GCodeParams() { }
-    GCodeParams(const Tool& tool, double depth, GCodeType type) {
-        tools.emplace_back(tool);
+    GCodeParams() {
         if (!params.contains(PocketIndex))
             params[PocketIndex] = 0;
+    }
+    GCodeParams(const Tool& tool, double depth, GCodeType type)
+        : GCodeParams {} {
+        tools.emplace_back(tool);
         params[GCodeParams::Depth] = depth;
         gcType = type;
     }
 
     mvector<Tool> tools;
-    std::map<int, variant> params;
+    std::map<int, Variant> params;
     GCodeType gcType = Null;
     mutable int fileId = -1;
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type) {
-        // qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
-        //         qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream >> type.tools;
         stream >> type.params;
         stream >> type.gcType;
@@ -220,8 +188,6 @@ public:
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type) {
-        // qRegisterMetaTypeStreamOperators<UsedItems>("QMap<std::pair<int, int>, mvector<int>>");
-        //         qRegisterMetaTypeStreamOperators<mvector<QPointF>>("mvector<QPointF>");
         stream << type.tools;
         stream << type.params;
         stream << type.gcType;
