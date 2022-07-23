@@ -17,7 +17,6 @@
 namespace GCode {
 
 void PocketCreator::create() {
-
     if (gcp_.tools.size() > 1) {
         createMultiTool(gcp_.tools, gcp_.params[GCodeParams::Depth].toDouble());
     } else if (gcp_.params.contains(GCodeParams::Steps) && gcp_.params[GCodeParams::Steps].toInt() > 0) {
@@ -196,12 +195,6 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
             const auto p = Perimeter(path);
             return a < ta && p < tp;
         });
-        //        for (size_t i = 0; i < paths.size(); ++i) {
-        //            const auto a = abs(Area(paths[i]));
-        //            const auto p = Perimeter(paths[i]);
-        //            if (a < ta && p < tp)
-        //                paths.remove(i--);
-        //        }
     };
 
     int steps = 0;
