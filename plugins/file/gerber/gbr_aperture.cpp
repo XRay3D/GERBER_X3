@@ -13,7 +13,7 @@
  *******************************************************************************/
 #include "gbr_aperture.h"
 #include "gbr_file.h"
-#include "mathparser.h"
+
 #include <QDebug>
 #include <QLineF>
 

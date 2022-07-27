@@ -22,22 +22,12 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
 add_library(common STATIC
-    app.h
-    colorselector.cpp
-    colorselector.h
-    datastream.h
-    depthform.cpp
-    depthform.h
-    doublespinbox.cpp
-    doublespinbox.h
-    utils.h
-    leakdetector.h
-    mvector.h
-    project.cpp
-    project.h
-    settings.cpp
-    settings.h
+    ${HEADERS}
+    ${SOURCES}
 )
 
 target_link_libraries(common PRIVATE

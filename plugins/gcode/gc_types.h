@@ -63,7 +63,7 @@ enum Grouping {
 struct Variant : V {
     using V::V;
 
-    friend QDataStream& operator>>(QDataStream& stream, Variant& v) {
+    friend QDataStream& operator>>(QDataStream& stream, V& v) {
         uint8_t index;
         stream >> index;
         switch (index) {
@@ -81,7 +81,7 @@ struct Variant : V {
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const Variant& v) {
+    friend QDataStream& operator<<(QDataStream& stream, const V& v) {
         stream << uint8_t(v.index());
         std::visit([&stream](auto&& val) { stream << val; }, v);
         return stream;
@@ -100,7 +100,7 @@ struct Variant : V {
                 return int{};
             } else {
                 return int(val);
-            } }, *this);
+            } }, (V&)*this);
     }
 
     bool toBool() const {
@@ -110,7 +110,7 @@ struct Variant : V {
                 return bool{};
             } else {
                 return bool(val);
-            } }, *this);
+            } }, (V&)*this);
     }
 
     double toDouble() const {
@@ -120,7 +120,7 @@ struct Variant : V {
                 return {};
             } else {
                 return double(val);
-            } }, *this);
+            } }, (V&)*this);
     }
 
     template <class T>
@@ -207,49 +207,49 @@ public:
 
 class Settings {
 protected:
-    static inline QString m_fileExtension = { "tap" };
-    static inline QString m_formatMilling { "G?X?Y?Z?F?S?" };
-    static inline QString m_formatLaser { "G?X?Y?Z?F?S?" };
-    static inline QString m_laserConstOn { "M3" };
-    static inline QString m_laserDynamOn { "M4" };
-    static inline QString m_spindleLaserOff { "M5" };
-    static inline QString m_spindleOn { "M3" };
+    static inline QString fileExtension_ = { "tap" };
+    static inline QString formatMilling_ { "G?X?Y?Z?F?S?" };
+    static inline QString formatLaser_ { "G?X?Y?Z?F?S?" };
+    static inline QString laserConstOn_ { "M3" };
+    static inline QString laserDynamOn_ { "M4" };
+    static inline QString spindleLaserOff_ { "M5" };
+    static inline QString spindleOn_ { "M3" };
 
-    static inline QString m_start { "G21 G17 G90\nM3 S?" };
-    static inline QString m_end { "M5\nM30" };
+    static inline QString start_ { "G21 G17 G90\nM3 S?" };
+    static inline QString end_ { "M5\nM30" };
 
-    static inline QString m_laserStart { "G21 G17 G90" };
-    static inline QString m_laserEnd { "M30" };
+    static inline QString laserStart_ { "G21 G17 G90" };
+    static inline QString laserEnd_ { "M30" };
 
-    static inline bool m_info { true };
-    static inline bool m_sameFolder { true };
+    static inline bool info_ { true };
+    static inline bool sameFolder_ { true };
 
-    static inline bool m_simplifyHldi { false };
+    static inline bool simplifyHldi_ { false };
 
-    static inline int m_profileSort = 0;
+    static inline int profileSort_ = 0;
 
 public:
-    static QString fileExtension() { return m_fileExtension; }
-    static QString formatMilling() { return m_formatMilling; }
-    static QString formatLaser() { return m_formatLaser; }
-    static QString laserConstOn() { return m_laserConstOn; }
-    static QString laserDynamOn() { return m_laserDynamOn; }
+    static QString fileExtension() { return fileExtension_; }
+    static QString formatMilling() { return formatMilling_; }
+    static QString formatLaser() { return formatLaser_; }
+    static QString laserConstOn() { return laserConstOn_; }
+    static QString laserDynamOn() { return laserDynamOn_; }
 
-    static QString spindleLaserOff() { return m_spindleLaserOff; }
-    static QString spindleOn() { return m_spindleOn; }
+    static QString spindleLaserOff() { return spindleLaserOff_; }
+    static QString spindleOn() { return spindleOn_; }
 
-    static QString laserStart() { return m_laserStart; }
-    static QString laserEnd() { return m_laserEnd; }
+    static QString laserStart() { return laserStart_; }
+    static QString laserEnd() { return laserEnd_; }
 
-    static QString start() { return m_start; }
-    static QString end() { return m_end; }
+    static QString start() { return start_; }
+    static QString end() { return end_; }
 
-    static bool info() { return m_info; }
-    static bool sameFolder() { return m_sameFolder; }
+    static bool info() { return info_; }
+    static bool sameFolder() { return sameFolder_; }
 
-    static bool simplifyHldi() { return m_simplifyHldi; }
+    static bool simplifyHldi() { return simplifyHldi_; }
 
-    static int profileSort() { return m_profileSort; }
+    static int profileSort() { return profileSort_; }
 };
 
 } // namespace GCode

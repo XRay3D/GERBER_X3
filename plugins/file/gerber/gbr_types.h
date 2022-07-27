@@ -29,7 +29,7 @@ class AbstractAperture;
 
 #if __cplusplus > 201703L
 using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
-using VarMap = std::map<QString, double>;
+
 #else
 struct ApertureMap : std::map<int, std::shared_ptr<AbstractAperture>> {
     using M = std::map<int, std::shared_ptr<AbstractAperture>>;

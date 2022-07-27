@@ -263,48 +263,48 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
             settings.beginGroup("GCode");
-            m_info = settings.getValue(chbxInfo, m_info);
-            m_sameFolder = settings.getValue(chbxSameGFolder, m_sameFolder);
-            m_fileExtension = settings.getValue(leFileExtension, m_fileExtension);
-            m_formatMilling = settings.getValue(leFormatMilling, m_formatMilling);
-            m_formatLaser = settings.getValue(leFormatLaser, m_formatLaser);
-            m_laserConstOn = settings.getValue(leLaserCPC, m_laserConstOn);
-            m_laserDynamOn = settings.getValue(leLaserDPC, m_laserDynamOn);
-            m_spindleOn = settings.getValue(leSpindleCC, m_spindleOn);
-            m_spindleLaserOff = settings.getValue(leSpindleLaserOff, m_spindleLaserOff);
+            info_ = settings.getValue(chbxInfo, info_);
+            sameFolder_ = settings.getValue(chbxSameGFolder, sameFolder_);
+            fileExtension_ = settings.getValue(leFileExtension, fileExtension_);
+            formatMilling_ = settings.getValue(leFormatMilling, formatMilling_);
+            formatLaser_ = settings.getValue(leFormatLaser, formatLaser_);
+            laserConstOn_ = settings.getValue(leLaserCPC, laserConstOn_);
+            laserDynamOn_ = settings.getValue(leLaserDPC, laserDynamOn_);
+            spindleOn_ = settings.getValue(leSpindleCC, spindleOn_);
+            spindleLaserOff_ = settings.getValue(leSpindleLaserOff, spindleLaserOff_);
 
-            m_end = settings.getValue(pteEnd, m_end);
-            m_start = settings.getValue(pteStart, m_start);
+            end_ = settings.getValue(pteEnd, end_);
+            start_ = settings.getValue(pteStart, start_);
 
-            m_laserEnd = settings.getValue(pteLaserEnd, m_laserEnd);
-            m_laserStart = settings.getValue(pteLaserStart, m_laserStart);
+            laserEnd_ = settings.getValue(pteLaserEnd, laserEnd_);
+            laserStart_ = settings.getValue(pteLaserStart, laserStart_);
 
-            m_simplifyHldi = settings.getValue(chbxSimplifyHldi, m_simplifyHldi);
+            simplifyHldi_ = settings.getValue(chbxSimplifyHldi, simplifyHldi_);
 
-            m_profileSort = settings.getValue(cbxProfileSort, m_profileSort);
+            profileSort_ = settings.getValue(cbxProfileSort, profileSort_);
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup("GCode");
-            m_fileExtension = settings.setValue(leFileExtension);
-            m_formatMilling = settings.setValue(leFormatMilling);
-            m_formatLaser = settings.setValue(leFormatLaser);
-            m_info = settings.setValue(chbxInfo);
-            m_laserConstOn = settings.setValue(leLaserCPC);
-            m_laserDynamOn = settings.setValue(leLaserDPC);
-            m_sameFolder = settings.setValue(chbxSameGFolder);
-            m_spindleLaserOff = settings.setValue(leSpindleLaserOff);
-            m_spindleOn = settings.setValue(leSpindleCC);
+            fileExtension_ = settings.setValue(leFileExtension);
+            formatMilling_ = settings.setValue(leFormatMilling);
+            formatLaser_ = settings.setValue(leFormatLaser);
+            info_ = settings.setValue(chbxInfo);
+            laserConstOn_ = settings.setValue(leLaserCPC);
+            laserDynamOn_ = settings.setValue(leLaserDPC);
+            sameFolder_ = settings.setValue(chbxSameGFolder);
+            spindleLaserOff_ = settings.setValue(leSpindleLaserOff);
+            spindleOn_ = settings.setValue(leSpindleCC);
 
-            m_start = settings.setValue(pteStart);
-            m_end = settings.setValue(pteEnd);
+            start_ = settings.setValue(pteStart);
+            end_ = settings.setValue(pteEnd);
 
-            m_laserStart = settings.setValue(pteLaserStart);
-            m_laserEnd = settings.setValue(pteLaserEnd);
+            laserStart_ = settings.setValue(pteLaserStart);
+            laserEnd_ = settings.setValue(pteLaserEnd);
 
-            m_simplifyHldi = settings.setValue(chbxSimplifyHldi);
+            simplifyHldi_ = settings.setValue(chbxSimplifyHldi);
 
-            m_profileSort = settings.setValue(cbxProfileSort);
+            profileSort_ = settings.setValue(cbxProfileSort);
             settings.endGroup();
         }
     };
