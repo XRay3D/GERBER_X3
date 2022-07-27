@@ -14,34 +14,40 @@
  */
 #pragma once
 
-#include "gbr_types.h"
-
 #include <QMap>
 #include <QObject>
+#include <string_view>
+
+using VarMap = std::map<QString, double>;
+using sv = std::u16string_view;
 
 class Result {
 public:
-    double acc;   // Аккамулятор
-    QString rest; // остаток строки, которую мы еще не обработали
-    Result(double v = 0.0, const QString& r = "")
+    double acc; // Аккамулятор
+    sv rest;    // остаток строки, которую мы еще не обработали
+    Result(double v = {}, sv rest = {})
         : acc(v)
-        , rest(r) {
+        , rest(rest = {}) {
     }
 };
 
 class MathParser {
 public:
-    MathParser(Gerber::VarMap* variables);
-    double getVariable(QString variableName);
-    double parse(const QString& s = "");
+    MathParser(VarMap* variables);
+    MathParser() { }
+    double getVariable(const QString& varName);
+    double parse(const QString& s = {});
 
 private:
-    Gerber::VarMap* variables;
-    Result plusMinus(QString s);
-    Result bracket(QString s);
-    Result functionVariable(QString s);
-    Result mulDiv(QString s);
-    Result num(QString s);
+    QString toString(sv s);
+    double toDouble(sv s);
+
+    VarMap* variables = {};
+    Result plusMinus(sv s);
+    Result bracket(sv s);
+    Result functionVariable(sv s);
+    Result mulDiv(sv s);
+    Result num(sv s);
     // Тут определяем все нашие функции, которыми мы можем пользоватся в формулах
-    Result processFunction(QString func, Result r);
+    Result processFunction(sv func, Result r);
 };
