@@ -195,12 +195,5 @@ Result MathParser::processFunction(sv func, Result r) {
     return r;
 }
 
-QString toString(sv s) {
-    return QString((const QChar*)s.data(), s.size());
-}
 
-double MathParser::toDouble(sv s) {
-    //    double val;
-    //    std::from_chars(s.data(), s.data() + s.size(), val);
-    return toString(s).toDouble();
-}
+

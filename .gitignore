@@ -1,3 +1,59 @@
+# C++ objects and libs
+*.a
+*.dll
+*.dylib
+*.la
+*.lai
+*.lo
+*.o
+*.slo
+*.so
+*.so.*
+
+# Qt-es
+*.jsc
+*.moc
+*.prl
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.qm
+*.qmlc
+*.txt.user
+*.txt.user.*
+*_plugin_import.cpp
+*build-*
+/.qmake.cache
+/.qmake.stash
+Makefile*
+moc_*.cpp
+moc_*.h
+object_script.*.Debug
+object_script.*.Release
+qrc_*.cpp
+ui_*.h
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCreator CMake
+CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database
+compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+*_qmlcache.qrc
+*creator.user*
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -18,14 +74,12 @@ $RECYCLE.BIN/
 *.lnk
 
 # =========================
+
 # Operating System Files
-# =========================
 
 # OSX
-# =========================
-
-.DS_Store
 .AppleDouble
+.DS_Store
 .LSOverride
 
 # Thumbnails
@@ -38,18 +92,17 @@ $RECYCLE.BIN/
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
+.apdisk
 Network Trash Folder
 Temporary Items
-.apdisk
 
 # User's project preferences
 *.user*
 
 # Build dir
+build
 build-*
 libs_*
-build
-
 
 # Binaries
 bin/*
@@ -68,10 +121,12 @@ uic_*
 .vscode
 
 #makefiles
-Makefile*
 
 #binaries
 bin
 
 #wrappers
 *_wrapper.bat
+
+# notepad++
+*.bak

@@ -21,7 +21,7 @@ class Node : public FileTree::Node {
     Shape* shape;
 
 public:
-    explicit Node(Shape* shape, int* id);
+    explicit Node(Shape* shape);
     ~Node() override = default;
 
     // AbstractNode interface

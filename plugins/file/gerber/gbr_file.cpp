@@ -261,7 +261,7 @@ void File::initFrom(FileInterface* file) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Node(this, &id_);
+    return node_ ? node_ : node_ = new Node(this);
 }
 
 void File::setItemType(int type) {

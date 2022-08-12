@@ -39,8 +39,11 @@ public:
     double parse(const QString& s = {});
 
 private:
-    QString toString(sv s);
-    double toDouble(sv s);
+    QString toString(sv s) { return QString((const QChar*)s.data(), s.size()); }
+
+    double toDouble(sv s) { //    double val;        //    std::from_chars(s.data(), s.data() + s.size(), val);
+        return toString(s).toDouble();
+    }
 
     VarMap* variables = {};
     Result plusMinus(sv s);

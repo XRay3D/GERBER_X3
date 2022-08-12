@@ -95,7 +95,7 @@ public:
     virtual int type() const = 0;
     virtual void finalizeShape() = 0;
     virtual void updateShape(const QPointF& point) = 0;
-    //    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
+    //    virtual void addToGcForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
     void createMainMenu(QMenu& menu, FileTree::View* tv) {
         menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete All Shapes"), [tv] {
             if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)

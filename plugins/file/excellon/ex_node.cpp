@@ -25,8 +25,8 @@
 
 namespace Excellon {
 
-Node::Node(File* file, int* id)
-    : FileTree::Node(id, FileTree::File)
+Node::Node(File* file)
+    : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
 }
 
@@ -76,7 +76,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
             case FileTree::Id:
-                return *m_id;
+                return id_.get();
             default:
                 return QVariant();
             }
@@ -88,7 +88,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::EditRole:
                 return static_cast<bool>(file->side());
             case FileTree::Id:
-                return *m_id;
+                return id_.get();
             default:
                 return QVariant();
             }

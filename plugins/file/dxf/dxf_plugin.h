@@ -38,10 +38,13 @@ public:
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void updateFileModel(FileInterface* file) override;
     // FIXME   DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
-    // FIXME   void addToDrillForm(FileInterface* file, QComboBox* cbx);
+    // FIXME   void addToGcForm(FileInterface* file, QComboBox* cbx);
 
     // public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
+    // FilePlugin interface
+    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin) override;
+    void addToGcForm(FileInterface* file, QComboBox* cbx) override;
 
 private:
     File* m_file = nullptr;

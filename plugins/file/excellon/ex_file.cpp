@@ -118,7 +118,7 @@ void File::initFrom(FileInterface* file) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Excellon::Node(this, &id_);
+    return node_ ? node_ : node_ = new Excellon::Node(this);
 }
 
 } //  namespace Excellon

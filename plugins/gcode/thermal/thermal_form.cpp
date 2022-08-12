@@ -149,7 +149,7 @@ void ThermalForm::updateFiles() {
     ui->cbxFile->clear();
 
     for (auto file : App::project()->files(FileType::Gerber))
-        App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
+        App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -162,7 +162,7 @@ void ThermalForm::updateFiles() {
 bool ThermalForm::canToShow() {
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
-        App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
+        App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
         if (cbx.count())
             return true;
     }

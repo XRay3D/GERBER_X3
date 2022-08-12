@@ -121,7 +121,7 @@ MainWindow::MainWindow(QWidget* parent)
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
         if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf)"); });
+            QTimer::singleShot(i += k, [this] { loadFile(R"(C:\Users\X-Ray\YandexDisk\ТабуреткаD57_Голубая/D57.dxf)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
@@ -130,7 +130,7 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
-        if (1) {
+        if (0) {
             i = 1000;
             // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });

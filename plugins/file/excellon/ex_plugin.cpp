@@ -13,16 +13,16 @@
  *******************************************************************************/
 #include "ex_plugin.h"
 #include "ex_file.h"
-#include "ex_node.h"
+//#include "ex_node.h"
 #include "ex_settingstab.h"
 #include "ex_types.h"
 
-#include "app.h"
+//#include "app.h"
 #include "ctre.hpp"
-#include "doublespinbox.h"
+//#include "doublespinbox.h"
 #include "file.h"
-#include "ft_view.h"
-#include "gi_drill.h"
+//#include "ft_view.h"
+//#include "gi_drill.h"
 #include "utils.h"
 
 #include "drill/drill_form.h"
@@ -106,7 +106,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
+void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);

@@ -35,14 +35,13 @@ public:
     FileInterface* createFile() override;
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
+    void addToGcForm(FileInterface* file, QComboBox* cbx) override;
     //    DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
 
     // public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
 
     // FilePlugin interface
-public:
     std::any createPreviewGi(FileInterface *file, GCodePlugin* plugin) override;
 };
 } // namespace Excellon

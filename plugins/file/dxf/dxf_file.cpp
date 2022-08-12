@@ -30,8 +30,8 @@
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "dxf_node.h"
-#include "gi_gcpath.h"
-#include "settings.h"
+//#include "gi_gcpath.h"
+//#include "settings.h"
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -126,7 +126,7 @@ void File::initFrom(FileInterface* file) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Node(this, &id_);
+    return node_ ? node_ : node_ = new Node(this);
 }
 
 Layer* File::layer(const QString& name) {

@@ -16,7 +16,8 @@
 #include "dxf_node.h"
 #include "dxf_settingstab.h"
 
-#include "entities/dxf_allentities.h"
+//#include "entities/dxf_allentities.h"
+#include "entities/dxf_circle.h"
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 #include "section/dxf_headerparser.h"
@@ -24,8 +25,11 @@
 //#include "section/dxf_classes.h"
 //#include "section/dxf_objects.h"
 //#include "section/dxf_thumbnailimage.h"
-#include "ft_view.h"
+//#include "ft_view.h"
 #include "tables/dxf_layer.h"
+
+#include "drill/drill_form.h"
+
 #include <QtWidgets>
 
 namespace Dxf {
@@ -152,6 +156,35 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
         return nullptr;
     }
     return m_file;
+}
+
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+    if (plugin->type() == ::GCode::Drill) {
+        Drills retData;
+        auto const dxfFile = static_cast<File*>(file);
+        for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
+            for (auto&& go : layer->graphicObjects())
+                if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
+                    retData[{ ctr, circle->radius * 2, false, name + ": CIRCLE" }].posOrPath.emplace_back(dxfFile->transform().map(circle->centerPoint));
+            ctr++;
+        }
+        return retData;
+    }
+    return {};
+}
+
+void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
+    auto const dxfFile = static_cast<File*>(file);
+    for (auto&& layer : dxfFile->layers()) {
+        for (auto&& go : layer.second->graphicObjects()) {
+            if (go.entity()->type() == Entity::CIRCLE) {
+                cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+                cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
+                cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
+                return;
+            }
+        }
+    }
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
@@ -318,7 +351,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //    return giPeview;
 //}
 
-// FIXME void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
+// FIXME void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //    int ctr {};
 //    for (auto& [key, lay] : static_cast<File*>(file)->layers())
 //        if (lay->isVisible()) {
