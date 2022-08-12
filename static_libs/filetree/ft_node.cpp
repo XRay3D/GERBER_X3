@@ -24,20 +24,19 @@
 
 namespace FileTree {
 
-Node::Node(int* id, Type type)
-    : sideStrList(QObject::tr("Top|Bottom").split('|'))
-    , type(type)
-    , m_id(id) {
+Node::Node(std::reference_wrapper<const int> id, Type type)
+    : type(type)
+    , id_(id) {
 }
 
 Node::~Node() {
-    if (m_id && *m_id > -1) {
+    if (id_ > -1) {
         switch (type) {
         case File:
-            App::project()->deleteFile(*m_id);
+            App::project()->deleteFile(id_);
             break;
         case Shape:
-            App::project()->deleteShape(*m_id);
+            App::project()->deleteShape(id_);
             break;
         default:
             break;
@@ -52,11 +51,11 @@ Node* Node::child(int row) const {
     return childs[row].get();
 }
 
-Node* Node::parent() const { return m_parent; }
+Node* Node::parent() const { return parent_; }
 
 void Node::setChild(int row, Node* item) {
     if (item) {
-        item->m_parent = this;
+        item->parent_ = this;
         if (row < static_cast<int>(childs.size()))
             childs[row].reset(item);
     }
@@ -67,8 +66,8 @@ int Node::childCount() const {
 }
 
 int Node::row() const {
-    if (m_parent)
-        return m_parent->childs.indexOf(this);
+    if (parent_)
+        return parent_->childs.indexOf(this);
     //    for (int i = 0, size = m_parent->childs.size(); i < size; ++i)
     //        if (m_parent->childs[i].get() == this)
     //            return i;
@@ -76,7 +75,7 @@ int Node::row() const {
 }
 
 void Node::addChild(Node* item) {
-    item->m_parent = this;
+    item->parent_ = this;
     childs.resize(childs.size() + 1);
     childs.back().reset(item);
 }
@@ -86,7 +85,5 @@ void Node::remove(int row) { childs.takeAt(row); }
 QModelIndex Node::index(int column) const {
     return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this));
 }
-
-void Node::setId(int* id) { m_id = id; }
 
 } // namespace FileTree

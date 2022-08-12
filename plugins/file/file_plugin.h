@@ -54,7 +54,7 @@ public:
     [[nodiscard]] virtual FileInterface* createFile() = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
 
-    virtual void addToDrillForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
+    virtual void addToGcForm([[maybe_unused]] FileInterface* file, [[maybe_unused]] QComboBox* cbx) {};
 
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,

@@ -25,8 +25,8 @@
 
 namespace GCode {
 
-Node::Node(File* file, int* id)
-    : FileTree::Node(id, FileTree::File)
+Node::Node(File* file)
+    : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
 }
 
@@ -77,7 +77,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::DecorationRole:
             return file->icon();
         case FileTree::Id:
-            return *m_id;
+            return id_.get();
         default:
             return QVariant();
         }
@@ -116,20 +116,20 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
-        emit tv->saveGCodeFile(*m_id);
+        emit tv->saveGCodeFile(id_);
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    if (!dialog[*m_id])
+    if (!dialog[id_])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-            dialog[*m_id] = new Dialog(file->lines2(), file->name(), tv);
+            dialog[id_] = new Dialog(file->lines2(), file->name(), tv);
             auto destroy = [this] {
-                delete dialog[*m_id];
-                dialog[*m_id] = nullptr;
+                delete dialog[id_];
+                dialog[id_] = nullptr;
             };
-            QObject::connect(dialog[*m_id], &QDialog::finished, destroy);
-            dialog[*m_id]->show();
+            QObject::connect(dialog[id_], &QDialog::finished, destroy);
+            dialog[id_]->show();
         });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);

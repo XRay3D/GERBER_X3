@@ -17,12 +17,19 @@
 
 namespace FileTree {
 
-FolderNode::FolderNode(const QString& name, int* id)
+constexpr int FolderNodeId { -1 };
+
+FolderNode::FolderNode(const QString& name)
+    : FileTree::Node(FolderNodeId, Folder)
+    , name(name) {
+}
+
+FolderNode::FolderNode(const QString& name, int& id)
     : FileTree::Node(id, Folder)
     , name(name) {
 }
 
-FolderNode::~FolderNode() { delete m_id; }
+FolderNode::~FolderNode() { }
 
 QVariant FolderNode::data(const QModelIndex& index, int role) const {
     if (!index.column()) {
@@ -37,7 +44,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
     }
     switch (role) {
     case Role::Id:
-        return *m_id;
+        return id_.get();
     case Role::NodeType:
         return Folder;
     case Role::ContentType:

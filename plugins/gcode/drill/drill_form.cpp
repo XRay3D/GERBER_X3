@@ -212,7 +212,7 @@ void DrillForm::updateFiles() {
 
     ui->cbxFile->clear();
     for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber, FileType::Dxf }))
-        App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
+        App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
 
@@ -230,7 +230,7 @@ bool DrillForm::canToShow() {
     QComboBox cbx;
     for (auto type : { FileType::Gerber, FileType::Dxf }) {
         for (auto file : App::project()->files(type)) {
-            App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
+            App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
             if (cbx.count())
                 return true;
         }

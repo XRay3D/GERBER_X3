@@ -253,7 +253,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-void Plugin::addToDrillForm(FileInterface* file, QComboBox* cbx) {
+void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
     if (static_cast<File*>(file)->flashedApertures() && cbx) {
         cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         QPixmap pixmap(IconSize, IconSize);

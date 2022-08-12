@@ -36,12 +36,12 @@ signals:
 private:
     void updateTree();
     void updateIcons();
-    Model* m_model;
+    Model* model_;
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-    int m_childCount = 0;
-    QModelIndex m_menuIndex;
+    int childCount_ = 0;
+    QModelIndex menuIndex_;
     void showExcellonDialog();
 
 protected:

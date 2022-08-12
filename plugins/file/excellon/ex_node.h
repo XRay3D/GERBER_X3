@@ -23,7 +23,7 @@ class Node : public FileTree::Node {
     File* file;
 
 public:
-    explicit Node(File* file, int* id);
+    explicit Node(File* file);
     ~Node() override = default;
 
     // FileTree::Node interface

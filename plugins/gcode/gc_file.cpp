@@ -851,7 +851,7 @@ void File::createGi() {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Node(this, &id_);
+    return node_ ? node_ : node_ = new Node(this);
 }
 
 } // namespace GCode

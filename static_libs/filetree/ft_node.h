@@ -73,7 +73,7 @@ class Node {
     Node(const Node&) = delete;
 
 public:
-    explicit Node(int* id, Type type);
+    explicit Node(std::reference_wrapper<const int> id, Type type);
     virtual ~Node();
 
     Node* child(int row) const;
@@ -94,15 +94,14 @@ public:
 
     QModelIndex index(int column = 0) const;
 
-    const QStringList sideStrList;
+    const QStringList sideStrList { QObject::tr("Top|Bottom").split('|') };
     const Type type;
 
-    void setId(int* id);
+    void setId(const int& id) { id_ = id; }
 
 protected:
-    int* m_id;
-
-    Node* m_parent = nullptr;
+    std::reference_wrapper<const int> id_;
+    Node* parent_ = nullptr;
     mvector<std::unique_ptr<Node>> childs;
 };
 

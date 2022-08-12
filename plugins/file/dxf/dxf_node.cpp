@@ -176,8 +176,8 @@ protected:
     }
 };
 
-Node::Node(File* file, int* id)
-    : FileTree::Node(id, FileTree::File)
+Node::Node(File* file)
+    : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
 }
 
@@ -265,7 +265,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     }
     switch (role) {
     case FileTree::Id:
-        return *m_id;
+        return id_.get();
     default:
         return QVariant();
     }
@@ -275,7 +275,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
-        auto dialog = new SourceDialog(*m_id, tv);
+        auto dialog = new SourceDialog(id_, tv);
         dialog->exec();
         delete dialog;
     });
@@ -311,7 +311,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
 ///// \brief Node::NodeLayer
 ///// \param id
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
-    : FileTree::Node(nullptr, FileTree::SubFile)
+    : FileTree::Node(layer->file()->id(), FileTree::SubFile)
     , name(name)
     , layer(layer) {
 }
@@ -325,7 +325,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->m_layersVisible[name] = visible;
             if (visible) {
                 layer->file()->visible_ = visible;
-                emit App::fileModel()->dataChanged(m_parent->index(index.column()), m_parent->index(index.column()), { role });
+                emit App::fileModel()->dataChanged(parent_->index(index.column()), parent_->index(index.column()), { role });
             }
         }
         return true;
@@ -362,7 +362,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
         case Qt::DecorationRole:
             return decoration(layer->color());
         case FileTree::Id:
-            return *m_id;
+            return id_.get();
         default:
             return QVariant();
         }

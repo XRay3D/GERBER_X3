@@ -59,39 +59,21 @@ public:
             using Fr = std::decay_t<decltype(arg)>;
             bool ok = true;
             T val;
-            /*  */ if constexpr (std::is_same_v<Fr, To>) {
+            /**/ if constexpr (std::is_same_v<Fr, To>)
                 return arg;
-            } else if constexpr (std::is_same_v<To, QString> && std::is_integral_v<Fr>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
-                return T::number(arg);
-            } else if constexpr (std::is_same_v<To, QString> && std::is_floating_point_v<Fr>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
-                return T::number(arg);
-            } else if constexpr (std::is_same_v<Fr, QString> && std::is_integral_v<To>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
+            else if constexpr (std::is_same_v<To, QString> && std::is_integral_v<Fr>)
+                return QString::number(arg);
+            else if constexpr (std::is_same_v<To, QString> && std::is_floating_point_v<Fr>)
+                return QString::number(arg);
+            else if constexpr (std::is_same_v<Fr, QString> && std::is_integral_v<To>)
                 val = T(arg.toLongLong(&ok));
-            } else if constexpr (std::is_same_v<Fr, QString> && std::is_floating_point_v<To>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
+            else if constexpr (std::is_same_v<Fr, QString> && std::is_floating_point_v<To>)
                 val = T(arg.toDouble(&ok));
-            } else if constexpr (std::is_integral_v<To>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
+            else if constexpr (std::is_integral_v<To>)
                 return T(arg);
-            } else if constexpr (std::is_floating_point_v<To>) {
-                //                qDebug()
-                //                         << "\n\tFr" << typeid(Fr).name()
-                //                         << "\n\tTo" << typeid(To).name();
+            else if constexpr (std::is_floating_point_v<To>)
                 return T(arg);
-            } else
+            else
                 TypenameTest<T> {}; // static_assert(always_false_v<T>, "non-exhaustive visitor!");
             if (!ok)
                 throw QString("CodeData::operator T(), %1 to %2 from %3")

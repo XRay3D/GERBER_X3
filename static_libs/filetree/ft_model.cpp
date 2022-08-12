@@ -27,7 +27,7 @@ using TreeItem = Node;
 
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new FolderNode("rootItem", new int(-1)))
+    , rootItem(new FolderNode("rootItem"))
     , mimeType(QStringLiteral("application/GCodeItem")) {
     App::setFileModel(this);
 }
@@ -48,7 +48,7 @@ void Model::addFile(FileInterface* file) {
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
-        rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), new int(mapNode[type].type)));
+        rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), mapNode[type].type));
         endInsertRows();
     }
 
@@ -75,7 +75,7 @@ void Model::addShape(ShapeInterface* shape) {
         beginInsertRows(index, rowCount, rowCount);
         mapNode.emplace(type, Pair { nullptr, type });
         auto si = App::shapePlugins().begin()->second;
-        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), new int(mapNode[type].type)));
+        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), mapNode[type].type));
         endInsertRows();
     }
 
@@ -110,9 +110,7 @@ QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
 
     TreeItem* parentItem;
 
-    parentItem = !parent.isValid()
-        ? rootItem
-        : static_cast<TreeItem*>(parent.internalPointer());
+    parentItem = !parent.isValid() ? rootItem : static_cast<TreeItem*>(parent.internalPointer());
 
     TreeItem* childItem = parentItem->child(row);
     if (childItem)
@@ -201,9 +199,7 @@ int Model::rowCount(const QModelIndex& parent) const {
     if (parent.column() > 0)
         return 0;
 
-    parentItem = !parent.isValid()
-        ? rootItem
-        : static_cast<TreeItem*>(parent.internalPointer());
+    parentItem = !parent.isValid() ? rootItem : static_cast<TreeItem*>(parent.internalPointer());
 
     return parentItem->childCount();
     //    if (parent.column() > 0)

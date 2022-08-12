@@ -56,17 +56,17 @@ public:
     // FileInterface
     template <typename T = FileInterface>
     T* file(int id) {
-        QMutexLocker locker(&m_mutex);
-        if (m_files.contains(id))
-            return static_cast<T*>(m_files[id].get());
+        QMutexLocker locker(&mutex_);
+        if (files_.contains(id))
+            return static_cast<T*>(files_[id].get());
         return nullptr;
     }
 
     template <typename T = FileInterface>
     mvector<T*> files() {
-        QMutexLocker locker(&m_mutex);
+        QMutexLocker locker(&mutex_);
         mvector<T*> rfiles;
-        for (const auto& [id, sp] : m_files) {
+        for (const auto& [id, sp] : files_) {
             T* file = dynamic_cast<T*>(sp.get());
             if (file)
                 rfiles.push_back(file);
@@ -76,9 +76,9 @@ public:
 
     template <typename T>
     mvector<T*> count() {
-        QMutexLocker locker(&m_mutex);
+        QMutexLocker locker(&mutex_);
         int count = 0;
-        for (const auto& [id, sp] : m_files) {
+        for (const auto& [id, sp] : files_) {
             if (dynamic_cast<T*>(sp.get()))
                 ++count;
         }
@@ -184,34 +184,34 @@ private:
 
     // File Watcher
     QFileSystemWatcher watcher;
-    bool m_reloadFile = false;
+    bool reloadFile_ = false;
 
-    int m_ver;
+    int ver_;
 
-    FilesMap m_files;
-    ShapesMap m_shapes;
-    QMutex m_mutex;
+    FilesMap files_;
+    ShapesMap shapes_;
+    QMutex mutex_;
     QString fileName_;
-    QString m_name;
-    bool m_isModified = false;
-    bool m_isUntitled = true;
-    bool m_isPinsPlaced = false;
+    QString name_;
+    bool isModified_ = false;
+    bool isUntitled_ = true;
+    bool isPinsPlaced_ = false;
 
-    QPointF m_home;
-    QPointF m_zero;
-    QPointF m_pins[4];
-    bool m_pinsUsed[4] { true, true, true, true };
-    QRectF m_worckRect;
+    QPointF home_;
+    QPointF zero_;
+    QPointF pins_[4];
+    bool pinsUsed_[4] { true, true, true, true };
+    QRectF worckRect_;
 
-    double m_safeZ;
-    double m_boardThickness;
-    double m_copperThickness;
-    double m_clearence;
-    double m_plunge;
-    double m_glue;
+    double safeZ_ {};
+    double boardThickness_ {};
+    double copperThickness_ {};
+    double clearence_ {};
+    double plunge_ {};
+    double glue_ {};
 
-    double m_spacingX = 0.0;
-    double m_spacingY = 0.0;
-    uint m_stepsX = 1;
-    uint m_stepsY = 1;
+    double spacingX_ {};
+    double spacingY_ {};
+    uint stepsX_ { 1 };
+    uint stepsY_ { 1 };
 };

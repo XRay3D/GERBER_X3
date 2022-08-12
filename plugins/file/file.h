@@ -129,7 +129,7 @@ public:
     virtual void initFrom(FileInterface* file) {
         id_ = file->id();
         node_ = file->node();
-        node_->setId(&id_);
+        // node_->setId(&id_);
     }
 
     virtual FileType type() const = 0;
@@ -158,7 +158,7 @@ public:
     }
     const QTransform& transform() const { return transform_; }
 
-    int id() const { return id_; }
+    const int& id() const { return id_; }
     void setId(int id) { id_ = id; }
 
     virtual FileTree::Node* node() = 0;

@@ -34,8 +34,8 @@ namespace Gerber {
 
 QTimer Node::m_decorationTimer;
 
-Node::Node(File* file, int* id)
-    : FileTree::Node(id, FileTree::File)
+Node::Node(File* file)
+    : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
     if (!file->userColor()) {
         connect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
@@ -108,7 +108,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
                 return decoration(file->color());
             }
         case FileTree::Id:
-            return *m_id;
+            return id_.get();
         default:
             return QVariant();
         }
@@ -120,7 +120,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::EditRole:
             return static_cast<bool>(file->side());
         case FileTree::Id:
-            return *m_id;
+            return id_.get();
         default:
             return QVariant();
         }
@@ -133,7 +133,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::EditRole:
             return file->displayedTypes().at(file->itemsType()).id;
         case FileTree::Id:
-            return *m_id;
+            return id_.get();
         default:
             return QVariant();
         }
@@ -146,9 +146,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 QTimer* Node::decorationTimer() { return &m_decorationTimer; }
 
 void Node::repaint() const {
-    if (!m_parent)
+    if (!parent_)
         return;
-    const int count = m_parent->childCount();
+    const int count = parent_->childCount();
     const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row() : 0);
     file->setColor(QColor::fromHsv(k, 255, 255, 150));
     emit App::fileModel()->dataChanged(index(0), index(0), { Qt::DecorationRole });
@@ -187,7 +187,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     if (!file->itemGroup(File::Components)->empty()) {
         menu.addAction(QIcon(), GbrObj::tr("Show &Components"), [this, tv] {
             ComponentsDialog dialog(tv);
-            dialog.setFile(*m_id);
+            dialog.setFile(id_);
             dialog.exec();
         });
     }

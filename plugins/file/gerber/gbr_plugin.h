@@ -36,7 +36,7 @@ public:
 
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    void addToDrillForm(FileInterface* file, QComboBox* cbx) override;
+    void addToGcForm(FileInterface* file, QComboBox* cbx) override;
     // FIXME   DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
     // FIXME   ThermalPreviewGiMap createThermalPreviewGi(FileInterface* file, const ThParam2& tp2) override;
 

@@ -29,7 +29,7 @@ class Node : public QObject,
     File* file;
 
 public:
-    explicit Node(File* file, int* id);
+    explicit Node(File* file);
     ~Node() override;
 
     // FileTree::Node interface

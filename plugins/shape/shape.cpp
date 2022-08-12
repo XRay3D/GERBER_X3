@@ -13,7 +13,7 @@
  *******************************************************************************/
 #include "shape.h"
 #include "ft_view.h"
-#include "graphicsview.h"
+//#include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
@@ -26,7 +26,7 @@
 namespace Shapes {
 
 Shape::Shape()
-    : m_node(new Node(this, &id_)) {
+    : m_node(new Node(this)) {
     m_paths.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);

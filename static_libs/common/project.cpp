@@ -66,16 +66,14 @@ Project::Project(QObject* parent)
     : QObject(parent)
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
-        const int id = m_files[contains(path)]->id();
+        const int id = files_[contains(path)]->id();
         if (id > -1
             && QFileInfo(path).exists()
-            && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\n"
-                                                     "Reload it into the project?")
-                                                      .arg(QFileInfo(path).fileName()),
+            && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
                 == QMessageBox::Ok) {
-            m_reloadFile = true;
-            emit parseFile(path, static_cast<int>(m_files[id]->type()));
+            reloadFile_ = true;
+            emit parseFile(path, static_cast<int>(files_[id]->type()));
         }
     });
 
@@ -95,33 +93,33 @@ bool Project::save(const QString& fileName) {
     }
     QDataStream out(&file);
     try {
-        out << (m_ver = ProVer_6);
+        out << (ver_ = ProVer_6);
         // ProVer_5:
-        out << m_isPinsPlaced;
+        out << isPinsPlaced_;
         // ProVer_4:
         // ProVer_3:
-        out << m_spacingX;
-        out << m_spacingY;
-        out << m_stepsX;
-        out << m_stepsY;
+        out << spacingX_;
+        out << spacingY_;
+        out << stepsX_;
+        out << stepsY_;
         // ProVer_2:
-        out << m_home;
-        out << m_zero;
-        for (auto& pt : m_pins)
+        out << home_;
+        out << zero_;
+        for (auto& pt : pins_)
             out << pt;
-        for (auto& fl : m_pinsUsed)
+        for (auto& fl : pinsUsed_)
             out << fl;
-        out << m_worckRect;
-        out << m_safeZ;
-        out << m_boardThickness;
-        out << m_copperThickness;
-        out << m_clearence;
-        out << m_plunge;
-        out << m_glue;
+        out << worckRect_;
+        out << safeZ_;
+        out << boardThickness_;
+        out << copperThickness_;
+        out << clearence_;
+        out << plunge_;
+        out << glue_;
         // ProVer_1:;
-        out << m_files;
-        out << m_shapes;
-        m_isModified = false;
+        out << files_;
+        out << shapes_;
+        isModified_ = false;
         emit changed();
         return true;
     } catch (...) {
@@ -138,50 +136,50 @@ bool Project::open(const QString& fileName) {
     }
     QDataStream in(&file);
     try {
-        in >> m_ver;
-        switch (m_ver) {
+        in >> ver_;
+        switch (ver_) {
         case ProVer_6:
             [[fallthrough]];
         case ProVer_5:
-            in >> m_isPinsPlaced;
+            in >> isPinsPlaced_;
             [[fallthrough]];
         case ProVer_4:
             [[fallthrough]];
         case ProVer_3:
-            in >> m_spacingX;
-            in >> m_spacingY;
-            in >> m_stepsX;
-            in >> m_stepsY;
+            in >> spacingX_;
+            in >> spacingY_;
+            in >> stepsX_;
+            in >> stepsY_;
             [[fallthrough]];
         case ProVer_2:
-            in >> m_home;
-            emit homePosChanged(m_home);
-            in >> m_zero;
-            emit zeroPosChanged(m_zero);
-            for (auto& pt : m_pins)
+            in >> home_;
+            emit homePosChanged(home_);
+            in >> zero_;
+            emit zeroPosChanged(zero_);
+            for (auto& pt : pins_)
                 in >> pt;
-            for (auto& fl : m_pinsUsed)
+            for (auto& fl : pinsUsed_)
                 in >> fl;
-            emit pinsPosChanged(m_pins);
-            in >> m_worckRect;
-            emit worckRectChanged(m_worckRect);
-            in >> m_safeZ;
-            in >> m_boardThickness;
-            in >> m_copperThickness;
-            in >> m_clearence;
-            in >> m_plunge;
-            in >> m_glue;
+            emit pinsPosChanged(pins_);
+            in >> worckRect_;
+            emit worckRectChanged(worckRect_);
+            in >> safeZ_;
+            in >> boardThickness_;
+            in >> copperThickness_;
+            in >> clearence_;
+            in >> plunge_;
+            in >> glue_;
             [[fallthrough]];
         case ProVer_1:;
-            in >> m_files;
-            for (const auto& [id, filePtr] : m_files)
+            in >> files_;
+            for (const auto& [id, filePtr] : files_)
                 App::fileModel()->addFile(filePtr.get());
 
-            in >> m_shapes;
-            for (const auto& [id, shPtr] : m_shapes)
+            in >> shapes_;
+            for (const auto& [id, shPtr] : shapes_)
                 App::fileModel()->addShape(shPtr.get());
 
-            m_isModified = false;
+            isModified_ = false;
         }
         return true;
     } catch (const QString& ex) {
@@ -201,28 +199,28 @@ void Project::close() {
     setStepsY(1);
     setSpaceX(0.0);
     setSpaceY(0.0);
-    m_isPinsPlaced = false;
-    m_isModified = false;
-    for (auto& fl : m_pinsUsed)
+    isPinsPlaced_ = false;
+    isModified_ = false;
+    for (auto& fl : pinsUsed_)
         fl = true;
     emit changed();
 }
 
 void Project::deleteFile(int id) {
-    QMutexLocker locker(&m_mutex);
-    if (m_files.contains(id)) {
-        watcher.removePath(m_files[id]->name());
-        m_files.erase(id);
+    QMutexLocker locker(&mutex_);
+    if (files_.contains(id)) {
+        watcher.removePath(files_[id]->name());
+        files_.erase(id);
         setChanged();
     } else
         qWarning() << "Error id" << id << "File not found";
 }
 
 void Project::deleteShape(int id) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     try {
-        if (m_shapes.contains(id)) {
-            m_shapes.erase(id);
+        if (shapes_.contains(id)) {
+            shapes_.erase(id);
             setChanged();
         } else
             qWarning() << "Error id" << id << "Shape not found";
@@ -231,17 +229,17 @@ void Project::deleteShape(int id) {
     }
 }
 
-int Project::size() { return int(m_files.size() + m_shapes.size()); }
+int Project::size() { return int(files_.size() + shapes_.size()); }
 
-bool Project::isModified() { return m_isModified; }
+bool Project::isModified() { return isModified_; }
 
-void Project::setModified(bool fl) { m_isModified = fl; }
+void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
     IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
-    for (const auto& [id, filePtr] : m_files) {
+    for (const auto& [id, filePtr] : files_) {
         if (filePtr && filePtr->itemGroup()->isVisible()) {
             for (const GraphicsItem* const item : *filePtr->itemGroup()) {
                 for (const Path& path : item->paths()) {
@@ -259,9 +257,9 @@ QRectF Project::getBoundingRect() {
 }
 
 QString Project::fileNames() {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     QString fileNames;
-    for (const auto& [id, sp] : m_files) {
+    for (const auto& [id, sp] : files_) {
         FileInterface* item = sp.get();
         if (sp && (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon)))
             fileNames.append(item->name()).push_back('|');
@@ -270,10 +268,10 @@ QString Project::fileNames() {
 }
 
 int Project::contains(const QString& name) {
-    // QMutexLocker locker(&m_mutex);
-    if (m_reloadFile)
+    // QMutexLocker locker(&mutex_);
+    if (reloadFile_)
         return -1;
-    for (const auto& [id, sp] : m_files) {
+    for (const auto& [id, sp] : files_) {
         FileInterface* item = sp.get();
         if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
@@ -283,9 +281,9 @@ int Project::contains(const QString& name) {
 }
 
 bool Project::reload(int id, FileInterface* file) {
-    if (m_files.contains(id)) {
-        file->initFrom(m_files[id].get());
-        m_files[id].reset(file);
+    if (files_.contains(id)) {
+        file->initFrom(files_[id].get());
+        files_[id].reset(file);
         App::filePlugin(int(file->type()))->updateFileModel(file);
         setChanged();
         return true;
@@ -294,10 +292,10 @@ bool Project::reload(int id, FileInterface* file) {
 }
 
 mvector<FileInterface*> Project::files(FileType type) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     mvector<FileInterface*> rfiles;
-    rfiles.reserve(m_files.size());
-    for (const auto& [id, sp] : m_files) {
+    rfiles.reserve(files_.size());
+    for (const auto& [id, sp] : files_) {
         if (sp && sp.get()->type() == type)
             rfiles.push_back(sp.get());
     }
@@ -306,11 +304,11 @@ mvector<FileInterface*> Project::files(FileType type) {
 }
 
 mvector<FileInterface*> Project::files(const mvector<FileType> types) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     mvector<FileInterface*> rfiles;
-    rfiles.reserve(m_files.size());
+    rfiles.reserve(files_.size());
     for (auto type : types) {
-        for (const auto& [id, sp] : m_files) {
+        for (const auto& [id, sp] : files_) {
             if (sp && sp.get()->type() == type)
                 rfiles.push_back(sp.get());
         }
@@ -320,26 +318,26 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types) {
 }
 
 ShapeInterface* Project::shape(int id) {
-    QMutexLocker locker(&m_mutex);
-    return m_shapes[id].get();
+    QMutexLocker locker(&mutex_);
+    return shapes_[id].get();
 }
 
 int Project::addFile(FileInterface* file) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     if (!file)
         return -1;
-    m_isPinsPlaced = false;
-    m_reloadFile = false;
+    isPinsPlaced_ = false;
+    reloadFile_ = false;
     file->createGi();
     file->addToScene();
     file->setVisible(true);
     const int id = contains(file->name());
-    if (id > -1 && m_files[id]->type() == file->type()) {
+    if (id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {
-        const int newId = m_files.size() ? (--m_files.end())->first + 1 : 0;
+        const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
-        m_files.emplace(newId, file);
+        files_.emplace(newId, file);
         App::fileModel()->addFile(file);
         setChanged();
         watcher.addPath(file->name());
@@ -349,45 +347,45 @@ int Project::addFile(FileInterface* file) {
 }
 
 int Project::addShape(ShapeInterface* const shape) {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker locker(&mutex_);
     if (!shape)
         return -1;
-    m_isPinsPlaced = false;
-    const int newId = m_shapes.size() ? (--m_shapes.end())->first + 1 : 0;
+    isPinsPlaced_ = false;
+    const int newId = shapes_.size() ? (--shapes_.end())->first + 1 : 0;
     shape->id_ = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
-    m_shapes.emplace(newId, shape);
+    shapes_.emplace(newId, shape);
     App::fileModel()->addShape(shape);
     setChanged();
     return newId;
 }
 
 bool Project::contains(FileInterface* file) {
-    for (const auto& [id, sp] : m_files)
+    for (const auto& [id, sp] : files_)
         if (sp.get() == file)
             return true;
     return false;
 }
 
-QString Project::name() { return m_name; }
+QString Project::name() { return name_; }
 
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
-    if (m_isUntitled)
-        m_name = QObject::tr("Untitled.g2g");
+    if (isUntitled_)
+        name_ = QObject::tr("Untitled.g2g");
     else
-        m_name = name;
+        name_ = name;
 }
 
 void Project::setChanged() {
-    m_isModified = true;
+    isModified_ = true;
     changed();
 }
 
 bool Project::pinsPlacedMessage() {
 
-    if (m_isPinsPlaced == false) {
+    if (isPinsPlaced_ == false) {
         QMessageBox msgbx(QMessageBox::Information,
             "",
             QObject::tr("Board dimensions may have changed.\n"
@@ -408,113 +406,113 @@ bool Project::pinsPlacedMessage() {
      */
 }
 
-bool Project::isUntitled() { return m_isUntitled; }
+bool Project::isUntitled() { return isUntitled_; }
 
-bool Project::isPinsPlaced() const { return m_isPinsPlaced; }
+bool Project::isPinsPlaced() const { return isPinsPlaced_; }
 
 void Project::setUntitled(bool value) {
-    m_isUntitled = value;
+    isUntitled_ = value;
     emit layoutFrameUpdate();
     setChanged();
 }
 
-double Project::spaceX() const { return m_spacingX; }
+double Project::spaceX() const { return spacingX_; }
 void Project::setSpaceX(double value) {
-    m_spacingX = value;
+    spacingX_ = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-double Project::spaceY() const { return m_spacingY; }
+double Project::spaceY() const { return spacingY_; }
 void Project::setSpaceY(double value) {
-    m_spacingY = value;
+    spacingY_ = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-uint Project::stepsX() const { return m_stepsX; }
+uint Project::stepsX() const { return stepsX_; }
 void Project::setStepsX(uint value) {
-    m_stepsX = value;
+    stepsX_ = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-uint Project::stepsY() const { return m_stepsY; }
+uint Project::stepsY() const { return stepsY_; }
 void Project::setStepsY(uint value) {
-    m_stepsY = value;
+    stepsY_ = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-QRectF Project::worckRect() const { return m_worckRect; }
+QRectF Project::worckRect() const { return worckRect_; }
 void Project::setWorckRect(const QRectF& worckRect) {
-    m_worckRect = worckRect;
-    m_isPinsPlaced = true;
+    worckRect_ = worckRect;
+    isPinsPlaced_ = true;
     emit layoutFrameUpdate();
     setChanged();
 }
 
-QPointF Project::homePos() const { return m_home; }
+QPointF Project::homePos() const { return home_; }
 void Project::setHomePos(const QPointF& pos) {
-    m_home = pos;
+    home_ = pos;
     setChanged();
 }
 
-QPointF Project::zeroPos() const { return m_zero; }
+QPointF Project::zeroPos() const { return zero_; }
 void Project::setZeroPos(const QPointF& pos) {
-    m_zero = pos;
+    zero_ = pos;
     setChanged();
 }
 
-const QPointF* Project::pinsPos() const { return m_pins; }
+const QPointF* Project::pinsPos() const { return pins_; }
 void Project::setPinsPos(const QPointF pos[4]) {
-    m_pins[0] = pos[0];
-    m_pins[1] = pos[1];
-    m_pins[2] = pos[2];
-    m_pins[3] = pos[3];
+    pins_[0] = pos[0];
+    pins_[1] = pos[1];
+    pins_[2] = pos[2];
+    pins_[3] = pos[3];
     setChanged();
 }
 
-bool Project::pinUsed(int idx) const { return m_pinsUsed[idx]; }
+bool Project::pinUsed(int idx) const { return pinsUsed_[idx]; }
 void Project::setPinUsed(bool used, int idx) {
-    m_pinsUsed[idx] = used;
+    pinsUsed_[idx] = used;
     setChanged();
 }
 
-int Project::ver() const { return m_ver; }
+int Project::ver() const { return ver_; }
 
-double Project::safeZ() const { return m_safeZ; }
+double Project::safeZ() const { return safeZ_; }
 void Project::setSafeZ(double safeZ) {
-    m_safeZ = safeZ;
+    safeZ_ = safeZ;
     setChanged();
 }
 
-double Project::boardThickness() const { return m_boardThickness; }
+double Project::boardThickness() const { return boardThickness_; }
 void Project::setBoardThickness(double boardThickness) {
-    m_boardThickness = boardThickness;
+    boardThickness_ = boardThickness;
     setChanged();
 }
 
-double Project::copperThickness() const { return m_copperThickness; }
+double Project::copperThickness() const { return copperThickness_; }
 void Project::setCopperThickness(double copperThickness) {
-    m_copperThickness = copperThickness;
+    copperThickness_ = copperThickness;
     setChanged();
 }
 
-double Project::clearence() const { return m_clearence; }
+double Project::clearence() const { return clearence_; }
 void Project::setClearence(double clearence) {
-    m_clearence = clearence;
+    clearence_ = clearence;
     setChanged();
 }
 
-double Project::plunge() const { return m_plunge; }
+double Project::plunge() const { return plunge_; }
 void Project::setPlunge(double plunge) {
-    m_plunge = plunge;
+    plunge_ = plunge;
     setChanged();
 }
 
-double Project::glue() const { return m_glue; }
+double Project::glue() const { return glue_; }
 void Project::setGlue(double glue) {
-    m_glue = glue;
+    glue_ = glue;
     setChanged();
 }
