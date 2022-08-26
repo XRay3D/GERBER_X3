@@ -31,8 +31,8 @@ private slots:
 
 private:
     Ui::ProfileForm* ui;
-    double m_size = 0.0;
-    double m_lenght = 0.0;
+    double size_ = 0.0;
+    double lenght_ = 0.0;
     void updateBridge();
     void updatePixmap();
     const QStringList names;
@@ -51,7 +51,7 @@ private:
         Line = 1,
         Corner = 2,
     };
-    int m_trimming = 0;
+    int trimming_ = 0;
 
 protected:
     // QWidget interface

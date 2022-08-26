@@ -35,7 +35,7 @@ private:
     QRadioButton* rbCopper;
     QRadioButton* rbCustom;
 
-    const QString m_parentName;
+    const QString parentName_;
 
     void setupUi(QWidget* Form);
     void retranslateUi(QWidget* Form);

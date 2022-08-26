@@ -47,7 +47,7 @@ public:
     void addToGcForm(FileInterface* file, QComboBox* cbx) override;
 
 private:
-    File* m_file = nullptr;
+    File* file_ = nullptr;
 };
 
 } // namespace Dxf

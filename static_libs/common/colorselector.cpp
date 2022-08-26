@@ -22,23 +22,23 @@
 
 class PushButton : public QPushButton {
     //    Q_OBJECT
-    QColor& m_color;
+    QColor& color_;
     void selectColor() {
-        QColorDialog dialog(m_color);
+        QColorDialog dialog(color_);
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
-        QColor color(m_color);
+        QColor color(color_);
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
-        if (dialog.exec() && m_color != color)
-            m_color = color;
-        //        setText("ARGB " + m_color.name(QColor::HexArgb).toUpper());
+        if (dialog.exec() && color_ != color)
+            color_ = color;
+        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
     }
 
 public:
     PushButton(QColor& color, QWidget* parent = nullptr)
         : QPushButton("", parent)
-        , m_color(color) {
+        , color_(color) {
         connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
-        //        setText("ARGB " + m_color.name(QColor::HexArgb).toUpper());
+        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
     }
     virtual ~PushButton() { }
 
@@ -55,7 +55,7 @@ protected:
         gr.setColorAt(0.9, Qt::white);
         p.setBrush(gr);
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
-        p.setBrush(m_color);
+        p.setBrush(color_);
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
         //        p.setCompositionMode(QPainter::CompositionMode_Xor);
         //        p.setPen(Qt::NoPen);
@@ -70,8 +70,8 @@ protected:
 
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)
-    , m_color(color)
-    , m_defaultColor(std::move(defaultColor)) {
+    , color_(color)
+    , defaultColor_(std::move(defaultColor)) {
     if (objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
     auto horizontalLayout = new QHBoxLayout(this);
@@ -102,9 +102,9 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
 ColorSelector::~ColorSelector() { }
 
 void ColorSelector::resetColor() {
-    m_color = m_defaultColor;
+    color_ = defaultColor_;
     pbSelectColor->update();
     updateName();
 }
 
-void ColorSelector::updateName() { lineEdit->setText(m_color.name(QColor::HexArgb).toUpper()); }
+void ColorSelector::updateName() { lineEdit->setText(color_.name(QColor::HexArgb).toUpper()); }

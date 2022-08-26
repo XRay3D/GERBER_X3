@@ -78,16 +78,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
 
         emit interface->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
 
-        m_lineNum = 0;
+        lineNum_ = 0;
 
         //        std::map<int, int> rel;
         QElapsedTimer t;
         t.start();
         for (const QString& gerberLine : file->lines()) {
-            m_currentGerbLine = gerberLine;
-            ++m_lineNum;
-            if (!(m_lineNum % 1000))
-                emit interface->fileProgress(file->shortName(), 0, m_lineNum);
+            currentGerbLine_ = gerberLine;
+            ++lineNum_;
+            if (!(lineNum_ % 1000))
+                emit interface->fileProgress(file->shortName(), 0, lineNum_);
             auto dummy = [](const QString& gLine) -> bool {
                 auto data { toU16StrView(gLine) };
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
@@ -163,7 +163,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             }
 
             // Line didn`t match any pattern. Warn user.
-            qWarning() << QString("Line ignored (%1): '" + gerberLine + "'").arg(m_lineNum);
+            qWarning() << QString("Line ignored (%1): '" + gerberLine + "'").arg(lineNum_);
 
         } // End of file parsing
 
@@ -176,14 +176,14 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             delete file;
         } else {
 
-            if (attFile.m_function && attFile.m_function->side_() == Attr::AbstrFileFunc::Side::Bot) {
+            if (attFile.function_ && attFile.function_->side_() == Attr::AbstrFileFunc::Side::Bot) {
                 file->setSide(Bottom);
             } else if (file->shortName().contains("bot", Qt::CaseInsensitive))
                 file->setSide(Bottom);
             else if (file->shortName().contains(".gb", Qt::CaseInsensitive) && !file->shortName().endsWith(".gbr", Qt::CaseInsensitive))
                 file->setSide(Bottom);
 
-            if (attFile.m_function && attFile.m_function->function == Attr::File::Profile)
+            if (attFile.function_ && attFile.function_->function == Attr::File::Profile)
                 file->setItemType(File::ApPaths);
 
             file->mergedPaths();
@@ -339,9 +339,9 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
 }
 
 double Parser::arcAngle(double start, double stop) {
-    if (m_state.interpolation() == CounterclockwiseCircular && stop <= start)
+    if (state_.interpolation() == CounterclockwiseCircular && stop <= start)
         stop += 2.0 * pi;
-    if (m_state.interpolation() == ClockwiseCircular && stop >= start)
+    if (state_.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * pi;
     return qAbs(stop - start);
 }
@@ -349,7 +349,7 @@ double Parser::arcAngle(double start, double stop) {
 double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     bool ok;
     double d = Str.toDouble(&ok);
-    if (m_state.file()->format().unitMode == Inches && inchControl)
+    if (state_.file()->format().unitMode == Inches && inchControl)
         d *= 25.4;
     if (scale)
         d *= uScale;
@@ -400,80 +400,80 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
 }
 
 void Parser::addPath() {
-    if (m_path.size() < 2) {
+    if (path_.size() < 2) {
         resetStep();
         return;
     }
-    switch (m_state.region()) {
+    switch (state_.region()) {
     case On:
-        m_state.setType(Region);
-        switch (m_abSrIdStack.top().workingType) {
+        state_.setType(Region);
+        switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.push_back(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
+            file->graphicObjects_.push_back(GraphicObject(goId_++, state_, createPolygon(), file, path_));
             break;
         case WorkingType::StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
+            stepRepeat_.storage.append(GraphicObject(goId_++, state_, createPolygon(), file, path_));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(m_goId++, m_state, createPolygon(), file, m_path));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(goId_++, state_, createPolygon(), file, path_));
             break;
         }
         break;
     case Off:
-        m_state.setType(Line);
-        switch (m_abSrIdStack.top().workingType) {
+        state_.setType(Line);
+        switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.push_back(GraphicObject(m_goId++, m_state, createLine(), file, m_path));
+            file->graphicObjects_.push_back(GraphicObject(goId_++, state_, createLine(), file, path_));
             break;
         case WorkingType::StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), file, m_path));
+            stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, createLine(), file, path_));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(apBlock(m_abSrIdStack.top().apertureBlockId)->size(), m_state, createLine(), file, m_path));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, createLine(), file, path_));
             break;
         }
         break;
     }
-    if (aperFunctionMap.contains(m_state.aperture()) && aperFunctionMap[m_state.aperture()].m_function->function == Attr::Aperture::ComponentOutline) {
-        components[refDes].addFootprint(m_path);
+    if (aperFunctionMap.contains(state_.aperture()) && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline) {
+        components[refDes].addFootprint(path_);
     }
     resetStep();
 }
 
 void Parser::addFlash() {
-    m_state.setType(Aperture);
-    if (!file->apertures_.contains(m_state.aperture()) && file->apertures_[m_state.aperture()].get() == nullptr) {
+    state_.setType(Aperture);
+    if (!file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get() == nullptr) {
         QString str;
         for (const auto& [ap, apPtr] : file->apertures_)
             str += QString::number(ap) + ", ";
-        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
+        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(state_.aperture()).arg(str);
     }
 
-    AbstractAperture* ap = file->apertures_[m_state.aperture()].get();
+    AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     ap->setUsed();
-    Paths paths(ap->draw(m_state, m_abSrIdStack.top().workingType != WorkingType::ApertureBlock));
+    Paths paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->withHole())
-        paths.push_back(ap->drawDrill(m_state));
+        paths.push_back(ap->drawDrill(state_));
 
-    switch (m_abSrIdStack.top().workingType) {
+    switch (abSrIdStack_.top().workingType) {
     case WorkingType::Normal:
-        file->graphicObjects_.push_back(GraphicObject(m_goId++, m_state, paths, file));
+        file->graphicObjects_.push_back(GraphicObject(goId_++, state_, paths, file));
         break;
     case WorkingType::StepRepeat:
-        m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, file));
+        stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, paths, file));
         break;
     case WorkingType::ApertureBlock:
-        apBlock(m_abSrIdStack.top().apertureBlockId)->append(GraphicObject(apBlock(m_abSrIdStack.top().apertureBlockId)->size(), m_state, paths, file));
+        apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, paths, file));
         break;
     }
-    if (aperFunctionMap.contains(m_state.aperture()) && !refDes.isEmpty()) {
-        switch (aperFunctionMap[m_state.aperture()].m_function->function) {
+    if (aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
+        switch (aperFunctionMap[state_.aperture()].function_->function) {
         case Attr::Aperture::ComponentPin:
-            components[refDes].pins().back().pos = m_state.curPos();
+            components[refDes].pins().back().pos = state_.curPos();
             break;
         case Attr::Aperture::ComponentMain:
-            components[refDes].setReferencePoint(m_state.curPos());
+            components[refDes].setReferencePoint(state_.curPos());
             break;
         default:
             break;
@@ -489,21 +489,21 @@ void Parser::reset(const QString& fileName) {
     aperFunctionMap.clear();
     attAper = {};
     components.clear();
-    m_abSrIdStack.clear();
-    m_abSrIdStack.push({ WorkingType::Normal, 0 });
-    m_apertureMacro.clear();
-    m_currentGerbLine.clear();
-    m_goId = 0;
-    m_path.clear();
-    m_state = State(file);
-    m_stepRepeat.reset();
+    abSrIdStack_.clear();
+    abSrIdStack_.push({ WorkingType::Normal, 0 });
+    apertureMacro_.clear();
+    currentGerbLine_.clear();
+    goId_ = 0;
+    path_.clear();
+    state_ = State(file);
+    stepRepeat_.reset();
     refDes.clear();
 }
 
 void Parser::resetStep() {
-    m_currentGerbLine.clear();
-    m_path.clear();
-    m_path.push_back(m_state.curPos());
+    currentGerbLine_.clear();
+    path_.clear();
+    path_.push_back(state_.curPos());
 }
 
 IntPoint Parser::parsePosition(const QString& xyStr) {
@@ -512,18 +512,18 @@ IntPoint Parser::parsePosition(const QString& xyStr) {
     if (auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
         cInt tmp = 0;
         if (x && parseNumber(CtreCapTo(x), tmp, file->format().xInteger, file->format().xDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? m_state.curPos().X = tmp : m_state.curPos().X += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().X = tmp : state_.curPos().X += tmp;
         tmp = 0;
         if (y && parseNumber(CtreCapTo(y), tmp, file->format().yInteger, file->format().yDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? m_state.curPos().Y = tmp : m_state.curPos().Y += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().Y = tmp : state_.curPos().Y += tmp;
     }
 
-    if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0)
-        throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(m_lineNum), QString(m_currentGerbLine));
-    if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0)
-        throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(m_lineNum), QString(m_currentGerbLine));
+    if (2.0e-310 > state_.curPos().X && state_.curPos().X > 0.0)
+        throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
+    if (2.0e-310 > state_.curPos().Y && state_.curPos().Y > 0.0)
+        throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
 
-    return m_state.curPos();
+    return state_.curPos();
 }
 
 Path Parser::arc(const IntPoint& center, double radius, double start, double stop) {
@@ -532,14 +532,14 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
 
     const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
 
-    if (m_state.interpolation() == ClockwiseCircular && stop >= start)
+    if (state_.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * pi;
-    else if (m_state.interpolation() == CounterclockwiseCircular && stop <= start)
+    else if (state_.interpolation() == CounterclockwiseCircular && stop <= start)
         stop += 2.0 * pi;
 
     double angle = qAbs(stop - start);
     double steps = qMax(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
-    double delta_angle = da_sign[m_state.interpolation()] * angle * 1.0 / steps;
+    double delta_angle = da_sign[state_.interpolation()] * angle * 1.0 / steps;
     for (int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
         points.push_back(IntPoint(
@@ -558,50 +558,50 @@ Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center) {
 }
 
 Paths Parser::createLine() {
-    if (file->apertures_.contains(m_state.aperture()) && file->apertures_[m_state.aperture()].get())
-        file->apertures_[m_state.aperture()].get()->setUsed();
+    if (file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
+        file->apertures_[state_.aperture()].get()->setUsed();
     Paths solution;
-    if (!file->apertures_.contains(m_state.aperture())) {
+    if (!file->apertures_.contains(state_.aperture())) {
         QString str;
         for (const auto& [ap, apPtr] : file->apertures_)
             str += QString::number(ap) + ", ";
-        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(m_state.aperture()).arg(str);
+        throw GbrObj::tr("Aperture %1 not found! Available %2").arg(state_.aperture()).arg(str);
     }
 
-    if (file->apertures_[m_state.aperture()]->type() == Rectangle) {
-        auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[m_state.aperture()]);
+    if (file->apertures_[state_.aperture()]->type() == Rectangle) {
+        auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
         if (!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
-            throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
-        double size = rect->width_ * uScale * 0.5 * m_state.scaling();
+            throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(state_.aperture()).arg(rect->name());
+        double size = rect->width_ * uScale * 0.5 * state_.scaling();
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
-        offset.AddPath(m_path, jtSquare, etOpenSquare);
+        offset.AddPath(path_, jtSquare, etOpenSquare);
         offset.Execute(solution, size);
-        if (m_state.imgPolarity() == Negative)
+        if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
     } else {
-        double size = file->apertures_[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
+        double size = file->apertures_[state_.aperture()]->apertureSize() * uScale * 0.5 * state_.scaling();
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
-        offset.AddPath(m_path, jtRound, etOpenRound);
+        offset.AddPath(path_, jtRound, etOpenRound);
         offset.Execute(solution, size);
-        if (m_state.imgPolarity() == Negative)
+        if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
     }
     return solution;
 }
 
 Paths Parser::createPolygon() {
-    if (Area(m_path) > 0.0) {
-        if (m_state.imgPolarity() == Negative)
-            ReversePath(m_path);
+    if (Area(path_) > 0.0) {
+        if (state_.imgPolarity() == Negative)
+            ReversePath(path_);
     } else {
-        if (m_state.imgPolarity() == Positive)
-            ReversePath(m_path);
+        if (state_.imgPolarity() == Positive)
+            ReversePath(path_);
     }
-    return { m_path };
+    return { path_ };
 }
 
 bool Parser::parseAperture(const QString& gLine) {
@@ -653,10 +653,10 @@ bool Parser::parseAperture(const QString& gLine) {
             VarMap macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
-            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), m_apertureMacro[CtreCapTo(apType)].split('*'), macroCoeff, file));
+            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split('*'), macroCoeff, file));
             break;
         }
-        if (attAper.m_function)
+        if (attAper.function_)
             aperFunctionMap[aperture] = attAper;
         return true;
     }
@@ -667,13 +667,13 @@ bool Parser::parseApertureBlock(const QString& gLine) {
     auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnApertureBlock(R"(^%ABD(\d+)\*%$)"); // fixed_string("^%ABD(\d+)\*%$");
     if (auto [whole, id] = ctre::match<ptrnApertureBlock>(data); whole) {
-        m_abSrIdStack.push({ WorkingType::ApertureBlock, int(CtreCapTo(id)) });
-        file->apertures_.emplace(m_abSrIdStack.top().apertureBlockId, std::make_shared<ApBlock>(file));
+        abSrIdStack_.push({ WorkingType::ApertureBlock, int(CtreCapTo(id)) });
+        file->apertures_.emplace(abSrIdStack_.top().apertureBlockId, std::make_shared<ApBlock>(file));
         return true;
     }
     if (gLine == "%AB*%") {
         addPath();
-        m_abSrIdStack.pop();
+        abSrIdStack_.pop();
         return true;
     }
     return false;
@@ -697,23 +697,23 @@ bool Parser::parseTransformations(const QString& gLine) {
             addPath();
             switch (slLevelPolarity.indexOf(val.data()[0])) {
             case Positive:
-                m_state.setImgPolarity(Positive);
+                state_.setImgPolarity(Positive);
                 break;
             case Negative:
-                m_state.setImgPolarity(Negative);
+                state_.setImgPolarity(Negative);
                 break;
             default:
                 throw "bool Parser::parseTransformations(const SLI & gLine) - Polarity error!";
             }
             return true;
         case trMirror:
-            m_state.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(CtreCapTo(val))));
+            state_.setMirroring(static_cast<Mirroring>(slLoadMirroring.indexOf(CtreCapTo(val))));
             return true;
         case trRotate:
-            m_state.setRotating(CtreCapTo(val));
+            state_.setRotating(CtreCapTo(val));
             return true;
         case trScale:
-            m_state.setScaling(CtreCapTo(val));
+            state_.setScaling(CtreCapTo(val));
             return true;
         }
     }
@@ -729,25 +729,25 @@ bool Parser::parseStepRepeat(const QString& gLine) {
     auto data { toU16StrView(gLine) };
     static constexpr ctll::fixed_string ptrnStepRepeat(R"(^%SRX(\d+)Y(\d+)I(.\d*\.?\d*)J(.\d*\.?\d*)\*%$)"); // fixed_string("^%SRX(\d+)Y(\d+)I(.\d*\.?\d*)J(.\d*\.?\d*)\*%$");
     if (auto [whole, srx, sry, sri, srj] = ctre::match<ptrnStepRepeat>(data); whole) {
-        if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
+        if (abSrIdStack_.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
-        m_stepRepeat.reset();
-        m_stepRepeat.x = CtreCapTo(srx);
-        m_stepRepeat.y = CtreCapTo(sry);
-        m_stepRepeat.i = CtreCapTo(sri), m_stepRepeat.i *= uScale;
-        m_stepRepeat.j = CtreCapTo(srj), m_stepRepeat.j *= uScale;
+        stepRepeat_.reset();
+        stepRepeat_.x = CtreCapTo(srx);
+        stepRepeat_.y = CtreCapTo(sry);
+        stepRepeat_.i = CtreCapTo(sri), stepRepeat_.i *= uScale;
+        stepRepeat_.j = CtreCapTo(srj), stepRepeat_.j *= uScale;
         if (file->format().unitMode == Inches) {
-            m_stepRepeat.i *= 25.4;
-            m_stepRepeat.j *= 25.4;
+            stepRepeat_.i *= 25.4;
+            stepRepeat_.j *= 25.4;
         }
-        if (m_stepRepeat.x > 1 || m_stepRepeat.y > 1)
-            m_abSrIdStack.push({ WorkingType::StepRepeat, 0 });
+        if (stepRepeat_.x > 1 || stepRepeat_.y > 1)
+            abSrIdStack_.push({ WorkingType::StepRepeat, 0 });
         return true;
     }
 
     static constexpr ctll::fixed_string ptrnStepRepeatEnd(R"(^%SR\*%$)"); // fixed_string("^%SR\*%$");
     if (ctre::match<ptrnStepRepeatEnd>(data)) {
-        if (m_abSrIdStack.top().workingType == WorkingType::StepRepeat)
+        if (abSrIdStack_.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
         return true;
     }
@@ -757,10 +757,10 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 
 void Parser::closeStepRepeat() {
     addPath();
-    for (int y = 0; y < m_stepRepeat.y; ++y) {
-        for (int x = 0; x < m_stepRepeat.x; ++x) {
-            const IntPoint pt(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y));
-            for (GraphicObject& go : m_stepRepeat.storage) {
+    for (int y = 0; y < stepRepeat_.y; ++y) {
+        for (int x = 0; x < stepRepeat_.x; ++x) {
+            const IntPoint pt(static_cast<cInt>(stepRepeat_.i * x), static_cast<cInt>(stepRepeat_.j * y));
+            for (GraphicObject& go : stepRepeat_.storage) {
                 Paths paths(go.paths());
                 for (Path& path : paths)
                     TranslatePath(path, pt);
@@ -768,12 +768,12 @@ void Parser::closeStepRepeat() {
                 TranslatePath(path, pt);
                 auto state = go.state();
                 state.setCurPos({ state.curPos().X + pt.X, state.curPos().Y + pt.Y });
-                file->graphicObjects_.push_back(GraphicObject(m_goId++, state, paths, go.gFile(), path));
+                file->graphicObjects_.push_back(GraphicObject(goId_++, state, paths, go.gFile(), path));
             }
         }
     }
-    m_stepRepeat.reset();
-    m_abSrIdStack.pop();
+    stepRepeat_.reset();
+    abSrIdStack_.pop();
 }
 
 ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->apertures_[id].get()); }
@@ -784,7 +784,7 @@ bool Parser::parseApertureMacros(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnApertureMacros(R"(^%AM([^\*]+)\*([^%]+)?(%)?$)"); // fixed_string("^%AM([^\*]+)\*([^%]+)?(%)?$");
     if (auto [whole, c1, c2, c3] = ctre::match<ptrnApertureMacros>(data); whole) {
         if (c1.size() && c2.size()) {
-            m_apertureMacro[CtreCapTo(c1)] = QString { CtreCapTo(c2) };
+            apertureMacro_[CtreCapTo(c1)] = QString { CtreCapTo(c2) };
             return true;
         }
     }
@@ -903,58 +903,58 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                                                                   R"(J?([\+\-]?\d+)*)"
                                                                   R"([^D]*(?:D0?([12]))?\*$)");
     if (auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(data); whole) {
-        if (!cg.size() && m_state.gCode() != G02 && m_state.gCode() != G03)
+        if (!cg.size() && state_.gCode() != G02 && state_.gCode() != G03)
             return false;
         cInt x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = m_state.curPos().X;
-        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = m_state.curPos().Y;
+        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().X;
+        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().Y;
         parseNumber(CtreCapTo(ci), i, file->format().xInteger, file->format().xDecimal);
         parseNumber(CtreCapTo(cj), j, file->format().yInteger, file->format().yDecimal);
         // Set operation code if provided
         if (cd.size())
-            m_state.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
-        int gc = cg ? int(CtreCapTo(cg)) : m_state.gCode();
+            state_.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
+        int gc = cg ? int(CtreCapTo(cg)) : state_.gCode();
         switch (gc) {
         case G02:
-            m_state.setInterpolation(ClockwiseCircular);
-            m_state.setGCode(G02);
+            state_.setInterpolation(ClockwiseCircular);
+            state_.setGCode(G02);
             break;
         case G03:
-            m_state.setInterpolation(CounterclockwiseCircular);
-            m_state.setGCode(G03);
+            state_.setInterpolation(CounterclockwiseCircular);
+            state_.setGCode(G03);
             break;
         default:
-            if (m_state.interpolation() != ClockwiseCircular && m_state.interpolation() != CounterclockwiseCircular) {
-                qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(m_lineNum);
+            if (state_.interpolation() != ClockwiseCircular && state_.interpolation() != CounterclockwiseCircular) {
+                qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(lineNum_);
                 qWarning() << QString(gLine);
-                m_state.setCurPos({ x, y });
-                m_state.setGCode(G01);
+                state_.setCurPos({ x, y });
+                state_.setGCode(G01);
                 return false;
             }
             break;
         }
 
-        if (m_state.quadrant() == Undef) {
-            qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(m_lineNum);
+        if (state_.quadrant() == Undef) {
+            qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(lineNum_);
             qWarning() << QString(gLine);
             return true;
         }
 
-        switch (m_state.dCode()) {
+        switch (state_.dCode()) {
         case D01:
             break;
         case D02: // Nothing created! Pen Up.
-            m_state.setDCode(D01);
+            state_.setDCode(D01);
             addPath();
-            m_state.setCurPos({ x, y });
+            state_.setCurPos({ x, y });
             return true;
         case D03: // Flash should not happen here
-            m_state.setCurPos({ x, y });
-            qWarning() << QString("Trying to flash within arc. (%1)").arg(m_lineNum);
+            state_.setCurPos({ x, y });
+            qWarning() << QString("Trying to flash within arc. (%1)").arg(lineNum_);
             return true;
         }
 
-        const IntPoint& curPos = m_state.curPos();
+        const IntPoint& curPos = state_.curPos();
 
         const IntPoint centerPos[4] = {
             { curPos.X + i, curPos.Y + j },
@@ -965,26 +965,26 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
 
         bool valid = false;
 
-        m_path.push_back(m_state.curPos());
+        path_.push_back(state_.curPos());
         Path arcPolygon;
-        switch (m_state.quadrant()) {
+        switch (state_.quadrant()) {
         case Multi: // G75
         {
             const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (m_state.curPos() == IntPoint(x, y)) ? start : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
+            const double stop = (state_.curPos() == IntPoint(x, y)) ? start : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
             arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
             // arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
             //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
             //  Точной конечной точкой является указанная (x, y). Заменить.
-            m_state.curPos() = IntPoint { x, y };
+            state_.curPos() = IntPoint { x, y };
             if (arcPolygon.size())
-                arcPolygon.back() = m_state.curPos();
+                arcPolygon.back() = state_.curPos();
             else
-                arcPolygon.push_back(m_state.curPos());
+                arcPolygon.push_back(state_.curPos());
         } break;
         case Single: // G74
             for (int c = 0; c < 4; ++c) {
@@ -994,8 +994,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 if (qAbs(radius2 - radius1) > (5e-4 * uScale)) // Недействительный центр.
                     continue;
                 // Correct i and j and return true; as with multi-quadrant.
-                i = centerPos[c].X - m_state.curPos().X;
-                j = centerPos[c].Y - m_state.curPos().Y;
+                i = centerPos[c].X - state_.curPos().X;
+                j = centerPos[c].Y - state_.curPos().Y;
                 // Углы
                 const double start = atan2(-j, -i);
                 const double stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
@@ -1003,24 +1003,24 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 if (angle < (pi + 1e-5) * 0.5) {
                     arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
                     // Replace with exact values
-                    m_state.setCurPos({ x, y });
+                    state_.setCurPos({ x, y });
                     if (arcPolygon.size())
-                        arcPolygon.back() = m_state.curPos();
+                        arcPolygon.back() = state_.curPos();
                     else
-                        arcPolygon.push_back(m_state.curPos());
+                        arcPolygon.push_back(state_.curPos());
                     valid = true;
                 }
             }
             if (!valid)
-                qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
+                qWarning() << QString("Invalid arc in line %1.").arg(lineNum_) << gLine;
             break;
         default:
-            m_state.setCurPos({ x, y });
-            m_path.push_back(m_state.curPos());
+            state_.setCurPos({ x, y });
+            path_.push_back(state_.curPos());
             return true;
             // break;
         }
-        m_path.append(arcPolygon);
+        path_.append(arcPolygon);
         return true;
     }
     return false;
@@ -1099,57 +1099,57 @@ bool Parser::parseGCode(const QString& gLine) {
     if (auto [whole, c1] = ctre::match<ptrnGCode>(data); whole) {
         switch (int { CtreCapTo(c1) }) {
         case G01:
-            m_state.setInterpolation(Linear);
-            m_state.setGCode(G01);
+            state_.setInterpolation(Linear);
+            state_.setGCode(G01);
             break;
         case G02:
-            m_state.setInterpolation(ClockwiseCircular);
-            m_state.setGCode(G02);
+            state_.setInterpolation(ClockwiseCircular);
+            state_.setGCode(G02);
             break;
         case G03:
-            m_state.setInterpolation(CounterclockwiseCircular);
-            m_state.setGCode(G03);
+            state_.setInterpolation(CounterclockwiseCircular);
+            state_.setGCode(G03);
             break;
         case G04:
-            m_state.setGCode(G04);
+            state_.setGCode(G04);
             break;
         case G36:
             addPath();
-            m_state.setRegion(On);
-            m_state.setGCode(G36);
-            m_state.setDCode(D02);
+            state_.setRegion(On);
+            state_.setGCode(G36);
+            state_.setDCode(D02);
             break;
         case G37:
             addPath();
-            m_state.setRegion(Off);
-            m_state.setGCode(G37);
+            state_.setRegion(Off);
+            state_.setGCode(G37);
             break;
 #ifdef DEPRECATED
         case G70:
             file->format().unitMode = Inches;
-            m_state.setGCode(G70);
+            state_.setGCode(G70);
             break;
         case G71:
             file->format().unitMode = Millimeters;
-            m_state.setGCode(G71);
+            state_.setGCode(G71);
             break;
 #endif
         case G74:
-            m_state.setQuadrant(Single);
-            m_state.setGCode(G74);
+            state_.setQuadrant(Single);
+            state_.setGCode(G74);
             break;
         case G75:
-            m_state.setQuadrant(Multi);
-            m_state.setGCode(G75);
+            state_.setQuadrant(Multi);
+            state_.setGCode(G75);
             break;
 #ifdef DEPRECATED
         case G90:
             file->format().coordValueNotation = AbsoluteNotation;
-            m_state.setGCode(G90);
+            state_.setGCode(G90);
             break;
         case G91:
             file->format().coordValueNotation = IncrementalNotation;
-            m_state.setGCode(G91);
+            state_.setGCode(G91);
 #endif
             break;
         default:
@@ -1160,7 +1160,7 @@ bool Parser::parseGCode(const QString& gLine) {
     }
     static constexpr ctll::fixed_string ptrnGCodeComment(R"(^G0?4(.*)$)"); // fixed_string("^G0?4(.*)$");
     if (ctre::match<ptrnGCodeComment>(data)) {
-        m_state.setGCode(G04);
+        state_.setGCode(G04);
         return true;
     }
     return false;
@@ -1173,10 +1173,10 @@ bool Parser::parseImagePolarity(const QString& gLine) {
     if (auto [whole, c1] = ctre::match<ptrnImagePolarity>(data); whole) {
         switch (slImagePolarity.indexOf(CtreCapTo(c1))) {
         case Positive:
-            m_state.setImgPolarity(Positive);
+            state_.setImgPolarity(Positive);
             break;
         case Negative:
-            m_state.setImgPolarity(Negative);
+            state_.setImgPolarity(Negative);
             break;
         }
         return true;
@@ -1192,22 +1192,22 @@ bool Parser::parseLineInterpolation(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnLineInterpolation(R"(^(?:G0?(1))?(?=.*X([\+\-]?\d+))?(?=.*Y([\+\-]?\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\*$)"); // fixed_string("^(?:G0?(1))?(?=.*X([\+\-]?\d+))?(?=.*Y([\+\-]?\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\*$");
     if (auto [whole, c1, c2, c3, c4] = ctre::match<ptrnLineInterpolation>(data); whole) {
         parsePosition(gLine);
-        Operation dcode = m_state.dCode();
+        Operation dcode = state_.dCode();
         if (c4.size())
             dcode = static_cast<Operation>(CtreCapTo(c4).toInt());
 
         switch (dcode) {
         case D01: // перемещение в указанную точку x-y с открытым затвором засветки
-            m_state.setDCode(dcode);
-            m_path.push_back(m_state.curPos());
+            state_.setDCode(dcode);
+            path_.push_back(state_.curPos());
             break;
         case D02: // перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();
-            m_state.setDCode(dcode);
+            state_.setDCode(dcode);
             break;
         case D03: // перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             addPath();
-            m_state.setDCode(dcode);
+            state_.setDCode(dcode);
             addFlash();
             break;
         }
@@ -1233,15 +1233,15 @@ bool Parser::parseDCode(const QString& gLine) {
     if (auto [whole, c1] = ctre::match<ptrnDCode>(data); whole) {
         switch (int { CtreCapTo(c1) }) {
         case D01:
-            m_state.setDCode(D01);
+            state_.setDCode(D01);
             break;
         case D02:
             addPath();
-            m_state.setDCode(D02);
+            state_.setDCode(D02);
             break;
         case D03:
             addPath();
-            m_state.setDCode(D03);
+            state_.setDCode(D03);
             addFlash();
             break;
         }
@@ -1251,10 +1251,10 @@ bool Parser::parseDCode(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnDCodeAperture(R"(^(?:G54)?D(\d+)\*$)"); // fixed_string("^(?:G54)?D(\d+)\*$");
     if (auto [whole, c1] = ctre::match<ptrnDCodeAperture>(data); whole) {
         addPath();
-        m_state.setAperture(CtreCapTo(c1));
-        m_state.setDCode(D02);
+        state_.setAperture(CtreCapTo(c1));
+        state_.setDCode(D02);
 #ifdef DEPRECATED
-        m_state.setGCode(G54);
+        state_.setGCode(G54);
 #endif
         addPath();
         return true;

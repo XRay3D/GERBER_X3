@@ -17,7 +17,7 @@ namespace FileTree {
 class TextDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
-    mutable QRect m_rect;
+    mutable QRect rect_;
 
 public:
     TextDelegate(QObject* parent = nullptr);

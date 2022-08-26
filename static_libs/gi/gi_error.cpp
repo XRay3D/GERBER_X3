@@ -17,15 +17,15 @@
 #include <QtMath>
 
 GiError::GiError(const Paths& paths, double area)
-    : m_area(area) {
+    : area_(area) {
     for (auto& path : paths)
-        m_shape.addPolygon(path);
+        shape_.addPolygon(path);
     setFlag(ItemIsSelectable);
 }
 
-double GiError::area() const { return m_area; }
+double GiError::area() const { return area_; }
 
-QRectF GiError::boundingRect() const { return m_shape.boundingRect(); }
+QRectF GiError::boundingRect() const { return shape_.boundingRect(); }
 
 void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
@@ -41,7 +41,7 @@ void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*
         painter->setBrush(br);
     }
 
-    painter->drawPath(m_shape);
+    painter->drawPath(shape_);
 }
 
-QPainterPath GiError::shape() const { return m_shape; }
+QPainterPath GiError::shape() const { return shape_; }

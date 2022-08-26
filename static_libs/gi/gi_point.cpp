@@ -48,8 +48,8 @@ bool updateRect() {
 }
 
 GiMarker::GiMarker(Type type)
-    : QGraphicsObject { nullptr }
-    , type_ { type } {
+    : QGraphicsObject {nullptr}
+    , type_ {type} {
     App::setMarkers(type, this);
     setAcceptHoverEvents(true);
     if (type_ == Home) {
@@ -193,9 +193,9 @@ void GiMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
-    //    QMatrix matrix(scene()->views().first()->matrix());
-    //    matrix.translate(-pos().x(), pos().y());
-    //    scene()->views().first()->setMatrix(matrix);
+    // QMatrix matrix(scene()->views().first()->matrix());
+    // matrix.translate(-pos().x(), pos().y());
+    // scene()->views().first()->setMatrix(matrix);
     updateGCPForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
@@ -208,8 +208,8 @@ void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
     // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    //    });
+    // SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    // });
     menu.exec(event->screenPos());
 }
 
@@ -281,8 +281,7 @@ void GiPin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         pins_[0]->pos(),
         pins_[1]->pos(),
         pins_[2]->pos(),
-        pins_[3]->pos()
-    };
+        pins_[3]->pos()};
 
     const QPointF center(App::layoutFrames()->boundingRect().center());
     // const QPointF center(App::project()->worckRect().center());
@@ -355,7 +354,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
-        ToolDatabase tdb(App::graphicsView(), { Tool::Drill, Tool::EndMill });
+        ToolDatabase tdb(App::graphicsView(), {Tool::Drill, Tool::EndMill});
         if (tdb.exec()) {
             Tool tool(tdb.tool());
 
@@ -372,26 +371,22 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             QSettings settings;
             settings.beginGroup("Pin");
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
             bool ok;
             double depth = QInputDialog::getDouble(
-                nullptr,                            //                             parent
-                "",                                 //                                  title
-                tr("Set Depth"),                    //                     label
-                settings.value("depth").toDouble(), //  value
-                0,                                  //                                   minValue
-                20,                                 //                                  maxValue
-                1,                                  //                                   decimals
-                &ok,                                //                                 ok
-                Qt::WindowFlags(),                  //                   flags
-                1                                   //                                    step
+                nullptr,                            // parent
+                "",                                 // title
+                tr("Set Depth"),                    // label
+                settings.value("depth").toDouble(), // value
+                0,                                  // minValue
+                20,                                 // maxValue
+                1,                                  // decimals
+                &ok,                                // ok
+                Qt::WindowFlags(),                  // flags
+                1                                   // step
             );
-
             if (!ok)
                 return;
-#else
-            double depth = QInputDialog::getDouble(App::graphicsView(), "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
-#endif
+
             if (depth == 0.0)
                 return;
 
@@ -402,7 +397,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             gcp_.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File(Pathss { { dst } }, std::move(gcp_));
+            GCode::File* gcode = new GCode::File(Pathss {{dst}}, std::move(gcp_));
             gcode->setFileName(tr("Pin_") + tool.nameEnc());
             App::project()->addFile(gcode);
         }
@@ -422,8 +417,8 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     }
     menu.addSeparator();
     // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    //    });
+    // SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    // });
     menu.exec(event->screenPos());
 }
 

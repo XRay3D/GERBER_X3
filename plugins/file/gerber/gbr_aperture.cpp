@@ -775,7 +775,7 @@ void ApBlock::draw() {
     }
     size_ = 1;
 
-    // CleanPolygons(m_paths, 0.0009 * uScale);
+    // CleanPolygons(paths_, 0.0009 * uScale);
 }
 
 } // namespace Gerber

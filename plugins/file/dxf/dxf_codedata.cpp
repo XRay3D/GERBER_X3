@@ -17,9 +17,9 @@ namespace Dxf {
 
 QDebug operator<<(QDebug debug, const CodeData& c) {
     QDebugStateSaver saver(debug);
-    //      debug.nospace() << QString("DC(%1, ").arg(c.m_code, 5).toLocal8Bit().data();
+    //      debug.nospace() << QString("DC(%1, ").arg(c.code_, 5).toLocal8Bit().data();
     //      debug.nospace() << '\n';
-    debug.nospace() << QString("DC(%1, ").arg(c.m_code).toLocal8Bit().data();
+    debug.nospace() << QString("DC(%1, ").arg(c.code_).toLocal8Bit().data();
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr /*  */ (std::is_same_v<T, double>) {
@@ -42,7 +42,7 @@ QDebug operator<<(QDebug debug, const CodeData& c) {
 
 CodeData::CodeData(int code, const QString& value, int lineNum)
     : lineNum(lineNum)
-    , m_code(code)
+    , code_(code)
     , strVal(value) {
     bool ok = true;
     Type type;
@@ -167,7 +167,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
         throw QString("Unknown data: code %1, data %2, line %3!").arg(code).arg(value).arg(lineNum);
 }
 
-int CodeData::code() const { return m_code; }
+int CodeData::code() const { return code_; }
 
 int CodeData::line() const { return lineNum; }
 

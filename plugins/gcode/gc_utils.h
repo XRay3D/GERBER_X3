@@ -25,24 +25,24 @@ public:
     GCUtils(GCodeParams&& gcp);
     GCUtils(){};
 
-    inline double feedRate() { return m_feedRate; }
-    inline double plungeRate() { return m_plungeRate; }
-    inline int spindleSpeed() { return m_spindleSpeed; }
-    inline int toolType() { return m_toolType; }
+    inline double feedRate() { return feedRate_; }
+    inline double plungeRate() { return plungeRate_; }
+    inline int spindleSpeed() { return spindleSpeed_; }
+    inline int toolType() { return toolType_; }
 
-    void setFeedRate(double val) { m_feedRate = val; }
-    void setPlungeRate(double val) { m_plungeRate = val; }
-    void setSpindleSpeed(int val) { m_spindleSpeed = val; }
-    void setToolType(int val) { m_toolType = val; }
+    void setFeedRate(double val) { feedRate_ = val; }
+    void setPlungeRate(double val) { plungeRate_ = val; }
+    void setSpindleSpeed(int val) { spindleSpeed_ = val; }
+    void setToolType(int val) { toolType_ = val; }
 
     static QString getLastDir();
     static void setLastDir(QString dirPath);
 
 private:
-    double m_feedRate = 0.0;
-    double m_plungeRate = 0.0;
-    int m_spindleSpeed = 0;
-    int m_toolType = 0;
+    double feedRate_ = 0.0;
+    double plungeRate_ = 0.0;
+    int spindleSpeed_ = 0;
+    int toolType_ = 0;
 
 protected:
     /*const*/ GCodeParams gcp_; ////
@@ -64,7 +64,7 @@ protected:
         Size
     };
 
-    Paths m_g0path;
+    Paths g0path_;
 
     static inline QString lastDir;
     static inline bool redirected;
@@ -74,15 +74,15 @@ protected:
 
     bool formatFlags[Size];
     QString lastValues[6];
-    Code m_gCode = GNull;
+    Code gCode_ = GNull;
 
     inline QString g0() {
-        m_gCode = G00;
+        gCode_ = G00;
         return "G0";
     }
 
     inline QString g1() {
-        m_gCode = G01;
+        gCode_ = G01;
         return "G1";
     }
 

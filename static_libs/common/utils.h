@@ -24,7 +24,7 @@ requires                            //
 
 struct Timer {
 #if defined(__gnu_linux__) || defined(__GNUC__)
-    const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> t1;
+    const std::chrono::time_point<std::chrono::systeclock_, std::chrono::nanoseconds> t1;
 #else
     const std::chrono::time_point<std::chrono::steady_clock> t1;
 #endif
@@ -87,7 +87,7 @@ struct CtreCapTo {
     //    template <typename Ty>
     //    operator Ty() const {
     //        qDebug() << __FUNCSIG__;
-    //        if constexpr (std::is_enum_v<Ty>)
+    //        if constexpr (std::is_enuv_<Ty>)
     //            return static_cast<Ty>(toInt());
     //        if constexpr (std::is_integral_v<Ty>)
     //            return toInt();

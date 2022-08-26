@@ -45,8 +45,8 @@ public:
 
 protected:
     mutable mvector<std::unique_ptr<Handler>> handlers;
-    Paths m_paths;
-    Node* m_node;
+    Paths paths_;
+    Node* node_;
     std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                             // групповое перемещение
     bool isFinal {};

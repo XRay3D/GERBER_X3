@@ -20,7 +20,7 @@
 
 DepthForm::DepthForm(QWidget* parent)
     : QWidget(parent)
-    , m_parentName(parent->objectName()) {
+    , parentName_(parent->objectName()) {
     setupUi(this);
     retranslateUi(this);
 
@@ -49,7 +49,7 @@ DepthForm::DepthForm(QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup(m_parentName);
+    settings.beginGroup(parentName_);
     settings.getValue("dsbxDepth", value_);
     settings.getValue(rbBoard);
     settings.getValue(rbCopper);
@@ -59,7 +59,7 @@ DepthForm::DepthForm(QWidget* parent)
 
 DepthForm::~DepthForm() {
     MySettings settings;
-    settings.beginGroup(m_parentName);
+    settings.beginGroup(parentName_);
     settings.setValue("dsbxDepth", value_);
     settings.setValue(rbBoard);
     settings.setValue(rbCopper);

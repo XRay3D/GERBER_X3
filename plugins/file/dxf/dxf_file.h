@@ -43,24 +43,24 @@ public:
     explicit File();
     ~File();
     Layer* layer(const QString& name);
-    HeaderData& header() { return m_header; }
-    Layers& layers() { return m_layers; }
-    Blocks& blocks() { return m_blocks; }
-    Styles& styles() { return m_styles; }
-    EntitiesUP& entities() { return m_entities; }
+    HeaderData& header() { return header_; }
+    Layers& layers() { return layers_; }
+    Blocks& blocks() { return blocks_; }
+    Styles& styles() { return styles_; }
+    EntitiesUP& entities() { return entities_; }
 
     void setItemType(int type) override;
     int itemsType() const override;
 
 private:
-    Sections m_sections;
-    Blocks m_blocks;
-    HeaderData m_header;
-    Layers m_layers;
-    Styles m_styles;
-    EntitiesUP m_entities;
+    Sections sections_;
+    Blocks blocks_;
+    HeaderData header_;
+    Layers layers_;
+    Styles styles_;
+    EntitiesUP entities_;
 
-    mutable std::map<QString, bool> m_layersVisible;
+    mutable std::map<QString, bool> layersVisible_;
 
     enum Group {
         CopperGroup,

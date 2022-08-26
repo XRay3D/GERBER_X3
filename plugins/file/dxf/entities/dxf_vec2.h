@@ -36,10 +36,10 @@ struct Vec2 {
     */
 
     //@classmethod
-    Vec2 from_angle(double angle, double length = 1.);
+    Vec2 froangle_(double angle, double length = 1.);
 
     //@classmethod
-    Vec2 from_deg_angle(double angle, double length = 1.);
+    Vec2 frodeg_angle_(double angle, double length = 1.);
 
     double abs();
 

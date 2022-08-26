@@ -16,13 +16,13 @@
 namespace Gerber {
 
 class ComponentItem final : public GraphicsItem {
-    const Gerber::Component& m_component;
+    const Gerber::Component& component_;
     QVector<QRectF> pins;
     mutable QPainterPath pathRefDes;
     mutable mvector<QPair<QPainterPath, QPointF>> pathPins;
-    mutable double m_scale = std::numeric_limits<double>::max();
+    mutable double scale_ = std::numeric_limits<double>::max();
     mutable QPointF pt;
-    bool m_selected {};
+    bool selected_ {};
 
 public:
     ComponentItem(const Gerber::Component& component, FileInterface* file);
@@ -35,7 +35,7 @@ public:
     Paths paths(int alternate = {}) const override;
     void changeColor() override { }
 
-    void setSelected(bool selected) { m_selected = selected; }
+    void setSelected(bool selected) { selected_ = selected; }
 };
 
 } // namespace Gerber

@@ -29,7 +29,7 @@ public:
     explicit ComponentsDialog(QWidget* parent = nullptr);
     ~ComponentsDialog();
     void setFile(int fileId);
-    static QGraphicsScene* scene() { return m_scene; };
+    static QGraphicsScene* scene() { return scene_; };
 
 private:
     // QDialogButtonBox* buttonBox;
@@ -37,7 +37,7 @@ private:
     ComponentsView* componentsView;
     QGraphicsView* graphicsView;
     QSplitter* splitter;
-    static inline QGraphicsScene* m_scene;
+    static inline QGraphicsScene* scene_;
 
     void setupUi(QDialog* dialog); // setupUi
 

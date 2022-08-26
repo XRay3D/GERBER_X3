@@ -47,10 +47,10 @@ protected:
     Paths createLine();
     Paths createPolygon();
 
-    ClipperLib::Clipper m_clipper;
-    ClipperLib::ClipperOffset m_offset;
+    ClipperLib::Clipper clipper_;
+    ClipperLib::ClipperOffset offset_;
 
-    QMap<QString, QString> m_apertureMacro;
+    QMap<QString, QString> apertureMacro_;
 
     struct WorkingType {
         enum eWT {
@@ -62,16 +62,16 @@ protected:
         int apertureBlockId = 0;
     };
 
-    QStack<WorkingType> m_abSrIdStack;
+    QStack<WorkingType> abSrIdStack_;
 
-    Path m_path;
-    State m_state;
-    QString m_currentGerbLine;
+    Path path_;
+    State state_;
+    QString currentGerbLine_;
 
-    int m_lineNum = 0;
-    int m_goId = 0;
+    int lineNum_ = 0;
+    int goId_ = 0;
 
-    StepRepeatStr m_stepRepeat;
+    StepRepeatStr stepRepeat_;
     QMap<QString, Component> components;
     QString refDes;
     QMap<int, Attr::Aperture> aperFunctionMap;

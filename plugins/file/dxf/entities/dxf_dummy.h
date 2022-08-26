@@ -15,7 +15,7 @@
 namespace Dxf {
 
 class Dummy final : public Entity {
-    Type m_type;
+    Type type_;
 
 public:
     Dummy(SectionParser* sp, Type type = NULL_ENT);

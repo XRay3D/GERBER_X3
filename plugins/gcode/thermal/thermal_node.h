@@ -81,15 +81,15 @@ private:
     const bool container = false;
     const QIcon icon;
     const QString name;
-    const IntPoint m_pos;
+    const IntPoint pos_;
 
     ThParam par;
 
-    AbstractThermPrGi* const m_item;
+    AbstractThermPrGi* const item_;
 
-    ThermalNode* m_parent = nullptr;
+    ThermalNode* parent_ = nullptr;
     mvector<std::shared_ptr<ThermalNode>> childs;
-    bool m_checked = false;
+    bool checked_ = false;
 
     ThermalModel* const model; // static wrong from anotherr dll
     static inline const Qt::CheckState chState[] {

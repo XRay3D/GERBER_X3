@@ -25,10 +25,8 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#include <QStandardPaths>
-#endif
+//#include <QGLWidget>
+//#include <QStandardPaths>
 
 void translation(QApplication* app);
 
@@ -39,18 +37,8 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-// QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-// QApplication::setAttribute(Qt::AA_Use96Dpi);
-#else
     QApplication::setAttribute(Qt::AA_Use96Dpi);
-    //    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Unset);
-    //    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
-//    qputenv("QT_SCREEN_SCALE_FACTORS", QByteArray("1;1;1"));
-#endif
 
     Q_INIT_RESOURCE(resources);
 
@@ -82,12 +70,10 @@ int main(int argc, char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QGLFormat glf = QGLFormat::defaultFormat();
-    glf.setSampleBuffers(true);
-    glf.setSamples(16);
-    QGLFormat::setDefaultFormat(glf);
-#endif
+    //  FIXME ??? QGLFormat glf = QGLFormat::defaultFormat();
+    //    glf.setSampleBuffers(true);
+    //    glf.setSamples(16);
+    //    QGLFormat::setDefaultFormat(glf);
 
     if constexpr (0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
@@ -195,7 +181,7 @@ int main(int argc, char** argv) {
 
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
-    mainWin.setIconSize({ 24, 24 });
+    mainWin.setIconSize({24, 24});
 
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");

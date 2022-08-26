@@ -35,7 +35,7 @@ FileInterface* Parser::parseFile(const QString& fileName) {
     file = new File;
     toolIt = file->tools_.end();
     file->setFileName(fileName);
-    m_state.reset(&file->format_);
+    state_.reset(&file->format_);
 
     QTextStream in(&file_);
     in.setAutoDetectUnicode(true);
@@ -102,7 +102,7 @@ bool Parser::parseComment(QString line) {
                 const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
                 if (toolIt == file->tools_.end()) {
                     toolIt = file->tools_.begin();
-                    m_state.toolId = tCode; // m_state.tCode = file->m_tools.firstKey();
+                    state_.toolId = tCode; // state_.tCode = file->tools_.firstKey();
                 }
                 file->tools_[tCode] = CtreCapTo(diam).toDouble() * (file->format_.unitMode == Inches ? (0.0254 * 1 / 25.4) : 1.0);
                 //                file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
@@ -111,8 +111,8 @@ bool Parser::parseComment(QString line) {
             // static constexpr ctll::fixed_string regexFormat(R"(.*(?:FORMAT|format).*(\d).(\d))");
             // fixed_string(".*(?:FORMAT|format).*(\d).(\d)");
             // if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-            //     file->m_format.integer = CtreCapTo(integer).toInt();
-            //     file->m_format.decimal = CtreCapTo(decimal).toInt();
+            //     file->format_.integer = CtreCapTo(integer).toInt();
+            //     file->format_.decimal = CtreCapTo(decimal).toInt();
             // }
             if (auto [match, integer, decimal] = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment); match) {
                 file->format_.integer = CtreCapTo(integer).toInt();
@@ -130,28 +130,28 @@ bool Parser::parseGCode(const QString& line) {
         if (auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
             switch (CtreCapTo(c1).toInt()) {
             case G00:
-                m_state.gCode = G00;
-                m_state.wm = RouteMode;
+                state_.gCode = G00;
+                state_.wm = RouteMode;
                 parsePos(line);
                 break;
             case G01:
-                m_state.gCode = G01;
+                state_.gCode = G01;
                 parsePos(line);
                 break;
             case G02:
-                m_state.gCode = G02;
+                state_.gCode = G02;
                 parsePos(line);
                 break;
             case G03:
-                m_state.gCode = G03;
+                state_.gCode = G03;
                 parsePos(line);
                 break;
             case G05:
-                m_state.gCode = G05;
-                m_state.wm = DrillMode;
+                state_.gCode = G05;
+                state_.wm = DrillMode;
                 break;
             case G90:
-                m_state.gCode = G90;
+                state_.gCode = G90;
                 break;
             default:
                 break;
@@ -173,49 +173,49 @@ bool Parser::parseMCode(const QString& line) {
                 //                auto tools = file->tools_;
                 //                QList<int> keys;
                 //                std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
-                //                if (keys.indexOf(m_state.toolId) < (keys.size() - 1))
-                //                    m_state.toolId = keys[keys.indexOf(m_state.toolId) + 1];
-                m_state.toolId = (++toolIt)->first;
+                //                if (keys.indexOf(state_.toolId) < (keys.size() - 1))
+                //                    state_.toolId = keys[keys.indexOf(state_.toolId) + 1];
+                state_.toolId = (++toolIt)->first;
             } break;
             case M15:
-                m_state.mCode = M15;
-                m_state.wm = RouteMode;
-                m_state.rawPosList = { m_state.rawPos };
-                m_state.path = QPolygonF({ m_state.pos });
+                state_.mCode = M15;
+                state_.wm = RouteMode;
+                state_.rawPosList = { state_.rawPos };
+                state_.path = QPolygonF({ state_.pos });
                 break;
             case M16:
-                m_state.mCode = M16;
-                m_state.wm = RouteMode;
-                m_state.rawPosList.append(m_state.rawPos);
-                m_state.path.append(m_state.pos);
-                file->append(Hole(m_state, file));
-                m_state.path.clear();
-                m_state.rawPosList.clear();
+                state_.mCode = M16;
+                state_.wm = RouteMode;
+                state_.rawPosList.append(state_.rawPos);
+                state_.path.append(state_.pos);
+                file->append(Hole(state_, file));
+                state_.path.clear();
+                state_.rawPosList.clear();
                 break;
             case M30:
-                m_state.mCode = M30;
+                state_.mCode = M30;
                 break;
             case M48:
-                m_state.mCode = M48;
+                state_.mCode = M48;
                 break;
             case M71:
-                m_state.mCode = M71;
+                state_.mCode = M71;
                 file->format_.unitMode = Millimeters;
                 break;
             case M72:
-                m_state.mCode = M72;
+                state_.mCode = M72;
                 file->format_.unitMode = Inches;
                 break;
             case M95:
-                m_state.mCode = M95;
+                state_.mCode = M95;
                 break;
             default:
                 break;
             }
             return true;
         }
-        if (line == "%" && m_state.mCode == M48) {
-            m_state.mCode = M95;
+        if (line == "%" && state_.mCode == M48) {
+            state_.mCode = M95;
             return true;
         }
         return false;
@@ -233,9 +233,9 @@ bool Parser::parseTCode(const QString& line) {
                                                   R"(.*$)");
         static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
         if (auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(toU16StrView(line)); whole) {
-            m_state.toolId = CtreCapTo(tool).toInt();
+            state_.toolId = CtreCapTo(tool).toInt();
             if (auto [whole, diam] = *ctre::range<regex2>(toU16StrView(line)).begin(); whole) {
-                file->tools_[m_state.toolId] = CtreCapTo(diam).toDouble();
+                file->tools_[state_.toolId] = CtreCapTo(diam).toDouble();
                 return true;
             }
             return true;
@@ -264,25 +264,25 @@ bool Parser::parsePos(const QString& line) {
             return false;
 
         if (X) {
-            m_state.rawPos.X = CtreCapTo(X);
-            parseNumber(CtreCapTo(X), m_state.pos.rx());
+            state_.rawPos.X = CtreCapTo(X);
+            parseNumber(CtreCapTo(X), state_.pos.rx());
         }
         if (Y) {
-            m_state.rawPos.Y = CtreCapTo(Y);
-            parseNumber(CtreCapTo(Y), m_state.pos.ry());
+            state_.rawPos.Y = CtreCapTo(Y);
+            parseNumber(CtreCapTo(Y), state_.pos.ry());
         }
         if (A)
-            m_state.rawPos.A = CtreCapTo(A);
+            state_.rawPos.A = CtreCapTo(A);
 
-        switch (m_state.wm) {
+        switch (state_.wm) {
         case DrillMode:
-            file->append(Hole(m_state, file));
+            file->append(Hole(state_, file));
             break;
         case RouteMode:
-            switch (m_state.gCode) {
+            switch (state_.gCode) {
             case G00:
             case G01:
-                m_state.path.append(m_state.pos);
+                state_.path.append(state_.pos);
                 break;
             case G02:
             case G03:
@@ -311,40 +311,40 @@ bool Parser::parseSlot(const QString& line) {
                                               R"((?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"(.*$)");
     if (auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(toU16StrView(line)); whole) {
-        m_state.gCode = G85;
-        m_state.path.clear();
-        m_state.rawPosList.clear();
+        state_.gCode = G85;
+        state_.path.clear();
+        state_.rawPosList.clear();
 
         if (X1) {
-            m_state.rawPos.X = QString { CtreCapTo(X1) };
-            parseNumber(CtreCapTo(X1), m_state.pos.rx());
+            state_.rawPos.X = QString { CtreCapTo(X1) };
+            parseNumber(CtreCapTo(X1), state_.pos.rx());
         }
 
         if (Y1) {
-            m_state.rawPos.Y = QString { CtreCapTo(Y1) };
-            parseNumber(CtreCapTo(Y1), m_state.pos.ry());
+            state_.rawPos.Y = QString { CtreCapTo(Y1) };
+            parseNumber(CtreCapTo(Y1), state_.pos.ry());
         }
 
-        m_state.rawPosList.append(m_state.rawPos);
-        m_state.path.append(m_state.pos);
+        state_.rawPosList.append(state_.rawPos);
+        state_.path.append(state_.pos);
 
         if (X2) {
-            m_state.rawPos.X = QString { CtreCapTo(X2) };
-            parseNumber(CtreCapTo(X2), m_state.pos.rx());
+            state_.rawPos.X = QString { CtreCapTo(X2) };
+            parseNumber(CtreCapTo(X2), state_.pos.rx());
         }
 
         if (Y2) {
-            m_state.rawPos.Y = QString { CtreCapTo(Y2) };
-            parseNumber(CtreCapTo(Y2), m_state.pos.ry());
+            state_.rawPos.Y = QString { CtreCapTo(Y2) };
+            parseNumber(CtreCapTo(Y2), state_.pos.ry());
         }
 
-        m_state.rawPosList.append(m_state.rawPos);
-        m_state.path.append(m_state.pos);
+        state_.rawPosList.append(state_.rawPos);
+        state_.path.append(state_.pos);
 
-        file->append(Hole(m_state, file));
-        m_state.path.clear();
-        m_state.rawPosList.clear();
-        m_state.gCode = G05;
+        file->append(Hole(state_, file));
+        state_.path.clear();
+        state_.rawPosList.clear();
+        state_.gCode = G05;
         return true;
     }
     return false;
@@ -362,8 +362,8 @@ bool Parser::parseRepeat(const QString& line) {
         parseNumber(CtreCapTo(C2), p.rx());
         parseNumber(CtreCapTo(C3), p.ry());
         for (int i = 0; i < count; ++i) {
-            m_state.pos += p;
-            file->append(Hole(m_state, file));
+            state_.pos += p;
+            file->append(Hole(state_, file));
         }
         return true;
     }
@@ -447,7 +447,7 @@ bool Parser::parseNumber(QString Str, double& val) {
 void Parser::circularRout() {
 
     double radius = 0.0;
-    parseNumber(m_state.rawPos.A, radius);
+    parseNumber(state_.rawPos.A, radius);
 
     auto CalcCircleCenter = [this](QPointF a, QPointF b, float r) {
         //находим центр отрезка ab
@@ -461,12 +461,12 @@ void Parser::circularRout() {
         //находм две точки
         QPointF x1 = c + n * d;
         QPointF x2 = c - n * d;
-        return m_state.gCode == G03 ? (x1) : (x2);
+        return state_.gCode == G03 ? (x1) : (x2);
     };
 
-    QPointF center(CalcCircleCenter(m_state.path.last(), m_state.pos, radius));
-    m_state.path.append(arc(m_state.path.last(), m_state.pos, center));
-    m_state.path.last() = m_state.pos;
+    QPointF center(CalcCircleCenter(state_.path.last(), state_.pos, radius));
+    state_.path.append(arc(state_.path.last(), state_.pos, center));
+    state_.path.last() = state_.pos;
 }
 
 QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
@@ -479,14 +479,14 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
 
         const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
 
-        if (m_state.gCode == G02 && stop >= start)
+        if (state_.gCode == G02 && stop >= start)
             stop -= 2.0 * pi;
-        else if (m_state.gCode == G03 && stop <= start)
+        else if (state_.gCode == G03 && stop <= start)
             stop += 2.0 * pi;
 
         double angle = qAbs(stop - start);
         double steps = qMax(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
-        double delta_angle = da_sign[m_state.gCode] * angle * 1.0 / steps;
+        double delta_angle = da_sign[state_.gCode] * angle * 1.0 / steps;
         for (int i = 0; i < steps; i++) {
             double theta = start + delta_angle * (i + 1);
             points.push_back(QPointF(

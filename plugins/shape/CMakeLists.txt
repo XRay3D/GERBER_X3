@@ -18,7 +18,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
+include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
@@ -40,7 +40,7 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 link_directories(
-    ${CMAKE_SOURCE_DIR}/libs${SUFFIX}
+    ${CMAKE_SOURCE_DIR}/libs${PATHS}
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -57,9 +57,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-#add_subdirectory(circle)
-#add_subdirectory(circlearc)
-#add_subdirectory(polyline)
-#add_subdirectory(rectangle)
-#add_subdirectory(text)
+add_subdirectory(circle)
+add_subdirectory(circlearc)
+add_subdirectory(polyline)
+add_subdirectory(rectangle)
+add_subdirectory(text)
 

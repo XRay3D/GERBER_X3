@@ -19,6 +19,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)# qDebug()
 add_definitions(-DCTRE)
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)
 #add_definitions("-D__cpp_consteval")# source_location
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)

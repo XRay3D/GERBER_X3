@@ -66,17 +66,17 @@ void View::on_doubleClicked(const QModelIndex& index) {
         menuIndex_ = index;
         if (index.data(Role::NodeType).toInt() != Type::Folder)
             hideOther();
-        //        if (index.parent() == m_model->index(Model::GerberFiles, 0, QModelIndex())) {
+        //        if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
         //            hideOther();
-        //        } else if (index.parent() == m_model->index(Model::DrillFiles, 0, QModelIndex())) {
+        //        } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
         //            hideOther();
-        //        } else if (index.parent() == m_model->index(Model::ToolPath, 0, QModelIndex())) {
+        //        } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
         //            hideOther();
         //            {
-        //                const int id = m_menuIndex.data(Qt::UserRole).toInt();
+        //                const int id = menuIndex_.data(Qt::UserRole).toInt();
         //                GCode::File* file = static_cast<GCode::File*>(App::project()->file(id));
-        //                App::project()->showFiles(file->m_gcp.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
-        //                file->m_gcp.fileId = file->id();
+        //                App::project()->showFiles(file->gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
+        //                file->gcp_.fileId = file->id();
         //                App::mainWindow()->editGcFile(file);
         //                updateTree();
         //            }
@@ -201,7 +201,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         {
             auto selectedRows { selectionModel()->selectedRows().toVector() };
             if (selectedRows.empty())
-                selectedRows.emplaceBack(menuIndex_);
+                selectedRows.push_back(menuIndex_);
             menu.addSeparator();
             menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                 QDialog d(this);

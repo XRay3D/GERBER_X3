@@ -17,32 +17,32 @@
 #include <QPainter>
 
 GiBridge::GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiBridge*& ptr)
-    : m_ptr(ptr)
-    , m_side(side)
-    , m_lenght(lenght)
-    , m_size(size) {
+    : ptr_(ptr)
+    , side_(side)
+    , lenght_(lenght)
+    , size_(size) {
     connect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
-    m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
+    path_.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
 
 QRectF GiBridge::boundingRect() const {
-    return m_path.boundingRect();
+    return path_.boundingRect();
 }
 
 void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    painter->setBrush(!m_ok ? Qt::red : Qt::green);
-    painter->setTransform(QTransform().rotate(-(m_angle - 360)), true);
+    painter->setBrush(!ok_ ? Qt::red : Qt::green);
+    painter->setTransform(QTransform().rotate(-(angle_ - 360)), true);
     painter->setPen(Qt::NoPen);
-    painter->drawPath(m_path);
+    painter->drawPath(path_);
     painter->setBrush(Qt::NoBrush);
     painter->setPen(QPen(Qt::white, 2 * App::graphicsView()->scaleFactor()));
 
-    const double halfSize = m_size / 2;
+    const double halfSize = size_ / 2;
 
-    QLineF l(0, 0, m_lenght / 2 + halfSize, 0);
-    switch (m_side) {
+    QLineF l(0, 0, lenght_ / 2 + halfSize, 0);
+    switch (side_) {
     case GCode::On:
         break;
     case GCode::Outer:
@@ -76,7 +76,7 @@ QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) 
 }
 
 void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    m_lastPos = pos();
+    lastPos_ = pos();
     disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
@@ -115,9 +115,9 @@ QPointF GiBridge::calculate(const QPointF& pos) {
                                 line.setLength(sqrt(l1.length() * l1.length() - h * h));
                                 pt = line.p2();
                                 const QPointF center(l3.center());
-                                if (QLineF(center, pt).length() < m_lenght / 2)
+                                if (QLineF(center, pt).length() < lenght_ / 2)
                                     pt = center;
-                                m_angle = line.normalVector().angle();
+                                angle_ = line.normalVector().angle();
                             }
                         }
                         //                        lastAngle = l3.normalVector().angle();
@@ -126,61 +126,61 @@ QPointF GiBridge::calculate(const QPointF& pos) {
             }
         }
     }
-    if (l < m_lenght / 2) {
-        m_ok = true;
+    if (l < lenght_ / 2) {
+        ok_ = true;
         return pt;
     }
-    m_ok = false;
+    ok_ = false;
     return pos;
 }
 
-void GiBridge::setOk(bool ok) { m_ok = ok; }
+void GiBridge::setOk(bool ok) { ok_ = ok; }
 
-double GiBridge::angle() const { return m_angle; }
+double GiBridge::angle() const { return angle_; }
 
 void GiBridge::update() {
-    m_path = QPainterPath();
-    m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
+    path_ = QPainterPath();
+    path_.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
     QGraphicsItem::update();
 }
 
 IntPoint GiBridge::getPoint(const int side) const {
-    QLineF l2(0, 0, m_size / 2, 0);
+    QLineF l2(0, 0, size_ / 2, 0);
     l2.translate(pos());
     switch (side) {
     case GCode::On:
         return (pos());
     case GCode::Outer:
-        l2.setAngle(m_angle + 180);
+        l2.setAngle(angle_ + 180);
         return (l2.p2());
     case GCode::Inner:
-        l2.setAngle(m_angle);
+        l2.setAngle(angle_);
         return (l2.p2());
     }
     return IntPoint();
 }
 
 QLineF GiBridge::getPath() const {
-    QLineF retLine(QLineF::fromPolar(m_size * 0.51, m_angle).p2(), QLineF::fromPolar(m_size * 0.51, m_angle + 180).p2());
+    QLineF retLine(QLineF::fromPolar(size_ * 0.51, angle_).p2(), QLineF::fromPolar(size_ * 0.51, angle_ + 180).p2());
     retLine.translate(pos());
     return retLine;
 }
 
-double GiBridge::lenght() const { return m_lenght; }
+double GiBridge::lenght() const { return lenght_; }
 
-bool GiBridge::ok() const { return m_ok; }
+bool GiBridge::ok() const { return ok_; }
 
-QPainterPath GiBridge::shape() const { return m_path; }
+QPainterPath GiBridge::shape() const { return path_; }
 
 void GiBridge::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
 
 void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    if (m_ok && pos() == m_lastPos) {
-        m_ptr = new GiBridge(m_lenght, m_size, m_side, m_ptr);
-        scene()->addItem(m_ptr);
-        m_ptr->setPos(pos());
-        m_ptr->setVisible(true);
-    } else if (!m_ok) {
+    if (ok_ && pos() == lastPos_) {
+        ptr_ = new GiBridge(lenght_, size_, side_, ptr_);
+        scene()->addItem(ptr_);
+        ptr_->setPos(pos());
+        ptr_->setVisible(true);
+    } else if (!ok_) {
         deleteLater();
     }
     QGraphicsItem::mouseReleaseEvent(event);

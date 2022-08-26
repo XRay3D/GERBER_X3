@@ -68,8 +68,8 @@ int Node::childCount() const {
 int Node::row() const {
     if (parent_)
         return parent_->childs.indexOf(this);
-    //    for (int i = 0, size = m_parent->childs.size(); i < size; ++i)
-    //        if (m_parent->childs[i].get() == this)
+    //    for (int i = 0, size = parent_->childs.size(); i < size; ++i)
+    //        if (parent_->childs[i].get() == this)
     //            return i;
     return -1;
 }

@@ -18,12 +18,12 @@ ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& 
     : container(false)
     , icon(icon)
     , name(name)
-    , m_pos(pos)
+    , pos_(pos)
     , par(par)
-    , m_item(item)
+    , item_(item)
     , model(model) {
-    m_item->m_node = this;
-    m_item->redraw();
+    item_->node_ = this;
+    item_->redraw();
 }
 
 ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, ThermalModel* model)
@@ -31,12 +31,12 @@ ThermalNode::ThermalNode(const QIcon& icon, const QString& name, const ThParam& 
     , icon(icon)
     , name(name)
     , par(par)
-    , m_item(nullptr)
+    , item_(nullptr)
     , model(model) {
 }
 
 ThermalNode::ThermalNode(ThermalModel* model)
-    : m_item(nullptr)
+    : item_(nullptr)
     , model(model) {
 }
 
@@ -44,20 +44,20 @@ ThermalNode::~ThermalNode() { childs.clear(); }
 
 ThermalNode* ThermalNode::child(int row) const { return childs.at(row).get(); }
 
-ThermalNode* ThermalNode::parentItem() { return m_parent; }
+ThermalNode* ThermalNode::parentItem() { return parent_; }
 
 int ThermalNode::childCount() const { return static_cast<int>(childs.size()); }
 
 int ThermalNode::row() const {
-    if (m_parent)
-        for (size_t i = 0, size = m_parent->childs.size(); i < size; ++i)
-            if (m_parent->childs[i].get() == this)
+    if (parent_)
+        for (size_t i = 0, size = parent_->childs.size(); i < size; ++i)
+            if (parent_->childs[i].get() == this)
                 return static_cast<int>(i);
     return 0;
 }
 
 void ThermalNode::append(ThermalNode* item) {
-    item->m_parent = this;
+    item->parent_ = this;
     childs.emplace_back(std::shared_ptr<ThermalNode>(item));
 }
 
@@ -66,11 +66,11 @@ void ThermalNode::remove(int row) { childs.remove(row); }
 bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int role) {
     if (role == Qt::CheckStateRole && !index.column()) {
         static bool updateGuard = false;
-        m_checked = (value.value<Qt::CheckState>() == Qt::Checked);
+        checked_ = (value.value<Qt::CheckState>() == Qt::Checked);
         if (container) {
             auto childItems(this->childs);
             if (container && childItems.empty())
-                childItems = m_parent->childs.mid(1);
+                childItems = parent_->childs.mid(1);
             updateGuard = true;
             for (auto node : qAsConst(childItems))
                 node->setData(index, value, role);
@@ -79,15 +79,15 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
             updateGuard = false;
         } else {
             if (!updateGuard)
-                emit model->dataChanged(m_parent->index(), m_parent->index(), { role });
-            m_item->mouseDoubleClickEvent(nullptr);
+                emit model->dataChanged(parent_->index(), parent_->index(), { role });
+            item_->mouseDoubleClickEvent(nullptr);
         }
         return true;
     } else if (role == Qt::EditRole) {
         if (container) {
             auto childItems(this->childs);
             if (container && childItems.empty())
-                childItems = m_parent->childs.mid(1);
+                childItems = parent_->childs.mid(1);
             switch (index.column()) {
             case ThermalModel::Name:
             case ThermalModel::Position:
@@ -116,15 +116,15 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
                 return false;
             case ThermalModel::GapAngle:
                 par.angle = value.toDouble();
-                m_item->redraw();
+                item_->redraw();
                 return true;
             case ThermalModel::apThickness:
                 par.tickness = value.toDouble();
-                m_item->redraw();
+                item_->redraw();
                 return true;
             case ThermalModel::GapCount:
                 par.count = value.toInt();
-                m_item->redraw();
+                item_->redraw();
                 return true;
             }
         }
@@ -140,7 +140,7 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const {
         case ThermalModel::Name:
             return name;
         case ThermalModel::Position:
-            return QString("%1 : %2").arg(m_pos.X * dScale).arg(m_pos.Y * dScale).replace('.', ',');
+            return QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
         case ThermalModel::GapAngle:
             return par.angle;
         case ThermalModel::apThickness:
@@ -163,14 +163,14 @@ QVariant ThermalNode::data(const QModelIndex& index, int role) const {
             return {};
         if (container) {
             if (childs.empty())
-                return m_checked ? Qt::Checked : Qt::Unchecked;
+                return checked_ ? Qt::Checked : Qt::Unchecked;
             int val = 0;
             for (const auto& node : childs) {
-                val |= node->m_checked ? 2 : 1;
+                val |= node->checked_ ? 2 : 1;
             }
             return chState[val];
         } else
-            return m_checked ? Qt::Checked : Qt::Unchecked;
+            return checked_ ? Qt::Checked : Qt::Unchecked;
     case Qt::TextAlignmentRole:
         if (index.column())
             return Qt::AlignCenter;
@@ -201,25 +201,25 @@ int ThermalNode::count() const { return par.count; }
 
 ThParam ThermalNode::getParam() const { return par; }
 
-IntPoint ThermalNode::pos() const { return m_pos; }
+IntPoint ThermalNode::pos() const { return pos_; }
 
-AbstractThermPrGi* ThermalNode::item() const { return m_item; }
+AbstractThermPrGi* ThermalNode::item() const { return item_; }
 
-bool ThermalNode::createFile() const { return m_checked && m_item; }
+bool ThermalNode::createFile() const { return checked_ && item_; }
 
 void ThermalNode::disable() {
-    m_checked = false;
+    checked_ = false;
     model->dataChanged(index(), index(), {});
     model->dataChanged(parentItem()->index(), parentItem()->index(), {});
 }
 
 void ThermalNode::enable() {
-    m_checked = true;
+    checked_ = true;
     model->dataChanged(index(), index(), {});
     model->dataChanged(parentItem()->index(), parentItem()->index(), {});
 }
 
-bool ThermalNode::isChecked() const { return m_checked; }
+bool ThermalNode::isChecked() const { return checked_; }
 
 QModelIndex ThermalNode::index(int column) const { return model->createIndex(row(), column, reinterpret_cast<quintptr>(this)); }
 

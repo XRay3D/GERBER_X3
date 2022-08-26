@@ -53,7 +53,7 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     settings.getValue(ui->rbOn);
     settings.getValue(ui->rbOutside);
     settings.getValue(ui->cbxTrimming);
-    settings.getValue(varName(m_trimming), 0);
+    settings.getValue(varName(trimming_), 0);
     settings.endGroup();
 
     rb_clicked();
@@ -73,9 +73,9 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     connect(pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
         if (side == GCode::On)
-            checked ? m_trimming |= Trimming::Line : m_trimming &= ~Trimming::Line;
+            checked ? trimming_ |= Trimming::Line : trimming_ &= ~Trimming::Line;
         else
-            checked ? m_trimming |= Trimming::Corner : m_trimming &= ~Trimming::Corner;
+            checked ? trimming_ |= Trimming::Corner : trimming_ &= ~Trimming::Corner;
     });
 }
 
@@ -89,7 +89,7 @@ ProfileForm::~ProfileForm() {
     settings.setValue(ui->rbOn);
     settings.setValue(ui->rbOutside);
     settings.setValue(ui->cbxTrimming);
-    settings.setValue(varName(m_trimming));
+    settings.setValue(varName(trimming_));
     settings.endGroup();
 
     for (QGraphicsItem* giItem : App::scene()->items()) {
@@ -197,14 +197,14 @@ void ProfileForm::on_pbAddBridge_clicked() {
         if (!brItem->ok())
             delete brItem;
     }
-    brItem = new GiBridge(m_lenght, m_size, side, brItem);
+    brItem = new GiBridge(lenght_, size_, side, brItem);
     App::scene()->addItem(brItem);
     brItem->setVisible(true);
 }
 
 void ProfileForm::updateBridge() {
-    m_lenght = ui->dsbxBridgeLenght->value();
-    m_size = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    lenght_ = ui->dsbxBridgeLenght->value();
+    size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
     for (QGraphicsItem* item : App::scene()->items()) {
         if (static_cast<GiType>(item->type()) == GiType::Bridge)
             static_cast<GiBridge*>(item)->update();
@@ -220,15 +220,15 @@ void ProfileForm::rb_clicked() {
     if (ui->rbOn->isChecked()) {
         side = GCode::On;
         ui->cbxTrimming->setText(tr("Trimming"));
-        ui->cbxTrimming->setChecked(m_trimming & Trimming::Line);
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Line);
     } else if (ui->rbOutside->isChecked()) {
         side = GCode::Outer;
         ui->cbxTrimming->setText(tr("Corner Trimming"));
-        ui->cbxTrimming->setChecked(m_trimming & Trimming::Corner);
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
     } else if (ui->rbInside->isChecked()) {
         side = GCode::Inner;
         ui->cbxTrimming->setText(tr("Corner Trimming"));
-        ui->cbxTrimming->setChecked(m_trimming & Trimming::Corner);
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
     }
 
     if (ui->rbClimb->isChecked())
@@ -247,7 +247,7 @@ void ProfileForm::editFile(GCode::File* file) {
     GCode::GCodeParams gcp_ { file->gcp() };
 
     fileId = gcp_.fileId;
-    m_editMode = true;
+    editMode_ = true;
 
     { // GUI
         side = gcp_.side();
@@ -295,13 +295,13 @@ void ProfileForm::editFile(GCode::File* file) {
         if (gcp_.params.contains(GCode::GCodeParams::Bridges)) {
             ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
             //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
-            //                brItem = new BridgeItem(m_lenght, m_size, side, brItem);
+            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
             //                App::scene()->addItem(brItem);
             //                brItem->setPos(pos);
-            //                brItem->m_lastPos = pos;
+            //                brItem->lastPos_ = pos;
             //            }
             updateBridge();
-            brItem = new GiBridge(m_lenght, m_size, side, brItem);
+            brItem = new GiBridge(lenght_, size_, side, brItem);
             //        delete item;
         }
     }

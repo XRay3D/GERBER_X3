@@ -18,10 +18,10 @@ public:
     void push_back(GraphicsItem* item);
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);
-    bool isVisible() { return m_visible; }
+    bool isVisible() { return visible_; }
     void addToScene(QGraphicsScene* scene = nullptr);
-    QColor brushColor() const { return m_brushColor; }
-    QPen pen() const { return m_pen; }
+    QColor brushColor() const { return brushColor_; }
+    QPen pen() const { return pen_; }
     void setBrushColor(const QColor& color);
     void setPen(const QPen& pen);
     void setBrushColorP(QColor* col);
@@ -29,7 +29,7 @@ public:
     void setZValue(double z);
     void setPos(QPointF offset);
 private:
-    bool m_visible = false;
-    QPen m_pen;
-    QColor m_brushColor;
+    bool visible_ = false;
+    QPen pen_;
+    QColor brushColor_;
 };

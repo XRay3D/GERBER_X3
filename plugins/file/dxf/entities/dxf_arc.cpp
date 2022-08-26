@@ -105,16 +105,6 @@ GraphicObject Arc::toGo() const {
     QPointF rad(radius, radius);
     path.arcTo(QRectF(centerPoint - rad, centerPoint + rad), -startAngle, -aspan);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u, u);
-    QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QMatrix m2;
-    m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2).first());
-#else
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
@@ -123,9 +113,8 @@ GraphicObject Arc::toGo() const {
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
-#endif
 
-    return { id, p, {} };
+    return {id, p, {}};
 }
 
 void Arc::write(QDataStream& stream) const {

@@ -19,7 +19,7 @@ namespace Dxf {
 
 Layer::Layer(File* sp)
     : AbstractTable(nullptr) {
-    m_file = sp;
+    file_ = sp;
 }
 
 Layer::Layer(SectionParser* sp)
@@ -28,7 +28,7 @@ Layer::Layer(SectionParser* sp)
 
 Layer::Layer(SectionParser* sp, const QString& name)
     : AbstractTable(sp)
-    , m_name(name) {
+    , name_(name) {
 }
 
 void Layer::parse(CodeData& code) {
@@ -39,13 +39,13 @@ void Layer::parse(CodeData& code) {
             break;
         case LayerName:
             qDebug() << code.string();
-            m_name = code.string();
+            name_ = code.string();
             break;
         case Flags:
             flags = code;
             break;
         case ColorNumber:
-            m_colorNumber = code;
+            colorNumber_ = code;
             break;
         case LineTypeName:
             lineTypeName = code.string();
@@ -63,84 +63,84 @@ void Layer::parse(CodeData& code) {
         }
         code = sp->nextCode();
     } while (code.code() != 0);
-    setColor(dxfColors[m_colorNumber]);
+    setColor(dxfColors[colorNumber_]);
 }
 
-QString Layer::name() const { return m_name; }
+QString Layer::name() const { return name_; }
 
-int Layer::colorNumber() const { return m_colorNumber; }
+int Layer::colorNumber() const { return colorNumber_; }
 
-const GraphicObjects& Layer::graphicObjects() const { return m_graphicObjects; }
+const GraphicObjects& Layer::graphicObjects() const { return graphicObjects_; }
 
-void Layer::addGraphicObject(GraphicObject&& go) { m_graphicObjects.emplace_back(go); }
+void Layer::addGraphicObject(GraphicObject&& go) { graphicObjects_.emplace_back(go); }
 
 QColor Layer::color() const {
-    return m_itemsType == ItemsType::Normal
-        ? m_colorNorm
-        : m_colorPath;
+    return itemsType_ == ItemsType::Normal
+        ? colorNorm_
+        : colorPath_;
 }
 
 void Layer::setColor(const QColor& color) {
-    m_colorNorm = color;
-    m_colorNorm.setAlpha(150);
-    m_colorPath = color;
+    colorNorm_ = color;
+    colorNorm_.setAlpha(150);
+    colorPath_ = color;
 }
 
-bool Layer::isVisible() const { return m_visible; }
+bool Layer::isVisible() const { return visible_; }
 
 void Layer::setVisible(bool visible) {
-    m_visible = visible;
+    visible_ = visible;
     if (itemGroupNorm && itemGroupPath) {
-        switch (m_itemsType) {
+        switch (itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
-            itemGroupNorm->setVisible(m_visible);
+            itemGroupNorm->setVisible(visible_);
             itemGroupPath->setVisible(false);
             break;
         case ItemsType::Paths:
             itemGroupNorm->setVisible(false);
-            itemGroupPath->setVisible(m_visible);
+            itemGroupPath->setVisible(visible_);
             break;
         case ItemsType::Both:
-            itemGroupNorm->setVisible(m_visible);
-            itemGroupPath->setVisible(m_visible);
+            itemGroupNorm->setVisible(visible_);
+            itemGroupPath->setVisible(visible_);
             break;
         }
     }
 }
 
 GiGroup* Layer::itemGroup() const {
-    return m_itemsType == ItemsType::Paths
+    return itemsType_ == ItemsType::Paths
         ? itemGroupPath
         : itemGroupNorm;
 }
 
 bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
 
-ItemsType Layer::itemsType() const { return m_itemsType; }
+ItemsType Layer::itemsType() const { return itemsType_; }
 
 void Layer::setItemsType(ItemsType itemsType) {
-    if (m_itemsType == itemsType)
+    if (itemsType_ == itemsType)
         return;
-    m_itemsType = itemsType;
+    itemsType_ = itemsType;
     if (itemGroupNorm && itemGroupPath) {
         if (itemGroupNorm->empty())
-            m_itemsType = ItemsType::Paths;
+            itemsType_ = ItemsType::Paths;
         else if (itemGroupPath->empty())
-            m_itemsType = ItemsType::Normal;
-        switch (m_itemsType) {
+            itemsType_ = ItemsType::Normal;
+        switch (itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
-            itemGroupNorm->setVisible(m_visible);
+            itemGroupNorm->setVisible(visible_);
             itemGroupPath->setVisible(false);
             break;
         case ItemsType::Paths:
             itemGroupNorm->setVisible(false);
-            itemGroupPath->setVisible(m_visible);
+            itemGroupPath->setVisible(visible_);
             break;
         case ItemsType::Both:
-            itemGroupNorm->setVisible(m_visible);
-            itemGroupPath->setVisible(m_visible);
+            itemGroupNorm->setVisible(visible_);
+            itemGroupPath->setVisible(visible_);
             break;
         }
     }

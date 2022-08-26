@@ -48,8 +48,8 @@ public:
         cancel_ = {};
     }
 
-    //    static GCode::Creator* creator() { return m_creator; }
-    //    static void setCreator(GCode::Creator* creator) { m_creator = creator; }
+    //    static GCode::Creator* creator() { return creator_; }
+    //    static void setCreator(GCode::Creator* creator) { creator_ = creator; }
 
     //    static void setClipper(ClipperLib::ClipperBase* clipper) { clipper_ = clipper; }
     //    static ClipperLib::ClipperBase* clipper() { return clipper_; }
@@ -142,10 +142,10 @@ protected:
     virtual void create() = 0;
     virtual GCodeType type() = 0;
 
-    //    inline static ClipperBase* m_clipperPtr;
-    //    inline static bool m_cancel;
-    //    static inline int //PROG  m_progressMax;
-    //    static inline int //PROG m_progressVal;
+    //    inline static ClipperBase* clipperPtr_;
+    //    inline static bool cancel_;
+    //    static inline int //PROG  progressMax_;
+    //    static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
     Paths workingPs;

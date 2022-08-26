@@ -322,7 +322,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
         if (role == Qt::CheckStateRole) {
             bool visible = value.value<Qt::CheckState>() == Qt::Checked;
             layer->setVisible(visible);
-            layer->file()->m_layersVisible[name] = visible;
+            layer->file()->layersVisible_[name] = visible;
             if (visible) {
                 layer->file()->visible_ = visible;
                 emit App::fileModel()->dataChanged(parent_->index(index.column()), parent_->index(index.column()), { role });

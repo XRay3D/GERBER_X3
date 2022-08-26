@@ -33,10 +33,10 @@ public:
     void setTool(const Tool& tool);
     void setDialog();
     enum Feeds {
-        mm_sec,
-        mm_min,
-        cm_min,
-        m_min
+        msec_,
+        mmin_,
+        cmin_,
+        min_
     };
 
 public slots:
@@ -68,10 +68,10 @@ private:
 
     void valueChangedSlot(double value);
 
-    ToolItem* m_item = nullptr;
-    Tool m_tool;
-    double m_feed = 1.0;
-    bool m_dialog = true;
+    ToolItem* item_ = nullptr;
+    Tool tool_;
+    double feed_ = 1.0;
+    bool dialog_ = true;
 
     void updateName();
     void setChanged(bool fl = true);

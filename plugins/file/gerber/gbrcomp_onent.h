@@ -161,66 +161,66 @@ public:
     bool setData(int key, const QStringList& data);
     QString toolTip() const;
 
-    ComponentItem* componentitem() const { return m_componentitem; }
-    void setComponentitem(ComponentItem* componentitem) const { m_componentitem = componentitem; }
+    ComponentItem* componentitem() const { return componentitem_; }
+    void setComponentitem(ComponentItem* componentitem) const { componentitem_ = componentitem; }
 
-    Library library() const { return m_library; }
-    void setLibrary(const Library& library) { m_library = library; }
+    Library library() const { return library_; }
+    void setLibrary(const Library& library) { library_ = library; }
 
-    Manufacturer manufacturer() const { return m_manufacturer; }
-    void setManufacturer(const Manufacturer& manufacturer) { m_manufacturer = manufacturer; }
+    Manufacturer manufacturer() const { return manufacturer_; }
+    void setManufacturer(const Manufacturer& manufacturer) { manufacturer_ = manufacturer; }
 
-    MountType mount() const { return m_mount; }
-    void setMount(const MountType& mount) { m_mount = mount; }
+    MountType mount() const { return mount_; }
+    void setMount(const MountType& mount) { mount_ = mount; }
 
-    Package package() const { return m_package; }
-    void setPackage(const Package& package) { m_package = package; }
+    Package package() const { return package_; }
+    void setPackage(const Package& package) { package_ = package; }
 
-    mvector<Pin> pins() const { return m_pins; }
-    mvector<Pin>& pins() { return m_pins; }
-    void addPin(Pin&& pins) { m_pins.emplace_back(pins); }
+    mvector<Pin> pins() const { return pins_; }
+    mvector<Pin>& pins() { return pins_; }
+    void addPin(Pin&& pins) { pins_.emplace_back(pins); }
 
-    mvector<Supplier> suppliers() const { return m_suppliers; }
-    void setSuppliers(const mvector<Supplier>& suppliers) { m_suppliers = suppliers; }
+    mvector<Supplier> suppliers() const { return suppliers_; }
+    void setSuppliers(const mvector<Supplier>& suppliers) { suppliers_ = suppliers; }
 
-    QPointF referencePoint() const { return m_referencePoint; }
-    void setReferencePoint(const QPointF& referencePoint) { m_referencePoint = referencePoint; }
+    QPointF referencePoint() const { return referencePoint_; }
+    void setReferencePoint(const QPointF& referencePoint) { referencePoint_ = referencePoint; }
 
-    mvector<QPolygonF> footprint() const { return m_footprint; }
-    void addFootprint(const QPolygonF& footprint) { m_footprint.emplace_back(footprint); }
+    mvector<QPolygonF> footprint() const { return footprint_; }
+    void addFootprint(const QPolygonF& footprint) { footprint_.emplace_back(footprint); }
 
-    QString footprintName() const { return m_footprintName; }
-    void setFootprintName(const QString& footprintName) { m_footprintName = footprintName; }
+    QString footprintName() const { return footprintName_; }
+    void setFootprintName(const QString& footprintName) { footprintName_ = footprintName; }
 
-    const QString& refdes() const { return m_refdes; }
-    void setRefdes(const QString& refdes) { m_isNull = true, m_refdes = refdes; }
+    const QString& refdes() const { return refdes_; }
+    void setRefdes(const QString& refdes) { isNull_ = true, refdes_ = refdes; }
 
-    QString value() const { return m_value; }
-    void setValue(const QString& value) { m_value = value; }
+    QString value() const { return value_; }
+    void setValue(const QString& value) { value_ = value; }
 
-    double height() const { return m_height; }
-    void setHeight(double height) { m_height = height; }
+    double height() const { return height_; }
+    void setHeight(double height) { height_ = height; }
 
-    double rotation() const { return m_rotation; }
-    void setRotation(double rotation) { m_rotation = rotation; }
+    double rotation() const { return rotation_; }
+    void setRotation(double rotation) { rotation_ = rotation; }
 
-    bool isNull() const { return m_isNull; }
+    bool isNull() const { return isNull_; }
 
 private:
-    double m_rotation = 0.0; /* <decimal> The rotation angle of the component.*/
-    double m_height = 0.0;   /* <decimal> Height, in the unit of the file. */
-    mutable ComponentItem* m_componentitem = nullptr;
-    Library m_library;
-    Manufacturer m_manufacturer;
-    MountType m_mount = Other; /* (TH|SMD|BGA|Other) Mount type. */
-    Package m_package;
-    mvector<Pin> m_pins;
-    mvector<Supplier> m_suppliers;
-    QPointF m_referencePoint;
-    mvector<QPolygonF> m_footprint;
-    QString m_footprintName; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
-    QString m_refdes;
-    QString m_value; /* <field> E.g. 220nF. */
-    bool m_isNull = true;
+    double rotation_ = 0.0; /* <decimal> The rotation angle of the component.*/
+    double height_ = 0.0;   /* <decimal> Height, in the unit of the file. */
+    mutable ComponentItem* componentitem_ = nullptr;
+    Library library_;
+    Manufacturer manufacturer_;
+    MountType mount_ = Other; /* (TH|SMD|BGA|Other) Mount type. */
+    Package package_;
+    mvector<Pin> pins_;
+    mvector<Supplier> suppliers_;
+    QPointF referencePoint_;
+    mvector<QPolygonF> footprint_;
+    QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
+    QString refdes_;
+    QString value_; /* <field> E.g. 220nF. */
+    bool isNull_ = true;
 };
 } // namespace Gerber

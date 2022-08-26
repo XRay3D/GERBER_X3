@@ -7,7 +7,7 @@
 Header::Header(Qt::Orientation orientation, QWidget* parent)
     : QHeaderView(orientation, parent) {
     connect(this, &QHeaderView::sectionCountChanged, [this](int /*oldCount*/, int newCount) {
-        m_checkRect.resize(newCount);
+        checkRect_.resize(newCount);
     });
     setSectionsClickable(true);
     setHighlightSections(true);
@@ -71,7 +71,7 @@ void Header::mousePressEvent(QMouseEvent* event) {
     do {
         if (index < 0)
             break;
-        if (!m_checkRect[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
+        if (!checkRect_[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
             break;
         togle(index);
         event->accept();
@@ -86,7 +86,7 @@ void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex
     painter->restore();
 
     QStyleOptionButton option;
-    m_checkRect[logicalIndex] = option.rect = getRect(rect);
+    checkRect_[logicalIndex] = option.rect = getRect(rect);
 
     option.state = checked(logicalIndex) ? QStyle::State_On : QStyle::State_Off;
     option.state |= model()->toolId(logicalIndex) != -1 && isEnabled() ? QStyle::State_Enabled : QStyle::State_None;

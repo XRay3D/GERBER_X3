@@ -60,7 +60,7 @@ private:
     double lastMin;
 
     QCheckBox* chbx;
-    double m_depth;
+    double depth_;
     inline void redraw();
     Tool tool;
 

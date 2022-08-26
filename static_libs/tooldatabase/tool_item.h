@@ -55,10 +55,10 @@ public:
     ToolItem& operator=(const ToolItem&) = delete;
 
 private:
-    static inline bool m_deleteEnable = false;
+    static inline bool deleteEnable_ = false;
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
-    mutable int m_toolId = 0;
-    QString m_name;
-    QString m_note;
+    mutable int toolId_ = 0;
+    QString name_;
+    QString note_;
 };

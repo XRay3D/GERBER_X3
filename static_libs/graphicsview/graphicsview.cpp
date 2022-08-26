@@ -49,7 +49,7 @@ void setCursor(QWidget* w) {
     p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
     p.drawLine(0, Mid, Size, Mid);
     p.drawLine(Mid, 0, Mid, Size);
-    w->setCursor(QCursor { cursor, Mid, Mid });
+    w->setCursor(QCursor {cursor, Mid, Mid});
 }
 
 GraphicsView::GraphicsView(QWidget* parent)
@@ -57,11 +57,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlag(DontSavePainterState);
     setOptimizationFlag(DontAdjustForAntialiasing);
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
-    setOptimizationFlag(DontClipPainter);
-#else
-#endif
 
     setViewportUpdateMode(FullViewportUpdate);
     setDragMode(RubberBandDrag);
@@ -95,11 +90,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     { // add grid layout
         auto gridLayout = new QGridLayout(this);
         gridLayout->setSpacing({});
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        gridLayout->setMargin({});
-#else
         gridLayout->setContentsMargins({});
-#endif
         gridLayout->addWidget(corner, 1, 0);
         gridLayout->addWidget(hRuler, 1, 1);
         gridLayout->addWidget(vRuler, 0, 0);
@@ -122,8 +113,8 @@ GraphicsView::GraphicsView(QWidget* parent)
         settings.endGroup();
     }
 
-    setScene(m_scene = new Scene(this));
-    connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross1);
+    setScene(scene_ = new Scene(this));
+    connect(this, &GraphicsView::mouseMove, scene_, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
     App::setGraphicsView(this);
@@ -218,11 +209,7 @@ double GraphicsView::scaleFactor() {
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
     if (event->modifiers() & Qt::AltModifier || App::settings().snap()) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        const double gs = App::settings().gridStep(matrix().m11());
-#else
         const double gs = App::settings().gridStep(transform().m11());
-#endif
         QPointF px(mapToScene(event->pos()) / gs);
         px.setX(gs * round(px.x()));
         px.setY(gs * round(px.y()));
@@ -233,9 +220,9 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
 
 void GraphicsView::setScale(double s) noexcept {
     const auto trf(transform());
-    setTransform({ +s /*11*/, trf.m12(), trf.m13(),
+    setTransform({+s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
-        /*      */ trf.m31(), trf.m32(), trf.m33() });
+        /*      */ trf.m31(), trf.m32(), trf.m33()});
 }
 
 double GraphicsView::getScale() noexcept { return transform().m11(); }
@@ -261,11 +248,7 @@ QRectF GraphicsView::getViewRect() {
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QRectF visible_scene_rect(matrix().inverted().mapRect({ topLeft, bottomRight }));
-#else
-    QRectF visible_scene_rect(transform().inverted().mapRect({ topLeft, bottomRight }));
-#endif
+    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
 
     return visible_scene_rect;
 }
@@ -273,11 +256,7 @@ QRectF GraphicsView::getViewRect() {
 void GraphicsView::wheelEvent(QWheelEvent* event) {
     const auto delta = event->angleDelta().y();
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
-    const auto pos = event->pos();
-#else
     const auto pos = event->position().toPoint();
-#endif
 
     static auto sbUpdate = [&delta, this, scale = 3](QScrollBar* sb) { // Warning if create more GraphicsView`s!!
         if (App::settings().guiSmoothScSh())
@@ -360,19 +339,19 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
-        QGraphicsView::mouseReleaseEvent(&releaseEvent);
-        setDragMode(ScrollHandDrag);
-        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
-        QGraphicsView::mousePressEvent(&fakeEvent);
-#else
+        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        //        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
+        //        QGraphicsView::mouseReleaseEvent(&releaseEvent);
+        //        setDragMode(ScrollHandDrag);
+        //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
+        //        QGraphicsView::mousePressEvent(&fakeEvent);
+        //#else
         QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mousePressEvent(&fakeEvent);
-#endif
+        //#endif
     } else if (event->button() == Qt::RightButton) {
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
@@ -384,9 +363,9 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         setInteractive(false);
         // Ruler
         if (ruler_) {
-            m_scene->setDrawRuller(true);
+            scene_->setDrawRuller(true);
             const QPointF point(mappedPos(event));
-            m_scene->setCross2(point);
+            scene_->setCross2(point);
             emit mouseClickR(point);
         }
     } else {
@@ -398,11 +377,11 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-#else
+        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
+        //#else
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-#endif
+        //#endif
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
         setDragMode(NoDrag);
         setInteractive(true);
@@ -411,7 +390,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
-        m_scene->setDrawRuller(false);
+        scene_->setDrawRuller(false);
         emit mouseClickR(mappedPos(event));
         latPos = event->pos();
     } else {

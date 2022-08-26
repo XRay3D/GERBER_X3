@@ -30,6 +30,6 @@ private:
     void resetColor();
     void updateName();
 
-    QColor& m_color;
-    const QColor m_defaultColor;
+    QColor& color_;
+    const QColor defaultColor_;
 };

@@ -31,14 +31,14 @@
 
 namespace Gerber {
 
-Path GraphicObject::elipse() const { return (m_state.dCode() == D03
-                                                && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle)
-        ? m_path
+Path GraphicObject::elipse() const { return (state_.dCode() == D03
+                                                && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle)
+        ? path_
         : Path(); } // circle
-Paths GraphicObject::elipseW() const { return (m_state.dCode() == D03
-                                                  && m_gFile->apertures()->at(m_state.aperture())->type() == ApertureType::Circle
-                                                  && m_gFile->apertures()->at(m_state.aperture())->withHole())
-        ? m_paths
+Paths GraphicObject::elipseW() const { return (state_.dCode() == D03
+                                                  && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
+                                                  && gFile_->apertures()->at(state_.aperture())->withHole())
+        ? paths_
         : Paths(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
@@ -274,7 +274,7 @@ void File::setItemType(int type) {
     itemGroups_[ApPaths]->setVisible(false);
     itemGroups_[Components]->setVisible(false);
 
-    itemGroups_[itemsType_]->setVisible(true /*m_visible*/);
+    itemGroups_[itemsType_]->setVisible(true /*visible_*/);
 }
 
 int File::itemsType() const { return itemsType_; }
@@ -302,8 +302,8 @@ void File::read(QDataStream& stream) {
     stream >> components_;
 
     for (GraphicObject& go : graphicObjects_) {
-        go.m_gFile = this;
-        go.m_state.file_ = this;
+        go.gFile_ = this;
+        go.state_.file_ = this;
     }
 }
 

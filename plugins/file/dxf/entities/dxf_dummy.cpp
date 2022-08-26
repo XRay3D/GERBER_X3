@@ -17,14 +17,14 @@ namespace Dxf {
 
 Dxf::Dummy::Dummy(Dxf::SectionParser* sp, Dxf::Entity::Type type)
     : Entity(sp)
-    , m_type(type) {
+    , type_(type) {
 }
 
 void Dummy::draw(const Dxf::InsertEntity* const) const {
 }
 
 void Dummy::parse(Dxf::CodeData& code) {
-    switch (m_type) {
+    switch (type_) {
     case Type::POLYLINE:
         do {
             code = sp->nextCode();

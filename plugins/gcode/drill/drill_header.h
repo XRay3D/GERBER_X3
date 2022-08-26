@@ -1,7 +1,6 @@
 #pragma once
 
 #include "drill_form.h"
-#include "qtmetamacros.h"
 #include "qwidget.h"
 
 class Header : public QHeaderView {
@@ -31,7 +30,7 @@ protected:
 
 private:
     int flag = Qt::Unchecked;
-    mutable mvector<QRect> m_checkRect;
+    mutable mvector<QRect> checkRect_;
     void setChecked(int index, bool ch);
     bool checked(int index) const;
     DrillModel* model() const;

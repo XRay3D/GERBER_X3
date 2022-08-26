@@ -32,8 +32,8 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  X = %1 in\n"
-                                                          "  Y = %2 in\n"
-                                                        : "  X = %1 mm\n"
+                                                          "  Y = %2 in\n" :
+                                                          "  X = %1 mm\n"
                                                           "  Y = %2 mm\n")
                              .arg(pt1.x() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(pt1.y() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
@@ -58,10 +58,10 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
 
 Handler::Handler(Shape* shape, HType type)
     : shape(shape)
-    , m_hType(type) {
+    , hType_(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
-    switch (m_hType) {
+    switch (hType_) {
     case Adder:
         setZValue(std::numeric_limits<double>::max() - 2);
         break;
@@ -85,7 +85,7 @@ QRectF Handler::boundingRect() const { return rect(); }
 void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
     QColor c;
-    switch (m_hType) {
+    switch (hType_) {
     case Adder:
         c = QColor(Qt::yellow);
         break;
@@ -108,7 +108,7 @@ void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
 
 void Handler::setPos(const QPointF& pos) {
     QGraphicsItem::setPos(pos);
-    if (m_hType == Center) {
+    if (hType_ == Center) {
         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
     } else if (shape->isFinal) { // прилипание
@@ -129,19 +129,19 @@ void Handler::setPos(const QPointF& pos) {
     shape->redraw();
 }
 
-Handler::HType Handler::hType() const { return m_hType; }
+Handler::HType Handler::hType() const { return hType_; }
 
-void Handler::setHType(const HType& value) { m_hType = value; }
+void Handler::setHType(const HType& value) { hType_ = value; }
 
 QRectF Handler::rect() const {
     const double scale = App::graphicsView()->scaleFactor();
     const double k = Size * scale;
     const double s = k * 2;
-    return { QPointF(-k, -k), QSizeF(s, s) };
+    return {QPointF(-k, -k), QSizeF(s, s)};
 }
 
 void Handler::savePos() {
-    if (m_hType != Center)
+    if (hType_ != Center)
         return;
     pt.clear();
     pt.reserve(shape->handlers.size());
@@ -168,9 +168,9 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged),
                     [h, type](auto val) {
                         if (type == X)
-                            h->setPos({ val, h->pos().y() });
+                            h->setPos({val, h->pos().y()});
                         else
-                            h->setPos({ h->pos().x(), val });
+                            h->setPos({h->pos().x(), val});
                         h->shape->updateOtherHandlers(h);
                         h->shape->redraw();
                     });
@@ -182,11 +182,7 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             gl->addWidget(new QLabel("Y:", this), 1, 0);
             gl->addWidget(dsbx(X), 0, 1);
             gl->addWidget(dsbx(Y), 1, 1);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-            gl->setMargin(6);
-#else
             gl->setContentsMargins(6, 6, 6, 6);
-#endif
         }
         ~Dialog() = default;
         void leaveEvent(QEvent*) override { reject(); };

@@ -24,7 +24,7 @@ class Tool {
 public:
     Tool();
     Tool(int)
-        : m_diameter(0) { }
+        : diameter_(0) { }
 
     enum Type {
         Drill,
@@ -88,9 +88,9 @@ public:
     // id
     int id() const;
     void setId(int id);
-    // m_depth
-    static double depth() { return m_depth; }
-    static void setDepth(double depth) { m_depth = depth; }
+    // depth_
+    static double depth() { return depth_; }
+    static void setDepth(double depth) { depth_ = depth; }
 
     double getDiameter(double depth) const;
     double getDepth() const;
@@ -108,29 +108,29 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString m_name { QObject::tr("Default") };
-    QString m_note;
+    QString name_ { QObject::tr("Default") };
+    QString note_;
 
-    double m_angle {};
-    double m_diameter { 1 };
-    double m_feedRate { 100 };
-    double m_oneTurnCut { 0.1 };
-    double m_passDepth { 2 };
-    double m_plungeRate { 600 };
-    double m_spindleSpeed { 12000 };
-    double m_stepover { 0.5 };
-    static inline double m_depth;
+    double angle_ {};
+    double diameter_ { 1 };
+    double feedRate_ { 100 };
+    double oneTurnCut_ { 0.1 };
+    double passDepth_ { 2 };
+    double plungeRate_ { 600 };
+    double spindleSpeed_ { 12000 };
+    double stepover_ { 0.5 };
+    static inline double depth_;
 
-    int m_id { -1 };
+    int id_ { -1 };
 
-    mutable size_t m_hash = 0;
-    mutable size_t m_hash2 = 0;
+    mutable size_t hash_ = 0;
+    mutable size_t hash2_ = 0;
 
-    Type m_type { EndMill };
+    Type type_ { EndMill };
 
-    QPainterPath m_path;
+    QPainterPath path_;
 
-    bool m_autoName { true };
+    bool autoName_ { true };
 };
 
 using Tools = std::map<int, Tool, std::greater<int>>;
@@ -139,7 +139,7 @@ class ToolHolder {
     friend class ToolItem;
     friend class FilePlugin;
 
-    Tools m_tools;
+    Tools tools_;
     ToolHolder(const ToolHolder&) = delete;
     ToolHolder& operator=(const ToolHolder&) = delete;
     ToolHolder(ToolHolder&&) = delete;
@@ -148,8 +148,8 @@ class ToolHolder {
 public:
     ToolHolder();
 
-    const Tool& tool(int id) { return m_tools.at(id); }
-    const Tools& tools() { return m_tools; }
+    const Tool& tool(int id) { return tools_.at(id); }
+    const Tools& tools() { return tools_; }
     void readTools();
     void readTools(const QJsonObject& json);
     void writeTools(QJsonObject& json);

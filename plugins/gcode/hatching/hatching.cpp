@@ -26,7 +26,7 @@
 #include <ranges>
 
 // struct sort_fn {
-//     template <std::random_access_iterator I, std::sentinel_for<I> S, class Comp = std::ranges::less, class Proj = std::identity>
+//     template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = std::ranges::less, class Proj = std::identity>
 //     requires std::sortable<I, Comp, Proj> constexpr I
 //     operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
 //     {
@@ -44,7 +44,7 @@
 //        return { std::ranges::next(first, last) };
 //    }
 
-//    template <std::ranges::random_access_range R, class Comp = std::ranges::less, class Proj = std::identity>
+//    template <std::ranges::randoaccess_range_ R, class Comp = std::ranges::less, class Proj = std::identity>
 //    requires std::sortable<std::ranges::iterator_t<R>, Comp, Proj> constexpr std::ranges::borrowed_iterator_t<R>
 //    operator()(R&& r, Comp comp = {}, Proj proj = {}) const
 //    {
@@ -72,7 +72,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
 
     switch (gcp_.side()) {
     case Outer:
-        groupedPaths(CutoffPaths, uScale /*static_cast<cInt>(m_toolDiameter + 5)*/);
+        groupedPaths(CutoffPaths, uScale /*static_cast<cInt>(toolDiameter_ + 5)*/);
         break;
     case Inner:
         groupedPaths(CopperPaths);

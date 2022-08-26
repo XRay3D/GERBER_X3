@@ -174,136 +174,136 @@ struct Format {
 class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        stream << state.m_dCode;
-        stream << state.m_gCode;
-        stream << state.m_imgPolarity;
-        stream << state.m_interpolation;
-        stream << state.m_type;
-        stream << state.m_quadrant;
-        stream << state.m_region;
-        stream << state.m_aperture;
-        stream << state.m_lineNum;
-        stream << state.m_curPos;
-        stream << state.m_mirroring;
-        stream << state.m_scaling;
-        stream << state.m_rotating;
+        stream << state.dCode_;
+        stream << state.gCode_;
+        stream << state.imgPolarity_;
+        stream << state.interpolation_;
+        stream << state.type_;
+        stream << state.quadrant_;
+        stream << state.region_;
+        stream << state.aperture_;
+        stream << state.lineNum_;
+        stream << state.curPos_;
+        stream << state.mirroring_;
+        stream << state.scaling_;
+        stream << state.rotating_;
         return stream;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        stream >> state.m_dCode;
-        stream >> state.m_gCode;
-        stream >> state.m_imgPolarity;
-        stream >> state.m_interpolation;
-        stream >> state.m_type;
-        stream >> state.m_quadrant;
-        stream >> state.m_region;
-        stream >> state.m_aperture;
-        stream >> state.m_lineNum;
-        stream >> state.m_curPos;
-        stream >> state.m_mirroring;
-        stream >> state.m_scaling;
-        stream >> state.m_rotating;
+        stream >> state.dCode_;
+        stream >> state.gCode_;
+        stream >> state.imgPolarity_;
+        stream >> state.interpolation_;
+        stream >> state.type_;
+        stream >> state.quadrant_;
+        stream >> state.region_;
+        stream >> state.aperture_;
+        stream >> state.lineNum_;
+        stream >> state.curPos_;
+        stream >> state.mirroring_;
+        stream >> state.scaling_;
+        stream >> state.rotating_;
         return stream;
     }
 
     File* file_ = nullptr;
-    Operation m_dCode = D02;
-    GCode m_gCode = G01;
-    ImagePolarity m_imgPolarity = Positive;
-    InterpolationMode m_interpolation = Linear;
-    PrimitiveType m_type = Aperture;
-    QuadrantMode m_quadrant = Undef;
-    RegionMode m_region = Off;
-    int m_aperture = 0;
-    int m_lineNum = 0;
-    IntPoint m_curPos;
-    Mirroring m_mirroring = NoMirroring;
-    double m_scaling = 1.0;
-    double m_rotating = 0.0;
+    Operation dCode_ = D02;
+    GCode gCode_ = G01;
+    ImagePolarity imgPolarity_ = Positive;
+    InterpolationMode interpolation_ = Linear;
+    PrimitiveType type_ = Aperture;
+    QuadrantMode quadrant_ = Undef;
+    RegionMode region_ = Off;
+    int aperture_ = 0;
+    int lineNum_ = 0;
+    IntPoint curPos_;
+    Mirroring mirroring_ = NoMirroring;
+    double scaling_ = 1.0;
+    double rotating_ = 0.0;
 
 public:
     State(File* const file = nullptr)
         : file_(file)
-        , m_dCode(D02)
-        , m_gCode(G01)
-        , m_imgPolarity(Positive)
-        , m_interpolation(Linear)
-        , m_type(Aperture)
-        , m_quadrant(Undef)
-        , m_region(Off)
-        , m_aperture(0)
-        , m_lineNum(0)
-        , m_curPos(IntPoint())
-        , m_mirroring(NoMirroring)
-        , m_scaling(1.0)
-        , m_rotating(0.0) {
+        , dCode_(D02)
+        , gCode_(G01)
+        , imgPolarity_(Positive)
+        , interpolation_(Linear)
+        , type_(Aperture)
+        , quadrant_(Undef)
+        , region_(Off)
+        , aperture_(0)
+        , lineNum_(0)
+        , curPos_(IntPoint())
+        , mirroring_(NoMirroring)
+        , scaling_(1.0)
+        , rotating_(0.0) {
     }
 
     inline File* file() const { return file_; }
 
-    inline Operation dCode() const { return m_dCode; }
-    inline void setDCode(Operation dCode) { m_dCode = dCode; }
+    inline Operation dCode() const { return dCode_; }
+    inline void setDCode(Operation dCode) { dCode_ = dCode; }
 
-    inline GCode gCode() const { return m_gCode; }
-    inline void setGCode(GCode gCode) { m_gCode = gCode; }
+    inline GCode gCode() const { return gCode_; }
+    inline void setGCode(GCode gCode) { gCode_ = gCode; }
 
-    inline ImagePolarity imgPolarity() const { return m_imgPolarity; }
-    inline void setImgPolarity(ImagePolarity imgPolarity) { m_imgPolarity = imgPolarity; }
+    inline ImagePolarity imgPolarity() const { return imgPolarity_; }
+    inline void setImgPolarity(ImagePolarity imgPolarity) { imgPolarity_ = imgPolarity; }
 
-    inline InterpolationMode interpolation() const { return m_interpolation; }
-    inline void setInterpolation(InterpolationMode interpolation) { m_interpolation = interpolation; }
+    inline InterpolationMode interpolation() const { return interpolation_; }
+    inline void setInterpolation(InterpolationMode interpolation) { interpolation_ = interpolation; }
 
-    inline PrimitiveType type() const { return m_type; }
-    inline void setType(PrimitiveType type) { m_type = type; }
+    inline PrimitiveType type() const { return type_; }
+    inline void setType(PrimitiveType type) { type_ = type; }
 
-    inline QuadrantMode quadrant() const { return m_quadrant; }
-    inline void setQuadrant(QuadrantMode quadrant) { m_quadrant = quadrant; }
+    inline QuadrantMode quadrant() const { return quadrant_; }
+    inline void setQuadrant(QuadrantMode quadrant) { quadrant_ = quadrant; }
 
-    inline RegionMode region() const { return m_region; }
-    inline void setRegion(RegionMode region) { m_region = region; }
+    inline RegionMode region() const { return region_; }
+    inline void setRegion(RegionMode region) { region_ = region; }
 
-    inline int aperture() const { return m_aperture; }
-    inline void setAperture(int aperture) { m_aperture = aperture; }
+    inline int aperture() const { return aperture_; }
+    inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline IntPoint& curPos() { return m_curPos; }
-    inline IntPoint curPos() const { return m_curPos; }
-    inline void setCurPos(const IntPoint& curPos) { m_curPos = curPos; }
+    inline IntPoint& curPos() { return curPos_; }
+    inline IntPoint curPos() const { return curPos_; }
+    inline void setCurPos(const IntPoint& curPos) { curPos_ = curPos; }
 
-    inline Mirroring mirroring() const { return m_mirroring; }
-    inline void setMirroring(Mirroring mirroring) { m_mirroring = mirroring; }
+    inline Mirroring mirroring() const { return mirroring_; }
+    inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
 
-    inline double scaling() const { return m_scaling; }
-    inline void setScaling(double scaling) { m_scaling = scaling; }
+    inline double scaling() const { return scaling_; }
+    inline void setScaling(double scaling) { scaling_ = scaling; }
 
-    inline double rotating() const { return m_rotating; }
-    inline void setRotating(double rotating) { m_rotating = rotating; }
+    inline double rotating() const { return rotating_; }
+    inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
 class GraphicObject final : public AbstrGraphicObject {
     friend class File;
     friend class Plugin;
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        stream << go.m_path;
-        stream << go.m_paths;
-        stream << go.m_state;
+        stream << go.path_;
+        stream << go.paths_;
+        stream << go.state_;
         return stream;
     }
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        stream >> go.m_path;
-        stream >> go.m_paths;
-        stream >> go.m_state;
+        stream >> go.path_;
+        stream >> go.paths_;
+        stream >> go.state_;
         return stream;
     }
 
-    File* m_gFile;
-    Path m_path;
-    State m_state;
+    File* gFile_;
+    Path path_;
+    State state_;
 
 public:
     GraphicObject()
         : AbstrGraphicObject { {} }
-        , m_gFile(nullptr) {
+        , gFile_(nullptr) {
     }
     GraphicObject(
         int /*id*/,
@@ -312,39 +312,39 @@ public:
         File* gFile,
         const Path& path = Path())
         : AbstrGraphicObject { paths }
-        , m_gFile(gFile)
-        , m_path(path)
-        , m_state(state) {
+        , gFile_(gFile)
+        , path_(path)
+        , state_(state) {
     }
-    inline File* gFile() const { return m_gFile; }
-    inline State state() const { return m_state; }
+    inline File* gFile() const { return gFile_; }
+    inline State state() const { return state_; }
 
-    inline Path& rPath() override { return m_path; }
-    inline Paths& rPaths() override { return m_paths; }
+    inline Path& rPath() override { return path_; }
+    inline Paths& rPaths() override { return paths_; }
 
-    const Path& path() const override { return m_path; }
-    const Paths& paths() const override { return m_paths; }
+    const Path& path() const override { return path_; }
+    const Paths& paths() const override { return paths_; }
 
-    Path line() const override { return m_path.size() == 2 ? m_path : Path(); }
-    Path lineW() const override { return m_path.size() == 2 ? m_paths.front() : Path(); } // polygon
+    Path line() const override { return path_.size() == 2 ? path_ : Path(); }
+    Path lineW() const override { return path_.size() == 2 ? paths_.front() : Path(); } // polygon
 
-    Path polyLine() const override { return closed() ? Path() : m_path; }
-    Paths polyLineW() const override { return closed() ? Paths() : m_paths; } // closed
+    Path polyLine() const override { return closed() ? Path() : path_; }
+    Paths polyLineW() const override { return closed() ? Paths() : paths_; } // closed
 
-    Path elipse() const override;   // { return m_gFile.; } // circle
+    Path elipse() const override;   // { return gFile_.; } // circle
     Paths elipseW() const override; // { return {}; }
 
     Path arc() const override { return {}; } // part of elipse
     Path arcW() const override { return {}; }
 
-    Path polygon() const override { return m_state.type() == Region ? m_path : Path(); }
-    Paths polygonWholes() const override { return m_paths; }
+    Path polygon() const override { return state_.type() == Region ? path_ : Path(); }
+    Paths polygonWholes() const override { return paths_; }
 
-    Path hole() const override { return !positive() ? m_path : Path(); }
-    Paths holes() const override { return !positive() ? Paths { m_paths.front() } : m_paths.mid(1); }
+    Path hole() const override { return !positive() ? path_ : Path(); }
+    Paths holes() const override { return !positive() ? Paths { paths_.front() } : paths_.mid(1); }
 
-    bool positive() const override { return m_state.imgPolarity() == Gerber::Positive; }                                                         // not hole
-    bool closed() const override { return m_path.size() ? m_path.front() == m_path.back() : m_paths.front().front() == m_paths.front().back(); } // front == back
+    bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                         // not hole
+    bool closed() const override { return path_.size() ? path_.front() == path_.back() : paths_.front().front() == paths_.front().back(); } // front == back
 };
 
 struct StepRepeatStr {
@@ -364,18 +364,18 @@ struct StepRepeatStr {
 
 class Settings {
 protected:
-    static inline bool m_cleanPolygons;
-    static inline double m_cleanPolygonsDist = 0.0005;
+    static inline bool cleanPolygons_;
+    static inline double cleanPolygonsDist_ = 0.0005;
 
-    static inline bool m_simplifyRegions;
-    static inline bool m_skipDuplicates;
+    static inline bool simplifyRegions_;
+    static inline bool skipDuplicates_;
 
 public:
-    static bool cleanPolygons() { return m_cleanPolygons; }
-    static double cleanPolygonsDist() { return m_cleanPolygonsDist; }
+    static bool cleanPolygons() { return cleanPolygons_; }
+    static double cleanPolygonsDist() { return cleanPolygonsDist_; }
 
-    static bool simplifyRegions() { return m_simplifyRegions; }
-    static bool skipDuplicates() { return m_skipDuplicates; }
+    static bool simplifyRegions() { return simplifyRegions_; }
+    static bool skipDuplicates() { return skipDuplicates_; }
 };
 
 } // namespace Gerber

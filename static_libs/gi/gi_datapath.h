@@ -18,7 +18,7 @@ class File;
 }
 
 class GiDataPath : public GraphicsItem {
-    //    QRectF m_boundingRect;
+    //    QRectF boundingRect_;
     int timerId = 0;
 #ifdef __GNUC__
     static QTimer timer;

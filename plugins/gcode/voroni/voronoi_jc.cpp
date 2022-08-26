@@ -82,11 +82,11 @@ void VoronoiJc::jcVoronoi() {
             { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
         };
         jcv_diagram diagram;
-        jcv_diagram_generate(points.size(), points.data(), &bounding_box, nullptr, &diagram);
+        jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
             return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
         };
-        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+        const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
@@ -99,12 +99,12 @@ void VoronoiJc::jcVoronoi() {
                 graph_edge = graph_edge->next;
             }
         }
-        jcv_diagram_free(&diagram);
+        jcv_diagrafree_(&diagram);
     }
 
     for (const auto& [key, edge] : edges) {
         returnPs.append(toPath(edge));
-        // PROG //PROG .3setProgMaxAndVal(edges.size(), m_returnPs.size()); // progress
+        // PROG //PROG .3setProgMaxAndVal(edges.size(), returnPs_.size()); // progress
     }
     mergePaths(returnPs, 0.005 * uScale);
     returnPs.append(toPath(frame));

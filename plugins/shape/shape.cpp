@@ -26,8 +26,8 @@
 namespace Shapes {
 
 Shape::Shape()
-    : m_node(new Node(this)) {
-    m_paths.resize(1);
+    : node_(new Node(this)) {
+    paths_.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
     setAcceptHoverEvents(true);
@@ -57,7 +57,7 @@ QRectF Shape::boundingRect() const { return shape_.boundingRect(); }
 
 QPainterPath Shape::shape() const { return shape_; }
 
-Paths Shape::paths(int) const { return m_paths; }
+Paths Shape::paths(int) const { return paths_; }
 
 void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
 {
@@ -98,13 +98,13 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
         const bool selected = value.toInt();
         for (auto& item : handlers)
             item->setVisible(selected);
-        if (m_node->index().isValid()) {
-            App::fileTreeView()->selectionModel()->select(m_node->index(),
+        if (node_->index().isValid()) {
+            App::fileTreeView()->selectionModel()->select(node_->index(),
                 (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(m_node->index(), m_node->index(), { Qt::CheckStateRole });
+        emit App::fileModel()->dataChanged(node_->index(), node_->index(), { Qt::CheckStateRole });
     }
     return GraphicsItem::itemChange(change, value);
 }
@@ -135,14 +135,14 @@ void Shape::changeColor() {
     animation.start();
 }
 
-Node* Shape::node() const { return m_node; }
+Node* Shape::node() const { return node_; }
 
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch (role) {
         // case Qt::DisplayRole:
-        //     return QString("%1 (%2)").arg(name()).arg(m_giId);
+        //     return QString("%1 (%2)").arg(name()).arg(giId_);
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
@@ -198,7 +198,7 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
 
 void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        App::fileModel()->removeRow(m_node->row(), m_node->index().parent());
+        App::fileModel()->removeRow(node_->row(), node_->index().parent());
     });
     auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
     action->setCheckable(true);
@@ -218,7 +218,7 @@ void Shape::write_(QDataStream& stream) const {
     stream << qint32(handlers.size());
     for (const auto& item : handlers) {
         stream << item->pos();
-        stream << item->m_hType;
+        stream << item->hType_;
     }
     write(stream);
 }

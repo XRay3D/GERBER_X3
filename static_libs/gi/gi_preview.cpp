@@ -23,8 +23,8 @@ GiAbstractPreview::GiAbstractPreview()
     : propAnimGr(this)
     , propAnimBr(this, "bodyColor")
     , propAnimPn(this, "pathColor")
-    , m_bodyColor(colors[(int)Colors::Default])
-    , m_pathColor(colors[(int)Colors::UnUsed]) {
+    , bodyColor_(colors[(int)Colors::Default])
+    , pathColor_(colors[(int)Colors::UnUsed]) {
     propAnimGr.addAnimation(&propAnimBr);
     propAnimGr.addAnimation(&propAnimPn);
 
@@ -42,12 +42,12 @@ GiAbstractPreview::GiAbstractPreview()
 }
 
 void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
-    painter->setPen({ m_bodyColor, 0.0 });
-    painter->setBrush(m_bodyColor);
+    painter->setPen({ bodyColor_, 0.0 });
+    painter->setBrush(bodyColor_);
     painter->drawPath(sourcePath_);
     // draw tool
     if (toolId() > -1) {
-        painter->setPen(QPen(m_pathColor, 2 * App::graphicsView()->scaleFactor()));
+        painter->setPen(QPen(pathColor_, 2 * App::graphicsView()->scaleFactor()));
         painter->setBrush(Qt::NoBrush);
         if (toolPath_.isEmpty())
             painter->drawPath(App::toolHolder().tool(toolId()).path(pos()));
@@ -70,8 +70,8 @@ void GiAbstractPreview::changeColor() {
     else
         colorState &= ~Used;
 
-    propAnimBr.setStartValue(m_bodyColor);
-    propAnimPn.setStartValue(m_pathColor);
+    propAnimBr.setStartValue(bodyColor_);
+    propAnimPn.setStartValue(pathColor_);
 
     if (colorState & Selected) {
         propAnimBr.setEndValue(colors[int((colorState & Hovered) ? Colors::SelectedHovered :

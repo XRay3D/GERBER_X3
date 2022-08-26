@@ -25,7 +25,7 @@ class ThermalModel : public QAbstractItemModel {
     QIcon repaint(QColor color, const QIcon& icon) const;
 
     ThermalNode* const rootItem = nullptr;
-    mvector<ThermalNode*> m_data;
+    mvector<ThermalNode*> data_;
 
 public:
     enum {

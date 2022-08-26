@@ -51,7 +51,7 @@ const QString colorName[GuiColors::Count] {
 };
 
 class ModelSettings : public QAbstractListModel {
-    std::vector<QWidget*> m_data;
+    std::vector<QWidget*> data_;
 
 public:
     ModelSettings(QObject* parent = nullptr)
@@ -60,14 +60,14 @@ public:
     virtual ~ModelSettings() { }
 
     // QAbstractItemModel interface
-    int rowCount(const QModelIndex& /*parent*/) const override { return m_data.size(); }
+    int rowCount(const QModelIndex& /*parent*/) const override { return data_.size(); }
     int columnCount(const QModelIndex& /*parent*/) const override { return 1; }
     QVariant data(const QModelIndex& index, int role) const override {
         if (role == Qt::DisplayRole)
-            return m_data[index.row()]->windowTitle();
+            return data_[index.row()]->windowTitle();
         return {};
     }
-    void addWidget(QWidget* w) { m_data.emplace_back(w); }
+    void addWidget(QWidget* w) { data_.emplace_back(w); }
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
     for (int i = 0; i < GuiColors::Count; ++i) {
-        formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(App::settings().m_guiColor[i], defaultColor[i], gbxColor));
+        formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(App::settings().guiColor_[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
 
@@ -165,16 +165,16 @@ void SettingsDialog::readSettings() {
     settings.beginGroup("Viewer");
     settings.getValue(chbxAntialiasing);
     settings.getValue(chbxOpenGl);
-    settings.getValue(chbxScaleHZMarkers, App::settings().m_scaleHZMarkers);
-    settings.getValue(chbxScalePinMarkers, App::settings().m_scalePinMarkers);
-    settings.getValue(chbxSmoothScSh, App::settings().m_guiSmoothScSh);
-    settings.getValue(chbxAnimSelection, App::settings().m_animSelection);
-    settings.getValue(cbxTheme, App::settings().m_theme);
+    settings.getValue(chbxScaleHZMarkers, App::settings().scaleHZMarkers_);
+    settings.getValue(chbxScalePinMarkers, App::settings().scalePinMarkers_);
+    settings.getValue(chbxSmoothScSh, App::settings().guiSmoothScSh_);
+    settings.getValue(chbxAnimSelection, App::settings().animSelection_);
+    settings.getValue(cbxTheme, App::settings().theme_);
     settings.endGroup();
 
     settings.beginGroup("Color");
     for (int i = 0; i < GuiColors::Count; ++i)
-        App::settings().m_guiColor[i].setNamedColor(settings.value(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb)).toString());
+        App::settings().guiColor_[i].setNamedColor(settings.value(QString("%1").arg(i), App::settings().guiColor_[i].name(QColor::HexArgb)).toString());
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -185,27 +185,27 @@ void SettingsDialog::readSettings() {
 
     /*Clipper*/
     settings.beginGroup("Clipper");
-    settings.getValue(dsbxMinCircleSegmentLength, App::settings().m_clpMinCircleSegmentLength);
-    settings.getValue(sbxMinCircleSegments, App::settings().m_clpMinCircleSegments);
+    settings.getValue(dsbxMinCircleSegmentLength, App::settings().clpMinCircleSegmentLength_);
+    settings.getValue(sbxMinCircleSegments, App::settings().clpMinCircleSegments_);
     settings.endGroup();
 
     /*Markers*/
     settings.beginGroup("Home");
-    settings.getValue("homeOffset", App::settings().m_mrkHomeOffset);
-    settings.getValue("pinOffset", App::settings().m_mrkPinOffset, QPointF(6, 6));
-    settings.getValue("zeroOffset", App::settings().m_mrkZeroOffset);
-    dsbxHomeX->setValue(App::settings().m_mrkHomeOffset.x());
-    dsbxHomeY->setValue(App::settings().m_mrkHomeOffset.y());
-    dsbxPinX->setValue(App::settings().m_mrkPinOffset.x());
-    dsbxPinY->setValue(App::settings().m_mrkPinOffset.y());
-    dsbxZeroX->setValue(App::settings().m_mrkZeroOffset.x());
-    dsbxZeroY->setValue(App::settings().m_mrkZeroOffset.y());
+    settings.getValue("homeOffset", App::settings().mrkHomeOffset_);
+    settings.getValue("pinOffset", App::settings().mrkPinOffset_, QPointF(6, 6));
+    settings.getValue("zeroOffset", App::settings().mrkZeroOffset_);
+    dsbxHomeX->setValue(App::settings().mrkHomeOffset_.x());
+    dsbxHomeY->setValue(App::settings().mrkHomeOffset_.y());
+    dsbxPinX->setValue(App::settings().mrkPinOffset_.x());
+    dsbxPinY->setValue(App::settings().mrkPinOffset_.y());
+    dsbxZeroX->setValue(App::settings().mrkZeroOffset_.x());
+    dsbxZeroY->setValue(App::settings().mrkZeroOffset_.y());
     settings.getValue(cbxHomePos, HomePosition::TopLeft);
     settings.getValue(cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
     /*Other*/
-    settings.getValue(App::settings().m_inch, "inch", false);
-    settings.getValue(App::settings().m_snap, "snap", false);
+    settings.getValue(App::settings().inch_, "inch", false);
+    settings.getValue(App::settings().snap_, "snap", false);
     for (auto tab : tabs)
         tab->readSettings(settings);
 }
@@ -223,16 +223,16 @@ void SettingsDialog::saveSettings() {
         App::graphicsView()->setRenderHint(QPainter::Antialiasing, chbxAntialiasing->isChecked());
         settings.setValue(chbxAntialiasing);
     }
-    App::settings().m_animSelection = settings.setValue(chbxAnimSelection);
-    App::settings().m_guiSmoothScSh = settings.setValue(chbxSmoothScSh);
-    App::settings().m_scaleHZMarkers = settings.setValue(chbxScaleHZMarkers);
-    App::settings().m_scalePinMarkers = settings.setValue(chbxScalePinMarkers);
-    App::settings().m_theme = settings.setValue(cbxTheme);
+    App::settings().animSelection_ = settings.setValue(chbxAnimSelection);
+    App::settings().guiSmoothScSh_ = settings.setValue(chbxSmoothScSh);
+    App::settings().scaleHZMarkers_ = settings.setValue(chbxScaleHZMarkers);
+    App::settings().scalePinMarkers_ = settings.setValue(chbxScalePinMarkers);
+    App::settings().theme_ = settings.setValue(cbxTheme);
     settings.endGroup();
 
     settings.beginGroup("Color");
     for (int i = 0; i < GuiColors::Count; ++i)
-        settings.setValue(QString("%1").arg(i), App::settings().m_guiColor[i].name(QColor::HexArgb));
+        settings.setValue(QString("%1").arg(i), App::settings().guiColor_[i].name(QColor::HexArgb));
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -241,22 +241,22 @@ void SettingsDialog::saveSettings() {
 
     /*Clipper*/
     settings.beginGroup("Clipper");
-    App::settings().m_clpMinCircleSegmentLength = settings.setValue(dsbxMinCircleSegmentLength);
-    App::settings().m_clpMinCircleSegments = settings.setValue(sbxMinCircleSegments);
+    App::settings().clpMinCircleSegmentLength_ = settings.setValue(dsbxMinCircleSegmentLength);
+    App::settings().clpMinCircleSegments_ = settings.setValue(sbxMinCircleSegments);
     settings.endGroup();
 
     /*Markers*/
     settings.beginGroup("Home");
-    App::settings().m_mrkHomeOffset = settings.setValue("homeOffset", QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
-    App::settings().m_mrkHomePos = settings.setValue(cbxHomePos);
-    App::settings().m_mrkPinOffset = settings.setValue("pinOffset", QPointF(dsbxPinX->value(), dsbxPinY->value()));
-    App::settings().m_mrkZeroOffset = settings.setValue("zeroOffset", QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
-    App::settings().m_mrkZeroPos = settings.setValue(cbxZeroPos);
+    App::settings().mrkHomeOffset_ = settings.setValue("homeOffset", QPointF(dsbxHomeX->value(), dsbxHomeY->value()));
+    App::settings().mrkHomePos_ = settings.setValue(cbxHomePos);
+    App::settings().mrkPinOffset_ = settings.setValue("pinOffset", QPointF(dsbxPinX->value(), dsbxPinY->value()));
+    App::settings().mrkZeroOffset_ = settings.setValue("zeroOffset", QPointF(dsbxZeroX->value(), dsbxZeroY->value()));
+    App::settings().mrkZeroPos_ = settings.setValue(cbxZeroPos);
     settings.endGroup();
 
     /*Other*/
-    settings.setValue(App::settings().m_inch, "inch");
-    settings.setValue(App::settings().m_snap, "snap");
+    settings.setValue(App::settings().inch_, "inch");
+    settings.setValue(App::settings().snap_, "snap");
     for (auto tab : tabs)
         tab->writeSettings(settings);
 }

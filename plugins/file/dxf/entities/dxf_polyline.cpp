@@ -103,16 +103,7 @@ GraphicObject PolyLine::toGo() const {
     if (polylineFlags & ClosedPolyline) {
         addSeg(vertex.last(), vertex.first());
     }
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u, u);
-    QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QMatrix m2;
-    m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2));
-#else
+
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
@@ -121,7 +112,7 @@ GraphicObject PolyLine::toGo() const {
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
-#endif
+
     return { id, p.value(0), {} };
 }
 

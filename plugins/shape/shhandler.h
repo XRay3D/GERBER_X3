@@ -39,7 +39,7 @@ public:
 
 private:
     Shape* const shape;
-    HType m_hType;
+    HType hType_;
     mvector<QPointF> pt;
     QPointF lastPos;
     void savePos();

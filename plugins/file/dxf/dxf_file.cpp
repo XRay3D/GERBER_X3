@@ -49,15 +49,15 @@ File::File()
 }
 
 File::~File() {
-    for (auto [k, v] : m_sections)
+    for (auto [k, v] : sections_)
         delete v;
-    for (const auto& [k, v] : m_blocks)
+    for (const auto& [k, v] : blocks_)
         delete v;
 }
 
 void File::setItemType(int type) {
     itemsType_ = type;
-    for (const auto& [name, layer] : m_layers)
+    for (const auto& [name, layer] : layers_)
         layer->setItemsType(ItemsType(itemsType_));
 }
 
@@ -130,10 +130,10 @@ FileTree::Node* File::node() {
 }
 
 Layer* File::layer(const QString& name) {
-    if (m_layers.contains(name)) {
-        return m_layers[name];
+    if (layers_.contains(name)) {
+        return layers_[name];
     } else {
-        return m_layers[name] = new Layer(m_sections.begin()->second, name);
+        return layers_[name] = new Layer(sections_.begin()->second, name);
     }
     return nullptr;
 }
@@ -142,9 +142,9 @@ FileType File::type() const { return FileType::Dxf; }
 
 void File::createGi() {
 
-    for (auto& [name, layer] : m_layers)
-        for (auto& go : layer->m_graphicObjects)
-            go.m_file = this;
+    for (auto& [name, layer] : layers_)
+        for (auto& go : layer->graphicObjects_)
+            go.file_ = this;
 
     GiGroup* igNorm = itemGroups_.back();
     GiGroup* igPath = new GiGroup;
@@ -152,8 +152,8 @@ void File::createGi() {
 
     int i = 0;
 
-    for (auto& [name, layer] : m_layers) {
-        if (layer->m_graphicObjects.size()) {
+    for (auto& [name, layer] : layers_) {
+        if (layer->graphicObjects_.size()) {
             if (i++) {
                 itemGroups_.push_back(igNorm = new GiGroup);
                 itemGroups_.push_back(igPath = new GiGroup);
@@ -161,8 +161,8 @@ void File::createGi() {
 
             Clipper clipper; // Clipper
 
-            for (auto& go : layer->m_graphicObjects) {
-                if (layer->m_groupedPaths.empty() && go.paths().size())
+            for (auto& go : layer->graphicObjects_) {
+                if (layer->groupedPaths_.empty() && go.paths().size())
                     clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
                 if (go.path().size() > 1) {
@@ -173,23 +173,23 @@ void File::createGi() {
                         //                                              .arg(go.entity()->name()));
                         gItem->setToolTip(go.entity()->name());
                     }
-                    gItem->setPenColorPtr(&layer->m_colorPath);
+                    gItem->setPenColorPtr(&layer->colorPath_);
                     igPath->push_back(gItem);
                 }
             }
 
-            if (layer->m_groupedPaths.empty()) {
+            if (layer->groupedPaths_.empty()) {
                 clipper.Execute(ctUnion, mergedPaths_, pftNonZero); // Clipper
-                //                dbgPaths(m_mergedPaths, "m_mergedPaths", true);
-                layer->m_groupedPaths = std::move(groupedPaths());
-                for (auto& paths : layer->m_groupedPaths)
+                //                dbgPaths(mergedPaths_, "mergedPaths_", true);
+                layer->groupedPaths_ = std::move(groupedPaths());
+                for (auto& paths : layer->groupedPaths_)
                     CleanPolygons(paths, uScale * 0.0005);
                 mergedPaths_.clear();
             }
 
-            for (Paths& paths : layer->m_groupedPaths) {
+            for (Paths& paths : layer->groupedPaths_) {
                 auto gItem = new GiDataSolid(paths, this);
-                gItem->setColorPtr(&layer->m_colorNorm);
+                gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
             }
 
@@ -198,7 +198,7 @@ void File::createGi() {
             layer->itemGroupNorm = igNorm;
             layer->itemGroupPath = igPath;
 
-            if (layer->m_itemsType == ItemsType::Null) {
+            if (layer->itemsType_ == ItemsType::Null) {
                 layer->setItemsType(ItemsType::Normal);
                 layer->setVisible(true);
             } else
@@ -214,43 +214,43 @@ void File::setVisible(bool visible) {
         return;
     visible_ = visible;
     if (visible_) {
-        for (const auto& [name, vis] : m_layersVisible) {
-            m_layers[name]->setVisible(vis);
+        for (const auto& [name, vis] : layersVisible_) {
+            layers_[name]->setVisible(vis);
         }
     } else {
-        m_layersVisible.clear();
-        for (const auto& [name, layer] : m_layers) {
+        layersVisible_.clear();
+        for (const auto& [name, layer] : layers_) {
             if (!layer->isEmpty()) {
-                m_layersVisible[name] = layer->isVisible();
-                m_layers[name]->setVisible(false);
+                layersVisible_[name] = layer->isVisible();
+                layers_[name]->setVisible(false);
             }
         }
     }
 }
 
 void File::write(QDataStream& stream) const {
-    stream << m_header;
+    stream << header_;
     {
-        stream << int(m_layers.size());
-        for (auto& [name, layer] : m_layers) {
+        stream << int(layers_.size());
+        for (auto& [name, layer] : layers_) {
             stream << name;
             stream << *layer;
         }
     }
     stream << itemsType_;
-    if (!m_layersVisible.size() && visible_) {
-        for (const auto& [name, layer] : m_layers) {
+    if (!layersVisible_.size() && visible_) {
+        for (const auto& [name, layer] : layers_) {
             if (!layer->isEmpty()) {
-                m_layersVisible[name] = layer->isVisible();
+                layersVisible_[name] = layer->isVisible();
             }
         }
     }
-    stream << m_layersVisible;
-    stream << m_entities;
+    stream << layersVisible_;
+    stream << entities_;
 }
 
 void File::read(QDataStream& stream) {
-    stream >> m_header;
+    stream >> header_;
     {
         int size;
         stream >> size;
@@ -259,12 +259,12 @@ void File::read(QDataStream& stream) {
             Layer* layer = new Layer(this);
             stream >> name;
             stream >> *layer;
-            m_layers[name] = layer;
+            layers_[name] = layer;
         }
     }
     stream >> itemsType_;
-    stream >> m_layersVisible;
-    stream >> m_entities;
+    stream >> layersVisible_;
+    stream >> entities_;
 }
 
 Paths File::merge() const { return mergedPaths_; }

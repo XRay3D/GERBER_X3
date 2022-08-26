@@ -60,12 +60,12 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
     //                return QString("%1 (%2, %3)")
     //                    .arg(shape()->name())
-    //                    .arg(m_id)
+    //                    .arg(id_)
     //                    .arg(static_cast<Text*>(shape())->text());
     //            else
     //                return QString("%1 (%2)")
     //                    .arg(shape()->name())
-    //                    .arg(m_id);
+    //                    .arg(id_);
     //            //        case Qt::ToolTipRole:
     //            //            return file()->shortName() + "\n" + file()->name();
     //        case Qt::CheckStateRole:
@@ -73,7 +73,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //        case Qt::DecorationRole:
     //            return shape()->icon();
     //        case FileTree::Id:
-    //            return *m_id;
+    //            return *id_;
     //        case Qt::EditRole:
     //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
     //                return static_cast<Text*>(shape())->text();

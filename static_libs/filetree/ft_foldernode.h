@@ -16,7 +16,7 @@ namespace FileTree {
 
 class FolderNode : public FileTree::Node {
     QString name;
-    Qt::CheckState m_checkState = Qt::Checked;
+    Qt::CheckState checkState_ = Qt::Checked;
 
 public:
     explicit FolderNode(const QString& name);

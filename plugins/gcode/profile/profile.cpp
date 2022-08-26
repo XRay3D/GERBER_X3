@@ -178,8 +178,8 @@ void ProfileCreator::makeBridges() {
     }
     // create Bridges
     if (bridgeItems.size()) {
-        for (auto& m_returnPs : returnPss) {
-            const Path& path = m_returnPs.front();
+        for (auto& returnPs_ : returnPss) {
+            const Path& path = returnPs_.front();
             std::vector<std::pair<GiBridge*, IntPoint>> biStack;
             biStack.reserve(bridgeItems.size());
             IntPoint pt;
@@ -238,7 +238,7 @@ void ProfileCreator::makeBridges() {
                 if (check())
                     ReversePaths(paths);
 
-                std::swap(m_returnPs, paths);
+                std::swap(returnPs_, paths);
             }
         }
     }

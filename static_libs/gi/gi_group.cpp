@@ -22,16 +22,16 @@ GiGroup::~GiGroup() {
 void GiGroup::push_back(GraphicsItem* item) {
     item->id_ = mvector::size() ? mvector::back()->id_ + 1 : 0;
     item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->id_));
-    item->setVisible(m_visible);
+    item->setVisible(visible_);
     item->itemGroup = this;
     mvector::push_back(item);
 }
 
 void GiGroup::setVisible(bool visible) {
-    if (m_visible != visible) {
-        m_visible = visible;
+    if (visible_ != visible) {
+        visible_ = visible;
         for (GraphicsItem* item : *this)
-            item->setVisible(m_visible);
+            item->setVisible(visible_);
     }
 }
 
@@ -46,18 +46,18 @@ void GiGroup::addToScene(QGraphicsScene* scene) {
 }
 
 void GiGroup::setBrushColor(const QColor& color) {
-    if (m_brushColor != color) {
-        m_brushColor = color;
+    if (brushColor_ != color) {
+        brushColor_ = color;
         for (GraphicsItem* item : *this)
-            item->setColorPtr(&m_brushColor);
+            item->setColorPtr(&brushColor_);
     }
 }
 
 void GiGroup::setPen(const QPen& pen) {
-    if (m_pen != pen) {
-        m_pen = pen;
+    if (pen_ != pen) {
+        pen_ = pen;
         for (GraphicsItem* item : *this)
-            item->setPen(m_pen);
+            item->setPen(pen_);
     }
 }
 

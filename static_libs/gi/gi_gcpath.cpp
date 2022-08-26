@@ -23,12 +23,12 @@
 //#undef QT_DEBUG
 
 GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
-    : m_gcFile(file) {
+    : gcFile_(file) {
     for (const Path& path : paths)
         shape_.addPolygon(path);
     double k;
-    if (m_gcFile)
-        k = m_gcFile->gcp_.getToolDiameter() * 0.5;
+    if (gcFile_)
+        k = gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
@@ -38,11 +38,11 @@ GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
 }
 
 GiGcPath::GiGcPath(const Path& path, GCode::File* file)
-    : m_gcFile(file) {
+    : gcFile_(file) {
     shape_.addPolygon(path);
     double k;
-    if (m_gcFile)
-        k = m_gcFile->gcp_.getToolDiameter() * 0.5;
+    if (gcFile_)
+        k = gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
@@ -81,23 +81,23 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawPath(shape_);
 
     //    painter->setPen(QPen(Qt::magenta, 0.0));
-    //    painter->drawRect(m_rect);
+    //    painter->drawRect(rect_);
 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
-    if (m_sc != scaleFactor())
+    if (sc_ != scaleFactor())
         updateArrows();
-    painter->drawPath(m_arrows);
+    painter->drawPath(arrows_);
 #endif
 }
 
 int GiGcPath::type() const { return static_cast<int>(GiType::Path); }
 
-Paths GiGcPath::paths(int) const { return {} /*m_paths*/; }
+Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
 #ifdef QT_DEBUG
 void GiGcPath::updateArrows() {
-    m_sc = scaleFactor();
-    m_arrows = QPainterPath(); //.clear();
+    sc_ = scaleFactor();
+    arrows_ = QPainterPath(); //.clear();
     if (qFuzzyIsNull(pen_.widthF())) {
         for (const QPolygonF& path : shape_.toSubpathPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
@@ -110,12 +110,12 @@ void GiGcPath::updateArrows() {
                 const double angle = line.angle();
                 line.setLength(length);
                 line.setAngle(angle + 10);
-                m_arrows.moveTo(line.p1());
-                m_arrows.lineTo(line.p2());
+                arrows_.moveTo(line.p1());
+                arrows_.lineTo(line.p2());
                 // painter->drawLine(line);
                 line.setAngle(angle - 10);
-                m_arrows.moveTo(line.p1());
-                m_arrows.lineTo(line.p2());
+                arrows_.moveTo(line.p1());
+                arrows_.lineTo(line.p2());
                 // painter->drawLine(line);
             }
         }

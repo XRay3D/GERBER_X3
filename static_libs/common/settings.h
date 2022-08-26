@@ -211,11 +211,11 @@ public:
     bool snap();
 
 private:
-    //    inline static AppSettings* m_settings = nullptr;
+    //    inline static AppSettings* settings_ = nullptr;
 
     /*GUI*/
     enum { gridColor = 100 };
-    QColor m_guiColor[GuiColors::Count] {
+    QColor guiColor_[GuiColors::Count] {
         QColor(Qt::black),                            // Background
         QColor(255, 255, 0, 120),                     // Pin
         QColor(Qt::gray),                             // CutArea
@@ -228,24 +228,24 @@ private:
         QColor(255, 0, 0, 120),                       // Zero
         QColor(Qt::red)                               // G0
     };
-    bool m_animSelection = true;
-    bool m_guiSmoothScSh;
-    bool m_scaleHZMarkers {};
-    bool m_scalePinMarkers {};
-    int m_theme = false;
+    bool animSelection_ = true;
+    bool guiSmoothScSh_;
+    bool scaleHZMarkers_ {};
+    bool scalePinMarkers_ {};
+    int theme_ = false;
 
     /*Clipper*/
-    double m_clpMinCircleSegmentLength { 0.5 };
-    int m_clpMinCircleSegments { 36 };
+    double clpMinCircleSegmentLength_ { 0.5 };
+    int clpMinCircleSegments_ { 36 };
 
     /*Markers*/
-    QPointF m_mrkHomeOffset;
-    QPointF m_mrkPinOffset;
-    QPointF m_mrkZeroOffset;
-    int m_mrkHomePos { Qt::BottomLeftCorner };
-    int m_mrkZeroPos { Qt::BottomLeftCorner };
+    QPointF mrkHomeOffset_;
+    QPointF mrkPinOffset_;
+    QPointF mrkZeroOffset_;
+    int mrkHomePos_ { Qt::BottomLeftCorner };
+    int mrkZeroPos_ { Qt::BottomLeftCorner };
 
     /*Other*/
-    bool m_inch = false;
-    bool m_snap = false;
+    bool inch_ = false;
+    bool snap_ = false;
 };

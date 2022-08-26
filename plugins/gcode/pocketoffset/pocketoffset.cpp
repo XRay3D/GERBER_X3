@@ -269,7 +269,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 offset.Execute(wp, -stepOver);
             } while (wp.size());
             returnPs.append(offsetPaths);
-        } // for (const Paths& paths : m_groupedPss) {
+        } // for (const Paths& paths : groupedPss_) {
 
         if (returnPs.empty()) {
             emit fileReady(nullptr);
@@ -292,7 +292,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
             offset.Execute(fillToolpath, dOffset);
             file_ = new GCode::File(returnPss, GCodeParams { gcp_ }, fillToolpath);
             file_->setFileName(tool.nameEnc());
-            // App::project()->addFile(m_file);
+            // App::project()->addFile(file_);
             emit fileReady(file_);
         }
 

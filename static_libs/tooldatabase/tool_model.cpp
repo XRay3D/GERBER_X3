@@ -36,7 +36,7 @@ ToolModel::~ToolModel() {
 }
 
 bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
-   
+
     //    return false;
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -53,7 +53,7 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
 }
 
 bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
-   
+
     //    return false;
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -65,7 +65,7 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
 }
 
 bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) {
-   
+
     qDebug() << "sourceParent" << sourceParent;
     qDebug() << "sourceRow" << sourceRow;
     qDebug() << "count" << count;
@@ -196,12 +196,7 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
         beginRow = rowCount(QModelIndex());
 
     QString encodedData = data->data(mimeType);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
-#else
     QList<QString> list = encodedData.split('|', Qt::SkipEmptyParts);
-#endif
-
     for (QString& item : list) {
         ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
         ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -287,16 +282,8 @@ void ToolModel::loadTools() {
     if (file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
     else {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        file.setFileName(qApp->applicationDirPath() + QStringLiteral("/tools.dat"));
-        if (file.exists() && file.open(QIODevice::ReadOnly)) {
-            loadDoc = QJsonDocument::fromBinaryData(file.readAll());
-        } else
-#endif
-        {
-            qDebug() << __FUNCTION__ << file.errorString();
-            return;
-        }
+        qDebug() << __FUNCTION__ << file.errorString();
+        return;
     }
 
     App::toolHolder().readTools(loadDoc.object());

@@ -83,7 +83,7 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
 
 ComponentsModel::~ComponentsModel() {
     delete rootItem;
-    //    App::app->m_ComponentsModel = nullptr;
+    //    App::app->ComponentsModel_ = nullptr;
 }
 
 QModelIndex ComponentsModel::index(int row, int column, const QModelIndex& parent) const {

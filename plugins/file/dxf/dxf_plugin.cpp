@@ -45,8 +45,8 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return nullptr;
 
-    m_file = new File;
-    m_file->setFileName(fileName);
+    file_ = new File;
+    file_->setFileName(fileName);
 
     int line = 1;
 
@@ -61,18 +61,18 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     auto getCode = [&in, &codes, &line, this] {
         // Code
         QString strCode(in.readLine());
-        m_file->lines().push_back(strCode);
+        file_->lines().push_back(strCode);
         bool ok;
         auto code(strCode.toInt(&ok));
         if (!ok)
             throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
-        m_file->lines().push_back(strValue);
+        file_->lines().push_back(strValue);
         int multi = 0;
         while (strValue.endsWith("\\P")) {
-            m_file->lines().push_back(in.readLine());
-            strValue.append("\n" + m_file->lines().back());
+            file_->lines().push_back(in.readLine());
+            strValue.append("\n" + file_->lines().back());
             ++multi;
         }
         codes.emplace_back(code, strValue, line);
@@ -90,72 +90,72 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
         codes.shrink_to_fit();
         file.close();
 
-        // emit fileProgress(m_file->shortName(), progress, progressCtr);
+        // emit fileProgress(file_->shortName(), progress, progressCtr);
 
         for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
             if (*it == "SECTION")
                 from = it;
             if (auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
-                // emit fileProgress(m_file->shortName(), 0, progressCtr++);
+                // emit fileProgress(file_->shortName(), 0, progressCtr++);
                 to = it;
                 const auto type = SectionParser::toType(*(from + 1));
                 switch (type) {
                 case SectionParser::HEADER:
-                    m_file->m_sections[type] = new SectionHEADER(m_file, from, to);
+                    file_->sections_[type] = new SectionHEADER(file_, from, to);
                     break;
                 case SectionParser::CLASSES:
-                    // dxfFile()->m_sections[type] = new SectionCLASSES(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionCLASSES(dxfFile(), from, to);
                     break;
                 case SectionParser::TABLES:
-                    m_file->m_sections[type] = new SectionTABLES(m_file, from, to);
+                    file_->sections_[type] = new SectionTABLES(file_, from, to);
                     break;
                 case SectionParser::BLOCKS:
-                    m_file->m_sections[type] = new SectionBLOCKS(m_file, from, to);
+                    file_->sections_[type] = new SectionBLOCKS(file_, from, to);
                     break;
                 case SectionParser::ENTITIES:
-                    m_file->m_sections[type] = new SectionENTITIES(m_file, from, to);
+                    file_->sections_[type] = new SectionENTITIES(file_, from, to);
                     break;
                 case SectionParser::OBJECTS:
-                    // dxfFile()->m_sections[type] = new SectionOBJECTS(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionOBJECTS(dxfFile(), from, to);
                     break;
                 case SectionParser::THUMBNAILIMAGE:
-                    // dxfFile()->m_sections[type] = new SectionTHUMBNAILIMAGE(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE(dxfFile(), from, to);
                     break;
                 default:
                     throw QString("Unknowh Section!");
                     break;
                 }
-                if (m_file->m_sections.contains(type))
-                    m_file->m_sections[type]->parse();
+                if (file_->sections_.contains(type))
+                    file_->sections_[type]->parse();
             }
         }
-        if (m_file->m_sections.size() == 0) {
-            delete m_file;
-            m_file = nullptr;
+        if (file_->sections_.size() == 0) {
+            delete file_;
+            file_ = nullptr;
         } else {
-            // emit fileProgress(m_file->shortName(), 1, 1);
-            emit fileReady(m_file);
+            // emit fileProgress(file_->shortName(), 1, 1);
+            emit fileReady(file_);
         }
     } catch (const QString& wath) {
         qWarning() << "exeption QString:" << wath;
-        // emit fileProgress(m_file->shortName(), 1, 1);
+        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), wath);
-        delete m_file;
+        delete file_;
         return nullptr;
     } catch (const std::exception& e) {
         qWarning() << "exeption:" << e.what();
-        // emit fileProgress(m_file->shortName(), 1, 1);
+        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
-        delete m_file;
+        delete file_;
         return nullptr;
     } catch (...) {
         qWarning() << "exeption:" << errno;
-        // emit fileProgress(m_file->shortName(), 1, 1);
+        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
-        delete m_file;
+        delete file_;
         return nullptr;
     }
-    return m_file;
+    return file_;
 }
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
@@ -265,7 +265,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //         , lwpline(dynamic_cast<const LwPolyline*>(go.entity())) {
 //         sourceDiameter_ = circle ? circle->radius * 2 : (QLineF(lwpline->poly.front(), lwpline->poly.back()).length() + lwpline->constantWidth) * go.scaleX();
 
-//        m_sourcePath = drawDrill();
+//        sourcePath_ = drawDrill();
 //        type_ = GiType::PrApetrure;
 //    }
 

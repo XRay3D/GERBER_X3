@@ -21,34 +21,34 @@
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     : QDialog(parent)
     , ui(new Ui::ToolDatabase)
-    , m_types(types) {
+    , types_(types) {
 
     ui->setupUi(this);
     ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
 
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(m_types.empty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(types_.empty());
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ToolDatabase::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ToolDatabase::reject);
 
     connect(ui->toolEdit, &ToolEditForm::itemChanged, [this](ToolItem* item) {
         if (item->isTool())
-            m_tool = item->tool();
+            tool_ = item->tool();
         ui->treeView->updateItem();
     });
 
     connect(ui->treeView, &ToolTreeView::itemSelected, [this](ToolItem* item) {
         if (item->isTool())
-            m_tool = item->tool();
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && m_types.contains(item->tool().type())) || m_types.empty());
+            tool_ = item->tool();
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && types_.contains(item->tool().type())) || types_.empty());
         ui->toolEdit->setItem(item);
     });
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [this](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-        if ((item->isTool() && m_types.contains(item->tool().type()))) {
+        if ((item->isTool() && types_.contains(item->tool().type()))) {
             if (item->tool().isValid()) {
-                m_tool = item->tool();
+                tool_ = item->tool();
                 accept();
             } else {
                 QMessageBox::information(this, tr("Invalid tool"), item->tool().errorStr());
@@ -68,7 +68,7 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
 
 ToolDatabase::~ToolDatabase() { delete ui; }
 
-Tool ToolDatabase::tool() const { return m_tool; }
+Tool ToolDatabase::tool() const { return tool_; }
 
 void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {

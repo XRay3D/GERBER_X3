@@ -83,16 +83,16 @@ struct Tables : std::map<int, QVector<AbstractTable*>> {
 
 class Settings {
 protected:
-    static inline QString m_defaultFont { "Arial" };
-    static inline bool m_boldFont { false };
-    static inline bool m_italicFont { false };
-    static inline bool m_overrideFonts { false };
+    static inline QString defaultFont_ { "Arial" };
+    static inline bool boldFont_ { false };
+    static inline bool italicFont_ { false };
+    static inline bool overrideFonts_ { false };
 
 public:
-    static QString defaultFont() { return m_defaultFont; }
-    static bool boldFont() { return m_boldFont; }
-    static bool italicFont() { return m_italicFont; }
-    static bool overrideFonts() { return m_overrideFonts; }
+    static QString defaultFont() { return defaultFont_; }
+    static bool boldFont() { return boldFont_; }
+    static bool italicFont() { return italicFont_; }
+    static bool overrideFonts() { return overrideFonts_; }
 };
 
 } // namespace Dxf

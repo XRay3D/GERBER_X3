@@ -30,10 +30,10 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
     , sp(sp)
     , blocks(blocks) {
     do {
-        file->m_entities.emplace_back(entityParse(code));
-        file->m_entities.back()->parse(code);
-        file->m_entities.back()->id = file->m_entities.size() - 1;
-        entities.push_back(file->m_entities.back().get());
+        file->entities_.emplace_back(entityParse(code));
+        file->entities_.back()->parse(code);
+        file->entities_.back()->id = file->entities_.size() - 1;
+        entities.push_back(file->entities_.back().get());
     } while (code != "ENDBLK");
 }
 
@@ -45,11 +45,11 @@ void SectionENTITIES::parse() {
     code = nextCode();
     code = nextCode();
     do {
-        file->m_entities.emplace_back(entityParse(code));
-        file->m_entities.back()->parse(code);
-        file->m_entities.back()->id = file->m_entities.size() - 1;
+        file->entities_.emplace_back(entityParse(code));
+        file->entities_.back()->parse(code);
+        file->entities_.back()->id = file->entities_.size() - 1;
     } while (hasNext());
-    for (auto& e : qAsConst(file->m_entities))
+    for (auto& e : qAsConst(file->entities_))
         e->draw();
 }
 

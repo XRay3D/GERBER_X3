@@ -47,7 +47,7 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
     painter->setPen(Qt::NoPen);
     painter->drawPath(shape_);
 
-    //    m_pen.setWidthF(option->state & QStyle::State_Selected
+    //    pen_.setWidthF(option->state & QStyle::State_Selected
     //                || option->state & QStyle::State_MouseOver
     //            ? 2.0 * scaleFactor()
     //            : 0);
@@ -96,11 +96,11 @@ void GiDataSolid::changeColor() {
     pathColor_.setAlpha(100);
     switch (colorState) {
     case Default:
-        //        m_pathColor.setAlpha(100);
+        //        pathColor_.setAlpha(100);
         break;
     case Hovered:
         pathColor_.setAlpha(255);
-        //        m_pathColor = m_pathColor.darker(125);
+        //        pathColor_ = pathColor_.darker(125);
         break;
     case Selected:
         pathColor_.setAlpha(150);
