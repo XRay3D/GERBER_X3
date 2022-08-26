@@ -46,7 +46,7 @@ public:
     //        void menu(QMenu& menu, FileTree::View* tv) const override { }
 
 private:
-    double m_radius;
+    double radius_;
 };
 
 class Plugin : public ShapePlugin {

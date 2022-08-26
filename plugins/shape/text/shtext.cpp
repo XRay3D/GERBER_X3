@@ -29,7 +29,7 @@ namespace Shapes {
 
 Text::Text(QPointF pt1)
     : iData(loadIData()) {
-    m_paths.resize(1);
+    paths_.resize(1);
 
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
 
@@ -89,22 +89,18 @@ void Text::redraw() {
         break;
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    QMatrix matrix;
-#else
-    QTransform matrix;
-#endif
-    matrix.translate(-bRect.left() * scale, 0);
-    matrix.translate(handlePt.x() * scale, handlePt.y() * scale);
+    QTransform transform;
+    transform.translate(-bRect.left() * scale, 0);
+    transform.translate(handlePt.x() * scale, handlePt.y() * scale);
     if (iData.side == Bottom) {
-        matrix.translate((bRect.right() + bRect.left()) * scale, 0);
+        transform.translate((bRect.right() + bRect.left()) * scale, 0);
         //        matrix.scale(
         //            -scale * iData.xy > 0.0 ? 1 * iData.xy : 1,
         //            -scale * iData.xy < 0.0 ? 1 / iData.xy : 1);
-        matrix.scale(-scale * (100 / iData.xy), -scale);
+        transform.scale(-scale * (100 / iData.xy), -scale);
     } else {
         // matrix.scale(+scale * xyScale, -scale);
-        matrix.scale(+scale * (100 / iData.xy), -scale);
+        transform.scale(+scale * (100 / iData.xy), -scale);
     }
     {
         QPainterPath tmpPainterPath;
@@ -113,32 +109,32 @@ void Text::redraw() {
         }
         painterPath = std::move(tmpPainterPath);
         tmpPainterPath = QPainterPath();
-        for (auto& polygon : painterPath.toSubpathPolygons(matrix)) { // transform polygons with matrix
+        for (auto& polygon : painterPath.toSubpathPolygons(transform)) { // transform polygons with matrix
             tmpPainterPath.addPolygon(polygon);
         }
         painterPath = std::move(tmpPainterPath);
     }
-    matrix.reset();
-    matrix.translate(handlers.front()->pos().x(), handlers.front()->pos().y());
-    matrix.rotate(iData.angle - 360);
+    transform.reset();
+    transform.translate(handlers.front()->pos().x(), handlers.front()->pos().y());
+    transform.rotate(iData.angle - 360);
 
-    m_paths.clear();
-    m_shape = {};
+    paths_.clear();
+    shape_ = {};
 
     Clipper clipper;
-    for (auto& sp : painterPath.toSubpathPolygons(matrix)) {
+    for (auto& sp : painterPath.toSubpathPolygons(transform)) {
         clipper.AddPath(sp, ClipperLib::ptClip);
-        //        m_paths.push_back(sp);
-        //        m_shape.addPolygon(sp);
+        //        paths_.push_back(sp);
+        //        shape_.addPolygon(sp);
     }
-    clipper.Execute(ClipperLib::ctUnion, m_paths, ClipperLib::pftNonZero);
-    for (auto& sp : m_paths) {
+    clipper.Execute(ClipperLib::ctUnion, paths_, ClipperLib::pftNonZero);
+    for (auto& sp : paths_) {
         sp.emplace_back(sp.front());
-        m_shape.addPolygon(sp);
+        shape_.addPolygon(sp);
     }
 
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
     //    update();
 }
 
@@ -198,7 +194,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
                 .arg(name())
-                .arg(m_giId)
+//                .arg(giId_)
                 .arg(text());
         case Qt::EditRole:
             return text();
@@ -209,7 +205,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return m_node->sideStrList[side()];
+            return node_->sideStrList[side()];
         case Qt::EditRole:
             return static_cast<bool>(side());
         default:
@@ -223,7 +219,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
 void Text::menu(QMenu& menu, FileTree::View* tv) const {
     Shape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
-        ShTextDialog dlg({ const_cast<Text*>(this) }, tv);
+        ShTextDialog dlg({const_cast<Text*>(this)}, tv);
         dlg.exec();
     });
 }
@@ -271,12 +267,12 @@ void Text::ok() {
 
 void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
-    ShTextDialog dlg({ this }, nullptr);
+    ShTextDialog dlg({this}, nullptr);
     dlg.exec();
     redraw();
 }
 
-QPainterPath Text::shape() const { return m_shape; }
+QPainterPath Text::shape() const { return shape_; }
 
 QString Text::name() const { return QObject::tr("Text"); }
 

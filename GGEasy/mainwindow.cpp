@@ -35,12 +35,12 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui { new Ui::MainWindow }
-    , recentFiles { this, "recentFiles" }
-    , recentProjects { this, "recentProjects" }
-    , m_project { new Project { this } }
-    , actionGroup { this }
-    , reloadQuestion { this } {
+    , ui {new Ui::MainWindow}
+    , recentFiles {this, "recentFiles"}
+    , recentProjects {this, "recentProjects"}
+    , project_ {new Project {this}}
+    , actionGroup {this}
+    , reloadQuestion {this} {
     App::setMainWindow(this);
 
     ui->setupUi(this);
@@ -57,11 +57,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     GCodePropertiesForm(); // init default vars;
 
-    connect(m_project, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&GiMarker::setPos));
-    connect(m_project, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&GiMarker::setPos));
-    connect(m_project, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
-    connect(m_project, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
-    connect(m_project, &Project::changed, this, &MainWindow::documentWasModified);
+    connect(project_, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(project_, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
+    connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
+    connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
     menuBar()->installEventFilter(this);
 
     // connect plugins
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget* parent)
         connect(ptr, &FilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
         connect(ptr, &FilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
         connect(this, &MainWindow::parseFile, ptr, &FilePlugin::parseFile, Qt::QueuedConnection);
-        connect(m_project, &Project::parseFile, ptr, &FilePlugin::parseFile, Qt::QueuedConnection);
+        connect(project_, &Project::parseFile, ptr, &FilePlugin::parseFile, Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget* parent)
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if (dir.exists())
-                for (QString str : dir.entryList({ "*.gbr" }, QDir::Files)) {
+                for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
                     str = dir.path() + '/' + str;
                     QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                     // break;
@@ -163,7 +163,7 @@ bool MainWindow::closeProject() {
         dockWidget_->close();
         App::fileModel()->closeProject();
         setCurrentFile(QString());
-        m_project->close();
+        project_->close();
         // ui->graphicsView->scene()->clear();
         return true;
     }
@@ -239,10 +239,10 @@ void MainWindow::createActionsFile() {
         fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
     }
     { // Close project
-        m_closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
-        m_closeAllAct->setShortcuts(QKeySequence::Close);
-        m_closeAllAct->setStatusTip(tr("Close project"));
-        // m_closeAllAct->setEnabled(false);
+        closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+        closeAllAct_->setShortcuts(QKeySequence::Close);
+        closeAllAct_->setStatusTip(tr("Close project"));
+        // closeAllAct_->setEnabled(false);
         fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
     }
 
@@ -348,7 +348,7 @@ void MainWindow::createActionsService() {
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
-            setGeometry(QRect { 0, 1080, 1024, 720 });
+            setGeometry(QRect {0, 1080, 1024, 720});
         }));
     }
 }
@@ -517,9 +517,9 @@ void MainWindow::customContextMenuForToolBar(const QPoint& pos) {
 }
 
 void MainWindow::saveGCodeFile(int id) {
-    if (m_project->pinsPlacedMessage())
+    if (project_->pinsPlacedMessage())
         return;
-    auto* file = m_project->file<GCode::File>(id);
+    auto* file = project_->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::GCUtils::getLastDir().append(file->shortName()),
         tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
@@ -535,10 +535,10 @@ void MainWindow::saveGCodeFiles() {
 
 void MainWindow::saveSelectedGCodeFiles() {
 
-    if (m_project->pinsPlacedMessage())
+    if (project_->pinsPlacedMessage())
         return;
 
-    mvector<GCode::File*> gcFiles(m_project->files<GCode::File>());
+    mvector<GCode::File*> gcFiles(project_->files<GCode::File>());
     for (size_t i = 0; i < gcFiles.size(); ++i) {
         if (!gcFiles[i]->itemGroup()->isVisible())
             gcFiles.remove(i--);
@@ -549,14 +549,14 @@ void MainWindow::saveSelectedGCodeFiles() {
 
     std::map<Key, GcFiles> gcFilesMap;
     for (GCode::File* file : gcFiles)
-        gcFilesMap[{ file->getTool().hash2(), file->side() }].append(file);
+        gcFilesMap[{file->getTool().hash2(), file->side()}].append(file);
 
     for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
                 if (!name.endsWith(GCode::Settings::fileExtension()))
-                    name += QStringList({ "_TS", "_BS" })[file->side()];
+                    name += QStringList({"_TS", "_BS"})[file->side()];
 
                 name = QFileDialog::getSaveFileName(nullptr,
                     QObject::tr("Save GCode file"),
@@ -571,7 +571,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         } else {
             QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith(GCode::Settings::fileExtension()))
-                name += QStringList({ "_TS", "_BS" })[files.first()->side()];
+                name += QStringList({"_TS", "_BS"})[files.first()->side()];
 
             name = QFileDialog::getSaveFileName(nullptr,
                 QObject::tr("Save GCode file"),
@@ -651,7 +651,7 @@ void MainWindow::writeSettings() {
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
-    settings.setValue("project", m_project->name());
+    settings.setValue("project", project_->name());
     // toolBar actions visible
     for (auto toolBar : findChildren<QToolBar*>()) {
         settings.beginWriteArray(toolBar->objectName());
@@ -700,16 +700,10 @@ void MainWindow::printDialog() {
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        pPrinter->setMargins({ 10, 10, 10, 10 });
-        pPrinter->setPageSizeMM(size + QSizeF(pPrinter->margins().left + pPrinter->margins().right, pPrinter->margins().top + pPrinter->margins().bottom));
-#else
- QMarginsF margins( 10, 10, 10, 10 );
- pPrinter->setPageMargins(margins);
- pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(),
- margins.top() + margins.bottom()),
- QPageSize::Millimeter));
-#endif
+        QMarginsF margins(10, 10, 10, 10);
+        pPrinter->setPageMargins(margins);
+        pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(), margins.top() + margins.bottom()), QPageSize::Millimeter));
+
         pPrinter->setResolution(4800);
 
         QPainter painter(pPrinter);
@@ -733,13 +727,13 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value) {
         // pd->setModal(true);
         // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
-        m_progressDialogs[fileName] = pd;
+        progressDialogs_[fileName] = pd;
     } else if (max == 1 && value == 1) {
-        m_progressDialogs[fileName]->hide();
-        m_progressDialogs[fileName]->deleteLater();
-        m_progressDialogs.remove(fileName);
+        progressDialogs_[fileName]->hide();
+        progressDialogs_[fileName]->deleteLater();
+        progressDialogs_.remove(fileName);
     } else
-        m_progressDialogs[fileName]->setValue(value);
+        progressDialogs_[fileName]->setValue(value);
 }
 
 void MainWindow::fileError(const QString& fileName, const QString& error) {
@@ -762,12 +756,7 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
 
         verticalLayout->addWidget(textBrowser);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        verticalLayout->setMargin(6);
-#else
         verticalLayout->setContentsMargins(6, 6, 6, 6);
-#endif
         verticalLayout->setSpacing(6);
     }
     fileErrordialog->show();
@@ -784,16 +773,16 @@ void MainWindow::resetToolPathsActions() {
         delete dockWidget_->widget();
     dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
-    if (auto action { actionGroup.checkedAction() }; action)
+    if (auto action {actionGroup.checkedAction()}; action)
         action->setChecked(false);
 }
 
-void MainWindow::documentWasModified() { setWindowModified(m_project->isModified()); }
+void MainWindow::documentWasModified() { setWindowModified(project_->isModified()); }
 
 bool MainWindow::maybeSave() {
-    if (!m_project->isModified() && m_project->size()) {
+    if (!project_->isModified() && project_->size()) {
         return QMessageBox::warning(this, tr("Warning"), tr("Do you want to close this project?"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok;
-    } else if (!m_project->size()) {
+    } else if (!project_->size()) {
         return true;
     }
 
@@ -817,7 +806,7 @@ void MainWindow::editGcFile(GCode::File* file) {
     case GCode::Null:
     case GCode::Profile:
         // FIXME toolpathActions[GCode::Profile]->triggered();
-        // FIXME reinterpret_cast<FormsUtil*>(m_dockWidget->widget())->editFile(file);
+        // FIXME reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
         break;
     case GCode::Pocket:
     case GCode::Voronoi:
@@ -834,7 +823,7 @@ void MainWindow::editGcFile(GCode::File* file) {
 bool MainWindow::saveFile(const QString& fileName) {
     bool ok;
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    if (ok = m_project->save(fileName); ok) {
+    if (ok = project_->save(fileName); ok) {
         setCurrentFile(fileName);
         statusBar()->showMessage(tr("File saved"), 2000);
     } else {
@@ -850,21 +839,21 @@ bool MainWindow::saveFile(const QString& fileName) {
 }
 
 void MainWindow::setCurrentFile(const QString& fileName) {
-    m_project->setName(fileName);
-    m_project->setModified(false);
+    project_->setName(fileName);
+    project_->setModified(false);
     setWindowModified(false);
-    if (!m_project->isUntitled())
-        recentProjects.prependToRecentFiles(m_project->name());
-    m_closeAllAct->setText(tr(R"(&Close project "%1")").arg(strippedName(m_project->name())));
-    setWindowFilePath(m_project->name());
+    if (!project_->isUntitled())
+        recentProjects.prependToRecentFiles(project_->name());
+    closeAllAct_->setText(tr(R"(&Close project "%1")").arg(strippedName(project_->name())));
+    setWindowFilePath(project_->name());
 }
 
 void MainWindow::addFileToPro(FileInterface* file) {
-    if (m_project->isUntitled()) {
+    if (project_->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
     }
-    m_project->addFile(file);
+    project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
     ui->graphicsView->zoomFit();
 }
@@ -892,7 +881,7 @@ void MainWindow::translate(const QString& locale) {
     static std::vector<std::unique_ptr<QTranslator>> translators;
     translators.clear();
     QDir dir(qApp->applicationDirPath() + "/translations");
-    for (auto&& str : dir.entryList(QStringList { "*" + locale + ".qm" }, QDir::Files)) {
+    for (auto&& str : dir.entryList(QStringList {"*" + locale + ".qm"}, QDir::Files)) {
         translators.emplace_back(std::make_unique<QTranslator>());
         if (translators.back()->load(str, dir.path()))
             qApp->installTranslator(translators.back().get());
@@ -905,14 +894,14 @@ void MainWindow::loadFile(const QString& fileName) {
     lastPath = QFileInfo(fileName).absolutePath();
     if (fileName.endsWith(".g2g")) {
         if (closeProject()) {
-            m_project->open(fileName);
+            project_->open(fileName);
             setCurrentFile(fileName);
             QTimer::singleShot(100, Qt::CoarseTimer, ui->graphicsView, &GraphicsView::zoomFit);
             return;
         }
     } else {
-        if (m_project->contains(fileName) > -1 && QMessageBox::question(this, tr("Warning"), //
-                                                      tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+        if (project_->contains(fileName) > -1 && QMessageBox::question(this, tr("Warning"), //
+                                                     tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
                 == QMessageBox::Cancel)
             return;
         for (auto& [type, ptr] : App::filePlugins()) {
@@ -1034,7 +1023,7 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
         delete dockWidget_->widget();
     dockWidget_->show();
     dockWidget_->setWidget(dwContent);
-    if (auto pbClose { dwContent->findChild<QPushButton*>("pbClose") }; pbClose)
+    if (auto pbClose {dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
         connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
 }
 
@@ -1060,15 +1049,15 @@ void MainWindow::open() {
 }
 
 bool MainWindow::save() {
-    if (m_project->isUntitled())
+    if (project_->isUntitled())
         return saveAs();
     else
-        return saveFile(m_project->name());
+        return saveFile(project_->name());
 }
 
 bool MainWindow::saveAs() {
     QString file(
-        QFileDialog::getSaveFileName(this, tr("Open File"), m_project->name(), tr("Project (*.g2g)")));
+        QFileDialog::getSaveFileName(this, tr("Open File"), project_->name(), tr("Project (*.g2g)")));
     if (file.isEmpty())
         return false;
     return saveFile(file);

@@ -24,32 +24,32 @@ namespace Dxf {
 class Layer : public AbstractTable {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const Layer& l) {
-        stream << l.m_groupedPaths;
-        stream << l.m_colorNorm;
-        stream << l.m_colorPath;
-        stream << l.m_name;
+        stream << l.groupedPaths_;
+        stream << l.colorNorm_;
+        stream << l.colorPath_;
+        stream << l.name_;
         stream << l.lineTypeName;
-        stream << l.m_colorNumber;
+        stream << l.colorNumber_;
         stream << l.flags;
         stream << l.lineWeightEnum;
         stream << l.plottingFlag;
-        stream << l.m_graphicObjects;
-        stream << l.m_itemsType;
+        stream << l.graphicObjects_;
+        stream << l.itemsType_;
         return stream;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, Layer& l) {
-        stream >> l.m_groupedPaths;
-        stream >> l.m_colorNorm;
-        stream >> l.m_colorPath;
-        stream >> l.m_name;
+        stream >> l.groupedPaths_;
+        stream >> l.colorNorm_;
+        stream >> l.colorPath_;
+        stream >> l.name_;
         stream >> l.lineTypeName;
-        stream >> l.m_colorNumber;
+        stream >> l.colorNumber_;
         stream >> l.flags;
         stream >> l.lineWeightEnum;
         stream >> l.plottingFlag;
-        stream >> l.m_graphicObjects;
-        stream >> l.m_itemsType;
+        stream >> l.graphicObjects_;
+        stream >> l.itemsType_;
         return stream;
     }
 
@@ -86,23 +86,23 @@ public:
 private:
     GiGroup* itemGroupNorm = nullptr;
     GiGroup* itemGroupPath = nullptr;
-    //    File* m_fiGle = nullptr;
-    Pathss m_groupedPaths;
+    //    File* fiGle_ = nullptr;
+    Pathss groupedPaths_;
 
-    QColor m_colorNorm;
-    QColor m_colorPath;
+    QColor colorNorm_;
+    QColor colorPath_;
 
-    QString m_name;
+    QString name_;
     QString lineTypeName;
 
-    int16_t m_colorNumber = 0;
+    int16_t colorNumber_ = 0;
     int16_t flags = 0;
     int16_t lineWeightEnum = 0;
     int16_t plottingFlag = 0;
 
-    GraphicObjects m_graphicObjects;
-    ItemsType m_itemsType = ItemsType::Null;
-    bool m_visible = true;
+    GraphicObjects graphicObjects_;
+    ItemsType itemsType_ = ItemsType::Null;
+    bool visible_ = true;
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbLayerTableRecord)

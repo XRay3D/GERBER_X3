@@ -44,6 +44,6 @@ private:
 
 protected:
     File* file = nullptr;
-    State m_state;
+    State state_;
 };
 } // namespace Excellon

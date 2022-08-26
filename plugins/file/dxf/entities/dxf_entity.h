@@ -19,12 +19,6 @@
 #include <qmath.h>
 #include <tuple>
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QMatrix>
-#else
-#include <QTransform>
-#endif
-
 namespace Dxf {
 
 QPointF polar(QPointF p, float angle /*radians*/, float distance);

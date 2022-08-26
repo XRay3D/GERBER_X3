@@ -19,7 +19,7 @@
 namespace Shapes {
 
 PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
-    m_paths.resize(1);
+    paths_.resize(1);
     handlers.reserve(4);
 
     handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
@@ -36,25 +36,25 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
 }
 
 void PolyLine::redraw() {
-    Path& path = m_paths.front();
+    Path& path = paths_.front();
     path.clear();
     for (size_t i = 1, e = handlers.size(); i < e; ++i) {
         if (handlers[i]->hType() == Handler::Corner)
             path.push_back((handlers[i]->pos()));
     }
-    m_shape = QPainterPath();
-    m_shape.addPolygon(path);
-    m_rect = m_shape.boundingRect();
+    shape_ = QPainterPath();
+    shape_.addPolygon(path);
+    //    rect_ = shape_.boundingRect();
     if (handlers.size() > 4) {
         QPointF c(centroidFast());
         if (qIsNaN(c.x()) || qIsNaN(c.y()))
             c = {};
-        handlers[0]->QGraphicsItem::setPos(m_shape.boundingRect().contains(c) && !c.isNull() ? c : m_shape.boundingRect().center());
+        handlers[0]->QGraphicsItem::setPos(shape_.boundingRect().contains(c) && !c.isNull() ? c : shape_.boundingRect().center());
         handlers[0]->setVisible(true);
     } else
         handlers[0]->setVisible(false);
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString PolyLine::name() const { return QObject::tr("Line"); }

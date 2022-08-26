@@ -212,20 +212,20 @@ ExSettingsTab::~ExSettingsTab() { }
 
 void ExSettingsTab::readSettings(MySettings& settings) {
     settings.beginGroup("Excellon");
-    //  static inline Format m_format;
+    //  static inline Format format_;
 
-    m_format.decimal = settings.getValue(sbxDecimal, m_format.decimal);
-    m_format.integer = settings.getValue(sbxInteger, m_format.integer);
+    format_.decimal = settings.getValue(sbxDecimal, format_.decimal);
+    format_.integer = settings.getValue(sbxInteger, format_.integer);
 
-    m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbInches, bool(m_format.unitMode == Inches)));
-    m_format.unitMode = static_cast<UnitMode>(settings.getValue(rbMillimeters, bool(m_format.unitMode == Millimeters)));
+    format_.unitMode = static_cast<UnitMode>(settings.getValue(rbInches, bool(format_.unitMode == Inches)));
+    format_.unitMode = static_cast<UnitMode>(settings.getValue(rbMillimeters, bool(format_.unitMode == Millimeters)));
 
-    m_format.zeroMode = static_cast<ZeroMode>(settings.getValue(rbLeading, bool(m_format.zeroMode == LeadingZeros)));
-    m_format.zeroMode = static_cast<ZeroMode>(settings.getValue(rbTrailing, bool(m_format.zeroMode == TrailingZeros)));
+    format_.zeroMode = static_cast<ZeroMode>(settings.getValue(rbLeading, bool(format_.zeroMode == LeadingZeros)));
+    format_.zeroMode = static_cast<ZeroMode>(settings.getValue(rbTrailing, bool(format_.zeroMode == TrailingZeros)));
 
-    //            m_parseZeroMode = settings.getValue(leParseZero, m_parseZeroMode);
-    //            m_parseUnitMode = settings.getValue(leParseUnit, m_parseUnitMode);
-    //            m_parseDecimalAndInteger = settings.getValue(leParseDecimalAndInteger, m_parseDecimalAndInteger);
+    //            parseZeroMode_ = settings.getValue(leParseZero, parseZeroMode_);
+    //            parseUnitMode_ = settings.getValue(leParseUnit, parseUnitMode_);
+    //            parseDecimalAndInteger_ = settings.getValue(leParseDecimalAndInteger, parseDecimalAndInteger_);
 
     settings.endGroup();
 }
@@ -233,18 +233,18 @@ void ExSettingsTab::readSettings(MySettings& settings) {
 void ExSettingsTab::writeSettings(MySettings& settings) {
     settings.beginGroup("Excellon");
 
-    m_format.decimal = settings.setValue(sbxDecimal);
-    m_format.integer = settings.setValue(sbxInteger);
+    format_.decimal = settings.setValue(sbxDecimal);
+    format_.integer = settings.setValue(sbxInteger);
 
     settings.setValue(rbInches);
-    m_format.unitMode = static_cast<UnitMode>(settings.setValue(rbMillimeters));
+    format_.unitMode = static_cast<UnitMode>(settings.setValue(rbMillimeters));
 
     settings.setValue(rbLeading);
-    m_format.zeroMode = static_cast<ZeroMode>(settings.setValue(rbTrailing));
+    format_.zeroMode = static_cast<ZeroMode>(settings.setValue(rbTrailing));
 
-    //            m_parseZeroMode = settings.setValue(leParseZero);
-    //            m_parseUnitMode = settings.setValue(leParseUnit);
-    //            m_parseDecimalAndInteger = settings.setValue(leParseDecimalAndInteger);
+    //            parseZeroMode_ = settings.setValue(leParseZero);
+    //            parseUnitMode_ = settings.setValue(leParseUnit);
+    //            parseDecimalAndInteger_ = settings.setValue(leParseDecimalAndInteger);
 
     settings.endGroup();
 }

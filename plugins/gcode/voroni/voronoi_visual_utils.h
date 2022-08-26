@@ -62,9 +62,9 @@ namespace polygon {
             // Apply the linear transformation to move start point of the segment to
             // the point with coordinates (0, 0) and the direction of the segment to
             // coincide the positive direction of the x-axis.
-            CT segm_vec_x = cast(x(high(segment))) - cast(x(low(segment)));
-            CT segm_vec_y = cast(y(high(segment))) - cast(y(low(segment)));
-            CT sqr_segment_length = segm_vec_x * segm_vec_x + segm_vec_y * segm_vec_y;
+            CT segvec_x_ = cast(x(high(segment))) - cast(x(low(segment)));
+            CT segvec_y_ = cast(y(high(segment))) - cast(y(low(segment)));
+            CT sqr_segment_length = segvec_x_ * segvec_x_ + segvec_y_ * segvec_y_;
 
             // Compute x-coordinates of the endpoints of the edge
             // in the transformed space.
@@ -76,8 +76,8 @@ namespace polygon {
             // f(x) = ((x-rot_x)^2 + rot_y^2) / (2.0*rot_y).
             CT point_vec_x = cast(x(point)) - cast(x(low(segment)));
             CT point_vec_y = cast(y(point)) - cast(y(low(segment)));
-            CT rot_x = segm_vec_x * point_vec_x + segm_vec_y * point_vec_y;
-            CT rot_y = segm_vec_x * point_vec_y - segm_vec_y * point_vec_x;
+            CT rot_x = segvec_x_ * point_vec_x + segvec_y_ * point_vec_y;
+            CT rot_y = segvec_x_ * point_vec_y - segvec_y_ * point_vec_x;
 
             // Save the last point.
             Point<CT> last_point = (*discretization)[1];
@@ -107,8 +107,8 @@ namespace polygon {
                 if (dist <= max_dist_transformed) {
                     // Distance between parabola and line segment is less than max_dist.
                     point_stack.pop();
-                    CT inter_x = (segm_vec_x * new_x - segm_vec_y * new_y) / sqr_segment_length + cast(x(low(segment)));
-                    CT inter_y = (segm_vec_x * new_y + segm_vec_y * new_x) / sqr_segment_length + cast(y(low(segment)));
+                    CT inter_x = (segvec_x_ * new_x - segvec_y_ * new_y) / sqr_segment_length + cast(x(low(segment)));
+                    CT inter_y = (segvec_x_ * new_y + segvec_y_ * new_x) / sqr_segment_length + cast(y(low(segment)));
                     discretization->push_back(Point<CT>(inter_x, inter_y));
                     cur_x = new_x;
                     cur_y = new_y;

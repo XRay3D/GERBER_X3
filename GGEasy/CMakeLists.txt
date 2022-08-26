@@ -73,7 +73,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
-include (${CMAKE_SOURCE_DIR}/SUFFIX.cmake)
+include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -180,7 +180,7 @@ elseif (UNIX)#LINUX
     #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${SUFFIX}")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${PATHS}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(${PROJECT_NAME} PROPERTIES

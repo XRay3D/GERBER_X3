@@ -189,12 +189,12 @@ GraphicObject LwPolyline::toGo() const {
             //                         )
         }
         auto b = p1.bulge;
-        auto угол = QLineF(p1, p2).angle() + ToDeg((pi / 2) - (2 * atan(b)));
+        auto angle = QLineF(p1, p2).angle() + ToDeg((pi / 2) - (2 * atan(b)));
 
-        qDebug("\tугол  %3.4f", угол);
+        qDebug("\tугол  %3.4f", angle);
 
-        auto расстояние = (QLineF(p1, p2).length() * (1 + b * b) / 4 / b);
-        auto cl = QLineF::fromPolar(расстояние, -угол).p2() + p1;
+        auto lenght_ = (QLineF(p1, p2).length() * (1 + b * b) / 4 / b);
+        auto cl = QLineF::fromPolar(lenght_, -angle).p2() + p1;
 
         ////////////////////////
         QPointF center;
@@ -225,7 +225,7 @@ GraphicObject LwPolyline::toGo() const {
         double a2 = atan2(p.x(), p.y()) + (fl ? +.5 : -.5) * pi;
 
         double aspan = a2 - a1;
-        const bool isClockwise { p1.bulge < 0 };
+        const bool isClockwise {p1.bulge < 0};
 
         /**/ if (aspan < -pi || (qFuzzyCompare(aspan, -pi) && !isClockwise))
             aspan += 2.0 * pi;
@@ -243,13 +243,13 @@ GraphicObject LwPolyline::toGo() const {
             QPainterPath myPath;
             myPath.moveTo(center);
             myPath.arcTo(rect, ToDeg(a1), ToDeg(aspan));
-            auto item = App::scene()->addPath(myPath, { Qt::magenta, 0 });
+            auto item = App::scene()->addPath(myPath, {Qt::magenta, 0});
             item->setZValue(std::numeric_limits<double>::max());
             item->setToolTip(QString("%1\n%2\n%3\n").arg(ToDeg(a1)).arg(ToDeg(a2)).arg(ToDeg(aspan)));
         }
-        auto lll = QLineF::fromPolar(расстояние, угол).translated(p1);
-        App::scene()->addLine(lll, { Qt::green, 0 });
-        App::scene()->addLine({ lll.p2(), center }, { Qt::yellow, 0 });
+        auto lll = QLineF::fromPolar(lenght_, angle).translated(p1);
+        App::scene()->addLine(lll, {Qt::green, 0});
+        App::scene()->addLine({lll.p2(), center}, {Qt::yellow, 0});
     };
 
     Path path_;
@@ -263,16 +263,6 @@ GraphicObject LwPolyline::toGo() const {
     if (polylineFlag == Closed)
         addSeg(poly.back(), poly.front(), fl);
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u, u);
-    QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QMatrix m2;
-    m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2));
-#else
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
@@ -281,7 +271,6 @@ GraphicObject LwPolyline::toGo() const {
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
-#endif
 
     Paths paths;
     if (constantWidth) {
@@ -290,7 +279,7 @@ GraphicObject LwPolyline::toGo() const {
         offset.Execute(paths, constantWidth * uScale * 0.5);
     }
 
-    return { id, p.value(0), paths };
+    return {id, p.value(0), paths};
 }
 
 void LwPolyline::write(QDataStream& stream) const {

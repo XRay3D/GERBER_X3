@@ -27,10 +27,10 @@ public:
     Paths paths(int alternate = {}) const override;
 
 private:
-    GCode::File* m_gcFile;
+    GCode::File* gcFile_;
 #ifdef QT_DEBUG
-    QPainterPath m_arrows;
-    double m_sc = 0;
+    QPainterPath arrows_;
+    double sc_ = 0;
     void updateArrows();
 #endif
 protected:

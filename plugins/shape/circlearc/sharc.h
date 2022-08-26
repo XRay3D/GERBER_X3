@@ -47,7 +47,7 @@ public:
     //    QVariant data(const QModelIndex& index, int role) const override { }
     //    void menu(QMenu& menu, FileTree::View* tv) const override { }
 private:
-    mutable double m_radius;
+    mutable double radius_;
 
 protected:
     // Shape interface

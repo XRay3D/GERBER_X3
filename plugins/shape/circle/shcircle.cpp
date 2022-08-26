@@ -20,8 +20,8 @@
 namespace Shapes {
 
 Circle::Circle(QPointF center, QPointF pt)
-    : m_radius(QLineF(center, pt).length()) {
-    m_paths.resize(1);
+    : radius_(QLineF(center, pt).length()) {
+    paths_.resize(1);
 
     handlers.reserve(PtCount);
 
@@ -39,12 +39,12 @@ Circle::Circle(QPointF center, QPointF pt)
 Circle::~Circle() { }
 
 void Circle::redraw() {
-    m_radius = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
-    const int intSteps = App::settings().clpCircleSegments(m_radius);
-    const cInt radius = static_cast<cInt>(m_radius * uScale);
+    radius_ = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
+    const int intSteps = App::settings().clpCircleSegments(radius_);
+    const cInt radius = static_cast<cInt>(radius_ * uScale);
     const IntPoint center((handlers[Center]->pos()));
     const double delta_angle = (2.0 * pi) / intSteps;
-    Path& path = m_paths.front();
+    Path& path = paths_.front();
     path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
@@ -53,9 +53,8 @@ void Circle::redraw() {
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }
     path.push_back(path.front());
-    m_shape = QPainterPath();
-    m_shape.addPolygon(path);
-    m_rect = m_shape.boundingRect();
+    shape_ = QPainterPath();
+    shape_.addPolygon(path);
     setPos({ 1, 1 }); //костыли    //update();
     setPos({ 0, 0 });
 }
@@ -71,12 +70,12 @@ void Circle::setPt(const QPointF& pt) {
     redraw();
 }
 
-double Circle::radius() const { return m_radius; }
+double Circle::radius() const { return radius_; }
 
 void Circle::setRadius(double radius) {
-    if (!qFuzzyCompare(m_radius, radius))
+    if (!qFuzzyCompare(radius_, radius))
         return;
-    m_radius = radius;
+    radius_ = radius;
     redraw();
 }
 

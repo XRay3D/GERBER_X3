@@ -43,9 +43,9 @@ public:
 
     Codes data;
     SectionParser* sp = nullptr;
-    File* m_file = nullptr;
+    File* file_ = nullptr;
 
-    File* file() const { return sp == nullptr ? m_file : sp->file; }
+    File* file() const { return sp == nullptr ? file_ : sp->file; }
 
     //Общие групповые коды записей таблицы обозначений (DXF)
 

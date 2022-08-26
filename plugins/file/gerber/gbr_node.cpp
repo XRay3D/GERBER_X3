@@ -32,18 +32,18 @@
 
 namespace Gerber {
 
-QTimer Node::m_decorationTimer;
+QTimer Node::decorationTimer_;
 
 Node::Node(File* file)
     : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
     if (!file->userColor()) {
-        connect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
-        m_decorationTimer.start(500);
+        connect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
+        decorationTimer_.start(500);
     }
 }
 
-Node::~Node() { m_decorationTimer.start(100); }
+Node::~Node() { decorationTimer_.start(100); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
@@ -98,7 +98,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             //            if (file->color() == QColor())
-            //                m_decorationTimer.start(500);
+            //                decorationTimer_.start(500);
             switch (file->itemsType()) {
             case File::ApPaths:
                 return decoration(file->color(), 'A');
@@ -143,7 +143,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     return QVariant();
 }
 
-QTimer* Node::decorationTimer() { return &m_decorationTimer; }
+QTimer* Node::decorationTimer() { return &decorationTimer_; }
 
 void Node::repaint() const {
     if (!parent_)
@@ -170,11 +170,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         new SyntaxHighlighter(textBrowser->document());
         QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        verticalLayout->setMargin(6);
-#else
         verticalLayout->setContentsMargins(6,6,6,6);
-#endif
         verticalLayout->addWidget(textBrowser);
         QString s;
         s.reserve(1000000);
@@ -200,7 +196,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
             color.setAlpha(150);
             file->setColor(color);
             file->setUserColor(true);
-            disconnect(&m_decorationTimer, &QTimer::timeout, this, &Node::repaint);
+            disconnect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
         }
     });
     menu.addSeparator();

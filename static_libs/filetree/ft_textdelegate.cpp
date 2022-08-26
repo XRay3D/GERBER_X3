@@ -23,14 +23,14 @@ TextDelegate::TextDelegate(QObject* parent)
 
 QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const {
     auto* le = new QLineEdit(parent);
-    m_rect = option.rect;
+    rect_ = option.rect;
     connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
     return le;
 }
 
 void TextDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* le = qobject_cast<QLineEdit*>(editor);
-    le->setGeometry(m_rect);
+    le->setGeometry(rect_);
     le->setText(index.data(Qt::EditRole).toString());
 }
 

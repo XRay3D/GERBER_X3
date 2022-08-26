@@ -27,7 +27,7 @@ namespace Gerber {
 ComponentsDialog::ComponentsDialog(QWidget* parent)
     : QDialog(parent) {
     setupUi(this);
-    graphicsView->setScene(m_scene = new QGraphicsScene(graphicsView));
+    graphicsView->setScene(scene_ = new QGraphicsScene(graphicsView));
     graphicsView->scale(+1, -1);
     QSettings settings;
     settings.beginGroup("ComponentsDialog");

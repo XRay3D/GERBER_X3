@@ -24,14 +24,14 @@ namespace Gerber {
 
 ComponentItem::ComponentItem(const Component& component, FileInterface* file)
     : GraphicsItem(file)
-    , m_component(component) {
+    , component_(component) {
     component.setComponentitem(this);
-    pathPins.resize(m_component.pins().size());
-    for (auto&& poly : m_component.footprint())
+    pathPins.resize(component_.pins().size());
+    for (auto&& poly : component_.footprint())
         shape_.addPolygon(poly);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
-    setToolTip(m_component.toolTip());
+    setToolTip(component_.toolTip());
 }
 
 QRectF ComponentItem::boundingRect() const {
@@ -39,8 +39,8 @@ QRectF ComponentItem::boundingRect() const {
 }
 
 QPainterPath ComponentItem::shape() const {
-    if (!qFuzzyCompare(m_scale, App::graphicsView()->scaleFactor()))
-        m_scale = App::graphicsView()->scaleFactor();
+    if (!qFuzzyCompare(scale_, App::graphicsView()->scaleFactor()))
+        scale_ = App::graphicsView()->scaleFactor();
     return shape_;
 }
 
@@ -64,7 +64,7 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     auto color { file_->color() };
     painter->setBrush(color);
     color.setAlpha(255);
-    painter->setPen({ m_selected ? Qt::red : color, 2 * m_scale });
+    painter->setPen({ selected_ ? Qt::red : color, 2 * scale_ });
     auto fillPolygons { shape_.toFillPolygons() };
     if (fillPolygons.size()) {
         for (auto&& poly : fillPolygons)
@@ -78,31 +78,31 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
 
     painter->setBrush(Qt::NoBrush);
     double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
-    double k = std::min(min, m_scale * s);
+    double k = std::min(min, scale_ * s);
     painter->drawLine(
-        m_component.referencePoint() + QPointF { k, k },
-        m_component.referencePoint() - QPointF { k, k });
+        component_.referencePoint() + QPointF { k, k },
+        component_.referencePoint() - QPointF { k, k });
     painter->drawLine(
-        m_component.referencePoint() + QPointF { -k, k },
-        m_component.referencePoint() - QPointF { -k, k });
+        component_.referencePoint() + QPointF { -k, k },
+        component_.referencePoint() - QPointF { -k, k });
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(
-        { m_component.referencePoint() + QPointF { k, k },
-            m_component.referencePoint() - QPointF { k, k } });
-    if (m_scale < 0.05) {
-        double size = std::min(min, m_scale * s);
-        for (const auto& [number, description, pos] : m_component.pins()) {
+        { component_.referencePoint() + QPointF { k, k },
+            component_.referencePoint() - QPointF { k, k } });
+    if (scale_ < 0.05) {
+        double size = std::min(min, scale_ * s);
+        for (const auto& [number, description, pos] : component_.pins()) {
             Q_UNUSED(number)
             Q_UNUSED(description)
             painter->setBrush(Qt::NoBrush);
-            painter->setPen(QPen(color, 2 * m_scale, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+            painter->setPen(QPen(color, 2 * scale_, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             painter->drawLine(pos + QPointF { +size, +size }, pos - QPointF { +size, +size });
             painter->drawLine(pos + QPointF { -size, +size }, pos - QPointF { -size, +size });
         }
         for (const auto& [path, pos] : pathPins) {
             painter->save();
             painter->translate(pos);
-            painter->scale(m_scale, -m_scale);
+            painter->scale(scale_, -scale_);
             painter->setPen(QPen(Qt::black, 4.0, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             painter->setBrush(Qt::NoBrush);
             painter->drawPath(path);
@@ -114,18 +114,18 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     }
 
     drawText(painter,
-        m_component.refdes(),
+        component_.refdes(),
         Qt::red,
         shape_.boundingRect().center(),
-        m_scale);
+        scale_);
 
-    if (m_scale < 0.05)
-        for (const auto& [number, description, pos] : m_component.pins()) {
+    if (scale_ < 0.05)
+        for (const auto& [number, description, pos] : component_.pins()) {
             drawText(painter,
                 QString(description + '(' + number + ')'),
                 App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF,
-                pos + QPointF(0, m_scale * 60),
-                m_scale);
+                pos + QPointF(0, scale_ * 60),
+                scale_);
         }
 }
 

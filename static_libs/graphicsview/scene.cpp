@@ -31,10 +31,10 @@
 #include <QtMath>
 #include <utils.h>
 
-// QTime m_time;
-// int m_time2;
-// int m_frameCount = 0;
-// int m_frameCount2;
+// QTime time_;
+// int time2_;
+// int frameCount_ = 0;
+// int frameCount2_;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent) {
@@ -65,14 +65,8 @@ void Scene::renderPdf() {
     // QRectF rect(QGraphicsScene::itemsBoundingRect());
 
     QPdfWriter pdfWriter(curFile);
-#if QT_VERSION > QT_VERSION_CHECK(5, 99, 99)
     pdfWriter.setPageSize(QPageSize(rect.size(), QPageSize::Millimeter));
-    pdfWriter.setPageMargins({ 0, 0, 0, 0 });
-#else
-    QSizeF size(rect.size());
-    pdfWriter.setPageSizeMM(size);
-    pdfWriter.setMargins({ 0, 0, 0, 0 });
-#endif
+    pdfWriter.setPageMargins({0, 0, 0, 0});
     pdfWriter.setResolution(1000000);
 
     QPainter painter(&pdfWriter);
@@ -231,16 +225,10 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
         const long forLimit = 1000;
         const double downScale = 1.0 / upScale;
         static bool in = App::settings().inch();
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        if (!qFuzzyCompare(m_scale, views().first()->matrix().m11()) || m_rect != rect || in != App::settings().inch()) {
-            in = App::settings().inch();
-            m_scale = views().first()->matrix().m11();
-#else
-        if (!qFuzzyCompare(scale, views().first()->transform().m11()) || lastRect != rect || in != App::settings().inch()) {
 
+        if (!qFuzzyCompare(scale, views().first()->transform().m11()) || lastRect != rect || in != App::settings().inch()) {
             in = App::settings().inch();
             scale = views().first()->transform().m11();
-#endif
             if (qFuzzyIsNull(scale))
                 return;
 
@@ -349,21 +337,21 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
         drawRuller(painter);
 
     //    if (0) {
-    //        if (m_frameCount == 0) {
-    //            m_time.start();
-    //            m_time2 = m_time.elapsed() + 1000;
+    //        if (frameCount_ == 0) {
+    //            time_.start();
+    //            time2_ = time_.elapsed() + 1000;
 
     //        } else {
-    //            if (m_time.elapsed() > m_time2) {
+    //            if (time_.elapsed() > time2_) {
 
-    //                m_time2 = m_time.elapsed() + 1000;
-    //                m_frameCount2 = m_frameCount;
-    //                m_frameCount = 0;
+    //                time2_ = time_.elapsed() + 1000;
+    //                frameCount2_ = frameCount_;
+    //                frameCount_ = 0;
     //            }
 
     //            painter->setRenderHint(QPainter::Antialiasing, true);
-    //            QString str(QString("FPS %1").arg(m_frameCount2));
-    //            painter->translate(m_rect.center());
+    //            QString str(QString("FPS %1").arg(frameCount2_));
+    //            painter->translate(rect_.center());
     //            const double scaleFactor = App::graphicsView()->scaleFactor();
     //            painter->scale(scaleFactor, -scaleFactor);
     //            QFont f;
@@ -377,7 +365,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
     //            painter->setBrush(Qt::white);
     //            painter->drawPath(path);
     //        }
-    //        m_frameCount++;
+    //        frameCount_++;
     //    }
 
     { // NOTE FPS counter
@@ -389,7 +377,7 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
 
         QPainterPath path;
 
-        auto txt { QString("FPS: %1").arg(currentFps) };
+        auto txt {QString("FPS: %1").arg(currentFps)};
 
         QFont font;
         font.setPixelSize(16);

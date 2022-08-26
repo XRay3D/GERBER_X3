@@ -21,10 +21,10 @@ class GiAbstractPreview : public QGraphicsObject {
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(QColor pathColor READ pathColor WRITE setPathColor NOTIFY colorChanged FINAL)
 
-    QColor bodyColor() { return m_bodyColor; }
-    void setBodyColor(const QColor& c) { m_bodyColor = c, colorChanged(); }
-    QColor pathColor() { return m_pathColor; }
-    void setPathColor(const QColor& c) { m_pathColor = c, colorChanged(); }
+    QColor bodyColor() { return bodyColor_; }
+    void setBodyColor(const QColor& c) { bodyColor_ = c, colorChanged(); }
+    QColor pathColor() { return pathColor_; }
+    void setPathColor(const QColor& c) { pathColor_ = c, colorChanged(); }
 
     QParallelAnimationGroup propAnimGr;
     QPropertyAnimation propAnimBr;
@@ -60,8 +60,8 @@ protected:
     bool used {};
     double sourceDiameter_ {};
 
-    QColor m_bodyColor;
-    QColor m_pathColor;
+    QColor bodyColor_;
+    QColor pathColor_;
 
     enum class Colors : int {
         Default,

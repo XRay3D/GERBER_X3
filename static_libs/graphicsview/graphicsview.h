@@ -55,7 +55,7 @@ signals:
 private:
     Ruler* hRuler;
     Ruler* vRuler;
-    Scene* m_scene;
+    Scene* scene_;
     bool ruler_ {};
 
     void updateRuler();

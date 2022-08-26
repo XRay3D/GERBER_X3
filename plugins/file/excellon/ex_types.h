@@ -300,20 +300,20 @@ public:
 
 class Settings {
 protected:
-    static inline Format m_format;
+    static inline Format format_;
 
-    static inline QString m_parseZeroMode;
-    static inline QString m_parseUnitMode;
-    static inline QString m_parseDecimalAndInteger;
+    static inline QString parseZeroMode_;
+    static inline QString parseUnitMode_;
+    static inline QString parseDecimalAndInteger_;
 
 public:
-    static inline void setformat(const Format& format) { m_format = format; }
+    static inline void setformat(const Format& format) { format_ = format; }
 
-    static inline Format format() { return m_format; }
+    static inline Format format() { return format_; }
 
-    static QString parseZeroMode() { return m_parseZeroMode; }
-    static QString parseUnitMode() { return m_parseUnitMode; }
-    static QString parseDecimalAndInteger() { return m_parseDecimalAndInteger; }
+    static QString parseZeroMode() { return parseZeroMode_; }
+    static QString parseUnitMode() { return parseUnitMode_; }
+    static QString parseDecimalAndInteger() { return parseDecimalAndInteger_; }
 };
 
 } // namespace Excellon

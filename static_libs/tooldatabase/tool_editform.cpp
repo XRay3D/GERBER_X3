@@ -38,46 +38,38 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     for (DoubleSpinBox* pPsbx : dsbx) {
         connect(pPsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
     }
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxFeedSpeeds, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-#else
-    connect(ui->cbxFeedSpeeds, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), [this](int index) {
-#endif
-        double tmpFeed = m_feed;
+    connect(ui->cbxFeedSpeeds, &QComboBox::currentIndexChanged, [this](int index) {
+        double tmpFeed = feed_;
         switch (index) {
-        case mm_sec: // mm/sec
-            m_feed = 1.0 / 60.0;
+        case msec_: // mm/sec
+            feed_ = 1.0 / 60.0;
             break;
-        case mm_min: // mm/min!!!
-            m_feed = 1.0;
+        case mmin_: // mm/min!!!
+            feed_ = 1.0;
             break;
-        case cm_min: // cm/min
-            m_feed = 1.0 / 10.0;
+        case cmin_: // cm/min
+            feed_ = 1.0 / 10.0;
             break;
-        case m_min: //  m/min
-            m_feed = 1.0 / 1000.0;
+        case min_: //  m/min
+            feed_ = 1.0 / 1000.0;
             break;
         default:
             break;
         }
         bool fl1 = parentWidget()->isWindowModified();
         bool fl2 = ui->pbApply->isEnabled();
-        ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / tmpFeed) * m_feed);
-        ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / tmpFeed) * m_feed);
+        ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / tmpFeed) * feed_);
+        ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / tmpFeed) * feed_);
         ui->dsbxFeedRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
         ui->dsbxPlungeRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
         parentWidget()->setWindowModified(fl1);
         ui->pbApply->setEnabled(fl2);
     });
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(ui->cbxToolType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
-#else
-    connect(ui->cbxToolType, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &ToolEditForm::setupToolWidgets);
-#endif
+    connect(ui->cbxToolType, &QComboBox::currentIndexChanged, this, &ToolEditForm::setupToolWidgets);
 
-    connect(ui->leName, &QLineEdit::textChanged, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); });
-    connect(ui->leName, &QLineEdit::textEdited, [this](const QString& arg1) { m_tool.setName(arg1); setChanged(); ui->chbxAutoName->setChecked(false); });
-    connect(ui->teNote, &QTextEdit::textChanged, [this] { m_tool.setNote(ui->teNote->toPlainText()); setChanged(); });
+    connect(ui->leName, &QLineEdit::textChanged, [this](const QString& arg1) { tool_.setName(arg1); setChanged(); });
+    connect(ui->leName, &QLineEdit::textEdited, [this](const QString& arg1) { tool_.setName(arg1); setChanged(); ui->chbxAutoName->setChecked(false); });
+    connect(ui->teNote, &QTextEdit::textChanged, [this] { tool_.setNote(ui->teNote->toPlainText()); setChanged(); });
 
     ui->cbxUnits->setVisible(false);
 
@@ -86,7 +78,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->cbxToolType->setItemIcon(Tool::Engraver, QIcon::fromTheme("engraving"));
     ui->cbxToolType->setItemIcon(Tool::Laser, QIcon::fromTheme("laser"));
 
-    ui->lblWarn->setPixmap(QIcon::fromTheme("window-close").pixmap({ 16, 16 }));
+    ui->lblWarn->setPixmap(QIcon::fromTheme("window-close").pixmap({16, 16}));
     ui->lblWarn->setToolTip(QApplication::translate("ToolEditForm", "If the offset value is more than 50%, unmilled areas are possible.\nThese errors do not appear in the visualization.", "При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации."));
 
     QSettings settings;
@@ -107,27 +99,27 @@ ToolEditForm::~ToolEditForm() {
 void ToolEditForm::setItem(ToolItem* item) {
     if (item == nullptr)
         return;
-    m_item = item;
-    if (m_item->isTool()) {
-        setTool(m_item->tool());
+    item_ = item;
+    if (item_->isTool()) {
+        setTool(item_->tool());
         setVisibleToolWidgets(true);
     } else {
-        ui->leName->setText(m_item->name());
-        ui->teNote->setText(m_item->note());
+        ui->leName->setText(item_->name());
+        ui->teNote->setText(item_->note());
         setVisibleToolWidgets(false);
     }
     setChanged(false);
 }
 
 void ToolEditForm::setTool(const Tool& tool) {
-    m_tool = tool;
-    setupToolWidgets(m_tool.type());
+    tool_ = tool;
+    setupToolWidgets(tool_.type());
     dsbx[Tool::Angle]->setValue(tool.angle());
     dsbx[Tool::Diameter]->setValue(tool.diameter());
-    dsbx[Tool::FeedRate]->setValue(tool.feedRate() * m_feed);
+    dsbx[Tool::FeedRate]->setValue(tool.feedRate() * feed_);
     dsbx[Tool::OneTurnCut]->setValue(tool.oneTurnCut());
     dsbx[Tool::PassDepth]->setValue(tool.passDepth());
-    dsbx[Tool::PlungeRate]->setValue(tool.plungeRate() * m_feed);
+    dsbx[Tool::PlungeRate]->setValue(tool.plungeRate() * feed_);
     dsbx[Tool::SpindleSpeed]->setValue(tool.spindleSpeed());
     dsbx[Tool::Stepover]->setValue(tool.stepover());
 
@@ -156,8 +148,8 @@ void ToolEditForm::setVisibleToolWidgets(bool visible) {
 }
 
 void ToolEditForm::setupToolWidgets(int type) {
-    const int lastType = m_tool.type();
-    m_tool.setType(type);
+    const int lastType = tool_.type();
+    tool_.setType(type);
 
     auto setEnabled = [this, type](DoubleSpinBox* dsbx, double min, double max) {
         if (!dsbx->isEnabled()) {
@@ -229,10 +221,10 @@ void ToolEditForm::setupToolWidgets(int type) {
 void ToolEditForm::valueChangedSlot(double value) {
     switch (dsbx.indexOf(dynamic_cast<DoubleSpinBox*>(sender()))) {
     case Tool::Angle:
-        m_tool.setAngle(value);
+        tool_.setAngle(value);
         break;
     case Tool::Diameter:
-        m_tool.setDiameter(value);
+        tool_.setDiameter(value);
         ui->dsbxOneTurnCut->setMaximum(value);
         ui->dsbxStepover->setMaximum(value);
         if (ui->dsbxStepover->value() == 0.0) {
@@ -244,45 +236,44 @@ void ToolEditForm::valueChangedSlot(double value) {
         ui->dsbxStepoverPercent->valueChanged(ui->dsbxStepoverPercent->value());
         break;
     case Tool::FeedRate:
-        m_tool.setFeedRate(value / m_feed);
+        tool_.setFeedRate(value / feed_);
         break;
     case Tool::OneTurnCut:
-        m_tool.setOneTurnCut(value);
-        ui->dsbxOneTurnCutPercent->setValue(m_tool.diameter() > 0.0 ? value / (m_tool.diameter() * 0.01)
-                                                                    : 0.0);
+        tool_.setOneTurnCut(value);
+        ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0.0 ? value / (tool_.diameter() * 0.01) : 0.0);
         if (ui->chbxFeedRate->isChecked())
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+            ui->dsbxFeedRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed_);
         if (ui->chbxPlungeRate->isChecked())
-            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+            ui->dsbxPlungeRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed_);
         break;
     case Tool::PassDepth:
-        m_tool.setPassDepth(value);
+        tool_.setPassDepth(value);
         break;
     case Tool::PlungeRate:
-        m_tool.setPlungeRate(value / m_feed);
+        tool_.setPlungeRate(value / feed_);
         break;
     case Tool::SpindleSpeed:
-        m_tool.setSpindleSpeed(value); // rpm
+        tool_.setSpindleSpeed(value); // rpm
         if (ui->chbxFeedRate->isChecked())
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+            ui->dsbxFeedRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed_);
         if (ui->chbxPlungeRate->isChecked())
-            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
+            ui->dsbxPlungeRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed_);
         break;
     case Tool::Stepover:
-        m_tool.setStepover(value);
-        ui->dsbxStepoverPercent->setValue(m_tool.diameter() > 0.0 ? value / (m_tool.diameter() * 0.01) : 0.0);
+        tool_.setStepover(value);
+        ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0.0 ? value / (tool_.diameter() * 0.01) : 0.0);
         break;
     case Tool::OneTurnCutPercent:
-        ui->dsbxOneTurnCut->setValue(value * (m_tool.diameter() * 0.01));
+        ui->dsbxOneTurnCut->setValue(value * (tool_.diameter() * 0.01));
         break;
     case Tool::StepoverPercent:
-        ui->dsbxStepover->setValue(value * (m_tool.diameter() * 0.01));
+        ui->dsbxStepover->setValue(value * (tool_.diameter() * 0.01));
         break;
     default:
         break;
     }
 
-    const bool overflow = (ui->dsbxStepover->value() > (m_tool.diameter() * 0.5));
+    const bool overflow = (ui->dsbxStepover->value() > (tool_.diameter() * 0.5));
     ui->lblWarn->setVisible(overflow);
 
     updateName();
@@ -290,16 +281,16 @@ void ToolEditForm::valueChangedSlot(double value) {
 }
 
 void ToolEditForm::on_pbApply_clicked() {
-    if (m_item && m_tool.isValid()) {
-        m_item->setName(m_tool.name());
-        m_item->setNote(m_tool.note());
-        m_tool.setAutoName(ui->chbxAutoName->isChecked());
-        m_item->tool() = m_tool;
-        emit itemChanged(m_item);
+    if (item_ && tool_.isValid()) {
+        item_->setName(tool_.name());
+        item_->setNote(tool_.note());
+        tool_.setAutoName(ui->chbxAutoName->isChecked());
+        item_->tool() = tool_;
+        emit itemChanged(item_);
         setChanged(false);
         return;
     }
-    switch (m_tool.type()) {
+    switch (tool_.type()) {
     case Tool::Drill:
         ui->dsbxDiameter->flicker();
         ui->dsbxOneTurnCut->flicker();
@@ -329,9 +320,9 @@ void ToolEditForm::on_pbApply_clicked() {
 }
 
 void ToolEditForm::setDialog() {
-    m_dialog = false;
+    dialog_ = false;
     ui->pbApply->setVisible(false);
-    ui->cbxToolType->setEnabled(m_dialog);
+    ui->cbxToolType->setEnabled(dialog_);
     setVisibleToolWidgets(true);
 }
 

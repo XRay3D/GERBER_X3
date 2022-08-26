@@ -40,7 +40,7 @@ void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
             p.push_back(p.front());
 
     // assert(ps.isEmpty());
-    auto file = new GCode::File({ ps }, { tool, 0.0, GCode::Profile });
+    auto file = new GCode::File({ps}, {tool, 0.0, GCode::Profile});
     file->setFileName(fileName + "_" + tool.name());
     // file->itemGroup()->setPen({ Qt::green, 0.0 });
     emit App::project()->addFileDbg(file);
@@ -135,8 +135,8 @@ void Creator::addRawPaths(Paths rawPaths) {
     if (rawPaths.empty())
         return;
 
-    //    if (m_gcp.side() == On) {
-    //        m_workingRawPs.push_back(rawPaths);
+    //    if (gcp_.side() == On) {
+    //        workingRawPs_.push_back(rawPaths);
     //        return;
     //    }
 
@@ -169,10 +169,12 @@ void Creator::addRawPaths(Paths rawPaths) {
     IntRect r(clipper.GetBounds());
     int k = uScale;
     Paths paths;
-    clipper.AddPath({ { r.left - k, r.bottom + k },
-                        { r.right + k, r.bottom + k },
-                        { r.right + k, r.top - k },
-                        { r.left - k, r.top - k } },
+    clipper.AddPath({
+                        { r.left - k, r.bottom + k},
+                        {r.right + k, r.bottom + k},
+                        {r.right + k,    r.top - k},
+                        { r.left - k,    r.top - k}
+    },
         ptClip, true);
     clipper.Execute(ctXor, paths, pftEvenOdd);
     workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
@@ -218,7 +220,7 @@ void Creator::createGc() {
 GCode::File* Creator::file() const { return file_; }
 
 std::pair<int, int> Creator::getProgress() {
-    return { static_cast<int>(max()), static_cast<int>(current()) };
+    return {static_cast<int>(max()), static_cast<int>(current())};
 }
 
 void Creator::stacking(Paths& paths) {
@@ -233,8 +235,8 @@ void Creator::stacking(Paths& paths) {
         clipper.AddPaths(paths, ptSubject, true);
         IntRect r(clipper.GetBounds());
         int k = uScale;
-        Path outer = { IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k) };
+        Path outer = {IntPoint(r.left - k, r.bottom + k), IntPoint(r.right + k, r.bottom + k),
+            IntPoint(r.right + k, r.top - k), IntPoint(r.left - k, r.top - k)};
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
         paths.clear();
@@ -278,7 +280,7 @@ void Creator::stacking(Paths& paths) {
             //            if (App::settings().gbrCleanPolygons())
             //                CleanPolygon(path, uScale * 0.0005);
             if (returnPss.empty() || newPaths) {
-                returnPss.push_back({ path });
+                returnPss.push_back({path});
             } else {
                 // check distance;
                 std::pair<size_t, size_t> idx;
@@ -298,19 +300,19 @@ void Creator::stacking(Paths& paths) {
                 if (d <= toolDiameter && mathBE(returnPss.back(), path, idx))
                     returnPss.back().push_back(path);
                 else
-                    returnPss.push_back({ path });
+                    returnPss.push_back({path});
             }
             for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-                stacker({ node->Childs[i], static_cast<bool>(i) });
+                stacker({node->Childs[i], static_cast<bool>(i)});
         } else { // Start from here
             for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-                stacker({ node->Childs[i], true });
+                stacker({node->Childs[i], true});
         }
         // PROG setProgInc();
     };
     /***********************************************************************************************/
     // PROG .3setProgMax(polyTree.Total());
-    stacker({ polyTree.GetFirst(), false });
+    stacker({polyTree.GetFirst(), false});
 
     for (Paths& retPaths : returnPss) {
         std::reverse(retPaths.begin(), retPaths.end());
@@ -548,8 +550,8 @@ bool Creator::createability(bool side) {
                 clipper.AddPaths(frPaths, ptSubject, true);
                 IntRect rect(clipper.GetBounds());
                 int k = uScale;
-                Path outer = { IntPoint(rect.left - k, rect.bottom + k), IntPoint(rect.right + k, rect.bottom + k),
-                    IntPoint(rect.right + k, rect.top - k), IntPoint(rect.left - k, rect.top - k) };
+                Path outer = {IntPoint(rect.left - k, rect.bottom + k), IntPoint(rect.right + k, rect.bottom + k),
+                    IntPoint(rect.right + k, rect.top - k), IntPoint(rect.left - k, rect.top - k)};
                 clipper.AddPath(outer, ptSubject, true);
                 clipper.Execute(ctUnion, polyTree, pftEvenOdd);
             }
@@ -744,7 +746,7 @@ bool Creator::createability(bool side) {
         std::erase_if(nonCutPaths, [](Path& path) { return !path.size(); }); // убрать пустые
 
         std::ranges::for_each(nonCutPaths, [this](auto&& path) {
-            items.push_back(new GiError({ path }, Area(path) * dScale * dScale));
+            items.push_back(new GiError({path}, Area(path) * dScale * dScale));
         });
 
         QString last(msg);
@@ -883,12 +885,7 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret) 
         const IntPoint& pt1 = path[(i + 1) % cnt];
         const IntPoint& pt2 = path[i];
         QLineF l1(pt1, pt2);
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
-        if (QLineF::BoundedIntersection == l1.intersect(l2, &p)) {
-#else
         if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
-#endif
             if (ret)
                 *ret = (p);
             return true;

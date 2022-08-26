@@ -13,9 +13,9 @@
  *******************************************************************************/
 #include "dxf_vec2.h"
 
-Vec2 Vec2::from_angle(double angle, double length) { return { cos(angle) * length, sin(angle) * length }; }
+Vec2 Vec2::froangle_(double angle, double length) { return { cos(angle) * length, sin(angle) * length }; }
 
-Vec2 Vec2::from_deg_angle(double angle, double length) { return from_angle(qDegreesToRadians(angle), length); }
+Vec2 Vec2::frodeg_angle_(double angle, double length) { return froangle_(qDegreesToRadians(angle), length); }
 
 double Vec2::abs() { return magnitude(); }
 
@@ -132,7 +132,7 @@ Vec2 Vec2::rotate(double angle) {
         Args:
             angle: angle in radians
         */
-    return from_angle(this->angle() + angle, magnitude());
+    return froangle_(this->angle() + angle, magnitude());
 }
 
 Vec2 Vec2::rotate_deg(double angle) {
@@ -142,5 +142,5 @@ Vec2 Vec2::rotate_deg(double angle) {
             angle: angle in degrees
         Returns: rotated vector
         */
-    return from_angle(this->angle() + qDegreesToRadians(angle), magnitude());
+    return froangle_(this->angle() + qDegreesToRadians(angle), magnitude());
 }

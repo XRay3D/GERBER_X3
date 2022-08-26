@@ -83,14 +83,14 @@ void VoronoiCgal::cgalVoronoi() {
     msg = tr("Calc CGAL Voronoi");
 
     size_t max {};
-    for (const Paths& paths : m_groupedPss)
+    for (const Paths& paths : groupedPss_)
         for (const Path& path : paths)
             max += path.size();
 
     setMax(max);
     setCurrent();
 
-    for (const Paths& paths : m_groupedPss) {
+    for (const Paths& paths : groupedPss_) {
         for (const Path& path : paths) {
             for (size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
@@ -125,11 +125,11 @@ void VoronoiCgal::cgalVoronoi() {
                 continue;
             const int idIdx = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
             CGAL::Object o = sdg.primal(e);
-            /*  */ if (SDG2::Geom_traits::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
+            /*  */ if (SDG2::Geotraits_::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
                 pathPairs[idIdx].push_back(Path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
-            } else if (SDG2::Geom_traits::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
+            } else if (SDG2::Geotraits_::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
                 pathPairs[idIdx].push_back(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
-            } else if (SDG2::Geom_traits::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
+            } else if (SDG2::Geotraits_::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
                 pathPairs[idIdx].push_back(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
             } else if (CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 mvector<SDG2::Point_2> points;
@@ -147,7 +147,7 @@ void VoronoiCgal::cgalVoronoi() {
             segments.append(edge);
         }
     }
-    const cInt fo = m_gcp.params[GCodeParams::FrameOffset].toDouble() * uScale;
+    const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
         { minX - fo, minY - fo },
         { minX - fo, maxY + fo },
@@ -177,8 +177,8 @@ void VoronoiCgal::cgalVoronoi() {
     };
     std::ranges::for_each(segments, clean);
 
-    m_returnPs = segments;
-    m_returnPs.push_back(frame);
+    returnPs_ = segments;
+    returnPs_.push_back(frame);
 }
 
 } // namespace GCode

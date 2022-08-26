@@ -135,7 +135,7 @@ namespace Attr { // Attributes
         void parse(const QStringList& list);
 
         QString creationDate;
-        std::shared_ptr<AbstrFileFunc> m_function;
+        std::shared_ptr<AbstrFileFunc> function_;
         eFilePolarity filePolarity;
         QStringList generationSoftware;
         QString md5;
@@ -200,9 +200,9 @@ namespace Attr { // Attributes
         Function toFunction(const QString& key);
 
         void parse(const QStringList& list);
-        std::shared_ptr<AbstrAperFunc> m_function;
-        QStringList m_drillTolerance;
-        QStringList m_flashText;
+        std::shared_ptr<AbstrAperFunc> function_;
+        QStringList drillTolerance_;
+        QStringList flashText_;
     };
 
     //    struct AperFunction {
@@ -222,7 +222,7 @@ namespace Attr { // Attributes
     //        the first one ends. Thus, the order in which they are
     //        defined is significant. A contour is closed: the end point
     //        of the last draw/arc must coincide with the start point of
-    //        the first. Outlines cannot m_instance-intersect.
+    //        the first. Outlines cannot instance_-intersect.
     //        Four different types of outlines are defined. See drawing,
     //        courtesy Thiadmer Riemersma:
     //        Outlines of different types on the same component are

@@ -71,19 +71,19 @@ SettingsTab::~SettingsTab() { }
 
 void SettingsTab::readSettings(MySettings& settings) {
     settings.beginGroup("Dxf");
-    m_defaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
-    m_boldFont = settings.getValue(chbxBoldFont, false);
-    m_italicFont = settings.getValue(chbxItalicFont, false);
-    m_overrideFonts = settings.getValue(chbxOverrideFonts, false);
+    defaultFont_ = settings.getValue(fcbxDxfDefaultFont, "Arial");
+    boldFont_ = settings.getValue(chbxBoldFont, false);
+    italicFont_ = settings.getValue(chbxItalicFont, false);
+    overrideFonts_ = settings.getValue(chbxOverrideFonts, false);
     settings.endGroup();
 }
 
 void SettingsTab::writeSettings(MySettings& settings) {
     settings.beginGroup("Dxf");
-    m_defaultFont = settings.setValue(fcbxDxfDefaultFont);
-    m_boldFont = settings.setValue(chbxBoldFont);
-    m_italicFont = settings.setValue(chbxItalicFont);
-    m_overrideFonts = settings.setValue(chbxOverrideFonts);
+    defaultFont_ = settings.setValue(fcbxDxfDefaultFont);
+    boldFont_ = settings.setValue(chbxBoldFont);
+    italicFont_ = settings.setValue(chbxItalicFont);
+    overrideFonts_ = settings.setValue(chbxOverrideFonts);
     settings.endGroup();
 }
 

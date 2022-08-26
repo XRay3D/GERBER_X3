@@ -28,10 +28,10 @@ class AbstractThermPrGi : public QGraphicsObject {
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor)
     Q_PROPERTY(QColor pathColor READ pathColor WRITE setPathColor)
 
-    QColor bodyColor() { return m_bodyColor; }
-    void setBodyColor(const QColor& c) { m_bodyColor = c, update(); }
-    QColor pathColor() { return m_pathColor; }
-    void setPathColor(const QColor& c) { m_pathColor = c, update(); }
+    QColor bodyColor() { return bodyColor_; }
+    void setBodyColor(const QColor& c) { bodyColor_ = c, update(); }
+    QColor pathColor() { return pathColor_; }
+    void setPathColor(const QColor& c) { pathColor_ = c, update(); }
     friend class ThermalNode;
 
     QParallelAnimationGroup agr;
@@ -54,7 +54,7 @@ public:
     //////////////////////////////////////////
     int type() const override;
 
-    Paths bridge() const { return m_bridge; }
+    Paths bridge() const { return bridge_; }
     virtual bool isValid() const;
 
     virtual IntPoint pos() const = 0;
@@ -65,8 +65,8 @@ protected:
     Tool& tool;
 
 private:
-    QColor m_bodyColor;
-    QColor m_pathColor;
+    QColor bodyColor_;
+    QColor pathColor_;
 
     enum class Colors : int {
         Default,
@@ -114,12 +114,12 @@ protected:
     QPainterPath sourcePath;
     QPainterPath painterPath;
 
-    Paths m_bridge;
+    Paths bridge_;
     Paths previewPaths;
     Paths cashedPath;
     Paths cashedFrame;
 
-    ThermalNodeI* m_node = nullptr;
+    ThermalNodeI* node_ = nullptr;
 
     double diameter;
     int isEmpty = -1;

@@ -48,26 +48,26 @@ ComponentsNode::~ComponentsNode() {
 }
 
 int ComponentsNode::row() const {
-    if (m_parentItem)
-        for (int i = 0, size = m_parentItem->childItems.size(); i < size; ++i)
-            if (m_parentItem->childItems[i].data() == this)
+    if (parentItem_)
+        for (int i = 0, size = parentItem_->childItems.size(); i < size; ++i)
+            if (parentItem_->childItems[i].data() == this)
                 return i;
     return 0;
 }
 
 ComponentsNode* ComponentsNode::child(int row) { return childItems.value(row).data(); }
 
-ComponentsNode* ComponentsNode::parentItem() { return m_parentItem; }
+ComponentsNode* ComponentsNode::parentItem() { return parentItem_; }
 
 void ComponentsNode::setChild(int row, ComponentsNode* item) {
     if (item)
-        item->m_parentItem = this;
+        item->parentItem_ = this;
     if (row < childItems.size())
         childItems[row].reset(item);
 }
 
 void ComponentsNode::append(ComponentsNode* item) {
-    item->m_parentItem = this;
+    item->parentItem_ = this;
     childItems.append(QSharedPointer<ComponentsNode>(item));
 }
 
@@ -94,7 +94,7 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
     //        //    case Other_:
     //        //        switch (role) {
     //        //        case Qt::CheckStateRole:
-    //        //            m_current = value.value<Qt::CheckState>();
+    //        //            current_ = value.value<Qt::CheckState>();
     //        //            return true;
     //        //        default:
     //        //            return false;

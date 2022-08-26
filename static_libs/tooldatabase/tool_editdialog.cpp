@@ -21,16 +21,16 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     ui->setupUi(this);
     ui->toolEdit->setDialog();
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [this] {
-        if (ui->toolEdit->m_tool.isValid()) {
-            ui->toolEdit->m_tool.setId(-1);
+        if (ui->toolEdit->tool_.isValid()) {
+            ui->toolEdit->tool_.setId(-1);
             accept();
         } else {
             ui->toolEdit->on_pbApply_clicked();
-            // toolEdit->m_tool.errorMessageBox(this);
+            // toolEdit->tool_.errorMessageBox(this);
         }
     });
 }
 
-Tool ToolEditDialog::tool() const { return ui->toolEdit->m_tool; }
+Tool ToolEditDialog::tool() const { return ui->toolEdit->tool_; }
 
 void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }

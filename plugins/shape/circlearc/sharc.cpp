@@ -20,8 +20,8 @@
 namespace Shapes {
 
 Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
-    : m_radius(QLineF(center, pt).length()) {
-    m_paths.resize(1);
+    : radius_(QLineF(center, pt).length()) {
+    paths_.resize(1);
 
     handlers.reserve(PtCount);
 
@@ -44,10 +44,10 @@ void Arc::redraw() {
     const QLineF l1(handlers[Center]->pos(), handlers[Point1]->pos());
     const QLineF l2(handlers[Center]->pos(), handlers[Point2]->pos());
 
-    m_radius = l1.length();
+    radius_ = l1.length();
 
-    const int intSteps = App::settings().clpCircleSegments(m_radius);
-    const cInt radius = static_cast<cInt>(m_radius * uScale);
+    const int intSteps = App::settings().clpCircleSegments(radius_);
+    const cInt radius = static_cast<cInt>(radius_ * uScale);
     const IntPoint center((handlers[Center]->pos()));
     const double stepAngle = two_pi / intSteps;
 
@@ -60,7 +60,7 @@ void Arc::redraw() {
     if (angle < 0.0)
         angle = two_pi + angle;
 
-    Path& path = m_paths.front();
+    Path& path = paths_.front();
     path.clear();
     path.reserve(intSteps);
 
@@ -77,12 +77,12 @@ void Arc::redraw() {
             static_cast<cInt>(radius * sin(angle1 + theta)) + center.Y));
     }
 
-    m_shape = QPainterPath();
-    m_shape.addPolygon(path);
-    m_rect = m_shape.boundingRect();
+    shape_ = QPainterPath();
+    shape_.addPolygon(path);
+    //    rect_ = shape_.boundingRect();
 
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString Arc::name() const { return QObject::tr("Arc"); }
@@ -91,26 +91,28 @@ QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
 void Arc::updateOtherHandlers(Handler* handler) {
     QLineF l(handlers[Center]->pos(), handler->pos());
-    m_radius = l.length();
+    radius_ = l.length();
 
     QLineF l1(handlers[Center]->pos(),
         handlers[Center]->pos() == handlers[Point1]->pos() //если залипло на центр
-            ? handlers[Center]->pos() + QPointF(1.0, 0.0)
-            : handlers[Point1]->pos());
+            ?
+            handlers[Center]->pos() + QPointF(1.0, 0.0) :
+            handlers[Point1]->pos());
     QLineF l2(handlers[Center]->pos(),
         handlers[Center]->pos() == handlers[Point2]->pos() //если залипло на центр
-            ? handlers[Center]->pos() + QPointF(1.0, 0.0)
-            : handlers[Point2]->pos());
+            ?
+            handlers[Center]->pos() + QPointF(1.0, 0.0) :
+            handlers[Point2]->pos());
 
     switch (handlers.indexOf(handler)) {
     case Center:
         break;
     case Point1:
-        l2.setLength(m_radius);
+        l2.setLength(radius_);
         handlers[Point2]->QGraphicsItem::setPos(l2.p2());
         break;
     case Point2:
-        l1.setLength(m_radius);
+        l1.setLength(radius_);
         handlers[Point1]->QGraphicsItem::setPos(l1.p2());
         break;
     }
@@ -120,11 +122,11 @@ void Arc::setPt(const QPointF& pt) {
     {
         handlers[Point1]->setPos(pt);
         QLineF l(handlers[Center]->pos(), handlers[Point1]->pos());
-        m_radius = l.length();
+        radius_ = l.length();
     }
     {
         QLineF l(handlers[Center]->pos(), handlers[Point2]->pos());
-        l.setLength(m_radius);
+        l.setLength(radius_);
         handlers[Point2]->QGraphicsItem::setPos(l.p2());
     }
     redraw();
@@ -132,18 +134,18 @@ void Arc::setPt(const QPointF& pt) {
 
 void Arc::setPt2(const QPointF& pt) {
     QLineF l(handlers[Center]->pos(), pt);
-    l.setLength(m_radius);
+    l.setLength(radius_);
 
     handlers[Point2]->QGraphicsItem::setPos(l.p2());
     redraw();
 }
 
-double Arc::radius() const { return m_radius; }
+double Arc::radius() const { return radius_; }
 
 void Arc::setRadius(double radius) {
-    if (!qFuzzyCompare(m_radius, radius))
+    if (!qFuzzyCompare(radius_, radius))
         return;
-    m_radius = radius;
+    radius_ = radius;
     redraw();
 }
 

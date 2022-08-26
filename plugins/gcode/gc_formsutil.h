@@ -56,7 +56,7 @@ protected:
 
     QString fileName_;
 
-    bool m_editMode = false;
+    bool editMode_ = false;
     int fileId = -1;
 
     int fileCount;

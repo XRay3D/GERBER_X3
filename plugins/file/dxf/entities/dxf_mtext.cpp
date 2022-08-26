@@ -228,23 +228,7 @@ GraphicObject MText::toGo() const {
         }
         path.addText(offset - QPointF(-x, size.height() - height * (i + 1)), font, list[i]);
     }
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u * scaleX, -u * scaleY);
 
-    QPainterPath path2;
-    for (auto& poly : path.toFillPolygons(m))
-        path2.addPolygon(poly);
-
-    QMatrix m2;
-    m2.translate(insertionPoint.x(), insertionPoint.y());
-    //    m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
-    m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(d, d);
-    Paths paths;
-    for (auto& poly : path2.toFillPolygons(m2))
-        paths.push_back(poly);
-#else
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
 
@@ -260,8 +244,8 @@ GraphicObject MText::toGo() const {
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
-#endif
-    return { id, {}, paths };
+
+    return {id, {}, paths};
 }
 
 void MText::write(QDataStream& stream) const {

@@ -33,9 +33,9 @@ public:
 
 private:
     Ui::ToolDatabase* ui;
-    Tool m_tool;
-    ToolItem* m_item;
-    const mvector<Tool::Type> m_types;
+    Tool tool_;
+    ToolItem* item_;
+    const mvector<Tool::Type> types_;
 
 protected:
     void keyPressEvent(QKeyEvent* evt) override;

@@ -60,7 +60,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
     connect(pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
@@ -125,7 +125,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
 ThermalForm::~ThermalForm() {
     MySettings settings;
     settings.beginGroup("ThermalForm");
-    if (model && model->m_data.size()) {
+    if (model && model->data_.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
         settings.setValue(model->thParam().tickness, "tickness");
@@ -141,22 +141,16 @@ ThermalForm::~ThermalForm() {
 }
 
 void ThermalForm::updateFiles() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
-#else
-    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
-#endif
+
     ui->cbxFile->clear();
 
     for (auto file : App::project()->files(FileType::Gerber))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+
     connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
-#else
-    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
-#endif
 }
 
 bool ThermalForm::canToShow() {
@@ -232,8 +226,7 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->chbxPath->isChecked(),
         ui->chbxPour->isChecked(),
         ui->dsbxAreaMax->value() * uScale * uScale,
-        ui->dsbxAreaMin->value() * uScale * uScale
-    };
+        ui->dsbxAreaMin->value() * uScale * uScale};
 
     // FIXME     auto thPaths = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2);
 
@@ -308,7 +301,7 @@ void ThermalForm::redraw() {
 }
 
 void ThermalForm::on_dsbxDepth_valueChanged(double arg1) {
-    m_depth = arg1;
+    depth_ = arg1;
     redraw();
 }
 

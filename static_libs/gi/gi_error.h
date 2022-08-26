@@ -12,8 +12,8 @@
 #include "gi.h"
 
 class GiError : public QGraphicsItem {
-    QPainterPath m_shape;
-    const double m_area;
+    QPainterPath shape_;
+    const double area_;
 
 public:
     GiError(const Paths& paths, double area);

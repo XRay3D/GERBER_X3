@@ -33,12 +33,12 @@ private:
     void copyTool();
 
     void updateActions();
-    ToolModel* m_model;
+    ToolModel* model_;
     enum {
         Copy,
         Delete,
         New,
         NewGroup,
     };
-    mvector<QPushButton*> m_buttons;
+    mvector<QPushButton*> buttons_;
 };

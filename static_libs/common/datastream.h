@@ -16,23 +16,23 @@
 #include <map>
 #include <type_traits>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-inline QDataStream& operator>>(QDataStream& s, E& e) {
-    qint32 i;
-    s >> i;
-    e = static_cast<E>(i);
-    return s;
-}
+//#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+// template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
+// inline QDataStream& operator>>(QDataStream& s, E& e) {
+//    qint32 i;
+//    s >> i;
+//    e = static_cast<E>(i);
+//    return s;
+//}
 
-template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-inline QDataStream& operator<<(QDataStream& s, E e) {
-    s << static_cast<qint32>(e);
-    return s;
-}
-#endif
+// template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
+// inline QDataStream& operator<<(QDataStream& s, E e) {
+//     s << static_cast<qint32>(e);
+//     return s;
+// }
+//#endif
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 99, 99)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 template <class T1, class T2>
 inline QDataStream& operator>>(QDataStream& s, std::pair<T1, T2>& p) {
     s >> p.first >> p.second;
@@ -44,7 +44,7 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
     s << p.first << p.second;
     return s;
 }
-
+#endif
 ////////////////////////////////////////////////////////////////
 /// std::map<Key, T, std::greater<int>>
 ///
@@ -84,7 +84,7 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
 //     }
 //     return s;
 // }
-#endif
+//#endif
 
 template <typename T>
 inline QDataStream& operator>>(QDataStream& s, mvector<T>& c) {

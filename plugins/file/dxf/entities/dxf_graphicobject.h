@@ -27,14 +27,14 @@ class GraphicObject final : public AbstrGraphicObject {
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go);
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go);
 
-    int m_entityId {};
-    Path m_path;
-    Paths m_paths;
-    File* m_file = nullptr;
-    double m_rotationAngle {};
-    double m_scaleX {};
-    double m_scaleY {};
-    QPointF m_pos;
+    int entityId_ {};
+    Path path_;
+    Paths paths_;
+    File* file_ = nullptr;
+    double rotationAngle_ {};
+    double scaleX_ {};
+    double scaleY_ {};
+    QPointF pos_;
 
 public:
     GraphicObject();

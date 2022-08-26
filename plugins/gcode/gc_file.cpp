@@ -171,7 +171,7 @@ void File::saveDrill(const QPointF& offset) {
 
 void File::saveLaserPocket(const QPointF& offset) {
     saveLaserProfile(offset);
-    //    m_lines.push_back(Settings::laserDynamOn());
+    //    lines_.push_back(Settings::laserDynamOn());
     //    mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
     //    for (mvector<QPolygonF>& paths : toolPathss) {
     //        startPath(paths.front().front());
@@ -181,7 +181,7 @@ void File::saveLaserPocket(const QPointF& offset) {
     //                if (skip)
     //                    skip = false;
     //                else
-    //                    m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+    //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
     //            }
     //        }
     //        endPath();
@@ -243,7 +243,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                         //                        if (skip)
                         //                            skip = false;
                         //                        else
-                        //                            m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+                        //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
                         //                    }
                     }
                     endPath();
@@ -258,7 +258,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                     //                        if (skip)
                     //                            skip = false;
                     //                        else
-                    //                            m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+                    //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
                     //                    }
                     endPath();
                 }
@@ -282,7 +282,7 @@ void File::saveLaserProfile(const QPointF& offset) {
             //                if (skip)
             //                    skip = false;
             //                else
-            //                    m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
+            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
             //            }
             endPath();
         }
@@ -307,7 +307,7 @@ void File::saveMillingRaster(const QPointF& offset) {
                 //                    if (skip)
                 //                        skip = false;
                 //                    else
-                //                        m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+                //                        lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
                 //                }
                 endPath();
             }
@@ -333,7 +333,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
             //                if (skip)
             //                    skip = false;
             //                else
-            //                    m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
+            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
             //            }
         } else {
             auto sp(savePath(path, 0));
@@ -343,7 +343,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
             //                if (skip)
             //                    skip = false;
             //                else
-            //                    m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(static_cast<int>(0)) }));
+            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(static_cast<int>(0)) }));
             //            }
         }
     }
@@ -358,7 +358,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
             //                if (skip)
             //                    skip = false;
             //                else
-            //                    m_lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
             //            }
             endPath();
         }
@@ -379,7 +379,7 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     //        for (QPolygonF& path : paths)
     //            path.translate(offset);
 
-    //    if (m_side == Bottom) {
+    //    if (side_ == Bottom) {
     //        const double k = Pin::minX() + Pin::maxX();
     //        for (auto& paths : pathss) {
     //            for (auto& path : paths) {
@@ -521,7 +521,7 @@ GCodeType File::gtype() const { return gcp_.gcType; }
 void File::startPath(const QPointF& point) {
     if (toolType() == Tool::Laser) {
         lines_.push_back(formated({ g0(), x(point.x()), y(point.y()), speed(0) })); // start xy
-        //        m_gCodeText.push_back(formated({ g1(), speed(spindleSpeed) }));
+        //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
         lines_.push_back(formated({ g0(), x(point.x()), y(point.y()), speed(spindleSpeed()) })); // start xy
         lines_.push_back(formated({ g0(), z(App::project()->plunge()) }));                       // start z
@@ -588,8 +588,8 @@ void File::createGiPocket() {
     if (pocketPaths_.size()) {
         //        {
         //            ClipperOffset offset(uScale);
-        //            offset.AddPaths(m_pocketPaths, jtRound, etClosedPolygon);
-        //            offset.Execute(m_pocketPaths, uScale * m_gcp.getToolDiameter() * 0.5);
+        //            offset.AddPaths(pocketPaths_, jtRound, etClosedPolygon);
+        //            offset.Execute(pocketPaths_, uScale * gcp_.getToolDiameter() * 0.5);
         //        }
         item = new GiDataSolid(pocketPaths_, nullptr);
         item->setPen(Qt::NoPen);
@@ -598,7 +598,7 @@ void File::createGiPocket() {
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->push_back(item);
     }
-    m_g0path.reserve(toolPathss_.size());
+    g0path_.reserve(toolPathss_.size());
     size_t i = 0;
     for (const Paths& paths : toolPathss_) {
         int k = static_cast<int>((toolPathss_.size() > 1) ? (300.0 / (toolPathss_.size() - 1)) * i : 0);
@@ -629,10 +629,10 @@ void File::createGiPocket() {
         }
 
         if (i < toolPathss_.size() - 1) {
-            m_g0path.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
         }
     }
-    item = new GiGcPath(m_g0path);
+    item = new GiGcPath(g0path_);
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 }
@@ -651,24 +651,24 @@ void File::createGiProfile() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for (size_t j = 0; j < paths.size() - 1; ++j)
-            m_g0path.push_back({ paths[j].back(), paths[j + 1].front() });
+            g0path_.push_back({ paths[j].back(), paths[j + 1].front() });
         if (i < toolPathss_.size() - 1) {
-            m_g0path.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
         }
     }
 
-    item = new GiGcPath(m_g0path);
+    item = new GiGcPath(g0path_);
     //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 }
 
 void File::createGiRaster() {
-    //        int k = static_cast<int>((m_toolPathss.size() > 1) ? (300.0 / (m_toolPathss.size() - 1)) * i : 0);
+    //        int k = static_cast<int>((toolPathss_.size() > 1) ? (300.0 / (toolPathss_.size() - 1)) * i : 0);
     //        QColor* c = new QColor;
     //        *c = QColor::fromHsv(k, 255, 255, 255);
     GraphicsItem* item;
-    m_g0path.reserve(toolPathss_.size());
+    g0path_.reserve(toolPathss_.size());
 
     if (pocketPaths_.size()) {
         item = new GiDataSolid(pocketPaths_, nullptr);
@@ -692,12 +692,12 @@ void File::createGiRaster() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for (size_t j = 0; j < paths.size() - 1; ++j)
-            m_g0path.push_back({ paths[j].back(), paths[j + 1].front() });
+            g0path_.push_back({ paths[j].back(), paths[j + 1].front() });
         if (i < toolPathss_.size() - 1) {
-            m_g0path.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
         }
     }
-    item = new GiGcPath(m_g0path);
+    item = new GiGcPath(g0path_);
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 }
@@ -705,18 +705,18 @@ void File::createGiRaster() {
 void File::createGiLaser() {
     Paths paths;
     paths.reserve(toolPathss_.front().size() / 2 + 1);
-    m_g0path.reserve(paths.size());
+    g0path_.reserve(paths.size());
     for (size_t i = 0; i < toolPathss_.front().size(); ++i) {
         if (i % 2)
             paths.push_back(toolPathss_.front()[i]);
         else
-            m_g0path.push_back(toolPathss_.front()[i]);
+            g0path_.push_back(toolPathss_.front()[i]);
     }
     if (toolPathss_.size() > 1) {
         paths.insert(paths.end(), toolPathss_[1].begin(), toolPathss_[1].end());
-        m_g0path.push_back({ toolPathss_[0].back().back(), toolPathss_[1].front().front() });
+        g0path_.push_back({ toolPathss_[0].back().back(), toolPathss_[1].front().front() });
         for (size_t i = 0; i < toolPathss_[1].size() - 1; ++i)
-            m_g0path.push_back({ toolPathss_[1][i].back(), toolPathss_[1][i + 1].front() });
+            g0path_.push_back({ toolPathss_[1][i].back(), toolPathss_[1][i + 1].front() });
     }
 
     auto item = new GiGcPath(paths, this);
@@ -725,16 +725,16 @@ void File::createGiLaser() {
     itemGroup()->push_back(item);
 
     if (Settings::simplifyHldi()) {
-        auto item = new GiGcPath(m_g0path, this);
+        auto item = new GiGcPath(g0path_, this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         auto color = new QColor(App::settings().guiColor(GuiColors::G0));
         color->setAlpha(127);
         item->setPenColorPtr(color);
         itemGroup()->push_back(item);
         //        ClipperOffset offset;
-        //        offset.AddPaths(m_g0path, jtRound, etOpenRound);
-        //        offset.Execute(m_g0path,uScale*m_gcp.getToolDiameter());
-        //        item = new GcPathItem(m_g0path, this);
+        //        offset.AddPaths(g0path_, jtRound, etOpenRound);
+        //        offset.Execute(g0path_,uScale*gcp_.getToolDiameter());
+        //        item = new GcPathItem(g0path_, this);
         //        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         //        itemGroup()->push_back(item);
     } else {
@@ -742,7 +742,7 @@ void File::createGiLaser() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
 
-        item = new GiGcPath(m_g0path, this);
+        item = new GiGcPath(g0path_, this);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         itemGroup()->push_back(item);
     }

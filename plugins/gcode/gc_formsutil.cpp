@@ -129,7 +129,7 @@ void FormsUtil::fileHandler(GCode::File* file) {
     if (fileId > -1) {
         exit(-123456);
         //        App::project()->reload(fileId, file);
-        //        m_editMode = false;
+        //        editMode_ = false;
         //        fileId = -1;
     } else {
         App::project()->addFile(file);
@@ -150,7 +150,7 @@ void FormsUtil::addUsedGi(GraphicsItem* gi) {
         FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
 #ifdef GBR_
-            m_usedItems[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
+            usedItems_[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
 #endif
         } else {
             usedItems_[{ file->id(), -1 }].push_back(gi->id());

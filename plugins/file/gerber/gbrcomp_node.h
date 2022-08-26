@@ -48,7 +48,7 @@ public:
     const QString name;
 
 protected:
-    ComponentsNode* m_parentItem = nullptr;
+    ComponentsNode* parentItem_ = nullptr;
     QList<QSharedPointer<ComponentsNode>> childItems;
 };
 

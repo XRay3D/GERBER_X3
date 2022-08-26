@@ -17,7 +17,7 @@ class File;
 
 class GiDataSolid final : public GraphicsItem {
 public:
-    explicit GiDataSolid(Paths& m_paths, FileInterface* file);
+    explicit GiDataSolid(Paths& paths_, FileInterface* file);
     ~GiDataSolid() override;
 
     // QGraphicsItem interface

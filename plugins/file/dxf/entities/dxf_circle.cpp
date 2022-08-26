@@ -79,16 +79,6 @@ GraphicObject Circle::toGo() const {
     QPointF r(radius, radius);
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u, u);
-    QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QMatrix m2;
-    m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2));
-#else
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
@@ -97,9 +87,8 @@ GraphicObject Circle::toGo() const {
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
-#endif
 
-    return { id, p.value(0), {} };
+    return {id, p.value(0), {}};
 }
 
 void Circle::write(QDataStream& stream) const {

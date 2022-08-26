@@ -29,8 +29,8 @@ private slots:
 private:
     Ui::VoronoiForm* ui;
 
-    double m_size = 0.0;
-    double m_lenght = 0.0;
+    double size_ = 0.0;
+    double lenght_ = 0.0;
     void setWidth(double w);
 
     // FormsUtil interface

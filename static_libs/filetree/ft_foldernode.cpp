@@ -64,7 +64,7 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
 
     switch (role) {
     case Qt::CheckStateRole:
-        m_checkState = value.value<Qt::CheckState>();
+        checkState_ = value.value<Qt::CheckState>();
         return true;
     default:
         return false;

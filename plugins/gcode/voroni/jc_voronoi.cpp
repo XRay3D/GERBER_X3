@@ -108,7 +108,7 @@
 // static const int JCV_DIRECTION_RIGHT = 1;
 // static const jcv_real JCV_INVALID_VALUE = (jcv_real)-JCV_FLT_MAX;
 
-// void jcv_diagram_free(jcv_diagram* d)
+// void jcv_diagrafree_(jcv_diagram* d)
 //{
 //     jcv_context_internal* internal = d->internal;
 //     void* memctx = internal->memctx;
@@ -122,19 +122,19 @@
 //    freefn(memctx, internal->mem);
 //}
 
-// const jcv_site* jcv_diagram_get_sites(const jcv_diagram* diagram)
+// const jcv_site* jcv_diagraget_sites_(const jcv_diagram* diagram)
 //{
 //     return diagram->internal->sites;
 // }
 
-// const jcv_edge* jcv_diagram_get_edges(const jcv_diagram* diagram)
+// const jcv_edge* jcv_diagraget_edges_(const jcv_diagram* diagram)
 //{
 //     jcv_edge e;
 //     e.next = diagram->internal->edges;
-//     return jcv_diagram_get_next_edge(&e);
+//     return jcv_diagraget_next_edge_(&e);
 // }
 
-// const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge)
+// const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge)
 //{
 //     const jcv_edge* e = edge->next;
 //     while (e != 0 && jcv_point_eq(&e->pos[0], &e->pos[1])) {
@@ -943,9 +943,9 @@
 //     return a > b ? a : b;
 // }
 
-// void jcv_diagram_generate(int num_points, const jcv_point* points, const jcv_rect* rect, const jcv_clipper* clipper, jcv_diagram* d)
+// void jcv_diagragenerate_(int nupoints_, const jcv_point* points, const jcv_rect* rect, const jcv_clipper* clipper, jcv_diagram* d)
 //{
-//     jcv_diagram_generate_useralloc(num_points, points, rect, clipper, 0, jcv_alloc_fn, jcv_free_fn, d);
+//     jcv_diagragenerate_useralloc_(nupoints_, points, rect, clipper, 0, jcv_alloc_fn, jcv_free_fn, d);
 // }
 
 // typedef union _jcv_cast_align_struct {
@@ -979,7 +979,7 @@
 
 // static int jcv_prune_duplicates(jcv_context_internal* internal, jcv_rect* rect)
 //{
-//     int num_sites = internal->numsites;
+//     int nusites_ = internal->numsites;
 //     jcv_site* sites = internal->sites;
 
 //    jcv_rect r;
@@ -988,7 +988,7 @@
 
 //    int offset = 0;
 //    // Prune duplicates first
-//    for (int i = 0; i < num_sites; i++) {
+//    for (int i = 0; i < nusites_; i++) {
 //        const jcv_site* s = &sites[i];
 //        // Remove duplicates, to avoid anomalies
 //        if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -1009,7 +1009,7 @@
 
 // static int jcv_prune_not_in_shape(jcv_context_internal* internal, jcv_rect* rect)
 //{
-//     int num_sites = internal->numsites;
+//     int nusites_ = internal->numsites;
 //     jcv_site* sites = internal->sites;
 
 //    jcv_rect r;
@@ -1017,7 +1017,7 @@
 //    r.max.x = r.max.y = -JCV_FLT_MAX;
 
 //    int offset = 0;
-//    for (int i = 0; i < num_sites; i++) {
+//    for (int i = 0; i < nusites_; i++) {
 //        const jcv_site* s = &sites[i];
 
 //        if (!internal->clipper.test_fn(&internal->clipper, s->p)) {
@@ -1036,14 +1036,14 @@
 //    return offset;
 //}
 
-// static jcv_context_internal* jcv_alloc_internal(int num_points, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn)
+// static jcv_context_internal* jcv_alloc_internal(int nupoints_, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn)
 //{
 //     // Interesting limits from Euler's equation
 //     // Slide 81: https://courses.cs.washington.edu/courses/csep521/01au/lectures/lecture10slides.pdf
 //     // Page 3: https://sites.cs.ucsb.edu/~suri/cs235/Voronoi.pdf
-//     int max_num_events = num_points * 2; // beachline can have max 2*n-5 parabolas
-//     size_t sitessize = (size_t)num_points * sizeof(jcv_site);
-//     size_t memsize = 8u + (size_t)max_num_events * sizeof(void*) + sizeof(jcv_priorityqueue) + sitessize + sizeof(jcv_context_internal);
+//     int max_nuevents_ = nupoints_ * 2; // beachline can have max 2*n-5 parabolas
+//     size_t sitessize = (size_t)nupoints_ * sizeof(jcv_site);
+//     size_t memsize = 8u + (size_t)max_nuevents_ * sizeof(void*) + sizeof(jcv_priorityqueue) + sitessize + sizeof(jcv_context_internal);
 
 //    char* originalmem = (char*)allocfn(userallocctx, memsize);
 //    memset(originalmem, 0, memsize);
@@ -1072,12 +1072,12 @@
 //    return internal;
 //}
 
-// void jcv_diagram_generate_useralloc(int num_points, const jcv_point* points, const jcv_rect* rect, const jcv_clipper* clipper, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d)
+// void jcv_diagragenerate_useralloc_(int nupoints_, const jcv_point* points, const jcv_rect* rect, const jcv_clipper* clipper, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d)
 //{
 //     if (d->internal)
-//         jcv_diagram_free(d);
+//         jcv_diagrafree_(d);
 
-//    jcv_context_internal* internal = jcv_alloc_internal(num_points, userallocctx, allocfn, freefn);
+//    jcv_context_internal* internal = jcv_alloc_internal(nupoints_, userallocctx, allocfn, freefn);
 
 //    internal->beachline_start = jcv_halfedge_new(internal, 0, 0);
 //    internal->beachline_end = jcv_halfedge_new(internal, 0, 0);
@@ -1089,19 +1089,19 @@
 
 //    internal->last_inserted = 0;
 
-//    int max_num_events = num_points * 2; // beachline can have max 2*n-5 parabolas
-//    jcv_pq_create(internal->eventqueue, max_num_events, (void**)internal->eventmem);
+//    int max_nuevents_ = nupoints_ * 2; // beachline can have max 2*n-5 parabolas
+//    jcv_pq_create(internal->eventqueue, max_nuevents_, (void**)internal->eventmem);
 
-//    internal->numsites = num_points;
+//    internal->numsites = nupoints_;
 //    jcv_site* sites = internal->sites;
 
-//    for (int i = 0; i < num_points; ++i) {
+//    for (int i = 0; i < nupoints_; ++i) {
 //        sites[i].p = points[i];
 //        sites[i].edges = 0;
 //        sites[i].index = i;
 //    }
 
-//    qsort(sites, (size_t)num_points, sizeof(jcv_site), jcv_point_cmp);
+//    qsort(sites, (size_t)nupoints_, sizeof(jcv_site), jcv_point_cmp);
 
 //    jcv_clipper box_clipper;
 //    if (clipper == 0) {
@@ -1278,7 +1278,7 @@ static const int JCV_DIRECTION_LEFT = 0;
 static const int JCV_DIRECTION_RIGHT = 1;
 static const jcv_real JCV_INVALID_VALUE = (jcv_real)-JCV_FLT_MAX;
 
-void jcv_diagram_free(jcv_diagram* d) {
+void jcv_diagrafree_(jcv_diagram* d) {
     jcv_context_internal* internal = d->internal;
     void* memctx = internal->memctx;
     FJCVFreeFn freefn = internal->free;
@@ -1291,15 +1291,15 @@ void jcv_diagram_free(jcv_diagram* d) {
     freefn(memctx, internal->mem);
 }
 
-const jcv_site* jcv_diagram_get_sites(const jcv_diagram* diagram) {
+const jcv_site* jcv_diagraget_sites_(const jcv_diagram* diagram) {
     return diagram->internal->sites;
 }
 
-const jcv_edge* jcv_diagram_get_edges(const jcv_diagram* diagram) {
+const jcv_edge* jcv_diagraget_edges_(const jcv_diagram* diagram) {
     return diagram->internal->edges;
 }
 
-const jcv_edge* jcv_diagram_get_next_edge(const jcv_edge* edge) {
+const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge) {
     const jcv_edge* e = edge->next;
     while (e != nullptr && jcv_point_eq(&e->pos[0], &e->pos[1])) {
         e = e->next;
@@ -2030,10 +2030,10 @@ static inline jcv_real jcv_ceil(jcv_real v) {
     return (v > i) ? i + 1 : i;
 }
 
-static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv_point* min, jcv_point* max) {
+static inline void _jcv_calc_bounds(int nupoints_, const jcv_point* points, jcv_point* min, jcv_point* max) {
     jcv_point _min = points[0];
     jcv_point _max = points[0];
-    for (int i = 1; i < num_points; ++i) {
+    for (int i = 1; i < nupoints_; ++i) {
         if (points[i].x < _min.x)
             _min.x = points[i].x;
         else if (points[i].x > _max.x)
@@ -2050,8 +2050,8 @@ static inline void _jcv_calc_bounds(int num_points, const jcv_point* points, jcv
     max->y = jcv_ceil(_max.y);
 }
 
-void jcv_diagram_generate(size_t num_points, const jcv_point* points, const jcv_rect* rect, void*, jcv_diagram* d) {
-    jcv_diagram_generate_useralloc(num_points, points, rect, 0, jcv_alloc_fn, jcv_free_fn, d);
+void jcv_diagragenerate_(size_t nupoints_, const jcv_point* points, const jcv_rect* rect, void*, jcv_diagram* d) {
+    jcv_diagragenerate_useralloc_(nupoints_, points, rect, 0, jcv_alloc_fn, jcv_free_fn, d);
 }
 
 typedef union _jcv_cast_align_struct {
@@ -2059,13 +2059,13 @@ typedef union _jcv_cast_align_struct {
     void** voidpp;
 } jcv_cast_align_struct;
 
-void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d) {
+void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, const jcv_rect* rect, void* userallocctx, FJCVAllocFn allocfn, FJCVFreeFn freefn, jcv_diagram* d) {
     if (d->internal)
-        jcv_diagram_free(d);
+        jcv_diagrafree_(d);
 
-    size_t max_num_events = num_points * 2; // beachline can have max 2*n-5 parabolas
-    size_t sitessize = (size_t)num_points * sizeof(jcv_site);
-    size_t memsize = 8u + (size_t)max_num_events * sizeof(void*) + sizeof(jcv_priorityqueue) + sitessize + sizeof(jcv_context_internal);
+    size_t max_nuevents_ = nupoints_ * 2; // beachline can have max 2*n-5 parabolas
+    size_t sitessize = (size_t)nupoints_ * sizeof(jcv_site);
+    size_t memsize = 8u + (size_t)max_nuevents_ * sizeof(void*) + sizeof(jcv_priorityqueue) + sitessize + sizeof(jcv_context_internal);
 
     char* originalmem = (char*)allocfn(userallocctx, memsize);
     memset(originalmem, 0, memsize);
@@ -2103,20 +2103,20 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
 
 #pragma warning(push)
 #pragma warning(disable : 4267) // possible loss of data
-    jcv_pq_create(internal->eventqueue, max_num_events, (void**)internal->eventmem);
+    jcv_pq_create(internal->eventqueue, max_nuevents_, (void**)internal->eventmem);
 
     jcv_site* sites = internal->sites;
 
-    for (size_t i = 0; i < num_points; ++i) {
+    for (size_t i = 0; i < nupoints_; ++i) {
         sites[i].p = points[i];
         sites[i].edges = 0;
         sites[i].index = i;
     }
 
-    qsort(sites, (size_t)num_points, sizeof(jcv_site), jcv_point_cmp);
+    qsort(sites, (size_t)nupoints_, sizeof(jcv_site), jcv_point_cmp);
 
     int offset = 0;
-    for (size_t i = 0; i < num_points; i++) {
+    for (size_t i = 0; i < nupoints_; i++) {
         const jcv_site* s = &sites[i];
         // Remove duplicates, to avoid anomalies
         if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -2133,11 +2133,11 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
 
         sites[i - offset] = sites[i];
     }
-    num_points -= offset;
-    ProgressCancel::setMax(num_points * 3);
+    nupoints_ -= offset;
+    ProgressCancel::setMax(nupoints_ * 3);
     ProgressCancel::setCurrent(0);
     if (rect == 0) {
-        _jcv_calc_bounds(num_points, points, &d->min, &d->max);
+        _jcv_calc_bounds(nupoints_, points, &d->min, &d->max);
         d->min.x -= 10;
         d->min.y -= 10;
         d->max.x += 10;
@@ -2150,10 +2150,10 @@ void jcv_diagram_generate_useralloc(size_t num_points, const jcv_point* points, 
     internal->max = d->max;
 
     d->internal = internal;
-    d->numsites = num_points;
+    d->numsites = nupoints_;
 
-    internal->numsites = num_points;
-    internal->numsites_sqrt = (int)(JCV_SQRT((jcv_real)num_points));
+    internal->numsites = nupoints_;
+    internal->numsites_sqrt = (int)(JCV_SQRT((jcv_real)nupoints_));
     internal->currentsite = 0;
 
 #pragma warning(pop)

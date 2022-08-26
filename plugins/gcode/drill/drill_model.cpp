@@ -149,7 +149,7 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
                 return tr("Tool");
             }
         } else
-            return QString(/*m_type == tAperture ? "D%1" : "T%1"*/ "%1 ").arg(data_[section].apertureId);
+            return QString(/*type_ == tAperture ? "D%1" : "T%1"*/ "%1 ").arg(data_[section].apertureId);
     case Qt::SizeHintRole:
         if (orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);

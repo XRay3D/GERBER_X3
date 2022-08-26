@@ -51,7 +51,7 @@ Paths offset(const Path& path, double offset, bool fl = false) {
 DrillForm::DrillForm(GCodePlugin* plugin, QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DrillForm)
-    , plugin { plugin } {
+    , plugin {plugin} {
     ui->setupUi(this);
 
     {
@@ -75,9 +75,9 @@ DrillForm::DrillForm(GCodePlugin* plugin, QWidget* parent)
                 }
                 mvector<Tool::Type> tools;
                 if (fl)
-                    tools = mvector<Tool::Type> { Tool::EndMill };
+                    tools = mvector<Tool::Type> {Tool::EndMill};
                 else
-                    tools = (worckType == GCode::Drill) ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill } : mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser };
+                    tools = (worckType == GCode::Drill) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
                 ToolDatabase tdb(this, tools);
                 if (tdb.exec()) {
                     const Tool tool(tdb.tool());
@@ -172,7 +172,7 @@ DrillForm::DrillForm(GCodePlugin* plugin, QWidget* parent)
     ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
     }
 
     updateState();
@@ -204,23 +204,15 @@ DrillForm::~DrillForm() {
 
 void DrillForm::updateFiles() {
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
-#else
-    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
-#endif
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({ FileType::Excellon, FileType::Gerber, FileType::Dxf }))
+    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber, FileType::Dxf}))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
-#else
-    connect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &DrillForm::on_cbxFileCurrentIndexChanged);
-#endif
 }
 
 bool DrillForm::canToShow() {
@@ -228,7 +220,7 @@ bool DrillForm::canToShow() {
         return true;
 
     QComboBox cbx;
-    for (auto type : { FileType::Gerber, FileType::Dxf }) {
+    for (auto type : {FileType::Gerber, FileType::Dxf}) {
         for (auto file : App::project()->files(type)) {
             App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
             if (cbx.count())
@@ -282,7 +274,7 @@ void DrillForm::on_pbCreate_clicked() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                GCode::File* gcode = new GCode::File({ pathsMap[usedToolId].paths }, { App::toolHolder().tool(usedToolId), ui->dsbxDepth->value(), GCode::Profile });
+                GCode::File* gcode = new GCode::File({pathsMap[usedToolId].paths}, {App::toolHolder().tool(usedToolId), ui->dsbxDepth->value(), GCode::Profile});
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -370,7 +362,7 @@ void DrillForm::on_pbCreate_clicked() {
                         point1 = val.drillPath[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({ { val.drillPath } }, { App::toolHolder().tool(toolId), ui->dsbxDepth->value(), GCode::Drill });
+                GCode::File* gcode = new GCode::File({{val.drillPath}}, {App::toolHolder().tool(toolId), ui->dsbxDepth->value(), GCode::Drill});
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + type_ + indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -384,7 +376,7 @@ void DrillForm::on_pbCreate_clicked() {
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);
-                    gcp.tools = { App::toolHolder().tool(toolId) };
+                    gcp.tools = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
 
                     GCode::ProfileCreator tpc;
@@ -401,7 +393,7 @@ void DrillForm::on_pbCreate_clicked() {
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
-                    gcp.tools = { App::toolHolder().tool(toolId) };
+                    gcp.tools = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
                     gcp.params[GCode::GCodeParams::Pass] = 0;
                     gcp.params[GCode::GCodeParams::UseRaster] = 0;
@@ -496,7 +488,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
 void DrillForm::on_doubleClicked(const QModelIndex& current) {
     if (current.column() == 1) {
         mvector<Tool::Type> tools;
-        tools = model->isSlot(current.row()) ? mvector<Tool::Type> { Tool::EndMill } : ((worckType == GCode::Profile || worckType == GCode::Pocket) ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser } : mvector<Tool::Type> { Tool::Drill, Tool::EndMill });
+        tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCode::Profile || worckType == GCode::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -531,9 +523,9 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos) {
 
         mvector<Tool::Type> tools;
         if (flag)
-            tools = mvector<Tool::Type> { Tool::EndMill };
+            tools = mvector<Tool::Type> {Tool::EndMill};
         else
-            tools = (worckType == GCode::Drill) ? mvector<Tool::Type> { Tool::Drill, Tool::EndMill } : mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser };
+            tools = (worckType == GCode::Drill) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
 
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
@@ -596,7 +588,7 @@ void DrillForm::pickUpTool() {
 }
 
 void DrillForm::errorOccurred() {
-   
+
     auto tpc = (GCode::Creator*)sender();
     tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }

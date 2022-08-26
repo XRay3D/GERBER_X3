@@ -27,8 +27,8 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     setAlternatingRowColors(true);
     setAnimated(true);
 
-    m_model = new ToolModel(this);
-    setModel(m_model);
+    model_ = new ToolModel(this);
+    setModel(model_);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolTreeView::updateActions);
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
@@ -63,10 +63,10 @@ void ToolTreeView::newGroup() {
     QModelIndex index = selectionModel()->currentIndex();
     if (index.data(Qt::UserRole).toInt())
         index = index.parent();
-    if (!m_model->insertRows(0, 1, index))
+    if (!model_->insertRows(0, 1, index))
         return;
-    index = m_model->index(0, 0, index);
-    m_model->setData(index, tr("New Group"), Qt::EditRole);
+    index = model_->index(0, 0, index);
+    model_->setData(index, tr("New Group"), Qt::EditRole);
     selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     updateActions();
 }
@@ -75,20 +75,20 @@ void ToolTreeView::newTool() {
     QModelIndex index = selectionModel()->currentIndex();
     if (index.data(Qt::UserRole).toInt())
         index = index.parent();
-    if (!m_model->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
+    if (!model_->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
         return;
 
     ToolItem* item = nullptr;
 
     if (!index.isValid())
-        item = static_cast<ToolItem*>(m_model->index(0, 0, index).internalPointer());
+        item = static_cast<ToolItem*>(model_->index(0, 0, index).internalPointer());
     else
         item = static_cast<ToolItem*>(index.internalPointer())->lastChild();
 
     if (item) {
         item->setIsTool();
         item->tool().setName(tr("New Tool ") + QString::number(item->toolId()));
-        index = m_model->createIndex(item->row(), 0, item);
+        index = model_->createIndex(item->row(), 0, item);
         selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }
     updateActions();
@@ -98,14 +98,14 @@ void ToolTreeView::deleteItem() {
     if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
         return;
     QModelIndex index = selectionModel()->currentIndex();
-    if (m_model->removeRows(index.row(), 1, index.parent()))
+    if (model_->removeRows(index.row(), 1, index.parent()))
         updateActions();
 }
 
 void ToolTreeView::copyTool() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
-    if (!m_model->insertRows(index.row() + 1, 1, index.parent()))
+    if (!model_->insertRows(index.row() + 1, 1, index.parent()))
         return;
 
     index = index.sibling(index.row() + 1, 0);
@@ -121,21 +121,21 @@ void ToolTreeView::copyTool() {
 void ToolTreeView::updateActions() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    m_buttons[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
+    buttons_[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
     if (item) {
-        m_buttons[Copy]->setEnabled(item->isTool());
+        buttons_[Copy]->setEnabled(item->isTool());
         emit itemSelected(item);
     } else
-        m_buttons[Copy]->setEnabled(false);
+        buttons_[Copy]->setEnabled(false);
     expandAll();
 }
 
 void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons) {
-    m_buttons = buttons;
-    connect(m_buttons[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
-    connect(m_buttons[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
-    connect(m_buttons[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
-    connect(m_buttons[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
+    buttons_ = buttons;
+    connect(buttons_[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
+    connect(buttons_[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
+    connect(buttons_[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
+    connect(buttons_[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
     updateActions();
 }
 

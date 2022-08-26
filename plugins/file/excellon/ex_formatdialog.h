@@ -21,14 +21,14 @@ class File;
 
 class FormatDialog : public QDialog {
     Q_OBJECT
-    static inline bool m_showed;
+    static inline bool showed_;
     bool accepted;
 
 public:
     explicit FormatDialog(Excellon::File* file);
     ~FormatDialog() override;
 
-    static bool showed() { return m_showed; }
+    static bool showed() { return showed_; }
 
 private slots:
     void on_pushButton_clicked();
@@ -36,9 +36,9 @@ private slots:
 
 private:
     Ui::ExcellonDialog* ui;
-    Excellon::File* m_file;
-    const Excellon::Format m_format;
-    Excellon::Format m_tmpFormat;
+    Excellon::File* file_;
+    const Excellon::Format format_;
+    Excellon::Format tmpFormat_;
 
     void updateFormat();
 

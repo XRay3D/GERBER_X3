@@ -23,7 +23,7 @@ class GiBridge final : public GraphicsItem {
 
 public:
     explicit GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiBridge*& ptr);
-    ~GiBridge() override { m_ptr = nullptr; }
+    ~GiBridge() override { ptr_ = nullptr; }
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
@@ -53,13 +53,13 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    GiBridge*& m_ptr;
-    GCode::SideOfMilling& m_side;
-    QPainterPath m_path;
+    GiBridge*& ptr_;
+    GCode::SideOfMilling& side_;
+    QPainterPath path_;
     QPointF calculate(const QPointF& pos);
-    QPointF m_lastPos;
-    bool m_ok = false;
-    double m_angle = 0.0;
-    double& m_lenght;
-    double& m_size;
+    QPointF lastPos_;
+    bool ok_ = false;
+    double angle_ = 0.0;
+    double& lenght_;
+    double& size_;
 };

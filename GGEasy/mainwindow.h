@@ -84,7 +84,7 @@ private:
     Recent recentFiles;
     Recent recentProjects;
 
-    QAction* m_closeAllAct = nullptr;
+    QAction* closeAllAct_ = nullptr;
 
     QMenu* fileMenu = nullptr;
     QMenu* helpMenu = nullptr;
@@ -97,13 +97,13 @@ private:
     QToolBar* toolpathToolBar = nullptr;
     QToolBar* zoomToolBar = nullptr;
 
-    Project* m_project;
+    Project* project_;
     bool openFlag;
 
     std::map<int, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
-    QMap<QString, QProgressDialog*> m_progressDialogs;
+    QMap<QString, QProgressDialog*> progressDialogs_;
     QMessageBox reloadQuestion;
 
     void open();

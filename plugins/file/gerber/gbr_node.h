@@ -23,9 +23,9 @@ class Node : public QObject,
     friend class File;
     Q_OBJECT
 
-    static QTimer m_decorationTimer;
+    static QTimer decorationTimer_;
     void repaint() const;
-    Qt::CheckState m_current = Qt::Unchecked;
+    Qt::CheckState current_ = Qt::Unchecked;
     File* file;
 
 public:

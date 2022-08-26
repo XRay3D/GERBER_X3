@@ -190,20 +190,7 @@ GraphicObject Text::toGo() const {
 
     QPainterPath path;
     path.addText(offset, font, text);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMatrix m;
-    m.scale(u * scaleX, -u * scaleY);
-    QPainterPath path2;
-    for (auto& poly : path.toFillPolygons(m))
-        path2.addPolygon(poly);
-    QMatrix m2;
-    m2.translate(pt2.x(), pt2.y());
-    m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(d, d);
-    Paths paths;
-    for (auto& poly : path2.toFillPolygons(m2))
-        paths.push_back(poly);
-#else
+
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
@@ -216,8 +203,8 @@ GraphicObject Text::toGo() const {
     Paths paths;
     for (auto& poly : path2.toFillPolygons(m2))
         paths.push_back(poly);
-#endif
-    return { id, {}, paths };
+
+    return {id, {}, paths};
 }
 
 void Text::write(QDataStream& stream) const {

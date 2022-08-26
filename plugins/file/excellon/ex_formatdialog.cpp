@@ -25,10 +25,10 @@ namespace Excellon {
 
 FormatDialog::FormatDialog(Excellon::File* file)
     : ui(new Ui::ExcellonDialog)
-    , m_file(file)
-    , m_format(file->format())
-    , m_tmpFormat(file->format()) {
-    m_showed = true;
+    , file_(file)
+    , format_(file->format())
+    , tmpFormat_(file->format()) {
+    showed_ = true;
 
     ui->setupUi(this);
     setObjectName("ExcellonDialog");
@@ -36,11 +36,11 @@ FormatDialog::FormatDialog(Excellon::File* file)
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle(file->shortName());
 
-    ui->sbxInteger->setValue(m_format.integer);
-    ui->sbxDecimal->setValue(m_format.decimal);
+    ui->sbxInteger->setValue(format_.integer);
+    ui->sbxDecimal->setValue(format_.decimal);
 
-    ui->rbInches->setChecked(!m_format.unitMode);
-    ui->rbMillimeters->setChecked(m_format.unitMode);
+    ui->rbInches->setChecked(!format_.unitMode);
+    ui->rbMillimeters->setChecked(format_.unitMode);
 
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &FormatDialog::rejectFormat);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &FormatDialog::acceptFormat);
@@ -53,12 +53,12 @@ FormatDialog::FormatDialog(Excellon::File* file)
     connect(ui->rbMillimeters, &QRadioButton::toggled, [&] { updateFormat(); });
     connect(ui->rbTrailing, &QRadioButton::toggled, [&] { updateFormat(); });
 
-    ui->rbLeading->setChecked(!m_format.zeroMode);
-    ui->rbTrailing->setChecked(m_format.zeroMode);
+    ui->rbLeading->setChecked(!format_.zeroMode);
+    ui->rbTrailing->setChecked(format_.zeroMode);
 }
 
 FormatDialog::~FormatDialog() {
-    m_showed = false;
+    showed_ = false;
     resetFormat();
     delete ui;
 }
@@ -87,13 +87,13 @@ void FormatDialog::on_pushButton_clicked() {
 }
 
 void FormatDialog::updateFormat() {
-    m_tmpFormat.integer = ui->sbxInteger->value();
-    m_tmpFormat.decimal = ui->sbxDecimal->value();
+    tmpFormat_.integer = ui->sbxInteger->value();
+    tmpFormat_.decimal = ui->sbxDecimal->value();
 
-    m_tmpFormat.unitMode = static_cast<UnitMode>(ui->rbMillimeters->isChecked());
-    m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
+    tmpFormat_.unitMode = static_cast<UnitMode>(ui->rbMillimeters->isChecked());
+    tmpFormat_.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
 
-    m_file->setFormat(m_tmpFormat);
+    file_->setFormat(tmpFormat_);
     App::graphicsView()->zoomFit();
 }
 
@@ -107,7 +107,7 @@ void FormatDialog::rejectFormat() { deleteLater(); }
 void FormatDialog::resetFormat() {
     if (accepted)
         return;
-    m_file->setFormat(m_format);
+    file_->setFormat(format_);
     App::graphicsView()->zoomFit();
 }
 
@@ -119,17 +119,17 @@ void FormatDialog::on_pbSetAsDefault_clicked() {
     QSettings settings;
     settings.beginGroup("Excellon");
 
-    settings.setValue("rbInches", m_tmpFormat.unitMode == Inches);
-    settings.setValue("rbMillimeters", m_tmpFormat.unitMode == Millimeters);
+    settings.setValue("rbInches", tmpFormat_.unitMode == Inches);
+    settings.setValue("rbMillimeters", tmpFormat_.unitMode == Millimeters);
 
-    settings.setValue("rbLeading", m_tmpFormat.zeroMode == LeadingZeros);
-    settings.setValue("rbTrailing", m_tmpFormat.zeroMode == TrailingZeros);
+    settings.setValue("rbLeading", tmpFormat_.zeroMode == LeadingZeros);
+    settings.setValue("rbTrailing", tmpFormat_.zeroMode == TrailingZeros);
 
-    settings.setValue("sbxDecimal", m_tmpFormat.decimal);
-    settings.setValue("sbxInteger", m_tmpFormat.integer);
+    settings.setValue("sbxDecimal", tmpFormat_.decimal);
+    settings.setValue("sbxInteger", tmpFormat_.integer);
     settings.endGroup();
 
-    Settings::setformat(m_tmpFormat);
+    Settings::setformat(tmpFormat_);
 }
 
 } // namespace Excellon

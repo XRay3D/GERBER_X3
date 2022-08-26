@@ -112,11 +112,7 @@ QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
 
 double GraphicsItem::scaleFactor() const {
     if (scene() && scene()->views().size())
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        return 1.0 / scene()->views().first()->matrix().m11();
-#else
         return 1.0 / scene()->views().first()->transform().m11();
-#endif
     return 1.0;
 };
 

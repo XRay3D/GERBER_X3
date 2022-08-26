@@ -233,18 +233,18 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
             settings.beginGroup("Gerber");
-            m_cleanPolygons = settings.getValue(chbxCleanPolygons, m_cleanPolygons);
-            m_cleanPolygonsDist = settings.getValue(dsbxCleanPolygonsDist, m_cleanPolygonsDist);
-            m_simplifyRegions = settings.getValue(chbxSimplifyRegions, m_simplifyRegions);
-            m_skipDuplicates = settings.getValue(chbxSkipDuplicates, m_skipDuplicates);
+            cleanPolygons_ = settings.getValue(chbxCleanPolygons, cleanPolygons_);
+            cleanPolygonsDist_ = settings.getValue(dsbxCleanPolygonsDist, cleanPolygonsDist_);
+            simplifyRegions_ = settings.getValue(chbxSimplifyRegions, simplifyRegions_);
+            skipDuplicates_ = settings.getValue(chbxSkipDuplicates, skipDuplicates_);
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup("Gerber");
-            m_cleanPolygons = settings.setValue(chbxCleanPolygons);
-            m_cleanPolygonsDist = settings.setValue(dsbxCleanPolygonsDist);
-            m_simplifyRegions = settings.setValue(chbxSimplifyRegions);
-            m_skipDuplicates = settings.setValue(chbxSkipDuplicates);
+            cleanPolygons_ = settings.setValue(chbxCleanPolygons);
+            cleanPolygonsDist_ = settings.setValue(dsbxCleanPolygonsDist);
+            simplifyRegions_ = settings.setValue(chbxSimplifyRegions);
+            skipDuplicates_ = settings.setValue(chbxSkipDuplicates);
             settings.endGroup();
         }
     };
@@ -273,7 +273,7 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //         , gbrObj(go) {
 //         auto ap = go->gFile()->apertures()->at(id);
 //         sourceDiameter_ = qFuzzyIsNull(ap->drillDiameter()) ? ap->minSize() : ap->drillDiameter();
-//         m_sourcePath = drawApetrure(go, id);
+//         sourcePath_ = drawApetrure(go, id);
 //         type_ = GiType::PrApetrure;
 //     }
 
@@ -312,10 +312,10 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 // FIXME DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
 //    DrillPreviewGiMap giPeview;
 //    auto const gbrFile = reinterpret_cast<File*>(file);
-//    const ApertureMap* const m_apertures = gbrFile->apertures();
+//    const ApertureMap* const apertures_ = gbrFile->apertures();
 
 //    uint count = 0;
-//    for (auto [dCode, aperture] : *m_apertures) {
+//    for (auto [dCode, aperture] : *apertures_) {
 //        (void)dCode;
 //        if (ap.flashed())
 //            ++count;
@@ -329,7 +329,7 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //    assert(count == cacheApertures.size()); // assert on != - false
 
 //    data.reserve(count); // !!! reserve для отсутствия реалокаций, так как DrillPrGI хранит ссылки на него !!!
-//    for (auto [apDCode, aperture] : *m_apertures) {
+//    for (auto [apDCode, aperture] : *apertures_) {
 //        if (aperture && ap.flashed()) {
 //            double drillDiameter = 0;
 //            QString name(ap.name());
@@ -360,18 +360,18 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //        return areaMin <= area && area <= areaMax;
 //    };
 
-//    const ApertureMap& m_apertures = *gbrFile->apertures();
+//    const ApertureMap& apertures_ = *gbrFile->apertures();
 //    /////////////////////////////////////////////////////
 //    if (param.aperture) {
 //        std::map<int, mvector<std::pair<const Paths*, IntPoint>>*> thermalNodes;
 
-//        for (const auto [dCode, aperture] : m_apertures) {
+//        for (const auto [dCode, aperture] : apertures_) {
 //            if (ap.flashed() && testArea(ap.draw({}))) {
 //                thermalNodes.emplace(dCode, &sourcePreview[0][ap.name()]);
 //                //                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), ap.name(), param.par);
 //            }
 //        }
-//        for (const auto& [dCode, aperture] : m_apertures) {
+//        for (const auto& [dCode, aperture] : apertures_) {
 //            if (ap.flashed() && testArea(ap.draw({}))) {
 //                for (GraphicObject& go : gbrFile->graphicObjects_) {
 //                    if (thermalNodes.contains(dCode)
@@ -393,7 +393,7 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //            if (go.state().type() == PrimitiveType::Line
 //                && go.state().imgPolarity() == Positive
 //                && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
-//                && go.path().front().distTo(go.path().back()) * dScale * 0.3 < m_apertures.at(go.state().aperture())->minSize()
+//                && go.path().front().distTo(go.path().back()) * dScale * 0.3 < apertures_.at(go.state().aperture())->minSize()
 //                && testArea(go.paths())) {
 //                mv.emplace_back(&go.paths(), IntPoint {});
 //                //                workers.emplace_back(&go, thermalNodes[Line], tr("Line"), ctr++);

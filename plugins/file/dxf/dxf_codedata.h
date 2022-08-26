@@ -27,7 +27,7 @@ using Codes = std::vector<CodeData>;
 class CodeData {
     Q_GADGET
     int lineNum;
-    int m_code = 0;
+    int code_ = 0;
     variant varVal;
     QString strVal;
 
