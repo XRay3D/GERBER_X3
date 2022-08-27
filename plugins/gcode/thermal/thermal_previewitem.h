@@ -23,7 +23,7 @@ class Tool;
 namespace Thermal {
 
 // class QParallelAnimationGroup;
-class NodeI;
+// class NodeI;
 
 class AbstractThermPrGi : public QGraphicsObject {
     Q_OBJECT
@@ -122,7 +122,7 @@ protected:
     Paths cashedPath;
     Paths cashedFrame;
 
-    NodeI* node_ = nullptr;
+    Node* node_ = nullptr;
 
     double diameter;
     int isEmpty = -1;

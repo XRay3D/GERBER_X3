@@ -235,6 +235,8 @@ struct IntPoint {
         double y = pt2.Y - Y;
         return (x * x + y * y);
     }
+
+    QString toString() const { return QStringLiteral("{%1, %2}").arg(X * dScale).arg(Y * dScale); }
 };
 
 //------------------------------------------------------------------------------

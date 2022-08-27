@@ -22,6 +22,8 @@
 //     return debug;
 // }
 
+Q_DECLARE_METATYPE(ClipperLib::IntPoint)
+
 using namespace ClipperLib;
 
 using Pathss = mvector /*mvector*/<Paths>;

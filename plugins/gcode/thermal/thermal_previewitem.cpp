@@ -267,4 +267,4 @@ QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
 }
 
-}
+} // namespace Thermal

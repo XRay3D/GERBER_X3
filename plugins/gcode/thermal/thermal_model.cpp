@@ -127,4 +127,4 @@ Node* Model::getItem(const QModelIndex& index) const {
     return rootItem;
 }
 
-}
+} // namespace Thermal

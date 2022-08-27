@@ -29,4 +29,4 @@ public:
     void emitCommitData();
 };
 
-}
+} // namespace Thermal

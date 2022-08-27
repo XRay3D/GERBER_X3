@@ -141,7 +141,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Model::Name:
             return name;
         case Model::Position:
-            return QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
+            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:
@@ -228,4 +228,4 @@ ThParam Node::getPar() const {
     return par;
 }
 
-}
+} // namespace Thermal

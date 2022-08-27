@@ -23,20 +23,22 @@ namespace Thermal {
 class Model;
 class Node;
 
-class NodeI {
-public:
-    virtual ~NodeI() { }
-    virtual bool isChecked() const = 0;
-    virtual void disable() = 0;
-    virtual void enable() = 0;
-    virtual QModelIndex index(int column = 0) const = 0;
+// class NodeI {
+// public:
+//     virtual ~NodeI() { }
+//     virtual bool isChecked() const = 0;
+//     virtual void disable() = 0;
+//     virtual void enable() = 0;
+//     virtual QModelIndex index(int column = 0) const = 0;
 
-    virtual double angle() const = 0;
-    virtual double tickness() const = 0;
-    virtual int count() const = 0;
-};
+//    virtual double angle() const = 0;
+//    virtual double tickness() const = 0;
+//    virtual int count() const = 0;
+//};
 
-class Node final : public NodeI {
+#define override /**/
+
+class Node final /*: public NodeI*/ {
 public:
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, Model* model);
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
@@ -102,4 +104,6 @@ private:
     };
 };
 
-}
+#undef override
+
+} // namespace Thermal

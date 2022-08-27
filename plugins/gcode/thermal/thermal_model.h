@@ -59,4 +59,4 @@ private:
     Node* getItem(const QModelIndex& index) const;
 };
 
-}
+} // namespace Thermal
