@@ -228,11 +228,11 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->dsbxAreaMax->value() * uScale * uScale,
         ui->dsbxAreaMin->value() * uScale * uScale};
 
-    // FIXME     auto thPaths = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2);
+    //    auto thPaths = std::get<ThermalPreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal)));
 
-    int count {};
-    int ctr {};
-    // FIXME     for (const auto& [key, val] : thPaths)
+    //    int count {};
+    //    int ctr {};
+    //    for (const auto& [key, val] : thPaths)
     //        count += val.size();
 
     //    QProgressDialog pd("create th", "", 0, count, this);

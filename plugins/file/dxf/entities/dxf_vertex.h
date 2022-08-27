@@ -67,7 +67,7 @@ public:
         _3DPolygonMesh = 64,                     // полигональная 3D-сеть
         PolyfaceMeshVertex = 128,                // вершина многогранной сети
     };
-    operator QPointF() const { return { x, y }; };
+    operator QPointF() const { return {x, y}; };
     int vertexFlags = 0;
     double x = 0.0;
     double y = 0.0;

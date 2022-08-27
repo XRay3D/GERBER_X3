@@ -10,13 +10,13 @@
  *******************************************************************************/
 #pragma once
 
+#include "gi.h"
 #include <QJsonObject>
 #include <QMenu>
 #include <QMessageBox>
 #include <QObject>
 #include <app.h>
 #include <ft_view.h>
-#include "gi.h"
 #include <project.h>
 
 namespace Shapes {
@@ -74,7 +74,7 @@ public:
             sp->updateShape(point);
     }
     static void finalizeShape_() {
-       
+
         if (item)
             item->setSelected(true);
         if (sp)

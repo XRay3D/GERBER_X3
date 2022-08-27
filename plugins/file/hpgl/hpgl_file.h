@@ -10,9 +10,9 @@
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
+#include "gi_group.h"
 #include "hpgl_types.h"
 #include "interfaces/file.h"
-#include "gi_group.h"
 
 #include <QDebug>
 #include <QFile>

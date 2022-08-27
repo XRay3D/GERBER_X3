@@ -31,8 +31,8 @@ File::File()
     : FileInterface() {
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
-        { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
-        { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
+        {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")},
+        { int(ItemsType::Paths),  DxfObj::tr("Paths"),       DxfObj::tr("Displays paths without pen width.")},
     };
 }
 
@@ -56,8 +56,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
             IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
+            IntPoint(r.left - k, r.top - k)};
         if (fl)
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);

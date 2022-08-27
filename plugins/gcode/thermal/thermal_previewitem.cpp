@@ -13,8 +13,8 @@
  *******************************************************************************/
 #include "thermal_previewitem.h"
 #include "app.h"
-#include "thermal_node.h"
 #include "graphicsview.h"
+#include "thermal_node.h"
 #include "tool_pch.h"
 #include <QAnimationGroup>
 #include <QElapsedTimer>
@@ -101,7 +101,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
     painter->drawPath(sourcePath);
 }
 
-//QRectF AbstractThermPrGi::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
+// QRectF AbstractThermPrGi::boundingRect() const { return sourcePath.boundingRect().united(painterPath.boundingRect()); }
 
 QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
@@ -194,8 +194,8 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
 
 ThermalPreviewItem::ThermalPreviewItem(const Paths* paths, const IntPoint pos, Tool& tool)
     : AbstractThermPrGi(tool)
-    , paths_ { paths }
-    , pos_ { pos } {
+    , paths_ {paths}
+    , pos_ {pos} {
     for (QPolygonF polygon : *paths) {
         polygon.append(polygon.first());
         sourcePath.addPolygon(polygon);
@@ -230,10 +230,10 @@ void ThermalPreviewItem::redraw() {
         for (int i = 0; i < node_->count(); ++i) { // Gaps
             ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
-            offset.AddPath({ center,
+            offset.AddPath({center,
                                IntPoint(
                                    static_cast<cInt>((cos(angle) * radius) + center.X),
-                                   static_cast<cInt>((sin(angle) * radius) + center.Y)) },
+                                   static_cast<cInt>((sin(angle) * radius) + center.Y))},
                 jtSquare, etOpenButt);
             Paths paths;
             offset.Execute(paths, (node_->tickness() + diameter) * uScale * 0.5);

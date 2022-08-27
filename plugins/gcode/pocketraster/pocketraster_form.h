@@ -19,7 +19,7 @@ class PocketRasterForm : public FormsUtil {
     Q_OBJECT
 
 public:
-    explicit PocketRasterForm(GCodePlugin *plugin, QWidget* parent = nullptr);
+    explicit PocketRasterForm(GCodePlugin* plugin, QWidget* parent = nullptr);
     ~PocketRasterForm();
 
 private slots:
@@ -61,7 +61,7 @@ class GCPluginImpl final : public GCodePlugin {
     // GCodePlugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+R" }; }
-    QWidget* createForm()  override { return new PocketRasterForm(this); };
+    QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
+    QWidget* createForm() override { return new PocketRasterForm(this); };
     int type() const override { return GCode::Raster; }
 };

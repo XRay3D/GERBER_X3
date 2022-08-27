@@ -12,9 +12,9 @@
  *******************************************************************************/
 #include "profile.h"
 #include "gc_file.h"
-#include "profile_form.h"
 #include "gi_bridge.h"
 #include "mainwindow.h"
+#include "profile_form.h"
 #include "scene.h"
 #include <numbers>
 
@@ -65,7 +65,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
             mergePaths(workingRawPs);
             sortBE(workingRawPs);
             for (auto&& path : workingRawPs)
-                returnPss.push_back({ std::move(path) });
+                returnPss.push_back({std::move(path)});
         }
 
         makeBridges();
@@ -77,7 +77,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
             break;
 
         gcp_.gcType = Profile;
-        file_ = new File(returnPss,  std::move(gcp_));
+        file_ = new File(returnPss, std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
         return;
@@ -99,7 +99,7 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
             QLineF e(p.back(), p.front());
             b.setLength(b.length() - toolDiameter * 0.5);
             e.setLength(e.length() - toolDiameter * 0.5);
-            p = { (b.p2()), (e.p2()) };
+            p = {(b.p2()), (e.p2())};
         } else if (double l = Perimeter(p); l <= toolDiameter * uScale) {
             paths.remove(i--);
             continue;
@@ -254,10 +254,10 @@ void ProfileCreator::reorder() {
         IntRect r(clipper.GetBounds());
         int k = uScale;
         Path outer = {
-            { r.left - k, r.bottom + k },
-            { r.right + k, r.bottom + k },
-            { r.right + k, r.top - k },
-            { r.left - k, r.top - k }
+            { r.left - k, r.bottom + k},
+            {r.right + k, r.bottom + k},
+            {r.right + k,    r.top - k},
+            { r.left - k,    r.top - k}
         };
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftEvenOdd);
@@ -275,7 +275,7 @@ void ProfileCreator::reorder() {
 
     for (auto&& path : returnPs) {
         path.push_back(path.front());
-        returnPss.push_back({ path });
+        returnPss.push_back({path});
     }
 }
 
@@ -392,4 +392,5 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 //         if (polytree.Childs[i]->IsOpen())
 //             paths.push_back(polytree.Childs[i]->Contour);
 // }
+
 } // namespace GCode

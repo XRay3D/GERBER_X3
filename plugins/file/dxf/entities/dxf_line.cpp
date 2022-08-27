@@ -91,7 +91,7 @@ GraphicObject Line::toGo() const {
     //    offset.AddPath(p, jtRound, etOpenRound);
     //    offset.Execute(paths, thickness * uScale);
 
-    return { id, p, paths };
+    return {id, p, paths};
 }
 
 void Line::write(QDataStream& stream) const {

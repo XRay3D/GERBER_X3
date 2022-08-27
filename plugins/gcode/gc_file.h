@@ -18,13 +18,20 @@ class GiGcPath;
 
 namespace GCode {
 
+struct GCObj : QObject {
+    //    Q_OBJECT
+    // public:
+    //    GCObj() { }
+    //    virtual ~GCObj() { }
+};
+
 class File : private GCUtils, public FileInterface {
     friend class ::GiGcPath;
     friend class ::MainWindow;
 
 public:
     explicit File();
-    explicit File(const Pathss& toolPathss, GCodeParams &&gcp, const Paths& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
@@ -32,8 +39,8 @@ public:
 
 private:
     ////////////////////////////////////////
-    Paths pocketPaths_;     /////
-    Pathss toolPathss_;     /////
+    Paths pocketPaths_; /////
+    Pathss toolPathss_; /////
 
     mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
     mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
@@ -81,4 +88,5 @@ public:
     Tool getTool() const;
     const GCodeParams& gcp() const;
 };
+
 } // namespace GCode

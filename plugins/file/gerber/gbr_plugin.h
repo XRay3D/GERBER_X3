@@ -37,13 +37,12 @@ public:
     QIcon icon() const override;
     SettingsTabInterface* createSettingsTab(QWidget* parent) override;
     void addToGcForm(FileInterface* file, QComboBox* cbx) override;
-    // FIXME   DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
-    // FIXME   ThermalPreviewGiMap createThermalPreviewGi(FileInterface* file, const ThParam2& tp2) override;
 
     // public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
 
     // FilePlugin interface
-    std::any createPreviewGi(FileInterface *file, GCodePlugin* plugin) override;
+    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin) override;
 };
+
 } // namespace Gerber

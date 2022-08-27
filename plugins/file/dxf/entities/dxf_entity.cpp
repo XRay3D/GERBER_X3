@@ -329,9 +329,9 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
     double a = angle(start_point, end_point) + (pi / 2.0 - atan(bulge) * 2.0);
     QPointF c = polar(start_point, a, r);
     if (bulge < 0.0)
-        return { c, angle(c, end_point), angle(c, start_point), abs(r) };
+        return {c, angle(c, end_point), angle(c, start_point), abs(r)};
     else
-        return { c, angle(c, start_point), angle(c, end_point), abs(r) };
+        return {c, angle(c, start_point), angle(c, end_point), abs(r)};
 }
 
 } // namespace Dxf

@@ -78,4 +78,5 @@ struct Block {
     Entities entities;
     Blocks& blocks;
 };
+
 } // namespace Dxf

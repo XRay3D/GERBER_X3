@@ -207,24 +207,24 @@ public:
 
 class Settings {
 protected:
-    static inline QString fileExtension_ = { "tap" };
-    static inline QString formatMilling_ { "G?X?Y?Z?F?S?" };
-    static inline QString formatLaser_ { "G?X?Y?Z?F?S?" };
-    static inline QString laserConstOn_ { "M3" };
-    static inline QString laserDynamOn_ { "M4" };
-    static inline QString spindleLaserOff_ { "M5" };
-    static inline QString spindleOn_ { "M3" };
+    static inline QString fileExtension_ = {"tap"};
+    static inline QString formatMilling_ {"G?X?Y?Z?F?S?"};
+    static inline QString formatLaser_ {"G?X?Y?Z?F?S?"};
+    static inline QString laserConstOn_ {"M3"};
+    static inline QString laserDynamOn_ {"M4"};
+    static inline QString spindleLaserOff_ {"M5"};
+    static inline QString spindleOn_ {"M3"};
 
-    static inline QString start_ { "G21 G17 G90\nM3 S?" };
-    static inline QString end_ { "M5\nM30" };
+    static inline QString start_ {"G21 G17 G90\nM3 S?"};
+    static inline QString end_ {"M5\nM30"};
 
-    static inline QString laserStart_ { "G21 G17 G90" };
-    static inline QString laserEnd_ { "M30" };
+    static inline QString laserStart_ {"G21 G17 G90"};
+    static inline QString laserEnd_ {"M30"};
 
-    static inline bool info_ { true };
-    static inline bool sameFolder_ { true };
+    static inline bool info_ {true};
+    static inline bool sameFolder_ {true};
 
-    static inline bool simplifyHldi_ { false };
+    static inline bool simplifyHldi_ {false};
 
     static inline int profileSort_ = 0;
 

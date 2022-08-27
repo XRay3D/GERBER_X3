@@ -87,4 +87,5 @@ public:
     double startWidth = 0.0;
     double endWidth = 0.0;
 };
+
 } // namespace Dxf

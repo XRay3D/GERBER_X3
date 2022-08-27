@@ -35,7 +35,7 @@ inline QPixmap decoration(QColor color, QChar chr = {}) {
         f.setPixelSize(18);
         p.setFont(f);
         // p.setPen(Qt::white);
-        p.drawText(QRect(2, 2, 18, 18), Qt::AlignCenter, { chr });
+        p.drawText(QRect(2, 2, 18, 18), Qt::AlignCenter, {chr});
     }
     return pixmap;
 }
@@ -94,7 +94,7 @@ public:
 
     QModelIndex index(int column = 0) const;
 
-    const QStringList sideStrList { QObject::tr("Top|Bottom").split('|') };
+    const QStringList sideStrList {QObject::tr("Top|Bottom").split('|')};
     const Type type;
 
     void setId(const int& id) { id_ = id; }

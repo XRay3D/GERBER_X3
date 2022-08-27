@@ -108,7 +108,7 @@ void View::hideOther() {
     QTimer::singleShot(100, [this, rowCount] { emit model_->dataChanged(
                                                    menuIndex_.sibling(0, 0),
                                                    menuIndex_.sibling(rowCount - 1, 0),
-                                                   { Qt::CheckStateRole }); });
+                                                   {Qt::CheckStateRole}); });
 }
 
 void View::closeFile() {
@@ -189,7 +189,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         }
     } else {
         reinterpret_cast<Node*>(menuIndex_.internalId())->menu(menu, this);
-        if (auto selectedRows { selectionModel()->selectedRows().toVector() }; selectedRows.count() > 1) {
+        if (auto selectedRows {selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
             // FIXME rename Action in future.
             menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
@@ -199,7 +199,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             });
         }
         {
-            auto selectedRows { selectionModel()->selectedRows().toVector() };
+            auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
             menu.addSeparator();
@@ -221,7 +221,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 layout.addRow(&ly, &dsbxY);
                 // QPushButton button(tr("Apply"), &d);
                 // layout.addRow(new QWidget(&d), &button);
-                d.resize({ 0, 0 });
+                d.resize({0, 0});
 
                 auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
 
@@ -279,4 +279,5 @@ void View::mouseDoubleClickEvent(QMouseEvent* event) {
     else
         QTreeView::mouseDoubleClickEvent(event);
 }
+
 } // namespace FileTree

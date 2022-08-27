@@ -23,7 +23,7 @@ class GCUtils {
 
 public:
     GCUtils(GCodeParams&& gcp);
-    GCUtils(){};
+    GCUtils() {};
 
     inline double feedRate() { return feedRate_; }
     inline double plungeRate() { return plungeRate_; }
@@ -68,7 +68,7 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    inline static const mvector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    inline static const mvector<QChar> cmdList {'G', 'X', 'Y', 'Z', 'F', 'S'};
 
     mvector<double> getDepths();
 
@@ -94,7 +94,7 @@ protected:
             if (skip)
                 skip = false;
             else
-                lines.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed) }));
+                lines.push_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
         }
         return lines;
     }
@@ -125,4 +125,5 @@ protected:
         return str;
     }
 };
+
 } // namespace GCode

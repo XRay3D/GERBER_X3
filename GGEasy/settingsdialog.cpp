@@ -55,7 +55,7 @@ class ModelSettings : public QAbstractListModel {
 
 public:
     ModelSettings(QObject* parent = nullptr)
-        : QAbstractListModel { parent } {
+        : QAbstractListModel {parent} {
     }
     virtual ~ModelSettings() { }
 
@@ -263,7 +263,7 @@ void SettingsDialog::saveSettings() {
 
 void SettingsDialog::readSettingsDialog() {
     settings.beginGroup("SettingsDialog");
-    if (auto geometry { settings.value("geometry").toByteArray() }; geometry.size())
+    if (auto geometry {settings.value("geometry").toByteArray()}; geometry.size())
         restoreGeometry(geometry);
     settings.getValue(tabwMain);
     settings.endGroup();

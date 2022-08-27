@@ -99,7 +99,7 @@ public:
             }
             tableView->reset();
         });
-        setGeometry({ parent->mapToGlobal(QPoint()), parent->size() });
+        setGeometry({parent->mapToGlobal(QPoint()), parent->size()});
     }
 
     // QWidget interface
@@ -132,7 +132,7 @@ public:
                 auto iVal = iPar->second.cbegin();
                 while (iVal != iPar->second.cend()) {
                     items.last()->addChild(new QTreeWidgetItem(static_cast<QTreeWidget*>(nullptr),
-                        { QString::number(iVal->first), iVal->second.toString() }));
+                        {QString::number(iVal->first), iVal->second.toString()}));
                     ++iVal;
                 }
             }
@@ -141,7 +141,7 @@ public:
         insertTopLevelItems(0, items);
         setWindowFlag(Qt::WindowStaysOnTopHint, true);
         expandAll();
-        setGeometry({ parent->mapToGlobal(QPoint()), parent->size() });
+        setGeometry({parent->mapToGlobal(QPoint()), parent->size()});
 
         {
             setIconSize(QSize(24, 24));
@@ -185,7 +185,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+        emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
         switch (FileTree::Column(index.column())) {
@@ -198,7 +198,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case FileTree::Column::ItemsType:
             if (role == Qt::EditRole) {
                 file->setItemType(value.toInt());
-                emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+                emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
                 return true;
             }
         default:
@@ -325,7 +325,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->layersVisible_[name] = visible;
             if (visible) {
                 layer->file()->visible_ = visible;
-                emit App::fileModel()->dataChanged(parent_->index(index.column()), parent_->index(index.column()), { role });
+                emit App::fileModel()->dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
             }
         }
         return true;
@@ -399,4 +399,5 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const {
         }
     });
 }
+
 } // namespace Dxf

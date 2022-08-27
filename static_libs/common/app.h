@@ -34,10 +34,12 @@ class SplashScreen;
 namespace FileTree {
 class View;
 class Model;
+
 } // namespace FileTree
 
 namespace Shapes {
 class Handler;
+
 } // namespace Shapes
 
 using Handlers = mvector<Shapes::Handler*>;
@@ -112,7 +114,7 @@ class App {
     App(App&&) = delete;
     App(const App&) = delete;
 
-    QSharedMemory sharedMemory { "AppSettings" };
+    QSharedMemory sharedMemory {"AppSettings"};
 
 public:
     explicit App() {

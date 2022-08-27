@@ -75,11 +75,11 @@ bool ThermalNode::setData(const QModelIndex& index, const QVariant& value, int r
             for (auto node : qAsConst(childItems))
                 node->setData(index, value, role);
             if (childItems.size())
-                emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), { role });
+                emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), {role});
             updateGuard = false;
         } else {
             if (!updateGuard)
-                emit model->dataChanged(m_parent->index(), m_parent->index(), { role });
+                emit model->dataChanged(m_parent->index(), m_parent->index(), {role});
             m_item->mouseDoubleClickEvent(nullptr);
         }
         return true;

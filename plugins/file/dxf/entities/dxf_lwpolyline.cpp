@@ -305,4 +305,5 @@ void LwPolyline::read(QDataStream& stream) {
     stream >> elevation;
     stream >> thickness;
 }
+
 } // namespace Dxf

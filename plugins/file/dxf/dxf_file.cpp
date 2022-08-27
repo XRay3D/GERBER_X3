@@ -27,9 +27,9 @@
 //#include "section/dxf_thumbnailimage.h"
 //#include "gc_creator.h" //////////////////////
 
+#include "dxf_node.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
-#include "dxf_node.h"
 //#include "gi_gcpath.h"
 //#include "settings.h"
 
@@ -42,9 +42,9 @@ File::File()
     : FileInterface() {
     itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
-        { int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.") },
-        { int(ItemsType::Paths), DxfObj::tr("Paths"), DxfObj::tr("Displays paths without pen width.") },
-        { int(ItemsType::Both), DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.") },
+        {int(ItemsType::Normal), DxfObj::tr("Normal"),    DxfObj::tr("Displays paths with pen width and fill.")},
+        { int(ItemsType::Paths),  DxfObj::tr("Paths"),          DxfObj::tr("Displays paths without pen width.")},
+        {  int(ItemsType::Both),   DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.")},
     };
 }
 
@@ -74,8 +74,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
             IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
+            IntPoint(r.left - k, r.top - k)};
         if (fl)
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);
@@ -268,4 +267,5 @@ void File::read(QDataStream& stream) {
 }
 
 Paths File::merge() const { return mergedPaths_; }
+
 } // namespace Dxf

@@ -59,4 +59,5 @@ public:
 
     friend QDebug operator<<(QDebug debug, const SectionParser& c);
 };
+
 } // namespace Dxf

@@ -85,7 +85,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
         emit fileReady(nullptr);
         return;
     }
-    Paths fillPaths { returnPs };
+    Paths fillPaths {returnPs};
     stacking(returnPs);
     if (returnPss.empty()) {
         emit fileReady(nullptr);
@@ -290,7 +290,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 offset.AddPaths(paths, jtRound, etClosedLine);
             Paths fillToolpath;
             offset.Execute(fillToolpath, dOffset);
-            file_ = new GCode::File(returnPss, GCodeParams { gcp_ }, fillToolpath);
+            file_ = new GCode::File(returnPss, GCodeParams {gcp_}, fillToolpath);
             file_->setFileName(tool.nameEnc());
             // App::project()->addFile(file_);
             emit fileReady(file_);
@@ -304,4 +304,5 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
     } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
 }
+
 } // namespace GCode

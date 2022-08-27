@@ -88,4 +88,5 @@ void Block::parseData(CodeData& code) {
         code = sp->nextCode();
     } while (code != "ENDBLK");
 }
+
 } // namespace Dxf

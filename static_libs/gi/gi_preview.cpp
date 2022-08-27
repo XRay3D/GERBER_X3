@@ -42,7 +42,7 @@ GiAbstractPreview::GiAbstractPreview()
 }
 
 void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
-    painter->setPen({ bodyColor_, 0.0 });
+    painter->setPen({bodyColor_, 0.0});
     painter->setBrush(bodyColor_);
     painter->drawPath(sourcePath_);
     // draw tool

@@ -260,5 +260,7 @@ namespace Attr { // Attributes
     //        Q_ENUM(e)
     //        Q_GADGET
     //    };
+
 } // namespace Attr
+
 } // namespace Gerber

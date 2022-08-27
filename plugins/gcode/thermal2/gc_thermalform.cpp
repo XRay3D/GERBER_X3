@@ -62,7 +62,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
     connect(ui->pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
@@ -234,32 +234,31 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->chbxPath->isChecked(),
         ui->chbxPour->isChecked(),
         ui->dsbxAreaMax->value() * uScale * uScale,
-        ui->dsbxAreaMin->value() * uScale * uScale
-    };
+        ui->dsbxAreaMin->value() * uScale * uScale};
 
-// FIXME     auto thPaths = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2);
+    // FIXME     auto thPaths = App::filePlugin(int(file->type()))->createThermalPreviewGi(file, tp2);
 
     int count {};
     int ctr {};
-// FIXME     for (const auto& [key, val] : thPaths)
-//        count += val.size();
+    // FIXME     for (const auto& [key, val] : thPaths)
+    //        count += val.size();
 
-//    QProgressDialog pd("create th", "", 0, count, this);
-//    pd.setCancelButton(nullptr);
+    //    QProgressDialog pd("create th", "", 0, count, this);
+    //    pd.setCancelButton(nullptr);
 
-//    for (const auto& [key1, val] : thPaths) {
-//        for (const auto& [key, val] : val) {
-//            if (!val.size())
-//                continue;
-//            auto node = model->appendRow(drawIcon(*val.front().first), key, par);
-//            for (const auto& [paths, pos] : val) {
-//                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
-//                node->append(new ThermalNode(drawIcon(*paths), "", par, pos, items_.back().get(), model));
-//            }
-//            qApp->processEvents();
-//            pd.setValue(++ctr);
-//        }
-//    }
+    //    for (const auto& [key1, val] : thPaths) {
+    //        for (const auto& [key, val] : val) {
+    //            if (!val.size())
+    //                continue;
+    //            auto node = model->appendRow(drawIcon(*val.front().first), key, par);
+    //            for (const auto& [paths, pos] : val) {
+    //                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
+    //                node->append(new ThermalNode(drawIcon(*paths), "", par, pos, items_.back().get(), model));
+    //            }
+    //            qApp->processEvents();
+    //            pd.setValue(++ctr);
+    //        }
+    //    }
 
     for (auto& item : items_) {
         App::scene()->addItem(item.get());

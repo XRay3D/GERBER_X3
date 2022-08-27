@@ -269,4 +269,5 @@ void MText::read(QDataStream& stream) {
     stream >> attachmentPoint;
     stream >> drawingDirection;
 }
+
 } // namespace Dxf

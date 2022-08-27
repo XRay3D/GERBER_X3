@@ -45,6 +45,10 @@ public:
     AbstractAperture(const File* file);
     virtual ~AbstractAperture();
 
+    virtual ApertureType type() const = 0;
+    virtual QString name() const = 0;
+    virtual bool fit(double toolDiam) const = 0;
+
     bool withHole() const noexcept { return drillDiam_ > 0.0; }
     bool flashed() const noexcept { return isFlashed_; }
 
@@ -54,27 +58,21 @@ public:
     Path drawDrill(const State& state);
     Paths draw(const State& state, bool notApBlock = {});
 
-    virtual QString name() const = 0;
-    virtual ApertureType type() const = 0;
-
     double minSize() const noexcept { return size_; }
-
-    virtual bool fit(double toolDiam) const = 0;
-
     bool used() const noexcept { return isUsed_; }
     void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
 protected:
-    bool isFlashed_ {};
-    bool isUsed_ {};
     double drillDiam_ {};
     double size_ {};
-
+    const File* file_;
     Paths paths_;
+    bool isFlashed_ {};
+    bool isUsed_ {};
+
     virtual void draw() = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
-    const File* file_;
 
     void transform(Path& poligon, const State& state);
 };
@@ -89,14 +87,14 @@ public:
         : AbstractAperture(file) {
         read(stream);
     }
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double toolDiam) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double diam_ {};
@@ -114,14 +112,14 @@ public:
         : AbstractAperture(file) {
         read(stream);
     }
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double toolDiam) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double height_ {};
@@ -138,14 +136,14 @@ public:
         : AbstractAperture(file) {
         read(stream);
     }
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double toolDiam) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double height_ {};
@@ -165,14 +163,14 @@ public:
     double rotation() const;
     int verticesCount() const;
 
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double toolDiam) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     double diam_ {};
@@ -190,14 +188,14 @@ public:
         : AbstractAperture(file) {
         read(stream);
     }
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 
 private:
     QString macro_;
@@ -233,14 +231,14 @@ public:
         : AbstractAperture(file) {
         read(stream);
     }
-    QString name() const;
-    ApertureType type() const;
-    bool fit(double) const;
+    ApertureType type() const override;
+    QString name() const override;
+    bool fit(double) const override;
 
 protected:
-    void draw();
-    virtual void read(QDataStream& stream);
-    virtual void write(QDataStream& stream) const;
+    void draw() override;
+    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override;
 };
 
 using ApertureV = std::variant<ApCircle, ApRectangle, ApObround, ApPolygon, ApMacro, ApBlock>;

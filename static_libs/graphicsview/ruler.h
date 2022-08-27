@@ -56,10 +56,10 @@ private:
 
     QPoint cursorPos;
 
-    double gridStep { 1.0 };
+    double gridStep {1.0};
     double origin {};
-    double rulerUnit { 1.0 };
-    double rulerZoom { 1.0 };
-    double tickKoef { 1.0 };
+    double rulerUnit {1.0};
+    double rulerZoom {1.0};
+    double tickKoef {1.0};
     const Type rulerType;
 };

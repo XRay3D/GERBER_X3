@@ -17,7 +17,7 @@
 
 namespace FileTree {
 
-constexpr int FolderNodeId { -1 };
+constexpr int FolderNodeId {-1};
 
 FolderNode::FolderNode(const QString& name)
     : FileTree::Node(FolderNodeId, Folder)

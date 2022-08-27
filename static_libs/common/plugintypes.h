@@ -47,7 +47,7 @@
 struct AbstrGraphicObject {
     Paths paths_;
     AbstrGraphicObject(const Paths& paths_)
-        : paths_ { paths_ } { }
+        : paths_ {paths_} { }
     virtual ~AbstrGraphicObject() { }
 
     virtual Path line() const = 0;  //{ return {}; }

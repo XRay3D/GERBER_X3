@@ -200,7 +200,7 @@ private:
     QPointF home_;
     QPointF zero_;
     QPointF pins_[4];
-    bool pinsUsed_[4] { true, true, true, true };
+    bool pinsUsed_[4] {true, true, true, true};
     QRectF worckRect_;
 
     double safeZ_ {};
@@ -212,6 +212,6 @@ private:
 
     double spacingX_ {};
     double spacingY_ {};
-    uint stepsX_ { 1 };
-    uint stepsY_ { 1 };
+    uint stepsX_ {1};
+    uint stepsY_ {1};
 };

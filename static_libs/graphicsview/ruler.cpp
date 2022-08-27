@@ -14,8 +14,8 @@
 #include <QtMath>
 
 Ruler::Ruler(Ruler::Type rulerType, QWidget* parent)
-    : QWidget { parent }
-    , rulerType { rulerType } {
+    : QWidget {parent}
+    , rulerType {rulerType} {
     setMouseTracking(mouseTracking);
     // QFont txtFont("Vrinda");
     // txtFont.setStyleHint(QFont::TypeWriter, QFont::PreferOutline);
@@ -176,7 +176,7 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, d
             /*y2*/ isHorzRuler ? rect.bottom() - startPosition : current);
         if (drawText) [[unlikely]] {
             painter->save();
-            auto number { QString::number(startTickNo * K) };
+            auto number {QString::number(startTickNo * K)};
 
             if (startTickNo) [[likely]]
                 number = ((isHorzRuler ^ (step > 0.0)) ? "-" : "+") + number;

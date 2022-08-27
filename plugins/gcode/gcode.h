@@ -15,7 +15,6 @@
 #include "gc_highlighter.h"
 #include "gc_node.h"
 #include "gc_plugin.h"
-#include "gc_plugin.h"
 #include "gc_types.h"
 #include "gc_utils.h"
 

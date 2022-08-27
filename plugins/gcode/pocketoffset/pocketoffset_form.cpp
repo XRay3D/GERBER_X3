@@ -27,20 +27,18 @@ enum {
 PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
-    , names { tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside") } {
+    , names {tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
     ui->toolHolder->label()->setText("Tool 1:");
     ui->toolHolder2->label()->setText("Tool 2:");
     ui->toolHolder3->label()->setText("Tool 3:");
     ui->toolHolder4->label()->setText("Tool 4:");
 
-
     label->setText(tr("Pocket Offset Toolpath"));
     /*parent->*/ setWindowTitle(label->text());
 
-
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
@@ -90,8 +88,7 @@ void PocketOffsetForm::createFile() {
         ui->toolHolder->tool(),
         ui->toolHolder2->tool(),
         ui->toolHolder3->tool(),
-        ui->toolHolder4->tool()
-    };
+        ui->toolHolder4->tool()};
 
     for (const Tool& t : tool) {
         if (!t.isValid()) {
@@ -108,7 +105,7 @@ void PocketOffsetForm::createFile() {
     Paths wPaths;
     Paths wRawPaths;
     FileInterface const* file = nullptr;
-    bool skip { true };
+    bool skip {true};
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
@@ -195,7 +192,7 @@ void PocketOffsetForm::updatePixmap() {
 }
 
 void PocketOffsetForm::rb_clicked() {
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;

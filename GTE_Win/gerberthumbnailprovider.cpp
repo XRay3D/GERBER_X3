@@ -47,7 +47,7 @@ IFACEMETHODIMP GerberThumbnailProvider::QueryInterface(REFIID riid, void** ppv) 
     static const QITAB qit[] = {
         QITABENT(GerberThumbnailProvider, IThumbnailProvider),
         QITABENT(GerberThumbnailProvider, IInitializeWithStream),
-        { nullptr, 0 }
+        {nullptr, 0}
     };
     return QISearch(this, qit, riid, ppv);
 }

@@ -67,7 +67,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             if (file->shortName().endsWith(Settings::fileExtension()))
                 return file->shortName();
             else
-                return file->shortName() + QStringList({ "_TS", "_BS" })[file->side()];
+                return file->shortName() + QStringList({"_TS", "_BS"})[file->side()];
         case Qt::EditRole:
             return file->shortName();
         case Qt::ToolTipRole:
@@ -134,4 +134,5 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
+
 } // namespace GCode

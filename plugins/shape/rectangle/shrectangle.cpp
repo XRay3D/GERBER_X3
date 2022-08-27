@@ -51,8 +51,8 @@ void Rectangle::redraw() {
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(paths_.front());
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString Rectangle::name() const { return QObject::tr("Rectangle"); }

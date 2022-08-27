@@ -144,4 +144,5 @@ QVariant ComponentsNode::data(const QModelIndex& index, int role) const {
 }
 
 int ComponentsNode::childCount() const { return childItems.count(); }
+
 } // namespace Gerber

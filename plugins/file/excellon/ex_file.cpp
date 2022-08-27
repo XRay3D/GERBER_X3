@@ -58,12 +58,11 @@ Format File::format() const {
 }
 
 void File::setFormat(const Format& value) {
-   
+
     (format_ = value).file = this;
     for (Hole& hole : *this) {
         hole.state.updatePos();
-        hole.item->update(hole.state.path.size() ? Path { hole.state.path } : Path { hole.state.pos }, hole.state.currentToolDiameter());
-
+        hole.item->update(hole.state.path.size() ? Path {hole.state.path} : Path {hole.state.pos}, hole.state.currentToolDiameter());
     }
 }
 
@@ -107,7 +106,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     for (Hole& hole : *this)
-        itemGroup()->push_back(hole.item = new GiDrill(hole.state.path.size() ? Path { hole.state.path } : Path { hole.state.pos }, hole.state.currentToolDiameter(), this, hole.state.toolId));
+        itemGroup()->push_back(hole.item = new GiDrill(hole.state.path.size() ? Path {hole.state.path} : Path {hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId));
     itemGroup()->setVisible(true);
 }
 

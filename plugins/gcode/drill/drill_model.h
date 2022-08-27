@@ -34,7 +34,7 @@ struct Row {
     const int apertureId;
     const bool isSlot;
     bool useForCalc {};
-    int toolId { -1 };
+    int toolId {-1};
     mvector<GiDrillPreview*> items;
 };
 

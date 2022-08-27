@@ -3,7 +3,6 @@
 
 #include <QTableView>
 
-
 Header::Header(Qt::Orientation orientation, QWidget* parent)
     : QHeaderView(orientation, parent) {
     connect(this, &QHeaderView::sectionCountChanged, [this](int /*oldCount*/, int newCount) {

@@ -23,7 +23,7 @@
 namespace Shapes {
 
 Node::Node(Shape* shape)
-    : FileTree::Node(shape ->id_, FileTree::Shape)
+    : FileTree::Node(shape->id_, FileTree::Shape)
     , shape(shape) {
 }
 

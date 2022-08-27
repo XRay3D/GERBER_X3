@@ -14,7 +14,7 @@ using seconds__ = std::ratio<1>;
 using minutes__ = std::ratio<60>;
 using hours__ = std::ratio<3600>;
 template <class T = seconds__>
-requires                            //
+requires                                 //
     std::is_same_v<T, nanoseconds__> ||  //
     std::is_same_v<T, microseconds__> || //
     std::is_same_v<T, milliseconds__> || //
@@ -32,15 +32,15 @@ struct Timer {
     static inline std::map<std::string_view, std::pair<size_t, double>> avgMap;
 
     constexpr Timer(std::string_view name, T = {})
-        : t1 { std::chrono::high_resolution_clock::now() }
-        , stringView { name } {
+        : t1 {std::chrono::high_resolution_clock::now()}
+        , stringView {name} {
     }
 
     ~Timer() {
         using std::chrono::duration;
         using std::chrono::high_resolution_clock;
 
-        duration<double, T> timeout { high_resolution_clock::now() - t1 };
+        duration<double, T> timeout {high_resolution_clock::now() - t1};
 
         auto& [ctr, avg] = avgMap[stringView];
         avg += timeout.count();
@@ -71,7 +71,7 @@ template <class T>
 struct CtreCapTo {
     T& cap;
     constexpr CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
-        : cap { cap } {
+        : cap {cap} {
     }
 
     auto toDouble() const { return toString().toDouble(); }
@@ -102,7 +102,7 @@ CtreCapTo(T) -> CtreCapTo<T>;
 struct ScopedTrue {
     bool& fl;
     ScopedTrue(bool& fl)
-        : fl { fl } { fl = true; }
+        : fl {fl} { fl = true; }
     ~ScopedTrue() { fl = false; }
 };
 

@@ -167,4 +167,5 @@ private:
     class PrivateData;
     PrivateData* d_data;
 };
+
 } // namespace Dxf

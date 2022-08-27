@@ -18,6 +18,7 @@
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
+
 } // namespace ClipperLib
 
 namespace GCode {
@@ -38,7 +39,7 @@ void VoronoiJc::jcVoronoi() {
             for (size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
                 IntPoint pt((line.p2()));
-                points.push_back({ static_cast<jcv_real>(pt.X), static_cast<jcv_real>(pt.Y), id });
+                points.push_back({static_cast<jcv_real>(pt.X), static_cast<jcv_real>(pt.Y), id});
             }
         }
     };
@@ -48,7 +49,7 @@ void VoronoiJc::jcVoronoi() {
             IntPoint tmp(path.front());
             for (const IntPoint& point : path) {
                 condei(tmp, point);
-                points.push_back({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                points.push_back({static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id});
                 tmp = point;
             }
             condei(tmp, path.front());
@@ -60,7 +61,7 @@ void VoronoiJc::jcVoronoi() {
         IntPoint tmp(path.front());
         for (const IntPoint& point : path) {
             condei(tmp, point);
-            points.push_back({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+            points.push_back({static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id});
             tmp = point;
         }
         condei(tmp, path.front());
@@ -78,20 +79,20 @@ void VoronoiJc::jcVoronoi() {
     {
         const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
-            { static_cast<jcv_real>(r.left - fo), static_cast<jcv_real>(r.top - fo) },
-            { static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo) }
+            { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
+            {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
         };
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
-            return { static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y) };
+            return {static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair { toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id };
+                const Pair pair {toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id};
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)

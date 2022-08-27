@@ -19,4 +19,5 @@ void SeqEnd::parse(CodeData& code) {
 GraphicObject SeqEnd::toGo() const {
     return {};
 }
+
 } // namespace Dxf

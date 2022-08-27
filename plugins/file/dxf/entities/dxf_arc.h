@@ -48,4 +48,5 @@ public:
     double startAngle = 0;
     double endAngle = 0;
 };
+
 } // namespace Dxf

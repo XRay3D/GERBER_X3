@@ -85,7 +85,7 @@ class GCPluginImpl final : public GCodePlugin {
     // GCodePlugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+D" }; }
+    QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
     QWidget* createForm() override { return new DrillForm(this); };
     bool canToShow() const override { return DrillForm::canToShow(); }
     int type() const override { return GCode::Drill; }

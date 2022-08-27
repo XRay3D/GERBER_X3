@@ -31,7 +31,7 @@ ToolName::ToolName(QWidget* parent)
 }
 
 void ToolName::setTool(const Tool& tool) {
-    lblPixmap->setPixmap(tool.icon().pixmap({ 22, 22 }));
+    lblPixmap->setPixmap(tool.icon().pixmap({22, 22}));
     lblName->setText(tool.name());
     setToolTip(tool.note());
 }

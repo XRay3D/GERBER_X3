@@ -25,8 +25,8 @@
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
-    , counter { static_cast<int>(parent->findChildren<ToolSelectorForm*>().count()) }
-    , toolFileName_ { App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json" } {
+    , counter {static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
+    , toolFileName_ {App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
@@ -45,7 +45,7 @@ void ToolSelectorForm::setTool(const Tool& tool) {
 const Tool& ToolSelectorForm::tool() const { return tool_; }
 
 void ToolSelectorForm::on_pbSelect_clicked() {
-    ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraver, Tool::Laser });
+    ToolDatabase tdb(this, {Tool::EndMill, Tool::Engraver, Tool::Laser});
     if (tdb.exec())
         setTool(tdb.tool());
 }
@@ -58,7 +58,7 @@ void ToolSelectorForm::on_pbEdit_clicked() {
 }
 
 void ToolSelectorForm::updateForm() {
-    lblPixmap->setPixmap(tool_.icon().pixmap({ 22, 22 }));
+    lblPixmap->setPixmap(tool_.icon().pixmap({22, 22}));
     lblName->setText(tool_.name());
     setToolTip(tool_.note());
     emit updateName();

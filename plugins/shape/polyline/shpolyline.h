@@ -10,10 +10,10 @@
  *******************************************************************************/
 #pragma once
 
+#include "gi.h"
 #include "shape.h"
 #include "shapepluginin.h"
 #include <QJsonObject>
-#include "gi.h"
 
 namespace Shapes {
 class PolyLine final : public Shape {
@@ -71,4 +71,5 @@ public:
 
 signals:
 };
+
 } // namespace Shapes

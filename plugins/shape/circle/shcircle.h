@@ -10,10 +10,10 @@
  *******************************************************************************/
 #pragma once
 
+#include "gi.h"
 #include "shape.h"
 #include "shapepluginin.h"
 #include <QJsonObject>
-#include "gi.h"
 
 namespace Shapes {
 
@@ -73,4 +73,5 @@ public:
 
 signals:
 };
+
 } // namespace Shapes

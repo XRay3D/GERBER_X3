@@ -32,13 +32,13 @@ void DockWidget::pop() {
         QDockWidget::setWidget(widgets.pop());
 }
 
-//void DockWidget::closeEvent(QCloseEvent* event) {
-//    pop();
-//    event->accept();
-//}
+// void DockWidget::closeEvent(QCloseEvent* event) {
+//     pop();
+//     event->accept();
+// }
 
-//void DockWidget::showEvent(QShowEvent* event) {
-//    event->ignore();
-//    if (widget() == nullptr)
-//        QTimer::singleShot(1, this, &QDockWidget::close);
-//}
+// void DockWidget::showEvent(QShowEvent* event) {
+//     event->ignore();
+//     if (widget() == nullptr)
+//         QTimer::singleShot(1, this, &QDockWidget::close);
+// }

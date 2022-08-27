@@ -23,17 +23,17 @@
 HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::HatchingCreator, parent)
     , ui(new Ui::HatchingForm)
-    , names { tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside") }
+    , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps {
-        QStringLiteral("pock_rast_climb"),
-        QStringLiteral("pock_rast_conv"),
-    } {
+          QStringLiteral("pock_rast_climb"),
+          QStringLiteral("pock_rast_conv"),
+      } {
     ui->setupUi(content);
     label->setText(tr("Crosshatch Toolpath"));
     /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -75,7 +75,7 @@ HatchingForm::~HatchingForm() {
 }
 
 void HatchingForm::createFile() {
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -85,7 +85,7 @@ void HatchingForm::createFile() {
     Paths wPaths;
     Paths wRawPaths;
     FileInterface const* file = nullptr;
-    bool skip { true };
+    bool skip {true};
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);

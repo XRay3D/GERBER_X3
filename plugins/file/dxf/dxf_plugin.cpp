@@ -165,7 +165,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
             for (auto&& go : layer->graphicObjects())
                 if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
-                    retData[{ ctr, circle->radius * 2, false, name + ": CIRCLE" }].posOrPath.emplace_back(dxfFile->transform().map(circle->centerPoint));
+                    retData[{ctr, circle->radius * 2, false, name + ": CIRCLE"}].posOrPath.emplace_back(dxfFile->transform().map(circle->centerPoint));
             ctr++;
         }
         return retData;

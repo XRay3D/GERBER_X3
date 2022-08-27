@@ -180,8 +180,8 @@ bool Parser::parseMCode(const QString& line) {
             case M15:
                 state_.mCode = M15;
                 state_.wm = RouteMode;
-                state_.rawPosList = { state_.rawPos };
-                state_.path = QPolygonF({ state_.pos });
+                state_.rawPosList = {state_.rawPos};
+                state_.path = QPolygonF({state_.pos});
                 break;
             case M16:
                 state_.mCode = M16;
@@ -316,12 +316,12 @@ bool Parser::parseSlot(const QString& line) {
         state_.rawPosList.clear();
 
         if (X1) {
-            state_.rawPos.X = QString { CtreCapTo(X1) };
+            state_.rawPos.X = QString {CtreCapTo(X1)};
             parseNumber(CtreCapTo(X1), state_.pos.rx());
         }
 
         if (Y1) {
-            state_.rawPos.Y = QString { CtreCapTo(Y1) };
+            state_.rawPos.Y = QString {CtreCapTo(Y1)};
             parseNumber(CtreCapTo(Y1), state_.pos.ry());
         }
 
@@ -329,12 +329,12 @@ bool Parser::parseSlot(const QString& line) {
         state_.path.append(state_.pos);
 
         if (X2) {
-            state_.rawPos.X = QString { CtreCapTo(X2) };
+            state_.rawPos.X = QString {CtreCapTo(X2)};
             parseNumber(CtreCapTo(X2), state_.pos.rx());
         }
 
         if (Y2) {
-            state_.rawPos.Y = QString { CtreCapTo(Y2) };
+            state_.rawPos.Y = QString {CtreCapTo(Y2)};
             parseNumber(CtreCapTo(Y2), state_.pos.ry());
         }
 
@@ -371,8 +371,8 @@ bool Parser::parseRepeat(const QString& line) {
 }
 
 bool Parser::parseFormat(const QString& line) {
-    static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
-    static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
+    static const QVector<QString> unitMode({QStringLiteral("INCH"), QStringLiteral("METRIC")});
+    static const QVector<QString> zeroMode({QStringLiteral("LZ"), QStringLiteral("TZ")});
     if (auto [whole, C1, C2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
         if (C1)
             switch (unitMode.indexOf(CtreCapTo(C1))) {
@@ -474,7 +474,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
     double start = atan2(p1.y() - center.y(), p1.x() - center.x());
     double stop = atan2(p2.y() - center.y(), p2.x() - center.x());
     auto arc = [this](const QPointF& center, double radius, double start, double stop) {
-        const double da_sign[4] = { 0, 0, -1.0, +1.0 };
+        const double da_sign[4] = {0, 0, -1.0, +1.0};
         QPolygonF points;
 
         const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
@@ -485,7 +485,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
             stop += 2.0 * pi;
 
         double angle = qAbs(stop - start);
-        double steps = qMax(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
+        double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
         double delta_angle = da_sign[state_.gCode] * angle * 1.0 / steps;
         for (int i = 0; i < steps; i++) {
             double theta = start + delta_angle * (i + 1);
@@ -532,4 +532,5 @@ double Parser::parseNumber(QString Str, const State& state) {
     }
     return val;
 }
+
 } // namespace Excellon

@@ -82,7 +82,7 @@ bool ThermalModel::setData(const QModelIndex& index, const QVariant& value, int 
 }
 
 QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    static const QStringList horizontalLabel { tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|') };
+    static const QStringList horizontalLabel {tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|')};
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal)

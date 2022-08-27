@@ -41,4 +41,5 @@ public:
     double thickness = 0;
     double radius = 0;
 };
+
 } // namespace Dxf

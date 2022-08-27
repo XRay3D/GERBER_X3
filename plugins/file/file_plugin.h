@@ -41,14 +41,14 @@ class FilePlugin : public QObject {
 
 public:
     explicit FilePlugin(QObject* parent = nullptr)
-        : QObject { parent } { App app; }
+        : QObject {parent} { App app; }
     virtual ~FilePlugin() = default;
 
     virtual bool thisIsIt(const QString& fileName) = 0;
     virtual int type() const = 0;
     virtual QString folderName() const = 0;
 
-    [[nodiscard]] virtual std::any createPreviewGi(FileInterface *file, GCodePlugin* plugin) { return {}; };
+    [[nodiscard]] virtual std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin) { return {}; };
 
     [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual FileInterface* createFile() = 0;

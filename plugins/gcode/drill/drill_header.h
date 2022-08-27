@@ -35,4 +35,3 @@ private:
     bool checked(int index) const;
     DrillModel* model() const;
 };
-

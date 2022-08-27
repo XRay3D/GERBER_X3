@@ -97,7 +97,7 @@ void Tool::setAngle(double angle) { hash_ = {}, angle_ = angle; }
 double Tool::diameter() const { return diameter_; }
 void Tool::setDiameter(double diameter) { hash_ = {}, diameter_ = diameter, updatePath(); }
 
-double Tool::feedRateMmS() const { return feedRate_ / 60.0; }
+double Tool::feedRate_mm_s() const { return feedRate_ / 60.0; }
 double Tool::feedRate() const { return feedRate_; }
 
 void Tool::setFeedRate(double feedRate) { hash_ = {}, feedRate_ = feedRate; }

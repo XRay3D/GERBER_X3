@@ -124,7 +124,7 @@ void Scene::drawRuller(QPainter* painter) {
     QLineF line(pt2, pt1);
     const QRectF rect(
         QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
-        QPointF(qMax(pt1.x(), pt2.x()), qMax(pt1.y(), pt2.y())));
+        QPointF(std::max(pt1.x(), pt2.x()), std::max(pt1.y(), pt2.y())));
     const double length = line.length();
     const double angle = line.angle();
 

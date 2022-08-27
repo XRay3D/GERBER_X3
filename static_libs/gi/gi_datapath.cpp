@@ -61,7 +61,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({ dl, dl - 1 });
+        pen.setDashPattern({dl, dl - 1});
     }
 
     painter->setPen(pen);

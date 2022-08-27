@@ -41,5 +41,5 @@ protected:
 
     // QWidget interface
 protected:
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 };

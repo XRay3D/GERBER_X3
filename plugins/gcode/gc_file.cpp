@@ -160,10 +160,10 @@ void File::saveDrill(const QPointF& offset) {
         startPath(point);
         size_t i = 0;
         while (true) {
-            lines_.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
+            lines_.push_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
             if (++i == depths.size())
                 break;
-            lines_.push_back(formated({ g0(), z(0.0) }));
+            lines_.push_back(formated({g0(), z(0.0)}));
         }
         endPath();
     }
@@ -198,22 +198,22 @@ void File::saveMillingPocket(const QPointF& offset) {
     for (mvector<QPolygonF>& paths : toolPathss) {
         startPath(paths.front().front());
         for (size_t i = 0; i < depths.size(); ++i) {
-            lines_.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
+            lines_.push_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
             bool skip = true;
             for (auto& path : paths) {
                 for (QPointF& point : path) {
                     if (skip)
                         skip = false;
                     else
-                        lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
+                        lines_.push_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate())}));
                 }
             }
             for (size_t j = paths.size() - 2; j != std::numeric_limits<size_t>::max() && i < depths.size() - 1; --j) {
                 QPointF& point = paths[j].back();
-                lines_.push_back(formated({ g0(), x(point.x()), y(point.y()) }));
+                lines_.push_back(formated({g0(), x(point.x()), y(point.y())}));
             }
             if (paths.size() > 1 && i < (depths.size() - 1))
-                lines_.push_back(formated({ g0(), x(paths.front().front().x()), y(paths.front().front().y()) }));
+                lines_.push_back(formated({g0(), x(paths.front().front().x()), y(paths.front().front().y())}));
         }
         endPath();
     }
@@ -235,7 +235,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                 if (path.front() == path.last()) { // make complete depth and remove from worck
                     startPath(path.front());
                     for (size_t k = 0; k < depths.size(); ++k) {
-                        lines_.push_back(formated({ g1(), z(depths[k]), feed(plungeRate()) }));
+                        lines_.push_back(formated({g1(), z(depths[k]), feed(plungeRate())}));
                         auto sp(savePath(path, spindleSpeed()));
                         lines_.append(sp);
                         //                    bool skip = true;
@@ -250,7 +250,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                     paths.erase(paths.begin() + j--);
                 } else {
                     startPath(path.front());
-                    lines_.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
+                    lines_.push_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                     auto sp(savePath(path, spindleSpeed()));
                     lines_.append(sp);
                     //                    bool skip = true;
@@ -299,7 +299,7 @@ void File::saveMillingRaster(const QPointF& offset) {
         for (size_t i = 0; i < depths.size(); ++i) {
             for (auto& path : paths) {
                 startPath(path.front());
-                lines_.push_back(formated({ g1(), z(depths[i]), feed(plungeRate()) }));
+                lines_.push_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                 auto sp(savePath(path, spindleSpeed()));
                 lines_.append(sp);
                 //                bool skip = true;
@@ -322,7 +322,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
 
     int i = 0;
 
-    lines_.push_back(formated({ g0(), x(pathss.front().front().front().x()), y(pathss.front().front().front().y()), z(0.0) }));
+    lines_.push_back(formated({g0(), x(pathss.front().front().front().x()), y(pathss.front().front().front().y()), z(0.0)}));
 
     for (QPolygonF& path : pathss.front()) {
         if (i++ % 2) {
@@ -505,14 +505,15 @@ void File::genGcodeAndTile() {
 Tool File::getTool() const { return gcp_.getTool(); }
 
 void File::addInfo() {
+    const static auto side_ {GCObj::tr("Top|Bottom").split('|')};
     if (Settings::info()) {
-        lines_.push_back(QString(";\t              Name: %1").arg(shortName()));
-        lines_.push_back(QString(";\t              Tool: %1").arg(gcp_.getTool().name()));
-        lines_.push_back(QString(";\t    Tool passDepth: %1").arg(gcp_.getTool().passDepth()));
-        lines_.push_back(QString(";\t     Tool stepover: %1").arg(gcp_.getTool().stepover()));
-        lines_.push_back(QString(";\tTool feedRate mm/s: %1").arg(gcp_.getTool().feedRateMmS()));
-        lines_.push_back(QString(";\t             Depth: %1").arg(gcp_.getDepth()));
-        lines_.push_back(QString(";\t              Side: %1").arg(QStringList { "Top", "Bottom" }[side()]));
+        lines_.push_back(GCObj::tr(";\t              Name: %1").arg(shortName()));
+        lines_.push_back(GCObj::tr(";\t              Tool: %1").arg(gcp_.getTool().name()));
+        lines_.push_back(GCObj::tr(";\t    Tool passDepth: %1").arg(gcp_.getTool().passDepth()));
+        lines_.push_back(GCObj::tr(";\t     Tool stepover: %1").arg(gcp_.getTool().stepover()));
+        lines_.push_back(GCObj::tr(";\tTool feedRate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
+        lines_.push_back(GCObj::tr(";\t             Depth: %1").arg(gcp_.getDepth()));
+        lines_.push_back(GCObj::tr(";\t              Side: %1").arg(side_[side()]));
     }
 }
 
@@ -520,11 +521,11 @@ GCodeType File::gtype() const { return gcp_.gcType; }
 
 void File::startPath(const QPointF& point) {
     if (toolType() == Tool::Laser) {
-        lines_.push_back(formated({ g0(), x(point.x()), y(point.y()), speed(0) })); // start xy
+        lines_.push_back(formated({g0(), x(point.x()), y(point.y()), speed(0)})); // start xy
         //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
-        lines_.push_back(formated({ g0(), x(point.x()), y(point.y()), speed(spindleSpeed()) })); // start xy
-        lines_.push_back(formated({ g0(), z(App::project()->plunge()) }));                       // start z
+        lines_.push_back(formated({g0(), x(point.x()), y(point.y()), speed(spindleSpeed())})); // start xy
+        lines_.push_back(formated({g0(), z(App::project()->plunge())}));                       // start z
         //        lastValues[AlwaysF].clear();
     }
 }
@@ -533,7 +534,7 @@ void File::endPath() {
     if (toolType() == Tool::Laser) {
         //
     } else {
-        lines_.push_back(formated({ g0(), z(App::project()->clearence()) }));
+        lines_.push_back(formated({g0(), z(App::project()->clearence())}));
     }
 }
 
@@ -541,12 +542,12 @@ void File::statFile() {
     if (toolType() == Tool::Laser) {
         QString str(Settings::laserStart()); //"G21 G17 G90"); //G17 XY plane
         lines_.push_back(str);
-        lines_.push_back(formated({ g0(), z(0) })); // Z0 for visible in Candle
+        lines_.push_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
         QString str(Settings::start()); //"G21 G17 G90"); //G17 XY plane
-        str.replace(QRegularExpression("S\\?"), formated({ speed(spindleSpeed()) }));
+        str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.push_back(str);
-        lines_.push_back(formated({ g0(), z(App::project()->safeZ()) })); // HomeZ
+        lines_.push_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
     }
 }
 
@@ -554,12 +555,12 @@ void File::endFile() {
     if (toolType() == Tool::Laser) {
         lines_.push_back(Settings::spindleLaserOff());
         QPointF home(App::home()->pos() - App::zero()->pos());
-        lines_.push_back(formated({ g0(), x(home.x()), y(home.y()) })); // HomeXY
+        lines_.push_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
         lines_.push_back(Settings::laserEnd());
     } else {
-        lines_.push_back(formated({ g0(), z(App::project()->safeZ()) })); // HomeZ
+        lines_.push_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
         QPointF home(App::home()->pos() - App::zero()->pos());
-        lines_.push_back(formated({ g0(), x(home.x()), y(home.y()) })); // HomeXY
+        lines_.push_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
         lines_.push_back(Settings::end());
     }
     for (size_t i = 0; i < lines_.size(); ++i) { // remove epty lines
@@ -573,7 +574,7 @@ mvector<QString> File::gCodeText() const { return lines_; }
 void File::createGiDrill() {
     GraphicsItem* item;
     for (const IntPoint& point : toolPathss_.front().front()) {
-        item = new GiDrill({ point }, gcp_.getTool().diameter(), this, gcp_.getTool().id());
+        item = new GiDrill({point}, gcp_.getTool().diameter(), this, gcp_.getTool().id());
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
@@ -617,7 +618,7 @@ void File::createGiPocket() {
         {
             Paths g1path;
             for (size_t j = 0; j < paths.size() - 1; ++j)
-                g1path.push_back({ paths[j].back(), paths[j + 1].front() });
+                g1path.push_back({paths[j].back(), paths[j + 1].front()});
             item = new GiGcPath(g1path);
 #ifdef QT_DEBUG
             debugColor.push_back(QSharedPointer<QColor>(new QColor(0, 0, 255)));
@@ -629,7 +630,7 @@ void File::createGiPocket() {
         }
 
         if (i < toolPathss_.size() - 1) {
-            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
         }
     }
     item = new GiGcPath(g0path_);
@@ -651,9 +652,9 @@ void File::createGiProfile() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for (size_t j = 0; j < paths.size() - 1; ++j)
-            g0path_.push_back({ paths[j].back(), paths[j + 1].front() });
+            g0path_.push_back({paths[j].back(), paths[j + 1].front()});
         if (i < toolPathss_.size() - 1) {
-            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
         }
     }
 
@@ -692,9 +693,9 @@ void File::createGiRaster() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for (size_t j = 0; j < paths.size() - 1; ++j)
-            g0path_.push_back({ paths[j].back(), paths[j + 1].front() });
+            g0path_.push_back({paths[j].back(), paths[j + 1].front()});
         if (i < toolPathss_.size() - 1) {
-            g0path_.push_back({ toolPathss_[i].back().back(), toolPathss_[++i].front().front() });
+            g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
         }
     }
     item = new GiGcPath(g0path_);
@@ -714,9 +715,9 @@ void File::createGiLaser() {
     }
     if (toolPathss_.size() > 1) {
         paths.insert(paths.end(), toolPathss_[1].begin(), toolPathss_[1].end());
-        g0path_.push_back({ toolPathss_[0].back().back(), toolPathss_[1].front().front() });
+        g0path_.push_back({toolPathss_[0].back().back(), toolPathss_[1].front().front()});
         for (size_t i = 0; i < toolPathss_[1].size() - 1; ++i)
-            g0path_.push_back({ toolPathss_[1][i].back(), toolPathss_[1][i + 1].front() });
+            g0path_.push_back({toolPathss_[1][i].back(), toolPathss_[1][i + 1].front()});
     }
 
     auto item = new GiGcPath(paths, this);

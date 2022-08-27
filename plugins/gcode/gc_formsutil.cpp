@@ -24,7 +24,7 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
 FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     : QWidget(parent)
-    , plugin { plugin }
+    , plugin {plugin}
     , creator(tpc)
     , fileCount(1)
     , progressDialog(new QProgressDialog(this)) {
@@ -150,10 +150,10 @@ void FormsUtil::addUsedGi(GraphicsItem* gi) {
         FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
 #ifdef GBR_
-            usedItems_[{ file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType() }].push_back(gi->id());
+            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
 #endif
         } else {
-            usedItems_[{ file->id(), -1 }].push_back(gi->id());
+            usedItems_[{file->id(), -1}].push_back(gi->id());
         }
     }
 }

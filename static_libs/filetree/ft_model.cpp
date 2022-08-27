@@ -47,7 +47,7 @@ void Model::addFile(FileInterface* file) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair { nullptr, type });
+        mapNode.emplace(type, Pair {nullptr, type});
         rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), mapNode[type].type));
         endInsertRows();
     }
@@ -73,7 +73,7 @@ void Model::addShape(ShapeInterface* shape) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair { nullptr, type });
+        mapNode.emplace(type, Pair {nullptr, type});
         auto si = App::shapePlugins().begin()->second;
         rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), mapNode[type].type));
         endInsertRows();

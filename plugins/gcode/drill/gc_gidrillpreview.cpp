@@ -2,22 +2,20 @@
 #include "utils.h"
 
 GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
-    : hv { std::move(hv) }
-    , row { row }
-    , toolId_ { toolId } {
+    : hv {std::move(hv)}
+    , row {row}
+    , toolId_ {toolId} {
     sourceDiameter_ = diameter;
     auto draw = Overload {
         [this](const QPolygonF& val) {
-           
             QPainterPath painterPath;
             for (auto&& path : offset(val, sourceDiameter_))
                 painterPath.addPolygon(path);
             return painterPath;
         },
         [this](const QPointF& val) {
-           
             QPainterPath painterPath;
-            painterPath.addPolygon( CirclePath(sourceDiameter_ * uScale));
+            painterPath.addPolygon(CirclePath(sourceDiameter_ * uScale));
             return painterPath;
         },
     };
@@ -98,10 +96,10 @@ Paths GiDrillPreview::paths() const {
             //            auto path { CirclePath(sourceDiameter_ * uScale, val) };
             //            return ReversePath(path);
 
-            Paths paths { sourcePath_.translated(val).toSubpathPolygons() };
+            Paths paths {sourcePath_.translated(val).toSubpathPolygons()};
             return ReversePaths(paths);
         },
-        [](const QPolygonF& val) { return Paths { val }; },
+        [](const QPolygonF& val) { return Paths {val}; },
     };
     return std::visit(getPath, hv);
 }

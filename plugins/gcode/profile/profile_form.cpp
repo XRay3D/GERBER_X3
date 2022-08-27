@@ -24,7 +24,7 @@
 ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::ProfileCreator, parent)
     , ui(new Ui::ProfileForm)
-    , names { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") }
+    , names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")}
 //    , pixmaps {
 //        "prof_on_climb",
 //        "prof_out_climb",
@@ -42,7 +42,7 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     MySettings settings;
     settings.beginGroup("ProfileForm");
@@ -101,7 +101,7 @@ ProfileForm::~ProfileForm() {
 
 void ProfileForm::createFile() {
     usedItems_.clear();
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -110,7 +110,7 @@ void ProfileForm::createFile() {
     Paths wPaths;
     Paths wRawPaths;
     FileInterface const* file = nullptr;
-    bool skip { true };
+    bool skip {true};
 
     for (auto* sItem : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
@@ -244,7 +244,7 @@ void ProfileForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1;
 
 void ProfileForm::editFile(GCode::File* file) {
 
-    GCode::GCodeParams gcp_ { file->gcp() };
+    GCode::GCodeParams gcp_ {file->gcp()};
 
     fileId = gcp_.fileId;
     editMode_ = true;
@@ -279,7 +279,7 @@ void ProfileForm::editFile(GCode::File* file) {
 
     { // GrItems
         usedItems_.clear();
-        auto items { gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>() };
+        auto items {gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>()};
 
         auto i = items.cbegin();
         while (i != items.cend()) {
