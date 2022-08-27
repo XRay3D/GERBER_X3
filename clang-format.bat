@@ -1,4 +1,4 @@
-set CLANG_FORMAT="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\clang-format.exe"
+set CLANG_FORMAT="C:\Qt\Tools\QtCreator\bin\clang\bin\clang-format.exe"
 
 for %%P in (GGEasy GTE_Win plugins static_libs) do (
 	cd %%P 
