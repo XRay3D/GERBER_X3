@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -48,7 +47,7 @@ void Circle::redraw() {
     path.clear();
     for (int i = 0; i < intSteps; i++) {
         const double theta = delta_angle * i;
-        path.push_back(IntPoint(
+        path.emplace_back(IntPoint(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }

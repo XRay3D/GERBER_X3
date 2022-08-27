@@ -273,12 +273,6 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 
 //#pragma once
 
-//#include <math.h>
-//#include <stddef.h>
-//#include <stdlib.h>
-
-//#include <assert.h>
-
 //#ifdef __cplusplus
 // extern "C" {
 //#endif

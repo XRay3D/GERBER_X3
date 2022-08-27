@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -40,7 +39,7 @@ void PolyLine::redraw() {
     path.clear();
     for (size_t i = 1, e = handlers.size(); i < e; ++i) {
         if (handlers[i]->hType() == Handler::Corner)
-            path.push_back((handlers[i]->pos()));
+            path.emplace_back((handlers[i]->pos()));
     }
     shape_ = QPainterPath();
     shape_.addPolygon(path);
@@ -132,7 +131,7 @@ QPointF PolyLine::centroid() {
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
         if (h->hType() == Handler::Corner)
-            vertices.push_back(h->pos());
+            vertices.emplace_back(h->pos());
     }
     // For all vertices
     for (size_t i = 0; i < vertices.size(); ++i) {
@@ -156,7 +155,7 @@ QPointF PolyLine::centroidFast() {
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
         if (h->hType() == Handler::Corner)
-            vertices.push_back(h->pos());
+            vertices.emplace_back(h->pos());
     }
     // For all vertices except last
     size_t i = 0;

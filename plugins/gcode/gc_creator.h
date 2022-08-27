@@ -12,11 +12,8 @@
 #include "gc_types.h"
 #include <myclipper.h>
 
-//#include <QMutex>
 #include <QObject>
-//#include <QProperty>
-//#include <QSemaphore>
-//#include <QWaitCondition>
+
 #include <condition_variable>
 #include <mutex>
 #include <source_location>
@@ -63,8 +60,8 @@ public:
 
     static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(const sl location = sl::current()) {
-        static std::stringstream ss;
         if (cancel_) {
+            //            static std::stringstream ss;
             //            ss.clear();
             //            ss << "file: "
             //               << location.file_name() << "("

@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -14,11 +13,8 @@
 #include "gc_formsutil.h"
 #include "gc_errordialog.h"
 
-#include "gcode.h"
-
 #include "project.h"
 #include "qprogressdialog.h"
-#include "scene.h"
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
@@ -30,7 +26,7 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     , progressDialog(new QProgressDialog(this)) {
     tpc->moveToThread(&thread);
 
-    auto grid = new QGridLayout(this);
+    grid = new QGridLayout(this);
     grid->setContentsMargins(6, 6, 6, 6);
     grid->setSpacing(6);
     {
@@ -86,6 +82,7 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
         grid->addWidget(pbClose, 7, 0, 1, 2);           // 7
         grid->addWidget(new QWidget(this), 9, 0, 1, 2); // 9
     }
+    //    grid->setRowStretch(3, 2);
     grid->setRowStretch(8, 1);
 
     connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);

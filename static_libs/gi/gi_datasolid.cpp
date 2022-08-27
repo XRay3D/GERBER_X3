@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -22,7 +21,8 @@
 #include <QStyleOptionGraphicsItem>
 
 GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
-    : GraphicsItem(file) {
+    : GraphicsItem(file)
+    , paths_ {paths} {
     for (Path path : paths) {
         if (path.size() && path.back() != path.front())
             path.push_back(path.front());
@@ -63,9 +63,29 @@ void GiDataSolid::redraw() {
     //        path.push_back(path.front());
     //        shape_.addPolygon(path);
     //    }
-    //    setPos({ 1, 1 }); // костыли
-    //    setPos({ 0, 0 });
+    setPos({1, 1}); // костыли
+    setPos({0, 0});
     // update();
+}
+
+void GiDataSolid::setPaths(Paths paths, int alternate) {
+    auto t {transform()};
+    auto a {qRadiansToDegrees(asin(t.m12()))};
+    t = t.rotateRadians(-t.m12());
+    auto x {t.dx()};
+    auto y {t.dy()};
+    shape_ = {};
+
+    // reverse transform
+    t = {};
+    t.rotate(-a);
+    t.translate(-x, -y);
+    for (auto&& path : paths) {
+        path = t.map(path);
+        shape_.addPolygon(path);
+    }
+    paths_ = std::move(paths);
+    redraw();
 }
 
 void GiDataSolid::changeColor() {
@@ -80,7 +100,7 @@ void GiDataSolid::changeColor() {
     switch (colorState) {
     case Default:
         break;
-    case Hovered:
+    case Hovered: // FIXME V1037. Two or more case-branches perform the same actions.
         bodyColor_.setAlpha(255);
         break;
     case Selected:

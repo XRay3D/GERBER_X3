@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -12,23 +11,17 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_plugin.h"
-
 #include "gbr_aperture.h"
 #include "gbr_file.h"
-#include "gbr_node.h"
+#include "settings.h"
 
 #include "doublespinbox.h"
-#include "ft_view.h"
-#include "settings.h"
-#include "tool_pch.h"
-#include "utils.h"
-
 #include "drill/drill_form.h"
 #include "thermal/thermal_vars.h"
+#include "utils.h"
 
-//#include <QtConcurrent>
 #include <QtWidgets>
-#include <ctre.hpp> //
+#include <ctre.hpp>
 
 namespace Gerber {
 
@@ -52,7 +45,19 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return file;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
+
+    auto mapPaths = [file](Paths paths) {
+        for (auto&& path : paths)
+            path = file->transform().map(path);
+        return paths;
+    };
+
+    auto mapPos = [file](auto pos) {
+        pos = file->transform().map(pos);
+        return pos;
+    };
+
     if (plugin->type() == ::GCode::Drill) {
         Drills retData;
         double drillDiameter {};
@@ -75,7 +80,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
                 drillDiameter = ap.apertureSize();
             }
 
-            retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(file->transform().map(gbrObj.state().curPos()));
+            retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
 
             // draw aperture
             if (!retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw.size()) {
@@ -92,126 +97,62 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
         return retData;
     }
     if (plugin->type() == ::GCode::Thermal) {
-
+        auto param_ = std::any_cast<ThParam2>(param);
         ThermalPreviewGiMap sourcePreview;
         auto gbrFile = static_cast<File*>(file);
 
-        auto testArea = [&param](const Paths& paths) {
-            const double areaMax = param.areaMax;
-            const double areaMin = param.areaMin;
+        auto testArea = [&param_](const Paths& paths) {
+            const double areaMax = param_.areaMax;
+            const double areaMin = param_.areaMin;
             const double area = Area(paths);
             return areaMin <= area && area <= areaMax;
         };
 
         const ApertureMap& apertures_ = *gbrFile->apertures();
-        /////////////////////////////////////////////////////
-        if (param.aperture) {
-            std::map<int, mvector<std::pair<const Paths*, IntPoint>>*> thermalNodes;
 
-            for (const auto [dCode, aperture] : apertures_) {
-                if (ap.flashed() && testArea(ap.draw({}))) {
-                    thermalNodes.emplace(dCode, &sourcePreview[0][ap.name()]);
-                    //                thermalNodes[dCode] = param.model->appendRow(drawApertureIcon(aperture.get()), ap.name(), param.par);
-                }
-            }
-            for (const auto& [dCode, aperture] : apertures_) {
-                if (ap.flashed() && testArea(ap.draw({}))) {
-                    for (GraphicObject& go : gbrFile->graphicObjects_) {
-                        if (thermalNodes.contains(dCode)
-                            && go.state().dCode() == D03
-                            && go.state().aperture() == dCode) {
-                            thermalNodes[dCode]->emplace_back(&go.paths(), go.state().curPos());
-                            //                            workers.emplace_back(&go, thermalNodes[dCode], "", ctr++);
-                        }
-                    }
-                }
-            }
+        if (param_.aperture) {
+            std::unordered_map<int, ThermalPreviewGiMapValVec*> thermalNodes;
+
+            for (const auto [dCode, aperture] : apertures_)
+                if (aperture->flashed() && !thermalNodes.contains(dCode) && testArea(aperture->draw({})))
+                    thermalNodes.emplace(dCode, &sourcePreview[0][aperture->name()]);
+
+            for (const auto& [dCode, aperture] : apertures_)
+                if (aperture->flashed() && testArea(aperture->draw({})))
+                    for (GraphicObject& go : gbrFile->graphicObjects_)
+                        if (thermalNodes.contains(dCode) && go.state().dCode() == D03 && go.state().aperture() == dCode)
+                            thermalNodes[dCode]->emplace_back(mapPaths(go.paths()), mapPos(go.state().curPos()));
         }
-        /////////////////////////////////////////////////////
-        if (param.path) {
+
+        if (param_.path) {
             auto& mv = sourcePreview[1][tr("Lines")];
 
-            //            thermalNodes[Line] = param.model->appendRow(QIcon(), tr("Lines"), param.par);
-            for (/*const*/ GraphicObject& go : gbrFile->graphicObjects_) {
+            for (/*const*/ GraphicObject& go : gbrFile->graphicObjects_)
                 if (go.state().type() == PrimitiveType::Line
                     && go.state().imgPolarity() == Positive
                     && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
                     && go.path().front().distTo(go.path().back()) * dScale * 0.3 < apertures_.at(go.state().aperture())->minSize()
-                    && testArea(go.paths())) {
-                    mv.emplace_back(&go.paths(), IntPoint {});
-                    //                workers.emplace_back(&go, thermalNodes[Line], tr("Line"), ctr++);
-                }
-            }
+                    && testArea(go.paths()))
+                    mv.emplace_back(mapPaths(go.paths()), IntPoint {});
         }
-        /////////////////////////////////////////////////////
-        if (param.pour) {
+
+        if (param_.pour) {
             auto& mv = sourcePreview[2][tr("Regions")];
-            //        thermalNodes[Region] = param.model->appendRow(QIcon(), tr("Regions"), param.par);
             mvector<const GraphicObject*> gos;
-            for (const GraphicObject& go : gbrFile->graphicObjects_) {
+            for (const GraphicObject& go : gbrFile->graphicObjects_)
                 if (go.state().type() == PrimitiveType::Region
                     && go.state().imgPolarity() == Positive
-                    && testArea(go.paths())) {
+                    && testArea(go.paths()))
                     gos.push_back(&go);
-                }
-            }
+
             std::ranges::sort(gos, {}, [](const GraphicObject* go1) {
-                //            return go1->paths() < go2->paths();
                 return go1->state().curPos();
             });
-            for (auto& go : gos) {
-                mv.emplace_back(&go->paths(), IntPoint {});
-                //            workers.emplace_back(go, thermalNodes[Region], tr("Region"), ctr++);
-            }
+            for (auto& go : gos)
+                mv.emplace_back(mapPaths(go->paths()), IntPoint {});
         }
 
-        //    std::vector<std::future<void>> futures;
-        //    for (size_t i = 0, c = QThread::idealThreadCount(); i < workers.size(); i += c) {
-        //        futures.clear();
-        //        for (auto&& wr : workers.mid(i, c))
-        //            futures.emplace_back(std::async(std::launch::async, creator, wr));
-        //        for (auto&& future : futures)
-        //            future.wait();
-        //    }
-
         return sourcePreview;
-
-        //        Drills retData;
-        //        double drillDiameter {};
-
-        //        auto const gbrFile = static_cast<File*>(file);
-        //        for (auto gbrObj : gbrFile->graphicObjects2()) {
-        //            if (!gbrFile->apertures_.contains(gbrObj.state().aperture()) || gbrObj.state().dCode() != D03)
-        //                continue;
-
-        //            auto& ap = *gbrFile->apertures_[gbrObj.state().aperture()];
-
-        //            if (!ap.flashed())
-        //                continue;
-
-        //            auto name {ap.name()};
-        //            if (ap.withHole()) {
-        //                drillDiameter = ap.drillDiameter();
-        //                name += tr(", drill Ø%1mm").arg(drillDiameter);
-        //            } else if (ap.type() == Circle) {
-        //                drillDiameter = ap.apertureSize();
-        //            }
-
-        //            retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(file->transform().map(gbrObj.state().curPos()));
-
-        //            // draw aperture
-        //            if (!retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw.size()) {
-        //                auto state = gbrObj.state();
-        //                state.setCurPos({});
-        //                retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw = ap.draw(state);
-        //                QTransform transform {};
-        //                transform.rotateRadians(asin(file->transform().m12()));
-        //                for (auto&& path : retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw)
-        //                    path = transform.map(path);
-        //            }
-        //        }
-
-        //        return retData;
     }
     return {};
 }

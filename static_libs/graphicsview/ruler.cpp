@@ -1,6 +1,17 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+/********************************************************************************
+ * Author    :  Damir Bakiev                                                    *
+ * Version   :  na                                                              *
+ * Date      :  01 February 2020                                                *
+ * Website   :  na                                                              *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "ruler.h"
 
@@ -115,9 +126,9 @@ void Ruler::paintEvent(QPaintEvent* event) {
     }
 
     // drawing no man's land between the ruler & view
-    if (/* DISABLES CODE */ (0)) {
+    if (/* NOTE DISABLES CODE */ (0)) {
         QPointF starPt((Horizontal == rulerType) ? rulerRect.bottomLeft() : rulerRect.topRight());
-        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight()); // same branches!!!!!!
+        QPointF endPt((Horizontal == rulerType) ? rulerRect.bottomRight() : rulerRect.bottomRight()); // FIXME same branches!!!!!!
         painter.setPen(QPen(Qt::red, 2));
         painter.drawLine(starPt, endPt);
     }

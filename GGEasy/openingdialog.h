@@ -12,17 +12,6 @@
 //
 //
 
-//#include <QtCore/QVariant>
-//#include <QtWidgets/QAction>
-//#include <QtWidgets/QApplication>
-//#include <QtWidgets/QButtonGroup>
-//#include <QtWidgets/QDialog>
-//#include <QtWidgets/QDialogButtonBox>
-//#include <QtWidgets/QHeaderView>
-//#include <QtWidgets/QLabel>
-//#include <QtWidgets/QProgressBar>
-//#include <QtWidgets/QVBoxLayout>
-
 // QT_BEGIN_NAMESPACE
 
 // class OpeningDialog : public QDialog {

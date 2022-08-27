@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -28,7 +27,7 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     setAnimated(true);
 
     model_ = new ToolModel(this);
-    setModel(model_);
+    setModel(model_); // NOTE V1053. Calling the 'foo' virtual function in the constructor/destructor may lead to unexpected result at runtime.
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolTreeView::updateActions);
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);

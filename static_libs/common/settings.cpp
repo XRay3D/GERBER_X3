@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -19,10 +18,10 @@
 using std::numbers::pi;
 
 /*G-Code*/
-AppSettings::AppSettings() {
-    //    if (!settings_)
-    //        settings_ = this;
-}
+// AppSettings::AppSettings() {
+//     if (!settings_)
+//         settings_ = this;
+//}
 
 // void AppSettings::set(AppSettings* appSettings) { settings_ = appSettings; }
 // AppSettings* AppSettings::ptr() { return settings_; }

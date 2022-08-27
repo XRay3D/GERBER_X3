@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,1">
    <property name="sizeConstraint">
     <enum>QLayout::SetMinimumSize</enum>
    </property>

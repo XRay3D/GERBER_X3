@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -613,7 +612,6 @@ bool Creator::createability(bool side) {
         msg = last;
         if (!items.empty())
             isContinueCalc();
-        return true;
     }
 
     if (side == CutoffPaths) {
@@ -660,7 +658,7 @@ bool Creator::createability(bool side) {
             return retPaths;
         };
 
-        if (side == CutoffPaths) {
+        if (side == CutoffPaths) { // FIXME V547 Expression is always true.
             Paths srcPaths;
             mvector<QPainterPath> srcPPaths;
             mvector<QPainterPath> nonCutPPaths;
@@ -754,8 +752,8 @@ bool Creator::createability(bool side) {
         msg = last;
         if (!items.empty())
             isContinueCalc();
-        return true;
     }
+    return true;
 }
 
 GCodeParams Creator::getGcp() const { return gcp_; }

@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -234,7 +233,7 @@ bool DrillForm::canToShow() {
 
 void DrillForm::on_pbClose_clicked() {
     if (parent())
-        dynamic_cast<QWidget*>(parent())->close();
+        dynamic_cast<QWidget*>(parent())->close(); // FIXME V522 There might be dereferencing of a potential null pointer 'dynamic_cast< QWidget * > (parent())'. drill_form.cpp 236
 }
 
 void DrillForm::on_pbCreate_clicked() {

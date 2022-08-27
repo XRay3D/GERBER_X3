@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -13,7 +12,6 @@
  *******************************************************************************/
 #include "shape.h"
 #include "ft_view.h"
-//#include "graphicsview.h"
 #include "scene.h"
 #include "shhandler.h"
 #include "shnode.h"
@@ -81,7 +79,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto& h : shape->handlers) {
-                hInitPos[shape].push_back(h->pos());
+                hInitPos[shape].emplace_back(h->pos());
             }
         }
     }

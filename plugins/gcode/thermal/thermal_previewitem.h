@@ -126,12 +126,16 @@ protected:
 };
 
 class ThermalPreviewItem final : public AbstractThermPrGi {
-    const Paths* paths_;
+    const Paths& paths_;
     const IntPoint pos_;
 
 public:
-    ThermalPreviewItem(const Paths* paths, const IntPoint pos, Tool& tool);
+    ThermalPreviewItem(const Paths& paths, const IntPoint pos, Tool& tool);
     IntPoint pos() const override;
     Paths paths() const override;
     void redraw() override;
+
+    // QGraphicsItem interface
+public:
+    QRectF boundingRect() const override;
 };

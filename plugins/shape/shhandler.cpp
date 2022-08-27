@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -146,7 +145,7 @@ void Handler::savePos() {
     pt.clear();
     pt.reserve(shape->handlers.size());
     for (auto& item : shape->handlers)
-        pt.push_back(item->pos());
+        pt.emplace_back(item->pos());
 }
 
 void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {

@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -85,7 +84,7 @@ Paths File::merge() const {
     if constexpr (1) {
         std::list<Paths> pathList;
         {
-            std::list<std::map<int, Paths>> pathListMap;
+            std::list<std::map<int, Paths>> pathListMap; // FIXME V826. Consider replacing standard container with a different one. to vector
             int exp = -1;
             for (auto& go : graphicObjects_) {
                 if (exp != go.state().imgPolarity()) {
@@ -120,7 +119,7 @@ Paths File::merge() const {
         while (i < graphicObjects_.size()) {
             Clipper clipper;
             clipper.AddPaths(mergedPaths_, ptSubject, true);
-            const auto exp = graphicObjects_.at(i).state().imgPolarity();
+            const auto exp = graphicObjects_.at(i).state().imgPolarity(); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
             do {
                 if (graphicObjects_[i].state().type() == Line) {
                     ++i;
@@ -128,7 +127,7 @@ Paths File::merge() const {
                     const GraphicObject& go = graphicObjects_.at(i++);
                     clipper.AddPaths(go.paths(), ptClip, true);
                 }
-            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity());
+            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
 
             if (exp)
                 ReversePaths(pathList.front());
@@ -148,7 +147,7 @@ Paths File::merge() const {
             do {
                 const GraphicObject& go = graphicObjects_.at(i++);
                 clipper.AddPaths(go.paths(), ptClip, true);
-            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity());
+            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
             if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
                 clipper.Execute(ctUnion, mergedPaths_, pftPositive);
             else

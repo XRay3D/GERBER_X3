@@ -10,6 +10,12 @@
  *******************************************************************************/
 #pragma once
 
+#include "myclipper.h"
+
+#include <QString>
+#include <map>
+#include <utility>
+
 struct ThParam {
     double angle = 0.0;
     double tickness = 0.5;
@@ -25,3 +31,7 @@ struct ThParam2 {
     double areaMax = 0.0;
     double areaMin = 0.0;
 };
+
+using ThermalPreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
+using ThermalPreviewGiMapVal = std::map<QString, ThermalPreviewGiMapValVec>;
+using ThermalPreviewGiMap = std::map<int, ThermalPreviewGiMapVal>;

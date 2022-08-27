@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -96,7 +95,7 @@ void GiDrill::changeColor() {
         break;
     case Hovered:
         break;
-    case Selected:
+    case Selected: // FIXME V1037. Two or more case-branches perform the same actions.
         pathColor_ = Qt::white;
         break;
     case Hovered | Selected:
@@ -130,6 +129,6 @@ void GiDrill::create() {
         }
     }
 
-    boundingRect_ = shape_.boundingRect();
+    boundingRect_ = shape_.boundingRect(); // FIXME V519 The 'boundingRect_' variable is assigned values twice successively. Perhaps this is a mistake. Check lines: 121, 132. gi_drill.cpp 132
     fillPolygon = shape_.toFillPolygon();
 }
