@@ -35,3 +35,4 @@ struct ThParam2 {
 using ThermalPreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
 using ThermalPreviewGiMapVal = std::map<QString, ThermalPreviewGiMapValVec>;
 using ThermalPreviewGiMap = std::map<int, ThermalPreviewGiMapVal>;
+

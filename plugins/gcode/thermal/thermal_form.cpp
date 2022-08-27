@@ -238,16 +238,16 @@ void ThermalForm::createTPI(FileInterface* file) {
     QProgressDialog pd("create th", "", 0, count, this);
     pd.setCancelButton(nullptr);
 
-    for (const auto& [key1, val] : thPaths) {
-        for (const auto& [key, val] : val) {
-            if (!val.size())
+    for (const auto& [keyType, valMap] : thPaths) {
+        for (const auto& [keyId, valVec] : valMap) {
+            if (!valVec.size())
                 continue;
-            auto node = model->appendRow(drawIcon(val.front().first), key, par);
-            for (const auto& [paths, pos] : val) {
-                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
-                items_.back()->setVisible(true);
-                items_.back()->setOpacity(1.0);
-                node->append(new ThermalNode(drawIcon(paths), "", par, pos, items_.back().get(), model));
+            auto node = model->appendRow(drawIcon(valVec.front().first), keyId, par);
+            for (const auto& [paths, pos] : valVec) {
+                auto tprItem = items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
+                tprItem->setVisible(true);
+                tprItem->setOpacity(1.0);
+                node->append(new ThermalNode(drawIcon(paths), "", par, pos, tprItem.get(), model));
             }
             qApp->processEvents();
             pd.setValue(++ctr);
