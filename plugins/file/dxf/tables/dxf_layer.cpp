@@ -75,9 +75,7 @@ const GraphicObjects& Layer::graphicObjects() const { return graphicObjects_; }
 void Layer::addGraphicObject(GraphicObject&& go) { graphicObjects_.emplace_back(go); }
 
 QColor Layer::color() const {
-    return itemsType_ == ItemsType::Normal
-        ? colorNorm_
-        : colorPath_;
+    return itemsType_ == ItemsType::Normal ? colorNorm_ : colorPath_;
 }
 
 void Layer::setColor(const QColor& color) {
@@ -110,9 +108,7 @@ void Layer::setVisible(bool visible) {
 }
 
 GiGroup* Layer::itemGroup() const {
-    return itemsType_ == ItemsType::Paths
-        ? itemGroupPath
-        : itemGroupNorm;
+    return itemsType_ == ItemsType::Paths ? itemGroupPath : itemGroupNorm;
 }
 
 bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }

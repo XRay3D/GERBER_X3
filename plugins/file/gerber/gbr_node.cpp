@@ -58,7 +58,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case FileTree::Column::ItemsType:
             qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
-            emit App::fileModel()->dataChanged(this->index(), this->index(), { Qt::DecorationRole });
+            emit App::fileModel()->dataChanged(this->index(), this->index(), {Qt::DecorationRole});
             return true;
         default:
             break;
@@ -151,7 +151,7 @@ void Node::repaint() const {
     const int count = parent_->childCount();
     const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row() : 0);
     file->setColor(QColor::fromHsv(k, 255, 255, 150));
-    emit App::fileModel()->dataChanged(index(0), index(0), { Qt::DecorationRole });
+    emit App::fileModel()->dataChanged(index(0), index(0), {Qt::DecorationRole});
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
@@ -170,7 +170,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         new SyntaxHighlighter(textBrowser->document());
         QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        verticalLayout->setContentsMargins(6,6,6,6);
+        verticalLayout->setContentsMargins(6, 6, 6, 6);
         verticalLayout->addWidget(textBrowser);
         QString s;
         s.reserve(1000000);
@@ -202,4 +202,5 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), GbrObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
+
 } // namespace Gerber

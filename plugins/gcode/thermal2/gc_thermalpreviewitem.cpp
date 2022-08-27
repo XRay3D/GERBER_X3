@@ -194,8 +194,8 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
 
 ThermalPreviewItem::ThermalPreviewItem(const Paths* paths, const IntPoint pos, Tool& tool)
     : AbstractThermPrGi(tool)
-    , paths_ { paths }
-    , pos_ { pos } {
+    , paths_ {paths}
+    , pos_ {pos} {
     for (QPolygonF polygon : *paths) {
         polygon.append(polygon.first());
         sourcePath.addPolygon(polygon);
@@ -230,10 +230,10 @@ void ThermalPreviewItem::redraw() {
         for (int i = 0; i < m_node->count(); ++i) { // Gaps
             ClipperOffset offset;
             double angle = i * 2 * pi / m_node->count() + qDegreesToRadians(m_node->angle());
-            offset.AddPath({ center,
+            offset.AddPath({center,
                                IntPoint(
                                    static_cast<cInt>((cos(angle) * radius) + center.X),
-                                   static_cast<cInt>((sin(angle) * radius) + center.Y)) },
+                                   static_cast<cInt>((sin(angle) * radius) + center.Y))},
                 jtSquare, etOpenButt);
             Paths paths;
             offset.Execute(paths, (m_node->tickness() + diameter) * uScale * 0.5);

@@ -35,7 +35,7 @@ double MathParser::getVariable(const QString& varName) {
 double MathParser::parse(const QString& s) {
     Result result;
     try {
-        result = plusMinus(sv { (char16_t*)(s.data()), size_t(s.size()) });
+        result = plusMinus(sv {(char16_t*)(s.data()), size_t(s.size())});
         if (!result.rest.size()) {
             qWarning() << "Error: can't full parse"
                        << "\"" << s << "\"";
@@ -84,7 +84,7 @@ Result MathParser::bracket(sv s) // throws Exception
 
 Result MathParser::functionVariable(sv s) // throws Exception
 {
-    int sign { 1 };
+    int sign {1};
     if (s.starts_with('-')) {
         sign = -1;
         s = s.substr(1);
@@ -194,6 +194,3 @@ Result MathParser::processFunction(sv func, Result r) {
     }
     return r;
 }
-
-
-

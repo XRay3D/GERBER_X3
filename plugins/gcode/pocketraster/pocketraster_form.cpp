@@ -23,14 +23,14 @@
 PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names { tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") } {
+    , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
 
     label->setText(tr("Pocket Raster Toolpath"));
     setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     MySettings settings;
     settings.beginGroup("PocketRasterForm");
@@ -76,7 +76,7 @@ PocketRasterForm::~PocketRasterForm() {
 }
 
 void PocketRasterForm::createFile() {
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -86,7 +86,7 @@ void PocketRasterForm::createFile() {
     Paths wPaths;
     Paths wRawPaths;
     FileInterface const* file = nullptr;
-    bool skip { true };
+    bool skip {true};
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
@@ -138,7 +138,7 @@ void PocketRasterForm::createFile() {
     gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
         gcp_.params[GCode::GCodeParams::Fast] = true;
-        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
     }
 
     creator->setGcp(gcp_);
@@ -149,7 +149,7 @@ void PocketRasterForm::createFile() {
 }
 
 void PocketRasterForm::updateName() {
-    const auto& tool { ui->toolHolder->tool() };
+    const auto& tool {ui->toolHolder->tool()};
     if (tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);

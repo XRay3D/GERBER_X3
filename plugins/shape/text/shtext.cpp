@@ -194,7 +194,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
                 .arg(name())
-//                .arg(giId_)
+                //                .arg(giId_)
                 .arg(text());
         case Qt::EditRole:
             return text();
@@ -328,4 +328,5 @@ void PluginText::finalizeShape() {
     shape = nullptr;
     emit actionUncheck();
 }
+
 } // namespace Shapes

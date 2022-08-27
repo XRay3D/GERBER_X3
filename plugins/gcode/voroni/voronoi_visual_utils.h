@@ -163,7 +163,9 @@ namespace polygon {
             return static_cast<CT>(value);
         }
     };
+
 } // namespace polygon
+
 } // namespace boost
 
 #endif // BOOST_POLYGON_VORONOI_VISUAL_UTILS

@@ -13,7 +13,7 @@
  *******************************************************************************/
 #include "dxf_vec2.h"
 
-Vec2 Vec2::froangle_(double angle, double length) { return { cos(angle) * length, sin(angle) * length }; }
+Vec2 Vec2::froangle_(double angle, double length) { return {cos(angle) * length, sin(angle) * length}; }
 
 Vec2 Vec2::frodeg_angle_(double angle, double length) { return froangle_(qDegreesToRadians(angle), length); }
 
@@ -34,9 +34,9 @@ Vec2 Vec2::orthogonal(bool ccw) {
             ccw: counter clockwise if ``True`` else clockwise
         */
     if (ccw)
-        return { -y, x };
+        return {-y, x};
     else
-        return { y, -x };
+        return {y, -x};
 }
 
 Vec2 Vec2::lerp(Vec2 other, double factor) {
@@ -49,7 +49,7 @@ Vec2 Vec2::lerp(Vec2 other, double factor) {
         */
     x = x + (other.x - x) * factor;
     y = y + (other.y - y) * factor;
-    return { x, y };
+    return {x, y};
 }
 
 Vec2 Vec2::project(Vec2 other) {
@@ -60,7 +60,7 @@ Vec2 Vec2::project(Vec2 other) {
 
 Vec2 Vec2::normalize(double length) { return *this * (length / magnitude()); }
 
-Vec2 Vec2::reversed() { return { -x, -y }; }
+Vec2 Vec2::reversed() { return {-x, -y}; }
 
 Vec2::operator bool() { return !is_null(); }
 
@@ -74,7 +74,7 @@ bool Vec2::operator<(Vec2 other) {
         return x < other.x;
 }
 
-Vec2 Vec2::operator+(Vec2 other) { return { x + other.x, y + other.y }; }
+Vec2 Vec2::operator+(Vec2 other) { return {x + other.x, y + other.y}; }
 
 Vec2& Vec2::operator+=(Vec2 other) {
     x += other.x;
@@ -82,7 +82,7 @@ Vec2& Vec2::operator+=(Vec2 other) {
     return *this;
 }
 
-Vec2 Vec2::operator-(Vec2 other) { return { x - other.x, y - other.y }; }
+Vec2 Vec2::operator-(Vec2 other) { return {x - other.x, y - other.y}; }
 
 Vec2& Vec2::operator-=(Vec2 other) {
     x -= other.x;
@@ -90,7 +90,7 @@ Vec2& Vec2::operator-=(Vec2 other) {
     return *this;
 }
 
-Vec2 Vec2::operator*(double other) { return { x * other, y * other }; }
+Vec2 Vec2::operator*(double other) { return {x * other, y * other}; }
 
 Vec2& Vec2::operator*=(double other) {
     x *= other;
@@ -98,7 +98,7 @@ Vec2& Vec2::operator*=(double other) {
     return *this;
 }
 
-Vec2 Vec2::operator/(double other) { return { x / other, y / other }; }
+Vec2 Vec2::operator/(double other) { return {x / other, y / other}; }
 
 Vec2 Vec2::operator/=(double other) {
     x /= other;

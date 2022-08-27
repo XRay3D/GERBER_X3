@@ -238,4 +238,5 @@ void Text::read(QDataStream& stream) {
     stream >> textHeight;
     stream >> rotation;
 }
+
 } // namespace Dxf

@@ -49,7 +49,7 @@ public:
 
     template <IsWidget W>
     auto setValue(W* widget) {
-        const QString name { widget->objectName() };
+        const QString name {widget->objectName()};
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -83,7 +83,7 @@ public:
 
     template <IsWidget W>
     auto getValue(W* widget, const QVariant& defaultValue = {}) const {
-        const QString name { widget->objectName() };
+        const QString name {widget->objectName()};
         assert(!name.isEmpty());
 
         if constexpr (std::is_base_of_v<QAbstractButton, W>) {
@@ -235,15 +235,15 @@ private:
     int theme_ = false;
 
     /*Clipper*/
-    double clpMinCircleSegmentLength_ { 0.5 };
-    int clpMinCircleSegments_ { 36 };
+    double clpMinCircleSegmentLength_ {0.5};
+    int clpMinCircleSegments_ {36};
 
     /*Markers*/
     QPointF mrkHomeOffset_;
     QPointF mrkPinOffset_;
     QPointF mrkZeroOffset_;
-    int mrkHomePos_ { Qt::BottomLeftCorner };
-    int mrkZeroPos_ { Qt::BottomLeftCorner };
+    int mrkHomePos_ {Qt::BottomLeftCorner};
+    int mrkZeroPos_ {Qt::BottomLeftCorner};
 
     /*Other*/
     bool inch_ = false;

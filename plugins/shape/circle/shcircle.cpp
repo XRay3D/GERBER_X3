@@ -55,8 +55,8 @@ void Circle::redraw() {
     path.push_back(path.front());
     shape_ = QPainterPath();
     shape_.addPolygon(path);
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString Circle::name() const { return QObject::tr("Circle"); }

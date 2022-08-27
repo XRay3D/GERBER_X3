@@ -17,6 +17,7 @@
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
+
 } // namespace ClipperLib
 
 namespace GCode {
@@ -43,11 +44,11 @@ void VoronoiCreator::create() {
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
         gcp_.gcType = Voronoi;
-        file_ = new File({ sortBE(returnPs) }, std::move(gcp_));
+        file_ = new File({sortBE(returnPs)}, std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
-        Paths copy { returnPs };
+        Paths copy {returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
         gcp_.gcType = Voronoi;
@@ -58,7 +59,7 @@ void VoronoiCreator::create() {
             clipper.Execute(ctDifference, copy, pftNonZero);
             sortBE(copy);
             for (auto&& p : copy)
-                returnPss.push_back({ p });
+                returnPss.push_back({p});
         }
         dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.

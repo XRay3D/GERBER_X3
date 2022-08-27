@@ -23,9 +23,9 @@ GCHighlighter::GCHighlighter(QTextDocument* parent)
 }
 
 void GCHighlighter::highlightBlock(const QString& text) {
-    //   
+    //
 
-    static const mvector<char16_t> key { 'F', 'G', 'M', 'S', 'X', 'Y', 'Z' };
+    static const mvector<char16_t> key {'F', 'G', 'M', 'S', 'X', 'Y', 'Z'};
     static const mvector<Qt::GlobalColor> color {
         Qt::darkMagenta, // 'F',
         Qt::black,       // 'G',
@@ -38,7 +38,7 @@ void GCHighlighter::highlightBlock(const QString& text) {
 
     using namespace std::string_view_literals;
     static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
-    auto data { toU16StrView(text) };
+    auto data {toU16StrView(text)};
     for (auto [whole, code, number] : ctre::range<pattern>(data)) {
         { // code
             QTextCharFormat myClassFormat;
@@ -94,7 +94,7 @@ void GCHighlighter::highlightBlock(const QString& text) {
 }
 
 Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
-    : QDialog { parent } {
+    : QDialog {parent} {
     resize(600, 600);
     setWindowTitle(windowTitle);
 

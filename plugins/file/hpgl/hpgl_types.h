@@ -140,10 +140,10 @@ struct Tables : std::map<int, QVector<AbstractTable*>> {
 
 class Settings {
 protected:
-    static inline QString m_defaultFont { "Arial" };
-    static inline bool m_boldFont { false };
-    static inline bool m_italicFont { false };
-    static inline bool m_overrideFonts { false };
+    static inline QString m_defaultFont {"Arial"};
+    static inline bool m_boldFont {false};
+    static inline bool m_italicFont {false};
+    static inline bool m_overrideFonts {false};
 
 public:
     static QString defaultFont() { return m_defaultFont; }

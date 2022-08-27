@@ -17,6 +17,6 @@ public:
 
     // QWidget interface
 protected:
-//    void closeEvent(QCloseEvent* event) override;
-//    void showEvent(QShowEvent* event) override;
+    //    void closeEvent(QCloseEvent* event) override;
+    //    void showEvent(QShowEvent* event) override;
 }; ///// end DockWidget

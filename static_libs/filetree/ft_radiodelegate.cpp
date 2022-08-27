@@ -72,7 +72,7 @@ void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 }
 
 QSize RadioDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    return { 24, 24 };
+    return {24, 24};
     //    if (index.data().canConvert<StarRating>()) {
     //        StarRating starRating = qvariant_cast<StarRating>(index.data());
     //        return starRating.sizeHint();

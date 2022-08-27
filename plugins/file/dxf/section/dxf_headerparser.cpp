@@ -34,4 +34,5 @@ void SectionHEADER::parse() {
         }
     } while (hasNext());
 }
+
 } // namespace Dxf

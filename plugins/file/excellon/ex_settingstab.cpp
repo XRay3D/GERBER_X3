@@ -248,4 +248,5 @@ void ExSettingsTab::writeSettings(MySettings& settings) {
 
     settings.endGroup();
 }
+
 } // namespace Excellon

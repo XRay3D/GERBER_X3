@@ -34,4 +34,5 @@ public:
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
 };
+
 } // namespace GCode

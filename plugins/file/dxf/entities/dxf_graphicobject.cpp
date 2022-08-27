@@ -48,7 +48,7 @@ size_t GraphicObject::entityId() const {
 }
 
 GraphicObject::GraphicObject()
-    : AbstrGraphicObject { {} } { }
+    : AbstrGraphicObject {{}} { }
 
 GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
     : AbstrGraphicObject(paths)
@@ -85,7 +85,7 @@ void GraphicObject::setScale(double scaleX, double scaleY) {
         scale(path, scaleX_, scaleY_, {} /*pos_*/);
 }
 
-std::tuple<double, double> GraphicObject::scale() const { return { scaleX_, scaleY_ }; }
+std::tuple<double, double> GraphicObject::scale() const { return {scaleX_, scaleY_}; }
 
 double GraphicObject::scaleX() const { return scaleX_; }
 

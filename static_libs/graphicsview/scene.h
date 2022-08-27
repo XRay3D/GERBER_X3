@@ -9,9 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+#include "app.h"
 #include <QGraphicsItem>
 #include <QGraphicsScene>
-#include "app.h"
 
 class Scene : public QGraphicsScene {
     friend class MainWindow;

@@ -132,4 +132,5 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     }
     throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }
+
 } // namespace Dxf

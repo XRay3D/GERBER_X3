@@ -19,41 +19,6 @@
 
 namespace Gerber {
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-using QMatrix = QTransform;
-#endif
-
-#if __cplusplus > 201703L
-#else
-QDataStream& operator>>(QDataStream& s, ApertureMap& c) {
-    //    c.clear();
-    //    quint32 n;
-    //    s >> n;
-    //    for (quint32 i = 0; i < n; ++i) {
-    //        ApertureMap::key_type key;
-    //        ApertureMap::mapped_type val;
-    //        s >> key;
-    //        s >> val;
-    //        if (s.status() != QDataStream::Ok) {
-    //            c.clear();
-    //            break;
-    //        }
-    //        c.emplace(key, val);
-    //    }
-    s >> c.map();
-    return s;
-}
-
-QDataStream& operator<<(QDataStream& s, const ApertureMap& c) {
-    //    s << quint32(c.size());
-    //    for (auto& [key, val] : c) {
-    //        s << key << val;
-    //    }
-    s << c.map();
-    return s;
-}
-#endif
-
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture) {
     stream << aperture->type();
     aperture->write(stream);
@@ -195,6 +160,7 @@ void ApCircle::draw() {
     paths_.push_back(CirclePath(diam_ * uScale));
     size_ = diam_;
 }
+
 /////////////////////////////////////////////////////
 /// \brief ApRectangle::ApRectangle
 /// \param width
@@ -240,8 +206,9 @@ void ApRectangle::write(QDataStream& stream) const {
 
 void ApRectangle::draw() {
     paths_.push_back(RectanglePath(width_ * uScale, height_ * uScale));
-    size_ = qSqrt(width_ * width_ + height_ * height_);
+    size_ = std::sqrt(width_ * width_ + height_ * height_);
 }
+
 /////////////////////////////////////////////////////
 /// \brief ApObround::ApObround
 /// \param width
@@ -251,9 +218,8 @@ void ApRectangle::draw() {
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const File* format)
     : AbstractAperture(format) {
-
-    width = width;
-    height = height;
+    width_ = width;
+    height_ = height;
     drillDiam_ = drillDiam;
 }
 
@@ -298,8 +264,9 @@ void ApObround::draw() {
         }
         clipper.Execute(ctUnion, paths_, pftNonZero, pftNonZero);
     }
-    size_ = qMax(w, h);
+    size_ = std::max(height_, width_);
 }
+
 /////////////////////////////////////////////////////
 /// \brief ApPolygon::ApPolygon
 /// \param diam
@@ -358,8 +325,9 @@ void ApPolygon::draw() {
         RotatePath(poligon, rotation_);
     }
     paths_.push_back(poligon);
-    size_ = diam;
+    size_ = diam_;
 }
+
 /////////////////////////////////////////////////////
 /// \brief ApMacro::ApMacro
 /// \param macro
@@ -412,7 +380,7 @@ void ApMacro::draw() {
         CenterLine = 21,
     };
 
-    VarMap macroCoefficients { coefficients_ };
+    VarMap macroCoefficients {coefficients_};
     mvector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < modifiers_.size(); ++i) {
@@ -430,9 +398,7 @@ void ApMacro::draw() {
                 continue;
             } else {
                 for (QString& var2 : var.split(',')) {
-                    mod.push_back(var2.contains('$')
-                            ? MathParser(&macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
-                            : var2.toDouble());
+                    mod.push_back(var2.contains('$') ? MathParser(&macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)) : var2.toDouble());
                 }
             }
 
@@ -498,17 +464,18 @@ void ApMacro::draw() {
         paths_.push_back(items.front().second);
 
     /// ReversePaths(paths_);
-
-    ClipperBase clipperBase;
-    clipperBase.AddPaths(paths_, ptSubject, true);
-    IntRect rect = clipperBase.GetBounds();
-    rect.right -= rect.left;
-    rect.top -= rect.bottom;
-    const double x = rect.right * dScale;
-    const double y = rect.top * dScale;
-    size_ = qSqrt(x * x + y * y);
-
     /// normalize(paths_);
+
+    {
+        ClipperBase clipperBase;
+        clipperBase.AddPaths(paths_, ptSubject, true);
+        IntRect rect = clipperBase.GetBounds();
+        rect.right -= rect.left;
+        rect.top -= rect.bottom;
+        const double x = rect.right * dScale;
+        const double y = rect.top * dScale;
+        size_ = std::sqrt(x * x + y * y);
+    }
 }
 
 Path ApMacro::drawCenterLine(const QList<double>& mod) {
@@ -727,6 +694,7 @@ Path ApMacro::drawVectorLine(const QList<double>& mod) {
 
     return polygon;
 }
+
 /////////////////////////////////////////////////////
 /// \brief ApBlock::ApBlock
 /// \param macro
@@ -773,9 +741,17 @@ void ApBlock::draw() {
         else
             clipper.Execute(ctDifference, paths_, pftNonZero);
     }
-    size_ = 1;
-
     // CleanPolygons(paths_, 0.0009 * uScale);
+    {
+        ClipperBase clipperBase;
+        clipperBase.AddPaths(paths_, ptSubject, true);
+        IntRect rect = clipperBase.GetBounds();
+        rect.right -= rect.left;
+        rect.top -= rect.bottom;
+        const double x = rect.right * dScale;
+        const double y = rect.top * dScale;
+        size_ = std::sqrt(x * x + y * y);
+    }
 }
 
 } // namespace Gerber

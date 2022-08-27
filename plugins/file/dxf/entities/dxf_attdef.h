@@ -133,4 +133,5 @@ public:
         TransparencyOfBackgroundFillColor = 441, //	П+R[-99]C[-5]:RCрозрачность цвета заливки фона (не поддерживается)
     };
 };
+
 } // namespace Dxf

@@ -169,7 +169,7 @@ struct IntPoint {
     }
 
     constexpr operator QPointF() const noexcept {
-        return { X * dScale, Y * dScale };
+        return {X * dScale, Y * dScale};
     }
 
 #ifdef __GNUC___
@@ -180,7 +180,7 @@ struct IntPoint {
         return !(*this == L);
     }
     bool operator<(const IntPoint& L) const noexcept {
-        return std::tuple { X, Y } < std::tuple { L.X, L.Y };
+        return std::tuple {X, Y} < std::tuple {L.X, L.Y};
     }
 #else
     constexpr auto operator<=>(const IntPoint&) const noexcept = default;

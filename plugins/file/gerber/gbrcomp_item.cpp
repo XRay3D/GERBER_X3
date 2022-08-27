@@ -61,11 +61,11 @@ void drawText(QPainter* painter, const QString& str, const QColor& color, QPoint
 }
 
 void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    auto color { file_->color() };
+    auto color {file_->color()};
     painter->setBrush(color);
     color.setAlpha(255);
-    painter->setPen({ selected_ ? Qt::red : color, 2 * scale_ });
-    auto fillPolygons { shape_.toFillPolygons() };
+    painter->setPen({selected_ ? Qt::red : color, 2 * scale_});
+    auto fillPolygons {shape_.toFillPolygons()};
     if (fillPolygons.size()) {
         for (auto&& poly : fillPolygons)
             painter->drawPolygon(poly);
@@ -80,15 +80,17 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
     double k = std::min(min, scale_ * s);
     painter->drawLine(
-        component_.referencePoint() + QPointF { k, k },
-        component_.referencePoint() - QPointF { k, k });
+        component_.referencePoint() + QPointF {k, k},
+        component_.referencePoint() - QPointF {k, k});
     painter->drawLine(
-        component_.referencePoint() + QPointF { -k, k },
-        component_.referencePoint() - QPointF { -k, k });
+        component_.referencePoint() + QPointF {-k, k},
+        component_.referencePoint() - QPointF {-k, k});
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(
-        { component_.referencePoint() + QPointF { k, k },
-            component_.referencePoint() - QPointF { k, k } });
+        {
+            component_.referencePoint() + QPointF {k, k},
+            component_.referencePoint() - QPointF {k, k}
+    });
     if (scale_ < 0.05) {
         double size = std::min(min, scale_ * s);
         for (const auto& [number, description, pos] : component_.pins()) {
@@ -96,8 +98,8 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             Q_UNUSED(description)
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(color, 2 * scale_, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
-            painter->drawLine(pos + QPointF { +size, +size }, pos - QPointF { +size, +size });
-            painter->drawLine(pos + QPointF { -size, +size }, pos - QPointF { -size, +size });
+            painter->drawLine(pos + QPointF {+size, +size}, pos - QPointF {+size, +size});
+            painter->drawLine(pos + QPointF {-size, +size}, pos - QPointF {-size, +size});
         }
         for (const auto& [path, pos] : pathPins) {
             painter->save();

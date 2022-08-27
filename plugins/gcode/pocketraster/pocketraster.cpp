@@ -69,8 +69,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         for (size_t i {}, last {}; i < scanLines.size(); ++i) {
             if (auto y = scanLines[i].front().Y; y != start || i - 1 == scanLines.size()) {
                 std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Path& l, const Path& r) { // horizontal sort
-                    return fl ? l.front().X < r.front().X
-                              : l.front().X > r.front().X;
+                    return fl ? l.front().X < r.front().X : l.front().X > r.front().X;
                 });
                 for (size_t k = last; k < i; ++k) { // fix direction
                     if (fl ^ (scanLines[k].front().X < scanLines[k].back().X))
@@ -191,11 +190,11 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         if (src.size()) {
             for (auto& path : src)
                 RotatePath(path, angle);
-            auto zigzag { calcZigzag(src) };
-            auto scanLines { calcScanLines(src, zigzag) };
-            auto frames { calcFrames(src, zigzag) };
+            auto zigzag {calcZigzag(src)};
+            auto scanLines {calcScanLines(src, zigzag)};
+            auto frames {calcFrames(src, zigzag)};
             if (scanLines.size() && frames.size()) {
-                auto merged { merge(scanLines, frames) };
+                auto merged {merge(scanLines, frames)};
                 for (auto& path : merged)
                     RotatePath(path, -angle);
                 returnPs.append(merged);
@@ -278,7 +277,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         rect = c.GetBounds();
     }
 
-    const IntPoint center { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
+    const IntPoint center {rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2};
 
     Paths laserPath(profilePaths);
 
@@ -298,9 +297,15 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     { // create "snake"
         cInt y = rect.top;
         while (y < rect.bottom) {
-            zPath.append({ { rect.left, y }, { rect.right, y } });
+            zPath.append({
+                { rect.left, y},
+                {rect.right, y}
+            });
             y += stepOver;
-            zPath.append({ { rect.right, y }, { rect.left, y } });
+            zPath.append({
+                {rect.right, y},
+                { rect.left, y}
+            });
             y += stepOver;
         }
     }
@@ -369,26 +374,39 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
             {
                 const Path& path = pPath.back();
                 if (path.front().X < path.back().X) { // acc
-                    acc.append(Path { path.back(), { path.back().X + accDistance, path.front().Y } });
+                    acc.append(Path {
+                        path.back(), {path.back().X + accDistance, path.front().Y}
+                    });
                 } else {
-                    acc.append(Path { path.back(), { path.back().X - accDistance, path.front().Y } });
+                    acc.append(Path {
+                        path.back(), {path.back().X - accDistance, path.front().Y}
+                    });
                 }
             }
             {
                 const Path& path = paths.front();
                 if (path.front().X > path.back().X) { // acc
-                    acc.append(Path { { path.front().X + accDistance, path.front().Y }, path.front() });
+                    acc.append(Path {
+                        {path.front().X + accDistance, path.front().Y},
+                        path.front()
+                    });
                 } else {
-                    acc.append(Path { { path.front().X - accDistance, path.front().Y }, path.front() });
+                    acc.append(Path {
+                        {path.front().X - accDistance, path.front().Y},
+                        path.front()
+                    });
                 }
             }
             pPath.push_back(acc);
         } else { // acc first
-            pPath.push_back(Path { { paths.front().front().X - accDistance, paths.front().front().Y }, paths.front().front() });
+            pPath.push_back(Path {
+                {paths.front().front().X - accDistance, paths.front().front().Y},
+                paths.front().front()
+            });
         }
         for (size_t j = 0; j < paths.size(); ++j) {
             if (j) // acc
-                pPath.push_back(Path { paths[j - 1].back(), paths[j].front() });
+                pPath.push_back(Path {paths[j - 1].back(), paths[j].front()});
             pPath.push_back(paths[j]);
         }
     };
@@ -403,7 +421,7 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
                 adder(paths);
                 reverse = !reverse;
                 yLast = src[i].front().Y;
-                paths = { format(src[i]) };
+                paths = {format(src[i])};
             } else {
                 paths.push_back(format(src[i]));
             }
@@ -415,12 +433,17 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
     { // acc last
         Path& path = pPath.back();
         if (path.front().X < path.back().X) {
-            pPath.push_back(Path { path.back(), { path.back().X + accDistance, path.front().Y } });
+            pPath.push_back(Path {
+                path.back(), {path.back().X + accDistance, path.front().Y}
+            });
         } else {
-            pPath.push_back(Path { path.back(), { path.back().X - accDistance, path.front().Y } });
+            pPath.push_back(Path {
+                path.back(), {path.back().X - accDistance, path.front().Y}
+            });
         }
     }
 
     src = std::move(pPath);
 }
+
 } // namespace GCode

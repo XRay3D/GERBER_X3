@@ -22,10 +22,10 @@
 using namespace ClipperLib;
 
 GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int toolId)
-    : GraphicsItem { file }
-    , diameter_ { diameter }
-    , path_ { path }
-    , toolId_ { toolId } {
+    : GraphicsItem {file}
+    , diameter_ {diameter}
+    , path_ {path}
+    , toolId_ {toolId} {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolId(toolId_);
@@ -69,7 +69,7 @@ void GiDrill::update(const Path& path, double diameter) {
 }
 
 Paths GiDrill::paths(int alternate) const {
-    return { transform().map(path_) };
+    return {transform().map(path_)};
 }
 
 void GiDrill::changeColor() {

@@ -33,7 +33,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     treeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
     treeWidget->setAlternatingRowColors(true);
-    treeWidget->setIconSize({ 24, 24 });
+    treeWidget->setIconSize({24, 24});
 
     auto addRows = [](QTreeWidgetItem* twItem, char c, auto map) {
         QFont boldFont = twItem->font(0);
@@ -42,7 +42,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         twItem->setFont(0, boldFont);
         twItem->setExpanded(true);
         for (const auto& [type, ptr] : map) {
-            auto json { ptr->info() };
+            auto json {ptr->info()};
             auto featureItem = new QTreeWidgetItem(twItem);
             featureItem->setExpanded(true);
             featureItem->setIcon(0, ptr->icon());
@@ -56,17 +56,17 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     };
 
     if (App::filePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("File Plugins"), "", "" });
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("File Plugins"), "", ""});
         addRows(interfaceItem, 'F', App::filePlugins());
     }
 
     if (App::shapePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("Shape Plugins"), "", "" });
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("Shape Plugins"), "", ""});
         addRows(interfaceItem, 'S', App::shapePlugins());
     }
 
     if (App::gCodePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, { tr("GCode Plugins"), "", "" });
+        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("GCode Plugins"), "", ""});
         addRows(interfaceItem, 'G', App::gCodePlugins());
     }
 
@@ -106,8 +106,8 @@ void DialogAboutPlugins::setupUi(QDialog* Dialog) {
 void DialogAboutPlugins::retranslateUi(QDialog* Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
     treeWidget->setColumnCount(3);
-    treeWidget->setHeaderLabels({ //
+    treeWidget->setHeaderLabels({//
         QApplication::translate("Dialog", "Name", nullptr),
         QApplication::translate("Dialog", "Version", nullptr),
-        QApplication::translate("Dialog", "Author", nullptr) });
+        QApplication::translate("Dialog", "Author", nullptr)});
 }

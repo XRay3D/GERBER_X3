@@ -9,10 +9,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+#include "gi.h"
 #include "shape.h"
 #include "shapepluginin.h"
 #include <QJsonObject>
-#include "gi.h"
 
 namespace Shapes {
 

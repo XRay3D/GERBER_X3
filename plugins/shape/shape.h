@@ -71,4 +71,5 @@ protected:
     void write_(QDataStream& stream) const override;
     void read_(QDataStream& stream) override;
 };
+
 } // namespace Shapes

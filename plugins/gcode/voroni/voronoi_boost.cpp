@@ -59,20 +59,20 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
     //        return point_data_[index];
     //    }
     //    index -= point_data_.size();
-    return category == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT ? low(segment_data_[index])
-                                                                           : high(segment_data_[index]);
+    return category == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT ? low(segment_data_[index]) : high(segment_data_[index]);
 }
 
 Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
 
-    std::vector<point_type> sampled_edge { point_type { edge.vertex0()->x(), edge.vertex0()->y() }, point_type { edge.vertex1()->x(), edge.vertex1()->y() } };
+    std::vector<point_type> sampled_edge {
+        point_type {edge.vertex0()->x(), edge.vertex0()->y()},
+        point_type {edge.vertex1()->x(), edge.vertex1()->y()}
+    };
     coordinate_type max_dist = uScale * 0.00001; //* 1E-3* (xh(brect_) - xl(brect_));
 
-    point_type point = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell())
-                                                     : retrieve_point(segment_data_, *edge.twin()->cell());
+    point_type point = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell()) : retrieve_point(segment_data_, *edge.twin()->cell());
 
-    segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell())
-                                                         : retrieve_segment(segment_data_, *edge.cell());
+    segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
 
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
@@ -120,11 +120,11 @@ void VoronoiBoost::boostVoronoi() {
                 //                !i ? srcSegments.emplace_back(path.back().X, path.back().Y, point.X, point.Y /*, id, id2++*/)
                 //                   : srcSegments.emplace_back(path[i - 1].X, path[i - 1].Y, point.X, point.Y /*, id, id2++*/);
                 !i ? srcSegments.emplace_back(
-                    point_type { static_cast<coordinate_type>(path.back().X), static_cast<coordinate_type>(path.back().Y) },
-                    point_type { static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y) })
-                   : srcSegments.emplace_back(
-                       point_type { static_cast<coordinate_type>(path[i - 1].X), static_cast<coordinate_type>(path[i - 1].Y) },
-                       point_type { static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y) });
+                    point_type {static_cast<coordinate_type>(path.back().X), static_cast<coordinate_type>(path.back().Y)},
+                    point_type {static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y)}) :
+                     srcSegments.emplace_back(
+                         point_type {static_cast<coordinate_type>(path[i - 1].X), static_cast<coordinate_type>(path[i - 1].Y)},
+                         point_type {static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y)});
                 maxX = std::max(maxX, point.X);
                 maxY = std::max(maxY, point.Y);
                 minX = std::min(minX, point.X);
@@ -140,20 +140,20 @@ void VoronoiBoost::boostVoronoi() {
     //    srcSegments.emplace_back(minX - kx, minY - ky, minX - kx, maxY + ky, id);
     vecId.emplace_back(++id);
     srcSegments.emplace_back(
-        point_type { static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky) },
-        point_type { static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky) });
+        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
+        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type { static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky) },
-        point_type { static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky) });
+        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
+        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type { static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky) },
-        point_type { static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky) });
+        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)},
+        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type { static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky) },
-        point_type { static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky) });
+        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)},
+        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << "max id:" << id;
     //    const cInt kx = (maxX - minX) * 2;
@@ -186,15 +186,15 @@ void VoronoiBoost::boostVoronoi() {
             auto color2 = id1(edge);
 
             if (v0 && v1) {
-                IntPoint p0 { static_cast<cInt>(v0->x()), static_cast<cInt>(v0->y()) };
-                IntPoint p1 { static_cast<cInt>(v1->x()), static_cast<cInt>(v1->y()) };
+                IntPoint p0 {static_cast<cInt>(v0->x()), static_cast<cInt>(v0->y())};
+                IntPoint p1 {static_cast<cInt>(v1->x()), static_cast<cInt>(v1->y())};
                 if (color1 != color2 && color1 && color2) {
-                    if (set.emplace(Path { p0, p1 }).second && set.emplace(Path { p1, p0 }).second) {
+                    if (set.emplace(Path {p0, p1}).second && set.emplace(Path {p1, p0}).second) {
                         if (edge.is_curved() && p0.distTo(p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
                             // segments.emplace_back(Path { p0, p1 });
                         } else {
-                            segments.emplace_back(Path { p0, p1 });
+                            segments.emplace_back(Path {p0, p1});
                         }
                     }
                 }
@@ -205,11 +205,11 @@ void VoronoiBoost::boostVoronoi() {
 
     const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
-        { minX - fo, minY - fo },
-        { minX - fo, maxY + fo },
-        { maxX + fo, maxY + fo },
-        { maxX + fo, minY - fo },
-        { minX - fo, minY - fo },
+        {minX - fo, minY - fo},
+        {minX - fo, maxY + fo},
+        {maxX + fo, maxY + fo},
+        {maxX + fo, minY - fo},
+        {minX - fo, minY - fo},
     };
     {
         Clipper clipper;
@@ -234,6 +234,7 @@ void VoronoiBoost::boostVoronoi() {
     returnPs = segments;
     returnPs.push_back(frame);
 }
+
 } // namespace GCode
 #else
 void GCode::VoronoiBoost::boostVoronoi() {

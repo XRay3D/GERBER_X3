@@ -45,7 +45,7 @@ using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<GT, int, conv
 using DS = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<GT>>;
 using SDG2 = CGAL::Segment_Delaunay_graph_2<GT, ST, DS>;
 
-inline auto toIntPoint(const CGAL::Point_2<K>& point) { return IntPoint { static_cast<cInt>(point.x()), static_cast<cInt>(point.y()) }; }
+inline auto toIntPoint(const CGAL::Point_2<K>& point) { return IntPoint {static_cast<cInt>(point.x()), static_cast<cInt>(point.y())}; }
 
 ///////////////////////////////////
 
@@ -67,6 +67,7 @@ struct Segment {
 
 namespace ClipperLib {
 inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
+
 } // namespace ClipperLib
 
 namespace GCode {
@@ -96,8 +97,7 @@ void VoronoiCgal::cgalVoronoi() {
                 incCurrent();
                 getCancelThrow();
                 const IntPoint& point = path[i];
-                const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({ path.back().X, path.back().Y }, { point.X, point.Y })
-                                             : SDG2::Site_2::construct_site_2({ path[i - 1].X, path[i - 1].Y }, { point.X, point.Y });
+                const SDG2::Site_2 site = !i ? SDG2::Site_2::construct_site_2({path.back().X, path.back().Y}, {point.X, point.Y}) : SDG2::Site_2::construct_site_2({path[i - 1].X, path[i - 1].Y}, {point.X, point.Y});
                 sdg.insert(site, id);
                 maxX = std::max(maxX, point.X);
                 maxY = std::max(maxY, point.Y);
@@ -109,10 +109,10 @@ void VoronoiCgal::cgalVoronoi() {
     }
     const cInt kx = (maxX - minX) * 2;
     const cInt ky = (maxY - minY) * 2;
-    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { maxX + kx, maxY + ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ maxX + kx, minY - ky }, { minX - kx, minY - ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, maxY + ky }, { maxX + kx, maxY + ky }), id);
-    sdg.insert(SDG2::Site_2::construct_site_2({ minX - kx, minY - ky }, { minX - kx, maxY + ky }), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({maxX + kx, minY - ky}, {maxX + kx, maxY + ky}), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({maxX + kx, minY - ky}, {minX - kx, minY - ky}), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({minX - kx, maxY + ky}, {maxX + kx, maxY + ky}), id);
+    sdg.insert(SDG2::Site_2::construct_site_2({minX - kx, minY - ky}, {minX - kx, maxY + ky}), id);
     assert(sdg.is_valid(true, 1));
     Paths segments;
     segments.reserve(id);
@@ -126,11 +126,11 @@ void VoronoiCgal::cgalVoronoi() {
             const int idIdx = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
             CGAL::Object o = sdg.primal(e);
             /*  */ if (SDG2::Geotraits_::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
-                pathPairs[idIdx].push_back(Path { toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1)) });
+                pathPairs[idIdx].push_back(Path {toIntPoint(sdgLine.point(0)), toIntPoint(sdgLine.point(1))});
             } else if (SDG2::Geotraits_::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
-                pathPairs[idIdx].push_back(Path { toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1)) });
+                pathPairs[idIdx].push_back(Path {toIntPoint(sdgRay.point(0)), toIntPoint(sdgRay.point(1))});
             } else if (SDG2::Geotraits_::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                pathPairs[idIdx].push_back(Path { toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1)) });
+                pathPairs[idIdx].push_back(Path {toIntPoint(sdgSegment.point(0)), toIntPoint(sdgSegment.point(1))});
             } else if (CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 mvector<SDG2::Point_2> points;
                 cgalParabola.generate_points(points, 0.1 * uScale);
@@ -149,11 +149,11 @@ void VoronoiCgal::cgalVoronoi() {
     }
     const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
-        { minX - fo, minY - fo },
-        { minX - fo, maxY + fo },
-        { maxX + fo, maxY + fo },
-        { maxX + fo, minY - fo },
-        { minX - fo, minY - fo },
+        {minX - fo, minY - fo},
+        {minX - fo, maxY + fo},
+        {maxX + fo, maxY + fo},
+        {maxX + fo, minY - fo},
+        {minX - fo, minY - fo},
     };
     {
         Clipper clipper;
@@ -185,5 +185,6 @@ void VoronoiCgal::cgalVoronoi() {
 #else
 namespace GCode {
 void VoronoiCgal::cgalVoronoi() { }
+
 } // namespace GCode
 #endif

@@ -105,8 +105,9 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         for (size_t i {}, last {}; i < sl.size(); ++i) {
             if (auto y = sl[i].front().Y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; })              // horizontal sort
-                   : std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().X; }); // horizontal sort
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; }) // horizontal sort
+                     :
+                     std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().X; }); // horizontal sort
 
                 for (size_t k = last; k < i; ++k) { // fix direction
                     if (fl ^ (sl[k].front().X < sl[k].back().X))
@@ -237,11 +238,11 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
             {
                 for (auto& path : src)
                     RotatePath(path, angle);
-                auto zigzag { calcZigzag(src) };
-                auto scanLines { calcScanLines(src, zigzag) };
-                auto frames { calcFrames(src, zigzag) };
+                auto zigzag {calcZigzag(src)};
+                auto scanLines {calcScanLines(src, zigzag)};
+                auto frames {calcFrames(src, zigzag)};
                 if (scanLines.size() && frames.size()) {
-                    auto merged { merge(scanLines, frames) };
+                    auto merged {merge(scanLines, frames)};
                     for (auto& path : merged)
                         RotatePath(path, -angle);
                     returnPs.append(merged);
@@ -250,11 +251,11 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
             {
                 for (auto& path : src)
                     RotatePath(path, 90);
-                auto zigzag { calcZigzag(src) };
-                auto scanLines { calcScanLines(src, zigzag) };
-                auto frames { calcFrames(src, zigzag) };
+                auto zigzag {calcZigzag(src)};
+                auto scanLines {calcScanLines(src, zigzag)};
+                auto frames {calcFrames(src, zigzag)};
                 if (scanLines.size() && frames.size()) {
-                    auto merged { merge(scanLines, frames) };
+                    auto merged {merge(scanLines, frames)};
                     for (auto& path : merged)
                         RotatePath(path, -(angle + 90));
                     returnPs.append(merged);

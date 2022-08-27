@@ -78,4 +78,5 @@ public:
     int16_t elevation = 0;
     double thickness = 0.0;
 };
+
 } // namespace Dxf

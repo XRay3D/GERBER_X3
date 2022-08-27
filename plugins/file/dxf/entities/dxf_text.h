@@ -92,4 +92,5 @@ public:
     double textHeight = 0;
     double rotation = 0;
 };
+
 } // namespace Dxf

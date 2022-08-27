@@ -387,7 +387,7 @@ inline double qwtGetMax(const double* array, int size) {
 
     double rv = array[0];
     for (int i = 1; i < size; i++)
-        rv = qMax(rv, array[i]);
+        rv = std::max(rv, array[i]);
 
     return rv;
 }
@@ -714,7 +714,7 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     //
 
     // L-U Factorization
-    a[0] = qSqrt(a[0]);
+    a[0] = std::sqrt(a[0]);
     c[0] = h[imax] / a[0];
     double sum = 0;
 
@@ -722,11 +722,11 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
         b[i] /= a[i];
         if (i > 0)
             c[i] = -c[i - 1] * b[i - 1] / a[i];
-        a[i + 1] = qSqrt(a[i + 1] - qwtSqr(b[i]));
+        a[i + 1] = std::sqrt(a[i + 1] - qwtSqr(b[i]));
         sum += qwtSqr(c[i]);
     }
     b[imax - 1] = (b[imax - 1] - c[imax - 2] * b[imax - 2]) / a[imax - 1];
-    a[imax] = qSqrt(a[imax] - qwtSqr(b[imax - 1]) - sum);
+    a[imax] = std::sqrt(a[imax] - qwtSqr(b[imax - 1]) - sum);
 
     // forward elimination
     s[0] = d[0] / a[0];
@@ -757,4 +757,5 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
 
     return true;
 }
+
 } // namespace Dxf

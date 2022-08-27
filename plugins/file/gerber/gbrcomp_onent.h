@@ -223,4 +223,5 @@ private:
     QString value_; /* <field> E.g. 220nF. */
     bool isNull_ = true;
 };
+
 } // namespace Gerber

@@ -66,9 +66,9 @@ public:
     static void setPinsPos(QPointF pos[4]);
 
     static double minX() { return qMin(pins_[0]->pos().x(), pins_[1]->pos().x()); }
-    static double maxX() { return qMax(pins_[0]->pos().x(), pins_[1]->pos().x()); }
+    static double maxX() { return std::max(pins_[0]->pos().x(), pins_[1]->pos().x()); }
     static double minY() { return qMin(pins_[0]->pos().y(), pins_[2]->pos().y()); }
-    static double maxY() { return qMax(pins_[0]->pos().y(), pins_[2]->pos().y()); }
+    static double maxY() { return std::max(pins_[0]->pos().y(), pins_[2]->pos().y()); }
 
     static void resetPos(bool fl = true);
     static void setPos(const QPointF pos[4]);

@@ -44,4 +44,5 @@ protected:
     void read(QDataStream& stream) override;
     Paths merge() const override;
 };
+
 } // namespace Excellon

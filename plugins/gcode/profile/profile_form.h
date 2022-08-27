@@ -76,7 +76,7 @@ class GCPluginImpl final : public GCodePlugin {
     // GCodePlugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+F" }; }
-    QWidget* createForm()  override { return new ProfileForm(this); };
+    QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
+    QWidget* createForm() override { return new ProfileForm(this); };
     int type() const override { return GCode::Profile; }
 };

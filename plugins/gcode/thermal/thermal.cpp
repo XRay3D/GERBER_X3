@@ -100,9 +100,10 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = Thermal;
-        file_ = new GCode::File(sortB(returnPss),  std::move(gcp_));
+        file_ = new GCode::File(sortB(returnPss), std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
+
 } // namespace GCode

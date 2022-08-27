@@ -30,7 +30,7 @@ using sl = std::source_location;
 
 using namespace ClipperLib;
 
-void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = { 1 });
+void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
 
 class GiError;
 

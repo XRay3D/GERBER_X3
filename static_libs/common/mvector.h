@@ -53,7 +53,7 @@ struct mvector : std::vector<T> {
             end = begin + (V::size() - idx);
         else
             end = begin + len;
-        return { begin, end };
+        return {begin, end};
     }
 
     mvector mid(size_t idx) const {
@@ -65,7 +65,7 @@ struct mvector : std::vector<T> {
     }
 
     std::span<T> midRef(size_t idx) const {
-        return { V::cbegin() + idx, V::cend() };
+        return {V::cbegin() + idx, V::cend()};
     }
 
     //    mvector mid(size_t idx, size_t len = 0)

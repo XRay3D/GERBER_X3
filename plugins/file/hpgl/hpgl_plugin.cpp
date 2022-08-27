@@ -55,10 +55,10 @@ FileInterface* Plugin::createFile() { return new File(); }
 
 QJsonObject Plugin::info() const {
     return QJsonObject {
-        { "Name", "HPGL" },
-        { "Version", "1.0" },
-        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "Opening HPGL Files" }
+        {        "Name",                   "HPGL"},
+        {     "Version",                    "1.0"},
+        {"VendorAuthor", "X-Ray aka Bakiev Damir"},
+        {        "Info",     "Opening HPGL Files"}
     };
 }
 

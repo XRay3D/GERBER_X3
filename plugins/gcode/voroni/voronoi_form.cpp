@@ -13,8 +13,8 @@
  *******************************************************************************/
 
 #include "voronoi_form.h"
-#include "voronoi.h"
 #include "ui_voronoiform.h"
+#include "voronoi.h"
 
 #include "scene.h"
 #include "settings.h"
@@ -29,7 +29,7 @@ VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
     /*parent->*/ setWindowTitle(label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({ 16, 16 });
+        button->setIconSize({16, 16});
 
     ui->cbxSolver->setCurrentIndex(-1);
 
@@ -69,7 +69,7 @@ VoronoiForm::~VoronoiForm() {
 }
 
 void VoronoiForm::createFile() {
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -78,7 +78,7 @@ void VoronoiForm::createFile() {
     Paths wPaths;
     Paths wRawPaths;
     FileInterface const* file = nullptr;
-    bool skip { true };
+    bool skip {true};
 
     auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
         if (!file) {
@@ -146,7 +146,7 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1) {
 }
 
 void VoronoiForm::setWidth(double) {
-    const auto tool { ui->toolHolder->tool() };
+    const auto tool {ui->toolHolder->tool()};
     const double d = tool.getDiameter(dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));

@@ -282,7 +282,7 @@ void ApMacro::draw() {
         CenterLine = 21,
     };
 
-    QMap<QString, double> macroCoefficients { m_coefficients };
+    QMap<QString, double> macroCoefficients {m_coefficients};
     QVector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
@@ -300,9 +300,7 @@ void ApMacro::draw() {
                 continue;
             } else {
                 for (QString& var2 : var.split(',')) {
-                    mod.push_back(var2.contains('$')
-                            ? MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive))
-                            : var2.toDouble());
+                    mod.push_back(var2.contains('$') ? MathParser(macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)) : var2.toDouble());
                 }
             }
 
@@ -344,7 +342,7 @@ void ApMacro::draw() {
             else if (area > 0 && !exposure)
                 ReversePath(path);
 
-            items.append({ exposure, path });
+            items.append({exposure, path});
         }
     } catch (...) {
         qWarning() << "Macro draw error";

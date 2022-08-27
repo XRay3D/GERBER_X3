@@ -251,4 +251,5 @@ struct Hatch final : Entity {
     double thickness = 0;
     double radius = 0;
 };
+
 } // namespace Dxf

@@ -52,9 +52,9 @@ void GCUtils::setLastDir(QString dirPath) {
 }
 
 mvector<double> GCUtils::getDepths() {
-    const auto gDepth { gcp_.getDepth() };
+    const auto gDepth {gcp_.getDepth()};
     if (gDepth < gcp_.getTool().passDepth() || qFuzzyCompare(gDepth, gcp_.getTool().passDepth()))
-        return { -gDepth - gcp_.getTool().getDepth() };
+        return {-gDepth - gcp_.getTool().getDepth()};
 
     const int count = static_cast<int>(ceil(gDepth / gcp_.getTool().passDepth()));
     const double depth = gDepth / count;
@@ -64,4 +64,5 @@ mvector<double> GCUtils::getDepths() {
     depths.back() = -gDepth - gcp_.getTool().depth();
     return depths;
 }
+
 } // namespace GCode

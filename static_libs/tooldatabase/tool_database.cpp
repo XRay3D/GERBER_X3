@@ -24,7 +24,7 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     , types_(types) {
 
     ui->setupUi(this);
-    ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
+    ui->treeView->setButtons({ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup});
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(types_.empty());
 

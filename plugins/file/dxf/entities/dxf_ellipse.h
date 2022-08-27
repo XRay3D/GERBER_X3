@@ -50,4 +50,5 @@ public:
     QPointF CenterPoint;
     QPointF EndpointOfMajorAxis;
 };
+
 } // namespace Dxf

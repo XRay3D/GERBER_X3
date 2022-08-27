@@ -10,11 +10,11 @@
  *******************************************************************************/
 #pragma once
 
+#include "gi.h"
 #include "plugintypes.h"
 #include "shape.h"
 #include "shapepluginin.h"
 #include <QJsonObject>
-#include "gi.h"
 
 class ShTextDialog;
 

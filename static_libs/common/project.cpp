@@ -246,8 +246,8 @@ QRectF Project::getBoundingRect() {
                     for (const IntPoint& pt : path) {
                         topLeft.X = qMin(pt.X, topLeft.X);
                         topLeft.Y = qMin(pt.Y, topLeft.Y);
-                        botRight.X = qMax(pt.X, botRight.X);
-                        botRight.Y = qMax(pt.Y, botRight.Y);
+                        botRight.X = std::max(pt.X, botRight.X);
+                        botRight.Y = std::max(pt.Y, botRight.Y);
                     }
                 }
             }

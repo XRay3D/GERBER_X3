@@ -402,7 +402,7 @@ void Parser::reset() {
     m_file.clear();
     m_state = State(&m_format);
     m_abSrIdStack.clear();
-    m_abSrIdStack.push({ Normal, 0 });
+    m_abSrIdStack.push({Normal, 0});
     m_stepRepeat.reset();
     m_goId = 0;
 }
@@ -435,7 +435,7 @@ IntPoint Parser::parsePosition(const QString& xyStr) {
 }
 
 Path Parser::arc(const IntPoint& center, double radius, double start, double stop) {
-    const double da_sign[4] = { 0, 0, -1.0, +1.0 };
+    const double da_sign[4] = {0, 0, -1.0, +1.0};
     Path points;
 
     const int intSteps = 18; // MinStepsPerCircle;
@@ -503,12 +503,12 @@ Paths Parser::createPolygon() {
         if (m_state.imgPolarity() == Positive)
             ReversePath(m_path);
     }
-    return { m_path };
+    return {m_path};
 }
 
 bool Parser::parseAperture(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
-    static const QList<QString> slApertureType({ "C", "R", "O", "P", "M" });
+    static const QList<QString> slApertureType({"C", "R", "O", "P", "M"});
     if (match.exactMatch(gLine)) {
         int aperture = /*state().aperture =*/match.cap(1).toInt();
         QString apType = match.cap(2);
@@ -564,7 +564,7 @@ bool Parser::parseAperture(const QString& gLine) {
 bool Parser::parseApertureBlock(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%ABD(\\d+)\\*%$"));
     if (match.exactMatch(gLine)) {
-        m_abSrIdStack.push({ ApertureBlock, match.cap(1).toInt() });
+        m_abSrIdStack.push({ApertureBlock, match.cap(1).toInt()});
         m_apertures.insert(m_abSrIdStack.top().second, QSharedPointer<AbstractAperture>(new ApBlock(&m_format)));
         return true;
     }
@@ -583,9 +583,9 @@ bool Parser::parseTransformations(const QString& gLine) {
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations { "P", "M", "R", "S" };
-    static const QStringList slLevelPolarity { "D", "C" };
-    static const QStringList slLoadMirroring { "N", "X", "Y", "XY" };
+    static const QStringList slTransformations {"P", "M", "R", "S"};
+    static const QStringList slLevelPolarity {"D", "C"};
+    static const QStringList slLoadMirroring {"N", "X", "Y", "XY"};
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
     if (match.exactMatch(gLine)) {
         switch (slTransformations.indexOf(match.cap(1))) {
@@ -635,7 +635,7 @@ bool Parser::parseStepRepeat(const QString& gLine) {
             m_stepRepeat.j *= 25.4;
         }
         if (m_stepRepeat.x > 1 || m_stepRepeat.y > 1)
-            m_abSrIdStack.push({ StepRepeat, 0 });
+            m_abSrIdStack.push({StepRepeat, 0});
         return true;
     }
     QRegExp match2("^%SR\\*%$");
@@ -658,7 +658,7 @@ void Parser::closeStepRepeat() {
                     TranslatePath(path, pt);
                 Path path(go.path());
                 TranslatePath(path, pt);
-                go.state().setCurPos({ go.state().curPos().X + pt.X, go.state().curPos().Y + pt.Y });
+                go.state().setCurPos({go.state().curPos().X + pt.X, go.state().curPos().Y + pt.Y});
                 m_file.append(GraphicObject(m_goId++, go.state(), paths, nullptr, path));
             }
         }
@@ -751,7 +751,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             if (m_state.interpolation() != ClockwiseCircular && m_state.interpolation() != CounterclockwiseCircular) {
                 qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(m_lineNum);
                 qWarning() << QString(gLine);
-                m_state.setCurPos({ x, y });
+                m_state.setCurPos({x, y});
                 m_state.setGCode(G01);
                 return false;
             }
@@ -773,10 +773,10 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         case D02: // Nothing created! Pen Up.
             m_state.setDCode(D01);
             addPath();
-            m_state.setCurPos({ x, y });
+            m_state.setCurPos({x, y});
             return true;
         case D03: // Flash should not happen here
-            m_state.setCurPos({ x, y });
+            m_state.setCurPos({x, y});
             qWarning() << QString("Trying to flash within arc. (%1)").arg(m_lineNum);
             return true;
         }
@@ -784,10 +784,10 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         const IntPoint& curPos = m_state.curPos();
 
         const IntPoint centerPos[4] = {
-            { curPos.X + i, curPos.Y + j },
-            { curPos.X - i, curPos.Y + j },
-            { curPos.X + i, curPos.Y - j },
-            { curPos.X - i, curPos.Y - j }
+            {curPos.X + i, curPos.Y + j},
+            {curPos.X - i, curPos.Y + j},
+            {curPos.X + i, curPos.Y - j},
+            {curPos.X - i, curPos.Y - j}
         };
 
         bool valid = false;
@@ -801,15 +801,13 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (m_state.curPos() == IntPoint(x, y))
-                ? start
-                : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
+            const double stop = (m_state.curPos() == IntPoint(x, y)) ? start : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
             arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
             // arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
             //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
             //  Точной конечной точкой является указанная (x, y). Заменить.
-            m_state.curPos() = { x, y };
+            m_state.curPos() = {x, y};
             if (arcPolygon.size())
                 arcPolygon.last() = m_state.curPos();
             else
@@ -832,7 +830,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 if (angle < (pi + 1e-5) * 0.5) {
                     arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
                     // Replace with exact values
-                    m_state.setCurPos({ x, y });
+                    m_state.setCurPos({x, y});
                     if (arcPolygon.size())
                         arcPolygon.last() = m_state.curPos();
                     else
@@ -844,7 +842,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
             break;
         default:
-            m_state.setCurPos({ x, y });
+            m_state.setCurPos({x, y});
             m_path.push_back(m_state.curPos());
             return true;
             // break;

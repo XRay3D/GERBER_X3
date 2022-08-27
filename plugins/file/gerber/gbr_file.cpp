@@ -32,14 +32,14 @@
 namespace Gerber {
 
 Path GraphicObject::elipse() const { return (state_.dCode() == D03
-                                                && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle)
-        ? path_
-        : Path(); } // circle
+                                                && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle) ?
+        path_ :
+        Path(); } // circle
 Paths GraphicObject::elipseW() const { return (state_.dCode() == D03
                                                   && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
-                                                  && gFile_->apertures()->at(state_.aperture())->withHole())
-        ? paths_
-        : Paths(); }
+                                                  && gFile_->apertures()->at(state_.aperture())->withHole()) ?
+        paths_ :
+        Paths(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
@@ -62,13 +62,13 @@ QDebug operator<<(QDebug debug, const State& state) {
 
 File::File(const QString& fileName)
     : FileInterface() {
-    itemGroups_.append({ new GiGroup, new GiGroup });
+    itemGroups_.append({new GiGroup, new GiGroup});
     name_ = fileName;
     layerTypes_ = {
-        { Normal, GbrObj::tr("Normal"), GbrObj::tr("Normal view") },
-        { ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
-                                                            "without width and without contacts") },
-        { Components, GbrObj::tr("Components"), GbrObj::tr("Show components") }
+        {    Normal,         GbrObj::tr("Normal"),                                                                       GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
+ "without width and without contacts")                                                          },
+        {Components,     GbrObj::tr("Components"),                                                                   GbrObj::tr("Show components")}
     };
 }
 
@@ -209,8 +209,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
             IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
+            IntPoint(r.left - k, r.top - k)};
         if (fl)
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);

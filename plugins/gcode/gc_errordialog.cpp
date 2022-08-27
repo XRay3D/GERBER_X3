@@ -35,7 +35,7 @@ QIcon errorIcon(const QPainterPath& path) {
 
     const QRectF rect = path.boundingRect();
 
-    double scale = static_cast<double>(IconSize) / qMax(rect.width(), rect.height());
+    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
 
     double ky = rect.bottom() * scale;
     double kx = rect.left() * scale;
@@ -76,7 +76,7 @@ public:
         switch (role) {
         case Qt::DisplayRole:
             if (index.column() == 0) {
-                auto pos { items[index.row()]->boundingRect().center() };
+                auto pos {items[index.row()]->boundingRect().center()};
                 return QString("X = %1\nY = %2").arg(pos.x()).arg(pos.y());
             }
             return items[index.row()]->area();
@@ -126,7 +126,7 @@ public:
         verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         setSelectionBehavior(QAbstractItemView::SelectRows);
         setSelectionMode(QAbstractItemView::ExtendedSelection);
-        setIconSize({ IconSize, IconSize });
+        setIconSize({IconSize, IconSize});
     }
     virtual ~TableView() { }
 
@@ -215,7 +215,7 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
     buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
     lastWidget = App::mainWindow()->dockWidget()->widget();
     //    App::mainWindow()->dockWidget()->push(this);
-    setGeometry({ App::mainWindow()->dockWidget()->mapToGlobal(QPoint()), App::mainWindow()->dockWidget()->size() });
+    setGeometry({App::mainWindow()->dockWidget()->mapToGlobal(QPoint()), App::mainWindow()->dockWidget()->size()});
     startTimer(32);
 }
 

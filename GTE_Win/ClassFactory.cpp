@@ -31,7 +31,7 @@ ClassFactory::~ClassFactory() { InterlockedDecrement(&g_cDllRef); }
 IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void** ppv) {
     static const QITAB qit[] = {
         QITABENT(ClassFactory, IClassFactory),
-        { nullptr, 0 }
+        {nullptr, 0}
     };
     return QISearch(this, qit, riid, ppv);
 }

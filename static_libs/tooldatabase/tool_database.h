@@ -24,7 +24,7 @@ class ToolDatabase : public QDialog {
 public:
     explicit ToolDatabase(
         QWidget* parent = nullptr,
-        mvector<Tool::Type> types = mvector<Tool::Type> { Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser });
+        mvector<Tool::Type> types = mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser});
 
     ~ToolDatabase() override;
 

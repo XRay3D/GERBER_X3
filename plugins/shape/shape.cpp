@@ -104,7 +104,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), { Qt::CheckStateRole });
+        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
     }
     return GraphicsItem::itemChange(change, value);
 }

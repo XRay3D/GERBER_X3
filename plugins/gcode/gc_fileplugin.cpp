@@ -21,10 +21,10 @@ namespace GCode {
 Plugin::Plugin(QObject* parent)
     : FilePlugin(parent) {
     info_ = {
-        { "Name", "GCode" },
-        { "Version", "1.1" },
-        { "VendorAuthor", "X-Ray aka Bakiev Damir" },
-        { "Info", "GCode is a static plugin always included with GGEasy." }
+        {        "Name",                                                 "GCode"},
+        {     "Version",                                                   "1.1"},
+        {"VendorAuthor",                                "X-Ray aka Bakiev Damir"},
+        {        "Info", "GCode is a static plugin always included with GGEasy."}
     };
 }
 

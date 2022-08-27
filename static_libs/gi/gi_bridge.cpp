@@ -54,7 +54,7 @@ void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     }
 
     auto drawEllipse = [painter, halfSize](const QPointF& pt, bool fl = false) {
-        const QRectF rectangle(pt + QPointF { halfSize, halfSize }, pt - QPointF { halfSize, halfSize });
+        const QRectF rectangle(pt + QPointF {halfSize, halfSize}, pt - QPointF {halfSize, halfSize});
         const int startAngle = (fl ? 0 : 180) * 16;
         const int spanAngle = 180 * 16;
         painter->drawArc(rectangle, startAngle, spanAngle);

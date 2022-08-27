@@ -8,7 +8,7 @@
 #include <QToolBar>
 
 GCodePlugin::GCodePlugin(QObject* parent)
-    : QObject { parent } {
+    : QObject {parent} {
     App app;
 }
 

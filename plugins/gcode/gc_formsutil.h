@@ -19,6 +19,7 @@
 namespace GCode {
 class File;
 class file_;
+
 } // namespace GCode
 
 class GraphicsItem;

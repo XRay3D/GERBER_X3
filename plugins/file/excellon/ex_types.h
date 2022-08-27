@@ -173,7 +173,7 @@ class File;
 
 struct Format {
     Format(File* file = nullptr)
-        : file { file } { }
+        : file {file} { }
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
     int decimal = 0;

@@ -53,7 +53,7 @@ class GCPluginImpl final : public GCodePlugin {
     // GCodePlugin interface
 public:
     int type() const override { return GCode::Voronoi; }
-    QWidget* createForm()  override { return new VoronoiForm(this); };
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+V" }; }
+    QWidget* createForm() override { return new VoronoiForm(this); };
+    QKeySequence keySequence() const override { return {"Ctrl+Shift+V"}; }
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
 };

@@ -28,6 +28,7 @@ public:
     void setPenColor(QColor* col);
     void setZValue(double z);
     void setPos(QPointF offset);
+
 private:
     bool visible_ = false;
     QPen pen_;

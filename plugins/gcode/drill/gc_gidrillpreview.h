@@ -8,7 +8,7 @@
 class GiDrillPreview final : public GiAbstractPreview {
     PosPath hv;
     Row& row;
-    int toolId_ { -1 };
+    int toolId_ {-1};
 
 public:
     explicit GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});

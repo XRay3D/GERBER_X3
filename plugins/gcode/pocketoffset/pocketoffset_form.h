@@ -62,7 +62,7 @@ class GCPluginImpl final : public GCodePlugin {
     // GCodePlugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    QKeySequence keySequence() const override { return { "Ctrl+Shift+P" }; }
-    QWidget* createForm()  override { return new PocketOffsetForm(this); };
+    QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
+    QWidget* createForm() override { return new PocketOffsetForm(this); };
     int type() const override { return GCode::Pocket; }
 };

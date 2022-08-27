@@ -302,7 +302,7 @@ class GraphicObject final : public AbstrGraphicObject {
 
 public:
     GraphicObject()
-        : AbstrGraphicObject { {} }
+        : AbstrGraphicObject {{}}
         , gFile_(nullptr) {
     }
     GraphicObject(
@@ -311,7 +311,7 @@ public:
         const Paths& paths,
         File* gFile,
         const Path& path = Path())
-        : AbstrGraphicObject { paths }
+        : AbstrGraphicObject {paths}
         , gFile_(gFile)
         , path_(path)
         , state_(state) {
@@ -341,9 +341,9 @@ public:
     Paths polygonWholes() const override { return paths_; }
 
     Path hole() const override { return !positive() ? path_ : Path(); }
-    Paths holes() const override { return !positive() ? Paths { paths_.front() } : paths_.mid(1); }
+    Paths holes() const override { return !positive() ? Paths {paths_.front()} : paths_.mid(1); }
 
-    bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                         // not hole
+    bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                     // not hole
     bool closed() const override { return path_.size() ? path_.front() == path_.back() : paths_.front().front() == paths_.front().back(); } // front == back
 };
 

@@ -73,7 +73,7 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({ 2.0, 2.0 });
+        pen.setDashPattern({2.0, 2.0});
         painter->setPen(pen);
     }
 #endif

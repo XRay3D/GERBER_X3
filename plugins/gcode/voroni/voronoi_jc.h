@@ -56,4 +56,5 @@ protected:
     void jcVoronoi();
     Paths toPath(const Pairs& pairs);
 };
+
 } // namespace GCode
