@@ -38,9 +38,8 @@ endif()
 
 include_directories(
     GGEasy
-    compile-time-regular-expressions/single-header
-    magic_get
-    magic_get/include
+    external_dependencies/compile-time-regular-expressions/single-header
+    external_dependencies/pfr_non_boost/include
     plugins/file
     plugins/gcode
     plugins/shape

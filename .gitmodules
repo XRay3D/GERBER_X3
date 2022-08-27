@@ -1,7 +1,6 @@
-[submodule "magic_get"]
-	path = magic_get
-	url = git@github.com:apolukhin/magic_get.git
-[submodule "compile-time-regular-expressions"]
-	path = compile-time-regular-expressions
+[submodule "external_dependencies/compile-time-regular-expressions"]
+	path = external_dependencies/compile-time-regular-expressions
 	url = git@github.com:hanickadot/compile-time-regular-expressions.git
-	
+[submodule "external_dependencies/pfr_non_boost"]
+	path = external_dependencies/pfr_non_boost
+	url = git@github.com:apolukhin/pfr_non_boost.git
