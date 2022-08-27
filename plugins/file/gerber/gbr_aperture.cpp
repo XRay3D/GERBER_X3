@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -157,7 +156,7 @@ void ApCircle::write(QDataStream& stream) const {
 }
 
 void ApCircle::draw() {
-    paths_.push_back(CirclePath(diam_ * uScale));
+    paths_.emplace_back(CirclePath(diam_ * uScale));
     size_ = diam_;
 }
 
@@ -205,7 +204,7 @@ void ApRectangle::write(QDataStream& stream) const {
 }
 
 void ApRectangle::draw() {
-    paths_.push_back(RectanglePath(width_ * uScale, height_ * uScale));
+    paths_.emplace_back(RectanglePath(width_ * uScale, height_ * uScale));
     size_ = std::sqrt(width_ * width_ + height_ * height_);
 }
 
@@ -251,7 +250,7 @@ void ApObround::draw() {
     const cInt h = static_cast<cInt>(height_ * uScale);
     const cInt w = static_cast<cInt>(width_ * uScale);
     if (qFuzzyCompare(w + 1.0, h + 1.0)) {
-        paths_.push_back(CirclePath(w));
+        paths_.emplace_back(CirclePath(w));
     } else {
         if (w > h) {
             clipper.AddPath(CirclePath(h, IntPoint(-(w - h) / 2, 0)), ptClip, true);
@@ -317,7 +316,7 @@ void ApPolygon::draw() {
     const double step = 360.0 / verticesCount_;
     const double diam = diam_ * uScale;
     for (int i = 0; i < verticesCount_; ++i) {
-        poligon.push_back(IntPoint(
+        poligon.emplace_back(IntPoint(
             static_cast<cInt>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<cInt>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     }
@@ -581,7 +580,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod) {
 
     Path polygon;
     for (int j = 0; j < int(num); ++j)
-        polygon.push_back(IntPoint(
+        polygon.emplace_back(IntPoint(
             static_cast<cInt>(mod[X + j * 2] * uScale),
             static_cast<cInt>(mod[Y + j * 2] * uScale)));
 
@@ -612,7 +611,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod) {
     Path polygon;
     for (int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
-        polygon.push_back(IntPoint(
+        polygon.emplace_back(IntPoint(
             static_cast<cInt>(qCos(angle) * diameter),
             static_cast<cInt>(qSin(angle) * diameter)));
     }

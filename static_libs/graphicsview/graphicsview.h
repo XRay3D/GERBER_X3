@@ -43,7 +43,7 @@ public:
 
     void setOpenGL(bool useOpenGL);
 
-    void setViewRect(QRectF r);
+    void setViewRect(const QRectF& r);
     QRectF getViewRect();
 
 signals:

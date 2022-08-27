@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -166,7 +165,7 @@ Result MathParser::num(sv s) // throws Exception
     return Result(dPart, restPart);
 }
 
-Result MathParser::processFunction(sv func, Result r) {
+Result MathParser::processFunction(sv func, const Result& r) {
 
     //    if (func.starts_with("sin"))
     //        return Result(sin(r.acc), r.rest);

@@ -12,7 +12,6 @@
 
 #include "../tooldatabase/tool.h"
 #include "app.h"
-//#include "drill/drill_model.h"
 #include "ft_view.h"
 #include "myclipper.h"
 #include "settings.h"
@@ -48,7 +47,7 @@ public:
     virtual int type() const = 0;
     virtual QString folderName() const = 0;
 
-    [[nodiscard]] virtual std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin) { return {}; };
+    [[nodiscard]] virtual std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param = {}) { return {}; };
 
     [[nodiscard]] virtual SettingsTabInterface* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual FileInterface* createFile() = 0;

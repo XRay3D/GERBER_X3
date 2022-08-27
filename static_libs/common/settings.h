@@ -174,7 +174,7 @@ class AppSettings {
     friend class SettingsDialog;
 
 public:
-    explicit AppSettings();
+    explicit AppSettings() = default;
 
     //    AppSettings(const AppSettings&) = delete;
     //    AppSettings(AppSettings&&) = delete;

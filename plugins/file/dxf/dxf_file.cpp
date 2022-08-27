@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -22,16 +21,11 @@
 #include "entities/dxf_entity.h"
 #include "tables/dxf_layer.h"
 
-//#include "section/dxf_classes.h"
-//#include "section/dxf_objects.h"
-//#include "section/dxf_thumbnailimage.h"
-//#include "gc_creator.h" //////////////////////
+//////////////////////
 
 #include "dxf_node.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
-//#include "gi_gcpath.h"
-//#include "settings.h"
 
 #include <QDebug>
 #include <QElapsedTimer>

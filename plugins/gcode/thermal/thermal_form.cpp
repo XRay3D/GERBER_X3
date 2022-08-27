@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -19,12 +18,10 @@
 #include "thermal_previewitem.h"
 #include "ui_thermalform.h"
 
-#include "graphicsview.h"
 #include "myclipper.h"
 #include "project.h"
 #include "scene.h"
 #include "settings.h"
-#include "tool_pch.h"
 
 #include <QCheckBox>
 #include <QDockWidget>
@@ -43,6 +40,9 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::ThermalCreator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
+
+    grid->setRowStretch(3, 1);
+    grid->setRowStretch(8, 0);
 
     MySettings settings;
     settings.beginGroup("ThermalForm");
@@ -179,7 +179,7 @@ void ThermalForm::createFile() {
     for (auto& item : items_) {
         if (item->isValid()) {
             wPaths.append(item->paths());
-            wBridgePaths.push_back(item->bridge());
+            wBridgePaths.emplace_back(item->bridge());
         }
     }
 
@@ -228,29 +228,31 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->dsbxAreaMax->value() * uScale * uScale,
         ui->dsbxAreaMin->value() * uScale * uScale};
 
-    //    auto thPaths = std::get<ThermalPreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal)));
+    thPaths = std::any_cast<ThermalPreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal), tp2));
 
-    //    int count {};
-    //    int ctr {};
-    //    for (const auto& [key, val] : thPaths)
-    //        count += val.size();
+    int count {};
+    int ctr {};
+    for (const auto& [key, val] : thPaths)
+        count += val.size();
 
-    //    QProgressDialog pd("create th", "", 0, count, this);
-    //    pd.setCancelButton(nullptr);
+    QProgressDialog pd("create th", "", 0, count, this);
+    pd.setCancelButton(nullptr);
 
-    //    for (const auto& [key1, val] : thPaths) {
-    //        for (const auto& [key, val] : val) {
-    //            if (!val.size())
-    //                continue;
-    //            auto node = model->appendRow(drawIcon(*val.front().first), key, par);
-    //            for (const auto& [paths, pos] : val) {
-    //                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
-    //                node->append(new ThermalNode(drawIcon(*paths), "", par, pos, items_.back().get(), model));
-    //            }
-    //            qApp->processEvents();
-    //            pd.setValue(++ctr);
-    //        }
-    //    }
+    for (const auto& [key1, val] : thPaths) {
+        for (const auto& [key, val] : val) {
+            if (!val.size())
+                continue;
+            auto node = model->appendRow(drawIcon(val.front().first), key, par);
+            for (const auto& [paths, pos] : val) {
+                items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
+                items_.back()->setVisible(true);
+                items_.back()->setOpacity(1.0);
+                node->append(new ThermalNode(drawIcon(paths), "", par, pos, items_.back().get(), model));
+            }
+            qApp->processEvents();
+            pd.setValue(++ctr);
+        }
+    }
 
     for (auto& item : items_) {
         App::scene()->addItem(item.get());

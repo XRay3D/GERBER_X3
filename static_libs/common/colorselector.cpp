@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -71,7 +70,7 @@ protected:
 ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget* parent)
     : QWidget(parent)
     , color_(color)
-    , defaultColor_(std::move(defaultColor)) {
+    , defaultColor_(defaultColor) {
     if (objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
     auto horizontalLayout = new QHBoxLayout(this);

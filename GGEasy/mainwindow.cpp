@@ -1,5 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
  * Author : Damir Bakiev *
@@ -18,16 +18,18 @@
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
+#include "gi_datasolid.h"
 #include "gi_point.h"
 #include "plugindialog.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
+#include "tool_database.h"
+
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
 #include <forward_list>
-#include <tool_database.h>
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -137,6 +139,8 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
+
+        QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->toggle(); });
     }
 }
 
@@ -467,31 +471,32 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        // FIXME auto selectedItems(App::scene()->selectedItems());
-        // Paths clipPaths;
-        // for (QGraphicsItem* clipItem : selectedItems) {
-        // if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
-        // clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
-        // }
+        auto selectedItems(App::scene()->selectedItems());
+        Paths clipPaths;
+        for (QGraphicsItem* clipItem : selectedItems) {
+            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
+        }
 
-        // QList<GraphicsItem*> rmi;
-        // for (QGraphicsItem* item : selectedItems) {
-        // if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
-        // auto gitem = static_cast<GiDataSolid*>(item);
-        // Clipper clipper;
-        // clipper.AddPaths(gitem->paths(), ptSubject, true);
-        // clipper.AddPaths(clipPaths, ptClip, true);
-        // clipper.Execute(type, *gitem->rPaths(), pftEvenOdd, pftPositive);
-        // if (gitem->rPaths()->empty()) {
-        // rmi.push_back(gitem);
-        // } else {
-        // ReversePaths(*gitem->rPaths()); //??
-        // gitem->redraw();
-        // }
-        // }
-        // }
-        // for (GraphicsItem* item : rmi)
-        // delete item->file()->itemGroup()->takeAt(item);
+        QList<GraphicsItem*> rmi;
+        for (QGraphicsItem* item : selectedItems) {
+            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+                auto gitem = static_cast<GiDataSolid*>(item);
+                Clipper clipper;
+                clipper.AddPaths(gitem->paths(), ptSubject, true);
+                clipper.AddPaths(clipPaths, ptClip, true);
+                Paths paths;
+                clipper.Execute(type, paths, pftEvenOdd, pftPositive);
+                if (paths.empty()) {
+                    rmi.push_back(gitem);
+                } else {
+                    ReversePaths(paths); // NOTE ??
+                    gitem->setPaths(paths);
+                }
+            }
+        }
+        for (GraphicsItem* item : rmi)
+            delete item->file()->itemGroup()->takeAt(item);
     };
     toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ctUnion); });
     toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ctDifference); });
@@ -582,7 +587,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 return;
             mvector<QString> sl;
 
-            sl.push_back(tr(";\tContains files:"));
+            sl.emplace_back(tr(";\tContains files:"));
             for (auto file : files)
                 sl.push_back(";\t" + file->shortName());
             for (auto file : files) {
@@ -769,8 +774,7 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 
 void MainWindow::resetToolPathsActions() {
     qWarning(__FUNCTION__);
-    if (dockWidget_->widget())
-        delete dockWidget_->widget();
+    delete dockWidget_->widget();
     dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
     if (auto action {actionGroup.checkedAction()}; action)
@@ -918,6 +922,7 @@ void MainWindow::updateTheme() {
 
     if (App::settings().theme()) {
         qApp->setStyle(QStyleFactory::create("Fusion"));
+
         QColor baseColor;
         QColor disabledColor;
         QColor highlightColor;
@@ -944,7 +949,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkBlue:
             baseColor = QColor(40, 40, 40);
-            disabledColor = QColor(127, 127, 127);
+            disabledColor = QColor(60, 60, 60);
             highlightColor = QColor(61, 174, 233);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(60, 60, 60);
@@ -952,7 +957,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkRed:
             baseColor = QColor(40, 40, 40);
-            disabledColor = QColor(127, 127, 127);
+            disabledColor = QColor(60, 60, 60);
             highlightColor = QColor(218, 68, 83);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(60, 60, 60);
@@ -961,32 +966,163 @@ void MainWindow::updateTheme() {
         }
 
         QPalette palette;
-        palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
-        palette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
-        palette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
-        palette.setColor(QPalette::Disabled, QPalette::Shadow, disabledColor);
 
-        palette.setColor(QPalette::Text, windowTextColor);
-        palette.setColor(QPalette::ToolTipText, windowTextColor);
-        palette.setColor(QPalette::WindowText, windowTextColor);
-        palette.setColor(QPalette::ButtonText, windowTextColor);
-        palette.setColor(QPalette::HighlightedText, Qt::black);
-        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setBrush(QPalette::Text, windowTextColor);
+        palette.setBrush(QPalette::ToolTipText, windowTextColor);
+        palette.setBrush(QPalette::WindowText, windowTextColor);
+        palette.setBrush(QPalette::ButtonText, windowTextColor);
+        palette.setBrush(QPalette::HighlightedText, Qt::black);
+        palette.setBrush(QPalette::BrightText, Qt::red);
 
-        palette.setColor(QPalette::Link, linkColor);
-        palette.setColor(QPalette::LinkVisited, highlightColor);
+        palette.setBrush(QPalette::Link, linkColor);
+        palette.setBrush(QPalette::LinkVisited, highlightColor);
 
-        palette.setColor(QPalette::AlternateBase, windowColor);
-        palette.setColor(QPalette::Base, baseColor);
-        palette.setColor(QPalette::Button, windowColor);
+        palette.setBrush(QPalette::AlternateBase, windowColor);
+        palette.setBrush(QPalette::Base, baseColor);
+        palette.setBrush(QPalette::Button, windowColor);
 
-        palette.setColor(QPalette::Highlight, highlightColor);
+        palette.setBrush(QPalette::Highlight, highlightColor);
 
-        palette.setColor(QPalette::ToolTipBase, windowTextColor);
-        palette.setColor(QPalette::Window, windowColor);
+        palette.setBrush(QPalette::ToolTipBase, windowTextColor);
+        palette.setBrush(QPalette::Window, windowColor);
+
+        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, disabledColor);
+        palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
+        palette.setBrush(QPalette::Disabled, QPalette::Text, disabledColor);
+        palette.setBrush(QPalette::Disabled, QPalette::Shadow, disabledColor);
+
+        //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, disabledColor);
+        //        palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, disabledColor);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Text, disabledColor);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Shadow, disabledColor);
+
         qApp->setPalette(palette);
     } else {
-        // qApp->setStyle(QStyleFactory::create("windowsvista"));
+
+        //        QPalette palette;
+
+        //        palette.setCurrentColorGroup(QPalette::Active);
+
+        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
+
+        //        palette.setCurrentColorGroup(QPalette::Disabled);
+        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
+
+        //        palette.setCurrentColorGroup(QPalette::Inactive);
+        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
+        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
+
+        //        enum ColorRole { WindowText,
+        //            Button,
+        //            Light,
+        //            Midlight,
+        //            Dark,
+        //            Mid,
+        //            Text,
+        //            BrightText,
+        //            ButtonText,
+        //            Base,
+        //            Window,
+        //            Shadow,
+        //            Highlight,
+        //            HighlightedText,
+        //            Link,
+        //            LinkVisited,
+        //            AlternateBase,
+        //            NoRole,
+        //            ToolTipBase,
+        //            ToolTipText,
+        //            PlaceholderText,
+        //        };
+
+        //        palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush13);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Base, brush01);
+        //        palette.setBrush(QPalette::Disabled, QPalette::BrightText, brush00);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Button, brush01);
+        //        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, brush00);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Dark, brush04);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Light, brush02);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Mid, brush05);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Midlight, brush03);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Shadow, brush07);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Text, brush00);
+        //        palette.setBrush(QPalette::Disabled, QPalette::ToolTipBase, brush08);
+        //        palette.setBrush(QPalette::Disabled, QPalette::ToolTipText, brush07);
+        //        palette.setBrush(QPalette::Disabled, QPalette::Window, brush01);
+        //        palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush07);
+
+        //        palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush13);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Base, brush00);
+        //        palette.setBrush(QPalette::Inactive, QPalette::BrightText, brush00);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Button, brush09);
+        //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, brush07);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Dark, brush11);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Light, brush00);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Mid, brush11);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Midlight, brush10);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Shadow, brush12);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Text, brush07);
+        //        palette.setBrush(QPalette::Inactive, QPalette::ToolTipBase, brush08);
+        //        palette.setBrush(QPalette::Inactive, QPalette::ToolTipText, brush07);
+        //        palette.setBrush(QPalette::Inactive, QPalette::Window, brush09);
+        //        palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush07);
+        //        qApp->setPalette(palette);
     }
 
     // if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
@@ -1019,8 +1155,7 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
     if (!dwContent)
         exit(-66);
 
-    if (dockWidget_->widget())
-        delete dockWidget_->widget();
+    delete dockWidget_->widget();
     dockWidget_->show();
     dockWidget_->setWidget(dwContent);
     if (auto pbClose {dwContent->findChild<QPushButton*>("pbClose")}; pbClose)

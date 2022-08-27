@@ -50,6 +50,7 @@ private:
     void createTPI(FileInterface* file);
 
     mvector<std::shared_ptr<AbstractThermPrGi>> items_;
+    ThermalPreviewGiMap thPaths;
 
     ThermalModel* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

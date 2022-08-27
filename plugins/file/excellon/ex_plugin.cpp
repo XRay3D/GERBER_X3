@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -13,16 +12,14 @@
  *******************************************************************************/
 #include "ex_plugin.h"
 #include "ex_file.h"
-//#include "ex_node.h"
+
 #include "ex_settingstab.h"
 #include "ex_types.h"
 
-//#include "app.h"
 #include "ctre.hpp"
-//#include "doublespinbox.h"
+
 #include "file.h"
-//#include "ft_view.h"
-//#include "gi_drill.h"
+
 #include "utils.h"
 
 #include "drill/drill_form.h"
@@ -50,7 +47,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return Parser::file;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         Drills retData;
         auto const exFile = static_cast<File*>(file);

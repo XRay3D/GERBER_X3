@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -20,8 +19,6 @@
 #include <execution>
 #endif
 #include "gi_point.h"
-//#include <QFuture>
-//#include <QtConcurrent>
 
 namespace GCode {
 RasterCreator::RasterCreator() {
@@ -399,14 +396,14 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
             }
             pPath.push_back(acc);
         } else { // acc first
-            pPath.push_back(Path {
+            pPath.emplace_back(Path {
                 {paths.front().front().X - accDistance, paths.front().front().Y},
                 paths.front().front()
             });
         }
         for (size_t j = 0; j < paths.size(); ++j) {
             if (j) // acc
-                pPath.push_back(Path {paths[j - 1].back(), paths[j].front()});
+                pPath.emplace_back(Path {paths[j - 1].back(), paths[j].front()});
             pPath.push_back(paths[j]);
         }
     };
@@ -433,11 +430,11 @@ void RasterCreator::addAcc(Paths& src, const cInt accDistance) {
     { // acc last
         Path& path = pPath.back();
         if (path.front().X < path.back().X) {
-            pPath.push_back(Path {
+            pPath.emplace_back(Path {
                 path.back(), {path.back().X + accDistance, path.front().Y}
             });
         } else {
-            pPath.push_back(Path {
+            pPath.emplace_back(Path {
                 path.back(), {path.back().X - accDistance, path.front().Y}
             });
         }

@@ -1,5 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -24,9 +24,6 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
-
-//#include <QGLWidget>
-//#include <QStandardPaths>
 
 void translation(QApplication* app);
 
@@ -93,7 +90,7 @@ int main(int argc, char** argv) {
         if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;       // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем 1 байт памяти
+            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
             is_running = false;                   // И определяем, что других экземпляров не запущено
         }
         semaphore.release(); // Опускаем семафор

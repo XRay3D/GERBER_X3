@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -16,16 +15,12 @@
 #include "dxf_node.h"
 #include "dxf_settingstab.h"
 
-//#include "entities/dxf_allentities.h"
 #include "entities/dxf_circle.h"
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 #include "section/dxf_headerparser.h"
 #include "section/dxf_tables.h"
-//#include "section/dxf_classes.h"
-//#include "section/dxf_objects.h"
-//#include "section/dxf_thumbnailimage.h"
-//#include "ft_view.h"
+
 #include "tables/dxf_layer.h"
 
 #include "drill/drill_form.h"
@@ -71,7 +66,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
         file_->lines().push_back(strValue);
         int multi = 0;
         while (strValue.endsWith("\\P")) {
-            file_->lines().push_back(in.readLine());
+            file_->lines().emplace_back(in.readLine());
             strValue.append("\n" + file_->lines().back());
             ++multi;
         }
@@ -158,7 +153,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return file_;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin) {
+std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         Drills retData;
         auto const dxfFile = static_cast<File*>(file);

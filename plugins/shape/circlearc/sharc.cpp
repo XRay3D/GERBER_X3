@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -67,12 +66,12 @@ void Arc::redraw() {
     for (int i = 0; i <= intSteps; i++) {
         const double theta = stepAngle * i;
         if (theta > angle) {
-            path.push_back(IntPoint(
+            path.emplace_back(IntPoint(
                 static_cast<cInt>(radius * cos(angle2)) + center.X,
                 static_cast<cInt>(radius * sin(angle2)) + center.Y));
             break;
         }
-        path.push_back(IntPoint(
+        path.emplace_back(IntPoint(
             static_cast<cInt>(radius * cos(angle1 + theta)) + center.X,
             static_cast<cInt>(radius * sin(angle1 + theta)) + center.Y));
     }

@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-//#include "gctypes.h"
+
 #include "file.h"
 #include "gc_utils.h"
 

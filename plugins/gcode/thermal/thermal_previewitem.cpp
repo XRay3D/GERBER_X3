@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -192,11 +191,11 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     return QGraphicsItem::itemChange(change, value);
 }
 
-ThermalPreviewItem::ThermalPreviewItem(const Paths* paths, const IntPoint pos, Tool& tool)
+ThermalPreviewItem::ThermalPreviewItem(const Paths& paths, const IntPoint pos, Tool& tool)
     : AbstractThermPrGi(tool)
     , paths_ {paths}
     , pos_ {pos} {
-    for (QPolygonF polygon : *paths) {
+    for (QPolygonF polygon : paths) {
         polygon.append(polygon.first());
         sourcePath.addPolygon(polygon);
     }
@@ -204,13 +203,13 @@ ThermalPreviewItem::ThermalPreviewItem(const Paths* paths, const IntPoint pos, T
 
 IntPoint ThermalPreviewItem::pos() const { return pos_; }
 
-Paths ThermalPreviewItem::paths() const { return *paths_; }
+Paths ThermalPreviewItem::paths() const { return paths_; }
 
 void ThermalPreviewItem::redraw() {
     if (double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
         ClipperOffset offset;
-        offset.AddPaths(*paths_, jtRound, etClosedPolygon);
+        offset.AddPaths(paths_, jtRound, etClosedPolygon);
         offset.Execute(cashedPath, diameter * uScale * 0.5); // toolpath
         offset.Clear();
         offset.AddPaths(cashedPath, jtMiter, etClosedLine);
@@ -226,8 +225,8 @@ void ThermalPreviewItem::redraw() {
         const auto rect(sourcePath.boundingRect());
         const IntPoint& center(rect.center());
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
-        const auto fp(sourcePath.toFillPolygons());
-        for (int i = 0; i < node_->count(); ++i) { // Gaps
+        const auto fp(sourcePath.toFillPolygons()); // FIXME not used
+        for (int i = 0; i < node_->count(); ++i) {  // Gaps
             ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
             offset.AddPath({center,
@@ -260,4 +259,8 @@ void ThermalPreviewItem::redraw() {
         changeColor();
     }
     update();
+}
+
+QRectF ThermalPreviewItem::boundingRect() const {
+    return painterPath.boundingRect().united(sourcePath.boundingRect());
 }

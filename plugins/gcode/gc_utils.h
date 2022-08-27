@@ -94,7 +94,7 @@ protected:
             if (skip)
                 skip = false;
             else
-                lines.push_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
+                lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
         }
         return lines;
     }

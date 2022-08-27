@@ -77,6 +77,20 @@ public:
     void setPenColorPtr(const QColor* penColor);
 
     virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
+    virtual void setPaths(Paths paths, int alternate = {}) {
+        auto t {transform()};
+        auto a {qRadiansToDegrees(asin(t.m12()))};
+        t = t.rotateRadians(-t.m12());
+        auto x {t.dx()};
+        auto y {t.dy()};
+        shape_ = {};
+        t = {};
+        t.translate(-x, -y);
+        t.rotate(-a);
+        for (auto&& path : paths)
+            shape_.addPolygon(t.map(path));
+        redraw();
+    }
     virtual void redraw() { }
 
     void setVisible(bool visible);

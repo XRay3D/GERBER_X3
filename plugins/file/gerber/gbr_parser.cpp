@@ -1,6 +1,5 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -387,7 +386,7 @@ void Parser::addPath() {
         state_.setType(Region);
         switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.push_back(GraphicObject(goId_++, state_, createPolygon(), file, path_));
+            file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, createPolygon(), file, path_));
             break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GraphicObject(goId_++, state_, createPolygon(), file, path_));
@@ -401,7 +400,7 @@ void Parser::addPath() {
         state_.setType(Line);
         switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.push_back(GraphicObject(goId_++, state_, createLine(), file, path_));
+            file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, createLine(), file, path_));
             break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, createLine(), file, path_));
@@ -432,11 +431,11 @@ void Parser::addFlash() {
     Paths paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->withHole())
-        paths.push_back(ap->drawDrill(state_));
+        paths.emplace_back(ap->drawDrill(state_));
 
     switch (abSrIdStack_.top().workingType) {
     case WorkingType::Normal:
-        file->graphicObjects_.push_back(GraphicObject(goId_++, state_, paths, file));
+        file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, paths, file));
         break;
     case WorkingType::StepRepeat:
         stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, paths, file));
@@ -520,7 +519,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     double delta_angle = da_sign[state_.interpolation()] * angle * 1.0 / steps;
     for (int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
-        points.push_back(IntPoint(
+        points.emplace_back(IntPoint(
             static_cast<cInt>(center.X + radius * cos(theta)),
             static_cast<cInt>(center.Y + radius * sin(theta))));
     }
@@ -745,7 +744,7 @@ void Parser::closeStepRepeat() {
                 TranslatePath(path, pt);
                 auto state = go.state();
                 state.setCurPos({state.curPos().X + pt.X, state.curPos().Y + pt.Y});
-                file->graphicObjects_.push_back(GraphicObject(goId_++, state, paths, go.gFile(), path));
+                file->graphicObjects_.emplace_back(GraphicObject(goId_++, state, paths, go.gFile(), path));
             }
         }
     }

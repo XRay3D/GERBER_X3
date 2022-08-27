@@ -16,6 +16,8 @@ class File;
 }
 
 class GiDataSolid final : public GraphicsItem {
+    Paths& paths_;
+
 public:
     explicit GiDataSolid(Paths& paths_, FileInterface* file);
     ~GiDataSolid() override;
@@ -26,6 +28,7 @@ public:
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
+    void setPaths(Paths paths, int alternate = {}) override;
     // GraphicsItem interface
     void changeColor() override;
 };

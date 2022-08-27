@@ -69,6 +69,7 @@ protected:
     QPushButton* pbClose;
     QPushButton* pbCreate;
     QWidget* content;
+    QGridLayout* grid;
 
 private:
     void cancel();

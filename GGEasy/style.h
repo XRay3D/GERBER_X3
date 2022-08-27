@@ -1,9 +1,5 @@
 //#pragma once
 
-//#include <QCommonStyle>
-//#include <QProxyStyle>
-//#include <QtGui>
-
 // class Style : public QProxyStyle {
 //     Q_OBJECT
 

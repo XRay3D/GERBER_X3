@@ -43,7 +43,7 @@ public:
     // public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
     // FilePlugin interface
-    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin) override;
+    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param = {}) override;
     void addToGcForm(FileInterface* file, QComboBox* cbx) override;
 
 private:

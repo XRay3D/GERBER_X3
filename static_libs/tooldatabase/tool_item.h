@@ -14,7 +14,7 @@
 class ToolItem {
 
 public:
-    ToolItem();
+    ToolItem() = default;
     ToolItem(int toolId);
     ToolItem(const ToolItem& item);
     ~ToolItem();
@@ -58,7 +58,7 @@ private:
     static inline bool deleteEnable_ = false;
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
-    mutable int toolId_ = 0;
     QString name_;
     QString note_;
+    mutable int toolId_ = 0;
 };

@@ -34,7 +34,7 @@ public:
 class MathParser {
 public:
     MathParser(VarMap* variables);
-    MathParser() { }
+    MathParser() = default;
     double getVariable(const QString& varName);
     double parse(const QString& s = {});
 
@@ -52,5 +52,5 @@ private:
     Result mulDiv(sv s);
     Result num(sv s);
     // Тут определяем все нашие функции, которыми мы можем пользоватся в формулах
-    Result processFunction(sv func, Result r);
+    Result processFunction(sv func, const Result& r);
 };
