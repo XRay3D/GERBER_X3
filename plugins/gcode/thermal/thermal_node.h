@@ -18,12 +18,14 @@
 #include <QModelIndex>
 #include <memory>
 
-class ThermalModel;
-class ThermalNode;
+namespace Thermal {
 
-class ThermalNodeI {
+class Model;
+class Node;
+
+class NodeI {
 public:
-    virtual ~ThermalNodeI() { }
+    virtual ~NodeI() { }
     virtual bool isChecked() const = 0;
     virtual void disable() = 0;
     virtual void enable() = 0;
@@ -34,23 +36,23 @@ public:
     virtual int count() const = 0;
 };
 
-class ThermalNode final : public ThermalNodeI {
+class Node final : public NodeI {
 public:
-    explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, ThermalModel* model);
-    explicit ThermalNode(const QIcon& icon, const QString& name, const ThParam& par, ThermalModel* model);
-    explicit ThermalNode(ThermalModel* model);
+    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, Model* model);
+    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
+    explicit Node(Model* model);
 
-    ~ThermalNode() override;
+    ~Node() override;
 
-    ThermalNode* child(int row) const;
+    Node* child(int row) const;
 
-    ThermalNode* parentItem();
+    Node* parentItem();
 
     int childCount() const;
 
     int row() const;
 
-    void append(ThermalNode* item);
+    void append(Node* item);
     void remove(int row);
 
     bool setData(const QModelIndex& index, const QVariant& value, int role);
@@ -69,8 +71,8 @@ public:
     void disable() override;
     void enable() override;
 
-    ThermalNode(const ThermalNode&) = delete;
-    ThermalNode& operator=(const ThermalNode&) = delete;
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
 
     bool isChecked() const override;
     QModelIndex index(int column = 0) const override;
@@ -87,11 +89,11 @@ private:
 
     AbstractThermPrGi* const item_;
 
-    ThermalNode* parent_ = nullptr;
-    mvector<std::shared_ptr<ThermalNode>> childs;
+    Node* parent_ = nullptr;
+    mvector<std::shared_ptr<Node>> childs;
     bool checked_ = false;
 
-    ThermalModel* const model; // static wrong from anotherr dll
+    Model* const model; // static wrong from anotherr dll
     static inline const Qt::CheckState chState[] {
         Qt::Unchecked,       // index 0
         Qt::Unchecked,       // index 1
@@ -99,3 +101,5 @@ private:
         Qt::PartiallyChecked // index 3
     };
 };
+
+}

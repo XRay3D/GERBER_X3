@@ -215,8 +215,8 @@ void Aperture::parse(const QStringList& list) {
         case FiducialPad:
             function_ = std::make_shared<struct FiducialPad>(function, list.mid(2));
             break;
-        case ThermalReliefPad:
-            function_ = std::make_shared<struct ThermalReliefPad>(function, list.mid(2));
+        case ReliefPad:
+            function_ = std::make_shared<struct ReliefPad>(function, list.mid(2));
             break;
         case WasherPad:
             function_ = std::make_shared<struct WasherPad>(function, list.mid(2));

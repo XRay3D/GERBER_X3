@@ -14,18 +14,19 @@
 
 class FileInterface;
 
-namespace GCode {
-class ThermalCreator : public Creator {
+namespace Thermal {
+
+class Creator : public ::GCode::Creator {
 public:
-    ThermalCreator();
-    ~ThermalCreator() override = default;
+    Creator();
+    ~Creator() override = default;
 
 private:
     void createThermal(FileInterface* file, const Tool& tool, const double depth);
 
 protected:
     void create() override; // Creator interface
-    GCodeType type() override { return Thermal; }
+    GCode::GCodeType type() override { return ::GCode::Thermal; }
 };
 
-} // namespace GCode
+} // namespace Thermal

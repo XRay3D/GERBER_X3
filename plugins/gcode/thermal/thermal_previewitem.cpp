@@ -27,6 +27,8 @@
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
 
+namespace Thermal {
+
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr(this)
     , pa1(this, "bodyColor")
@@ -191,7 +193,7 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     return QGraphicsItem::itemChange(change, value);
 }
 
-ThermalPreviewItem::ThermalPreviewItem(const Paths& paths, const IntPoint pos, Tool& tool)
+PreviewItem::PreviewItem(const Paths& paths, const IntPoint pos, Tool& tool)
     : AbstractThermPrGi(tool)
     , paths_ {paths}
     , pos_ {pos} {
@@ -201,11 +203,11 @@ ThermalPreviewItem::ThermalPreviewItem(const Paths& paths, const IntPoint pos, T
     }
 }
 
-IntPoint ThermalPreviewItem::pos() const { return pos_; }
+IntPoint PreviewItem::pos() const { return pos_; }
 
-Paths ThermalPreviewItem::paths() const { return paths_; }
+Paths PreviewItem::paths() const { return paths_; }
 
-void ThermalPreviewItem::redraw() {
+void PreviewItem::redraw() {
     if (double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
         ClipperOffset offset;
@@ -261,6 +263,8 @@ void ThermalPreviewItem::redraw() {
     update();
 }
 
-QRectF ThermalPreviewItem::boundingRect() const {
+QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
+}
+
 }

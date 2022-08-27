@@ -15,7 +15,9 @@
 
 #include <QIcon>
 
-QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const {
+namespace Thermal {
+
+QIcon Model::repaint(QColor color, const QIcon& icon) const {
     QImage image(icon.pixmap(24, 24).toImage());
     for (int x = 0; x < 24; ++x)
         for (int y = 0; y < 24; ++y) {
@@ -25,40 +27,40 @@ QIcon ThermalModel::repaint(QColor color, const QIcon& icon) const {
     return QIcon(QPixmap::fromImage(image));
 }
 
-ThermalModel::ThermalModel(QObject* parent)
+Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new ThermalNode(this)) {
+    , rootItem(new Node(this)) {
 }
 
-ThermalModel::~ThermalModel() { delete rootItem; }
+Model::~Model() { delete rootItem; }
 
-ThermalNode* ThermalModel::appendRow(const QIcon& icon, const QString& name, const ThParam& par) {
-    data_.push_back(new ThermalNode(icon, name, par, this));
+Node* Model::appendRow(const QIcon& icon, const QString& name, const ThParam& par) {
+    data_.push_back(new Node(icon, name, par, this));
     rootItem->append(data_.back());
     return data_.back();
 }
 
-int ThermalModel::rowCount(const QModelIndex& parent) const {
+int Model::rowCount(const QModelIndex& parent) const {
     if (parent.column() > 0)
         return 0;
     return getItem(parent)->childCount();
 }
 
-int ThermalModel::columnCount(const QModelIndex& /*parent*/) const { return 5; }
+int Model::columnCount(const QModelIndex& /*parent*/) const { return 5; }
 
-QModelIndex ThermalModel::index(int row, int column, const QModelIndex& parent) const {
-    ThermalNode* childItem = getItem(parent)->child(row);
+QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
+    Node* childItem = getItem(parent)->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
 }
 
-QModelIndex ThermalModel::parent(const QModelIndex& index) const {
+QModelIndex Model::parent(const QModelIndex& index) const {
 
     if (!index.isValid())
         return QModelIndex();
 
-    ThermalNode* parentItem = getItem(index)->parentItem();
+    Node* parentItem = getItem(index)->parentItem();
 
     if (parentItem == rootItem)
         return QModelIndex();
@@ -66,21 +68,21 @@ QModelIndex ThermalModel::parent(const QModelIndex& index) const {
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-QVariant ThermalModel::data(const QModelIndex& index, int role) const {
+QVariant Model::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
-    ThermalNode* item = getItem(index);
+    Node* item = getItem(index);
     return item->data(index, role);
 }
 
-bool ThermalModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     if (!index.isValid())
         return false;
     const bool result = getItem(index)->setData(index, value, role);
     return result;
 }
 
-QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
     static const QStringList horizontalLabel {tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|')};
     switch (role) {
     case Qt::DisplayRole:
@@ -93,17 +95,17 @@ QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int 
     }
 }
 
-Qt::ItemFlags ThermalModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     if (!index.isValid())
         return Qt::NoItemFlags;
-    ThermalNode* item = getItem(index);
+    Node* item = getItem(index);
     return item->flags(index);
 }
 
-bool ThermalModel::removeRows(int row, int count, const QModelIndex& parent) {
-    ThermalNode* item = nullptr;
+bool Model::removeRows(int row, int count, const QModelIndex& parent) {
+    Node* item = nullptr;
     if (parent.isValid())
-        item = static_cast<ThermalNode*>(parent.internalPointer());
+        item = static_cast<Node*>(parent.internalPointer());
     else
         return false;
     beginRemoveRows(parent, row, row + count - 1);
@@ -114,13 +116,15 @@ bool ThermalModel::removeRows(int row, int count, const QModelIndex& parent) {
     return true;
 }
 
-ThParam ThermalModel::thParam() { return data_.front()->getPar(); }
+ThParam Model::thParam() { return data_.front()->getPar(); }
 
-ThermalNode* ThermalModel::getItem(const QModelIndex& index) const {
+Node* Model::getItem(const QModelIndex& index) const {
     if (index.isValid()) {
-        auto* item = static_cast<ThermalNode*>(index.internalPointer());
+        auto* item = static_cast<Node*>(index.internalPointer());
         if (item)
             return item;
     }
     return rootItem;
+}
+
 }
