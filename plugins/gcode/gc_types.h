@@ -168,6 +168,7 @@ public:
         if (!params.contains(PocketIndex))
             params[PocketIndex] = 0;
     }
+
     GCodeParams(const Tool& tool, double depth, GCodeType type)
         : GCodeParams {} {
         tools.emplace_back(tool);
@@ -207,7 +208,7 @@ public:
 
 class Settings {
 protected:
-    static inline QString fileExtension_ = {"tap"};
+    static inline QString fileExtension_ {"tap"};
     static inline QString formatMilling_ {"G?X?Y?Z?F?S?"};
     static inline QString formatLaser_ {"G?X?Y?Z?F?S?"};
     static inline QString laserConstOn_ {"M3"};

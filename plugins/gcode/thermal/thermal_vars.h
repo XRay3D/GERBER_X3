@@ -38,4 +38,4 @@ using PreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
 using PreviewGiMapVal = std::map<QString, PreviewGiMapValVec>;
 using PreviewGiMap = std::map<int, PreviewGiMapVal>;
 
-}
+} // namespace Thermal

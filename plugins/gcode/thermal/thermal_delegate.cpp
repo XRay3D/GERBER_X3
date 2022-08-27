@@ -105,4 +105,4 @@ void Delegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QM
 
 void Delegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-}
+} // namespace Thermal
