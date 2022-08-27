@@ -31,12 +31,12 @@ enum class GiType {
     Path = QGraphicsItem::UserType + 200,
     Bridge,
 
-    Preview = QGraphicsItem::UserType + 300, // ThermalForm
+    Preview = QGraphicsItem::UserType + 300, // Form
     // PrSlot,                                    // DrillForm
     // PrDrill,                                   // DrillForm
     // PrApetrure,                                // DrillForm
 
-    Error = QGraphicsItem::UserType + 400, // ThermalForm
+    Error = QGraphicsItem::UserType + 400, // Form
 
     ShCircle = QGraphicsItem::UserType + 500,
     ShRectangle,

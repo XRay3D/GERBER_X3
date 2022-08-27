@@ -14,18 +14,18 @@
 #include "gc_file.h"
 #include "project.h"
 
-namespace GCode {
+namespace Thermal {
 
-ThermalCreator::ThermalCreator() { }
+Creator::Creator() { }
 
-void ThermalCreator::create() {
+void Creator::create() {
     createThermal(
-        App::project()->file(gcp_.params[GCodeParams::FileId].toInt()),
+        App::project()->file(gcp_.params[::GCode::GCodeParams::FileId].toInt()),
         gcp_.tools.front(),
-        gcp_.params[GCodeParams::Depth].toDouble());
+        gcp_.params[::GCode::GCodeParams::Depth].toDouble());
 }
 
-void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth) {
+void Creator::createThermal(FileInterface* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
 
@@ -36,9 +36,9 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
             offset.Execute(returnPs, dOffset);
         }
         // fix direction
-        if (gcp_.side() == Outer && !gcp_.convent())
+        if (gcp_.side() == ::GCode::Outer && !gcp_.convent())
             ReversePaths(returnPs);
-        else if (gcp_.side() == Inner && gcp_.convent())
+        else if (gcp_.side() == ::GCode::Inner && gcp_.convent())
             ReversePaths(returnPs);
 
         for (Path& path : returnPs)
@@ -63,7 +63,7 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
             offset.Execute(framePaths, dOffset - 0.005 * uScale);
             clipper.AddPaths(framePaths, ptSubject, true);
         }
-        if (!gcp_.params[GCodeParams::IgnoreCopper].toInt()) {
+        if (!gcp_.params[::GCode::GCodeParams::IgnoreCopper].toInt()) {
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 //                if (go->closed()) {
@@ -98,11 +98,11 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = Thermal;
+        gcp_.gcType = ::GCode::Thermal;
         file_ = new GCode::File(sortB(returnPss), std::move(gcp_));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
 
-} // namespace GCode
+} // namespace Thermal

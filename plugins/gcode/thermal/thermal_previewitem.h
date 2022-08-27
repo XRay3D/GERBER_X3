@@ -18,9 +18,12 @@
 
 #include <gerber/gbr_types.h>
 
-// class QParallelAnimationGroup;
-class ThermalNodeI;
 class Tool;
+
+namespace Thermal {
+
+// class QParallelAnimationGroup;
+class NodeI;
 
 class AbstractThermPrGi : public QGraphicsObject {
     Q_OBJECT
@@ -32,7 +35,7 @@ class AbstractThermPrGi : public QGraphicsObject {
     void setBodyColor(const QColor& c) { bodyColor_ = c, update(); }
     QColor pathColor() { return pathColor_; }
     void setPathColor(const QColor& c) { pathColor_ = c, update(); }
-    friend class ThermalNode;
+    friend class Node;
 
     QParallelAnimationGroup agr;
     QPropertyAnimation pa1;
@@ -119,18 +122,18 @@ protected:
     Paths cashedPath;
     Paths cashedFrame;
 
-    ThermalNodeI* node_ = nullptr;
+    NodeI* node_ = nullptr;
 
     double diameter;
     int isEmpty = -1;
 };
 
-class ThermalPreviewItem final : public AbstractThermPrGi {
+class PreviewItem final : public AbstractThermPrGi {
     const Paths& paths_;
     const IntPoint pos_;
 
 public:
-    ThermalPreviewItem(const Paths& paths, const IntPoint pos, Tool& tool);
+    PreviewItem(const Paths& paths, const IntPoint pos, Tool& tool);
     IntPoint pos() const override;
     Paths paths() const override;
     void redraw() override;
@@ -139,3 +142,5 @@ public:
 public:
     QRectF boundingRect() const override;
 };
+
+} // namespace Thermal

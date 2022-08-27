@@ -14,7 +14,7 @@
 #include "qparallelanimationgroup.h"
 
 class GiAbstractPreview : public QGraphicsObject {
-    friend class ThermalNode;
+    friend class Node;
 
     Q_OBJECT
 

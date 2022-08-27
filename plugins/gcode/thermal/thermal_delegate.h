@@ -12,11 +12,13 @@
 
 #include <QStyledItemDelegate>
 
-class ThermalDelegate : public QStyledItemDelegate {
+namespace Thermal {
+
+class Delegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
-    ThermalDelegate(QObject* parent = nullptr);
-    ~ThermalDelegate() override = default;
+    Delegate(QObject* parent = nullptr);
+    ~Delegate() override = default;
 
 public:
     // QAbstractItemDelegate interface
@@ -26,3 +28,5 @@ public:
 
     void emitCommitData();
 };
+
+}

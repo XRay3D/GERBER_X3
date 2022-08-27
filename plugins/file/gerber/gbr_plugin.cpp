@@ -97,8 +97,8 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
         return retData;
     }
     if (plugin->type() == ::GCode::Thermal) {
-        auto param_ = std::any_cast<ThParam2>(param);
-        ThermalPreviewGiMap sourcePreview;
+        auto param_ = std::any_cast<Thermal::ThParam2>(param);
+        Thermal::PreviewGiMap sourcePreview;
         auto gbrFile = static_cast<File*>(file);
 
         auto testArea = [&param_](const Paths& paths) {
@@ -111,7 +111,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
         const ApertureMap& apertures_ = *gbrFile->apertures();
 
         if (param_.aperture) {
-            std::unordered_map<int, ThermalPreviewGiMapValVec*> thermalNodes;
+            std::unordered_map<int, Thermal::PreviewGiMapValVec*> thermalNodes;
 
             for (const auto [dCode, aperture] : apertures_)
                 if (aperture->flashed() && !thermalNodes.contains(dCode) && testArea(aperture->draw({})))
@@ -374,8 +374,8 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 //    return giPeview;
 //}
 
-// FIXME ThermalPreviewGiMap Plugin::createThermalPreviewGi(FileInterface* file, const ThParam2& param) {
-//    ThermalPreviewGiMap sourcePreview;
+// FIXME PreviewGiMap Plugin::createPreviewGi(FileInterface* file, const ThParam2& param) {
+//    PreviewGiMap sourcePreview;
 //    auto gbrFile = static_cast<File*>(file);
 
 //    auto testArea = [&param](const Paths& paths) {

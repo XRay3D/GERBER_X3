@@ -218,13 +218,13 @@ public:
         : AbstrAperFunc(function) {
     }
 };
-struct ThermalReliefPad : AbstrAperFunc {
+struct ReliefPad : AbstrAperFunc {
     Q_GADGET
     /**/
     /*Тепловая разгрузочная площадка, соединенная с окружающей медью, ограничивая тепловой поток.*/
 
 public:
-    ThermalReliefPad(Aperture::Function function, const QStringList& /*list*/)
+    ReliefPad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };

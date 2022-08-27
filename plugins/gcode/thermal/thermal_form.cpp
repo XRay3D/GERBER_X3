@@ -11,33 +11,22 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal_form.h"
+#include "ui_thermalform.h"
+
 #include "thermal.h"
 #include "thermal_delegate.h"
 #include "thermal_model.h"
 #include "thermal_node.h"
 #include "thermal_previewitem.h"
-#include "ui_thermalform.h"
 
-#include "myclipper.h"
-#include "project.h"
 #include "scene.h"
-#include "settings.h"
 
-#include <QCheckBox>
-#include <QDockWidget>
-#include <QFuture>
-#include <QItemSelection>
-#include <QMessageBox>
-#include <QPicture>
-#include <QProgressDialog>
-#include <QTimer>
+namespace Thermal {
 
 enum { Size = 24 };
 
-extern QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
-
-ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::ThermalCreator, parent)
+Form::Form(GCodePlugin* plugin, QWidget* parent)
+    : FormsUtil(plugin, new Creator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
 
@@ -45,7 +34,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     grid->setRowStretch(8, 0);
 
     MySettings settings;
-    settings.beginGroup("ThermalForm");
+    settings.beginGroup("Form");
     settings.getValue(par.angle, "angle", 0.0);
     settings.getValue(par.count, "count", 4);
     settings.getValue(par.tickness, "tickness", 0.5);
@@ -63,8 +52,8 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
         button->setIconSize({16, 16});
 
     connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ThermalForm::updateName);
+    connect(pbCreate, &QPushButton::clicked, this, &Form::createFile);
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
 
     ui->treeView->setIconSize(QSize(Size, Size));
     connect(ui->treeView, &QTreeView::clicked, ui->treeView, qOverload<const QModelIndex&>(&QTreeView::edit));
@@ -95,9 +84,9 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
     ui->treeView->hideColumn(1);
-    ui->treeView->setItemDelegate(new ThermalDelegate(this));
+    ui->treeView->setItemDelegate(new Delegate(this));
     {
-        ui->treeView->setIconSize(QSize(24, 24));
+        ui->treeView->setIconSize({Size, Size});
         const int w = ui->treeView->indentation();
         const int h = Size;
         QImage i(w, h, QImage::Format_ARGB32);
@@ -122,9 +111,9 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
     }
 }
 
-ThermalForm::~ThermalForm() {
+Form::~Form() {
     MySettings settings;
-    settings.beginGroup("ThermalForm");
+    settings.beginGroup("Form");
     if (model && model->data_.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
@@ -140,8 +129,8 @@ ThermalForm::~ThermalForm() {
     delete ui;
 }
 
-void ThermalForm::updateFiles() {
-    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+void Form::updateFiles() {
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
 
     ui->cbxFile->clear();
 
@@ -150,10 +139,10 @@ void ThermalForm::updateFiles() {
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
 
-    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
 }
 
-bool ThermalForm::canToShow() {
+bool Form::canToShow() {
     QComboBox cbx;
     for (auto file : App::project()->files(FileType::Gerber)) {
         App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
@@ -165,9 +154,9 @@ bool ThermalForm::canToShow() {
     return false;
 }
 
-void ThermalForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
-void ThermalForm::createFile() {
+void Form::createFile() {
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -197,18 +186,18 @@ void ThermalForm::createFile() {
     emit createToolpath();
 }
 
-void ThermalForm::updateName() {
+void Form::updateName() {
     tool = ui->toolHolder->tool();
     leName->setText(tr("Thermal"));
     redraw();
 }
 
-void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
+void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
     FileInterface* file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
     createTPI(file);
 }
 
-void ThermalForm::createTPI(FileInterface* file) {
+void Form::createTPI(FileInterface* file) {
     if (!file)
         file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
     items_.clear();
@@ -216,7 +205,7 @@ void ThermalForm::createTPI(FileInterface* file) {
     if (model)
         delete ui->treeView->model();
 
-    model = new ThermalModel(ui->treeView);
+    model = new Model(ui->treeView);
     model->appendRow(QIcon(), tr("All"), par);
 
     boardSide = file->side();
@@ -228,7 +217,7 @@ void ThermalForm::createTPI(FileInterface* file) {
         ui->dsbxAreaMax->value() * uScale * uScale,
         ui->dsbxAreaMin->value() * uScale * uScale};
 
-    thPaths = std::any_cast<ThermalPreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal), tp2));
+    thPaths = std::any_cast<PreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal), tp2));
 
     int count {};
     int ctr {};
@@ -244,10 +233,10 @@ void ThermalForm::createTPI(FileInterface* file) {
                 continue;
             auto node = model->appendRow(drawIcon(valVec.front().first), keyId, par);
             for (const auto& [paths, pos] : valVec) {
-                auto tprItem = items_.emplace_back(std::make_shared<ThermalPreviewItem>(paths, pos, tool));
+                auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new ThermalNode(drawIcon(paths), "", par, pos, tprItem.get(), model));
+                node->append(new Node(drawIcon(paths), "", par, pos, tprItem.get(), model));
             }
             qApp->processEvents();
             pd.setValue(++ctr);
@@ -256,18 +245,18 @@ void ThermalForm::createTPI(FileInterface* file) {
 
     for (auto& item : items_) {
         App::scene()->addItem(item.get());
-        connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &ThermalForm::setSelection);
+        connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
     }
 
     ui->treeView->setModel(model);
-    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::onSelectionChanged);
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Form::onSelectionChanged);
     if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin"))
         ui->treeView->expandAll();
 }
 
-void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+void Form::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     for (const auto& index : selected.indexes()) {
-        auto* node = static_cast<ThermalNode*>(index.internalPointer());
+        auto* node = static_cast<Node*>(index.internalPointer());
         auto* item = node->item();
         if (item)
             item->setSelected(true);
@@ -278,7 +267,7 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
         }
     }
     for (const auto& index : deselected.indexes()) {
-        auto* node = static_cast<ThermalNode*>(index.internalPointer());
+        auto* node = static_cast<Node*>(index.internalPointer());
         auto* item = node->item();
         if (item)
             item->setSelected(false);
@@ -290,35 +279,37 @@ void ThermalForm::onSelectionChanged(const QItemSelection& selected, const QItem
     }
 }
 
-void ThermalForm::setSelection(const QModelIndex& selected, const QModelIndex& deselected) {
+void Form::setSelection(const QModelIndex& selected, const QModelIndex& deselected) {
     if (selected.isValid())
         ui->treeView->selectionModel()->select(selected, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     if (deselected.isValid())
         ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
-void ThermalForm::redraw() {
+void Form::redraw() {
     for (auto item : items_)
         item->redraw();
 }
 
-void ThermalForm::on_dsbxDepth_valueChanged(double arg1) {
+void Form::on_dsbxDepth_valueChanged(double arg1) {
     depth_ = arg1;
     redraw();
 }
 
-void ThermalForm::editFile(GCode::File* /*file*/) { }
+void Form::editFile(GCode::File* /*file*/) { }
 
-void ThermalForm::on_dsbxAreaMin_editingFinished() {
+void Form::on_dsbxAreaMin_editingFinished() {
     if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
         lastMin = ui->dsbxAreaMin->value();
         createTPI(nullptr);
     }
 }
 
-void ThermalForm::on_dsbxAreaMax_editingFinished() {
+void Form::on_dsbxAreaMax_editingFinished() {
     if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
         lastMax = ui->dsbxAreaMax->value();
         createTPI(nullptr);
     }
 }
+
+} // namespace Thermal

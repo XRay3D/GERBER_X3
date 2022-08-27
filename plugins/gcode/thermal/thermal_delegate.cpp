@@ -16,59 +16,61 @@
 
 #include <QSpinBox>
 
-ThermalDelegate::ThermalDelegate(QObject* parent)
+namespace Thermal {
+
+Delegate::Delegate(QObject* parent)
     : QStyledItemDelegate(parent) {
 }
 
-QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     switch (index.column()) {
-    case ThermalModel::Name:
-    case ThermalModel::Position:
+    case Model::Name:
+    case Model::Position:
         break;
-    case ThermalModel::GapAngle: {
+    case Model::GapAngle: {
         auto* dsbx = new DoubleSpinBox(parent);
         dsbx->setRange(0, 360);
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
+        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Delegate::emitCommitData);
         return dsbx;
     }
-    case ThermalModel::apThickness: {
+    case Model::apThickness: {
         auto* dsbx = new DoubleSpinBox(parent);
         dsbx->setRange(0, 10);
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
+        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Delegate::emitCommitData);
         return dsbx;
     }
-    case ThermalModel::GapCount: {
+    case Model::GapCount: {
         auto* sbx = new QSpinBox(parent);
         sbx->setRange(0, 16);
         sbx->setSingleStep(1);
         sbx->setAlignment(Qt::AlignCenter);
-        connect(sbx, qOverload<int>(&QSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
+        connect(sbx, qOverload<int>(&QSpinBox::valueChanged), this, &Delegate::emitCommitData);
         return sbx;
     }
     }
     return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
-void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
+void Delegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     switch (index.column()) {
-    case ThermalModel::Name:
-    case ThermalModel::Position:
+    case Model::Name:
+    case Model::Position:
         return;
-    case ThermalModel::GapAngle:
-    case ThermalModel::apThickness: {
+    case Model::GapAngle:
+    case Model::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
         dsbx->setValue(index.data(Qt::EditRole).toDouble());
         return;
     }
-    case ThermalModel::GapCount: {
+    case Model::GapCount: {
         auto* sbx = qobject_cast<QSpinBox*>(editor);
         if (!sbx)
             return;
@@ -78,20 +80,20 @@ void ThermalDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
     }
 }
 
-void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
+void Delegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     switch (index.column()) {
-    case ThermalModel::Name:
-    case ThermalModel::Position:
+    case Model::Name:
+    case Model::Position:
         return;
-    case ThermalModel::GapAngle:
-    case ThermalModel::apThickness: {
+    case Model::GapAngle:
+    case Model::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
         if (!dsbx)
             return;
         model->setData(index, dsbx->value());
         return;
     }
-    case ThermalModel::GapCount: {
+    case Model::GapCount: {
         auto* sbx = qobject_cast<QSpinBox*>(editor);
         if (!sbx)
             return;
@@ -101,4 +103,6 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
     }
 }
 
-void ThermalDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+void Delegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+
+}

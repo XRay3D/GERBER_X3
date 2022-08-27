@@ -15,17 +15,19 @@
 #include <QAbstractItemModel>
 #include <mvector.h>
 
-class ThermalNode;
+namespace Thermal {
 
-class ThermalModel : public QAbstractItemModel {
+class Node;
+
+class Model : public QAbstractItemModel {
     Q_OBJECT
-    friend class ThermalForm;
-    friend class ThermalNode;
+    friend class Form;
+    friend class Node;
 
     QIcon repaint(QColor color, const QIcon& icon) const;
 
-    ThermalNode* const rootItem = nullptr;
-    mvector<ThermalNode*> data_;
+    Node* const rootItem = nullptr;
+    mvector<Node*> data_;
 
 public:
     enum {
@@ -36,10 +38,10 @@ public:
         GapCount,
     };
 
-    explicit ThermalModel(QObject* parent = nullptr);
-    ~ThermalModel() override;
+    explicit Model(QObject* parent = nullptr);
+    ~Model() override;
 
-    virtual ThermalNode* appendRow(const QIcon& icon, const QString& name, const ThParam& par);
+    virtual Node* appendRow(const QIcon& icon, const QString& name, const ThParam& par);
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent) const override;
@@ -54,5 +56,7 @@ public:
     ThParam thParam();
 
 private:
-    ThermalNode* getItem(const QModelIndex& index) const;
+    Node* getItem(const QModelIndex& index) const;
 };
+
+}

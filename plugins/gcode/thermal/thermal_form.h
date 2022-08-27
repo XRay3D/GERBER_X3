@@ -12,8 +12,7 @@
 #include "gc_formsutil.h"
 #include "thermal_vars.h"
 
-class ThermalModel;
-class AbstractThermPrGi;
+class Model;
 class QCheckBox;
 class QItemSelection;
 
@@ -25,12 +24,16 @@ namespace Gerber {
 class AbstractAperture;
 }
 
-class ThermalForm : public FormsUtil {
+namespace Thermal {
+
+class AbstractThermPrGi;
+
+class Form : public FormsUtil {
     Q_OBJECT
 
 public:
-    explicit ThermalForm(GCodePlugin* plugin, QWidget* parent = nullptr);
-    ~ThermalForm() override;
+    explicit Form(GCodePlugin* plugin, QWidget* parent = nullptr);
+    ~Form() override;
 
     void updateFiles();
     static bool canToShow();
@@ -50,9 +53,9 @@ private:
     void createTPI(FileInterface* file);
 
     mvector<std::shared_ptr<AbstractThermPrGi>> items_;
-    ThermalPreviewGiMap thPaths;
+    PreviewGiMap thPaths;
 
-    ThermalModel* model = nullptr;
+    Model* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void setSelection(const QModelIndex& selected, const QModelIndex& deselected);
 
@@ -86,7 +89,9 @@ class GCPluginImpl final : public GCodePlugin {
 public:
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
-    QWidget* createForm() override { return new ThermalForm(this); };
-    bool canToShow() const { return ThermalForm::canToShow(); }
+    QWidget* createForm() override { return new Form(this); };
+    bool canToShow() const override { return Form::canToShow(); }
     int type() const override { return GCode::Thermal; }
 };
+
+} // namespace Thermal

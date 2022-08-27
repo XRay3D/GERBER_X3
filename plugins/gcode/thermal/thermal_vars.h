@@ -16,13 +16,15 @@
 #include <map>
 #include <utility>
 
+namespace Thermal {
+
 struct ThParam {
     double angle = 0.0;
     double tickness = 0.5;
     int count = 4;
 };
 
-class ThermalModel;
+class Model;
 
 struct ThParam2 {
     bool aperture = false;
@@ -32,7 +34,8 @@ struct ThParam2 {
     double areaMin = 0.0;
 };
 
-using ThermalPreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
-using ThermalPreviewGiMapVal = std::map<QString, ThermalPreviewGiMapValVec>;
-using ThermalPreviewGiMap = std::map<int, ThermalPreviewGiMapVal>;
+using PreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
+using PreviewGiMapVal = std::map<QString, PreviewGiMapValVec>;
+using PreviewGiMap = std::map<int, PreviewGiMapVal>;
 
+}

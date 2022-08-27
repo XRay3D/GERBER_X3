@@ -176,7 +176,7 @@ namespace Attr { // Attributes
             TestPad,
             CastellatedPad,
             FiducialPad,
-            ThermalReliefPad,
+            ReliefPad,
             WasherPad,
             AntiPad,
             OtherPad,
