@@ -18,22 +18,22 @@ namespace Gerber::Attr {
 
 File::StdAttr File::toStdAttr(const QString& key) {
     return static_cast<StdAttr>(
-        staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
+        staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data()));
 }
 
 File::ePart File::toPart(const QString& key) {
     return static_cast<ePart>(
-        staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
+        staticMetaObject.enumerator(1).keyToValue(key.toUtf8().data()));
 }
 
 File::eFilePolarity File::toFilePolarityValue(const QString& key) {
     return static_cast<eFilePolarity>(
-        staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().data()));
+        staticMetaObject.enumerator(2).keyToValue(key.toUtf8().data()));
 }
 
 File::Function File::toFunction(const QString& key) {
     return static_cast<Function>(
-        staticMetaObject.enumerator(3).keyToValue(key.toLocal8Bit().data()));
+        staticMetaObject.enumerator(3).keyToValue(key.toUtf8().data()));
 }
 
 void File::parse(const QStringList& list) {
@@ -153,14 +153,14 @@ void File::parse(const QStringList& list) {
 /// \param key
 /// \return
 ///
-int Aperture::value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+int Aperture::value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data()); }
 
 Aperture::StdAttr Aperture::toStdAttr(const QString& key) {
-    return static_cast<StdAttr>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
+    return static_cast<StdAttr>(staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data()));
 }
 
 Aperture::Function Aperture::toFunction(const QString& key) {
-    return static_cast<Function>(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().data()));
+    return static_cast<Function>(staticMetaObject.enumerator(1).keyToValue(key.toUtf8().data()));
 }
 
 void Aperture::parse(const QStringList& list) {

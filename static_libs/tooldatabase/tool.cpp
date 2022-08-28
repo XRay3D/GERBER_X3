@@ -233,8 +233,8 @@ size_t Tool::hash() const {
         return hash_;
 
     QByteArray hashData;
-    hashData.push_back(name_.toLocal8Bit());
-    hashData.push_back(note_.toLocal8Bit());
+    hashData.push_back(name_.toUtf8());
+    hashData.push_back(note_.toUtf8());
     auto push_back = [&hashData](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         hashData.append(reinterpret_cast<const char*>(&arg), sizeof(T));

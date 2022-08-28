@@ -35,7 +35,7 @@ public:
         Inr,
     };
     Q_ENUM(Side)
-    static Side toSide(const QString& str) { return Side(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
+    static Side toSide(const QString& str) { return Side(staticMetaObject.enumerator(0).keyToValue(str.toUtf8().data())); }
 
     enum class Layer {
         Null,
@@ -105,7 +105,7 @@ public:
         L64
     };
     Q_ENUM(Layer)
-    static Layer toLayer(const QString& str) { return Layer(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
+    static Layer toLayer(const QString& str) { return Layer(staticMetaObject.enumerator(1).keyToValue(str.toUtf8().data())); }
 
     AbstrFileFunc(File::Function function);
     const File::Function function;
@@ -116,7 +116,7 @@ public:
 ///
 struct Copper : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /* L<p>,(Top|Inr|Bot)[,<type>] */
     // Проводник или слой меди.
     // L<p> (p - целое число> 0) указывает номер физического медного сллоя.
@@ -137,7 +137,7 @@ public:
         Hatched
     };
     Q_ENUM(Type)
-    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
+    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toUtf8().data())); }
 
     Copper(File::Function function, const QStringList& list);
     const Layer layer;
@@ -149,7 +149,7 @@ public:
 ///
 struct ArrayDrawing : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*
      * Чертеж массива (бисквит, монтажный щит, отгрузочный щит, заказчик).
      * A drawing of the array (biscuit, assembly panel, shipment panel, customer panel).
@@ -168,7 +168,7 @@ public:
 ///
 struct AssemblyDrawing : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)
                Вспомогательный чертеж с расположением и позиционными обозначениями компонентов.
                Он в основном используется при сборке печатных плат. */
@@ -183,7 +183,7 @@ public:
 ///
 struct Component : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*L<p>,(Top|Bot) A component layer.
                 Слой с информацией о компонентах.
                 L<p> Целое число p - это номер слоя меди, к которому прикреплены компоненты, описанные в этом файле.
@@ -204,7 +204,7 @@ public:
 ///
 struct Depthrout : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)
                 Area that must be routed to a given depth rather than going through the whole board. */
 
@@ -218,7 +218,7 @@ public:
 ///
 struct Drillmap : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*
                A drawing with the locations of the drilled holes. It often also contains the hole sizes, tolerances and plated/non-plated info. */
 
@@ -232,7 +232,7 @@ public:
 ///
 struct FabricationDrawing : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*
                A drawing with additional information for the fabrication of the bare PCB: the location of holes and slots, the board outline, sizes and tolerances, layer stack, material, finish choice, etc. */
 
@@ -246,7 +246,7 @@ public:
 ///
 struct Glue : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)
                Glue spots used to fix components to the board prior to soldering. */
 
@@ -260,7 +260,7 @@ public:
 ///
 struct Legend : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)[,<index>]*/ /*
             Сверху паяльной маски напечатана легенда, показывающая, какой компонент и где находится.
             A.k.a. «Шелк» или «шелкография».
@@ -277,7 +277,7 @@ public:
 ///
 struct NonPlated : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*i,j,(NPTH|Blind|Buried) [,<label>]*/ /*
      Non-plated drill/rout data, span from copper layer i to layer j. The from/to order is not significant. The (NPTH|Blind|Buried) field is mandatory.
     The label is optional. If present it must take one of the following values: Drill, Rout or Mixed. */
@@ -290,7 +290,7 @@ public:
         Buried
     };
     Q_ENUM(Type)
-    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
+    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toUtf8().data())); }
 
     enum class Label {
         Null = -1,
@@ -299,7 +299,7 @@ public:
         Mixed
     };
     Q_ENUM(Label)
-    static Label toLabel(const QString& str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
+    static Label toLabel(const QString& str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toUtf8().data())); }
 
     NonPlated(File::Function function, const QStringList& list);
     const int layerFrom;
@@ -312,7 +312,7 @@ public:
 ///
 struct Other : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*<mandatory field>
                 The value ‘Other’ is to be used if none of the values above fits. By putting ‘Other’ rather than simply omitting the file function attribute it is clear the file has none of the standard functions, already useful information. Do not abuse standard values for a file with a vaguely similar function – use ‘Other’ to keep the function value clean and reliable.
                 The mandatory field informally describes the file function.*/
@@ -327,7 +327,7 @@ public:
 ///
 struct OtherDrawing : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*<mandatory field>
                 Any other drawing than the 4 ones above. The mandatory field informally describes its topic. */
     // Other files
@@ -341,7 +341,7 @@ public:
 ///
 struct Pads : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)
                 A file containing only the pads (SMD, BGA, component, …). Not needed in a fabrication data set. */
 
@@ -355,7 +355,7 @@ public:
 ///
 struct Paste : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)*/ /*  Места, где необходимо нанести паяльную пасту. */
 
 public:
@@ -368,7 +368,7 @@ public:
 ///
 struct Plated : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*i,j,(PTH|Blind|Buried)[,<label>]*/
     //    Данные сверления / фрезерования с покрытием от слоя меди i до слоя j.
     //    От / до заказа не имеет значения. Поле (PTH | Blind | Buried) является обязательным.
@@ -383,7 +383,7 @@ public:
         Buried
     };
     Q_ENUM(Type)
-    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
+    static Type toType(const QString& str) { return Type(staticMetaObject.enumerator(0).keyToValue(str.toUtf8().data())); }
 
     enum class Label {
         Null = -1,
@@ -392,7 +392,7 @@ public:
         Mixed
     };
     Q_ENUM(Label)
-    static Label toLabel(const QString& str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toLocal8Bit().data())); }
+    static Label toLabel(const QString& str) { return Label(staticMetaObject.enumerator(1).keyToValue(str.toUtf8().data())); }
 
     Plated(File::Function function, const QStringList& list);
     const int layerFrom;
@@ -405,7 +405,7 @@ public:
 ///
 struct Profile : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(P|NP)*/
     /*
     Файл, содержащий профиль платы (или схему) и только профиль платы.
@@ -419,7 +419,7 @@ public:
         NP
     };
     Q_ENUM(EdgePlated)
-    static EdgePlated toEdgePlated(const QString& str) { return EdgePlated(staticMetaObject.enumerator(0).keyToValue(str.toLocal8Bit().data())); }
+    static EdgePlated toEdgePlated(const QString& str) { return EdgePlated(staticMetaObject.enumerator(0).keyToValue(str.toUtf8().data())); }
 
     Profile(File::Function function, const QStringList& list);
     const EdgePlated plated;
@@ -429,7 +429,7 @@ public:
 ///
 struct Mask : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*(Top|Bot)[,<index>]*/
     /*
             Паяльная маска или припой резист.
@@ -468,7 +468,7 @@ public:
 ///
 struct Vcut : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*[,(Top|Bot)]
                Contains the lines that must be v-cut. (V-cutting is also called scoring.)
                If the optional attachment (Top|Bot) is not present the scoring lines are identical on top and bottom – this is the normal case. In the exceptional case scoring is different on top and bottom two files must be supplied, one with Top and the other with Bot. */
@@ -483,7 +483,7 @@ public:
 ///
 struct Vcutmap : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*
                A drawing with v-cut or scoring information. */
 
@@ -497,7 +497,7 @@ public:
 ///
 struct Viafill : AbstrFileFunc {
     Q_GADGET
-    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toLocal8Bit().data()); }
+    static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*
                Contains the via’s that must be filled. It is however recommended to specify the filled via’s with the optional field in the .AperFunction ViaDrill. */
 

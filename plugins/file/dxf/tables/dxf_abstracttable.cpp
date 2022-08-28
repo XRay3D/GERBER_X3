@@ -57,7 +57,7 @@ void AbstractTable::parse(CodeData& code) {
 AbstractTable::Type AbstractTable::toType(const QString& key) {
     return static_cast<Type>(staticMetaObject
                                  .enumerator(0)
-                                 .keyToValue(key.toLocal8Bit().toUpper().data()));
+                                 .keyToValue(key.toUtf8().toUpper().data()));
 }
 
 } // namespace Dxf

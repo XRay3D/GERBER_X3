@@ -13,17 +13,17 @@
 #include "gbrcomp_onent.h"
 #include "gbr_types.h"
 
-namespace Gerber {
+namespace Gerber::Comp {
 
 bool Component::setMountType(const QString& key) {
-    int val = staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
+    int val = staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data());
     mount_ = static_cast<MountType>(val);
     return val > -1 ? true : false;
 }
 
-int Component::value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().mid(0, 1).data()); }
+int Component::value1(const QString& key) { return staticMetaObject.enumerator(1).keyToValue(key.toUtf8().mid(0, 1).data()); }
 
-int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toLocal8Bit().mid(1).data()); }
+int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toUtf8().mid(1).data()); }
 
 bool Component::setData(int key, const QStringList& data) {
     bool fl = false;
