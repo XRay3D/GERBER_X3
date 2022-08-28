@@ -13,23 +13,19 @@
 #include "gbrcomp_dialog.h"
 #include "gbrcomp_view.h"
 
-#include "app.h"
-#include "gbr_file.h"
-#include "project.h"
-#include <QDebug>
 #include <QSettings>
 #include <QtWidgets>
 #include <scene.h>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-ComponentsDialog::ComponentsDialog(QWidget* parent)
+Dialog::Dialog(QWidget* parent)
     : QDialog(parent) {
     setupUi(this);
     graphicsView->setScene(scene_ = new QGraphicsScene(graphicsView));
     graphicsView->scale(+1, -1);
     QSettings settings;
-    settings.beginGroup("ComponentsDialog");
+    settings.beginGroup("Dialog");
     restoreGeometry(settings.value("geometry").toByteArray());
     splitter->restoreState(settings.value("splitter").toByteArray());
     componentsView->header()->restoreState(settings.value("header").toByteArray());
@@ -37,26 +33,26 @@ ComponentsDialog::ComponentsDialog(QWidget* parent)
     connect(splitter, &QSplitter::splitterMoved, [this] { resizeEvent(); });
 }
 
-ComponentsDialog::~ComponentsDialog() {
+Dialog::~Dialog() {
     QSettings settings;
-    settings.beginGroup("ComponentsDialog");
+    settings.beginGroup("Dialog");
     settings.setValue("geometry", saveGeometry());
     settings.setValue("splitter", splitter->saveState());
     settings.setValue("header", componentsView->header()->saveState());
 }
 
-void ComponentsDialog::setFile(int fileId) { componentsView->setFile(fileId); }
+void Dialog::setFile(int fileId) { componentsView->setFile(fileId); }
 
-void ComponentsDialog::setupUi(QDialog* dialog) {
+void Dialog::setupUi(QDialog* dialog) {
     if (dialog->objectName().isEmpty())
-        dialog->setObjectName(QString::fromUtf8("ComponentsDialog"));
+        dialog->setObjectName(QString::fromUtf8("Dialog"));
     dialog->resize(800, 600);
 
     splitter = new QSplitter(dialog);
     splitter->setObjectName(QString::fromUtf8("splitter"));
     splitter->setOrientation(Qt::Horizontal);
 
-    componentsView = new ComponentsView(splitter);
+    componentsView = new sView(splitter);
     componentsView->setObjectName(QString::fromUtf8("componentsView"));
 
     graphicsView = new QGraphicsView(splitter);
@@ -77,25 +73,24 @@ void ComponentsDialog::setupUi(QDialog* dialog) {
     verticalLayout->addWidget(buttonBox);
 
     retranslateUi(dialog);
-    QObject::connect(buttonBox, SIGNAL(accepted()), dialog, SLOT(accept()));
-    QObject::connect(buttonBox, SIGNAL(rejected()), dialog, SLOT(reject()));
-
+    connect(buttonBox, &QDialogButtonBox ::accepted, dialog, &QDialog ::accept);
+    connect(buttonBox, &QDialogButtonBox ::rejected, dialog, &QDialog ::reject);
     QMetaObject::connectSlotsByName(dialog);
 }
 
-void ComponentsDialog::retranslateUi(QDialog* dialog) {
-    dialog->setWindowTitle(QApplication::translate("ComponentsDialog", "Dialog", nullptr));
+void Dialog::retranslateUi(QDialog* dialog) {
+    dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
 }
 
-void ComponentsDialog::showEvent(QShowEvent* event) {
+void Dialog::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
     graphicsView->fitInView(graphicsView->scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
-void ComponentsDialog::resizeEvent(QResizeEvent* event) {
+void Dialog::resizeEvent(QResizeEvent* event) {
     if (event)
         QDialog::resizeEvent(event);
     graphicsView->fitInView(graphicsView->scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

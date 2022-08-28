@@ -21,26 +21,26 @@
 #include <QDebug>
 #include <QGraphicsRectItem>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-ComponentsView::ComponentsView(QWidget* parent)
+sView::sView(QWidget* parent)
     : QTreeView(parent) {
 }
 
-ComponentsView::~ComponentsView() {
+sView::~sView() {
     if (item)
         item->setSelected(false);
 }
 
-void ComponentsView::setFile(int fileId) {
-    setModel(new ComponentsModel(fileId, this));
+void sView::setFile(int fileId) {
+    setModel(new sModel(fileId, this));
     expandAll();
 
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         qDebug() << selected.size() << deselected.size();
         static QColor color;
         if (!selected.indexes().empty()) {
-            auto node = reinterpret_cast<ComponentsNode*>(selected.indexes().front().internalPointer());
+            auto node = reinterpret_cast<sNode*>(selected.indexes().front().internalPointer());
             if (node->item) {
                 color = node->item->brush().color();
                 node->item->setBrush(Qt::white);
@@ -51,7 +51,7 @@ void ComponentsView::setFile(int fileId) {
         }
 
         if (!deselected.indexes().empty()) {
-            auto node = reinterpret_cast<ComponentsNode*>(deselected.indexes().front().internalPointer());
+            auto node = reinterpret_cast<sNode*>(deselected.indexes().front().internalPointer());
             if (node->item) {
                 node->item->setBrush(color);
                 node->component.componentitem()->setSelected(false);
@@ -60,9 +60,9 @@ void ComponentsView::setFile(int fileId) {
     });
 }
 
-void ComponentsView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+void sView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     // qDebug() << selected.value(0) << deselected.value(0);
     QTreeView::selectionChanged(selected, deselected);
 }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

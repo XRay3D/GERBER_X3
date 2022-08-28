@@ -13,10 +13,10 @@
 #include "gbrcomp_onent.h"
 #include "gi.h"
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-class ComponentItem final : public GraphicsItem {
-    const Gerber::Component& component_;
+class Item final : public GraphicsItem {
+    const Component& component_;
     QVector<QRectF> pins;
     mutable QPainterPath pathRefDes;
     mutable mvector<QPair<QPainterPath, QPointF>> pathPins;
@@ -25,7 +25,7 @@ class ComponentItem final : public GraphicsItem {
     bool selected_ {};
 
 public:
-    ComponentItem(const Gerber::Component& component, FileInterface* file);
+    Item(const Component& component, FileInterface* file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -38,4 +38,4 @@ public:
     void setSelected(bool selected) { selected_ = selected; }
 };
 
-} // namespace Gerber
+} // namespace Gerber::Comp

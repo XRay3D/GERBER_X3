@@ -787,9 +787,9 @@ bool Parser::parseAttributes(const QString& gLine) {
             //                case Attr::Aperture::AperFunction:
             //                    if (sl.size() > 1) {
             //                        switch (int key = Attr::AperFunction::value(sl[1])) {
-            //                        case Attr::AperFunction::ComponentMain:
-            //                        case Attr::AperFunction::ComponentOutline:
-            //                        case Attr::AperFunction::ComponentPin:
+            //                        case Attr::AperFunction::Main:
+            //                        case Attr::AperFunction::Outline:
+            //                        case Attr::AperFunction::Pin:
             //                            aperFunction = key;
             //                            break;
             //                        default:
@@ -808,25 +808,25 @@ bool Parser::parseAttributes(const QString& gLine) {
             for (int i = cap[3].indexOf('"'); i > -1; i = cap[3].indexOf('"'))
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(',')); // remove symbol "
-            switch (int index = Component::value1(sl.first()); index) {
-            case Component::N: // The CAD net name of a conducting object, e.g. Clk13.
+            switch (int index = Comp::Component::value1(sl.first()); index) {
+            case Comp::Component::N: // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Component::P: // Pins
+            case Comp::Component::P: // Pins
                 components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}});
                 break;
-            case Component::C:
-                switch (int key = Component::value2(sl.first())) {
-                case Component::Rot:
-                case Component::Mfr:
-                case Component::MPN:
-                case Component::Val:
-                case Component::Mnt:
-                case Component::Ftp:
-                case Component::PgN:
-                case Component::Hgt:
-                case Component::LbN:
-                case Component::LbD:
-                case Component::Sup:
+            case Comp::Component::C:
+                switch (int key = Comp::Component::value2(sl.first())) {
+                case Comp::Component::Rot:
+                case Comp::Component::Mfr:
+                case Comp::Component::MPN:
+                case Comp::Component::Val:
+                case Comp::Component::Mnt:
+                case Comp::Component::Ftp:
+                case Comp::Component::PgN:
+                case Comp::Component::Hgt:
+                case Comp::Component::LbN:
+                case Comp::Component::LbD:
+                case Comp::Component::Sup:
                     components[refDes].setData(key, sl);
                     break;
                 default:

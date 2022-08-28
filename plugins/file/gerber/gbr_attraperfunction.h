@@ -58,7 +58,7 @@ public:
         : AbstrAperFunc(function) {
     }
 };
-struct ComponentDrill : AbstrAperFunc {
+struct Drill : AbstrAperFunc {
     Q_GADGET
     /*[,PressFit]*/
     /*[,PressFit]
@@ -69,9 +69,9 @@ struct ComponentDrill : AbstrAperFunc {
     Провода с прессовой посадкой вдавливаются в металлические сквозные отверстия
     подходящего размера для обеспечения электрического контакта.
     Этикетка может быть нанесена только на отверстия PTH.
-    См. Также ComponentPad.*/
+    См. Также Pad.*/
 public:
-    ComponentDrill(Aperture::Function function, const QStringList& /*list*/)
+    Drill(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };
@@ -112,14 +112,14 @@ public:
         : AbstrAperFunc(function) {
     }
 };
-struct ComponentPad : AbstrAperFunc {
+struct Pad : AbstrAperFunc {
     Q_GADGET
     /**/
-    /*Контактная площадка, связанная с отверстием для компонента. Контактные площадки вокруг ComponentDrill на всех слоях принимают значение ComponentPad, хотя на самом деле на внутренних слоях они имеют только функцию перехода. Другими словами, значение атрибута площадки следует за значением атрибута инструмента сверла.
+    /*Контактная площадка, связанная с отверстием для компонента. Контактные площадки вокруг Drill на всех слоях принимают значение Pad, хотя на самом деле на внутренних слоях они имеют только функцию перехода. Другими словами, значение атрибута площадки следует за значением атрибута инструмента сверла.
    Только для компонентов со сквозным отверстием; SMD и BGA имеют свой собственный выделенный тип.
-   См. Также ComponentDrill.*/
+   См. Также Drill.*/
 public:
-    ComponentPad(Aperture::Function function, const QStringList& /*list*/)
+    Pad(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };
@@ -321,7 +321,7 @@ public:
         : AbstrAperFunc(function) {
     }
 };
-struct ComponentMain : AbstrAperFunc {
+struct Main : AbstrAperFunc {
     Q_GADGET
     /**/
     /*
@@ -333,11 +333,11 @@ struct ComponentMain : AbstrAperFunc {
     nn - номер апертуры, целое число ≥ 10.
     */
 public:
-    ComponentMain(Aperture::Function function, const QStringList& /*list*/)
+    Main(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };
-struct ComponentOutline : AbstrAperFunc {
+struct Outline : AbstrAperFunc {
     Q_GADGET
     /*,<type><type>=(Body|Lead2Lead| Footprint|Courtyard)*/
     /*,<type>
@@ -348,11 +348,11 @@ struct ComponentOutline : AbstrAperFunc {
    %ADDnnC,0.100*% (mm)
    %ADDnnC,0.004*% (in)*/
 public:
-    ComponentOutline(Aperture::Function function, const QStringList& /*list*/)
+    Outline(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };
-struct ComponentPin : AbstrAperFunc {
+struct Pin : AbstrAperFunc {
     Q_GADGET
     /**/
     /*
@@ -367,7 +367,7 @@ struct ComponentPin : AbstrAperFunc {
    Эти контакты не видны, что позволяет избежать загромождения изображения.*/
 
 public:
-    ComponentPin(Aperture::Function function, const QStringList& /*list*/)
+    Pin(Aperture::Function function, const QStringList& /*list*/)
         : AbstrAperFunc(function) {
     }
 };

@@ -19,9 +19,9 @@
 #include <QVariant>
 #include <QVector>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-class ComponentItem;
+class Item;
 
 struct Library {
     QString name;        /* <field> Library name. */
@@ -91,7 +91,7 @@ struct Supplier {
 
 class Component {
     Q_GADGET
-    // friend ComponentItem;
+    // friend Item;
     friend QDataStream& operator<<(QDataStream& stream, const Component& c);
     friend QDataStream& operator>>(QDataStream& stream, Component& c);
 
@@ -161,8 +161,8 @@ public:
     bool setData(int key, const QStringList& data);
     QString toolTip() const;
 
-    ComponentItem* componentitem() const { return componentitem_; }
-    void setComponentitem(ComponentItem* componentitem) const { componentitem_ = componentitem; }
+    Item* componentitem() const { return componentitem_; }
+    void setitem(Item* componentitem) const { componentitem_ = componentitem; }
 
     Library library() const { return library_; }
     void setLibrary(const Library& library) { library_ = library; }
@@ -209,7 +209,7 @@ public:
 private:
     double rotation_ = 0.0; /* <decimal> The rotation angle of the component.*/
     double height_ = 0.0;   /* <decimal> Height, in the unit of the file. */
-    mutable ComponentItem* componentitem_ = nullptr;
+    mutable Item* componentitem_ = nullptr;
     Library library_;
     Manufacturer manufacturer_;
     MountType mount_ = Other; /* (TH|SMD|BGA|Other) Mount type. */
@@ -224,4 +224,4 @@ private:
     bool isNull_ = true;
 };
 
-} // namespace Gerber
+} // namespace Gerber::Comp

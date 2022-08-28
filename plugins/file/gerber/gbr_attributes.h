@@ -230,7 +230,7 @@ namespace Attr { // Attributes
     //        The following aperture must be used:
     //        %ADD11C,0.100*% (mm)
     //        %ADD11C,0.004*% (in)*/
-    //            ComponentPin,
+    //            Pin,
     //            /*An aperture whose flash point indicates the location of
     //        the component pins (leads). The .P object attribute must
     //        be attached to each flash to identify the reference

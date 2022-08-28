@@ -49,17 +49,17 @@ public:
     virtual QString name() const = 0;
     virtual bool fit(double toolDiam) const = 0;
 
-    bool withHole() const noexcept { return drillDiam_ > 0.0; }
-    bool flashed() const noexcept { return isFlashed_; }
-
-    double drillDiameter() const { return drillDiam_; }
-    double apertureSize();
-
     Path drawDrill(const State& state);
     Paths draw(const State& state, bool notApBlock = {});
 
-    double minSize() const noexcept { return size_; }
+    bool flashed() const noexcept { return isFlashed_; }
     bool used() const noexcept { return isUsed_; }
+    bool withHole() const noexcept { return drillDiam_ > 0.0; }
+
+    double apertureSize();
+    double drillDiameter() const { return drillDiam_; }
+    double minSize() const noexcept { return size_; }
+
     void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
 protected:

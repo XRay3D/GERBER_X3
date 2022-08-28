@@ -72,7 +72,7 @@ protected:
     int goId_ = 0;
 
     StepRepeatStr stepRepeat_;
-    QMap<QString, Component> components;
+    QMap<QString, Comp::Component> components;
     QString refDes;
     QMap<int, Attr::Aperture> aperFunctionMap;
 

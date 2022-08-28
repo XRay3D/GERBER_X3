@@ -177,7 +177,7 @@ void Aperture::parse(const QStringList& list) {
             function_ = std::make_shared<struct BackDrill>(function, list.mid(2));
             break;
         case ComponentDrill:
-            function_ = std::make_shared<struct ComponentDrill>(function, list.mid(2));
+            function_ = std::make_shared<struct Drill>(function, list.mid(2));
             break;
         case MechanicalDrill:
             function_ = std::make_shared<struct MechanicalDrill>(function, list.mid(2));
@@ -189,7 +189,7 @@ void Aperture::parse(const QStringList& list) {
             function_ = std::make_shared<struct OtherDrill>(function, list.mid(2));
             break;
         case ComponentPad:
-            function_ = std::make_shared<struct ComponentPad>(function, list.mid(2));
+            function_ = std::make_shared<struct Pad>(function, list.mid(2));
             break;
         case SMDPad:
             function_ = std::make_shared<struct SMDPad>(function, list.mid(2));
@@ -246,13 +246,13 @@ void Aperture::parse(const QStringList& list) {
             function_ = std::make_shared<struct OtherCopper>(function, list.mid(2));
             break;
         case ComponentMain: // Component
-            function_ = std::make_shared<struct ComponentMain>(function, list.mid(2));
+            function_ = std::make_shared<struct Main>(function, list.mid(2));
             break;
         case ComponentOutline:
-            function_ = std::make_shared<struct ComponentOutline>(function, list.mid(2));
+            function_ = std::make_shared<struct Outline>(function, list.mid(2));
             break;
         case ComponentPin: //
-            function_ = std::make_shared<struct ComponentPin>(function, list.mid(2));
+            function_ = std::make_shared<struct Pin>(function, list.mid(2));
             break;
         case Profile:
             function_ = std::make_shared<struct ProfileA>(function, list.mid(2));

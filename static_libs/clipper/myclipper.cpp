@@ -30,7 +30,6 @@
 //#endif
 // }
 
-static auto IntPointConverter = QMetaType::registerConverter(&IntPoint::toString);
 
 Path CirclePath(double diametr, const IntPoint& center) {
     if (diametr == 0.0)

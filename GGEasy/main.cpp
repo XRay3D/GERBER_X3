@@ -78,13 +78,13 @@ int main(int argc, char** argv) {
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
-        QSharedMemory nix_fix_shared_memory("GGEasy_Memory");
+        QSharedMemory nix_fix_shared_memory("GGEasyMemory");
         if (nix_fix_shared_memory.attach()) {
             nix_fix_shared_memory.detach();
         }
 #endif
         MainWindow* mainWin = nullptr;
-        QSharedMemory sharedMemory("GGEasy_Memory"); // Создаём экземпляр разделяемой памяти
+        QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false;     // переменную для проверки ууже запущенного приложения
         if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    SplashScreen* splash = new SplashScreen(QPixmap(QLatin1String(":/256.png")));
+    SplashScreen* splash = new SplashScreen(QPixmap(QStringLiteral(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
 

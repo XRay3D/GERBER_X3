@@ -107,4 +107,4 @@ QDataStream& operator>>(QDataStream& stream, Component& c) {
     return stream;
 }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

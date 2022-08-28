@@ -160,7 +160,7 @@ Paths File::merge() const {
     return mergedPaths_;
 }
 
-const QList<Component>& File::components() const { return components_; }
+const QList<Comp::Component> &File::components() const { return components_; }
 
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
@@ -314,9 +314,9 @@ void File::createGi() {
         itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr (1) { // add components
-        for (const Component& component : qAsConst(components_)) {
+        for (const Comp::Component& component : qAsConst(components_)) {
             if (!component.referencePoint().isNull())
-                itemGroups_[Components]->push_back(new ComponentItem(component, this));
+                itemGroups_[Components]->push_back(new Comp::Item(component, this));
         }
         itemGroups_[Components]->shrink_to_fit();
     }

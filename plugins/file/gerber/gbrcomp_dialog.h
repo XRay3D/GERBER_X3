@@ -18,23 +18,23 @@ class QSplitter;
 class QVBoxLayout;
 class QGraphicsScene;
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-class ComponentsView;
+class sView;
 
-class ComponentsDialog : public QDialog {
+class Dialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ComponentsDialog(QWidget* parent = nullptr);
-    ~ComponentsDialog();
+    explicit Dialog(QWidget* parent = nullptr);
+    ~Dialog();
     void setFile(int fileId);
     static QGraphicsScene* scene() { return scene_; };
 
 private:
     // QDialogButtonBox* buttonBox;
     // QVBoxLayout* verticalLayout;
-    ComponentsView* componentsView;
+    sView* componentsView;
     QGraphicsView* graphicsView;
     QSplitter* splitter;
     static inline QGraphicsScene* scene_;
@@ -48,4 +48,4 @@ protected:
     void resizeEvent(QResizeEvent* event = nullptr) override;
 };
 
-} // namespace Gerber
+} // namespace Gerber::Comp
