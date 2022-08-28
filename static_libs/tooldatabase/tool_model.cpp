@@ -166,7 +166,7 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const {
         if (noCopy != index.row()) {
             noCopy = index.row();
             if (index.isValid()) {
-                encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
+                encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toUtf8());
                 encodedData.push_back("|");
             }
         }

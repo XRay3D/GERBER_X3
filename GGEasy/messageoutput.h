@@ -79,7 +79,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QS
     //    Bright Cyan     96  106
     //    Bright White    97  107
 
-    QByteArray localMsg = msg.toLocal8Bit();
+    QByteArray localMsg = msg.toUtf8();
     const char* file = context.file ? context.file : "";
     const char* function = context.function ? context.function : "";
     switch (type) {

@@ -225,7 +225,7 @@ int Model::rowCount(const QModelIndex& parent) const {
 //     //            if (!item)
 //     //                item = rootItem;
 //     //            if (index.isValid()) {
-//     //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+//     //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toUtf8());
 //     //                encodedData.push_back("|");
 //     //            }
 //     //        }
@@ -239,7 +239,7 @@ int Model::rowCount(const QModelIndex& parent) const {
 //         if (noCopy != index.row()) {
 //             noCopy = index.row();
 //             if (index.isValid()) {
-//                 encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toLocal8Bit());
+//                 encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toUtf8());
 //                 encodedData.push_back("|");
 //             }
 //         }

@@ -262,7 +262,7 @@ void Entity::read(QDataStream& stream) {
 }
 
 Entity::Type Entity::toType(const QString& key) {
-    return Type(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().toUpper().data()));
+    return Type(staticMetaObject.enumerator(0).keyToValue(key.toUtf8().toUpper().data()));
 }
 
 QString Entity::typeName(int key) {
@@ -295,7 +295,7 @@ void Entity::attachToLayer(GraphicObject&& go) const {
 }
 
 Entity::DataEnum Entity::toDataEnum(const QString& key) {
-    return DataEnum(staticMetaObject.enumerator(1).keyToValue(key.toLocal8Bit().toUpper().data()));
+    return DataEnum(staticMetaObject.enumerator(1).keyToValue(key.toUtf8().toUpper().data()));
 }
 
 QPointF polar(QPointF p, float angle, float distance) {

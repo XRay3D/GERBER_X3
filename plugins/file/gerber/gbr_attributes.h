@@ -44,7 +44,7 @@ namespace Attr { // Attributes
 
     struct Command {
         static int value(const QString& key) {
-            return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data());
+            return staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data());
         }
         enum e {
             TF, // Attribute file. Set a file attribute.    5.2
@@ -206,15 +206,15 @@ namespace Attr { // Attributes
     };
 
     //    struct AperFunction {
-    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data()); }
     //        enum e {
-    //            ComponentMain, /* This aperture is flashed at the centroid of a component.
+    //            Main, /* This aperture is flashed at the centroid of a component.
     //        The flash carries the object attributes with the main
     //        characteristics of the component.
     //        The following aperture must be used:
     //        %ADD10C,0.300*% (mm)
     //        %ADD10C,0.012*% (in)*/
-    //            ComponentOutline, /*(Body|Lead2Lead|Footprint|Courtyard)
+    //            Outline, /*(Body|Lead2Lead|Footprint|Courtyard)
     //        This attribute is used to draw the outline of the
     //        component. An outline is a sequence of connected
     //        draws and arcs. They are said to connect only if they are
@@ -249,8 +249,8 @@ namespace Attr { // Attributes
     //        Q_ENUM(e)
     //        Q_GADGET
     //    };
-    //    struct ComponentOutline {
-    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()); }
+    //    struct Outline {
+    //        static int value(const QString& key) { return staticMetaObject.enumerator(0).keyToValue(key.toUtf8().data()); }
     //        enum e {
     //            Body,
     //            Lead2Lead,

@@ -40,7 +40,7 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* fil
 SectionParser::SectionType SectionParser::toType(const QString& key) {
     return static_cast<SectionType>(staticMetaObject
                                         .enumerator(0)
-                                        .keysToValue(key.toLocal8Bit().data()));
+                                        .keysToValue(key.toUtf8().data()));
 }
 
 const CodeData& SectionParser::nextCode() const {

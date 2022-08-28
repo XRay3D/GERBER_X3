@@ -16,9 +16,9 @@ namespace Dxf {
 
 QDebug operator<<(QDebug debug, const CodeData& c) {
     QDebugStateSaver saver(debug);
-    //      debug.nospace() << QString("DC(%1, ").arg(c.code_, 5).toLocal8Bit().data();
+    //      debug.nospace() << QString("DC(%1, ").arg(c.code_, 5).toUtf8().data();
     //      debug.nospace() << '\n';
-    debug.nospace() << QString("DC(%1, ").arg(c.code_).toLocal8Bit().data();
+    debug.nospace() << QString("DC(%1, ").arg(c.code_).toUtf8().data();
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr /*  */ (std::is_same_v<T, double>) {
