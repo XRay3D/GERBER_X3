@@ -26,8 +26,8 @@ public:
     ~ProfileForm() override;
 
 private slots:
-    void on_pbAddBridge_clicked();
-    void on_leName_textChanged(const QString& arg1);
+    void onAddBridgeClicked();
+    void onNameTextChanged(const QString& arg1);
 
 private:
     Ui::ProfileForm* ui;

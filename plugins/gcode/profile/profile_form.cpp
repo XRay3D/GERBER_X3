@@ -76,6 +76,9 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
         else
             checked ? trimming_ |= Trimming::Corner : trimming_ &= ~Trimming::Corner;
     });
+
+    connect(ui->pbAddBridge, &QPushButton::clicked, this, &ProfileForm::onAddBridgeClicked);
+    connect(leName, &QLineEdit::textChanged, this, &ProfileForm::onNameTextChanged);
 }
 
 ProfileForm::~ProfileForm() {
@@ -191,7 +194,7 @@ void ProfileForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void ProfileForm::on_pbAddBridge_clicked() {
+void ProfileForm::onAddBridgeClicked() {
     if (brItem) {
         if (!brItem->ok())
             delete brItem;
@@ -199,6 +202,7 @@ void ProfileForm::on_pbAddBridge_clicked() {
     brItem = new GiBridge(lenght_, size_, side, brItem);
     App::scene()->addItem(brItem);
     brItem->setVisible(true);
+    brItem->setOpacity(1.0);
 }
 
 void ProfileForm::updateBridge() {
@@ -239,7 +243,7 @@ void ProfileForm::rb_clicked() {
     updatePixmap();
 }
 
-void ProfileForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void ProfileForm::editFile(GCode::File* file) {
 
