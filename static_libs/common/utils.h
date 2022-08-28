@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDebug>
+#include <QMetaEnum>
 #include <QString>
 #include <chrono>
 #include <concepts>
@@ -127,3 +128,36 @@ QDebug operator<<(QDebug debug, Cap& cap) {
     debug.nospace() << "captured_content(" << QStringView(cap.data(), cap.size()) << ')';
     return debug;
 }
+
+namespace EnumHelper {
+// Tool to convert enum values to/from QString
+template <typename E>
+E fromString(const QString& text) {
+    bool ok;
+    auto result = static_cast<E>(QMetaEnum::fromType<E>().keyToValue(text.toUtf8(), &ok));
+    if (!ok) {
+        qDebug() << "Failed to convert enum" << text;
+        return {};
+    }
+    return result;
+}
+
+struct fromString {
+    const QString& text;
+    template <typename E>
+    operator E() {
+        bool ok;
+        auto result = static_cast<E>(QMetaEnum::fromType<E>().keyToValue(text.toUtf8(), &ok));
+        if (ok) [[likely]]
+            return result;
+        qDebug() << "Failed to convert enum" << text;
+        return {};
+    }
+};
+
+template <typename E>
+QString toString(E value) {
+    const int intValue = static_cast<int>(value);
+    return QString::fromUtf8(QMetaEnum::fromType<E>().valueToKey(intValue));
+}
+} // namespace EnumHelper

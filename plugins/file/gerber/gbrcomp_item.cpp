@@ -19,12 +19,12 @@
 #include <QTimer>
 #include <future>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-ComponentItem::ComponentItem(const Component& component, FileInterface* file)
+Item::Item(const Component& component, FileInterface* file)
     : GraphicsItem(file)
     , component_(component) {
-    component.setComponentitem(this);
+    component.setitem(this);
     pathPins.resize(component_.pins().size());
     for (auto&& poly : component_.footprint())
         shape_.addPolygon(poly);
@@ -33,11 +33,11 @@ ComponentItem::ComponentItem(const Component& component, FileInterface* file)
     setToolTip(component_.toolTip());
 }
 
-QRectF ComponentItem::boundingRect() const {
+QRectF Item::boundingRect() const {
     return shape().boundingRect();
 }
 
-QPainterPath ComponentItem::shape() const {
+QPainterPath Item::shape() const {
     if (!qFuzzyCompare(scale_, App::graphicsView()->scaleFactor()))
         scale_ = App::graphicsView()->scaleFactor();
     return shape_;
@@ -59,7 +59,7 @@ void drawText(QPainter* painter, const QString& str, const QColor& color, QPoint
     painter->restore();
 }
 
-void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     auto color {file_->color()};
     painter->setBrush(color);
     color.setAlpha(255);
@@ -130,6 +130,6 @@ void ComponentItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
         }
 }
 
-Paths ComponentItem::paths(int) const { return {}; }
+Paths Item::paths(int) const { return {}; }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

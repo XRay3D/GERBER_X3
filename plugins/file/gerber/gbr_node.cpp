@@ -181,7 +181,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     });
     if (!file->itemGroup(File::Components)->empty()) {
         menu.addAction(QIcon(), GbrObj::tr("Show &Components"), [this, tv] {
-            ComponentsDialog dialog(tv);
+            Comp::Dialog dialog(tv);
             dialog.setFile(id_);
             dialog.exec();
         });

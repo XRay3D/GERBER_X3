@@ -22,21 +22,21 @@
 
 #include "utils.h"
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-ComponentsModel::ComponentsModel(int fileId, QObject* parent)
+sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new ComponentsNode("")) {
+    , rootItem(new sNode("")) {
     //    auto file = App::project()->file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
 
     auto file = App::project()->file<Gerber::File>(fileId);
 
-    using pair = std::pair<int, ComponentsNode*>;
+    using pair = std::pair<int, sNode*>;
     std::map<QString, mvector<pair>> map;
 
-    auto unsorted = new ComponentsNode(GbrObj::tr("unsorted"));
+    auto unsorted = new sNode(GbrObj::tr("unsorted"));
 
     for (const auto& component : file->components()) {
         static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
@@ -45,10 +45,10 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
 
         if (auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
             if (map[CtreCapTo(c1)].empty())
-                map[CtreCapTo(c1)].emplace_back(-1, new ComponentsNode(CtreCapTo(c1)));
-            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new ComponentsNode(component));
+                map[CtreCapTo(c1)].emplace_back(-1, new sNode(CtreCapTo(c1)));
+            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode(component));
         } else {
-            unsorted->append(new ComponentsNode(component));
+            unsorted->append(new sNode(component));
         }
     }
 
@@ -64,7 +64,7 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
     //        std::sort(
     //            it.value().begin(),
     //            it.value().end(),
-    //            [](const QPair<int, ComponentsNode*>& p1, const QPair<int, ComponentsNode*>& p2) {
+    //            [](const QPair<int, sNode*>& p1, const QPair<int, sNode*>& p2) {
     //                return p1.first < p2.first;
     //            });
     //        for (int i = 1; i < it.value().size(); ++i) {
@@ -80,39 +80,39 @@ ComponentsModel::ComponentsModel(int fileId, QObject* parent)
         delete unsorted;
 }
 
-ComponentsModel::~ComponentsModel() {
+sModel::~sModel() {
     delete rootItem;
-    //    App::app->ComponentsModel_ = nullptr;
+    //    App::app->sModel_ = nullptr;
 }
 
-QModelIndex ComponentsModel::index(int row, int column, const QModelIndex& parent) const {
-    ComponentsNode* childItem = getItem(parent)->child(row);
+QModelIndex sModel::index(int row, int column, const QModelIndex& parent) const {
+    sNode* childItem = getItem(parent)->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
 }
 
-QModelIndex ComponentsModel::parent(const QModelIndex& index) const {
+QModelIndex sModel::parent(const QModelIndex& index) const {
     if (!index.isValid())
         return QModelIndex();
-    ComponentsNode* parentItem = getItem(index)->parentItem();
+    sNode* parentItem = getItem(index)->parentItem();
     if (parentItem == rootItem)
         return QModelIndex();
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-QVariant ComponentsModel::data(const QModelIndex& index, int role) const {
+QVariant sModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
-    ComponentsNode* item = getItem(index);
+    sNode* item = getItem(index);
     return item->data(index, role);
 }
 
-bool ComponentsModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+bool sModel::setData(const QModelIndex& index, const QVariant& value, int role) {
     return getItem(index)->setData(index, value, role);
 }
 
-QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         switch (section) {
         case 0: /* <field> Manufacturer. */
@@ -143,16 +143,16 @@ QVariant ComponentsModel::headerData(int section, Qt::Orientation orientation, i
     return QVariant();
 }
 
-Qt::ItemFlags ComponentsModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags sModel::flags(const QModelIndex& index) const {
     if (!index.isValid())
         return Qt::NoItemFlags;
     return getItem(index)->flags(index);
 }
 
-bool ComponentsModel::removeRows(int row, int count, const QModelIndex& parent) {
-    ComponentsNode* item = nullptr;
+bool sModel::removeRows(int row, int count, const QModelIndex& parent) {
+    sNode* item = nullptr;
     if (parent.isValid())
-        item = static_cast<ComponentsNode*>(parent.internalPointer());
+        item = static_cast<sNode*>(parent.internalPointer());
     else
         return false;
 
@@ -164,23 +164,23 @@ bool ComponentsModel::removeRows(int row, int count, const QModelIndex& parent) 
     return true;
 }
 
-int ComponentsModel::columnCount(const QModelIndex&) const {
+int sModel::columnCount(const QModelIndex&) const {
     return 8;
 }
 
-int ComponentsModel::rowCount(const QModelIndex& parent) const {
+int sModel::rowCount(const QModelIndex& parent) const {
     if (parent.column() > 0)
         return 0;
     return getItem(parent)->childCount();
 }
 
-ComponentsNode* ComponentsModel::getItem(const QModelIndex& index) const {
+sNode* sModel::getItem(const QModelIndex& index) const {
     if (index.isValid()) {
-        auto* item = static_cast<ComponentsNode*>(index.internalPointer());
+        auto* item = static_cast<sNode*>(index.internalPointer());
         if (item)
             return item;
     }
     return rootItem;
 }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

@@ -13,30 +13,30 @@
 
 class QGraphicsRectItem;
 
-namespace Gerber {
+namespace Gerber::Comp {
 
 class Component;
 
-class ComponentsNode {
-    ComponentsNode& operator=(ComponentsNode&&) = delete;
-    ComponentsNode& operator=(const ComponentsNode&) = delete;
-    ComponentsNode(ComponentsNode&&) = delete;
-    ComponentsNode(const ComponentsNode&) = delete;
+class sNode {
+    sNode& operator=(sNode&&) = delete;
+    sNode& operator=(const sNode&) = delete;
+    sNode(sNode&&) = delete;
+    sNode(const sNode&) = delete;
 
 public:
-    ComponentsNode(const QString& name);
-    ComponentsNode(const Component& component);
-    virtual ~ComponentsNode();
+    sNode(const QString& name);
+    sNode(const Component& component);
+    virtual ~sNode();
 
-    ComponentsNode* child(int row);
-    ComponentsNode* parentItem();
+    sNode* child(int row);
+    sNode* parentItem();
 
-    void setChild(int row, ComponentsNode* item);
+    void setChild(int row, sNode* item);
 
     int childCount() const;
     int row() const;
 
-    void append(ComponentsNode* item);
+    void append(sNode* item);
     void remove(int row);
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
@@ -48,8 +48,8 @@ public:
     const QString name;
 
 protected:
-    ComponentsNode* parentItem_ = nullptr;
-    QList<QSharedPointer<ComponentsNode>> childItems;
+    sNode* parentItem_ = nullptr;
+    QList<QSharedPointer<sNode>> childItems;
 };
 
-} // namespace Gerber
+} // namespace Gerber::Comp

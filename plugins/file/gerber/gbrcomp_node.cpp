@@ -21,20 +21,20 @@
 #include <QGraphicsScene>
 #include <QSharedPointer>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
 const Component dummy;
 
-ComponentsNode::ComponentsNode(const QString& name)
+sNode::sNode(const QString& name)
     : component(dummy)
     , name(name)
     , item(nullptr) {
 }
 
-ComponentsNode::ComponentsNode(const Component& component)
+sNode::sNode(const Component& component)
     : component(component)
     , name("")
-    , item(ComponentsDialog::scene()->addRect(
+    , item(Dialog::scene()->addRect(
           component.componentitem()->boundingRect(),
           Qt::NoPen,
           component.componentitem()->file()->color()))
@@ -42,11 +42,11 @@ ComponentsNode::ComponentsNode(const Component& component)
 {
 }
 
-ComponentsNode::~ComponentsNode() {
+sNode::~sNode() {
     childItems.clear();
 }
 
-int ComponentsNode::row() const {
+int sNode::row() const {
     if (parentItem_)
         for (int i = 0, size = parentItem_->childItems.size(); i < size; ++i)
             if (parentItem_->childItems[i].data() == this)
@@ -54,25 +54,25 @@ int ComponentsNode::row() const {
     return 0;
 }
 
-ComponentsNode* ComponentsNode::child(int row) { return childItems.value(row).data(); }
+sNode* sNode::child(int row) { return childItems.value(row).data(); }
 
-ComponentsNode* ComponentsNode::parentItem() { return parentItem_; }
+sNode* sNode::parentItem() { return parentItem_; }
 
-void ComponentsNode::setChild(int row, ComponentsNode* item) {
+void sNode::setChild(int row, sNode* item) {
     if (item)
         item->parentItem_ = this;
     if (row < childItems.size())
         childItems[row].reset(item);
 }
 
-void ComponentsNode::append(ComponentsNode* item) {
+void sNode::append(sNode* item) {
     item->parentItem_ = this;
-    childItems.append(QSharedPointer<ComponentsNode>(item));
+    childItems.append(QSharedPointer<sNode>(item));
 }
 
-void ComponentsNode::remove(int row) { childItems.removeAt(row); }
+void sNode::remove(int row) { childItems.removeAt(row); }
 
-bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) {
+bool sNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) {
     //    switch (index.column()) {
     //        //    case Name_:
     //        //        switch (role) {
@@ -104,12 +104,12 @@ bool ComponentsNode::setData(const QModelIndex& /*index*/, const QVariant& /*val
     return false;
 }
 
-Qt::ItemFlags ComponentsNode::flags(const QModelIndex& /*index*/) const {
+Qt::ItemFlags sNode::flags(const QModelIndex& /*index*/) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled /*| Qt::ItemNeverHasChildren*/ | Qt::ItemIsSelectable;
     return itemFlag;
 }
 
-QVariant ComponentsNode::data(const QModelIndex& index, int role) const {
+QVariant sNode::data(const QModelIndex& index, int role) const {
     if (!name.isEmpty()) {
         if (role == Qt::DisplayRole && index.column() == 0)
             return name;
@@ -142,6 +142,6 @@ QVariant ComponentsNode::data(const QModelIndex& index, int role) const {
     return {};
 }
 
-int ComponentsNode::childCount() const { return childItems.count(); }
+int sNode::childCount() const { return childItems.count(); }
 
-} // namespace Gerber
+} // namespace Gerber::Comp

@@ -64,7 +64,7 @@ protected:
     Paths merge() const override;
 
 private:
-    QList<Component> components_;
+    QList<Comp::Component> components_;
     mvector<GraphicObject> graphicObjects_;
     ApertureMap apertures_;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
@@ -85,7 +85,7 @@ protected:
     // FileTree::Node interface
 public:
     void createGi() override;
-    const QList<Component>& components() const;
+    const QList<Comp::Component>& components() const;
 };
 
 } // namespace Gerber

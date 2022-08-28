@@ -11,18 +11,18 @@
 #pragma once
 #include <QAbstractItemModel>
 
-namespace Gerber {
+namespace Gerber::Comp {
 
-class ComponentsNode;
+class sNode;
 
-class ComponentsModel : public QAbstractItemModel {
+class sModel : public QAbstractItemModel {
     Q_OBJECT
 public:
-    explicit ComponentsModel(int fileId, QObject* parent = nullptr);
+    explicit sModel(int fileId, QObject* parent = nullptr);
 
     // QAbstractItemModel interface
 
-    ~ComponentsModel();
+    ~sModel();
 
     QModelIndex index(int row, int column, const QModelIndex& parent) const;
 
@@ -43,9 +43,9 @@ public:
 signals:
 
 private:
-    ComponentsNode* rootItem;
+    sNode* rootItem;
 
-    ComponentsNode* getItem(const QModelIndex& index) const;
+    sNode* getItem(const QModelIndex& index) const;
 };
 
-} // namespace Gerber
+} // namespace Gerber::Comp

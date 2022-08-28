@@ -31,6 +31,8 @@
 #include <QtWidgets>
 #include <forward_list>
 
+static auto IntPointConverter = QMetaType::registerConverter(&IntPoint::toString);
+
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
 }
