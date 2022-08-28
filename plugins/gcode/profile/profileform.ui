@@ -107,12 +107,7 @@
       </property>
       <item>
        <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
+<property name="text">
          <string>Lenght:</string>
         </property>
         <property name="alignment">

@@ -42,18 +42,10 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    #    clipper
-    #    common
-    #    filetree
-    #    gi
-    #    graphicsview
-    #    shape
-    #    tooldatabase
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
 )
-
 
 add_subdirectory(dxf)
 add_subdirectory(excellon)

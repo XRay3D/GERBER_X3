@@ -18,85 +18,52 @@
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
-FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
+GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin {plugin}
-    , creator(tpc)
-    , fileCount(1)
+    , creator {tpc}
     , progressDialog(new QProgressDialog(this)) {
-    tpc->moveToThread(&thread);
+
+    content = new QWidget(this);
+
+    dsbxDepth = new DepthForm(this);
+    dsbxDepth->setObjectName("dsbxDepth");
+
+    leName = new QLineEdit(this);
+    leName->setObjectName("leName");
+
+    pbClose = new QPushButton(tr("Close"), this);
+    pbClose->setIcon(QIcon::fromTheme("window-close"));
+    pbClose->setObjectName("pbClose");
+
+    pbCreate = new QPushButton(tr("Create"), this);
+    pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    pbCreate->setObjectName("pbCreate");
+    connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::createFile);
+
+    auto line = [this] {
+        auto line = new QFrame(this);
+        line->setFrameShadow(QFrame::Plain);
+        line->setFrameShape(QFrame::HLine);
+        return line;
+    };
 
     grid = new QGridLayout(this);
     grid->setContentsMargins(6, 6, 6, 6);
     grid->setSpacing(6);
-    {
-        auto frame = new QFrame(this);
-        frame->setFrameShadow(QFrame::Plain);
-        frame->setFrameShape(QFrame::Box);
-        label = new QLabel("Label", frame);
-        auto layout = new QVBoxLayout(frame);
-        layout->setContentsMargins(6, 6, 6, 6);
-        layout->addWidget(label);
 
-        grid->addWidget(frame, 0, 0, 1, 2); // 0
-        dsbxDepth = new DepthForm(this);
-        dsbxDepth->setObjectName("dsbxDepth");
-        grid->addWidget(dsbxDepth, 1, 0, 1, 2); // 1
-    }
-
-    {
-        auto line = new QFrame(this);
-        line->setFrameShadow(QFrame::Plain);
-        line->setFrameShape(QFrame::HLine);
-        grid->addWidget(line, 2, 0, 1, 2); // 2
-    }
-
-    {
-        content = new QWidget(this);
-        grid->addWidget(content, 3, 0, 1, 2); // 3
-    }
-
-    {
-        auto line = new QFrame(this);
-        line->setFrameShadow(QFrame::Plain);
-        line->setFrameShape(QFrame::HLine);
-        grid->addWidget(line, 4, 0, 1, 2); // 4
-    }
-    {
-        auto label = new QLabel(tr("Name:"), this);
-
-        leName = new QLineEdit(this);
-        leName->setObjectName("leName");
-
-        pbClose = new QPushButton(tr("Close"), this);
-        pbClose->setObjectName("pbClose");
-        pbClose->setIcon(QIcon::fromTheme("window-close"));
-
-        pbCreate = new QPushButton(tr("Create"), this);
-        pbCreate->setObjectName("pbCreate");
-        pbCreate->setIcon(QIcon::fromTheme("document-export"));
-
-        grid->addWidget(label, 5, 0);                   // 5
-        grid->addWidget(leName, 5, 1);                  // 5
-        grid->addWidget(pbCreate, 6, 0, 1, 2);          // 6
-        grid->addWidget(pbClose, 7, 0, 1, 2);           // 7
-        grid->addWidget(new QWidget(this), 9, 0, 1, 2); // 9
-    }
-    //    grid->setRowStretch(3, 2);
-    grid->setRowStretch(8, 1);
-
-    connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);
-
-    connect(tpc, &GCode::Creator::canceled, this, &FormsUtil::stopProgress);
-    connect(tpc, &GCode::Creator::errorOccurred, this, &FormsUtil::errorHandler);
-    connect(tpc, &GCode::Creator::fileReady, this, &FormsUtil::fileHandler);
-
-    connect(progressDialog, &QProgressDialog::canceled, this, &FormsUtil::cancel);
-
-    connect(this, &FormsUtil::createToolpath, tpc, &GCode::Creator::createGc);
-    connect(this, &FormsUtil::createToolpath, this, &FormsUtil::startProgress);
-
-    thread.start(QThread::LowPriority /*HighestPriority*/);
+    int row {};
+    constexpr int rowSpan {1}, columnSpan {2};
+    grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan);           // row 0
+    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 1
+    grid->addWidget(content, ++row, 0, rowSpan, columnSpan);           // row 2
+    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 3
+    grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);          // row 4
+    grid->addWidget(leName, row, 1);                                   // row 4
+    grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan);          // row 5
+    grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan);           // row 6
+    grid->addWidget(new QWidget(this), ++row, 0, rowSpan, columnSpan); // row 7
+    grid->setRowStretch(row, 1);
 
     progressDialog->setMinimumDuration(100);
     progressDialog->setModal(true);
@@ -104,14 +71,29 @@ FormsUtil::FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     progressDialog->setAutoClose(false);
     progressDialog->setAutoReset(false);
     progressDialog->reset();
+    connect(progressDialog, &QProgressDialog::canceled, this, &GcFormBase::cancel);
+
+    if (!tpc)
+        return;
+
+    connect(this, &GcFormBase::createToolpath, this, &GcFormBase::startProgress);
+    connect(this, &GcFormBase::createToolpath, tpc, &GCode::Creator::createGc);
+
+    connect(tpc, &GCode::Creator::canceled, this, &GcFormBase::stopProgress);
+    connect(tpc, &GCode::Creator::errorOccurred, this, &GcFormBase::errorHandler);
+    connect(tpc, &GCode::Creator::fileReady, this, &GcFormBase::fileHandler);
+
+    tpc->moveToThread(&thread);
+    connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);
+    thread.start(QThread::LowPriority /*HighestPriority*/);
 }
 
-FormsUtil::~FormsUtil() {
+GcFormBase::~GcFormBase() {
     thread.quit();
     thread.wait();
 }
 
-void FormsUtil::fileHandler(GCode::File* file) {
+void GcFormBase::fileHandler(GCode::File* file) {
     qDebug() << __FUNCTION__ << file;
     if (--fileCount == 0)
         cancel();
@@ -133,7 +115,7 @@ void FormsUtil::fileHandler(GCode::File* file) {
     }
 }
 
-void FormsUtil::timerEvent(QTimerEvent* event) {
+void GcFormBase::timerEvent(QTimerEvent* event) {
     if (event->timerId() == progressTimerId && progressDialog && creator) {
         const auto [max, val] = creator->getProgress();
         progressDialog->setMaximum(max);
@@ -142,7 +124,7 @@ void FormsUtil::timerEvent(QTimerEvent* event) {
     }
 }
 
-void FormsUtil::addUsedGi(GraphicsItem* gi) {
+void GcFormBase::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
         FileInterface const* file = gi->file();
         if (file->type() == FileType::Gerber) {
@@ -155,12 +137,12 @@ void FormsUtil::addUsedGi(GraphicsItem* gi) {
     }
 }
 
-void FormsUtil::cancel() {
+void GcFormBase::cancel() {
     creator->continueCalc({});
     stopProgress();
 }
 
-void FormsUtil::errorHandler(int) {
+void GcFormBase::errorHandler(int) {
     stopProgress();
     if (bool fl = ErrorDialog(std::move(creator->items), this).exec(); fl) {
         startProgress();
@@ -169,7 +151,7 @@ void FormsUtil::errorHandler(int) {
         creator->continueCalc(fl);
 }
 
-void FormsUtil::startProgress() {
+void GcFormBase::startProgress() {
     if (!fileCount)
         fileCount = 1;
     creator->msg = fileName_;
@@ -177,7 +159,7 @@ void FormsUtil::startProgress() {
     progressTimerId = startTimer(100);
 }
 
-void FormsUtil::stopProgress() {
+void GcFormBase::stopProgress() {
     killTimer(progressTimerId);
     progressTimerId = 0;
     progressDialog->reset();

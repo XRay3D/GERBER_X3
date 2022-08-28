@@ -109,7 +109,7 @@ Paths File::merge() const {
                         }
                     }
                     offset.AddPaths(paths, ClipperLib::jtRound, ClipperLib::etOpenRound);
-                    offset.Execute(paths, apertures_.at(aperture)->apertureSize() * uScale * 0.5);
+                    offset.Execute(paths, apertures_.at(aperture)->apSize() * uScale * 0.5);
                     // pathList.back().append(std::move(paths));
                     pathList.back().append(paths);
                 }
@@ -160,7 +160,7 @@ Paths File::merge() const {
     return mergedPaths_;
 }
 
-const QList<Comp::Component> &File::components() const { return components_; }
+const QList<Comp::Component>& File::components() const { return components_; }
 
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;

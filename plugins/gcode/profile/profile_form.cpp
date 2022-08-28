@@ -15,33 +15,17 @@
 #include "ui_profileform.h"
 
 #include "gi_bridge.h"
-#include "project.h"
 #include "scene.h"
 #include "settings.h"
 #include <QMessageBox>
 
 ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::ProfileCreator, parent)
-    , ui(new Ui::ProfileForm)
-    , names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")}
-//    , pixmaps {
-//        "prof_on_climb",
-//        "prof_out_climb",
-//        "prof_in_climb",
-//        "prof_on_conv",
-//        "prof_out_conv",
-//        "prof_in_conv",
-//    }
-{
+    : GcFormBase(plugin, new GCode::ProfileCreator, parent)
+    , ui(new Ui::ProfileForm) {
     ui->setupUi(content);
-    ///*parent->*/setWindowTitle(ui->label->text());
-    label->setText(tr("Profile Toolpath"));
-    setWindowTitle(label->text());
+    setWindowTitle(tr("Profile Toolpath"));
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
-
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
 
     MySettings settings;
     settings.beginGroup("ProfileForm");
@@ -68,8 +52,9 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
 
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &ProfileForm::createFile);
+    connect(leName, &QLineEdit::textChanged, this, &ProfileForm::onNameTextChanged);
+
+    //
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
         if (side == GCode::On)
             checked ? trimming_ |= Trimming::Line : trimming_ &= ~Trimming::Line;
@@ -78,7 +63,6 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     });
 
     connect(ui->pbAddBridge, &QPushButton::clicked, this, &ProfileForm::onAddBridgeClicked);
-    connect(leName, &QLineEdit::textChanged, this, &ProfileForm::onNameTextChanged);
 }
 
 ProfileForm::~ProfileForm() {
@@ -240,6 +224,8 @@ void ProfileForm::rb_clicked() {
         direction = GCode::Conventional;
 
     updateName();
+    updateButtonIconSize();
+
     updatePixmap();
 }
 

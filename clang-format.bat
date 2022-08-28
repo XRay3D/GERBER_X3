@@ -7,4 +7,4 @@ for %%P in (GGEasy GTE_Win plugins static_libs) do (
 	)
 	cd ..
 )
-pause
+REM pause

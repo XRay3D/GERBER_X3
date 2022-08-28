@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Thermal]->toggle(); });
+        QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
     }
 }
 
@@ -191,6 +191,11 @@ void MainWindow::createActions() {
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dockWidget_->setObjectName(QStringLiteral("dwCreatePath"));
     dockWidget_->installEventFilter(this);
+
+    QFont font;
+    font.setBold(true);
+    dockWidget_->setFont(font);
+
     // fileMenu
     createActionsFile();
     // zoomToolBar
@@ -1158,10 +1163,11 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
         exit(-66);
 
     delete dockWidget_->widget();
-    dockWidget_->show();
     dockWidget_->setWidget(dwContent);
+    dockWidget_->setWindowTitle(dwContent->windowTitle());
     if (auto pbClose {dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
         connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
+    dockWidget_->show();
 }
 
 void MainWindow::open() {

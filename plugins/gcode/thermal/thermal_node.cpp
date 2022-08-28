@@ -91,7 +91,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
                 childItems = parent_->childs.mid(1);
             switch (index.column()) {
             case Model::Name:
-            case Model::Position:
+                //            case Model::Position:
                 return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
@@ -113,8 +113,8 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         } else {
             switch (index.column()) {
             case Model::Name:
-            case Model::Position:
-                return false;
+                //            case Model::Position:
+                //                return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
                 item_->redraw();
@@ -139,9 +139,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch (index.column()) {
         case Model::Name:
-            return name;
-        case Model::Position:
-            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
+            return name.size() ? name : pos_.toString();
+            //        case Model::Position:
+            //            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:
@@ -186,7 +186,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags flags = Qt::ItemIsEnabled;
     if (!index.column())
         flags |= Qt::ItemIsUserCheckable;
-    if (index.column() > Model::Position)
+    if (index.column() > Model::/*Position*/ Name)
         flags |= Qt::ItemIsEditable;
     if (!container)
         flags |= Qt::ItemNeverHasChildren;

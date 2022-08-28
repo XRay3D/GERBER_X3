@@ -1,4 +1,4 @@
-/********************************************************************************
+/********************************************************************************4
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
@@ -25,18 +25,13 @@ class file_;
 class GraphicsItem;
 class QProgressDialog;
 
-struct FormsUtilI {
-    virtual void createFile() = 0;
-    virtual void updateName() = 0;
-};
-
-class FormsUtil : public QWidget, protected FormsUtilI {
+class GcFormBase : public QWidget {
     Q_OBJECT
     friend class MainWindow;
 
 public:
-    explicit FormsUtil(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent = nullptr);
-    ~FormsUtil() override;
+    explicit GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent = nullptr);
+    ~GcFormBase() override;
     virtual void editFile(GCode::File* file) = 0;
 
 signals:
@@ -44,9 +39,15 @@ signals:
 
 protected:
     void fileHandler(GCode::File* file);
+    void updateButtonIconSize() {
+        for (auto* button : findChildren<QPushButton*>())
+            button->setIconSize({16, 16});
+    }
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
+    virtual void createFile() = 0;
+    virtual void updateName() = 0;
 
     GCode::Creator* const creator;
     GCode::Direction direction = GCode::Climb;
@@ -58,13 +59,13 @@ protected:
     QString fileName_;
 
     bool editMode_ = false;
-    int fileId = -1;
+    int fileId {-1};
 
-    int fileCount;
+    int fileCount {1};
     GCodePlugin* const plugin;
 
     DepthForm* dsbxDepth;
-    QLabel* label;
+    //    QLabel* label;
     QLineEdit* leName;
     QPushButton* pbClose;
     QPushButton* pbCreate;

@@ -20,7 +20,7 @@
 #include <QMessageBox>
 
 HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::HatchingCreator, parent)
+    : GcFormBase(plugin, new GCode::HatchingCreator, parent)
     , ui(new Ui::HatchingForm)
     , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps {
@@ -28,11 +28,8 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
           QStringLiteral("pock_rast_conv"),
       } {
     ui->setupUi(content);
-    label->setText(tr("Crosshatch Toolpath"));
-    /*parent->*/ setWindowTitle(label->text());
 
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
+    setWindowTitle(tr("Crosshatch Toolpath"));
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -54,8 +51,9 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &HatchingForm::updateName);
 
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &HatchingForm::createFile);
+    connect(leName, &QLineEdit::textChanged, this, &HatchingForm::onNameTextChanged);
+
+    //
 }
 
 HatchingForm::~HatchingForm() {
@@ -174,6 +172,7 @@ void HatchingForm::rb_clicked() {
 
     updateName();
     updatePixmap();
+    updateButtonIconSize();
 }
 
 void HatchingForm::resizeEvent(QResizeEvent* event) {
@@ -186,7 +185,7 @@ void HatchingForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void HatchingForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void HatchingForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void HatchingForm::editFile(GCode::File* /*file*/) {
 }

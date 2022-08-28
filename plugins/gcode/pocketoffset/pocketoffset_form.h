@@ -15,7 +15,7 @@ namespace Ui {
 class PocketOffsetForm;
 }
 
-class PocketOffsetForm : public FormsUtil {
+class PocketOffsetForm : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -24,7 +24,7 @@ public:
 
 private slots:
     void on_sbxSteps_valueChanged(int arg1);
-    void on_leName_textChanged(const QString& arg1);
+    void onNameTextChanged(const QString& arg1);
 
 private:
     Ui::PocketOffsetForm* ui;

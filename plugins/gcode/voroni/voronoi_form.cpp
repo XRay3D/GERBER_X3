@@ -20,15 +20,11 @@
 #include <QMessageBox>
 
 VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::VoronoiCreator, parent)
+    : GcFormBase(plugin, new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
-    label->setText(tr("Voronoi Toolpath"));
-    /*parent->*/ setWindowTitle(label->text());
-
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
+    setWindowTitle(tr("Voronoi Toolpath"));
 
     ui->cbxSolver->setCurrentIndex(-1);
 
@@ -45,15 +41,14 @@ VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
 #endif
     settings.endGroup();
 
-    connect(pbCreate, &QPushButton::clicked, this, &VoronoiForm::createFile);
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-
+    connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
+    connect(leName, &QLineEdit::textChanged, this, &VoronoiForm::onNameTextChanged);
+    //
+    connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
 
-    connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
-
     updateName();
+    updateButtonIconSize();
 }
 
 VoronoiForm::~VoronoiForm() {
@@ -140,7 +135,7 @@ void VoronoiForm::updateName() {
     setWidth(0.0);
 }
 
-void VoronoiForm::on_leName_textChanged(const QString& arg1) {
+void VoronoiForm::onNameTextChanged(const QString& arg1) {
     fileName_ = arg1;
 }
 

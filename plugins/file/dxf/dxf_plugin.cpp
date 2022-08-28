@@ -155,7 +155,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
-        Drills retData;
+        Drill::Preview retData;
         auto const dxfFile = static_cast<File*>(file);
         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
             for (auto&& go : layer->graphicObjects())

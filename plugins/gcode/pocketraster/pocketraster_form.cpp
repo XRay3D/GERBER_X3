@@ -20,16 +20,12 @@
 #include <QMessageBox>
 
 PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::RasterCreator, parent)
+    : GcFormBase(plugin, new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
 
-    label->setText(tr("Pocket Raster Toolpath"));
-    setWindowTitle(label->text());
-
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
+    setWindowTitle(tr("Pocket Raster Toolpath"));
 
     MySettings settings;
     settings.beginGroup("PocketRasterForm");
@@ -53,8 +49,9 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
 
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
 
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &PocketRasterForm::createFile);
+    connect(leName, &QLineEdit::textChanged, this, &PocketRasterForm::onNameTextChanged);
+
+    //
 }
 
 PocketRasterForm::~PocketRasterForm() {
@@ -173,6 +170,8 @@ void PocketRasterForm::rb_clicked() {
         direction = GCode::Conventional;
 
     updateName();
+    updateButtonIconSize();
+
     updatePixmap();
 }
 
@@ -186,7 +185,7 @@ void PocketRasterForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void PocketRasterForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void PocketRasterForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void PocketRasterForm::editFile(GCode::File* /*file*/) {
 }

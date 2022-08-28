@@ -26,12 +26,12 @@ namespace Thermal {
 enum { Size = 24 };
 
 Form::Form(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new Creator, parent)
+    : GcFormBase(plugin, new Creator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
 
-    grid->setRowStretch(3, 1);
-    grid->setRowStretch(8, 0);
+    grid->setRowStretch(2, 1);
+    grid->setRowStretch(7, 0);
 
     MySettings settings;
     settings.beginGroup("Form");
@@ -45,14 +45,11 @@ Form::Form(GCodePlugin* plugin, QWidget* parent)
     settings.getValue(ui->chbxPath);
     settings.getValue(ui->chbxPour);
     settings.endGroup();
-    label->setText(tr("Thermal Insulation Toolpath"));
-    /*parent->*/ setWindowTitle(label->text());
+    setWindowTitle(tr("Thermal Insulation Toolpath"));
 
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
 
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &Form::createFile);
+    //
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
 
     ui->treeView->setIconSize(QSize(Size, Size));
@@ -63,6 +60,7 @@ Form::Form(GCodePlugin* plugin, QWidget* parent)
     connect(ui->chbxPour, &QCheckBox::toggled, [this] { createTPI(nullptr); });
 
     updateName();
+    updateButtonIconSize();
 
     if (0) {
         chbx = new QCheckBox("", ui->treeView);
@@ -83,7 +81,7 @@ Form::Form(GCodePlugin* plugin, QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
-    ui->treeView->hideColumn(1);
+    //    ui->treeView->hideColumn(1);
     ui->treeView->setItemDelegate(new Delegate(this));
     {
         ui->treeView->setIconSize({Size, Size});
@@ -154,7 +152,7 @@ bool Form::canToShow() {
     return false;
 }
 
-void Form::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void Form::createFile() {
     if (!tool.isValid()) {

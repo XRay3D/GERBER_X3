@@ -44,11 +44,7 @@
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label_7">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
+     
      <property name="text">
       <string>Solver:</string>
      </property>
@@ -70,11 +66,7 @@
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_4">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
+     
      <property name="text">
       <string>Precision:</string>
      </property>
@@ -104,11 +96,7 @@
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="label_8">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
+     
      <property name="text">
       <string>Frame Offset:</string>
      </property>
@@ -129,11 +117,7 @@
    </item>
    <item row="5" column="0">
     <widget class="QLabel" name="label_5">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
+     
      <property name="text">
       <string>Width:</string>
      </property>

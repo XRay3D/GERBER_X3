@@ -43,7 +43,7 @@ class AbstractAperture {
 
 public:
     AbstractAperture(const File* file);
-    virtual ~AbstractAperture();
+    virtual ~AbstractAperture() = default;
 
     virtual ApertureType type() const = 0;
     virtual QString name() const = 0;
@@ -56,15 +56,16 @@ public:
     bool used() const noexcept { return isUsed_; }
     bool withHole() const noexcept { return drillDiam_ > 0.0; }
 
-    double apertureSize();
-    double drillDiameter() const { return drillDiam_; }
-    double minSize() const noexcept { return size_; }
+    double apSize();
+    double drillDiameter() const noexcept { return drillDiam_; }
+    double minSize() const noexcept { return minSize_; }
 
     void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
 protected:
     double drillDiam_ {};
     double size_ {};
+    double minSize_ {};
     const File* file_;
     Paths paths_;
     bool isFlashed_ {};
