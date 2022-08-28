@@ -15,6 +15,8 @@
 
 #include <QTableView>
 
+namespace Drill {
+
 Header::Header(Qt::Orientation orientation, QWidget* parent)
     : QHeaderView(orientation, parent) {
     connect(this, &QHeaderView::sectionCountChanged, [this](int /*oldCount*/, int newCount) {
@@ -109,4 +111,6 @@ void Header::setChecked(int index, bool ch) { model()->setCreate(index, ch); }
 
 bool Header::checked(int index) const { return model()->useForCalc(index); }
 
-DrillModel* Header::model() const { return static_cast<DrillModel*>(static_cast<QTableView*>(parent())->model()); }
+Model* Header::model() const { return static_cast<Model*>(static_cast<QTableView*>(parent())->model()); }
+
+} // namespace Drill

@@ -5,13 +5,15 @@
 #include "gi_preview.h"
 #include "qpainterpath.h"
 
-class GiDrillPreview final : public GiAbstractPreview {
-    PosPath hv;
+namespace Drill {
+
+class GiPreview final : public GiAbstractPreview {
+    PosOrPath hv;
     Row& row;
     int toolId_ {-1};
 
 public:
-    explicit GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
+    explicit GiPreview(PosOrPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
 
     // GiAbstractPreview interface
     void updateTool() override;
@@ -30,3 +32,5 @@ public:
 private:
     static Paths offset(const Path& path, double offset);
 };
+
+} // namespace Drill

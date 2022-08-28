@@ -109,9 +109,8 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     if (parent != nullptr)
         setWindowTitle(ui->label->text());
 
-    for (QPushButton* button : findChildren<QPushButton*>()) {
+    for (auto* button : findChildren<QPushButton*>())
         button->setIconSize({16, 16});
-    }
 
     App::setGCodePropertiesForm(this);
 }

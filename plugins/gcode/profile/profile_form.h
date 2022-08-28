@@ -12,13 +12,14 @@
 
 #include "gc_formsutil.h"
 #include "gc_plugin.h"
+#include <array>
 
 namespace Ui {
 class ProfileForm;
 }
 class GiBridge;
 
-class ProfileForm : public FormsUtil {
+class ProfileForm : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -30,13 +31,18 @@ private slots:
     void onNameTextChanged(const QString& arg1);
 
 private:
-    Ui::ProfileForm* ui;
-    double size_ = 0.0;
-    double lenght_ = 0.0;
     void updateBridge();
     void updatePixmap();
-    const QStringList names;
-    static inline const QString pixmaps[] {
+    void rb_clicked();
+
+    double size_ = 0.0;
+    double lenght_ = 0.0;
+
+    Ui::ProfileForm* ui;
+    GiBridge* brItem = nullptr;
+
+    const QStringList names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
+    static inline const std::array pixmaps {
         QStringLiteral("prof_on_climb"),
         QStringLiteral("prof_out_climb"),
         QStringLiteral("prof_in_climb"),
@@ -44,8 +50,6 @@ private:
         QStringLiteral("prof_out_conv"),
         QStringLiteral("prof_in_conv"),
     };
-    void rb_clicked();
-    GiBridge* brItem = nullptr;
 
     enum Trimming {
         Line = 1,
@@ -55,15 +59,14 @@ private:
 
 protected:
     // QWidget interface
-    void
-    resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     // FormsUtil interface
     void createFile() override;
     void updateName() override;
 
 public:
-    virtual void editFile(GCode::File* file) override;
+    void editFile(GCode::File* file) override;
 };
 
 #include <QToolBar>

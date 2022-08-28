@@ -24,7 +24,7 @@ enum {
 };
 
 PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
-    : FormsUtil(plugin, new GCode::PocketCreator, parent)
+    : GcFormBase(plugin, new GCode::PocketCreator, parent)
     , ui(new Ui::PocketOffsetForm)
     , names {tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
@@ -33,11 +33,7 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     ui->toolHolder3->label()->setText("Tool 3:");
     ui->toolHolder4->label()->setText("Tool 4:");
 
-    label->setText(tr("Pocket Offset Toolpath"));
-    /*parent->*/ setWindowTitle(label->text());
-
-    for (QPushButton* button : findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
+    setWindowTitle(tr("Pocket Offset Toolpath"));
 
     MySettings settings;
     settings.beginGroup("PocketOffsetForm");
@@ -62,8 +58,9 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
 
-    connect(pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(pbCreate, &QPushButton::clicked, this, &PocketOffsetForm::createFile);
+    connect(leName, &QLineEdit::textChanged, this, &PocketOffsetForm::onNameTextChanged);
+
+    //
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
@@ -218,6 +215,8 @@ void PocketOffsetForm::rb_clicked() {
     }
 
     updateName();
+    updateButtonIconSize();
+
     updatePixmap();
 }
 
@@ -231,7 +230,7 @@ void PocketOffsetForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
 }
 
-void PocketOffsetForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
+void PocketOffsetForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void PocketOffsetForm::editFile(GCode::File* /*file*/) {
 }

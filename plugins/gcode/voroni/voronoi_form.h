@@ -15,7 +15,7 @@ namespace Ui {
 class VoronoiForm;
 }
 
-class VoronoiForm : public FormsUtil {
+class VoronoiForm : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -23,7 +23,7 @@ public:
     ~VoronoiForm() override;
 
 private slots:
-    void on_leName_textChanged(const QString& arg1);
+    void onNameTextChanged(const QString& arg1);
     void on_cbxSolver_currentIndexChanged(int index);
 
 private:

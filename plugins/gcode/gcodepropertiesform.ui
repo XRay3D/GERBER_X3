@@ -61,12 +61,7 @@
       </property>
       <item>
        <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
+<property name="text">
          <string>G-Code Properties</string>
         </property>
        </widget>
@@ -219,11 +214,6 @@
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
-        <property name="font">
-         <font>
-          <bold>false</bold>
-         </font>
-        </property>
         <property name="text">
          <string>Safe Z</string>
         </property>
@@ -522,11 +512,6 @@
      </property>
      <item>
       <widget class="QLabel" name="glueLabel">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
        <property name="text">
         <string>Glue</string>
        </property>

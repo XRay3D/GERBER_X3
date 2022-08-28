@@ -46,7 +46,7 @@ int Model::rowCount(const QModelIndex& parent) const {
     return getItem(parent)->childCount();
 }
 
-int Model::columnCount(const QModelIndex& /*parent*/) const { return 5; }
+int Model::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 
 QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
     Node* childItem = getItem(parent)->child(row);
@@ -83,7 +83,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    static const QStringList horizontalLabel {tr("     Name|Pos (X:Y)|Angle|Tickness|Count").split('|')};
+    static const QStringList horizontalLabel {tr("     Name|Angle|Tickness|Count").split('|')};
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal)

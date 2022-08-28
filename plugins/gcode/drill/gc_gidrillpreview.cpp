@@ -13,7 +13,9 @@
 #include "gc_gidrillpreview.h"
 #include "utils.h"
 
-GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
+namespace Drill {
+
+GiPreview::GiPreview(PosOrPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
     : hv {std::move(hv)}
     , row {row}
     , toolId_ {toolId} {
@@ -50,7 +52,7 @@ GiDrillPreview::GiDrillPreview(PosPath&& hv, double diameter, int toolId, Row& r
     update();
 }
 
-void GiDrillPreview::updateTool() {
+void GiPreview::updateTool() {
     if (toolId() > -1) {
         colorState |= Tool;
 
@@ -102,7 +104,7 @@ void GiDrillPreview::updateTool() {
     changeColor();
 }
 
-Paths GiDrillPreview::paths() const {
+Paths GiPreview::paths() const {
     auto getPath = Overload {
         [this](const QPointF& val) {
             //            auto path { CirclePath(sourceDiameter_ * uScale, val) };
@@ -116,16 +118,16 @@ Paths GiDrillPreview::paths() const {
     return std::visit(getPath, hv);
 }
 
-bool GiDrillPreview::fit(double depth) const {
+bool GiPreview::fit(double depth) const {
     const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth);
     return sourceDiameter_ > diameter && !qFuzzyCompare(sourceDiameter_, diameter);
 }
 
-int GiDrillPreview::toolId() const {
+int GiPreview::toolId() const {
     return toolId_ < 0 ? row.toolId : toolId_;
 }
 
-Paths GiDrillPreview::offset(const Path& path, double offset) {
+Paths GiPreview::offset(const Path& path, double offset) {
     ClipperOffset cOffset;
     Paths retPaths;
     // cpOffset.AddPath(path, jtRound, etClosedLine);
@@ -138,10 +140,12 @@ Paths GiDrillPreview::offset(const Path& path, double offset) {
     return retPaths;
 }
 
-int GiDrillPreview::type() const { return int(GiType::Preview) + hv.index(); }
+int GiPreview::type() const { return int(GiType::Preview) + hv.index(); }
 
-bool GiDrillPreview::isSlot() const { return hv.index(); }
+bool GiPreview::isSlot() const { return hv.index(); }
 
-Paths GiDrillPreview::offset() const {
+Paths GiPreview::offset() const {
     return offset(paths().front(), sourceDiameter_);
 }
+
+} // namespace Drill

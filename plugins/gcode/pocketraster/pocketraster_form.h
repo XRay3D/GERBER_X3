@@ -15,7 +15,7 @@ namespace Ui {
 class PocketRasterForm;
 }
 
-class PocketRasterForm : public FormsUtil {
+class PocketRasterForm : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -23,7 +23,7 @@ public:
     ~PocketRasterForm();
 
 private slots:
-    void on_leName_textChanged(const QString& arg1);
+    void onNameTextChanged(const QString& arg1);
 
 private:
     Ui::PocketRasterForm* ui;

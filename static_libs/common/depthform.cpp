@@ -86,12 +86,7 @@ void DepthForm::setupUi(QWidget* Form) {
         label = new QLabel(Form);
         label->setObjectName(QString::fromUtf8("label"));
 
-        QFont font;
-        font.setBold(true);
-        //        font.setWeight(75);
-        label->setFont(font);
-
-        QFontMetrics fm(font);
+        QFontMetrics fm(font());
         label->setMinimumWidth(std::max(
             fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
             fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));

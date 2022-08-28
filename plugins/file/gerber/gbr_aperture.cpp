@@ -51,10 +51,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
 }
 
 AbstractAperture::AbstractAperture(const File* file)
-    : file_(file) {
-}
-
-AbstractAperture::~AbstractAperture() { }
+    : file_(file) { }
 
 Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     if (state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
@@ -83,7 +80,7 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     return retPaths;
 }
 
-double AbstractAperture::apertureSize() {
+double AbstractAperture::apSize() {
     if (paths_.empty())
         draw();
     return size_;
@@ -157,7 +154,7 @@ void ApCircle::write(QDataStream& stream) const {
 
 void ApCircle::draw() {
     paths_.emplace_back(CirclePath(diam_ * uScale));
-    size_ = diam_;
+    minSize_ = size_ = diam_;
 }
 
 /////////////////////////////////////////////////////
@@ -206,6 +203,7 @@ void ApRectangle::write(QDataStream& stream) const {
 void ApRectangle::draw() {
     paths_.emplace_back(RectanglePath(width_ * uScale, height_ * uScale));
     size_ = std::sqrt(width_ * width_ + height_ * height_);
+    minSize_ = std::min(width_, height_);
 }
 
 /////////////////////////////////////////////////////
@@ -264,6 +262,7 @@ void ApObround::draw() {
         clipper.Execute(ctUnion, paths_, pftNonZero, pftNonZero);
     }
     size_ = std::max(height_, width_);
+    minSize_ = std::min(width_, height_);
 }
 
 /////////////////////////////////////////////////////
@@ -324,7 +323,7 @@ void ApPolygon::draw() {
         RotatePath(poligon, rotation_);
     }
     paths_.push_back(poligon);
-    size_ = diam_;
+    minSize_ = size_ = diam_;
 }
 
 /////////////////////////////////////////////////////
@@ -474,6 +473,7 @@ void ApMacro::draw() {
         const double x = rect.right * dScale;
         const double y = rect.top * dScale;
         size_ = std::sqrt(x * x + y * y);
+        minSize_ = std::min(x, y);
     }
 }
 
@@ -750,6 +750,7 @@ void ApBlock::draw() {
         const double x = rect.right * dScale;
         const double y = rect.top * dScale;
         size_ = std::sqrt(x * x + y * y);
+        minSize_ = std::min(x, y);
     }
 }
 

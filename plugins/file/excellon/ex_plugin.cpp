@@ -49,7 +49,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
-        Drills retData;
+        Drill::Preview retData;
         auto const exFile = static_cast<File*>(file);
         for (const Excellon::Hole& hole : *exFile) {
             auto name {QString("T%1").arg(hole.state.toolId)};

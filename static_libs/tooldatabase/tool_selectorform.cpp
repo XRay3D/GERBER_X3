@@ -108,13 +108,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
             label_->setSizePolicy(sizePolicy);
         }
 
-        QFont font;
-        font.setBold(true);
-        //        font.setWeight(75);
-        label_->setFont(font);
-
-        QFontMetrics fm(font);
-
+        QFontMetrics fm(font());
         label_->setMinimumWidth(std::max(
             fm.horizontalAdvance(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr)),
             fm.horizontalAdvance(QCoreApplication::translate("DepthForm", "Depth:", nullptr))));

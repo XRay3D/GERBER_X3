@@ -28,7 +28,7 @@ namespace Thermal {
 
 class AbstractThermPrGi;
 
-class Form : public FormsUtil {
+class Form : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -39,7 +39,7 @@ public:
     static bool canToShow();
 
 private slots:
-    void on_leName_textChanged(const QString& arg1);
+    void onNameTextChanged(const QString& arg1);
 
     void on_cbxFileCurrentIndexChanged(int index);
     void on_dsbxDepth_valueChanged(double arg1);

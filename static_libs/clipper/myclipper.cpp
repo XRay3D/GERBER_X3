@@ -30,7 +30,6 @@
 //#endif
 // }
 
-
 Path CirclePath(double diametr, const IntPoint& center) {
     if (diametr == 0.0)
         return Path();

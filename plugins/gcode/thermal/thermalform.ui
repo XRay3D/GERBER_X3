@@ -102,12 +102,7 @@
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label_4">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
+<property name="text">
       <string>File:</string>
      </property>
      <property name="alignment">

@@ -14,7 +14,9 @@
 #include <QAbstractTableModel>
 #include <QIcon>
 
-class GiDrillPreview;
+namespace Drill {
+
+class GiPreview;
 
 struct Row {
     //    Row(QString&& name = {},
@@ -35,10 +37,10 @@ struct Row {
     const bool isSlot;
     bool useForCalc {};
     int toolId {-1};
-    mvector<GiDrillPreview*> items;
+    mvector<GiPreview*> items;
 };
 
-class DrillModel : public QAbstractTableModel {
+class Model : public QAbstractTableModel {
     Q_OBJECT
 
     mvector<Row> data_;
@@ -54,16 +56,19 @@ signals:
     void set(int, bool);
 
 public:
-    DrillModel(QString type, int rowCount, QObject* parent = nullptr);
-    DrillModel(QObject* parent = nullptr);
+    explicit Model(QString type, int rowCount, QObject* parent = nullptr);
+    ~Model() override { qDebug(__FUNCTION__); }
 
-    void setToolId(int row, int id);
-    int toolId(int row);
-    bool isSlot(int row);
-    int apertureId(int row);
-    bool useForCalc(int row) const;
-    void setCreate(int row, bool create);
+    bool isSlot(int row) const { return data_[row].isSlot; }
+    bool useForCalc(int row) const { return data_[row].useForCalc; }
+
+    int apertureId(int row) const { return data_[row].apertureId; }
+    int toolId(int row) const { return data_[row].toolId; }
+
     void setCreate(bool create);
+    void setCreate(int row, bool create);
+    void setToolId(int row, int id);
+    void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = {}) const override;
@@ -71,10 +76,11 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-    void setType(int type) { type = type; }
 
     mvector<Row>& data() { return data_; }
     const mvector<Row>& data() const { return data_; }
     auto begin() { return data_.begin(); }
     auto end() { return data_.end(); }
 };
+
+} // namespace Drill

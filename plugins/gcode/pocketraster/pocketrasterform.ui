@@ -31,12 +31,7 @@
      <property name="enabled">
       <bool>true</bool>
      </property>
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
+<property name="text">
       <string>Profile Pass:</string>
      </property>
      <property name="alignment">
@@ -259,12 +254,7 @@
    </item>
    <item row="7" column="1">
     <widget class="QLabel" name="labelAcc">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
+<property name="text">
       <string>Acceleration:</string>
      </property>
      <property name="alignment">
@@ -277,12 +267,7 @@
      <property name="enabled">
       <bool>true</bool>
      </property>
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
+<property name="text">
       <string>Raster Angle:</string>
      </property>
      <property name="alignment">

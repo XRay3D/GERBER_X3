@@ -15,7 +15,7 @@ namespace Ui {
 class HatchingForm;
 }
 
-class HatchingForm : public FormsUtil {
+class HatchingForm : public GcFormBase {
     Q_OBJECT
 
 public:
@@ -23,7 +23,7 @@ public:
     ~HatchingForm();
 
 private slots:
-    void on_leName_textChanged(const QString& arg1);
+    void onNameTextChanged(const QString& arg1);
 
 private:
     Ui::HatchingForm* ui;

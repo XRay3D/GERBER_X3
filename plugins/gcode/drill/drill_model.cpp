@@ -20,17 +20,15 @@
 #include <QDebug>
 #include <QPainter>
 
-DrillModel::DrillModel(QString type, int rowCount, QObject* parent)
+namespace Drill {
+
+Model::Model(QString type, int rowCount, QObject* parent)
     : QAbstractTableModel(parent)
     , type(type) {
     data_.reserve(rowCount);
 }
 
-DrillModel::DrillModel(QObject* parent)
-    : QAbstractTableModel(parent) {
-}
-
-void DrillModel::setToolId(int row, int id) {
+void Model::setToolId(int row, int id) {
     if (data_[row].toolId != id)
         data_[row].useForCalc = id > -1;
     data_[row].toolId = id;
@@ -42,15 +40,7 @@ void DrillModel::setToolId(int row, int id) {
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
-int DrillModel::toolId(int row) { return data_[row].toolId; }
-
-bool DrillModel::isSlot(int row) { return data_[row].isSlot; }
-
-int DrillModel::apertureId(int row) { return data_[row].apertureId; }
-
-bool DrillModel::useForCalc(int row) const { return data_[row].useForCalc; }
-
-void DrillModel::setCreate(int row, bool create) {
+void Model::setCreate(int row, bool create) {
     if (data_[row].toolId == -1)
         return;
     data_[row].useForCalc = create;
@@ -62,18 +52,18 @@ void DrillModel::setCreate(int row, bool create) {
     emit headerDataChanged(Qt::Vertical, row, row);
 }
 
-void DrillModel::setCreate(bool create) {
+void Model::setCreate(bool create) {
     for (int row = 0; row < rowCount(); ++row) {
         data_[row].useForCalc = create && data_[row].toolId != -1;
     }
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
-int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(data_.size()); }
+int Model::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(data_.size()); }
 
-int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
+int Model::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 
-QVariant DrillModel::data(const QModelIndex& index, int role) const {
+QVariant Model::data(const QModelIndex& index, int role) const {
     int row = index.row();
     if (index.column() == Name) {
         switch (role) {
@@ -137,7 +127,7 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const {
     return QVariant();
 }
 
-QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
     switch (role) {
     case Qt::DisplayRole:
         if (orientation == Qt::Horizontal) {
@@ -162,8 +152,10 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
     }
 }
 
-Qt::ItemFlags DrillModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     if (index.column() == Name)
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
+
+} // namespace Drill

@@ -3,6 +3,8 @@
 #include "drill_form.h"
 #include "qwidget.h"
 
+namespace Drill {
+
 class Header : public QHeaderView {
     Q_OBJECT
 
@@ -33,5 +35,7 @@ private:
     mutable mvector<QRect> checkRect_;
     void setChecked(int index, bool ch);
     bool checked(int index) const;
-    DrillModel* model() const;
+    Model* model() const;
 };
+
+} // namespace Drill

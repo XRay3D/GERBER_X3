@@ -59,7 +59,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
     };
 
     if (plugin->type() == ::GCode::Drill) {
-        Drills retData;
+        Drill::Preview retData;
         double drillDiameter {};
 
         auto const gbrFile = static_cast<File*>(file);
@@ -77,9 +77,11 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
                 drillDiameter = ap.drillDiameter();
                 name += tr(", drill Ø%1mm").arg(drillDiameter);
             } else if (ap.type() == Circle) {
-                drillDiameter = ap.apertureSize();
+                drillDiameter = ap.apSize();
+            } else {
+                drillDiameter = ap.minSize();
             }
-
+            qDebug() << ap.type() << "ap.apSize()" << ap.apSize();
             retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
 
             // draw aperture

@@ -558,7 +558,7 @@ Paths Parser::createLine() {
         if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
     } else {
-        double size = file->apertures_[state_.aperture()]->apertureSize() * uScale * 0.5 * state_.scaling();
+        double size = file->apertures_[state_.aperture()]->apSize() * uScale * 0.5 * state_.scaling();
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
