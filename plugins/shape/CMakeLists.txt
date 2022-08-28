@@ -27,7 +27,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-#include_directories()
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -44,14 +43,6 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    #    clipper
-    #    common
-    #    filetree
-    #    gi
-    #    graphicsview
-    #    shape
-    #    tooldatabase
-    #    File_Plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
