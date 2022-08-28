@@ -57,7 +57,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-##add_subdirectory(thermal2)
+#add_subdirectory(thermal2)
 add_subdirectory(profile)
 add_subdirectory(pocketoffset)
 
