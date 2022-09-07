@@ -12,5 +12,15 @@
 namespace Dxf {
 struct Viewport final : Entity {
     Viewport(SectionParser* sp);
+
+    // Entity interface
+public:
+    Type type() const override {
+        ret/*urn Type::WIPEOUT;*/
+    }
+
+    GraphicObject toGo() const override {
+        return { id, {}, {} };
+    }
 };
 } // namespace Dxf

@@ -29,10 +29,13 @@
 #include "dxf_solid.h"
 #include "dxf_spline.h"
 #include "dxf_text.h"
+#include "dxf_wipeout.h"
+#include "dxf_dimension.h"
+
+//#include "dxf_viewport.h"//
 
 //#include "dxf_attrib.h"
 //#include "dxf_body.h"
-//#include "dxf_dimension.h"
 //#include "dxf_helix.h"
 //#include "dxf_image.h"
 //#include "dxf_leader.h"
@@ -54,6 +57,4 @@
 //#include "dxf_trace.h"
 //#include "dxf_underlay.h"
 //#include "dxf_vertex.h"
-//#include "dxf_viewport.h"
-//#include "dxf_wipeout.h"
 //#include "dxf_xline.h"
