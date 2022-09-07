@@ -68,7 +68,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::CIRCLE:
         return std::make_shared<Circle>(sp); // return std::make_shared<Dummy>(sp);
     case Entity::DIMENSION:
-        break;
+        return std::make_shared<Dimension>(sp); // return std::make_shared<Dummy>(sp);
     case Entity::ELLIPSE:
         return std::make_shared<Ellipse>(sp); // return std::make_shared<Dummy>(sp);
     case Entity::HATCH:
@@ -124,6 +124,8 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::VIEWPORT:
         return std::make_shared<Dummy>(sp); // return std::make_shared<Dummy>(sp);
     case Entity::WIPEOUT:
+        return std::make_shared<Wipeout>(sp); // return std::make_shared<Dummy>(sp);
+
     case Entity::XLINE:
         break;
     default:

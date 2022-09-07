@@ -24,6 +24,7 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
+#include <QTextCodec>
 
 void translation(QApplication* app);
 
@@ -58,6 +59,9 @@ int main(int argc, char** argv) {
     QApplication::setApplicationName("GGEasy");
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
+
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
 
     [[maybe_unused]] App appSingleton;
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();

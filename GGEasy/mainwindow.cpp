@@ -39,12 +39,12 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui {new Ui::MainWindow}
-    , recentFiles {this, "recentFiles"}
-    , recentProjects {this, "recentProjects"}
-    , project_ {new Project {this}}
-    , actionGroup {this}
-    , reloadQuestion {this} {
+    , ui { new Ui::MainWindow }
+    , recentFiles { this, "recentFiles" }
+    , recentProjects { this, "recentProjects" }
+    , project_ { new Project { this } }
+    , actionGroup { this }
+    , reloadQuestion { this } {
     App::setMainWindow(this);
 
     ui->setupUi(this);
@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget* parent)
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if (dir.exists())
-                for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
+                for (QString str : dir.entryList({ "*.gbr" }, QDir::Files)) {
                     str = dir.path() + '/' + str;
                     QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                     // break;
@@ -359,7 +359,7 @@ void MainWindow::createActionsService() {
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
-            setGeometry(QRect {0, 1080, 1024, 720});
+            setGeometry(QRect { 0, 1080, 1024, 720 });
         }));
     }
 }
@@ -561,14 +561,14 @@ void MainWindow::saveSelectedGCodeFiles() {
 
     std::map<Key, GcFiles> gcFilesMap;
     for (GCode::File* file : gcFiles)
-        gcFilesMap[{file->getTool().hash2(), file->side()}].append(file);
+        gcFilesMap[{ file->getTool().hash2(), file->side() }].append(file);
 
     for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
                 if (!name.endsWith(GCode::Settings::fileExtension()))
-                    name += QStringList({"_TS", "_BS"})[file->side()];
+                    name += QStringList({ "_TS", "_BS" })[file->side()];
 
                 name = QFileDialog::getSaveFileName(nullptr,
                     QObject::tr("Save GCode file"),
@@ -583,7 +583,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         } else {
             QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith(GCode::Settings::fileExtension()))
-                name += QStringList({"_TS", "_BS"})[files.first()->side()];
+                name += QStringList({ "_TS", "_BS" })[files.first()->side()];
 
             name = QFileDialog::getSaveFileName(nullptr,
                 QObject::tr("Save GCode file"),
@@ -784,7 +784,7 @@ void MainWindow::resetToolPathsActions() {
     delete dockWidget_->widget();
     dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
-    if (auto action {actionGroup.checkedAction()}; action)
+    if (auto action { actionGroup.checkedAction() }; action)
         action->setChecked(false);
 }
 
@@ -892,7 +892,7 @@ void MainWindow::translate(const QString& locale) {
     static std::vector<std::unique_ptr<QTranslator>> translators;
     translators.clear();
     QDir dir(qApp->applicationDirPath() + "/translations");
-    for (auto&& str : dir.entryList(QStringList {"*" + locale + ".qm"}, QDir::Files)) {
+    for (auto&& str : dir.entryList(QStringList { "*" + locale + ".qm" }, QDir::Files)) {
         translators.emplace_back(std::make_unique<QTranslator>());
         if (translators.back()->load(str, dir.path()))
             qApp->installTranslator(translators.back().get());
@@ -1165,7 +1165,7 @@ void MainWindow::setDockWidget(QWidget* dwContent) {
     delete dockWidget_->widget();
     dockWidget_->setWidget(dwContent);
     dockWidget_->setWindowTitle(dwContent->windowTitle());
-    if (auto pbClose {dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
+    if (auto pbClose { dwContent->findChild<QPushButton*>("pbClose") }; pbClose)
         connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
     dockWidget_->show();
 }

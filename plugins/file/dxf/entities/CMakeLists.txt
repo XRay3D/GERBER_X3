@@ -35,7 +35,7 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_vertex.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attrib.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_body.cpp
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dimension.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dimension.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_helix.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_image.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_leader.cpp
@@ -57,7 +57,7 @@ set(SOURCE
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_trace.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_underlay.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_viewport.cpp
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.cpp
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_xline.cpp
     PARENT_SCOPE
 )
@@ -88,7 +88,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/dxf_vertex.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_attrib.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_body.h
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dimension.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/dxf_dimension.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_helix.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_image.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_leader.h
@@ -110,7 +110,7 @@ set(HEADERS
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_trace.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_underlay.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_viewport.h
-    #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/dxf_wipeout.h
     #    ${CMAKE_CURRENT_SOURCE_DIR}/dxf_xline.h
     PARENT_SCOPE
 )
