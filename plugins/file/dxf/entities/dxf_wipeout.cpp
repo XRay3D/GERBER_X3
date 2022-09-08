@@ -18,6 +18,4 @@ namespace Dxf {
 Wipeout::Wipeout(SectionParser* sp)
     : Entity(sp) { }
 
-
-
 } // namespace Dxf

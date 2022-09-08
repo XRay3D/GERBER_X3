@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "sun.h"
+#include "dxf_sun.h"
 namespace Dxf {
-SUN::SUN(SectionParser* sp)
+Sun::Sun(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

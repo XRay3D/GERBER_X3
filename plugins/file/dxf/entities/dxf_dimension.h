@@ -13,7 +13,10 @@ namespace Dxf {
 struct Dimension final : Entity {
     Dimension(SectionParser* sp);
     Type type() const override { return Type::DIMENSION; }
-    GraphicObject toGo() const override { return { id, {}, {} }; }
+        GraphicObject toGo() const override {
+        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        return {};
+    }
     void parse(CodeData& code) override {
         do {
             data.push_back(code);

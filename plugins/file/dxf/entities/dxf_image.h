@@ -12,5 +12,18 @@
 namespace Dxf {
 struct Image final : Entity {
     Image(SectionParser* sp);
+    Type type() const override { return Type::IMAGE; }
+    GraphicObject toGo() const override {
+        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        return {};
+    }
+    // void write(QDataStream&) const override { }
+    // void read(QDataStream&) override { }
+    void parse(CodeData& code) override {
+        do {
+            data.push_back(code);
+            code = sp->nextCode();
+        } while (code.code() != 0);
+    }
 };
 } // namespace Dxf

@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "trace.h"
+#include "dxf_trace.h"
 namespace Dxf {
-TRACE::TRACE(SectionParser* sp)
+Trace::Trace(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

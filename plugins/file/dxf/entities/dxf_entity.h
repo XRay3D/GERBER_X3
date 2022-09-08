@@ -21,6 +21,8 @@
 
 namespace Dxf {
 
+class Blocks;
+
 QPointF polar(QPointF p, float angle /*radians*/, float distance);
 double angle(QPointF p1, QPointF p2);
 double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge);
@@ -236,5 +238,7 @@ public:
 
     };
 };
+
+std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp);
 
 } // namespace Dxf

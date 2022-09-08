@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "mesh.h"
+#include "dxf_mesh.h"
 namespace Dxf {
-MESH::MESH(SectionParser* sp)
+Mesh::Mesh(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf
