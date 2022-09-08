@@ -52,11 +52,11 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
         Drill::Preview retData;
         auto const exFile = static_cast<File*>(file);
         for (const Excellon::Hole& hole : *exFile) {
-            auto name { QString("T%1").arg(hole.state.toolId) };
+            auto name {QString("T%1").arg(hole.state.toolId)};
             if (bool slot = hole.state.path.size(); slot)
-                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(exFile->transform().map(hole.state.path));
+                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(exFile->transform().map(hole.state.path));
             else
-                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(exFile->transform().map(hole.state.pos));
+                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(exFile->transform().map(hole.state.pos));
         }
         return retData;
     }
@@ -81,7 +81,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
     while (in.readLineInto(&line)) {
-        auto data { toU16StrView(line) };
+        auto data {toU16StrView(line)};
         if (ctre::match<regex1>(data))
             return true;
         if (ctre::match<regex2>(data))

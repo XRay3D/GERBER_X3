@@ -100,8 +100,8 @@ void MText::parse(CodeData& code) {
             break;                              //	48	Ширина столбцов
         case ColumnGutter:                      // 49
             break;                              //	49	Интервал между столбцами
-            //        case ColumnHeights: //50
-            //            break; //	50	Высота столбца; после этого кода идет число столбцов (Int16), а затем и число высот столбцов
+            // case ColumnHeights: //50
+            // break; //	50	Высота столбца; после этого кода идет число столбцов (Int16), а затем и число высот столбцов
         default:
             Entity::parse(code);
         }
@@ -114,10 +114,6 @@ Entity::Type MText::type() const { return Type::MTEXT; }
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 GraphicObject MText::toGo() const {
-    //    qDebug() << data.size();
-    //    for (auto& code : data)
-    //        qDebug() << "\t" << DataEnum(code.code()) << code;
-
     double ascent = 0.0;
     double descent = 0.0;
     double height = 0.0;
@@ -126,8 +122,7 @@ GraphicObject MText::toGo() const {
 
     QString text(textString);
     text.replace("\\P", "\n");
-    QStringList list(text.split('\n'));
-    qDebug() << list;
+    QStringList list(text.split(';').back().split('\n'));
     QFont font;
     QPointF offset;
     QSizeF size;
@@ -139,20 +134,19 @@ GraphicObject MText::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf(font);
-        //        offset.ry() -= fmf.descent();
-        ascent = fmf.ascent();
-        descent = fmf.descent();
-        height = fmf.height();
-        size = fmf.size(0, text);
-        scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fmf.height();
+        QFontMetricsF fm(font);
+        // offset.ry() -= fmf.descent();
+        ascent = fm.ascent();
+        descent = fm.descent();
+        height = fm.height();
+        size = fm.size(0, text);
+        scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fm.height();
         if (drawingDirection == ByStyle) {
             if (style->textGenerationFlag & Style::MirroredInX)
                 scaleX = -scaleX;
             if (style->textGenerationFlag & Style::MirroredInY)
                 scaleY = -scaleY;
         }
-        qDebug() << fmf;
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -160,30 +154,28 @@ GraphicObject MText::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf(font);
-        //        offset.ry() -= fmf.descent();
-        ascent = fmf.ascent();
-        descent = fmf.descent();
-        height = fmf.height();
-        size = fmf.size(0, text);
-        scaleX = scaleY = nominalTextHeight / fmf.height();
-        qDebug() << fmf;
+        QFontMetricsF fm(font);
+        // offset.ry() -= fmf.descent();
+        ascent = fm.ascent();
+        descent = fm.descent();
+        height = fm.height();
+        size = fm.size(0, text);
+        scaleX = scaleY = nominalTextHeight / fm.height();
     }
-    qDebug() << size << height << (size.height() / height) << ascent;
 
     switch (attachmentPoint) {
-    case TopLeft: //      вверху слева
+    case TopLeft: // вверху слева
         offset.ry() += size.height() - descent;
         break;
-    case TopCenter: //    вверху по центру
+    case TopCenter: // вверху по центру
         offset.rx() -= size.width() / 2;
         offset.ry() += size.height() - descent;
         break;
-    case TopRight: //     вверху справа
+    case TopRight: // вверху справа
         offset.rx() -= size.width();
         offset.ry() += size.height() - descent;
         break;
-    case MiddleLeft: //   посередине слева
+    case MiddleLeft: // посередине слева
         offset.ry() += size.height() / 2 - descent;
         offset.ry() -= descent;
         break;
@@ -191,16 +183,16 @@ GraphicObject MText::toGo() const {
         offset.rx() -= size.width() / 2;
         offset.ry() += size.height() / 2 - descent;
         break;
-    case MiddleRight: //  посередине справа
+    case MiddleRight: // посередине справа
         offset.rx() -= size.width();
         offset.ry() += size.height() / 2 - descent;
         break;
-    case BottomLeft: //   снизу слева;
+    case BottomLeft: // снизу слева;
         break;
     case BottomCenter: // снизу по центру
         offset.rx() -= size.width() / 2;
         break;
-    case BottomRight: //  снизу справа
+    case BottomRight: // снизу справа
         offset.rx() -= size.width();
         break;
     }
@@ -210,23 +202,26 @@ GraphicObject MText::toGo() const {
     for (int i = list.size() - 1; i >= 0; --i) {
         double x = 0.0;
         switch (attachmentPoint) {
-        case TopLeft:    //      вверху слева
-        case MiddleLeft: //   посередине слева
-        case BottomLeft: //   снизу слева;
+        case TopLeft:    // вверху слева
+        case MiddleLeft: // посередине слева
+        case BottomLeft: // снизу слева;
             break;
-        case TopCenter:    //    вверху по центру
+        case TopCenter:    // вверху по центру
         case MiddleCenter: // посередине по центру
         case BottomCenter: // снизу по центру
             x = (size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width()) * 0.5;
             break;
-        case TopRight:    //     вверху справа
-        case MiddleRight: //  посередине справа
-        case BottomRight: //  снизу справа
+        case TopRight:    // вверху справа
+        case MiddleRight: // посередине справа
+        case BottomRight: // снизу справа
             x = size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width();
             break;
         }
         path.addText(offset - QPointF(-x, size.height() - height * (i + 1)), font, list[i]);
+        qDebug() << list[i];
     }
+    Paths paths;
+    Path path_;
 
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
@@ -237,14 +232,20 @@ GraphicObject MText::toGo() const {
 
     QTransform m2;
     m2.translate(insertionPoint.x(), insertionPoint.y());
-    //    m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
+    // m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
-    Paths paths;
-    for (auto& poly : path2.toFillPolygons(m2))
-        paths.push_back(poly);
 
-    return {id, {}, paths};
+    for (auto& poly : path2.toFillPolygons(m2)) {
+        paths.emplace_back(poly);
+        path_.append(paths.back());
+    }
+
+    //    for (auto&& poly : path.toFillPolygons())
+    //        paths.emplace_back(poly);
+    //    path_ = paths.front();
+    //    path_.append(paths.back());
+    return {id, path_, paths};
 }
 
 void MText::write(QDataStream& stream) const {

@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "section.h"
+#include "dxf_section.h"
 namespace Dxf {
-SECTION::SECTION(SectionParser* sp)
+Section::Section(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

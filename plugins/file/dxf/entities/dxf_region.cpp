@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "region.h"
+#include "dxf_region.h"
 namespace Dxf {
-REGION::REGION(SectionParser* sp)
+Region::Region(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

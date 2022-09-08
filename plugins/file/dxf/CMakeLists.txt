@@ -20,14 +20,14 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
-add_subdirectory(entities)
-add_subdirectory(section)
-add_subdirectory(tables)
+#add_subdirectory(entities)
+#add_subdirectory(section)
+#add_subdirectory(tables)
 
 add_library(${PROJECT_NAME} SHARED
     ${HEADERS}

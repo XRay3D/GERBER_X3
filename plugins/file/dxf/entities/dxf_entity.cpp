@@ -16,8 +16,106 @@
 #include "tables/dxf_layer.h"
 #include <QDebug>
 #include <QMetaEnum>
+#include <dxf_types.h>
 
 namespace Dxf {
+
+std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp) {
+    switch (key) {
+    case Entity::ACAD_PROXY_ENTITY:
+        return std::make_shared<Dummy /*Dimension*/>(sp);
+        break; // return std::make_shared<ACADProxyEntity>(sp);
+    case Entity::ARC:
+        return std::make_shared<Arc>(sp);
+    case Entity::ATTDEF:
+        return std::make_shared<AttDef>(sp);
+    case Entity::ATTRIB:
+        return std::make_shared<Attrib>(sp);
+    case Entity::BODY:
+        return std::make_shared<Body>(sp);
+    case Entity::CIRCLE:
+        return std::make_shared<Circle>(sp);
+    case Entity::DIMENSION:
+        return std::make_shared<Dimension>(sp);
+    case Entity::ELLIPSE:
+        return std::make_shared<Ellipse>(sp);
+    case Entity::HATCH:
+        return std::make_shared<Hatch>(sp);
+    case Entity::HELIX:
+        return std::make_shared<Helix>(sp);
+    case Entity::IMAGE:
+        return std::make_shared<Image>(sp);
+    case Entity::INSERT:
+        return std::make_shared<InsertEntity>(blocks, sp);
+    case Entity::LEADER:
+        return std::make_shared<Leader>(sp);
+    case Entity::LIGHT:
+        return std::make_shared<Light>(sp);
+    case Entity::LINE:
+        return std::make_shared<Line>(sp);
+    case Entity::LWPOLYLINE:
+        return std::make_shared<LwPolyline>(sp);
+    case Entity::MESH:
+        return std::make_shared<Mesh>(sp);
+    case Entity::MLEADER:
+        return std::make_shared<MLeader>(sp);
+    case Entity::MLEADERSTYLE:
+        return std::make_shared<MLeaderStyle>(sp);
+    case Entity::MLINE:
+        return std::make_shared<MLine>(sp);
+    case Entity::MTEXT:
+        return std::make_shared<MText>(sp);
+    case Entity::OLE2FRAME:
+        return std::make_shared<Ole2Frame>(sp);
+    case Entity::OLEFRAME:
+        return std::make_shared<OleFrame>(sp);
+    case Entity::POINT:
+        return std::make_shared<Point>(sp);
+    case Entity::POLYLINE:
+        return std::make_shared<PolyLine>(sp);
+    case Entity::RAY:
+        return std::make_shared<Ray>(sp);
+    case Entity::REGION:
+        return std::make_shared<Region>(sp);
+    case Entity::SECTION:
+        return std::make_shared<Section>(sp);
+    case Entity::SEQEND:
+        return std::make_shared<SeqEnd>(sp);
+    case Entity::SHAPE:
+        return std::make_shared<Shape>(sp);
+    case Entity::SOLID:
+        return std::make_shared<Solid>(sp);
+    case Entity::SPLINE:
+        return std::make_shared<Spline>(sp);
+    case Entity::SUN:
+        return std::make_shared<Sun>(sp);
+    case Entity::SURFACE:
+        return std::make_shared<Surface>(sp);
+    case Entity::TABLE:
+        return std::make_shared<Table>(sp);
+    case Entity::TEXT:
+        return std::make_shared<Text>(sp);
+    case Entity::TOLERANCE:
+        return std::make_shared<Tolerance>(sp);
+    case Entity::TRACE:
+        return std::make_shared<Trace>(sp);
+    case Entity::UNDERLAY:
+        return std::make_shared<Underlay>(sp);
+    case Entity::VERTEX:
+        return std::make_shared<Vertex>(sp);
+    case Entity::VIEWPORT:
+        return std::make_shared<Viewport>(sp);
+    case Entity::WIPEOUT:
+        return std::make_shared<Wipeout>(sp);
+    case Entity::XLINE:
+        return std::make_shared<XLine>(sp);
+    default:
+
+        throw std::logic_error(__FUNCTION__);
+        //        throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+    }
+    //    throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
+}
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& entity) {
     stream << static_cast<int>(entity->type());
@@ -28,119 +126,23 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& enti
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity) {
     static Blocks blocks;
-    int type;
+    Entity::Type type;
     stream >> type;
-    switch (type) {
-    case Entity::NULL_ENT:
-        entity = std::make_shared<Dummy>(nullptr);
-        break;
-    case Entity::ACAD_PROXY_ENTITY:
-        break;
-    case Entity::ARC:
-        entity = std::make_shared<Arc>(nullptr);
-        break;
-    case Entity::ATTDEF:
-        entity = std::make_shared<AttDef>(nullptr);
-        break;
-    case Entity::ATTRIB:
-        entity = std::make_shared<Attrib>(nullptr);
-        break;
-    case Entity::BODY:
-        break;
-    case Entity::CIRCLE:
-        entity = std::make_shared<Circle>(nullptr);
-        break;
-    case Entity::DIMENSION:
-        break;
-    case Entity::ELLIPSE:
-        entity = std::make_shared<Ellipse>(nullptr);
-        break;
-    case Entity::HATCH:
-        entity = std::make_shared<Hatch>(nullptr);
-        break;
-    case Entity::HELIX:
-    case Entity::IMAGE:
-        break;
-    case Entity::INSERT:
-        entity = std::make_shared<InsertEntity>(blocks, nullptr);
-    case Entity::LEADER:
-    case Entity::LIGHT:
-        break;
-    case Entity::LINE:
-        entity = std::make_shared<Line>(nullptr);
-        break;
-    case Entity::LWPOLYLINE:
-        entity = std::make_shared<LwPolyline>(nullptr);
-        break;
-    case Entity::MESH:
-    case Entity::MLEADER:
-    case Entity::MLEADERSTYLE:
-    case Entity::MLINE:
-        break;
-    case Entity::MTEXT:
-        entity = std::make_shared<MText>(nullptr);
-        break;
-    case Entity::OLE2FRAME:
-    case Entity::OLEFRAME:
-        break;
-    case Entity::POINT:
-        entity = std::make_shared<Point>(nullptr);
-        break;
-    case Entity::POLYLINE:
-        entity = std::make_shared<PolyLine>(nullptr);
-        break;
-    case Entity::RAY:
-    case Entity::REGION:
-    case Entity::SECTION:
-    case Entity::SEQEND:
-        entity = std::make_shared<SeqEnd>(nullptr);
-        break;
-    case Entity::SHAPE:
-        break;
-    case Entity::SOLID:
-        entity = std::make_shared<Solid>(nullptr);
-        break;
-    case Entity::SPLINE:
-        entity = std::make_shared<Spline>(nullptr);
-        break;
-    case Entity::SUN:
-    case Entity::SURFACE:
-    case Entity::TABLE:
-        break;
-    case Entity::TEXT:
-        entity = std::make_shared<Text>(nullptr);
-        break;
-    case Entity::TOLERANCE:
-    case Entity::TRACE:
-    case Entity::UNDERLAY:
-    case Entity::VERTEX:
-        break;
-    case Entity::VIEWPORT:
-        entity = std::make_shared<Dummy>(nullptr);
-        break;
-    case Entity::WIPEOUT:
-    case Entity::XLINE:
-        break;
-    default:
-        break;
-    }
-    if (entity) {
-        entity->Entity::read(stream);
-        entity->read(stream);
-    }
+    entity = createEntity(type, blocks, nullptr);
+    entity->Entity::read(stream);
+    entity->read(stream);
     return stream;
 }
 
 Entity::Entity(SectionParser* sp)
-    : sp(sp) {
-}
+    : sp(sp) { }
 
 Entity::~Entity() { }
 
 void Entity::draw(const InsertEntity* const i) const {
     if (i) {
-        for (int r = 0; r < i->rowCount; ++r) {
-            for (int c = 0; c < i->colCount; ++c) {
+        for (int r {}; r < i->rowCount; ++r) {
+            for (int c {}; c < i->colCount; ++c) {
                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
                 GraphicObject go(toGo());
                 i->transform(go, tr);
@@ -240,7 +242,7 @@ void Entity::parse(CodeData& code) {
         // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
         break;
     default:
-        qDebug() << "default" << code;
+        qDebug() << __FUNCTION__ " default" << code;
         break;
     }
 }

@@ -26,6 +26,43 @@
 #include <QSystemSemaphore>
 #include <QTextCodec>
 
+#include <algorithm>
+#include <qapplication.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+    QByteArray localMsg = msg.toUtf8();
+    const char* file = context.file ? context.file : "";
+    const char* function = context.function ? context.function : "";
+
+    const char* file_ {file};
+    while (*file > 0) {
+        if (*file == '\\')
+            file_ = file + 1;
+        ++file;
+    }
+    file = file_;
+
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stdout, "Debug: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtInfoMsg:
+        fprintf(stdout, "Info: %s\n\t(%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning:\n\t%s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical:\n\t%s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal:\n\t%s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    }
+}
+
 void translation(QApplication* app);
 
 int main(int argc, char** argv) {
@@ -35,6 +72,7 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    qInstallMessageHandler(myMessageOutput);
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
@@ -61,7 +99,6 @@ int main(int argc, char** argv) {
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-
 
     [[maybe_unused]] App appSingleton;
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
