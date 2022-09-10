@@ -7,7 +7,7 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
 project(GGEasy VERSION 0.8 LANGUAGES CXX)
@@ -68,10 +68,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
+    qt_create_translation(QM_FILES  ${TS_FILES})
     qt6_add_resources(RESOURCES ${QRC_FILES})
 else()
-    qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
+    qt5_create_translation(QM_FILES  ${TS_FILES})
     qt5_add_resources(RESOURCES ${QRC_FILES})
 endif()
 

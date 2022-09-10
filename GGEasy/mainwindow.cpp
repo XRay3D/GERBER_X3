@@ -10,9 +10,8 @@
  * License: *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt *
- *******************************************************************************/
+ ********************************************************************************/
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 #include "aboutform.h"
 #include "gc_plugin.h"
@@ -21,11 +20,14 @@
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "gi_point.h"
+#include "graphicsview.h"
 #include "plugindialog.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
+
+//#include "qt.h"
 
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -40,7 +42,6 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui {new Ui::MainWindow}
     , recentFiles {this, "recentFiles"}
     , recentProjects {this, "recentProjects"}
     , project_ {new Project {this}}
@@ -48,17 +49,17 @@ MainWindow::MainWindow(QWidget* parent)
     , reloadQuestion {this} {
     App::setMainWindow(this);
 
-    ui->setupUi(this);
+    ui.setupUi(this);
 
     initWidgets();
     LayoutFrames* lfp;
-    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
-    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
+    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
+    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
     GCodePropertiesForm(); // init default vars;
 
@@ -83,22 +84,22 @@ MainWindow::MainWindow(QWidget* parent)
 
     parserThread.start(QThread::HighestPriority);
 
-    connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+    connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
 
     // Shapes::Constructor
-    connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePlugin::updateShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePlugin::finalizeShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePlugin::addShapePoint_);
+    connect(ui.graphicsView, &GraphicsView::mouseMove, &ShapePlugin::updateShape_);
+    connect(ui.graphicsView, &GraphicsView::mouseClickR, &ShapePlugin::finalizeShape_);
+    connect(ui.graphicsView, &GraphicsView::mouseClickL, &ShapePlugin::addShapePoint_);
     // status bar
-    connect(ui->graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
-        ui->statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
+    connect(ui.graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
+        ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
-    ui->treeView->setModel(new FileTree::Model(ui->treeView));
+    ui.treeView->setModel(new FileTree::Model(ui.treeView));
 
-    connect(ui->treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
-    connect(ui->treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
-    connect(ui->treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
+    connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
+    connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
     App::toolHolder().readTools();
     setCurrentFile(QString());
@@ -175,7 +176,7 @@ bool MainWindow::closeProject() {
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         project_->close();
-        // ui->graphicsView->scene()->clear();
+        // ui.graphicsView->scene()->clear();
         return true;
     }
     return false;
@@ -348,7 +349,7 @@ void MainWindow::createActionsService() {
             App::home()->resetPos(false);
             App::zero()->resetPos(false);
         }
-        ui->graphicsView->zoomFit();
+        ui.graphicsView->zoomFit();
     }));
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
@@ -357,7 +358,7 @@ void MainWindow::createActionsService() {
     action->setCheckable(true);
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(""), tr("Ruller"), ui->graphicsView, &GraphicsView::setRuler));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(""), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
@@ -396,26 +397,26 @@ void MainWindow::createActionsZoom() {
     connect(zoomToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     { // Fit best
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
         action->setShortcut(QKeySequence::FullScreen);
         vievMenu->addAction(action);
     }
     { // 100%
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
         action->setShortcut(tr("Ctrl+0"));
         vievMenu->addAction(action);
     }
     { // Zoom in
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
         action->setShortcut(QKeySequence::ZoomIn);
         vievMenu->addAction(action);
     }
     { // Zoom out
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
         action->setShortcut(QKeySequence::ZoomOut);
         vievMenu->addAction(action);
     }
@@ -424,8 +425,8 @@ void MainWindow::createActionsZoom() {
         vievMenu->addSeparator();
     }
     { // Zoom to selected
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
         action->setShortcut(QKeySequence("F12"));
         vievMenu->addAction(action);
     }
@@ -869,7 +870,7 @@ void MainWindow::addFileToPro(FileInterface* file) {
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    ui->graphicsView->zoomFit();
+    ui.graphicsView->zoomFit();
 }
 
 QString MainWindow::strippedName(const QString& fullFileName) {
@@ -880,7 +881,7 @@ QMenu* MainWindow::createPopupMenu() {
     QMenu* menu = QMainWindow::createPopupMenu();
     menu->removeAction(dockWidget_->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
-    menu->removeAction(ui->treeDockWidget->toggleViewAction());
+    menu->removeAction(ui.treeDockWidget->toggleViewAction());
 
     menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
     menu->addAction(tr("Icon size = 48"), [this]() { setIconSize(QSize(48, 48)); });
@@ -890,6 +891,10 @@ QMenu* MainWindow::createPopupMenu() {
 
     return menu;
 }
+
+const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
+
+QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
 
 void MainWindow::translate(const QString& locale) {
     static std::vector<std::unique_ptr<QTranslator>> translators;
@@ -910,7 +915,7 @@ void MainWindow::loadFile(const QString& fileName) {
         if (closeProject()) {
             project_->open(fileName);
             setCurrentFile(fileName);
-            QTimer::singleShot(100, Qt::CoarseTimer, ui->graphicsView, &GraphicsView::zoomFit);
+            QTimer::singleShot(100, Qt::CoarseTimer, ui.graphicsView, &GraphicsView::zoomFit);
             return;
         }
     } else {
@@ -1217,7 +1222,7 @@ void MainWindow::showEvent(QShowEvent* event) {
 void MainWindow::changeEvent(QEvent* event) {
     // В случае получения события изменения языка приложения
     if (event->type() == QEvent::LanguageChange)
-        ui->retranslateUi(this); // переведём окно заново
+        ui.retranslateUi(this); // переведём окно заново
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -1242,4 +1247,61 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
         resetToolPathsActions();
     }
     return QMainWindow::eventFilter(watched, event);
+}
+
+void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
+    if (MainWindow->objectName().isEmpty())
+        MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
+    MainWindow->resize(1600, 1000);
+    MainWindow->setWindowTitle(QString::fromUtf8(""));
+    MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
+    centralwidget = new QWidget(MainWindow);
+    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+    horizontalLayout = new QHBoxLayout(centralwidget);
+    horizontalLayout->setSpacing(0);
+    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setContentsMargins(3, 3, 3, 3);
+    graphicsView = new GraphicsView(centralwidget);
+    graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
+    graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    graphicsView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+
+    horizontalLayout->addWidget(graphicsView);
+
+    MainWindow->setCentralWidget(centralwidget);
+    menubar = new QMenuBar(MainWindow);
+    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menubar->setGeometry(QRect(0, 0, 1600, 26));
+    MainWindow->setMenuBar(menubar);
+    statusbar = new QStatusBar(MainWindow);
+    statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    MainWindow->setStatusBar(statusbar);
+    treeDockWidget = new QDockWidget(MainWindow);
+    treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
+    treeDockWidget->setMinimumSize(QSize(100, 119));
+    treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    widget = new QWidget();
+    widget->setObjectName(QString::fromUtf8("widget"));
+    verticalLayout = new QVBoxLayout(widget);
+    verticalLayout->setSpacing(6);
+    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setContentsMargins(3, 3, 3, 3);
+    treeView = new FileTree::View(widget);
+    treeView->setObjectName(QString::fromUtf8("treeView"));
+    treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    verticalLayout->addWidget(treeView);
+
+    treeDockWidget->setWidget(widget);
+    MainWindow->addDockWidget(Qt::LeftDockWidgetArea, treeDockWidget);
+
+    retranslateUi(MainWindow);
+
+    QMetaObject::connectSlotsByName(MainWindow);
+}
+
+void MainWindow::Ui::retranslateUi(QMainWindow* MainWindow) {
+    treeDockWidget->setWindowTitle(QCoreApplication::translate("MainWindow", "Files", nullptr));
+    (void)MainWindow;
 }

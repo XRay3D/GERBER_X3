@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include "dockwidget.h"
@@ -28,14 +28,16 @@ namespace GCode {
 class File;
 }
 
+namespace FileTree {
+class View;
+}
+
 class Project;
 class QProgressDialog;
 class QToolBar;
 class Scene;
-
-namespace Ui {
-class MainWindow;
-}
+class QHBoxLayout;
+class QVBoxLayout;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -49,8 +51,8 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
-    const QDockWidget* dockWidget() const { return dockWidget_; }
-    QDockWidget* dockWidget() { return dockWidget_; }
+    const QDockWidget* dockWidget() const;
+    QDockWidget* dockWidget();
 
     static void translate(const QString& locale);
     void loadFile(const QString& fileName);
@@ -79,7 +81,6 @@ private slots:
     void setDockWidget(QWidget* dwContent);
 
 private:
-    Ui::MainWindow* ui;
     QDockWidget* dockWidget_ = nullptr;
     Recent recentFiles;
     Recent recentProjects;
@@ -161,4 +162,19 @@ protected:
     // QObject interface
 public:
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+private:
+    struct Ui{
+        QWidget* centralwidget;
+        QHBoxLayout* horizontalLayout;
+        GraphicsView* graphicsView;
+        QMenuBar* menubar;
+        QStatusBar* statusbar;
+        QDockWidget* treeDockWidget;
+        QWidget* widget;
+        QVBoxLayout* verticalLayout;
+        FileTree::View* treeView;
+        void setupUi(QMainWindow* MainWindow);       // setupUi
+        void retranslateUi(QMainWindow* MainWindow); // retranslateUi
+    } ui;
 };
