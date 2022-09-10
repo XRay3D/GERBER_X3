@@ -24,7 +24,7 @@ class DrillForm;
 
 class QCheckBox;
 
-namespace Drill {
+namespace DrillPlugin {
 
 using PosOrPath = std::variant<const QPointF, const QPolygonF>;
 using Key = std::tuple<int, double, bool, QString>;
@@ -98,6 +98,6 @@ public:
     int type() const override { return GCode::Drill; }
 };
 
-} // namespace Drill
+} // namespace DrillPlugin
 
 #include "app.h"

@@ -16,7 +16,6 @@
 #include "tables/dxf_layer.h"
 #include <QDebug>
 #include <QMetaEnum>
-#include <dxf_types.h>
 
 namespace Dxf {
 
@@ -242,7 +241,7 @@ void Entity::parse(CodeData& code) {
         // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
         break;
     default:
-        qDebug() << __FUNCTION__ " default" << code;
+        qDebug() << __FUNCTION__ << "default" << code;
         break;
     }
 }

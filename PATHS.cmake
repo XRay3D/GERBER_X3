@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 find_package(QT NAMES Qt6 Qt5)
 set(DIR_NAME "Qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")

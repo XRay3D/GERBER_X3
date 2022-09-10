@@ -12,6 +12,7 @@
 
 #include "dxf_codedata.h"
 #include "dxf_graphicobject.h"
+#include "dxf_types.h"
 #include "section/dxf_sectionparser.h"
 #include <QLineF>
 #include <QObject>
@@ -20,8 +21,6 @@
 #include <tuple>
 
 namespace Dxf {
-
-class Blocks;
 
 QPointF polar(QPointF p, float angle /*radians*/, float distance);
 double angle(QPointF p1, QPointF p2);

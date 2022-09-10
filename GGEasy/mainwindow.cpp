@@ -18,6 +18,7 @@
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
+#include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "gi_point.h"
 #include "plugindialog.h"
@@ -105,6 +106,9 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
+    connect(&GiDataPath::timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
+    GiDataPath::timer.start(50);
+
     if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
         int i = 100;
         int k = 100;
@@ -124,8 +128,9 @@ MainWindow::MainWindow(QWidget* parent)
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(C:\Users\X-Ray\YandexDisk\ТабуреткаD57_Голубая/D57.dxf)"); });
+        if (1)
+            //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/Downloads/ФАЛЬШПАНЕЛИ РАСХОДОМЕТРИЯ-dxf/725327.003 Панель EL-SV-11-R-AG-измен.dxf)"); });
+            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
@@ -141,8 +146,8 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
-
-        QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
+        if (0)
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
     }
 }
 
@@ -481,13 +486,13 @@ void MainWindow::createActionsShape() {
         auto selectedItems(App::scene()->selectedItems());
         Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
-            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+            if (clipItem->type() >= GiType::ShCircle)
                 clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
         }
 
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : selectedItems) {
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+            if (item->type() == GiType::DataSolid) {
                 auto gitem = static_cast<GiDataSolid*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
@@ -680,13 +685,11 @@ void MainWindow::writeSettings() {
 void MainWindow::selectAll() {
     if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
-            if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::Preview)
+            if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
         for (QGraphicsItem* item : App::scene()->items())
-            if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::Preview)
+            if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else {
         for (QGraphicsItem* item : App::scene()->items())

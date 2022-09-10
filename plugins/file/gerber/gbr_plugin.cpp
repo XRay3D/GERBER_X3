@@ -59,7 +59,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
     };
 
     if (plugin->type() == ::GCode::Drill) {
-        Drill::Preview retData;
+        DrillPlugin::Preview retData;
         double drillDiameter {};
 
         auto const gbrFile = static_cast<File*>(file);

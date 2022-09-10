@@ -86,7 +86,7 @@ void PocketRasterForm::createFile() {
 
     for (auto* item : App::scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (static_cast<GiType>(item->type())) {
+        switch (item->type()) {
         case GiType::DataSolid:
         case GiType::DataPath:
             if (!file) {
@@ -98,7 +98,7 @@ void PocketRasterForm::createFile() {
                         return;
                 }
             }
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid)
+            if (item->type() == GiType::DataSolid)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());

@@ -25,9 +25,9 @@
 #include <QTimer>
 
 GraphicsItem::GraphicsItem(FileInterface* file)
-    : animation(this, "bodyColor")
-    , visibleAnim(this, "opacity")
-    , file_(file)
+    : //    animation(this, "bodyColor")
+      //    , visibleAnim(this, "opacity")     ,
+    file_(file)
     , pen_(QPen(Qt::white, 0.0))
     , colorPtr_(file ? &file->color() : nullptr)
     , color_(Qt::white)
@@ -35,12 +35,12 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     , pathColor_(Qt::transparent)
 
 {
-    animation.setDuration(100);
-    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    //    animation.setDuration(100);
+    //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     connect(this, &GraphicsItem::colorChanged, [this] { update(); });
-    visibleAnim.setDuration(100);
-    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
+    //    visibleAnim.setDuration(100);
+    //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
     QGraphicsItem::setVisible(false);
 
     //    connect(this, &QGraphicsObject::rotationChanged, [] { qDebug("rotationChanged"); });
@@ -72,11 +72,12 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor) {
 void GraphicsItem::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
     //        return;
-    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
-    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
-    visibleAnim.start();
+    //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
+    //    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
+    //    visibleAnim.start();
     if (visible) {
-        setOpacity(0.0);
+        //        setOpacity(0.0);
+        setOpacity(1.0);
         QGraphicsObject::setVisible(visible);
     }
 }

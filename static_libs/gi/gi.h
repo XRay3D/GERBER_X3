@@ -18,7 +18,7 @@ using namespace ClipperLib;
 #include <QPen>
 #include <QPropertyAnimation>
 
-enum class GiType {
+enum /*class*/ GiType : int {
     DataPath = QGraphicsItem::UserType,
     DataSolid,
     Drill,
@@ -28,7 +28,7 @@ enum class GiType {
     MarkPin,
     MarkZero,
 
-    Path = QGraphicsItem::UserType + 200,
+    Path_ = QGraphicsItem::UserType + 200,
     Bridge,
 
     Preview = QGraphicsItem::UserType + 300, // Form
@@ -104,8 +104,8 @@ public:
     virtual void changeColor() = 0;
 
 protected:
-    QPropertyAnimation animation;
-    QPropertyAnimation visibleAnim;
+    //    QPropertyAnimation animation;
+    //    QPropertyAnimation visibleAnim;
 
     mutable QRectF boundingRect_;
 

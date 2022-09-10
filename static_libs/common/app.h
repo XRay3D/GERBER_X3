@@ -18,7 +18,7 @@
 #include <QSharedMemory>
 #include <map>
 #include <mvector.h>
-namespace Drill {
+namespace DrillPlugin {
 class Form;
 }
 class FilePlugin;
@@ -66,25 +66,14 @@ using Handlers = mvector<Shapes::Handler*>;
 // template <class T>
 // Plug(T*, QObject*) -> Plug<T>;
 
-//#if __cplusplus > 201703L
 using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/   // > ;
 using ShapeInterfacesMap = std::map<int, ShapePlugin*>; /*PIS*/ // > ;
 using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/  // > ;
-//#else
-// struct FileInterfacesMap : std::map<int, PIF> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-// struct ShapeInterfacesMap : std::map<int, PIS> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-// struct GCodeInterfaceMap : std::map<int, PIG> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-//#endif
+
 class App {
     inline static App* app_ = nullptr;
 
-    Drill::Form* drillForm_ = nullptr;
+    DrillPlugin::Form* drillForm_ = nullptr;
     FileTree::Model* fileModel_ = nullptr;
     FileTree::View* fileTreeView_ = nullptr;
     GCodePropertiesForm* gCodePropertiesForm_ = nullptr;
@@ -146,7 +135,7 @@ public:
     static auto* splashScreen() { return app_->splashScreen_; }
     static auto& settingsPath() { return app_->settingsPath_; }
 
-    static void setDrillForm(Drill::Form* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
+    static void setDrillForm(DrillPlugin::Form* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
     static void setFileModel(FileTree::Model* fileModel) { (app_->fileModel_ && fileModel) ? exit(-2) : (app_->fileModel_ = fileModel, void()); }
     static void setFileTreeView(FileTree::View* fileTreeView) { (app_->fileTreeView_ && fileTreeView) ? exit(-3) : (app_->fileTreeView_ = fileTreeView, void()); }
     static void setGCodePropertiesForm(GCodePropertiesForm* gCodePropertiesForm) { (app_->gCodePropertiesForm_ && gCodePropertiesForm) ? exit(-4) : (app_->gCodePropertiesForm_ = gCodePropertiesForm, void()); }

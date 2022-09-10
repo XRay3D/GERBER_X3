@@ -90,7 +90,7 @@ void VoronoiForm::createFile() {
 
     for (auto* item : App::scene()->selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
-        switch (static_cast<GiType>(item->type())) {
+        switch (item->type()) {
         case GiType::DataSolid:
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;

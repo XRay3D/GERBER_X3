@@ -8,7 +8,8 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
+
 
 project(File_Plugins)
 set(CMAKE_CXX_STANDARD 20)
@@ -47,9 +48,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-add_subdirectory(dxf)
-add_subdirectory(excellon)
-add_subdirectory(gerber)
+#add_subdirectory(dxf)
+#add_subdirectory(excellon)
+#add_subdirectory(gerber)
 #add_subdirectory(hpgl)
 
 

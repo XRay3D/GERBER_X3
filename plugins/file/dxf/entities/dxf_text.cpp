@@ -135,7 +135,6 @@ GraphicObject Text::toGo() const {
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();
         size = fmf.size(0, text);
-        qDebug() << fmf;
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -148,9 +147,8 @@ GraphicObject Text::toGo() const {
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();
         size = fmf.size(0, text);
-        qDebug() << fmf;
     }
-    qDebug() << scaleX << scaleY;
+    // qDebug("scale X %f Y %f", scaleX, scaleY);
     switch (horizontalJustType) {
     case Left: // 0
         offset.rx();
@@ -193,17 +191,14 @@ GraphicObject Text::toGo() const {
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
-    for (auto& poly : path.toFillPolygons(m))
+    for (auto& poly : path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.translate(pt2.x(), pt2.y());
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
-    Paths paths;
-    for (auto& poly : path2.toFillPolygons(m2))
-        paths.push_back(poly);
 
-    return {id, {}, paths};
+    return {id, {}, path2.toSubpathPolygons(m2)};
 }
 
 void Text::write(QDataStream& stream) const {

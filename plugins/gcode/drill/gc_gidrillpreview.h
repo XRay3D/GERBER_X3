@@ -5,7 +5,7 @@
 #include "gi_preview.h"
 #include "qpainterpath.h"
 
-namespace Drill {
+namespace DrillPlugin {
 
 class GiPreview final : public GiAbstractPreview {
     PosOrPath hv;
@@ -33,4 +33,4 @@ private:
     static Paths offset(const Path& path, double offset);
 };
 
-} // namespace Drill
+} // namespace DrillPlugin

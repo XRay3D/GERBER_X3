@@ -16,44 +16,30 @@
 #include <QLineF>
 #include <myclipper.h>
 
-// static inline bool qt_is_finite(double d)
-//{
-//     uchar* ch = (uchar*)&d;
-//#ifdef QT_ARMFPA
-//     return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
-//#else
-//     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-//         return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
-//     } else {
-//         return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
-//     }
-//#endif
-// }
-
-Path CirclePath(double diametr, const IntPoint& center) {
+ClipperLib::Path CirclePath(double diametr, const ClipperLib::IntPoint& center) {
     if (diametr == 0.0)
         return Path();
 
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
-    Path poligon(intSteps);
+    ClipperLib::Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = IntPoint(
-            static_cast<cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
-            static_cast<cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
+        poligon[i] = ClipperLib::IntPoint(
+            static_cast<ClipperLib::cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
+            static_cast<ClipperLib::cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
     }
     return poligon;
 }
 
-Path RectanglePath(double width, double height, const IntPoint& center) {
+ClipperLib::Path RectanglePath(double width, double height, const ClipperLib::IntPoint& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Path poligon {
-        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
-        IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
+    ClipperLib::Path poligon {
+        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(-halfWidth + center.X), static_cast<ClipperLib::cInt>(+halfHeight + center.Y)),
+        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(-halfWidth + center.X), static_cast<ClipperLib::cInt>(-halfHeight + center.Y)),
+        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(+halfWidth + center.X), static_cast<ClipperLib::cInt>(-halfHeight + center.Y)),
+        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(+halfWidth + center.X), static_cast<ClipperLib::cInt>(+halfHeight + center.Y)),
     };
     if (Area(poligon) < 0.0)
         ReversePath(poligon);
@@ -61,12 +47,12 @@ Path RectanglePath(double width, double height, const IntPoint& center) {
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const IntPoint& center) {
+void RotatePath(Path& poligon, double angle, const ClipperLib::IntPoint& center) {
     const bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
+    for (ClipperLib::IntPoint& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
         const double length = center.distTo(pt);
-        pt = IntPoint(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
+        pt = ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(cos(dAangle) * length), static_cast<ClipperLib::cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;
     }
@@ -74,7 +60,7 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center) {
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const IntPoint& pos) {
+void TranslatePath(Path& path, const ClipperLib::IntPoint& pos) {
     if (pos.X == 0 && pos.Y == 0)
         return;
     for (auto& pt : path) {
@@ -106,15 +92,15 @@ void mergeSegments(Paths& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                IntPoint pib = paths[i].back();
-                IntPoint pjf = paths[j].front();
+                ClipperLib::IntPoint pib = paths[i].back();
+                ClipperLib::IntPoint pjf = paths[j].front();
                 if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                IntPoint pif = paths[i].front();
-                IntPoint pjb = paths[j].back();
+                ClipperLib::IntPoint pif = paths[i].front();
+                ClipperLib::IntPoint pjb = paths[j].back();
                 if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -141,15 +127,15 @@ void mergeSegments(Paths& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                IntPoint pib = paths[i].back();
-                IntPoint pjf = paths[j].front();
+                ClipperLib::IntPoint pib = paths[i].back();
+                ClipperLib::IntPoint pjf = paths[j].front();
                 if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                IntPoint pif = paths[i].front();
-                IntPoint pjb = paths[j].back();
+                ClipperLib::IntPoint pif = paths[i].front();
+                ClipperLib::IntPoint pjb = paths[j].back();
                 if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -288,11 +274,11 @@ Paths& normalize(Paths& paths) {
     Clipper clipper;
     clipper.AddPaths(paths, ptSubject, true);
     IntRect r(clipper.GetBounds());
-    Path outer = {
-        IntPoint(r.left - uScale, r.top - uScale),
-        IntPoint(r.right + uScale, r.top - uScale),
-        IntPoint(r.right + uScale, r.bottom + uScale),
-        IntPoint(r.left - uScale, r.bottom + uScale),
+    ClipperLib::Path outer = {
+        ClipperLib::IntPoint(r.left - uScale, r.top - uScale),
+        ClipperLib::IntPoint(r.right + uScale, r.top - uScale),
+        ClipperLib::IntPoint(r.right + uScale, r.bottom + uScale),
+        ClipperLib::IntPoint(r.left - uScale, r.bottom + uScale),
     };
     // ReversePath(outer);
     clipper.AddPath(outer, ptSubject, true);
@@ -301,7 +287,7 @@ Paths& normalize(Paths& paths) {
     ReversePaths(paths);
     //    /****************************/
     //    std::function<void(PolyNode*)> grouping = [&grouping](PolyNode* node) {
-    //        Paths paths;
+    //         ClipperLib::Paths paths;
 
     //        if (node->IsHole()) {
     //            Path& path = node->Contour;

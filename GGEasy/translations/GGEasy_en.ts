@@ -706,71 +706,63 @@ Public License instead of this License.  But first, please read
 <context>
     <name>ColorSelector</name>
     <message>
-        <location filename="../../static_libs/common/colorselector.cpp" line="94"/>
+        <location filename="../../static_libs/common/colorselector.cpp" line="89"/>
         <source>Reset</source>
-        <translation></translation>
-    </message>
-</context>
-<context>
-    <name>ComponentsDialog</name>
-    <message>
-        <location filename="../../file_plugins/gerber/compdialog.cpp" line="92"/>
-        <source>Dialog</source>
         <translation></translation>
     </message>
 </context>
 <context>
     <name>DepthForm</name>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="150"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="139"/>
         <source>Form</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="161"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="150"/>
         <source>C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="162"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="151"/>
         <source>Copper</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="158"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="147"/>
         <source>B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="102"/>
-        <location filename="../../static_libs/common/depthform.cpp" line="156"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="130"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="92"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="145"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="114"/>
         <source>Depth:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="159"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="148"/>
         <source>Board</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="164"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="153"/>
         <source>U</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="165"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="154"/>
         <source>User</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="153"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="142"/>
         <source> mm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="151"/>
-        <location filename="../../static_libs/common/depthform.cpp" line="154"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="140"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="143"/>
         <source>Cutting depth</source>
         <translation></translation>
     </message>
@@ -778,32 +770,55 @@ Public License instead of this License.  But first, please read
 <context>
     <name>Dialog</name>
     <message>
-        <location filename="../plugindialog.cpp" line="117"/>
+        <location filename="../plugindialog.cpp" line="107"/>
         <source>About Plugins...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../plugindialog.cpp" line="120"/>
+        <location filename="../plugindialog.cpp" line="110"/>
         <source>Name</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../plugindialog.cpp" line="121"/>
+        <location filename="../plugindialog.cpp" line="111"/>
         <source>Version</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../plugindialog.cpp" line="122"/>
+        <location filename="../plugindialog.cpp" line="112"/>
         <source>Author</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/gerber/gbrcomp_dialog.cpp" line="82"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DialogAboutPlugins</name>
+    <message>
+        <location filename="../plugindialog.cpp" line="59"/>
+        <source>File Plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="64"/>
+        <source>Shape Plugins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="69"/>
+        <source>GCode Plugins</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>DoubleSpinBox</name>
     <message>
-        <location filename="../../static_libs/common/doublespinbox.h" line="29"/>
-        <location filename="../../static_libs/common/doublespinbox.h" line="34"/>
-        <location filename="../../static_libs/common/doublespinbox.h" line="39"/>
+        <location filename="../../static_libs/common/doublespinbox.h" line="27"/>
+        <location filename="../../static_libs/common/doublespinbox.h" line="31"/>
+        <location filename="../../static_libs/common/doublespinbox.h" line="35"/>
         <source>Range from %1 to %2.</source>
         <translation></translation>
     </message>
@@ -811,368 +826,349 @@ Public License instead of this License.  But first, please read
 <context>
     <name>DrillForm</name>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="20"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="20"/>
         <source>Form</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="78"/>
-        <source>Drill Toolpath</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="107"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="148"/>
         <source>File:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="38"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="44"/>
         <source>Zoom To Selected</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="212"/>
-        <source>Side</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="237"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="123"/>
         <source>In</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="244"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="130"/>
         <source>Out</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="280"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="158"/>
         <source>Pick Up Tools</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="230"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="116"/>
         <source>On</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="117"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="98"/>
+        <source>Aligin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="165"/>
         <source>Direction</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="145"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="193"/>
         <source>Conventional</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="135"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="183"/>
         <source>Climb</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="170"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="56"/>
         <source>Work Type</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="188"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="74"/>
         <source>Only drilling</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="202"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="88"/>
         <source>Profile</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="195"/>
+        <location filename="../../plugins/gcode/drill/drillform.ui" line="81"/>
         <source>Pocket</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="88"/>
-        <source>Create</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="155"/>
-        <source>Close</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="252"/>
-        <source>No data to process.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="548"/>
-        <source>&amp;Select Tool</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="93"/>
-        <location filename="../forms/drillform/drillform.cpp" line="572"/>
-        <source>&quot; not suitable for T</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="70"/>
-        <source>&amp;Choose a Tool for everyone</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="103"/>
-        <source>&amp;Remove Tool for everyone</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.cpp" line="585"/>
-        <source>&amp;Remove Tool</source>
         <translation></translation>
     </message>
 </context>
 <context>
-    <name>DrillModel</name>
+    <name>DrillPlugin::Form</name>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="87"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="152"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="154"/>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="93"/>
+        <source>Drill Toolpath</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="141"/>
+        <source>No data to process.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="266"/>
+        <source>&amp;Select Tool</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="287"/>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="332"/>
+        <source>&quot; not suitable for T</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="299"/>
+        <source>&amp;Remove Tool</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="312"/>
+        <source>&amp;Choose a Tool for everyone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_form.cpp" line="341"/>
+        <source>&amp;Remove Tool for everyone</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DrillPlugin::Model</name>
+    <message>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="72"/>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="136"/>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="138"/>
         <source>Tool</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="87"/>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="72"/>
         <source>Slot</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="122"/>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="107"/>
         <source>Select Tool</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="152"/>
+        <location filename="../../plugins/gcode/drill/drill_model.cpp" line="136"/>
         <source>Aperture</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Dxf::DxfObj</name>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="46"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="40"/>
         <source>Normal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="46"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="40"/>
         <source>Displays paths with pen width and fill.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="47"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="41"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="77"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="167"/>
         <source>Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="47"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="41"/>
         <source>Displays paths without pen width.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="48"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="42"/>
         <source>Both</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="48"/>
+        <location filename="../../plugins/file/dxf/dxf_file.cpp" line="42"/>
         <source>Displays paths without and with pen width.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="45"/>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="293"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="43"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="282"/>
         <source>Colorize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="129"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="124"/>
         <source>Section HEADER</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="286"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="275"/>
         <source>&amp;Hide other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="287"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="276"/>
         <source>&amp;Show source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="306"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="295"/>
         <source>&amp;Layers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="311"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="300"/>
         <source>Header</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="317"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="306"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="407"/>
+        <location filename="../../plugins/file/dxf/dxf_node.cpp" line="391"/>
         <source>Change color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.cpp" line="98"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.cpp" line="96"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.cpp" line="111"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.cpp" line="109"/>
         <source>Prev</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="56"/>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="81"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.h" line="54"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.h" line="78"/>
         <source>Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="56"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.h" line="54"/>
         <source>Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="77"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.h" line="74"/>
         <source>Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="79"/>
+        <location filename="../../plugins/file/dxf/dxf_sourcedialog.h" line="76"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>Dxf::Plugin</name>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_plugin.cpp" line="205"/>
-        <source>Dxf Files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/dxf/dxf_plugin.cpp" line="351"/>
-        <source>Ø%1mm</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DxfObj</name>
-    <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="301"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_entity.cpp" line="289"/>
         <source>SectionParser is null!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="303"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_entity.cpp" line="291"/>
         <source>File in SectionParser is null!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="305"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_entity.cpp" line="293"/>
         <source>Layer &apos;%1&apos; not found in file!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_hatch.cpp" line="160"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_hatch.cpp" line="156"/>
         <source>Unimplemented edge type in HATCH: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_hatch.cpp" line="162"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_hatch.cpp" line="158"/>
         <source>Unknown edge type in HATCH: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_solid.cpp" line="115"/>
+        <location filename="../../plugins/file/dxf/entities/dxf_solid.cpp" line="111"/>
         <source>Unsupported type Solid: corners %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/section/dxf_blocks.cpp" line="35"/>
+        <location filename="../../plugins/file/dxf/section/dxf_blocks.cpp" line="33"/>
         <source>blockName ERR!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/section/dxf_entities.cpp" line="136"/>
+        <location filename="../../plugins/file/dxf/section/dxf_entities.cpp" line="149"/>
         <source>Unknown Entity: %1, %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/section/dxf_entities.cpp" line="138"/>
+        <location filename="../../plugins/file/dxf/section/dxf_entities.cpp" line="151"/>
         <source>Not implemented: %1, %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="72"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="84"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="68"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="80"/>
         <source>Empty layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="81"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="176"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="77"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="167"/>
         <source>Solid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="81"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="176"/>
-        <source>Paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="136"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="130"/>
         <source>Visible
 &amp; color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="138"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="132"/>
         <source>Entity
 count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="140"/>
+        <location filename="../../plugins/file/dxf/tables/dxf_layermodel.cpp" line="134"/>
         <source>Visible
 type</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
+    <name>Dxf::Plugin</name>
+    <message>
+        <location filename="../../plugins/file/dxf/dxf_plugin.cpp" line="214"/>
+        <source>Dxf Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ErrorDialog</name>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="186"/>
+        <location filename="../../plugins/gcode/gc_errordialog.cpp" line="179"/>
         <source>Uncut places:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="202"/>
+        <location filename="../../plugins/gcode/gc_errordialog.cpp" line="217"/>
         <source>Continue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="203"/>
+        <location filename="../../plugins/gcode/gc_errordialog.cpp" line="218"/>
         <source>Break</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1180,12 +1176,12 @@ type</source>
 <context>
     <name>ErrorModel</name>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="106"/>
+        <location filename="../../plugins/gcode/gc_errordialog.cpp" line="105"/>
         <source>Position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="108"/>
+        <location filename="../../plugins/gcode/gc_errordialog.cpp" line="107"/>
         <source>Area mm²</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1193,90 +1189,126 @@ type</source>
 <context>
     <name>Excellon::Plugin</name>
     <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="97"/>
+        <location filename="../../plugins/file/excellon/ex_plugin.cpp" line="92"/>
         <source>Excellon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="240"/>
-        <source>Tool Ø%1mm</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ExcellonDialog</name>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="14"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="14"/>
         <source>Excellon Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="35"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="35"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="31"/>
         <source>Units</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="53"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="53"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="217"/>
         <source>Inches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="60"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="60"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="219"/>
         <source>Millimeters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="105"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="105"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="60"/>
         <source>Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="142"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="142"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="79"/>
         <source>:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="70"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="70"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="45"/>
         <source>Zeroes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="88"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="88"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="218"/>
         <source>Leading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="95"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="95"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="220"/>
         <source>Trailing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="165"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="165"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="88"/>
         <source>Offset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="171"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="28"/>
+        <source>Default values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="106"/>
         <source>X:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="194"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="107"/>
         <source>Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="217"/>
-        <source>x1.0</source>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="121"/>
+        <source>Parse Reg.Expr.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="224"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="197"/>
+        <source>Parse Zero:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="198"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="203"/>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="208"/>
+        <source>Test String:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="202"/>
+        <source>Parse Unit:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="207"/>
+        <source>Parse Decimal And Integer:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/ex_settingstab.cpp" line="212"/>
+        <source>Test Output:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="183"/>
         <source>Flatten by selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="234"/>
+        <location filename="../../plugins/file/excellon/excellondialog.ui" line="193"/>
         <source>Set as default</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1284,17 +1316,17 @@ type</source>
 <context>
     <name>FileTree::Model</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="171"/>
+        <location filename="../../static_libs/filetree/ft_model.cpp" line="158"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="173"/>
+        <location filename="../../static_libs/filetree/ft_model.cpp" line="160"/>
         <source>Side</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="175"/>
+        <location filename="../../static_libs/filetree/ft_model.cpp" line="162"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1302,7 +1334,7 @@ type</source>
 <context>
     <name>FileTree::SideDelegate</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_sidedelegate.cpp" line="28"/>
+        <location filename="../../static_libs/filetree/ft_sidedelegate.cpp" line="25"/>
         <source>Top|Bottom</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1310,56 +1342,92 @@ type</source>
 <context>
     <name>FileTree::View</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_view.cpp" line="201"/>
+        <location filename="../../static_libs/filetree/ft_view.cpp" line="194"/>
         <source>Delete Selected</source>
         <translation>Delete (Close) Selected</translation>
     </message>
-</context>
-<context>
-    <name>FormsUtil</name>
     <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="66"/>
-        <source>Warning</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="66"/>
-        <source>The tool doesn`t fit in the Working items!</source>
+        <location filename="../../static_libs/filetree/ft_view.cpp" line="205"/>
+        <location filename="../../static_libs/filetree/ft_view.cpp" line="207"/>
+        <source>Transform</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>GCode::Creator</name>
     <message>
-        <location filename="../gcode/gccreator.cpp" line="472"/>
+        <location filename="../../plugins/gcode/gc_creator.cpp" line="401"/>
         <source>Merge Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gccreator.cpp" line="653"/>
+        <location filename="../../plugins/gcode/gc_creator.cpp" line="584"/>
         <source>Creativity check</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GCode::GCObj</name>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="507"/>
+        <source>Top|Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="509"/>
+        <source>;	              Name: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="510"/>
+        <source>;	              Tool: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="511"/>
+        <source>;	    Tool passDepth: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="512"/>
+        <source>;	     Tool stepover: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="513"/>
+        <source>;	Tool feedRate mm/s: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="514"/>
+        <source>;	             Depth: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_file.cpp" line="515"/>
+        <source>;	              Side: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>GCode::Plugin</name>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="34"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="39"/>
         <source>Tool Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="50"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="46"/>
         <source>&amp;Delete All Toolpaths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="51"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="47"/>
         <source>Really?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="54"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="50"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1367,7 +1435,7 @@ type</source>
 <context>
     <name>GCode::VoronoiBoost</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoiboost.cpp" line="102"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_boost.cpp" line="97"/>
         <source>Calc BOOST Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1375,7 +1443,7 @@ type</source>
 <context>
     <name>GCode::VoronoiCgal</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoicgal.cpp" line="87"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_cgal.cpp" line="83"/>
         <source>Calc CGAL Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1383,7 +1451,7 @@ type</source>
 <context>
     <name>GCode::VoronoiCreator</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoi.cpp" line="89"/>
+        <location filename="../../plugins/gcode/voroni/voronoi.cpp" line="86"/>
         <source>Create Offset</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1391,7 +1459,7 @@ type</source>
 <context>
     <name>GCode::VoronoiJc</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoijc.cpp" line="120"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_jc.cpp" line="118"/>
         <source>Merge Segments</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1399,285 +1467,328 @@ type</source>
 <context>
     <name>GCodePropertiesForm</name>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="14"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="70"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="65"/>
         <source>G-Code Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="80"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="75"/>
         <source>Material</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="111"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="134"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="184"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="207"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="238"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="305"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="321"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="347"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="363"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="457"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="496"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="563"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="106"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="129"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="179"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="202"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="228"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="295"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="311"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="337"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="353"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="447"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="486"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="532"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="174"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="169"/>
         <source>Clearence Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="197"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="192"/>
         <source>Plunge Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="101"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="96"/>
         <source>Board Thickness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="127"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="122"/>
         <source>Copper Thickness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="257"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="247"/>
         <source>Markers Position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="275"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="265"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="285"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="275"/>
         <source>Zero</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="379"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="386"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="369"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="376"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="399"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="389"/>
         <source>Layout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="337"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="476"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="327"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="466"/>
         <source>Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="228"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="218"/>
         <source>Safe Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="153"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="148"/>
         <source>G0 Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="437"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="427"/>
         <source>X </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="417"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="407"/>
         <source>Steps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="295"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="285"/>
         <source>X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="427"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="417"/>
         <source>Space</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="518"/>
-        <source>for Aperture paths</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="547"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="516"/>
         <source>Glue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="588"/>
+        <location filename="../../plugins/gcode/gcodepropertiesform.ui" line="556"/>
         <source>Ok</source>
-        <translation>Apply</translation>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GcFormBase</name>
+    <message>
+        <location filename="../../plugins/gcode/gc_formsutil.cpp" line="35"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_formsutil.cpp" line="39"/>
+        <source>Create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_formsutil.cpp" line="61"/>
+        <source>Name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_formsutil.cpp" line="102"/>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/gc_formsutil.cpp" line="102"/>
+        <source>The tool doesn`t fit in the Working items!</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Gerber::GbrObj</name>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="41"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="39"/>
         <source>unsorted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="127"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="119"/>
         <source>Ref Des</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="129"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="121"/>
         <source>Manufacturer
 part
 number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="133"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="125"/>
         <source>Value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="135"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="127"/>
         <source>Mount
 type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="138"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="130"/>
         <source>Footprint
 name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="141"/>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="144"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="133"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="136"/>
         <source>Package
 name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="147"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_model.cpp" line="139"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compnode.cpp" line="129"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_node.cpp" line="119"/>
         <source>TH|SMD|BGA|Other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbraperture.cpp" line="663"/>
+        <location filename="../../plugins/file/gerber/gbr_aperture.cpp" line="604"/>
         <source>Bad outline (regular polygon) macro!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbraperture.cpp" line="698"/>
+        <location filename="../../plugins/file/gerber/gbr_aperture.cpp" line="638"/>
         <source>Bad thermal macro!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="74"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_onent.cpp" line="70"/>
         <source>Rotation: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="75"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_onent.cpp" line="71"/>
         <source>Value: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="76"/>
+        <location filename="../../plugins/file/gerber/gbrcomp_onent.cpp" line="72"/>
         <source>Footprint: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="70"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="67"/>
         <source>Normal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="70"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="67"/>
         <source>Normal view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="68"/>
         <source>Aperture paths</source>
-        <translation>Stroke of a aperture</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="68"/>
         <source>Displays only aperture paths of copper
 without width and without contacts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="73"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="70"/>
         <source>Components</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="73"/>
+        <location filename="../../plugins/file/gerber/gbr_file.cpp" line="70"/>
         <source>Show components</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="163"/>
+        <location filename="../../plugins/file/gerber/gbr_node.cpp" line="157"/>
         <source>&amp;Hide other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="166"/>
+        <location filename="../../plugins/file/gerber/gbr_node.cpp" line="160"/>
         <source>&amp;Show source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="193"/>
+        <location filename="../../plugins/file/gerber/gbr_node.cpp" line="183"/>
         <source>Show &amp;Components</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="200"/>
+        <location filename="../../plugins/file/gerber/gbr_node.cpp" line="190"/>
         <source>Change color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="212"/>
+        <location filename="../../plugins/file/gerber/gbr_node.cpp" line="202"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="458"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="584"/>
+        <location filename="../../plugins/file/gerber/gbr_parser.cpp" line="426"/>
+        <location filename="../../plugins/file/gerber/gbr_parser.cpp" line="545"/>
         <source>Aperture %1 not found! Available %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="534"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="537"/>
+        <location filename="../../plugins/file/gerber/gbr_parser.cpp" line="499"/>
+        <location filename="../../plugins/file/gerber/gbr_parser.cpp" line="501"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="590"/>
+        <location filename="../../plugins/file/gerber/gbr_parser.cpp" line="551"/>
+        <source>Aperture D%1 (%2) not supported!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Gerber::Parser</name>
+    <message>
+        <location filename="../../GTE_Win/gerber/gbrparser.cpp" line="376"/>
+        <location filename="../../GTE_Win/gerber/gbrparser.cpp" line="471"/>
+        <source>Aperture %1 not found!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../GTE_Win/gerber/gbrparser.cpp" line="429"/>
+        <location filename="../../GTE_Win/gerber/gbrparser.cpp" line="432"/>
+        <source>line num %1: &apos;%2&apos;, error value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../GTE_Win/gerber/gbrparser.cpp" line="476"/>
         <source>Aperture D%1 (%2) not supported!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1685,167 +1796,165 @@ without width and without contacts</source>
 <context>
     <name>Gerber::Plugin</name>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="142"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="205"/>
         <source>Gerber Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="320"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="78"/>
         <source>, drill Ø%1mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="421"/>
-        <source>All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="472"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="130"/>
         <source>Lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="479"/>
-        <source>Line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="485"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="142"/>
         <source>Regions</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>GiPin</name>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="499"/>
-        <source>Region</source>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="353"/>
+        <source>&amp;Create path for Pins</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="375"/>
+        <source>Set Depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="398"/>
+        <source>Pin_</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="403"/>
+        <source>Fixed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="411"/>
+        <source>Used</source>
+        <translation type="unfinished">Use</translation>
     </message>
 </context>
 <context>
     <name>HatchingForm</name>
     <message>
-        <location filename="../forms/hatchingform.ui" line="14"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="74"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="32"/>
         <source>Crosshatch Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="96"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="50"/>
         <source>Aligin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="117"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="71"/>
         <source>Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="130"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="84"/>
         <source>Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="143"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="97"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="164"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="118"/>
         <source>Climb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="177"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="131"/>
         <source>Conventional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="253"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="201"/>
         <source>Raster Angle:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="266"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="214"/>
         <source> °</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="285"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="227"/>
         <source>Profile Pass:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="299"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="241"/>
         <source>No Profile Pass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="304"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="246"/>
         <source>First</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="309"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="251"/>
         <source>Last</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="323"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="259"/>
         <source>Hatch step:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="333"/>
+        <location filename="../../plugins/gcode/hatching/hatchingform.ui" line="269"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="382"/>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/hatchingform.ui" line="402"/>
-        <source>Create</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/hatchingform.ui" line="412"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="25"/>
         <source>Raster On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="25"/>
         <source>Hatching Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="25"/>
         <source>Hatching Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="104"/>
-        <location filename="../forms/hatchingform.cpp" line="130"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="97"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="123"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="104"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="97"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="130"/>
+        <location filename="../../plugins/gcode/hatching/hatching_form.cpp" line="123"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1853,27 +1962,27 @@ Would you like to continue?</source>
 <context>
     <name>Hpgl::DxfObj</name>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="36"/>
+        <location filename="../../plugins/file/hpgl/hpgl_file.cpp" line="35"/>
         <source>Normal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="36"/>
+        <location filename="../../plugins/file/hpgl/hpgl_file.cpp" line="35"/>
         <source>Displays paths with pen width and fill.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="37"/>
+        <location filename="../../plugins/file/hpgl/hpgl_file.cpp" line="36"/>
         <source>Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="37"/>
+        <location filename="../../plugins/file/hpgl/hpgl_file.cpp" line="36"/>
         <source>Displays paths without pen width.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_node.cpp" line="42"/>
+        <location filename="../../plugins/file/hpgl/hpgl_node.cpp" line="40"/>
         <source>Colorize</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1881,7 +1990,7 @@ Would you like to continue?</source>
 <context>
     <name>Hpgl::Plugin</name>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="58"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="52"/>
         <source>Dxf Files</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1894,8 +2003,8 @@ Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1173"/>
-        <location filename="../mainwindow.cpp" line="1202"/>
+        <location filename="../mainwindow.cpp" line="1179"/>
+        <location filename="../mainwindow.cpp" line="1206"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1911,42 +2020,37 @@ Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="494"/>
-        <source>&amp;Crosshatch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="592"/>
+        <location filename="../mainwindow.cpp" line="540"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="594"/>
+        <location filename="../mainwindow.cpp" line="542"/>
         <source>GCode (*.%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="657"/>
+        <location filename="../mainwindow.cpp" line="602"/>
         <source>;	Contains files:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="763"/>
         <source>File open errors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="980"/>
+        <location filename="../mainwindow.cpp" line="885"/>
         <source>Icon size = 24</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="981"/>
+        <location filename="../mainwindow.cpp" line="886"/>
         <source>Icon size = 48</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="982"/>
+        <location filename="../mainwindow.cpp" line="887"/>
         <source>Icon size = 72</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2032,182 +2136,182 @@ Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="301"/>
+        <location filename="../mainwindow.cpp" line="300"/>
         <source>&amp;Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="323"/>
+        <location filename="../mainwindow.cpp" line="321"/>
         <source>&amp;Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="330"/>
+        <location filename="../mainwindow.cpp" line="328"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="331"/>
+        <location filename="../mainwindow.cpp" line="329"/>
         <source>Show the application&apos;s settings box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="323"/>
         <location filename="../mainwindow.cpp" line="325"/>
-        <location filename="../mainwindow.cpp" line="327"/>
         <source>Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="359"/>
+        <location filename="../mainwindow.cpp" line="360"/>
         <source>Ruller</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="365"/>
+        <location filename="../mainwindow.cpp" line="366"/>
         <source>Resize</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="377"/>
+        <location filename="../mainwindow.cpp" line="373"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="379"/>
+        <location filename="../mainwindow.cpp" line="375"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="380"/>
+        <location filename="../mainwindow.cpp" line="376"/>
         <source>Show the application&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="382"/>
+        <location filename="../mainwindow.cpp" line="378"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="383"/>
+        <location filename="../mainwindow.cpp" line="379"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="387"/>
+        <location filename="../mainwindow.cpp" line="383"/>
         <source>About &amp;Plugins…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="388"/>
+        <location filename="../mainwindow.cpp" line="384"/>
         <source>Show loaded plugins…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="393"/>
+        <location filename="../mainwindow.cpp" line="388"/>
         <source>&amp;Viev</source>
         <translation>&amp;View</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="396"/>
-        <location filename="../mainwindow.cpp" line="398"/>
+        <location filename="../mainwindow.cpp" line="391"/>
+        <location filename="../mainwindow.cpp" line="393"/>
         <source>Zoom ToolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="404"/>
-        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="399"/>
+        <location filename="../mainwindow.cpp" line="400"/>
         <source>Fit best</source>
         <translation>Best Fit</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="410"/>
-        <location filename="../mainwindow.cpp" line="411"/>
+        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="406"/>
         <source>100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="412"/>
+        <location filename="../mainwindow.cpp" line="407"/>
         <source>Ctrl+0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="416"/>
-        <location filename="../mainwindow.cpp" line="417"/>
+        <location filename="../mainwindow.cpp" line="411"/>
+        <location filename="../mainwindow.cpp" line="412"/>
         <source>Zoom in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="422"/>
-        <location filename="../mainwindow.cpp" line="423"/>
+        <location filename="../mainwindow.cpp" line="417"/>
+        <location filename="../mainwindow.cpp" line="418"/>
         <source>Zoom out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="432"/>
-        <location filename="../mainwindow.cpp" line="433"/>
+        <location filename="../mainwindow.cpp" line="427"/>
+        <location filename="../mainwindow.cpp" line="428"/>
         <source>Zoom to selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="303"/>
+        <location filename="../mainwindow.cpp" line="302"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="441"/>
+        <location filename="../mainwindow.cpp" line="438"/>
         <source>&amp;Paths</source>
         <translation>&amp;Toolpaths</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="443"/>
-        <location filename="../mainwindow.cpp" line="445"/>
+        <location filename="../mainwindow.cpp" line="440"/>
+        <location filename="../mainwindow.cpp" line="442"/>
         <source>Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1175"/>
+        <location filename="../mainwindow.cpp" line="1181"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1202"/>
+        <location filename="../mainwindow.cpp" line="1206"/>
         <source>Project (*.g2g)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="873"/>
+        <location filename="../mainwindow.cpp" line="798"/>
         <source>Do you want to close this project?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="879"/>
+        <location filename="../mainwindow.cpp" line="804"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1017"/>
+        <location filename="../mainwindow.cpp" line="918"/>
         <source>Do you want to reload file %1?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="340"/>
+        <location filename="../mainwindow.cpp" line="341"/>
         <source>Tool Base</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="344"/>
+        <location filename="../mainwindow.cpp" line="345"/>
         <source>Autoplace All Refpoints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="510"/>
-        <location filename="../mainwindow.cpp" line="512"/>
+        <location filename="../mainwindow.cpp" line="459"/>
+        <location filename="../mainwindow.cpp" line="461"/>
         <source>Graphics Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="218"/>
+        <location filename="../mainwindow.cpp" line="219"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2219,7 +2323,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="../mainwindow.cpp" line="258"/>
         <location filename="../mainwindow.cpp" line="262"/>
-        <location filename="../mainwindow.cpp" line="939"/>
+        <location filename="../mainwindow.cpp" line="861"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2229,57 +2333,32 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="454"/>
-        <source>Pro&amp;file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="460"/>
-        <source>&amp;Pocket</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="472"/>
-        <source>&amp;Voronoi</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="478"/>
-        <source>&amp;Thermal Insulation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="486"/>
-        <source>&amp;Drilling</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="336"/>
+        <location filename="../mainwindow.cpp" line="334"/>
         <source>&amp;G-Code Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="562"/>
+        <location filename="../mainwindow.cpp" line="513"/>
         <source>Union</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="563"/>
+        <location filename="../mainwindow.cpp" line="514"/>
         <source>Difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="564"/>
+        <location filename="../mainwindow.cpp" line="515"/>
         <source>Exclusion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="565"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>Intersection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="312"/>
+        <location filename="../mainwindow.cpp" line="311"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2294,35 +2373,30 @@ Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="316"/>
+        <location filename="../mainwindow.cpp" line="315"/>
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="356"/>
         <source>Snap to grid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="466"/>
-        <source>&amp;PocketR</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="873"/>
-        <location filename="../mainwindow.cpp" line="879"/>
-        <location filename="../mainwindow.cpp" line="922"/>
-        <location filename="../mainwindow.cpp" line="1016"/>
+        <location filename="../mainwindow.cpp" line="798"/>
+        <location filename="../mainwindow.cpp" line="804"/>
+        <location filename="../mainwindow.cpp" line="845"/>
+        <location filename="../mainwindow.cpp" line="917"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="919"/>
+        <location filename="../mainwindow.cpp" line="842"/>
         <source>File saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="923"/>
+        <location filename="../mainwindow.cpp" line="846"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation type="unfinished"></translation>
@@ -2341,135 +2415,98 @@ Do you want to save your changes?</source>
 <context>
     <name>Pin</name>
     <message>
-        <location filename="../point.cpp" line="377"/>
-        <source>&amp;Create path for Pins</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../point.cpp" line="400"/>
-        <location filename="../point.cpp" line="413"/>
-        <source>Set Depth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../point.cpp" line="426"/>
-        <source>Pin_</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../point.cpp" line="431"/>
-        <source>Fixed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../point.cpp" line="439"/>
         <source>Used</source>
-        <translation>Use</translation>
+        <translation type="vanished">Use</translation>
     </message>
 </context>
 <context>
     <name>PocketOffsetForm</name>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="20"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="20"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="91"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="36"/>
         <source>Pocket Offset Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="106"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="74"/>
         <source>Aligin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="127"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="95"/>
         <source>Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="140"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="108"/>
         <source>Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="153"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="121"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="174"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="142"/>
         <source>Climb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="187"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="155"/>
         <source>Conventional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="242"/>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketoffsetform.ui" line="290"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="217"/>
         <source>Steps:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="319"/>
-        <source>Create</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketoffsetform.ui" line="335"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffsetform.ui" line="48"/>
         <source>Qty of
 tools:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="356"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="29"/>
         <source>Pocket Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="29"/>
         <source>Pocket Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="29"/>
         <source>Pockert On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="71"/>
-        <location filename="../forms/pocketoffsetform.cpp" line="189"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="65"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="179"/>
         <source> - Infinity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="125"/>
-        <location filename="../forms/pocketoffsetform.cpp" line="151"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="116"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="142"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="125"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="116"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="151"/>
+        <location filename="../../plugins/gcode/pocketoffset/pocketoffset_form.cpp" line="142"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2477,144 +2514,129 @@ Would you like to continue?</source>
 <context>
     <name>PocketRasterForm</name>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="14"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="74"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="28"/>
         <source>Pocket Raster Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="96"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="76"/>
         <source>Aligin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="117"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="97"/>
         <source>Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="130"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="110"/>
         <source>Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="169"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="149"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="190"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="170"/>
         <source>Climb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="203"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="183"/>
         <source>Conventional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="140"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="120"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="146"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="126"/>
         <source>Milling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="156"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="136"/>
         <source>HLDI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="279"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="271"/>
         <source>Raster Angle:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="298"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="35"/>
         <source>Profile Pass:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="314"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="258"/>
         <source>Acceleration:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="327"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="284"/>
         <source> °</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="341"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="230"/>
         <source>No Profile Pass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="346"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="235"/>
         <source>First</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="351"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="240"/>
         <source>Last</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="359"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketrasterform.ui" line="45"/>
         <source> mm/c²</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="405"/>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketrasterform.ui" line="425"/>
-        <source>Create</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketrasterform.ui" line="435"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="25"/>
         <source>Raster On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="25"/>
         <source>Raster Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="25"/>
         <source>Raster Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="104"/>
-        <location filename="../forms/pocketrasterform.cpp" line="130"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="97"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="123"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="104"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="97"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="130"/>
+        <location filename="../../plugins/gcode/pocketraster/pocketraster_form.cpp" line="123"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2622,130 +2644,115 @@ Would you like to continue?</source>
 <context>
     <name>ProfileForm</name>
     <message>
-        <location filename="../forms/profileform.ui" line="20"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="20"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="74"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="26"/>
         <source>Profile Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="105"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="41"/>
         <source>Trimming??? Corner Trimming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="203"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="121"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="235"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="48"/>
         <source>Aligin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="253"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="66"/>
         <source>Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="263"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="76"/>
         <source>Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="270"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="83"/>
         <source>On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="112"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="153"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="130"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="171"/>
         <source>Climb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="140"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="181"/>
         <source>Conventional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="169"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="93"/>
         <source>Bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="225"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="143"/>
         <source>Add Bridge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="193"/>
+        <location filename="../../plugins/gcode/profile/profileform.ui" line="111"/>
         <source>Lenght:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="298"/>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/profileform.ui" line="308"/>
-        <source>Create</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/profileform.ui" line="315"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/profileform.cpp" line="154"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="137"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="128"/>
-        <location filename="../forms/profileform.cpp" line="154"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="111"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="137"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
+        <location filename="../../plugins/gcode/profile/profile_form.h" line="44"/>
         <source>Profile On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
+        <location filename="../../plugins/gcode/profile/profile_form.h" line="44"/>
         <source>Profile Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
+        <location filename="../../plugins/gcode/profile/profile_form.h" line="44"/>
         <source>Profile Inside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="128"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="111"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="235"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="209"/>
         <source>Trimming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="239"/>
-        <location filename="../forms/profileform.cpp" line="243"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="213"/>
+        <location filename="../../plugins/gcode/profile/profile_form.cpp" line="217"/>
         <source>Corner Trimming</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2753,7 +2760,7 @@ Would you like to continue?</source>
 <context>
     <name>Project</name>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="78"/>
+        <location filename="../../static_libs/common/project.cpp" line="71"/>
         <source>External file &quot;%1&quot; has changed.
 Reload it into the project?</source>
         <translation type="unfinished"></translation>
@@ -2762,58 +2769,50 @@ Reload it into the project?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="156"/>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="176"/>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="183"/>
+        <location filename="../../static_libs/gi/gi_drill.h" line="38"/>
         <source>Tool %1, Ø%2mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tool.h" line="109"/>
+        <location filename="../../static_libs/tooldatabase/tool.h" line="111"/>
         <source>Default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tool.cpp" line="240"/>
+        <location filename="../../static_libs/tooldatabase/tool.cpp" line="228"/>
         <source>No valid tool...!!!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="41"/>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="37"/>
         <source>There are no selected items to define the border.
 The old border will be used.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="60"/>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="55"/>
         <source>G-Code Home Point</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="64"/>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="59"/>
         <source>G-Code Zero Point</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="215"/>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="201"/>
         <source>Fixed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="221"/>
-        <location filename="../point.cpp" line="444"/>
-        <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../point.cpp" line="510"/>
+        <location filename="../../static_libs/gi/gi_point.cpp" line="476"/>
         <source>Pin %1
 X %2:Y %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.cpp" line="31"/>
-        <location filename="../../static_libs/filetree/ft_node.cpp" line="28"/>
+        <location filename="../../plugins/shape/text/shtextdialog.cpp" line="29"/>
+        <location filename="../../static_libs/filetree/ft_node.h" line="97"/>
         <source>Top|Bottom</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2873,121 +2872,128 @@ X %2:Y %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="140"/>
+        <location filename="../../plugins/gcode/gc_node.cpp" line="134"/>
         <source>&amp;Delete Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="127"/>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="108"/>
+        <location filename="../../plugins/file/excellon/ex_node.cpp" line="101"/>
+        <location filename="../../plugins/gcode/gc_node.cpp" line="121"/>
         <source>&amp;Hide other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="128"/>
+        <location filename="../../plugins/file/excellon/ex_node.cpp" line="121"/>
         <source>&amp;Edit Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="133"/>
+        <location filename="../../plugins/file/excellon/ex_node.cpp" line="126"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="123"/>
+        <location filename="../../plugins/gcode/gc_node.cpp" line="117"/>
         <source>&amp;Save Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="130"/>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="109"/>
+        <location filename="../../plugins/file/excellon/ex_node.cpp" line="102"/>
+        <location filename="../../plugins/gcode/gc_node.cpp" line="124"/>
         <source>&amp;Show source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/circlearc/sharc.cpp" line="90"/>
+        <location filename="../../plugins/shape/circlearc/sharc.cpp" line="87"/>
         <source>Arc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/circle/shcircle.cpp" line="65"/>
+        <location filename="../../plugins/shape/circle/shcircle.cpp" line="61"/>
         <source>Circle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shape.cpp" line="204"/>
+        <location filename="../../plugins/shape/shape.cpp" line="198"/>
         <source>&amp;Delete object &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shape.cpp" line="207"/>
+        <location filename="../../plugins/shape/shape.cpp" line="201"/>
         <source>&amp;Visible &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="224"/>
+        <location filename="../../plugins/shape/shape.cpp" line="205"/>
+        <source>&amp;Selectable &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/shape/text/shtext.cpp" line="220"/>
         <source>&amp;Edit Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/polyline/shpolyline.cpp" line="62"/>
+        <location filename="../../plugins/shape/polyline/shpolyline.cpp" line="59"/>
         <source>Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/rectangle/shrectangle.cpp" line="60"/>
+        <location filename="../../plugins/shape/rectangle/shrectangle.cpp" line="57"/>
         <source>Rectangle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="252"/>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="285"/>
+        <location filename="../../plugins/shape/text/shtext.cpp" line="246"/>
+        <location filename="../../plugins/shape/text/shtext.cpp" line="276"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shhandler.cpp" line="175"/>
+        <location filename="../../plugins/shape/shhandler.cpp" line="165"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/gi/thermalpreviewitem.cpp" line="144"/>
+        <location filename="../../plugins/gcode/thermal/thermal_previewitem.cpp" line="134"/>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalpreviewitem.cpp" line="132"/>
         <source>Exclude from the calculation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/gi/thermalpreviewitem.cpp" line="153"/>
+        <location filename="../../plugins/gcode/thermal/thermal_previewitem.cpp" line="143"/>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalpreviewitem.cpp" line="141"/>
         <source>Include in the calculation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../interfaces/file.h" line="70"/>
+        <location filename="../../plugins/file/file.h" line="72"/>
         <source>Preparing: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../interfaces/pluginfile.h" line="72"/>
+        <location filename="../../plugins/file/file_plugin.h" line="61"/>
         <source>&amp;Close All Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../interfaces/pluginfile.h" line="73"/>
-        <location filename="../interfaces/shapepluginin.h" line="106"/>
+        <location filename="../../plugins/file/file_plugin.h" line="62"/>
+        <location filename="../../plugins/shape/shapepluginin.h" line="101"/>
         <source>Really?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../interfaces/shapepluginin.h" line="105"/>
+        <location filename="../../plugins/shape/shapepluginin.h" line="100"/>
         <source>&amp;Delete All Shapes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../interfaces/shapepluginin.h" line="110"/>
+        <location filename="../../plugins/shape/shapepluginin.h" line="105"/>
         <source>Shapes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="151"/>
+        <location filename="../main.cpp" line="181"/>
         <source>Load plugin %1
 
 
@@ -2995,34 +3001,44 @@ X %2:Y %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="634"/>
-        <location filename="../mainwindow.cpp" line="649"/>
+        <location filename="../mainwindow.cpp" line="579"/>
+        <location filename="../mainwindow.cpp" line="594"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="636"/>
-        <location filename="../mainwindow.cpp" line="651"/>
+        <location filename="../mainwindow.cpp" line="581"/>
+        <location filename="../mainwindow.cpp" line="596"/>
         <source>GCode (*.%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="688"/>
+        <location filename="../mainwindow.cpp" line="633"/>
         <source>No selected toolpath files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="402"/>
+        <location filename="../../static_libs/common/project.cpp" line="375"/>
         <source>Untitled.g2g</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="419"/>
+        <location filename="../../static_libs/common/project.cpp" line="390"/>
         <source>Board dimensions may have changed.
 It is advisable to perform automatic placement of the pins
 by selecting the necessary work items.
 
 Continue saving?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../GTE_Win/gerber/gbraperture.cpp" line="518"/>
+        <source>Bad outline (regular polygon) macro!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../GTE_Win/gerber/gbraperture.cpp" line="550"/>
+        <source>Bad thermal macro!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3034,7 +3050,7 @@ Continue saving?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../recent.cpp" line="110"/>
+        <location filename="../recent.cpp" line="104"/>
         <source>&amp;%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3042,12 +3058,12 @@ Continue saving?</source>
 <context>
     <name>Scene</name>
     <message>
-        <location filename="../../static_libs/graphicsview/scene.cpp" line="55"/>
+        <location filename="../../static_libs/graphicsview/scene.cpp" line="52"/>
         <source>Save PDF file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/graphicsview/scene.cpp" line="55"/>
+        <location filename="../../static_libs/graphicsview/scene.cpp" line="52"/>
         <source>File(*.pdf)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3187,61 +3203,61 @@ Continue saving?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="202"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="255"/>
         <source>Gerber</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="203"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="256"/>
         <source>Cleaning Polygons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="204"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="257"/>
         <source>Skip duplicates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="205"/>
+        <location filename="../../plugins/file/gerber/gbr_plugin.cpp" line="258"/>
         <source>Simplify Regions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="120"/>
-        <location filename="../gcode/gcplugin.cpp" line="154"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="114"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="148"/>
         <source>Start with:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="128"/>
-        <location filename="../gcode/gcplugin.cpp" line="162"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="122"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="156"/>
         <source>Finish with:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="136"/>
-        <location filename="../gcode/gcplugin.cpp" line="170"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="130"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="164"/>
         <source>The format of the line with the coordinates:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="140"/>
-        <location filename="../gcode/gcplugin.cpp" line="174"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="134"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="168"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - only if the value has changed.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - always.&lt;/p&gt;&lt;p&gt;If one of the commands &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; and&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; is missing, it will not be inserted into the G-code.&lt;/p&gt;&lt;p&gt;If there is a space between the teams, then it will also be inserted into the G-code.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="90"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="84"/>
         <source>Save the G-Code to the project folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="102"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="96"/>
         <source>File Extension:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="96"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="90"/>
         <source>Add a comment with the parameters G-Сode</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3251,57 +3267,57 @@ Continue saving?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="143"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="137"/>
         <source>Milling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="177"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="171"/>
         <source>Laser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="188"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="182"/>
         <source>Milling sequence:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="198"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="192"/>
         <source>Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="204"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="198"/>
         <source>Simplify Hldi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="224"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="218"/>
         <source>HLDI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="230"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="224"/>
         <source>Spindle / Laser Control Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="239"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="233"/>
         <source>Spindle On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="248"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="242"/>
         <source>Constant Laser Power Mode On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="257"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="251"/>
         <source>Dynamic Laser Power Mode On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="265"/>
+        <location filename="../../plugins/gcode/gc_fileplugin.cpp" line="259"/>
         <source>Spindle/Laser Off:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3396,43 +3412,43 @@ Continue saving?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="154"/>
+        <location filename="../settingsdialog.cpp" line="150"/>
         <source>Open Settings Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="316"/>
+        <location filename="../settingsdialog.cpp" line="305"/>
         <source>The complete translation of the application will take
 effect after restarting the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="63"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="137"/>
+        <location filename="../../plugins/file/dxf/dxf_settingstab.cpp" line="75"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="128"/>
         <source>Font</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="65"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="139"/>
+        <location filename="../../plugins/file/dxf/dxf_settingstab.cpp" line="77"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="130"/>
         <source>Bold:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="66"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="140"/>
+        <location filename="../../plugins/file/dxf/dxf_settingstab.cpp" line="78"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="131"/>
         <source>Default Font:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="67"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="141"/>
+        <location filename="../../plugins/file/dxf/dxf_settingstab.cpp" line="79"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="132"/>
         <source>Italic:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="68"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="142"/>
+        <location filename="../../plugins/file/dxf/dxf_settingstab.cpp" line="80"/>
+        <location filename="../../plugins/file/hpgl/hpgl_plugin.cpp" line="133"/>
         <source>Override declared fonts in DXF:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3440,154 +3456,202 @@ effect after restarting the application.</source>
 <context>
     <name>ShTextDialog</name>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="20"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="20"/>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="140"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="140"/>
         <source>Italic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="205"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="205"/>
         <source>X/Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="215"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="215"/>
         <source> %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="45"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="45"/>
         <source>Align</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="182"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="182"/>
         <source>Height:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="130"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="130"/>
         <source>Font:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="192"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="192"/>
         <source>Angle:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="120"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="120"/>
         <source>Bold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="172"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="172"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="153"/>
+        <location filename="../../plugins/shape/text/shtextdialog.ui" line="153"/>
         <source> °</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Thermal::Form</name>
+    <message>
+        <location filename="../../plugins/gcode/thermal/thermal_form.cpp" line="48"/>
+        <source>Thermal Insulation Toolpath</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/thermal/thermal_form.cpp" line="151"/>
+        <source>No data to process.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/thermal/thermal_form.cpp" line="189"/>
+        <source>Thermal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/thermal/thermal_form.cpp" line="207"/>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Thermal::Model</name>
+    <message>
+        <location filename="../../plugins/gcode/thermal/thermal_model.cpp" line="86"/>
+        <source>     Name|Angle|Tickness|Count</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ThermalForm</name>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="14"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="14"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="195"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="177"/>
         <source>Thermal Insulation Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="126"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="114"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="41"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="106"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="35"/>
         <source>File:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="51"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="116"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="45"/>
         <source>Area:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="71"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="126"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="65"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="89"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="144"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="83"/>
         <source>Aperture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="96"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="151"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="90"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="103"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="158"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="97"/>
         <source>Cop. Pour</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="113"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="107"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="136"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="71"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="124"/>
         <source>To </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="139"/>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="258"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="74"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="93"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="127"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="240"/>
         <source> mm²</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="152"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="140"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="234"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="168"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="216"/>
         <source>Ignore Copper</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="255"/>
+        <location filename="../../plugins/gcode/thermal/thermalform.ui" line="90"/>
+        <location filename="../../plugins/gcode/thermal2/thermalform.ui" line="237"/>
         <source>From </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.cpp" line="179"/>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalform.cpp" line="171"/>
         <source>No data to process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.cpp" line="219"/>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalform.cpp" line="209"/>
         <source>Thermal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalform.cpp" line="227"/>
+        <source>All</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ThermalModel</name>
     <message>
-        <location filename="../../static_libs/thermal/thermalmodel.cpp" line="94"/>
+        <location filename="../../plugins/gcode/thermal2/gc_thermalmodel.cpp" line="84"/>
         <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3620,7 +3684,7 @@ effect after restarting the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.cpp" line="55"/>
+        <location filename="../../static_libs/tooldatabase/tool_database.cpp" line="53"/>
         <source>Invalid tool</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3812,40 +3876,40 @@ effect after restarting the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="91"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="81"/>
         <source>If the offset value is more than 50%, unmilled areas are possible.
 These errors do not appear in the visualization.</source>
         <comment>При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации.</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="197"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="181"/>
         <source>Pass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="208"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="219"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="192"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="203"/>
         <source>Depth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="354"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="333"/>
         <source>End Mill (Ø%1 mm)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="357"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="336"/>
         <source>Engrave (%2° %1 mm tip)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="360"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="339"/>
         <source>Drill (Ø%1 mm)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="363"/>
+        <location filename="../../static_libs/tooldatabase/tool_editform.cpp" line="342"/>
         <source>Laser (Ø%1 mm)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3853,7 +3917,7 @@ These errors do not appear in the visualization.</source>
 <context>
     <name>ToolModel</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolmodel.cpp" line="156"/>
+        <location filename="../../static_libs/tooldatabase/tool_model.cpp" line="149"/>
         <source>Name|Note|Id</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3861,29 +3925,29 @@ These errors do not appear in the visualization.</source>
 <context>
     <name>ToolSelectorForm</name>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="101"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="129"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="175"/>
+        <location filename="../../static_libs/common/depthform.cpp" line="91"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="113"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="158"/>
         <source>Tool:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="171"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="154"/>
         <source>Form</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="173"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="156"/>
         <source>Tool %1:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="176"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="159"/>
         <source>Edit</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="177"/>
+        <location filename="../../static_libs/tooldatabase/tool_selectorform.cpp" line="160"/>
         <source>Select</source>
         <translation></translation>
     </message>
@@ -3891,22 +3955,22 @@ These errors do not appear in the visualization.</source>
 <context>
     <name>ToolTreeView</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="71"/>
+        <location filename="../../static_libs/tooldatabase/tool_treeview.cpp" line="68"/>
         <source>New Group</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="93"/>
+        <location filename="../../static_libs/tooldatabase/tool_treeview.cpp" line="89"/>
         <source>New Tool </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="102"/>
+        <location filename="../../static_libs/tooldatabase/tool_treeview.cpp" line="97"/>
         <source>Warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="102"/>
+        <location filename="../../static_libs/tooldatabase/tool_treeview.cpp" line="97"/>
         <source>Are you sure you want to delete the item and all content?</source>
         <translation></translation>
     </message>
@@ -3914,92 +3978,77 @@ These errors do not appear in the visualization.</source>
 <context>
     <name>VoronoiForm</name>
     <message>
-        <location filename="../forms/voronoiform.ui" line="14"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="14"/>
         <source>Form</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="68"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="27"/>
         <source>Voronoi Toolpath</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="131"/>
-        <location filename="../forms/voronoiform.ui" line="166"/>
-        <location filename="../forms/voronoiform.ui" line="192"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="78"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="108"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="129"/>
         <source> mm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="124"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="71"/>
         <source>Precision:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="221"/>
-        <source>Name:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/voronoiform.ui" line="97"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="49"/>
         <source>Solver:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="110"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="62"/>
         <source>JC_VORONOI</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="105"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="57"/>
         <source>BOOST</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="159"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="101"/>
         <source>Frame Offset:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="185"/>
+        <location filename="../../plugins/gcode/voroni/voronoiform.ui" line="122"/>
         <source>Width:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="231"/>
-        <source>Create</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/voronoiform.ui" line="238"/>
-        <source>Close</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/voronoiform.cpp" line="121"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="113"/>
         <source>No selected items for working...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="157"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="146"/>
         <source>The width must be larger than the tool diameter!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="92"/>
-        <location filename="../forms/voronoiform.cpp" line="121"/>
-        <location filename="../forms/voronoiform.cpp" line="157"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="84"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="113"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="146"/>
         <source>Warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="92"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="84"/>
         <source>Work items from different files!
 Would you like to continue?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="143"/>
+        <location filename="../../plugins/gcode/voroni/voronoi_form.cpp" line="134"/>
         <source>Voronoi</source>
         <translation></translation>
     </message>

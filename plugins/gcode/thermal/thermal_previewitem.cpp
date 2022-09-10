@@ -106,7 +106,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
 
 QPainterPath AbstractThermPrGi::shape() const { return sourcePath; }
 
-int AbstractThermPrGi::type() const { return static_cast<int>(GiType::Preview); }
+int AbstractThermPrGi::type() const { return GiType::Preview; }
 
 bool AbstractThermPrGi::isValid() const {
     return !previewPaths.empty() && node_->isChecked();

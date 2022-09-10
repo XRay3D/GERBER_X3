@@ -33,7 +33,7 @@
 #include <QThread>
 #include <QTimer>
 
-namespace Drill {
+namespace DrillPlugin {
 
 Paths offset(const Path& path, double offset, bool fl = false) {
     ClipperOffset cpOffset;
@@ -594,4 +594,4 @@ void Form::updateName() { }
 
 void Form::editFile(GCode::File* file) { }
 
-} // namespace Drill
+} // namespace DrillPlugin

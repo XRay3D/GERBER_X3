@@ -24,7 +24,7 @@ public:
     ~Circle();
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShCircle); }
+    int type() const override { return GiType::ShCircle; }
     void redraw() override;
     // Shape interface
     QString name() const override;

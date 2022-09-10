@@ -29,7 +29,6 @@ class GraphicObject final : public AbstrGraphicObject {
 
     int entityId_ {};
     Path path_;
-    Paths paths_;
     File* file_ = nullptr;
     double rotationAngle_ {};
     double scaleX_ {};

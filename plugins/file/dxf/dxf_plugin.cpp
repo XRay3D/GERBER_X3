@@ -49,7 +49,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     codes.reserve(10000);
 
     QTextStream in(&file);
-    //    in.setCodec("Windows-1251");
+    in.setCodec("Windows-1251");
 
     //    in.setAutoDetectUnicode(true);
 
@@ -86,6 +86,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
         file.close();
 
         // emit fileProgress(file_->shortName(), progress, progressCtr);
+        Timer t {"Section Parser"};
 
         for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
             if (*it == "SECTION")
@@ -97,31 +98,28 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
                 switch (type) {
                 case SectionParser::HEADER:
                     file_->sections_[type] = new SectionHEADER(file_, from, to);
-                    break;
+                    continue;
                 case SectionParser::CLASSES:
                     // dxfFile()->sections_[type] = new SectionCLASSES(dxfFile(), from, to);
-                    break;
+                    continue;
                 case SectionParser::TABLES:
                     file_->sections_[type] = new SectionTABLES(file_, from, to);
-                    break;
+                    continue;
                 case SectionParser::BLOCKS:
                     file_->sections_[type] = new SectionBLOCKS(file_, from, to);
-                    break;
+                    continue;
                 case SectionParser::ENTITIES:
                     file_->sections_[type] = new SectionENTITIES(file_, from, to);
-                    break;
+                    continue;
                 case SectionParser::OBJECTS:
                     // dxfFile()->sections_[type] = new SectionOBJECTS(dxfFile(), from, to);
-                    break;
+                    continue;
                 case SectionParser::THUMBNAILIMAGE:
                     // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE(dxfFile(), from, to);
-                    break;
+                    continue;
                 default:
                     throw QString("Unknowh Section!");
-                    break;
                 }
-                if (file_->sections_.contains(type))
-                    file_->sections_[type]->parse();
             }
         }
         if (file_->sections_.size() == 0) {
@@ -155,7 +153,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
-        Drill::Preview retData;
+        DrillPlugin::Preview retData;
         auto const dxfFile = static_cast<File*>(file);
         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
             for (auto&& go : layer->graphicObjects())

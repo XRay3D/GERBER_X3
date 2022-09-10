@@ -8,7 +8,8 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
+
 
 project(common LANGUAGES CXX)
 
@@ -38,5 +39,8 @@ target_link_libraries(common PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+
+#add_module_library(QT qt.cpp)
 
 #target_compile_definitions(common PRIVATE COMMON_LIBRARY)

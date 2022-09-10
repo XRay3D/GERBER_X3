@@ -75,7 +75,7 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for (auto item : scene()->selectedItems()) {
-        if (static_cast<GiType>(item->type()) >= GiType::ShCircle) {
+        if (item->type() >= GiType::ShCircle) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for (auto& h : shape->handlers) {
@@ -110,7 +110,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
 void Shape::updateOtherHandlers(Handler*) { }
 
 void Shape::changeColor() {
-    animation.setStartValue(bodyColor_);
+    //    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
@@ -129,8 +129,8 @@ void Shape::changeColor() {
         break;
     }
 
-    animation.setEndValue(bodyColor_);
-    animation.start();
+    //    animation.setEndValue(bodyColor_);
+    //    animation.start();
 }
 
 Node* Shape::node() const { return node_; }

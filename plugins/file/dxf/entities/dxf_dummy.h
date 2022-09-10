@@ -26,7 +26,7 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
     GraphicObject toGo() const override {
-        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     // void write(QDataStream&) const override { }

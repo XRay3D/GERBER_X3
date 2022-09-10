@@ -34,17 +34,9 @@ class QFile;
 class QFileSystemWatcher;
 enum class FileType;
 
-#if __cplusplus > 201703L
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
 using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
-#else
-struct FilesMap : std::map<int, std::shared_ptr<FileInterface>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-struct ShapesMap : std::map<int, std::shared_ptr<ShapeInterface>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-#endif
+
 class Project : public QObject {
     Q_OBJECT
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file);

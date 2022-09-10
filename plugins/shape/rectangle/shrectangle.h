@@ -23,7 +23,7 @@ public:
     ~Rectangle();
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShRectangle); }
+    int type() const override { return GiType::ShRectangle; }
     // GraphicsItem interface
     void redraw() override;
     // Shape interface
