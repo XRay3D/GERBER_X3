@@ -16,15 +16,8 @@
 class GiDrill;
 
 namespace Excellon {
-#if __cplusplus > 201703L
+
 using Tools = std::map<int, double>;
-#else
-struct Tools : std::map<int, double> {
-    bool contains(int key) const {
-        return find(key) != end();
-    }
-};
-#endif
 
 enum UnitMode {
     Inches,

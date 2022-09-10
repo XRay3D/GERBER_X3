@@ -10,6 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
+
+//import std;
+
 #include "graphicsview.h"
 #include "edid.h"
 #include "ruler.h"
@@ -22,6 +25,7 @@
 #else
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
+
 
 #include <QDragEnterEvent>
 #include <QGridLayout>
@@ -53,11 +57,10 @@ void setCursor(QWidget* w) {
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent) {
-    setCacheMode(/*CacheBackground*/ CacheNone);
-    setOptimizationFlag(DontSavePainterState);
-    setOptimizationFlag(DontAdjustForAntialiasing);
-
-    setViewportUpdateMode(FullViewportUpdate);
+    //    setCacheMode(CacheBackground);
+    //    setOptimizationFlag(DontSavePainterState);
+    //    setOptimizationFlag(DontAdjustForAntialiasing);
+    //    setViewportUpdateMode(/*FullViewportUpdate*/ SmartViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
     setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -354,7 +357,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     } else if (event->button() == Qt::RightButton) {
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-        //            if (item && static_cast<GiType>(item->type()) == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
+        //            if (item && item->type() == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
         //                delete item;
         //        }
         // это что бы при вызове контекстного меню ничего постороннего не было

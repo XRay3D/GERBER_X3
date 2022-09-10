@@ -39,7 +39,7 @@ Text::Text(QPointF pt1)
     App::scene()->addItem(this);
 }
 
-int Text::type() const { return static_cast<int>(GiType::ShText); }
+int Text::type() const { return GiType::ShText; }
 
 void Text::redraw() {
     QPainterPath painterPath;
@@ -306,7 +306,7 @@ PluginText::PluginText() { }
 
 PluginText::~PluginText() { }
 
-int PluginText::type() const { return static_cast<int>(GiType::ShText); }
+int PluginText::type() const { return GiType::ShText; }
 
 QIcon PluginText::icon() const { return QIcon::fromTheme("draw-text"); }
 

@@ -419,7 +419,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     menu.exec(event->screenPos());
 }
 
-int GiPin::type() const { return static_cast<int>(GiType::MarkPin); }
+int GiPin::type() const { return GiType::MarkPin; }
 
 void GiPin::setPinsPos(QPointF pos[]) {
     for (int i = 0; i < 4; ++i)
@@ -497,7 +497,7 @@ LayoutFrames::~LayoutFrames() {
 }
 
 int LayoutFrames::type() const {
-    return static_cast<int>(GiType::MarkLayoutFrames);
+    return GiType::MarkLayoutFrames;
 }
 
 QRectF LayoutFrames::boundingRect() const {

@@ -22,6 +22,7 @@ SectionENTITIES::SectionENTITIES(File* file, Codes::iterator from, Codes::iterat
     : SectionParser(from, to, file)
     , sp(this)
     , blocks(file->blocks()) {
+    parse();
 }
 
 SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* sp)

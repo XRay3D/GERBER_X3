@@ -12,6 +12,7 @@
  *******************************************************************************/
 #include "gi_drill.h"
 
+#include "myclipper.h"
 #include "scene.h"
 #include <graphicsview.h>
 
@@ -72,7 +73,7 @@ Paths GiDrill::paths(int alternate) const {
 }
 
 void GiDrill::changeColor() {
-    animation.setStartValue(bodyColor_);
+    //    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
@@ -103,8 +104,8 @@ void GiDrill::changeColor() {
         break;
     }
 
-    animation.setEndValue(bodyColor_);
-    animation.start();
+    //    animation.setEndValue(bodyColor_);
+    //    animation.start();
 }
 
 void GiDrill::create() {
@@ -113,10 +114,12 @@ void GiDrill::create() {
     if (!path_.size()) {
         return;
     } else if (path_.size() == 1) {
-        path_ = CirclePath(diameter_ ? diameter_ * uScale : uScale, path_.front());
-        ReversePath(path_);
-        path_.push_back(path_.front());
-        shape_.addPolygon(path_);
+        //        path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
+        //        ReversePath(path_);
+        //        path_.push_back(path_.front());
+        // shape_.addPolygon(path_);
+        shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
+        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
         Paths paths;

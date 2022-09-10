@@ -8,7 +8,8 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
+
 
 project(gcode)
 set(CMAKE_CXX_STANDARD 20)
@@ -58,13 +59,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 #add_subdirectory(thermal2)
-add_subdirectory(profile)
-add_subdirectory(pocketoffset)
 
-add_subdirectory(drill)
-add_subdirectory(hatching)
-add_subdirectory(pocketraster)
-add_subdirectory(thermal)
-add_subdirectory(voroni)
+#add_subdirectory(profile)
+#add_subdirectory(pocketoffset)
+
+#add_subdirectory(drill)
+#add_subdirectory(hatching)
+#add_subdirectory(pocketraster)
+#add_subdirectory(thermal)
+#add_subdirectory(voroni)
 
 

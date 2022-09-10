@@ -16,7 +16,7 @@ struct Wipeout final : Entity {
 public:
     Type type() const override { return Type::WIPEOUT; }
     GraphicObject toGo() const override {
-        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     void parse(CodeData& code) override {

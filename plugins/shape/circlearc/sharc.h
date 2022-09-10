@@ -23,7 +23,7 @@ public:
     ~Arc();
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShCirArc); }
+    int type() const override { return GiType::ShCirArc; }
     void redraw() override;
     // Shape interface
     QString name() const override;

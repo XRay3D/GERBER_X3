@@ -14,7 +14,7 @@ struct Underlay final : Entity {
     Underlay(SectionParser* sp);
     Type type() const override { return Type::UNDERLAY; }
     GraphicObject toGo() const override {
-        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     // void write(QDataStream&) const override { }

@@ -66,11 +66,11 @@ void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
     for (QGraphicsItem* item : App::scene()->selectedItems()) {
-        if (static_cast<GiType>(item->type()) == GiType::Drill) {
+        if (item->type() == GiType::Drill) {
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (static_cast<GiType>(item->type()) != GiType::Drill) {
+        if (item->type() != GiType::Drill) {
             pair.second = item->boundingRect().center();
             ++c;
         }

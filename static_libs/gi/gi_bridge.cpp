@@ -91,7 +91,7 @@ QPointF GiBridge::calculate(const QPointF& pos) {
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && gi->isSelected()) {
-            if (auto type(static_cast<GiType>(item->type()));
+            if (auto type(item->type());
                 type >= GiType::ShCircle ||  //
                 type == GiType::Drill ||     //
                 type == GiType::DataSolid || //
@@ -187,4 +187,4 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 Paths GiBridge::paths(int) const { return Paths(); }
 
-int GiBridge::type() const { return static_cast<int>(GiType::Bridge); }
+int GiBridge::type() const { return GiType::Bridge; }

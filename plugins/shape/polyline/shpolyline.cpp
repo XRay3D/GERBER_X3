@@ -185,7 +185,7 @@ Plugin::Plugin() { }
 
 Plugin::~Plugin() { }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShPolyLine); }
+int Plugin::type() const { return GiType::ShPolyLine; }
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-line"); }
 

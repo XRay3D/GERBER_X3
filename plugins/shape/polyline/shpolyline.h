@@ -23,7 +23,7 @@ public:
     ~PolyLine() = default;
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShPolyLine); }
+    int type() const override { return GiType::ShPolyLine; }
     void redraw() override;
     // Shape interface
     QString name() const override;

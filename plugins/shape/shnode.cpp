@@ -56,7 +56,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //    case FileTree::Column::NameColorVisible:
     //        switch (role) {
     //        case Qt::DisplayRole:
-    //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
+    //            if (shape()->type() == GiType::ShText)
     //                return QString("%1 (%2, %3)")
     //                    .arg(shape()->name())
     //                    .arg(id_)
@@ -74,7 +74,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //        case FileTree::Id:
     //            return *id_;
     //        case Qt::EditRole:
-    //            if (static_cast<GiType>(shape()->type()) == GiType::ShText)
+    //            if (shape()->type() == GiType::ShText)
     //                return static_cast<Text*>(shape())->text();
     //            return QVariant();
     //        default:
@@ -103,12 +103,12 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     //    switch (FileTree::Column(index.column())) {
     //    case FileTree::Column::NameColorVisible:
     //        return itemFlag | Qt::ItemIsUserCheckable
-    //            | (static_cast<GiType>(shape()->type()) == GiType::ShText
+    //            | (shape()->type() == GiType::ShText
     //                    ? Qt::ItemIsEditable
     //                    : Qt::NoItemFlags);
     //    case FileTree::Column::SideType:
     //        return itemFlag
-    //            | (static_cast<GiType>(shape()->type()) == GiType::ShText
+    //            | (shape()->type() == GiType::ShText
     //                    ? Qt::ItemIsEditable
     //                    : Qt::NoItemFlags);
     //    default:
@@ -121,7 +121,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     //    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
     //        App::fileModel()->removeRow(row(), index().parent());
     //    });
-    //    if (static_cast<GiType>(shape()->type()) == GiType::ShText) {
+    //    if (shape()->type() == GiType::ShText) {
     //        menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
     //            ShTextDialog dlg({ static_cast<Text*>(shape()) }, tv);
     //            dlg.exec();

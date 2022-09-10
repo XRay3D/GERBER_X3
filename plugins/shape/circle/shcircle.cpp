@@ -85,7 +85,7 @@ Plugin::Plugin() { }
 
 Plugin::~Plugin() { }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShCircle); }
+int Plugin::type() const { return GiType::ShCircle; }
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 

@@ -32,6 +32,7 @@ class GiDataPath : public GraphicsItem {
 
     void redraw() override { update(); }
     void changeColor() override { }
+    friend class MainWindow;
 
 public:
     GiDataPath(const Path& path, FileInterface* file);

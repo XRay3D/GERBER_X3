@@ -14,7 +14,7 @@ struct XLine final : Entity {
     XLine(SectionParser* sp);
     Type type() const override { return Type::XLINE; }
     GraphicObject toGo() const override {
-        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     // void write(QDataStream&) const override { }

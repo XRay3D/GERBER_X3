@@ -14,7 +14,7 @@ struct Dimension final : Entity {
     Dimension(SectionParser* sp);
     Type type() const override { return Type::DIMENSION; }
         GraphicObject toGo() const override {
-        qWarning(__FUNCTION__ " NOT IMPLEMENTED!");
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     void parse(CodeData& code) override {

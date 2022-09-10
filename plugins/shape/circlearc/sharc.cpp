@@ -155,7 +155,7 @@ Plugin::Plugin() { }
 
 Plugin::~Plugin() { }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShCirArc); }
+int Plugin::type() const { return GiType::ShCirArc; }
 
 QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 

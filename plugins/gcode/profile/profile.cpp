@@ -173,7 +173,7 @@ void ProfileCreator::makeBridges() {
     // find Bridges
     mvector<GiBridge*> bridgeItems;
     for (QGraphicsItem* item : App::scene()->items()) {
-        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+        if (item->type() == GiType::Bridge)
             bridgeItems.push_back(static_cast<GiBridge*>(item));
     }
     // create Bridges

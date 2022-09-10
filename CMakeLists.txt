@@ -8,7 +8,7 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
@@ -27,7 +27,13 @@ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-Winvalid-pch)
+    add_compile_options(
+        -Winvalid-pch
+        -fmodules-ts
+    )
+    set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
+    set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
+    #    target_compile_options(example PRIVATE -fmodules-ts)
     #    add_compile_options(-H)
     #    add_compile_options(-ftime-report)
     # -pthread
@@ -60,14 +66,3 @@ add_subdirectory(plugins)
 
 # main app
 add_subdirectory(GGEasy)
-
-#target_precompile_headers(gi
-#    #    PUBLIC
-#    #    "myclipper.h"
-#    #    project_header.h
-#    PRIVATE
-#    "static_libs/tooldatabase/tool_pch.h"
-#    )
-
-#target_precompile_headers(thermal REUSE_FROM gi)
-#target_precompile_headers(GGEasy REUSE_FROM gi)
