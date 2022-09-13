@@ -21,28 +21,30 @@ class Handler final : public QGraphicsItem {
     friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape);
 
 public:
-    enum HType : int {
+    enum Type : int {
         Adder,
         Center,
         Corner,
     };
-    explicit Handler(Shapes::Shape* shape, HType type = Corner);
+    explicit Handler(Shapes::Shape* shape, Type type = Corner);
     ~Handler();
+
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    void setPos(const QPointF& pos);
+    // QGraphicsItem interface
+    int type() const override;
 
-    HType hType() const;
-    void setHType(const HType& value);
-    QRectF rect() const;
+    //    void setPos(const QPointF& pos);
+
+    Type hType() const;
+    void setHType(Type value);
 
 private:
+    QRectF rect;
     Shape* const shape;
-    HType hType_;
-    mvector<QPointF> pt;
+    Type hType_;
     QPointF lastPos;
-    void savePos();
     bool pressed {};
 
 protected:
@@ -50,9 +52,11 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    //    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
 
 } // namespace Shapes
