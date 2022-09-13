@@ -29,7 +29,9 @@ class LayoutFrames;
 class MainWindow;
 class Project;
 // class Scene;
-class ShapePlugin;
+namespace Shapes {
+class Plugin;
+}
 class SplashScreen;
 
 namespace FileTree {
@@ -39,18 +41,17 @@ class Model;
 } // namespace FileTree
 
 namespace Shapes {
-class Handler;
-
+class Handle;
 } // namespace Shapes
 
-using Handlers = mvector<Shapes::Handler*>;
+using Handlers = mvector<Shapes::Handle*>;
 
 // union PIF {
 //     FilePlugin* plug;
 //     QObject* obj;
 // };
 // union PIS {
-//     ShapePlugin* plug;
+//     Shapes::Plugin* plug;
 //     QObject* obj;
 // };
 // union PIG {
@@ -66,9 +67,9 @@ using Handlers = mvector<Shapes::Handler*>;
 // template <class T>
 // Plug(T*, QObject*) -> Plug<T>;
 
-using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/   // > ;
-using ShapeInterfacesMap = std::map<int, ShapePlugin*>; /*PIS*/ // > ;
-using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/  // > ;
+using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/      // > ;
+using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>; /*PIS*/ // > ;
+using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/     // > ;
 
 class App {
     inline static App* app_ = nullptr;
@@ -149,7 +150,7 @@ public:
     static FilePlugin* filePlugin(int type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app_->filePlugins_; }
 
-    static ShapePlugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
+    static Shapes::Plugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app_->shapePlugin_; }
 
     static GCodePlugin* gCodePlugin(int type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }

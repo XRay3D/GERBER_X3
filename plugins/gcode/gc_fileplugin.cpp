@@ -74,7 +74,6 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
         Tab(QWidget* parent = nullptr)
             : SettingsTabInterface(parent) {
             setObjectName(QString::fromUtf8("tabGCode"));
-            qDebug() << this;
             auto /**/ verticalLayout1 = new QVBoxLayout(this);
             /**/ verticalLayout1->setObjectName(QString::fromUtf8("/**/verticalLayout1"));
             /**/ verticalLayout1->setContentsMargins(6, 6, 6, 6);

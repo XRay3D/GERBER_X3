@@ -18,9 +18,8 @@ namespace Shapes {
 
 class Rectangle final : public Shape {
 public:
-    explicit Rectangle(QPointF pt1, QPointF pt2);
-    explicit Rectangle() { }
-    ~Rectangle();
+    explicit Rectangle(QPointF pt1 = {}, QPointF pt2 = {});
+    ~Rectangle() override = default;
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShRectangle; }
@@ -30,7 +29,7 @@ public:
     QString name() const override;
     QIcon icon() const override;
 
-    void setPt(const QPointF& pt);
+    void setPt(const QPointF& pt) override;
     enum {
         Center,
         Point1,
@@ -39,39 +38,18 @@ public:
         Point4,
         PtCount
     };
-    // Shape interface
-    //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
-    //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
-    //    QVariant data(const QModelIndex& index, int role) const override { }
-    //    void menu(QMenu& menu, FileTree::View* tv) const override { }
-protected:
-    // Shape interface
-    void updateOtherHandlers(Handler* sh) override;
 };
 
-class Plugin : public ShapePlugin {
+class PluginImpl : public Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "rectangle.json")
-    Q_INTERFACES(ShapePlugin)
-
-    Rectangle* shape = nullptr;
+    Q_INTERFACES(Shapes::Plugin)
 
 public:
-    Plugin();
-    virtual ~Plugin() override;
-
-    // ShapePlugin interface
-public:
+    // Shapes::Plugin interface
     int type() const override;
-
     QIcon icon() const override;
-    Shape* createShape() override;
-    Shape* createShape(const QPointF& point) override;
-    bool addShapePoint(const QPointF& value) override;
-    void updateShape(const QPointF& value) override;
-    void finalizeShape() override;
-
-signals:
+    Shape* createShape(const QPointF& point) const override;
 };
 
 } // namespace Shapes

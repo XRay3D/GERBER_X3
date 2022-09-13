@@ -88,9 +88,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
 
     // Shapes::Constructor
-    connect(ui.graphicsView, &GraphicsView::mouseMove, &ShapePlugin::updateShape_);
-    connect(ui.graphicsView, &GraphicsView::mouseClickR, &ShapePlugin::finalizeShape_);
-    connect(ui.graphicsView, &GraphicsView::mouseClickL, &ShapePlugin::addShapePoint_);
+
     // status bar
     connect(ui.graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
         ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
@@ -467,18 +465,23 @@ void MainWindow::createActionsShape() {
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    for (auto& [type, ptr] : App::shapePlugins()) {
-        auto action = toolBar->addAction(ptr->icon(), ptr->info().value("Name").toString());
+    for (auto& [type, shPlugin] : App::shapePlugins()) {
+        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        // FIXME connect(ptr, &FilePlugin::actionUncheck(bool)), action, SLOT(setChecked(bool)));
-        connect(action, &QAction::toggled, [shInt = ptr, this](bool checked) {
+        connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
+        connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
             if (checked) {
-                ShapePlugin::finalizeShape_();
-                ShapePlugin::setShapePI(shInt);
+                connect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                connect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                connect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
                 setDockWidget(new QPushButton);
-            } else
-                ShapePlugin::finalizeShape_();
+            } else {
+                shPlugin->finalizeShape();
+                disconnect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                disconnect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                disconnect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+            }
         });
     }
 
@@ -787,7 +790,6 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::resetToolPathsActions() {
-    qWarning(__FUNCTION__);
     delete dockWidget_->widget();
     dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
@@ -1256,7 +1258,7 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     if (MainWindow->objectName().isEmpty())
         MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
     MainWindow->resize(1600, 1000);
-    MainWindow->setWindowTitle(QString::fromUtf8(""));
+    MainWindow->setWindowTitle(QString::fromUtf8("[*] GGEasy"));
     MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
     centralwidget = new QWidget(MainWindow);
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));

@@ -13,8 +13,9 @@
 #include <QAbstractItemModel>
 
 class FileInterface;
-
-class ShapeInterface;
+namespace Shapes {
+class Shape;
+}
 class Project;
 
 namespace FileTree {
@@ -82,7 +83,7 @@ private:
     const QString mimeType;
 
     void addFile(FileInterface* file);
-    void addShape(ShapeInterface* shape);
+    void addShape(Shapes::Shape* shape);
 };
 
 } // namespace FileTree

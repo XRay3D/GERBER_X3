@@ -30,7 +30,7 @@ Text::Text(QPointF pt1)
     : iData(loadIData()) {
     paths_.resize(1);
 
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
 
     handlers.front()->setPos(pt1);
 

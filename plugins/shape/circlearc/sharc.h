@@ -51,13 +51,13 @@ private:
 
 protected:
     // Shape interface
-    void updateOtherHandlers(Handler* handler) override;
+    void updateOtherHandlers(Handle* handler) override;
 };
 
-class Plugin : public ShapePlugin {
+class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "circlearc.json")
-    Q_INTERFACES(ShapePlugin)
+    Q_INTERFACES(Shapes::Plugin)
 
     Arc* shape = nullptr;
     int ctr = 0;
@@ -66,7 +66,7 @@ public:
     Plugin();
     virtual ~Plugin() override;
 
-    // ShapePlugin interface
+    // Shapes::Plugin interface
 public:
     int type() const override;
 

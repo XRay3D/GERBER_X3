@@ -29,13 +29,15 @@ enum FileVersion {
 };
 
 class FileInterface;
-class ShapeInterface;
+namespace Shapes {
+class Shape;
+}
 class QFile;
 class QFileSystemWatcher;
 enum class FileType;
 
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
-using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
+using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
 
 class Project : public QObject {
     Q_OBJECT
@@ -86,8 +88,8 @@ public:
     int contains(const QString& name);
 
     // Shape
-    int addShape(ShapeInterface* const shape);
-    ShapeInterface* shape(int id);
+    int addShape(Shapes::Shape* const shape);
+    Shapes::Shape* shape(int id);
     void deleteShape(int id);
 
     // Project

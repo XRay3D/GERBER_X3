@@ -21,10 +21,10 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
     paths_.resize(1);
     handlers.reserve(4);
 
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
-    handlers.emplace_back(std::make_unique<Handler>(this));
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
-    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Adder));
+    handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[1]->setPos(pt1);
     handlers[3]->setPos(pt2);
@@ -38,7 +38,7 @@ void PolyLine::redraw() {
     Path& path = paths_.front();
     path.clear();
     for (size_t i = 1, e = handlers.size(); i < e; ++i) {
-        if (handlers[i]->hType() == Handler::Corner)
+        if (handlers[i]->hType() == Handle::Corner)
             path.emplace_back((handlers[i]->pos()));
     }
     shape_ = QPainterPath();
@@ -60,24 +60,24 @@ QString PolyLine::name() const { return QObject::tr("Line"); }
 
 QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
 
-void PolyLine::updateOtherHandlers(Handler* handler) {
-    if (handler->hType() == Handler::Adder) {
+void PolyLine::updateOtherHandlers(Handle* handler) {
+    if (handler->hType() == Handle::Adder) {
         int idx = handlers.indexOf(handler);
-        Handler* h;
+        Handle* h;
         {
-            Handler* h1 = handlers[idx + 1].get();
-            handlers.insert(handlers.begin() + idx + 1, std::make_unique<Handler>(this, Handler::Adder));
+            Handle* h1 = handlers[idx + 1].get();
+            handlers.insert(handlers.begin() + idx + 1, std::make_unique<Handle>(this, Handle::Adder));
             h = handlers[idx + 1].get();
             h->QGraphicsItem::setPos(QLineF(handler->pos(), h1->pos()).center());
         }
         {
-            Handler* h1 = handlers[idx].get();
-            handlers.insert(handlers.begin() + idx, std::make_unique<Handler>(this, Handler::Adder));
+            Handle* h1 = handlers[idx].get();
+            handlers.insert(handlers.begin() + idx, std::make_unique<Handle>(this, Handle::Adder));
             h = handlers[idx].get();
             h->QGraphicsItem::setPos(QLineF(handler->pos(), h1->pos()).center());
         }
-        handler->setHType(Handler::Corner);
-    } else if (handler->hType() == Handler::Corner /*&& !Constructor::item*/) {
+        handler->setHType(Handle::Corner);
+    } else if (handler->hType() == Handle::Corner /*&& !Constructor::item*/) {
         int idx = handlers.indexOf(handler);
         if (handler != handlers[1].get()) {
             if (handlers.size() > 4
@@ -103,18 +103,18 @@ void PolyLine::updateOtherHandlers(Handler* handler) {
 
 void PolyLine::setPt(const QPointF& pt) {
     handlers[handlers.size() - 2]->QGraphicsItem::setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
-    handlers.back()->Handler::setPos(pt);
+    handlers.back()->Handle::setPos(pt);
     redraw();
 }
 
 void PolyLine::addPt(const QPointF& pt) {
-    Handler* h1 = handlers.back().get();
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Adder));
+    Handle* h1 = handlers.back().get();
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Adder));
 
-    Handler* h2 = handlers.back().get();
+    Handle* h2 = handlers.back().get();
     handlers.back()->QGraphicsItem::setPos(pt);
 
-    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
     handlers.back()->QGraphicsItem::setPos(pt);
     h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
 
@@ -130,7 +130,7 @@ QPointF PolyLine::centroid() {
     mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
-        if (h->hType() == Handler::Corner)
+        if (h->hType() == Handle::Corner)
             vertices.emplace_back(h->pos());
     }
     // For all vertices
@@ -154,7 +154,7 @@ QPointF PolyLine::centroidFast() {
     mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
     for (auto& h : handlers) {
-        if (h->hType() == Handler::Corner)
+        if (h->hType() == Handle::Corner)
             vertices.emplace_back(h->pos());
     }
     // For all vertices except last

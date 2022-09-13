@@ -40,17 +40,17 @@ public:
     //    void menu(QMenu& menu, FileTree::View* tv) const override { }
 protected:
     // Shape interface
-    void updateOtherHandlers(Handler* handler) override;
+    void updateOtherHandlers(Handle* handler) override;
 
 private:
     QPointF centroid();
     QPointF centroidFast(); //??????
 };
 
-class Plugin : public ShapePlugin {
+class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "polyline.json")
-    Q_INTERFACES(ShapePlugin)
+    Q_INTERFACES(Shapes::Plugin)
 
     PolyLine* shape = nullptr;
 
@@ -58,7 +58,7 @@ public:
     Plugin();
     virtual ~Plugin() override;
 
-    // ShapePlugin interface
+    // Shapes::Plugin interface
 public:
     int type() const override;
 
