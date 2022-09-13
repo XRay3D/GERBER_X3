@@ -211,7 +211,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
                 auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
         }
 
-        App::scene()->update();
+         App::graphicsView()->scene()->update();
     } catch (const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;

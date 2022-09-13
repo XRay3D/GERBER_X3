@@ -37,7 +37,7 @@ GiAbstractPreview::GiAbstractPreview()
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
-    App::scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
 
 void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {

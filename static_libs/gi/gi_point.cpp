@@ -31,7 +31,7 @@
 using namespace ClipperLib;
 
 bool updateRect() {
-    QRectF rect(App::scene()->getSelectedBoundingRect());
+    QRectF rect(App::graphicsView()->getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
                 QObject::tr("There are no selected items to define the border.\n"
@@ -65,14 +65,14 @@ GiMarker::GiMarker(Type type)
 GiMarker::~GiMarker() { App::setMarkers(type_, nullptr); }
 
 QRectF GiMarker::boundingRect() const {
-    if (App::scene()->drawPdf())
-        return QRectF();
+    // FIXME   if (App::graphicsView()->scene()->drawPdf())
+    //        return QRectF();
     return rect_;
 }
 
 void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if (App::scene()->drawPdf())
-        return;
+    // FIXME   if (App::graphicsView()->scene()->drawPdf())
+    //        return;
 
     QColor c(type_ == Home ? App::settings().guiColor(GuiColors::Home) : App::settings().guiColor(GuiColors::Zero));
     if (option->state & QStyle::State_MouseOver)
@@ -91,7 +91,7 @@ void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath GiMarker::shape() const { return App::scene()->drawPdf() ? QPainterPath() : path_; }
+QPainterPath GiMarker::shape() const { return /*  FIXME App::graphicsView()->scene()->drawPdf() ? QPainterPath() :*/ path_; }
 
 int GiMarker::type() const { return static_cast<int>(type_ ? GiType::MarkHome : GiType::MarkZero); }
 
@@ -237,14 +237,14 @@ GiPin::GiPin()
 GiPin::~GiPin() { }
 
 QRectF GiPin::boundingRect() const {
-    if (App::scene()->drawPdf())
-        return QRectF();
+    // FIXME   if (App::graphicsView()->scene()->drawPdf())
+    //        return QRectF();
     return rect_;
 }
 
 void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if (App::scene()->drawPdf())
-        return;
+    // FIXME   if (App::graphicsView()->scene()->drawPdf())
+    //        return;
 
     QColor c(App::project()->pinUsed(index_) ? App::settings().guiColor(GuiColors::Pin) : QColor(127, 127, 127, 127));
     if (option->state & QStyle::State_MouseOver)
@@ -265,8 +265,8 @@ void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
 }
 
 QPainterPath GiPin::shape() const {
-    if (App::scene()->drawPdf())
-        return QPainterPath();
+    // FIXME   if (App::graphicsView()->scene()->drawPdf())
+    //        return QPainterPath();
     return shape_;
 }
 
@@ -501,8 +501,8 @@ int LayoutFrames::type() const {
 }
 
 QRectF LayoutFrames::boundingRect() const {
-    if (App::scene()->drawPdf())
-        return QRectF();
+    //  FIXME  if (App::graphicsView()->scene()->drawPdf())
+    //        return QRectF();
     return rect_;
 }
 

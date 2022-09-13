@@ -14,6 +14,7 @@
 
 #include "file.h"
 #include "ft_model.h"
+#include "graphicsview.h"
 
 #include "shapepluginin.h"
 
@@ -56,7 +57,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& sh
     if (App::shapePlugins().contains(type)) {
         shape.reset(App::shapePlugin(type)->createShape());
         stream >> *shape;
-        App::scene()->addItem(shape.get());
+        App::graphicsView()->scene()->addItem(shape.get());
     }
     return stream;
 }

@@ -65,7 +65,7 @@ FormatDialog::~FormatDialog() {
 void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for (QGraphicsItem* item : App::scene()->selectedItems()) {
+    for (QGraphicsItem* item : App::graphicsView()->scene()->selectedItems()) {
         if (item->type() == GiType::Drill) {
             pair.first = item->boundingRect().center();
             ++c;

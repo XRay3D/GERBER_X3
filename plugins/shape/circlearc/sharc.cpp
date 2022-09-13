@@ -34,7 +34,7 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
 
     redraw();
 
-    App::scene()->addItem(this);
+     App::graphicsView()->scene()->addItem(this);
 }
 
 Arc::~Arc() { }

@@ -28,7 +28,7 @@ class GraphicsView;
 class LayoutFrames;
 class MainWindow;
 class Project;
-class Scene;
+// class Scene;
 class ShapePlugin;
 class SplashScreen;
 
@@ -85,7 +85,7 @@ class App {
 
     MainWindow* mainWindow_ = nullptr;
     Project* project_ = nullptr;
-    Scene* scene_ = nullptr;
+    //    Scene* scene_ = nullptr;
     SplashScreen* splashScreen_ = nullptr;
 
     FileInterfacesMap filePlugins_;
@@ -131,7 +131,7 @@ public:
     static auto* layoutFrames() { return app_->layoutFrames_; }
     static auto* mainWindow() { return app_->mainWindow_; }
     static auto* project() { return app_->project_; }
-    static auto* scene() { return app_->scene_; }
+    //    static auto* scene() { return app_->scene_; }
     static auto* splashScreen() { return app_->splashScreen_; }
     static auto& settingsPath() { return app_->settingsPath_; }
 
@@ -143,7 +143,7 @@ public:
     static void setLayoutFrames(LayoutFrames* layoutFrames) { (app_->layoutFrames_ && layoutFrames) ? exit(-6) : (app_->layoutFrames_ = layoutFrames, void()); }
     static void setMainWindow(MainWindow* mainWindow) { (app_->mainWindow_ && mainWindow) ? exit(-7) : (app_->mainWindow_ = mainWindow, void()); }
     static void setProject(Project* project) { (app_->project_ && project) ? exit(-8) : (app_->project_ = project, void()); }
-    static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
+    //    static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
 
     static FilePlugin* filePlugin(int type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }

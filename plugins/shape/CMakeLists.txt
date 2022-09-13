@@ -49,9 +49,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-#add_subdirectory(circle)
-#add_subdirectory(circlearc)
-#add_subdirectory(polyline)
-#add_subdirectory(rectangle)
-#add_subdirectory(text)
+add_subdirectory(circle)
+add_subdirectory(circlearc)
+add_subdirectory(polyline)
+add_subdirectory(rectangle)
+add_subdirectory(text)
 

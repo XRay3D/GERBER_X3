@@ -88,7 +88,7 @@ void VoronoiForm::createFile() {
         return {};
     };
 
-    for (auto* item : App::scene()->selectedItems()) {
+    for (auto* item :  App::graphicsView()->scene()->selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:

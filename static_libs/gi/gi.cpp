@@ -19,7 +19,7 @@
 #include "gi.h"
 #include "file.h"
 #include "gi_group.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
@@ -117,8 +117,8 @@ double GraphicsItem::scaleFactor() const {
 };
 
 QRectF GraphicsItem::boundingRect() const {
-    if (App::scene()->boundingRect())
-        return shape_.toFillPolygon(transform()).boundingRect();
+    // FIXME   if (App::graphicsView()->scene()->boundingRect())
+    //        return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }
 

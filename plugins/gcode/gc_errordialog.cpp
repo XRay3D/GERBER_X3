@@ -185,13 +185,13 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
     //    mvector<GiError*> tmp;
 
     //    for (auto item : items) {
-    //        App::scene()->addItem(item);
+    //        App::graphicsView()->scene()->addItem(item);
     //        item->setZValue(std::numeric_limits<double>::max());
 
     //        mvector<QGraphicsItem*> ci;
 
     //        {
-    //            auto tmp = App::scene()->collidingItems(item);
+    //            auto tmp = App::graphicsView()->scene()->collidingItems(item);
     //            ci.reserve(tmp.size());
     //            ci.insert(ci.begin(), tmp.begin(), tmp.end());
     //        }
@@ -207,8 +207,8 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
 
     setupUi(this);
 
-    for (auto item : items)
-        App::scene()->addItem(item);
+    for (auto scene {App::graphicsView()->scene()}; auto item : items)
+        scene->addItem(item);
 
     verticalLayout->insertWidget(0, table = new TableView(this));
     table->setModel(new ErrorModel(std::move(items), table));
@@ -216,21 +216,16 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
 
     buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
-    lastWidget = App::mainWindow()->dockWidget()->widget();
-    //    App::mainWindow()->dockWidget()->push(this);
-    setGeometry({App::mainWindow()->dockWidget()->mapToGlobal(QPoint()), App::mainWindow()->dockWidget()->size()});
+    setGeometry(parent->normalGeometry());
     startTimer(32);
 }
 
-ErrorDialog::~ErrorDialog() {
-    //    App::mainWindow()->dockWidget()->pop();
-    //    delete table->model();
-}
+ErrorDialog::~ErrorDialog() { }
 
 void ErrorDialog::timerEvent(QTimerEvent* event) {
     if (!table->model()->rowCount())
         accept();
-    App::scene()->update();
+    App::graphicsView()->scene()->update();
 }
 
 void ErrorDialog::showEvent(QShowEvent* event) {

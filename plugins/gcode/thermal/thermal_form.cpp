@@ -242,7 +242,7 @@ void Form::createTPI(FileInterface* file) {
     }
 
     for (auto& item : items_) {
-        App::scene()->addItem(item.get());
+         App::graphicsView()->scene()->addItem(item.get());
         connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
     }
 

@@ -36,15 +36,15 @@ Shape::Shape()
 Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    if (App::scene()->drawPdf()) [[unlikely]] {
-        pathColor_ = Qt::black;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
-    } else [[likely]] {
-        pathColor_ = bodyColor_;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) [[unlikely]] {
+    //        pathColor_ = Qt::black;
+    //        pathColor_.setAlpha(255);
+    //        pen_.setColor(pathColor_);
+    //    } else [[likely]] {
+    pathColor_ = bodyColor_;
+    pathColor_.setAlpha(255);
+    pen_.setColor(pathColor_);
+    //    }
 
     painter->setPen(pen_);
     painter->setBrush(bodyColor_);

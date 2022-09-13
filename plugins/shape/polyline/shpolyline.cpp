@@ -31,7 +31,7 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
 
     redraw();
 
-    App::scene()->addItem(this);
+     App::graphicsView()->scene()->addItem(this);
 }
 
 void PolyLine::redraw() {

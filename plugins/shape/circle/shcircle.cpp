@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shcircle.h"
+#include "graphicsview.h"
 #include "math.h"
 #include "scene.h"
 #include "shhandler.h"
@@ -32,7 +33,7 @@ Circle::Circle(QPointF center, QPointF pt)
 
     redraw();
 
-    App::scene()->addItem(this);
+     App::graphicsView()->scene()->addItem(this);
 }
 
 Circle::~Circle() { }
