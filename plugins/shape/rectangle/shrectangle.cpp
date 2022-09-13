@@ -32,12 +32,15 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
 
     redraw();
 
-     App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
 
 Rectangle::~Rectangle() { }
 
 void Rectangle::redraw() {
+    if (handlers.size() < 5)
+        return;
+
     handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
     paths_.front() = {
         handlers[Point1]->pos(),
@@ -50,8 +53,8 @@ void Rectangle::redraw() {
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(paths_.front());
-    setPos({1, 1}); //костыли    //update();
-    setPos({0, 0});
+    setPos({ 1, 1 }); //костыли    //update();
+    setPos({ 0, 0 });
 }
 
 QString Rectangle::name() const { return QObject::tr("Rectangle"); }

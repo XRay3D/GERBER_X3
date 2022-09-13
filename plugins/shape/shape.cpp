@@ -68,8 +68,8 @@ void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // группово�
     }
 }
 
-void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
-{
+void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
+
     QGraphicsItem::mousePressEvent(event);
     hInitPos.clear();
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
@@ -78,7 +78,8 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // группово
         if (item->type() >= GiType::ShCircle) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
-            for (auto& h : shape->handlers) {
+            for (auto&& h : shape->handlers) {
+                h->setFlag(ItemSendsScenePositionChanges, false);
                 hInitPos[shape].emplace_back(h->pos());
             }
         }
@@ -102,7 +103,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
+        emit App::fileModel()->dataChanged(node_->index(), node_->index(), { Qt::CheckStateRole });
     }
     return GraphicsItem::itemChange(change, value);
 }
@@ -237,7 +238,7 @@ void Shape::read_(QDataStream& stream) {
         int type;
         stream >> pos;
         stream >> type;
-        handlers.emplace_back(std::make_unique<Handler>(this, static_cast<Handler::HType>(type)));
+        handlers.emplace_back(std::make_unique<Handler>(this, static_cast<Handler::Type>(type)));
         handlers.back()->QGraphicsItem::setPos(pos);
         handlers.back()->setVisible(false);
     }
