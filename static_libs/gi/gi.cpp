@@ -75,11 +75,11 @@ void GraphicsItem::setVisible(bool visible) {
     //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
     //    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
     //    visibleAnim.start();
-    if (visible) {
-        //        setOpacity(0.0);
-        setOpacity(1.0);
-        QGraphicsObject::setVisible(visible);
-    }
+    //    if (visible) {
+    //        setOpacity(0.0);
+    setOpacity(1.0 * visible);
+    QGraphicsObject::setVisible(visible);
+    //    }
 }
 
 const FileInterface* GraphicsItem::file() const { return file_; }

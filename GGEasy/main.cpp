@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
                         App::filePlugins().emplace(file->type(), file);
                         continue;
                     }
-                    if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
+                    if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
                         shape->setInfo(loader.metaData().value("MetaData").toObject());
                         App::shapePlugins().emplace(shape->type(), shape);
                         continue;

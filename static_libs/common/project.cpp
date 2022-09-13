@@ -44,12 +44,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<ShapeInterface>& shape) {
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape) {
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& shape) {
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape) {
     int type;
     stream >> type;
     if (App::shapePlugins().contains(type)) {
@@ -315,7 +315,7 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types) {
     return rfiles;
 }
 
-ShapeInterface* Project::shape(int id) {
+Shapes::Shape* Project::shape(int id) {
     QMutexLocker locker(&mutex_);
     return shapes_[id].get();
 }
@@ -344,7 +344,7 @@ int Project::addFile(FileInterface* file) {
     return file->id();
 }
 
-int Project::addShape(ShapeInterface* const shape) {
+int Project::addShape(Shapes::Shape* const shape) {
     QMutexLocker locker(&mutex_);
     if (!shape)
         return -1;

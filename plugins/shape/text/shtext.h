@@ -99,10 +99,10 @@ private:
     void ok();
 };
 
-class PluginText : public ShapePlugin {
+class PluginText : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "text.json")
-    Q_INTERFACES(ShapePlugin)
+    Q_INTERFACES(Shapes::Plugin)
 
     Text* shape = nullptr;
 

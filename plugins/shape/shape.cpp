@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "shape.h"
 #include "ft_view.h"
-#include "graphicsview.h"
+#include "qgraphicsscene.h"
 #include "shhandler.h"
 #include "shnode.h"
 
@@ -103,12 +103,12 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), { Qt::CheckStateRole });
+        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
     }
     return GraphicsItem::itemChange(change, value);
 }
 
-void Shape::updateOtherHandlers(Handler*) { }
+void Shape::updateOtherHandlers(Handle* h) { currentHandler = h, redraw(); }
 
 void Shape::changeColor() {
     //    animation.setStartValue(bodyColor_);
@@ -212,37 +212,35 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
 }
 
 // write to project
-void Shape::write_(QDataStream& stream) const {
+void Shape::write(QDataStream& stream) const {
     stream << bool(GraphicsItem::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
     for (const auto& item : handlers) {
         stream << item->pos();
-        stream << item->hType_;
+        stream << item->type_;
     }
-    write(stream);
 }
 
 // read from project
-void Shape::read_(QDataStream& stream) {
+void Shape::read(QDataStream& stream) {
+    stream >> isFinal;
+    setFlag(ItemIsSelectable, isFinal);
+
     isFinal = true;
-    {
-        bool fl;
-        stream >> fl;
-        setFlag(ItemIsSelectable, fl);
-    }
+
     qint32 size;
     stream >> size;
     handlers.reserve(size);
-    while (size--) {
-        QPointF pos;
-        int type;
+    QPointF pos;
+    Handle::Type type;
+    for (int i {}; i < size; ++i) {
         stream >> pos;
         stream >> type;
-        handlers.emplace_back(std::make_unique<Handler>(this, static_cast<Handler::Type>(type)));
-        handlers.back()->QGraphicsItem::setPos(pos);
-        handlers.back()->setVisible(false);
+        if (handlers.size() < size)
+            handlers.emplace_back(std::make_unique<Handle>(this, type));
+        handlers[i]->QGraphicsItem::setPos(pos);
+        handlers[i]->setVisible(false);
     }
-    read(stream);
     redraw();
 }
 

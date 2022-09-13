@@ -24,9 +24,9 @@ Arc::Arc(QPointF center, QPointF pt, QPointF pt2)
 
     handlers.reserve(PtCount);
 
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
-    handlers.emplace_back(std::make_unique<Handler>(this));
-    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[Center]->setPos(center);
     handlers[Point1]->setPos(pt);
@@ -88,7 +88,7 @@ QString Arc::name() const { return QObject::tr("Arc"); }
 
 QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-void Arc::updateOtherHandlers(Handler* handler) {
+void Arc::updateOtherHandlers(Handle* handler) {
     QLineF l(handlers[Center]->pos(), handler->pos());
     radius_ = l.length();
 

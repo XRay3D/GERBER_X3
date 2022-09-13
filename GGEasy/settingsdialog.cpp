@@ -150,7 +150,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         button = new QPushButton(tr("Open Settings Folder"), ui.buttonBox);
         button->setIcon(QIcon::fromTheme("folder"));
         button->setMinimumWidth(QFontMetrics(font()).boundingRect(button->text()).width() + 32);
-        ui.buttonBox->addButton(button, QDialogButtonBox::NRoles);
+        ui.buttonBox->addButton(button, QDialogButtonBox::ResetRole);
         connect(button, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl(App::settingsPath(), QUrl::TolerantMode)); });
     }
 
