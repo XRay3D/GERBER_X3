@@ -383,5 +383,12 @@
         <file>icons/ggeasy-light/actions/24/flip-horizontal.svg</file>
         <file>icons/ggeasy-light/actions/24/flip-vertical.svg</file>
         <file>icons/ggeasy-light/actions/24/rotate-90.svg</file>
+        <file>icons/ggeasy-dark/actions/16/ruller-on.svg</file>
+        <file>icons/ggeasy-dark/actions/22/ruller-on.svg</file>
+        <file>icons/ggeasy-dark/actions/24/ruller-on.svg</file>
+        <file>resources.qrc</file>
+        <file>icons/ggeasy-light/actions/16/ruller-on.svg</file>
+        <file>icons/ggeasy-light/actions/22/ruller-on.svg</file>
+        <file>icons/ggeasy-light/actions/24/ruller-on.svg</file>
     </qresource>
 </RCC>

@@ -71,7 +71,7 @@ Handler::Handler(Shape* shape, HType type)
         setZValue(std::numeric_limits<double>::max() - 1);
         break;
     }
-    App::scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
     App::shapeHandlers().emplace_back(this);
 }
 

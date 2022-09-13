@@ -271,10 +271,10 @@ void MainWindow::createActionsFile() {
         action->setStatusTip(tr("Save selected toolpaths"));
         fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
     }
-    { // Export PDF
-        auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
-        action->setStatusTip(tr("Export to PDF file"));
-        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
+    {   // Export PDF
+        // FIXME       auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
+        //        action->setStatusTip(tr("Export to PDF file"));
+        //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
     }
 
     fileMenu->addSeparator();
@@ -358,7 +358,7 @@ void MainWindow::createActionsService() {
     action->setCheckable(true);
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(""), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
@@ -484,7 +484,7 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        auto selectedItems(App::scene()->selectedItems());
+        auto selectedItems(App::graphicsView()->scene()->selectedItems());
         Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
             if (clipItem->type() >= GiType::ShCircle)
@@ -685,22 +685,22 @@ void MainWindow::writeSettings() {
 
 void MainWindow::selectAll() {
     if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else {
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
 }
 
 void MainWindow::deSelectAll() {
-    for (QGraphicsItem* item : App::scene()->items())
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items())
         if (item->isVisible())
             item->setSelected(false);
 }
@@ -709,9 +709,9 @@ void MainWindow::printDialog() {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
-        ScopedTrue sTrue(App::scene()->drawPdf_);
+        // FIXME       ScopedTrue sTrue(App::graphicsView()->scene()->drawPdf_);
         QRectF rect;
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
@@ -726,7 +726,7 @@ void MainWindow::printDialog() {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        App::scene()->render(&painter,
+        App::graphicsView()->scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);

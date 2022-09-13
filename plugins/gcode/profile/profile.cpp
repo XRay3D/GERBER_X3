@@ -172,7 +172,7 @@ void ProfileCreator::cornerTrimming() {
 void ProfileCreator::makeBridges() {
     // find Bridges
     mvector<GiBridge*> bridgeItems;
-    for (QGraphicsItem* item : App::scene()->items()) {
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
         if (item->type() == GiType::Bridge)
             bridgeItems.push_back(static_cast<GiBridge*>(item));
     }

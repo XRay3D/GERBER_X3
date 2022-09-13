@@ -24,7 +24,6 @@ class ErrorDialog : public QDialog {
     //    Q_OBJECT
     QDialogButtonBox* buttonBox;
     QVBoxLayout* verticalLayout;
-    QWidget* lastWidget = nullptr;
     TableView* table;
 
     void setupUi(QDialog* ErrorDialog);       // setupUi

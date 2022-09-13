@@ -32,7 +32,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
 
     redraw();
 
-    App::scene()->addItem(this);
+     App::graphicsView()->scene()->addItem(this);
 }
 
 Rectangle::~Rectangle() { }

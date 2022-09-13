@@ -36,12 +36,12 @@ GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
 GiDataSolid::~GiDataSolid() { }
 
 void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    if (App::scene()->drawPdf()) {
-        painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen);
-        painter->drawPath(shape_);
-        return;
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    //        painter->setBrush(Qt::black);
+    //        painter->setPen(Qt::NoPen);
+    //        painter->drawPath(shape_);
+    //        return;
+    //    }
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);

@@ -36,7 +36,7 @@ Text::Text(QPointF pt1)
 
     redraw();
 
-    App::scene()->addItem(this);
+     App::graphicsView()->scene()->addItem(this);
 }
 
 int Text::type() const { return GiType::ShText; }

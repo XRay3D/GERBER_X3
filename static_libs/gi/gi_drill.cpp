@@ -35,12 +35,12 @@ GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int too
 
 void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
-    if (App::scene()->drawPdf()) {
-        painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen);
-        painter->drawPath(shape_);
-        return;
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    //        painter->setBrush(Qt::black);
+    //        painter->setPen(Qt::NoPen);
+    //        painter->drawPath(shape_);
+    //        return;
+    //    }
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
