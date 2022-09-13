@@ -15,7 +15,6 @@
 
 #include <QSettings>
 #include <QtWidgets>
-#include <scene.h>
 
 namespace Gerber::Comp {
 

@@ -14,6 +14,8 @@
 #include "mainwindow.h"
 
 #include "aboutform.h"
+#include "file.h"
+#include "file_plugin.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
@@ -26,7 +28,6 @@
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
-
 //#include "qt.h"
 
 #include <QPrintPreviewDialog>
@@ -230,52 +231,50 @@ void MainWindow::createActionsFile() {
 
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(fileToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
+    QAction* action;
+    // New
+    action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+    action->setShortcuts(QKeySequence::New);
+    action->setStatusTip(tr("Create a new file"));
+    fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
 
-    { // New
-        auto action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
-        action->setShortcuts(QKeySequence::New);
-        action->setStatusTip(tr("Create a new file"));
-        fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
-    }
-    { // Open
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
-        action->setShortcuts(QKeySequence::Open);
-        action->setStatusTip(tr("Open an existing file"));
-        fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
-    }
-    { // Save
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
-        action->setShortcuts(QKeySequence::Save);
-        action->setStatusTip(tr("Save the document to disk"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
-    }
-    { // Save As
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
-        action->setShortcuts(QKeySequence::SaveAs);
-        action->setStatusTip(tr("Save the document under a new name"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
-    }
-    { // Close project
-        closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
-        closeAllAct_->setShortcuts(QKeySequence::Close);
-        closeAllAct_->setStatusTip(tr("Close project"));
-        // closeAllAct_->setEnabled(false);
-        fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
-    }
+    // Open
+    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action->setShortcuts(QKeySequence::Open);
+    action->setStatusTip(tr("Open an existing file"));
+    fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+
+    // Save
+    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    action->setShortcuts(QKeySequence::Save);
+    action->setStatusTip(tr("Save the document to disk"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+
+    // Save As
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    action->setShortcuts(QKeySequence::SaveAs);
+    action->setStatusTip(tr("Save the document under a new name"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+
+    // Close project
+    closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+    closeAllAct_->setShortcuts(QKeySequence::Close);
+    closeAllAct_->setStatusTip(tr("Close project"));
+    // closeAllAct_->setEnabled(false);
+    fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
 
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
-    { // Save Selected Tool Paths
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
-        action->setStatusTip(tr("Save selected toolpaths"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
-    }
-    {   // Export PDF
-        // FIXME       auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
-        //        action->setStatusTip(tr("Export to PDF file"));
-        //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
-    }
+    // Save Selected Tool Paths
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    action->setStatusTip(tr("Save selected toolpaths"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+
+    // Export PDF
+    // FIXME       auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
+    //        action->setStatusTip(tr("Export to PDF file"));
+    //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -284,17 +283,16 @@ void MainWindow::createActionsFile() {
     recentProjects.createMenu(fileMenu, tr("Recent Projects..."));
 
     fileMenu->addSeparator();
-    {
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
-        action->setShortcuts(QKeySequence::Print);
-        action->setStatusTip(tr("Print"));
-    }
+
+    action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
+    action->setShortcuts(QKeySequence::Print);
+    action->setStatusTip(tr("Print"));
+
     fileMenu->addSeparator();
-    {
-        auto action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
-        action->setShortcuts(QKeySequence::Quit);
-        action->setStatusTip(tr("Exit the application"));
-    }
+
+    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+    action->setShortcuts(QKeySequence::Quit);
+    action->setStatusTip(tr("Exit the application"));
 }
 
 void MainWindow::createActionsEdit() {
@@ -309,13 +307,15 @@ void MainWindow::createActionsEdit() {
 
     editMenu->addSeparator();
 
-    action = editMenu->addAction(tr("Undo"));
-    action->setEnabled(false);
-    action->setShortcut(QKeySequence::Undo);
+    undoAct = undoStack_.createUndoAction(this, tr("Undo"));
+    undoAct->setShortcut(QKeySequence::Undo);
+    undoAct->setIcon(QIcon::fromTheme("edit-undo"));
+    editMenu->addAction(undoAct);
 
-    action = editMenu->addAction(tr("Redo"));
-    action->setEnabled(false);
-    action->setShortcut(QKeySequence::Redo);
+    redoAct = undoStack_.createRedoAction(this, tr("Redo"));
+    redoAct->setShortcut(QKeySequence::Redo);
+    redoAct->setIcon(QIcon::fromTheme("edit-redo"));
+    editMenu->addAction(redoAct);
 }
 
 void MainWindow::createActionsService() {
@@ -325,6 +325,9 @@ void MainWindow::createActionsService() {
     toolpathToolBar->setObjectName("tbService");
     toolpathToolBar->setToolTip(tr("Service"));
 
+    toolpathToolBar->addAction(redoAct);
+    toolpathToolBar->addAction(undoAct);
+    toolpathToolBar->addSeparator();
     // Settings
     auto action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));

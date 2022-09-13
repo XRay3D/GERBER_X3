@@ -9,9 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+#include "doublespinbox.h"
 #include "mvector.h"
 #include "settings.h"
-#include "doublespinbox.h"
 #include <QtCore>
 #include <QtWidgets>
 

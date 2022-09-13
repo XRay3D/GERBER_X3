@@ -15,6 +15,8 @@
 
 #include "graphicsview.h"
 #include "edid.h"
+#include "gi.h"
+#include "mainwindow.h"
 #include "myclipper.h"
 #include "project.h"
 #include "ruler.h"
@@ -24,6 +26,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
 #include <QPropertyAnimation>
+#include <QUndoCommand>
 #else
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
@@ -53,16 +56,19 @@ void setCursor(QWidget* w) {
     p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
     p.drawLine(0, Mid, Size, Mid);
     p.drawLine(Mid, 0, Mid, Size);
-    w->setCursor(QCursor {cursor, Mid, Mid});
+    w->setCursor(QCursor { cursor, Mid, Mid });
 }
 
 static int rulCtr;
 
+using MovedShapesMap = std::unordered_map<QGraphicsItem*, QPointF>;
+static MovedShapesMap shUndoPos;
+
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler {new Ruler(Ruler::Horizontal, this)}
-    , vRuler {new Ruler(Ruler::Vertical, this)}
-    , gridLayout {new QGridLayout(this)} {
+    , hRuler { new Ruler(Ruler::Horizontal, this) }
+    , vRuler { new Ruler(Ruler::Vertical, this) }
+    , gridLayout { new QGridLayout(this) } {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
@@ -241,9 +247,9 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
 
 void GraphicsView::setScale(double s) noexcept {
     const auto trf(transform());
-    setTransform({+s /*11*/, trf.m12(), trf.m13(),
+    setTransform({ +s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
-        /*      */ trf.m31(), trf.m32(), trf.m33()});
+        /*      */ trf.m31(), trf.m32(), trf.m33() });
 }
 
 double GraphicsView::getScale() noexcept { return transform().m11(); }
@@ -270,13 +276,13 @@ QRectF GraphicsView::getViewRect() {
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
 
-    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
+    QRectF visible_scene_rect(transform().inverted().mapRect({ topLeft, bottomRight }));
 
     return visible_scene_rect;
 }
 
 QRectF GraphicsView::getSelectedBoundingRect() {
-    auto selectedItems {scene()->selectedItems()};
+    auto selectedItems { scene()->selectedItems() };
 
     if (selectedItems.isEmpty())
         return {};
@@ -357,56 +363,54 @@ void GraphicsView::updateRuler() {
     hRuler->SetRulerZoom(qAbs(transform().m11() * 0.1));
 }
 
-void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) {
-    const QPointF pt2(rulPt2);
-    const QPointF pt1(rulPt1);
-    QLineF line(pt2, pt1);
-    const QRectF rect(
-        QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
-        QPointF(std::max(pt1.x(), pt2.x()), std::max(pt1.y(), pt2.y())));
+void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
+
+    QLineF line { rulPt2, rulPt1 };
     const double length = line.length();
+    if (qFuzzyIsNull(length))
+        return;
+    const QRectF rect(QPointF(std::min(rulPt1.x(), rulPt2.x()), std::min(rulPt1.y(), rulPt2.y())), QPointF(std::max(rulPt1.x(), rulPt2.x()), std::max(rulPt1.y(), rulPt2.y())));
     const double angle = line.angle();
 
     QFont font;
-    font.setPixelSize(16);
-    const QString text = QString(App::settings().inch() ? "  ∆X: %1 in\n"
-                                                          "  ∆Y: %2 in\n"
-                                                          "  ∆/: %3 in\n"
-                                                          "  Area: %4 in²\n"
-                                                          "  Angle: %5°" :
-                                                          "  ∆X: %1 mm\n"
-                                                          "  ∆Y: %2 mm\n"
-                                                          "  ∆/: %3 mm\n"
-                                                          "  Area: %4 mm²\n"
-                                                          "  Angle: %5°")
-                             .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-                             .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0))
-                                     * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)),
-                                 4, 'f', 3, '0')
-                             .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
+    //    font.setPixelSize(16);
+    const auto text {
+        QString(App::settings().inch() ? "  ∆X: %1 in\n"
+                                         "  ∆Y: %2 in\n"
+                                         "  ∆/: %3 in\n"
+                                         "  Area: %4 in²\n"
+                                         "  Angle: %5°"
+                                       : "  ∆X: %1 mm\n"
+                                         "  ∆Y: %2 mm\n"
+                                         "  ∆/: %3 mm\n"
+                                         "  Area: %4 mm²\n"
+                                         "  Angle: %5°")
+            .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+            .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+            .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+            .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0)) * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)), 4, 'f', 3, '0')
+            .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+    };
 
-    const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
-
-    if (qFuzzyIsNull(line.length()))
-        return;
+    const auto textRect { QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text) };
 
     const double scaleFactor = App::graphicsView()->scaleFactor();
     painter->save();
-    painter->setBrush(QColor(127, 127, 127, 100));
+
     painter->setPen(QPen(Qt::green, 0.0));
-
     // draw rect
-    painter->drawRect(rect);
-    const double crossLength = 20.0 * scaleFactor;
-    // draw cross pt1
-    painter->drawLine(pt1 - QPointF(0, crossLength), pt1 + QPointF(0, crossLength));
-    painter->drawLine(pt1 - QPointF(crossLength, 0), pt1 + QPointF(crossLength, 0));
+    //    painter->setBrush(QColor(127, 127, 127, 100));
+    //    painter->drawRect(rect);
 
-    // draw cross pt1
-    painter->drawLine(pt2 - QPointF(0, crossLength), pt2 + QPointF(0, crossLength));
-    painter->drawLine(pt2 - QPointF(crossLength, 0), pt2 + QPointF(crossLength, 0));
+    const double crossLength = 20.0 * scaleFactor;
+
+    // draw cross
+    auto drawCross = [&](auto pt) {
+        painter->drawLine(pt - QPointF(0, crossLength), pt + QPointF(0, crossLength));
+        painter->drawLine(pt - QPointF(crossLength, 0), pt + QPointF(crossLength, 0));
+    };
+    drawCross(rulPt1);
+    drawCross(rulPt2);
 
     // draw arrow
     painter->setRenderHint(QPainter::Antialiasing, true);
@@ -419,31 +423,21 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) {
     painter->drawLine(line);
 
     // draw text
-    // painter->setFont(font);
-    // painter->drawText(textRect, Qt::AlignLeft, text);
-    //    QPointF pt(pt2);
-    //    if ((pt.x() + textRect.width() * scaleFactor) > rect.right())
-    //        pt.rx() -= textRect.width() * scaleFactor;
-    //    if ((pt.y() - textRect.height() * scaleFactor) < rect.top())
-    //        pt.ry() += textRect.height() * scaleFactor;
+    auto pt { rect.center() };
+    pt.rx() -= textRect.width() * 0.5 * scaleFactor;
+    pt.ry() += textRect.height() * 0.5 * scaleFactor;
 
-    auto pt {rect.intersected(rect_).center()};
     pt.rx() = std::clamp(pt.x(), rect_.left(), rect_.right() - textRect.width() * scaleFactor);
-    pt.ry() = std::clamp(pt.y(), rect_.top() + textRect.height() * scaleFactor* 1.5, rect_.bottom());
-
+    pt.ry() = std::clamp(pt.y(), rect_.top() + textRect.height() * scaleFactor, rect_.bottom());
     painter->translate(pt);
     painter->scale(scaleFactor, -scaleFactor);
-    int i = 0;
-    for (const QString& txt : text.split('\n')) {
-        QPainterPath path;
-        path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * ++i), font, txt);
-        painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawPath(path);
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(Qt::white);
-        painter->drawPath(path);
-    }
+    painter->setFont(font);
+
+    painter->setRenderHint(QPainter::TextAntialiasing);
+    painter->fillRect(textRect, QColor { 0, 0, 0, 127 });
+    painter->setBrush(Qt::white);
+    painter->drawText(textRect, Qt::AlignLeft, text);
+
     painter->restore();
 }
 
@@ -507,6 +501,13 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         QGraphicsView::mousePressEvent(event);
         if (ruler_ && !(rulCtr++ & 0x1))
             rulPt1 = mappedPos(event);
+        // это для отмены перемещения
+        shUndoPos.clear();
+        auto items { scene()->items() };
+        shUndoPos.reserve(items.size());
+        for (auto item : items)
+            if (item->type() == GiType::ShHandler)
+                shUndoPos.emplace(item, item->pos());
     }
 }
 
@@ -532,6 +533,42 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     } else {
         QGraphicsView::mouseReleaseEvent(event);
         emit mouseClickL(mappedPos(event));
+        auto shUndoPosTmp { shUndoPos };
+        if (shUndoPos.size()) {
+            for (auto [item, pos] : shUndoPos)
+                if (item->pos() == pos)
+                    shUndoPosTmp.erase(item);
+
+            class ShapeMoveCommand : public QUndoCommand {
+            public:
+                ShapeMoveCommand(const MovedShapesMap& shUndoPos, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
+                    : graphicsScene { graphicsScene }
+                    , shUndoPos { shUndoPos } {
+                    setText("Moved Shapes");
+                    shRedoPos.reserve(shUndoPos.size());
+                    for (auto [item, pos] : shUndoPos)
+                        shRedoPos.emplace(item, item->pos());
+                }
+
+                ~ShapeMoveCommand() { }
+
+                void undo() override {
+                    for (auto [item, pos] : shUndoPos)
+                        item->setPos(pos);
+                }
+
+                void redo() override {
+                    for (auto [item, pos] : shRedoPos)
+                        item->setPos(pos);
+                }
+
+            private:
+                QGraphicsScene* const graphicsScene;
+                const MovedShapesMap shUndoPos;
+                MovedShapesMap shRedoPos;
+            };
+            App::mainWindow()->undoStack().push(new ShapeMoveCommand(shUndoPosTmp, scene()));
+        }
     }
 }
 
@@ -550,7 +587,6 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
-    Timer t {__FUNCTION__};
     const auto scale = App::settings().gridStep(hRuler->RulerZoom());
     std::unordered_map<int, int> linesx, linesy;
     auto draw = [&](const auto sc) {
@@ -580,10 +616,10 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     };
 
     QColor color[4] {
-        {255, 255, 255, 00},
-        {255, 255, 255, 20},
-        {255, 255, 255, 40},
-        {255, 255, 255, 60},
+        { 255, 255, 255, 00 },
+        { 255, 255, 255, 20 },
+        { 255, 255, 255, 40 },
+        { 255, 255, 255, 60 },
     };
     //    painter->setPen({color, 0.0 /*2.0 / transform().m11()*/});
 
@@ -593,24 +629,24 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     for (auto [x, val] : linesx) {
-        auto tmp {x * dScale};
-        painter->setPen({color[val], 0.0 /*2.0 / transform().m11()*/});
-        painter->drawLine(QLineF {tmp, rect.top(), tmp, rect.bottom()});
+        auto tmp { x * dScale };
+        painter->setPen({ color[val], 0.0 /*2.0 / transform().m11()*/ });
+        painter->drawLine(QLineF { tmp, rect.top(), tmp, rect.bottom() });
     }
     for (auto [y, val] : linesy) {
-        auto tmp {y * dScale};
-        painter->setPen({color[val], 0.0 /*2.0 / transform().m11()*/});
-        painter->drawLine(QLineF {rect.left(), tmp, rect.right(), tmp});
+        auto tmp { y * dScale };
+        painter->setPen({ color[val], 0.0 /*2.0 / transform().m11()*/ });
+        painter->drawLine(QLineF { rect.left(), tmp, rect.right(), tmp });
     }
 
-    painter->setPen({Qt::red, 0.0 /*2.0 / transform().m11()*/});
+    painter->setPen({ Qt::red, 0.0 /*2.0 / transform().m11()*/ });
 
-    auto k {10 / hRuler->RulerZoom()};
+    auto k { 10 / hRuler->RulerZoom() };
 
-    painter->drawLine(QLineF {point.x() - k, point.y(), point.x() + k, point.y()});
-    painter->drawLine(QLineF {point.x(), point.y() - k, point.x(), point.y() + k});
-
-    painter->drawRect(rect);
+    painter->drawLine(QLineF { point.x() - k, point.y(), point.x() + k, point.y() });
+    painter->drawLine(QLineF { point.x(), point.y() - k, point.x(), point.y() + k });
+    //    painter->setBrush(Qt::NoBrush);
+    //    painter->drawRect(rect);
     painter->restore();
     if (ruler_)
         drawRuller(painter, rect);
@@ -643,3 +679,346 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
     animation->setEndValue(end);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
+
+//// QTime time_;
+//// int time2_;
+//// int frameCount_ = 0;
+//// int frameCount2_;
+
+// Scene::Scene(QObject* parent)
+//     : QGraphicsScene(parent) {
+//     //  App::setScene(this);
+//     double size = 1000.0; // 4 sqare meters
+//     setSceneRect(-size, -size, +size * 2, +size * 2);
+
+//    startTimer(1000);
+//}
+
+// Scene::~Scene() {
+//     //    App::setScene(nullptr);
+// }
+
+// QRectF Scene::itemsBoundingRect() {
+//     ScopedTrue sTrue(drawPdf_);
+//     QRectF rect(QGraphicsScene::itemsBoundingRect());
+//     return rect;
+// }
+
+// QRectF Scene::getSelectedBoundingRect() {
+//     auto selectedItems(App::graphicsView()->scene()->selectedItems());
+
+//    if (selectedItems.isEmpty())
+//        return {};
+
+//    QRectF rect;
+
+//    {
+//        ScopedTrue sTrue(boundingRect_);
+//        rect = selectedItems.front()->boundingRect();
+//        for (auto gi : selectedItems)
+//            rect = rect.united(gi->boundingRect());
+//    }
+
+//    if (!rect.isEmpty())
+//        App::project()->setWorckRect(rect);
+
+//    return rect;
+//}
+
+// void Scene::setCross1(const QPointF& cross) {
+//     cross1 = cross;
+//     update();
+// }
+
+// void Scene::setCross2(const QPointF& cross) {
+//     cross2 = cross;
+// }
+
+// void Scene::setDrawRuller(bool drawRuller) {
+//     drawRuller = drawRuller;
+//     update();
+// }
+
+// void Scene::drawRuller(QPainter* painter) {
+//     const QPointF pt1(cross2);
+//     const QPointF pt2(cross1);
+//     QLineF line(pt2, pt1);
+//     const QRectF rect(
+//         QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
+//         QPointF(std::max(pt1.x(), pt2.x()), std::max(pt1.y(), pt2.y())));
+//     const double length = line.length();
+//     const double angle = line.angle();
+
+//    QFont font;
+//    font.setPixelSize(16);
+//    const QString text = QString(App::settings().inch() ? "  ∆X: %1 in\n"
+//                                                          "  ∆Y: %2 in\n"
+//                                                          "  ∆/: %3 in\n"
+//                                                          "  Area: %4 in²\n"
+//                                                          "  Angle: %5°" :
+//                                                          "  ∆X: %1 mm\n"
+//                                                          "  ∆Y: %2 mm\n"
+//                                                          "  ∆/: %3 mm\n"
+//                                                          "  Area: %4 mm²\n"
+//                                                          "  Angle: %5°")
+//                             .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+//                             .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+//                             .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
+//                             .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0))
+//                                     * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)),
+//                                 4, 'f', 3, '0')
+//                             .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
+
+//    const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
+
+//    if (qFuzzyIsNull(line.length()))
+//        return;
+
+//    const double scaleFactor = App::graphicsView()->scaleFactor();
+//    painter->save();
+//    painter->setBrush(QColor(127, 127, 127, 100));
+//    painter->setPen(QPen(Qt::green, 0.0));
+//    {
+//        // draw rect
+//        painter->drawRect(rect);
+//        const double crossLength = 20.0 * scaleFactor;
+//        // draw cross pt1
+//        painter->drawLine(pt1, pt1 + QPointF(0, crossLength));
+//        painter->drawLine(pt1, pt1 + QPointF(crossLength, 0));
+//        painter->drawLine(pt1, pt1 - QPointF(0, crossLength));
+//        painter->drawLine(pt1, pt1 - QPointF(crossLength, 0));
+//        // draw cross pt1
+//        painter->drawLine(pt2, pt2 + QPointF(0, crossLength));
+//        painter->drawLine(pt2, pt2 + QPointF(crossLength, 0));
+//        painter->drawLine(pt2, pt2 - QPointF(0, crossLength));
+//        painter->drawLine(pt2, pt2 - QPointF(crossLength, 0));
+//    }
+
+//    { // draw arrow
+//        painter->setRenderHint(QPainter::Antialiasing, true);
+//        painter->setPen(QPen(Qt::white, 0.0));
+//        painter->drawLine(line);
+//        line.setLength(20.0 * scaleFactor);
+//        line.setAngle(angle + 10);
+//        painter->drawLine(line);
+//        line.setAngle(angle - 10);
+//        painter->drawLine(line);
+//    }
+//    // draw text
+//    // painter->setFont(font);
+//    // painter->drawText(textRect, Qt::AlignLeft, text);
+//    QPointF pt(pt2);
+//    if ((pt.x() + textRect.width() * scaleFactor) > rect.right())
+//        pt.rx() -= textRect.width() * scaleFactor;
+//    if ((pt.y() - textRect.height() * scaleFactor) < rect.top())
+//        pt.ry() += textRect.height() * scaleFactor;
+//    painter->translate(pt);
+//    painter->scale(scaleFactor, -scaleFactor);
+//    int i = 0;
+//    for (const QString& txt : text.split('\n')) {
+//        QPainterPath path;
+//        path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * ++i), font, txt);
+//        painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+//        painter->setBrush(Qt::NoBrush);
+//        painter->drawPath(path);
+//        painter->setPen(Qt::NoPen);
+//        painter->setBrush(Qt::white);
+//        painter->drawPath(path);
+//    }
+//    painter->restore();
+//}
+
+// void Scene::drawBackground(QPainter* painter, const QRectF& rect) {
+//     if (drawPdf_)
+//         return;
+
+//    painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
+//}
+
+// void Scene::drawForeground(QPainter* painter, const QRectF& rect) {
+//     if (drawPdf_)
+//         return;
+
+//    ++fpsCtr;
+
+//    { // draw grid
+//        const long upScale = 100000;
+//        const long forLimit = 1000;
+//        const double downScale = 1.0 / upScale;
+//        static bool in = App::settings().inch();
+
+//        if (!qFuzzyCompare(scale, views().first()->transform().m11()) || lastRect != rect || in != App::settings().inch()) {
+//            in = App::settings().inch();
+//            scale = views().first()->transform().m11();
+//            if (qFuzzyIsNull(scale))
+//                return;
+
+//            lastRect = rect;
+
+//            hGrid.clear();
+//            vGrid.clear();
+
+//            // Grid Step 0.1
+//            double gridStep = App::settings().gridStep(scale);
+//            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+//                      right = static_cast<long>(rect.right() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 hPos < right && ++nlp < forLimit; hPos += step) {
+//                hGrid[hPos] = 0;
+//            }
+//            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+//                      bottom = static_cast<long>(rect.bottom() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+//                vGrid[vPos] = 0;
+//            }
+//            // Grid Step  0.5
+//            gridStep *= 5;
+//            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+//                      right = static_cast<long>(rect.right() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 hPos < right && ++nlp < forLimit; hPos += step) {
+//                hGrid[hPos] = 1;
+//            }
+//            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+//                      bottom = static_cast<long>(rect.bottom() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+//                vGrid[vPos] = 1;
+//            }
+//            // Grid Step  1.0
+//            gridStep *= 2;
+//            for (long hPos = static_cast<long>(qFloor(rect.left() / gridStep) * gridStep * upScale),
+//                      right = static_cast<long>(rect.right() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 hPos < right && ++nlp < forLimit; hPos += step) {
+//                hGrid[hPos] = 2;
+//            }
+//            for (long vPos = static_cast<long>(qFloor(rect.top() / gridStep) * gridStep * upScale),
+//                      bottom = static_cast<long>(rect.bottom() * upScale),
+//                      step = static_cast<long>(gridStep * upScale), nlp = 0;
+//                 vPos < bottom && ++nlp < forLimit; vPos += step) {
+//                vGrid[vPos] = 2;
+//            }
+//        }
+
+//        const QColor color[] {
+//            App::settings().guiColor(GuiColors::Grid1),
+//            App::settings().guiColor(GuiColors::Grid5),
+//            App::settings().guiColor(GuiColors::Grid10),
+//        };
+
+//        painter->save();
+//        painter->setRenderHint(QPainter::Antialiasing, false);
+//        QElapsedTimer t;
+//        t.start();
+//        const double k2 = 0.5 / scale;
+//        // painter->setCompositionMode(QPainter::CompositionMode_Lighten);
+
+//        for (int i = 0; i < 3; ++i) {
+//            painter->setPen(QPen(color[i], 0.0));
+//            for (long hPos : hGrid.keys(i)) {
+//                if (hPos)
+//                    painter->drawLine(QLineF(hPos * downScale + k2, rect.top(), hPos * downScale + k2, rect.bottom()));
+//            }
+//            for (long vPos : vGrid.keys(i)) {
+//                if (vPos)
+//                    painter->drawLine(QLineF(rect.left(), vPos * downScale + k2, rect.right(), vPos * downScale + k2));
+//            }
+//        }
+
+//        // zero cross
+//        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0));
+//        painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
+//        painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
+//    }
+
+//    if (1) { // screen mouse cross
+//        QList<QGraphicsItem*> items = QGraphicsScene::items(cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
+//        bool fl = false;
+//        for (QGraphicsItem* item : items) {
+//            if (item && item->type() != GiType::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
+//                fl = true;
+//                break;
+//            }
+//        }
+//        if (fl)
+//            painter->setPen(QPen(QColor(255, 000, 000, 255), 0.0));
+//        else {
+//            QColor c(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF);
+//            //            c.setAlpha(150);
+//            painter->setPen(QPen(c, 0.0));
+//        }
+
+//        painter->drawLine(QLineF(cross1.x(), rect.top(), cross1.x(), rect.bottom()));
+//        painter->drawLine(QLineF(rect.left(), cross1.y(), rect.right(), cross1.y()));
+//    }
+
+//    if (drawRuller_)
+//        drawRuller(painter);
+
+//    //    if (0) {
+//    //        if (frameCount_ == 0) {
+//    //            time_.start();
+//    //            time2_ = time_.elapsed() + 1000;
+
+//    //        } else {
+//    //            if (time_.elapsed() > time2_) {
+
+//    //                time2_ = time_.elapsed() + 1000;
+//    //                frameCount2_ = frameCount_;
+//    //                frameCount_ = 0;
+//    //            }
+
+//    //            painter->setRenderHint(QPainter::Antialiasing, true);
+//    //            QString str(QString("FPS %1").arg(frameCount2_));
+//    //            painter->translate(rect_.center());
+//    //            const double scaleFactor = App::graphicsView()->scaleFactor();
+//    //            painter->scale(scaleFactor, -scaleFactor);
+//    //            QFont f;
+//    //            f.setPixelSize(100);
+//    //            QPainterPath path;
+//    //            path.addText(QPointF(), f, str);
+//    //            painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+//    //            painter->setBrush(Qt::NoBrush);
+//    //            painter->drawPath(path);
+//    //            painter->setPen(Qt::NoPen);
+//    //            painter->setBrush(Qt::white);
+//    //            painter->drawPath(path);
+//    //        }
+//    //        frameCount_++;
+//    //    }
+
+//    { // NOTE FPS counter
+//        painter->setRenderHint(QPainter::Antialiasing, true);
+
+//        const double scaleFactor = App::graphicsView()->scaleFactor();
+//        painter->translate(rect.bottomLeft());
+//        painter->scale(scaleFactor, -scaleFactor);
+
+//        QPainterPath path;
+
+//        auto txt {QString("FPS: %1").arg(currentFps)};
+
+//        QFont font;
+//        font.setPixelSize(16);
+//        font.setWeight(QFont::Thin);
+
+//        const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, txt);
+//        path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height()), font, txt);
+
+//        painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+//        painter->setBrush(Qt::black);
+//        painter->drawPath(path);
+//        painter->setPen(Qt::NoPen);
+//        painter->setBrush(Qt::white);
+//        painter->drawPath(path);
+//    }
+
+//    painter->restore();
+//}
+
+// void Scene::timerEvent(QTimerEvent* event) {
+//     currentFps = fpsCtr;
+//     fpsCtr = 0;
+// }

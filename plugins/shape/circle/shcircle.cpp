@@ -13,7 +13,7 @@
 #include "shcircle.h"
 #include "graphicsview.h"
 #include "math.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "shhandler.h"
 #include <QIcon>
 

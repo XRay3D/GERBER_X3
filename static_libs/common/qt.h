@@ -1,4 +1,4 @@
 #pragma once
 
-#include <QtWidgets>
 #include <QtCore>
+#include <QtWidgets>

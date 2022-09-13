@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "shape.h"
 #include "ft_view.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "shhandler.h"
 #include "shnode.h"
 

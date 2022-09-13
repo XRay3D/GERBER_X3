@@ -19,7 +19,7 @@
 #include "thermal_node.h"
 #include "thermal_previewitem.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 
 namespace Thermal {
 
@@ -242,7 +242,7 @@ void Form::createTPI(FileInterface* file) {
     }
 
     for (auto& item : items_) {
-         App::graphicsView()->scene()->addItem(item.get());
+        App::graphicsView()->scene()->addItem(item.get());
         connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
     }
 

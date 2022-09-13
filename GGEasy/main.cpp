@@ -14,6 +14,7 @@
 
 #include "gc_fileplugin.h"
 #include "gc_plugin.h"
+#include "splashscreen.h"
 
 #include "mainwindow.h"
 #include "settingsdialog.h"

@@ -10,19 +10,19 @@
  ********************************************************************************/
 #pragma once
 
-#include "dockwidget.h"
-#include "file.h"
-#include "file_plugin.h"
+//#include "dockwidget.h"
+
 #include "recent.h"
 
 #include <QActionGroup>
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QStack>
 #include <QThread>
 #include <QTimer>
 #include <QTranslator>
-#include <qevent.h>
+#include <QUndoStack>
 
 namespace GCode {
 class File;
@@ -32,11 +32,12 @@ namespace FileTree {
 class View;
 }
 
+class FileInterface;
+class GraphicsView;
 class Project;
+class QHBoxLayout;
 class QProgressDialog;
 class QToolBar;
-class Scene;
-class QHBoxLayout;
 class QVBoxLayout;
 
 class MainWindow : public QMainWindow {
@@ -58,18 +59,7 @@ public:
     void loadFile(const QString& fileName);
     static void updateTheme();
 
-    //    template <class T>
-    //    void createDockWidget() {
-    //        if (dynamic_cast<T*>(dockWidget_->widget()))
-    //            return;
-
-    //        auto dwContent = new T(dockWidget_);
-    //        dwContent->setObjectName(typeid(T).name());
-
-    //        dockWidget_->pop();
-    //        dockWidget_->push(dwContent);
-    //        dockWidget_->show();
-    //    }
+    QUndoStack& undoStack() { return undoStack_; }
 
 signals:
     void parseFile(const QString& filename, int type);
@@ -86,6 +76,8 @@ private:
     Recent recentProjects;
 
     QAction* closeAllAct_ = nullptr;
+    QAction* redoAct = nullptr;
+    QAction* undoAct = nullptr;
 
     QMenu* fileMenu = nullptr;
     QMenu* helpMenu = nullptr;
@@ -97,6 +89,7 @@ private:
     QToolBar* fileToolBar = nullptr;
     QToolBar* toolpathToolBar = nullptr;
     QToolBar* zoomToolBar = nullptr;
+    QUndoStack undoStack_;
 
     Project* project_;
     bool openFlag;
@@ -164,7 +157,7 @@ public:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    struct Ui{
+    struct Ui {
         QWidget* centralwidget;
         QHBoxLayout* horizontalLayout;
         GraphicsView* graphicsView;

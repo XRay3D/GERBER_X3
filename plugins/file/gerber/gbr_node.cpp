@@ -13,7 +13,7 @@
 #include "gbr_node.h"
 #include "gbr_file.h"
 #include "gbr_highlighter.h"
-#include "scene.h"
+#include "graphicsview.h"
 
 #include "ft_view.h"
 #include "gbrcomp_dialog.h"

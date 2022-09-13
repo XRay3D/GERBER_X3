@@ -13,7 +13,6 @@
 #include "gi_preview.h"
 
 #include "graphicsview.h"
-#include "scene.h"
 #include "tool_pch.h"
 #include <QPainter>
 #include <QPropertyAnimation>

@@ -15,7 +15,6 @@
 #include "file.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "scene.h"
 #include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -33,7 +32,6 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
-
 }
 
 void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {

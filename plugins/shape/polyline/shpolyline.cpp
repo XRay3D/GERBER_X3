@@ -11,7 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shpolyline.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "shhandler.h"
 #include <QIcon>
 

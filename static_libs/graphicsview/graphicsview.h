@@ -67,7 +67,7 @@ private:
     QPoint latPos;
     QPointF point, rulPt1, rulPt2;
 
-    void drawRuller(QPainter* painter, const QRectF &rect);
+    void drawRuller(QPainter* painter, const QRectF& rect) const;
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
