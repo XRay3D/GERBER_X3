@@ -15,7 +15,6 @@
 
 #include "ex_file.h"
 #include "graphicsview.h"
-#include "scene.h"
 #include <cmath>
 
 #include "ex_settingstab.h"

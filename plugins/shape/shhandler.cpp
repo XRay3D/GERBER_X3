@@ -14,7 +14,7 @@
 #include "app.h"
 #include "doublespinbox.h"
 #include "graphicsview.h"
-#include "scene.h"
+#include "graphicsview.h"
 
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>

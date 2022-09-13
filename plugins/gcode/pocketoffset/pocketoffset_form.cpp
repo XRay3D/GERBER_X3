@@ -14,7 +14,7 @@
 #include "pocketoffset.h"
 #include "ui_pocketoffsetform.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -103,7 +103,7 @@ void PocketOffsetForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* item :  App::graphicsView()->scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:

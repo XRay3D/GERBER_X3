@@ -21,7 +21,6 @@
 #include "gi_preview.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "scene.h"
 #include "settings.h"
 #include "tool_pch.h"
 
@@ -211,7 +210,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
                 auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
         }
 
-         App::graphicsView()->scene()->update();
+        App::graphicsView()->scene()->update();
     } catch (const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;

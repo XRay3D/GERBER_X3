@@ -16,7 +16,6 @@
 #include "gi_error.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
-#include "scene.h"
 
 #include <QAbstractTableModel>
 #include <QHeaderView>

@@ -12,9 +12,8 @@
  ********************************************************************************/
 #include "gi_drill.h"
 
+#include "graphicsview.h"
 #include "myclipper.h"
-#include "scene.h"
-#include <graphicsview.h>
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>

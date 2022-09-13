@@ -13,9 +13,9 @@
 #include "profile.h"
 #include "gc_file.h"
 #include "gi_bridge.h"
+#include "graphicsview.h"
 #include "mainwindow.h"
 #include "profile_form.h"
-#include "scene.h"
 #include <numbers>
 
 namespace GCode {

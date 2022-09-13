@@ -13,7 +13,7 @@
 #include "shtext.h"
 
 #include "file.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "shhandler.h"
 #include "shnode.h"
 #include "shtextdialog.h"

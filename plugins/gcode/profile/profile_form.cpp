@@ -15,7 +15,7 @@
 #include "ui_profileform.h"
 
 #include "gi_bridge.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -78,7 +78,7 @@ ProfileForm::~ProfileForm() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for (QGraphicsItem* giItem :  App::graphicsView()->scene()->items()) {
+    for (QGraphicsItem* giItem : App::graphicsView()->scene()->items()) {
         if (giItem->type() == GiType::Bridge)
             delete giItem;
     }
@@ -98,7 +98,7 @@ void ProfileForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* sItem :  App::graphicsView()->scene()->selectedItems()) {
+    for (auto* sItem : App::graphicsView()->scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
         switch (sItem->type()) {
         case GiType::DataSolid:
@@ -147,7 +147,7 @@ void ProfileForm::createFile() {
     gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
-    for (QGraphicsItem* item :  App::graphicsView()->scene()->items()) {
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
         if (item->type() == GiType::Bridge)
             brv.push_back(item->pos());
     }
@@ -184,7 +184,7 @@ void ProfileForm::onAddBridgeClicked() {
             delete brItem;
     }
     brItem = new GiBridge(lenght_, size_, side, brItem);
-     App::graphicsView()->scene()->addItem(brItem);
+    App::graphicsView()->scene()->addItem(brItem);
     brItem->setVisible(true);
     brItem->setOpacity(1.0);
 }
@@ -192,7 +192,7 @@ void ProfileForm::onAddBridgeClicked() {
 void ProfileForm::updateBridge() {
     lenght_ = ui->dsbxBridgeLenght->value();
     size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    for (QGraphicsItem* item :  App::graphicsView()->scene()->items()) {
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
         if (item->type() == GiType::Bridge)
             static_cast<GiBridge*>(item)->update();
     }

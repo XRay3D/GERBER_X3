@@ -18,8 +18,6 @@
 
 #include "shapepluginin.h"
 
-#include <scene.h>
-
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QIcon>

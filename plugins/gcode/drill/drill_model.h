@@ -68,7 +68,7 @@ public:
     void setCreate(bool create);
     void setCreate(int row, bool create);
     void setToolId(int row, int id);
-//    void setType(int type_) { type = type_; }
+    //    void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = {}) const override;

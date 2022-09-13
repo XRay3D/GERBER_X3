@@ -390,5 +390,17 @@
         <file>icons/ggeasy-light/actions/16/ruller-on.svg</file>
         <file>icons/ggeasy-light/actions/22/ruller-on.svg</file>
         <file>icons/ggeasy-light/actions/24/ruller-on.svg</file>
+        <file>icons/ggeasy-dark/actions/16/edit-redo.svg</file>
+        <file>icons/ggeasy-dark/actions/16/edit-undo.svg</file>
+        <file>icons/ggeasy-dark/actions/22/edit-redo.svg</file>
+        <file>icons/ggeasy-dark/actions/22/edit-undo.svg</file>
+        <file>icons/ggeasy-dark/actions/24/edit-redo.svg</file>
+        <file>icons/ggeasy-dark/actions/24/edit-undo.svg</file>
+        <file>icons/ggeasy-light/actions/16/edit-redo.svg</file>
+        <file>icons/ggeasy-light/actions/16/edit-undo.svg</file>
+        <file>icons/ggeasy-light/actions/22/edit-redo.svg</file>
+        <file>icons/ggeasy-light/actions/22/edit-undo.svg</file>
+        <file>icons/ggeasy-light/actions/24/edit-redo.svg</file>
+        <file>icons/ggeasy-light/actions/24/edit-undo.svg</file>
     </qresource>
 </RCC>

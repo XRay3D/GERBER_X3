@@ -10,10 +10,9 @@
  ********************************************************************************/
 #pragma once
 
+#include "graphicsview.h"
 #include "mvector.h"
-#include "scene.h"
 
-#include <QGraphicsItem>
 #include <span>
 
 bool updateRect();

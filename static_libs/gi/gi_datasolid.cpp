@@ -14,7 +14,6 @@
 
 #include "file.h"
 #include "graphicsview.h"
-#include "scene.h"
 #include <QElapsedTimer>
 #include <QPainter>
 #include <QPropertyAnimation>

@@ -15,7 +15,7 @@
 #include "ui_voronoiform.h"
 #include "voronoi.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -88,7 +88,7 @@ void VoronoiForm::createFile() {
         return {};
     };
 
-    for (auto* item :  App::graphicsView()->scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:
