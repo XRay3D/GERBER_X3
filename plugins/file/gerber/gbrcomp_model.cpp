@@ -184,3 +184,5 @@ sNode* sModel::getItem(const QModelIndex& index) const {
 }
 
 } // namespace Gerber::Comp
+
+#include "moc_gbrcomp_model.cpp"

@@ -159,3 +159,5 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 }
 
 } // namespace DrillPlugin
+
+#include "moc_drill_model.cpp"

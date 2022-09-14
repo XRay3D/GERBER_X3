@@ -131,3 +131,5 @@ void FormatDialog::on_pbSetAsDefault_clicked() {
 }
 
 } // namespace Excellon
+
+#include "moc_ex_formatdialog.cpp"

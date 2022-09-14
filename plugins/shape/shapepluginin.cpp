@@ -45,3 +45,5 @@ const QJsonObject& Plugin::info() const { return info_; }
 void Plugin::setInfo(const QJsonObject& info) { info_ = info; }
 
 } // namespace Shapes
+
+#include "moc_shapepluginin.cpp"

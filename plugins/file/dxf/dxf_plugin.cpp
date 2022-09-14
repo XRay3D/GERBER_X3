@@ -375,3 +375,5 @@ void Plugin::updateFileModel(FileInterface* file) {
 //}
 
 } // namespace Dxf
+
+#include "moc_dxf_plugin.cpp"

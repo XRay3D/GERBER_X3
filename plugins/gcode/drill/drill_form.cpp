@@ -594,3 +594,5 @@ void Form::updateName() { }
 void Form::editFile(GCode::File* file) { }
 
 } // namespace DrillPlugin
+
+#include "moc_drill_form.cpp"

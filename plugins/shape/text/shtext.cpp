@@ -329,3 +329,5 @@ void PluginText::finalizeShape() {
 }
 
 } // namespace Shapes
+
+#include "moc_shtext.cpp"

@@ -114,3 +114,4 @@ bool Header::checked(int index) const { return model()->useForCalc(index); }
 Model* Header::model() const { return static_cast<Model*>(static_cast<QTableView*>(parent())->model()); }
 
 } // namespace DrillPlugin
+#include "moc_drill_header.cpp"

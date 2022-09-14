@@ -260,3 +260,5 @@ void ThermalPreviewItem::redraw() {
     }
     update();
 }
+
+#include "moc_gc_thermalpreviewitem.cpp"

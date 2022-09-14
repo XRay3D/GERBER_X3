@@ -183,3 +183,5 @@ void Plugin::updateFileModel(FileInterface* file) {
 }
 
 } // namespace Hpgl
+
+#include "moc_hpgl_plugin.cpp"

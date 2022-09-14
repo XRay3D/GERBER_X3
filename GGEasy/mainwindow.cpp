@@ -1310,3 +1310,5 @@ void MainWindow::Ui::retranslateUi(QMainWindow* MainWindow) {
     treeDockWidget->setWindowTitle(QCoreApplication::translate("MainWindow", "Files", nullptr));
     (void)MainWindow;
 }
+
+#include "moc_mainwindow.cpp"

@@ -179,3 +179,5 @@ QVariant CodeData::value() const {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_codedata.cpp"

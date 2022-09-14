@@ -295,3 +295,5 @@ void ProfileForm::editFile(GCode::File* file) {
         }
     }
 }
+
+#include "moc_profile_form.cpp"

@@ -188,3 +188,5 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 Paths GiBridge::paths(int) const { return Paths(); }
 
 int GiBridge::type() const { return GiType::Bridge; }
+
+#include "moc_gi_bridge.cpp"

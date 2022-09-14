@@ -293,3 +293,5 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 }
 
 } // namespace Gerber
+
+#include "moc_gbr_plugin.cpp"

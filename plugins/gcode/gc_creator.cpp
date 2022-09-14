@@ -894,3 +894,5 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret) 
 }
 
 } // namespace GCode
+
+#include "moc_gc_creator.cpp"

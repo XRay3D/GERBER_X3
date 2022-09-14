@@ -274,3 +274,5 @@ const Color dxfColors[] {
 };
 
 }
+
+#include "moc_hpgl_types.cpp"

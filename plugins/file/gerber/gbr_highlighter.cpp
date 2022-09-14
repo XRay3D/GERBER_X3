@@ -52,3 +52,5 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 }
 
 } // namespace Gerber
+
+#include "moc_gbr_highlighter.cpp"

@@ -159,3 +159,5 @@ void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm) {
     pbEdit->setText(QCoreApplication::translate("ToolSelectorForm", "Edit", nullptr));
     pbSelect->setText(QCoreApplication::translate("ToolSelectorForm", "Select", nullptr));
 }
+
+#include "moc_tool_selectorform.cpp"

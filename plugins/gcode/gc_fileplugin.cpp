@@ -319,3 +319,5 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 FileInterface* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
 
 } // namespace GCode
+
+#include "moc_gc_fileplugin.cpp"

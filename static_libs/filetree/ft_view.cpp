@@ -280,3 +280,5 @@ void View::mouseDoubleClickEvent(QMouseEvent* event) {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_view.cpp"

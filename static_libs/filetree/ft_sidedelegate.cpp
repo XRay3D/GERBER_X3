@@ -49,3 +49,5 @@ void SideDelegate::emitCommitData() {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_sidedelegate.cpp"

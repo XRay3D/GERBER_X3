@@ -144,3 +144,5 @@ void ToolTreeView::updateItem() {
         update(index);
     }
 }
+
+#include "moc_tool_treeview.cpp"

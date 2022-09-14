@@ -187,3 +187,5 @@ void ShTextDialog::reject() {
         text->restore();
     QDialog::reject();
 }
+
+#include "moc_shtextdialog.cpp"

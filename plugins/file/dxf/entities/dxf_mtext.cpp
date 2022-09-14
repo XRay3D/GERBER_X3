@@ -250,3 +250,5 @@ void MText::read(QDataStream& stream) {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_mtext.cpp"

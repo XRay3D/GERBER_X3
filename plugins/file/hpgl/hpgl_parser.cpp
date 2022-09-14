@@ -116,3 +116,5 @@ FileInterface* Parser::parseFile(const QString& fileName) {
 }
 
 } // namespace Hpgl
+
+#include "moc_hpgl_parser.cpp"

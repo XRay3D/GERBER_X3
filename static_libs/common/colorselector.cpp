@@ -107,3 +107,5 @@ void ColorSelector::resetColor() {
 }
 
 void ColorSelector::updateName() { lineEdit->setText(color_.name(QColor::HexArgb).toUpper()); }
+
+#include "moc_colorselector.cpp"

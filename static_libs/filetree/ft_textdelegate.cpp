@@ -43,3 +43,5 @@ void TextDelegate::emitCommitData() {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_textdelegate.cpp"

@@ -76,3 +76,5 @@ void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
     }
     QDialog::keyPressEvent(evt);
 }
+
+#include "moc_tool_database.cpp"

@@ -66,3 +66,5 @@ void sView::selectionChanged(const QItemSelection& selected, const QItemSelectio
 }
 
 } // namespace Gerber::Comp
+
+#include "moc_gbrcomp_view.cpp"

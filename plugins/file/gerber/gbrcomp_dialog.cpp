@@ -93,3 +93,5 @@ void Dialog::resizeEvent(QResizeEvent* event) {
 }
 
 } // namespace Gerber::Comp
+
+#include "moc_gbrcomp_dialog.cpp"

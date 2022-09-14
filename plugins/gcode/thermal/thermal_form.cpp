@@ -311,3 +311,5 @@ void Form::on_dsbxAreaMax_editingFinished() {
 }
 
 } // namespace Thermal
+
+#include "moc_thermal_form.cpp"

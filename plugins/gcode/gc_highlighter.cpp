@@ -109,3 +109,5 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
 }
 
 Dialog::~Dialog() { }
+
+#include "moc_gc_highlighter.cpp"

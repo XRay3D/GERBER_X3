@@ -15,3 +15,5 @@
 namespace Gerber::Attr {
 
 }
+
+#include "moc_gbr_attraperfunction.cpp"

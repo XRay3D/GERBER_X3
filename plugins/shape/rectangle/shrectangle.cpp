@@ -112,3 +112,5 @@ QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 Shape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point); }
 
 } // namespace Shapes
+
+#include "moc_shrectangle.cpp"

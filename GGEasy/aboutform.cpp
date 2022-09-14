@@ -33,3 +33,5 @@ AboutForm::AboutForm(QWidget* parent)
 }
 
 AboutForm::~AboutForm() { delete ui; }
+
+#include "moc_aboutform.cpp"

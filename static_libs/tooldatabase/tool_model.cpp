@@ -324,3 +324,5 @@ void ToolModel::loadTools() {
         parent->insertChild(parent->childCount(), item);
     }
 }
+
+#include "moc_tool_model.cpp"

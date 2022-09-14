@@ -1022,3 +1022,5 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //     currentFps = fpsCtr;
 //     fpsCtr = 0;
 // }
+
+#include "moc_graphicsview.cpp"

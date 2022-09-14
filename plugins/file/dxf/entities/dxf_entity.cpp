@@ -335,3 +335,5 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_entity.cpp"

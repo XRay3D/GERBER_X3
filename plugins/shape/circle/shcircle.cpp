@@ -86,3 +86,5 @@ QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 Shape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point); }
 
 } // namespace Shapes
+
+#include "moc_shcircle.cpp"

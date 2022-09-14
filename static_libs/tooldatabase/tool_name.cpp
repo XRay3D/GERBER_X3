@@ -34,3 +34,5 @@ void ToolName::setTool(const Tool& tool) {
     lblName->setText(tool.name());
     setToolTip(tool.note());
 }
+
+#include "moc_tool_name.cpp"
