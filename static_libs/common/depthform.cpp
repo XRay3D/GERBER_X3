@@ -153,3 +153,5 @@ void DepthForm::retranslateUi(QWidget* Form) {
     rbCustom->setText(QApplication::translate("DepthForm", "U", nullptr));
     rbCustom->setToolTip(QApplication::translate("DepthForm", "User", nullptr));
 }
+
+#include "moc_depthform.cpp"

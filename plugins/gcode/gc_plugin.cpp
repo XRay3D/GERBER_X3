@@ -42,3 +42,5 @@ QAction* GCodePlugin::addAction(QMenu* menu, QToolBar* toolbar) {
 const QJsonObject& GCodePlugin::info() const { return info_; }
 
 void GCodePlugin::setInfo(const QJsonObject& info) { info_ = info; }
+
+#include "moc_gc_plugin.cpp"

@@ -165,3 +165,5 @@ void GCodePropertiesForm::on_pbResetZero_clicked() {
     ui->dsbxZeroX->setValue(0);
     ui->dsbxZeroY->setValue(0);
 }
+
+#include "moc_gc_propertiesform.cpp"

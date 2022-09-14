@@ -115,3 +115,5 @@ void Recent::openRecentFile() {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
         mainWindow->loadFile(action->data().toString());
 }
+
+#include "moc_recent.cpp"

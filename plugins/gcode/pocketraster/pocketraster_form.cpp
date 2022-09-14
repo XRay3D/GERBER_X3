@@ -189,3 +189,5 @@ void PocketRasterForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1
 
 void PocketRasterForm::editFile(GCode::File* /*file*/) {
 }
+
+#include "moc_pocketraster_form.cpp"

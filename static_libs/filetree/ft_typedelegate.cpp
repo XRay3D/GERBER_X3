@@ -53,3 +53,5 @@ void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, cons
 void TypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
 } // namespace FileTree
+
+#include "moc_ft_typedelegate.cpp"

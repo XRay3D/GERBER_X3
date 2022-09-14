@@ -343,3 +343,5 @@ void ToolEditForm::updateName() {
         return;
     }
 }
+
+#include "moc_tool_editform.cpp"

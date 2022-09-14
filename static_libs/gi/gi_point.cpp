@@ -600,3 +600,5 @@ void LayoutFrames::updateRect(bool fl) {
         GiPin::resetPos(false);
     }
 }
+
+#include "moc_gi_point.cpp"

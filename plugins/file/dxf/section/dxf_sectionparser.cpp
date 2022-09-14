@@ -74,3 +74,5 @@ QDebug operator<<(QDebug debug, const SectionParser& c) {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_sectionparser.cpp"

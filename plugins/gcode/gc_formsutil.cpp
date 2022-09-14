@@ -165,3 +165,5 @@ void GcFormBase::stopProgress() {
     progressDialog->reset();
     progressDialog->hide();
 }
+
+#include "moc_gc_formsutil.cpp"

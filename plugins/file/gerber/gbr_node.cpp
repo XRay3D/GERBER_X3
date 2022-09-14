@@ -203,3 +203,5 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
 }
 
 } // namespace Gerber
+
+#include "moc_gbr_node.cpp"

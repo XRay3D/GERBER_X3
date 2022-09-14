@@ -758,3 +758,5 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_spline.cpp"

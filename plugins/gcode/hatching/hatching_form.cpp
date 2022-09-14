@@ -189,3 +189,5 @@ void HatchingForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void HatchingForm::editFile(GCode::File* /*file*/) {
 }
+
+#include "moc_hatching_form.cpp"

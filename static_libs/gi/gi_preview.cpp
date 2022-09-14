@@ -130,3 +130,5 @@ QVariant GiAbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change,
     }
     return QGraphicsItem::itemChange(change, value);
 }
+
+#include "moc_gi_preview.cpp"

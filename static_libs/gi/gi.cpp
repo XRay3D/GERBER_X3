@@ -123,3 +123,5 @@ QRectF GraphicsItem::boundingRect() const {
 }
 
 QPainterPath GraphicsItem::shape() const { return shape_; }
+
+#include "moc_gi.cpp"

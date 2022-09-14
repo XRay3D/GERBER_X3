@@ -33,3 +33,5 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
 Tool ToolEditDialog::tool() const { return ui->toolEdit->tool_; }
 
 void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }
+
+#include "moc_tool_editdialog.cpp"

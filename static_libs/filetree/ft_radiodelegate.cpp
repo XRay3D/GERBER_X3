@@ -86,3 +86,5 @@ void RadioDelegate::commitAndCloseEditor() {
     // emit closeEditor(editor);
 }
 #endif
+
+#include "moc_ft_radiodelegate.cpp"

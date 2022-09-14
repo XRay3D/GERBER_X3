@@ -274,3 +274,5 @@ const Color dxfColors[] {
 };
 
 }
+
+#include "moc_dxf_types.cpp"

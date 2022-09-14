@@ -102,3 +102,5 @@ void ThermalDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 }
 
 void ThermalDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+
+#include "moc_gc_thermaldelegate.cpp"

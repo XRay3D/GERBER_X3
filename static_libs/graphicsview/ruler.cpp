@@ -224,3 +224,5 @@ void Ruler::DrawMousePosTick(QPainter* painter) {
     }
     painter->drawLine(starPt, endPt);
 }
+
+#include "moc_ruler.cpp"

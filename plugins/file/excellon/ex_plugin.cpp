@@ -108,3 +108,5 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 }
 
 } // namespace Excellon
+
+#include "moc_ex_plugin.cpp"

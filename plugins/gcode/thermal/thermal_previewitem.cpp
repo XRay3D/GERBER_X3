@@ -268,3 +268,5 @@ QRectF PreviewItem::boundingRect() const {
 }
 
 } // namespace Thermal
+
+#include "moc_thermal_previewitem.cpp"

@@ -704,3 +704,5 @@ void SettingsDialog::Ui::retranslateUi(QDialog* SettingsDialog) {
     dsbxMinCircleSegmentLength->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));
     tabwMain->setTabText(tabwMain->indexOf(tabUtils), QCoreApplication::translate("SettingsDialog", "Utils", nullptr));
 }
+
+#include "moc_settingsdialog.cpp"

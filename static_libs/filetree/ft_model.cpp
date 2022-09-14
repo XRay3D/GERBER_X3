@@ -336,3 +336,5 @@ Node* Model::getItem(const QModelIndex& index) const {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_model.cpp"

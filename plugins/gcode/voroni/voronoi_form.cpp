@@ -155,3 +155,5 @@ void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
     ui->label_4->setVisible(index);
     ui->dsbxPrecision->setVisible(index);
 }
+
+#include "moc_voronoi_form.cpp"

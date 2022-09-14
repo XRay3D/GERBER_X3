@@ -514,3 +514,5 @@ void Project::setGlue(double glue) {
     glue_ = glue;
     setChanged();
 }
+
+#include "moc_project.cpp"

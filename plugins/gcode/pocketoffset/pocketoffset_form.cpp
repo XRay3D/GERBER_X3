@@ -234,3 +234,5 @@ void PocketOffsetForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1
 
 void PocketOffsetForm::editFile(GCode::File* /*file*/) {
 }
+
+#include "moc_pocketoffset_form.cpp"
