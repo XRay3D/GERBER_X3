@@ -26,20 +26,14 @@
 
 namespace Shapes {
 
-Text::Text(QPointF pt1)
-    : iData(loadIData()) {
+Text::Text(QPointF pt1) {
+    loadIData();
     paths_.resize(1);
-
     handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-
     handlers.front()->setPos(pt1);
-
     redraw();
-
-     App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
-
-int Text::type() const { return GiType::ShText; }
 
 void Text::redraw() {
     QPainterPath painterPath;
@@ -151,6 +145,11 @@ void Text::setSide(const Side& side) {
     redraw();
 }
 
+void Text::setPt(const QPointF& point) {
+    handlers.front()->setPos(point);
+    redraw();
+}
+
 bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
@@ -230,26 +229,26 @@ void Text::read(QDataStream& stream) { stream >> iData; }
 void Text::saveIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
-    settings.setValue("font", lastUsedIData.font);
-    settings.setValue("text", lastUsedIData.text);
-    settings.setValue("side", lastUsedIData.side);
-    settings.setValue("angle", lastUsedIData.angle);
-    settings.setValue("height", lastUsedIData.height);
-    settings.setValue("xy", lastUsedIData.xy);
-    settings.setValue("handleAlign", lastUsedIData.handleAlign);
+    settings.setValue("font", iData.font);
+    settings.setValue("text", iData.text);
+    settings.setValue("side", iData.side);
+    settings.setValue("angle", iData.angle);
+    settings.setValue("height", iData.height);
+    settings.setValue("xy", iData.xy);
+    settings.setValue("handleAlign", iData.handleAlign);
 }
 
 Text::InternalData Text::loadIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
-    lastUsedIData.font = settings.value("font").toString();
-    lastUsedIData.text = settings.value("text", QObject::tr("Text")).toString();
-    lastUsedIData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
-    lastUsedIData.angle = settings.value("angle", 0.0).toDouble();
-    lastUsedIData.height = settings.value("height", 10.0).toDouble();
-    lastUsedIData.xy = settings.value("xy", 10.0).toDouble();
-    lastUsedIData.handleAlign = settings.value("handleAlign", BotLeft).toInt();
-    return lastUsedIData;
+    iData.font = settings.value("font").toString();
+    iData.text = settings.value("text", QObject::tr("Text")).toString();
+    iData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
+    iData.angle = settings.value("angle", 0.0).toDouble();
+    iData.height = settings.value("height", 10.0).toDouble();
+    iData.xy = settings.value("xy", 10.0).toDouble();
+    iData.handleAlign = settings.value("handleAlign", BotLeft).toInt();
+    return iData;
 }
 
 void Text::save() { iDataCopy = iData; }
@@ -259,10 +258,7 @@ void Text::restore() {
     redraw();
 }
 
-void Text::ok() {
-    lastUsedIData = iData;
-    saveIData();
-}
+void Text::ok() { saveIData(); }
 
 void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
@@ -302,31 +298,12 @@ QDataStream& operator>>(QDataStream& stream, Text::InternalData& d) {
 ////////////////////////////////////////////////////////////
 /// \brief PluginText::PluginText
 ///
-PluginText::PluginText() { }
 
-PluginText::~PluginText() { }
+int PluginImpl::type() const { return GiType::ShText; }
 
-int PluginText::type() const { return GiType::ShText; }
+QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-text"); }
 
-QIcon PluginText::icon() const { return QIcon::fromTheme("draw-text"); }
-
-Shape* PluginText::createShape() { return new Text(); }
-
-Shape* PluginText::createShape(const QPointF& point) {
-    QTimer::singleShot(100, [this] { emit actionUncheck(); });
-    return new Text(point);
-}
-
-bool PluginText::addShapePoint(const QPointF&) { return false; }
-
-void PluginText::updateShape(const QPointF&) { }
-
-void PluginText::finalizeShape() {
-    if (shape)
-        shape->finalize();
-    shape = nullptr;
-    emit actionUncheck();
-}
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Text(point); }
 
 } // namespace Shapes
 
