@@ -60,6 +60,7 @@ private:
     QGridLayout* const gridLayout;
     //    Scene* scene_;
     bool ruler_ {};
+    int rulerCtr {};
     bool boundingRect_ {};
     void updateRuler();
     template <class T>

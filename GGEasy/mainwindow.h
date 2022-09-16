@@ -10,8 +10,6 @@
  ********************************************************************************/
 #pragma once
 
-//#include "dockwidget.h"
-
 #include "recent.h"
 
 #include <QActionGroup>
@@ -23,6 +21,7 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QUndoStack>
+
 
 namespace GCode {
 class File;

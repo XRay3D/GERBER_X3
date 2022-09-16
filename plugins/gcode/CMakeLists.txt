@@ -45,14 +45,14 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    clipper
     #    common
     #    filetree
-    gi
     #    graphicsview
     #    shape
     #    tooldatabase
     File_Plugins
+    clipper
+    gi
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

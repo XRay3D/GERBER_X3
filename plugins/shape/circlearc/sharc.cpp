@@ -33,9 +33,9 @@ Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
     handlers[Point1]->setPos(pt1);
     handlers[Point2]->setPos(pt2);
 
-    currentHandler = handlers[Point1].get();
-
+    currentHandler = handlers[Center].get();
     redraw();
+    currentHandler = handlers[Point1].get();
 
     App::graphicsView()->scene()->addItem(this);
 }
@@ -44,40 +44,46 @@ Arc::~Arc() { }
 
 void Arc::redraw() {
 
-    qDebug() << __FUNCTION__ << handlers.indexOf(currentHandler);
+    //    qDebug() << __FUNCTION__ << handlers.indexOf(currentHandler);
+    shape_ = QPainterPath();
 
     if (currentHandler) {
-        QLineF l(handlers[Center]->pos(), currentHandler->pos());
-        radius_ = l.length();
+        auto test = [this](const QPointF& p) { shape_.addEllipse(p, 1, 1); };
 
-        QLineF l1(handlers[Center]->pos(),
-            handlers[Center]->pos() == handlers[Point1]->pos() //если залипло на центр
-                ? handlers[Center]->pos() + QPointF(1.0, 0.0)
-                : handlers[Point1]->pos());
-        QLineF l2(handlers[Center]->pos(),
-            handlers[Center]->pos() == handlers[Point2]->pos() //если залипло на центр
-                ? handlers[Center]->pos() + QPointF(1.0, 0.0)
-                : handlers[Point2]->pos());
+        auto updateCenter = [this](bool fl = {}) {
+            QLineF line { handlers[Point1]->pos(), handlers[Point2]->pos() };
+            auto center { line.center() };
+            auto hCenter { handlers[Center]->pos() };
+            double length {};
+            if (!fl) {
+                auto line2 = QLineF::fromPolar(1, line.angle() - 90).translated(hCenter);
+                QPointF intersectionPoint;
+                qDebug() << "intersects" << line.intersects(line2, &intersectionPoint);
+                length = QLineF(hCenter, intersectionPoint).length();
+                line.setLength(line.length());
+                radius_ = QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length();
+            } else {
+                length = (radius_ * radius_) / line.length();
+                // length = sqrt(length * radius_);
+            }
+            handlers[Center]->setPos(QLineF::fromPolar(length, line.angle() - 90).translated(center).p2());
+        };
 
         switch (handlers.indexOf(currentHandler)) {
         case Center:
+            updateCenter();
+            // radius_ = QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length();
             break;
         case Point1:
-            l2.setLength(radius_);
-            handlers[Point2]->QGraphicsItem::setPos(l2.p2());
-            break;
         case Point2:
-            l1.setLength(radius_);
-            handlers[Point1]->QGraphicsItem::setPos(l1.p2());
+            updateCenter(true);
             break;
         }
     }
 
     const QLineF l1(handlers[Center]->pos(), handlers[Point1]->pos());
     const QLineF l2(handlers[Center]->pos(), handlers[Point2]->pos());
-
-    radius_ = l1.length();
-
+    //    radius_ = l1.length();
     double angle1 = two_pi - qDegreesToRadians(l1.angle());
     double angle2 = two_pi - qDegreesToRadians(l2.angle());
 
@@ -109,7 +115,6 @@ void Arc::redraw() {
         static_cast<cInt>(radius * sin(angle2)) + center.Y
     };
 
-    shape_ = QPainterPath();
     shape_.addPolygon(path);
 
     setPos({ 1, 1 }); //костыли    //update();
@@ -123,9 +128,9 @@ QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 bool Arc::addPt(const QPointF& pt) {
     switch (ptCtr++) {
     case 0:
-        return (currentHandler = handlers[Point1].get())->setPos(pt), true;
-    case 1:
         return (currentHandler = handlers[Point2].get())->setPos(pt), true;
+    case 1:
+        return (currentHandler = handlers[Center].get())->setPos(pt), true;
     default:
         return false;
     }
@@ -153,7 +158,7 @@ int PluginImpl::type() const { return GiType::ShCirArc; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Arc(point, point, point); }
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Arc(point, point + QPointF { 0, +5 }, point + QPointF { 0, -5 }); }
 
 } // namespace Shapes
 
