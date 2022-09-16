@@ -60,7 +60,7 @@ void setCursor(QWidget* w) {
     p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
     p.drawLine(0, Mid, Size, Mid);
     p.drawLine(Mid, 0, Mid, Size);
-    w->setCursor(QCursor {cursor, Mid, Mid});
+    w->setCursor(QCursor { cursor, Mid, Mid });
 }
 
 static int rulCtr;
@@ -70,9 +70,9 @@ static MovedShapesMap shUndoPos;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler {new Ruler(Qt::Horizontal, this)}
-    , vRuler {new Ruler(Qt::Vertical, this)}
-    , gridLayout {new QGridLayout(this)} {
+    , hRuler { new Ruler(Qt::Horizontal, this) }
+    , vRuler { new Ruler(Qt::Vertical, this) }
+    , gridLayout { new QGridLayout(this) } {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
@@ -253,9 +253,9 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
 
 void GraphicsView::setScale(double s) noexcept {
     const auto trf(transform());
-    setTransform({+s /*11*/, trf.m12(), trf.m13(),
+    setTransform({ +s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
-        /*      */ trf.m31(), trf.m32(), trf.m33()});
+        /*      */ trf.m31(), trf.m32(), trf.m33() });
 }
 
 double GraphicsView::getScale() noexcept { return transform().m11(); }
@@ -282,13 +282,13 @@ QRectF GraphicsView::getViewRect() {
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
 
-    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
+    QRectF visible_scene_rect(transform().inverted().mapRect({ topLeft, bottomRight }));
 
     return visible_scene_rect;
 }
 
 QRectF GraphicsView::getSelectedBoundingRect() {
-    auto selectedItems {scene()->selectedItems()};
+    auto selectedItems { scene()->selectedItems() };
 
     if (selectedItems.isEmpty())
         return {};
@@ -371,7 +371,7 @@ void GraphicsView::updateRuler() {
 
 void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
 
-    QLineF line {rulPt2, rulPt1};
+    QLineF line { rulPt2, rulPt1 };
     const double length = line.length();
     if (qFuzzyIsNull(length))
         return;
@@ -385,8 +385,8 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
                                          "  ∆Y: %2 in\n"
                                          "  ∆/: %3 in\n"
                                          "  Area: %4 in²\n"
-                                         "  Angle: %5°" :
-                                         "  ∆X: %1 mm\n"
+                                         "  Angle: %5°"
+                                       : "  ∆X: %1 mm\n"
                                          "  ∆Y: %2 mm\n"
                                          "  ∆/: %3 mm\n"
                                          "  Area: %4 mm²\n"
@@ -395,12 +395,12 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
             .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
             .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
             .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0)) * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)), 4, 'f', 3, '0')
-            .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')};
+            .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+    };
 
-    const auto textRect {QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text)};
+    const auto textRect { QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text) };
 
     const double scaleFactor = App::graphicsView()->scaleFactor();
-    painter->save();
 
     painter->setPen(QPen(Qt::green, 0.0));
     // draw rect
@@ -428,7 +428,7 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->drawLine(line);
 
     // draw text
-    auto pt {rect.center()};
+    auto pt { rect.center() };
     pt.rx() -= textRect.width() * 0.5 * scaleFactor;
     pt.ry() += textRect.height() * 0.5 * scaleFactor;
 
@@ -439,11 +439,9 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->setFont(font);
 
     painter->setRenderHint(QPainter::TextAntialiasing);
-    painter->fillRect(textRect, QColor {0, 0, 0, 127});
+    painter->fillRect(textRect, QColor { 0, 0, 0, 127 });
     painter->setBrush(Qt::white);
     painter->drawText(textRect, Qt::AlignLeft, text);
-
-    painter->restore();
 }
 
 class name : public QGraphicsItem {
@@ -457,7 +455,7 @@ class name : public QGraphicsItem {
 
 public:
     name(QPointF pos, Qt::Orientation orientation)
-        : orientation {orientation} {
+        : orientation { orientation } {
         setFlags(ItemIsSelectable | ItemIsMovable);
         orientation == Qt::Horizontal ? setPos(0, pos.y()) : setPos(pos.x(), 0);
     }
@@ -467,12 +465,12 @@ public:
     // QGraphicsItem interface
     QRectF boundingRect() const override {
         qDebug(__FUNCTION__);
-        auto sceneRect {scene()->sceneRect()};
+        auto sceneRect { scene()->sceneRect() };
         auto k = 2 * scaleFactor();
         if (orientation == Qt::Horizontal) {
-            return {sceneRect.left(), -k, sceneRect.width(), k * 2};
+            return { sceneRect.left(), -k, sceneRect.width(), k * 2 };
         } else {
-            return {-k, sceneRect.top(), k * 2, sceneRect.height()};
+            return { -k, sceneRect.top(), k * 2, sceneRect.height() };
         }
     }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override {
@@ -488,7 +486,7 @@ protected:
 
 void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData {event->mimeData()};
+    auto mimeData { event->mimeData() };
 
     if (mimeData->hasFormat(Ruler::mimeType()))
         event->acceptProposedAction();
@@ -502,7 +500,7 @@ void GraphicsView::dragMoveEvent(QDragMoveEvent* event) { event->acceptProposedA
 
 void GraphicsView::dropEvent(QDropEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData {event->mimeData()};
+    auto mimeData { event->mimeData() };
     for (QUrl& var : mimeData->urls())
         emit fileDroped(var.path().remove(0, 1));
 
@@ -559,18 +557,18 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             rulPt1 = mappedPos(event);
         // это для отмены перемещения
         shUndoPos.clear();
-        auto items {scene()->items()};
+        auto items { scene()->items() };
         shUndoPos.reserve(items.size());
         for (auto item : items)
             if (item->type() == GiType::ShHandler)
                 shUndoPos.emplace(item, item->pos());
 
-        if (auto item {scene()->itemAt(mapToScene(event->pos()), transform())}; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
+        if (auto item { scene()->itemAt(mapToScene(event->pos()), transform()) }; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
             mimeData->setText(Ruler::mimeType());
             mimeData->setData(Ruler::mimeType(), QByteArray::fromRawData(reinterpret_cast<const char*>(item), sizeof(item)));
 
-            QPixmap pixmapIcon {Ruler::Breadth, Ruler::Breadth};
+            QPixmap pixmapIcon { Ruler::Breadth, Ruler::Breadth };
             pixmapIcon.fill(Qt::magenta);
 
             QDrag* drag = new QDrag(this);
@@ -608,7 +606,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     } else {
         QGraphicsView::mouseReleaseEvent(event);
         emit mouseClickL(mappedPos(event));
-        auto shUndoPosTmp {shUndoPos};
+        auto shUndoPosTmp { shUndoPos };
         if (shUndoPos.size()) {
             for (auto [item, pos] : shUndoPos)
                 if (item->pos() == pos)
@@ -617,8 +615,8 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
             class ShapeMoveCommand : public QUndoCommand {
             public:
                 ShapeMoveCommand(const MovedShapesMap& shUndoPos, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
-                    : graphicsScene {graphicsScene}
-                    , shUndoPos {shUndoPos} {
+                    : graphicsScene { graphicsScene }
+                    , shUndoPos { shUndoPos } {
                     setText("Moved Shapes");
                     shRedoPos.reserve(shUndoPos.size());
                     for (auto [item, pos] : shUndoPos)
@@ -662,69 +660,74 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
-    const auto scale = App::settings().gridStep(hRuler->zoom());
-    std::unordered_map<int, int> linesx, linesy;
+    const double scale = App::settings().gridStep(hRuler->zoom());
+    const double lineWidth { 0 }; //{ 2.0 / transform().m11() };
+    static std::unordered_map<int, int> gridLinesX, gridLinesY;
+    gridLinesX.clear(), gridLinesY.clear();
     auto draw = [&](const auto sc) {
         qreal y, x;
-
         if (sc >= 1.0) {
             int top = floor(rect.top());
             int left = floor(rect.left());
             y = top - top % int(sc);
             x = left - left % int(sc);
         } else {
-            const auto k = 1.0 / sc;
+            const double k = 1.0 / sc;
             int top = floor(rect.top()) * k;
             int left = floor(rect.left()) * k;
             y = (top - top % int(k)) / k;
             x = (left - left % int(k)) / k;
         }
 
-        for (const auto end_ = rect.bottom(); y < end_; y += sc) {
-            //            painter->drawLine(QLineF {rect.left(), y, rect.right(), y});
-            ++linesy[ceil(y * uScale)];
-        }
-        for (const auto end_ = rect.right(); x < end_; x += sc) {
-            //            painter->drawLine(QLineF {x, rect.top(), x, rect.bottom()});
-            ++linesx[ceil(x * uScale)];
-        }
+        for (const auto end_ = rect.bottom(); y < end_; y += sc)
+            ++gridLinesY[ceil(y * uScale)];
+
+        for (const auto end_ = rect.right(); x < end_; x += sc)
+            ++gridLinesX[ceil(x * uScale)];
     };
 
-    QColor color[4] {
-        {255, 255, 255, 00},
-        {255, 255, 255, 20},
-        {255, 255, 255, 40},
-        {255, 255, 255, 60},
+    const QColor color[4] {
+        { 255, 0, 0, 127 }, // рисовние нулей красным
+        App::settings().guiColor(GuiColors::Grid01),
+        App::settings().guiColor(GuiColors::Grid05),
+        App::settings().guiColor(GuiColors::Grid10),
     };
-    //    painter->setPen({color, 0.0 /*2.0 / transform().m11()*/});
 
     draw(scale * 0.1);
     draw(scale * 0.5);
     draw(scale * 1.0);
+
+    gridLinesX[0] = 0; // рисовние нулей красным
+    gridLinesY[0] = 0;
+
+    static mvector<QLineF> lines[4];
+    for (auto&& vec : lines)
+        vec.clear();
+    double tmp {};
+    for (auto [x, colorIndex] : gridLinesX) {
+        tmp = x * dScale;
+        lines[colorIndex].emplace_back(tmp, rect.top(), tmp, rect.bottom());
+    }
+    for (auto [y, colorIndex] : gridLinesY) {
+        tmp = y * dScale;
+        lines[colorIndex].emplace_back(rect.left(), tmp, rect.right(), tmp);
+    }
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
-    for (auto [x, val] : linesx) {
-        auto tmp {x * dScale};
-        painter->setPen({color[val], 0.0 /*2.0 / transform().m11()*/});
-        painter->drawLine(QLineF {tmp, rect.top(), tmp, rect.bottom()});
-    }
-    for (auto [y, val] : linesy) {
-        auto tmp {y * dScale};
-        painter->setPen({color[val], 0.0 /*2.0 / transform().m11()*/});
-        painter->drawLine(QLineF {rect.left(), tmp, rect.right(), tmp});
+    for (int colorIndex {}; auto&& vec : lines) {
+        painter->setPen({ color[colorIndex++], lineWidth });
+        painter->drawLines(vec.data(), vec.size());
     }
 
-    painter->setPen({Qt::red, 0.0 /*2.0 / transform().m11()*/});
+    auto k { 100 / transform().m11() };
+    painter->setPen({ Qt::red, 0.0 /*2.0 / transform().m11()*/ });
+    painter->drawLine(QLineF { point.x() - k, point.y(), point.x() + k, point.y() });
+    painter->drawLine(QLineF { point.x(), point.y() - k, point.x(), point.y() + k });
 
-    auto k {10 / hRuler->zoom()};
-
-    painter->drawLine(QLineF {point.x() - k, point.y(), point.x() + k, point.y()});
-    painter->drawLine(QLineF {point.x(), point.y() - k, point.x(), point.y() + k});
-    //    painter->setBrush(Qt::NoBrush);
-    //    painter->drawRect(rect);
-    painter->restore();
     if (ruler_)
         drawRuller(painter, rect);
+
+    painter->restore();
 }
 
 void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
