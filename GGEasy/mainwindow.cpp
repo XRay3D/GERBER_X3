@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget* parent)
     , actionGroup {this}
     , reloadQuestion {this} {
     App::setMainWindow(this);
+    App::setUndoStack(&undoStack_);
 
     ui.setupUi(this);
 

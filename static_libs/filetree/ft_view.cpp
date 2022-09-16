@@ -113,7 +113,7 @@ void View::hideOther() {
 void View::closeFile() {
     model_->removeRow(menuIndex_.row(), menuIndex_.parent());
     //    if (App::drillForm())
-    //        App::drillForm()->on_pbClose_clicked();
+    //        App::drillForm().on_pbClose_clicked();
 }
 
 void View::closeFiles() {

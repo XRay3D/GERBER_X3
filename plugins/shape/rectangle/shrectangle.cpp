@@ -31,7 +31,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
 
     handlers[Point1]->setPos(pt1);
     handlers[Point3]->setPos(pt2);
-
+    currentHandler = handlers[Point1].get();
     redraw();
 
     App::graphicsView()->scene()->addItem(this);
@@ -54,7 +54,7 @@ void Rectangle::redraw() {
     case Center: {
         QRectF rect(handlers[Point1]->pos(), handlers[Point3]->pos());
         rect.moveCenter(handlers[Center]->pos());
-        auto center {handlers[Center]->pos()};
+        auto center { handlers[Center]->pos() };
         handlers[Point1]->setPos(rect.topLeft());
         handlers[Point2]->setPos(rect.topRight());
         handlers[Point3]->setPos(rect.bottomRight());
@@ -86,8 +86,8 @@ void Rectangle::redraw() {
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(paths_.front());
-    setPos({1, 1}); //костыли    //update();
-    setPos({0, 0});
+    setPos({ 1, 1 }); //костыли    //update();
+    setPos({ 0, 0 });
 }
 
 QString Rectangle::name() const { return QObject::tr("Rectangle"); }
@@ -109,7 +109,7 @@ int PluginImpl::type() const { return GiType::ShRectangle; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point); }
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point + QPointF { 10, 10 }); }
 
 } // namespace Shapes
 

@@ -30,8 +30,8 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  X = %1 in\n"
-                                                          "  Y = %2 in\n" :
-                                                          "  X = %1 mm\n"
+                                                          "  Y = %2 in\n"
+                                                        : "  X = %1 mm\n"
                                                           "  Y = %2 mm\n")
                              .arg(pt1.x() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(pt1.y() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
@@ -92,7 +92,7 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         double scale = App::graphicsView()->scaleFactor();
         const double k = Size * scale;
         const double s = k * 2;
-        rect = {QPointF(-k, -k), QSizeF(s, s)};
+        rect = { QPointF(-k, -k), QSizeF(s, s) };
     }
 
     if (!pressed)
@@ -183,7 +183,17 @@ void Handle::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     shape->updateOtherHandlers(this);
 }
 
+struct Data {
+    QPointF pos;
+    Handle::Type type;
+};
+using HandlePosN = std::unordered_map<Handle*, Data>;
+static HandlePosN lastHandlePos;
+
 void Handle::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    lastPos = pos();
+    for (auto&& handle : shape->handlers)
+        lastHandlePos.emplace(handle.get(), Data { handle->pos(), handle->type_ });
     QGraphicsItem::mousePressEvent(event);
     pressed = true;
 }
@@ -191,6 +201,52 @@ void Handle::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     pressed = false;
     QGraphicsItem::mouseReleaseEvent(event);
+
+    class ShapeMoveCommand : public QUndoCommand {
+    public:
+        ShapeMoveCommand(HandlePosN&& lastHandlePos, Handle* handle, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
+            : QUndoCommand { parent }
+            , graphicsScene { graphicsScene }
+            , lastHandlePos { std::move(lastHandlePos) }
+            , redoPos { handle->pos(), handle->type_ }
+            , handle { handle } {
+            setText("Shape Handle Moved");
+        }
+
+        ~ShapeMoveCommand() { }
+
+        void undo() override {
+            auto shape { lastHandlePos.begin()->first->shape };
+
+            mvector<int> toDelete;
+            for (auto&& handle : shape->handlers) {
+                if (lastHandlePos.contains(handle.get())) {
+                    auto [pos, type] = lastHandlePos.at(handle.get());
+                    handle->setPos(pos), handle->type_ = type;
+                } else
+                    toDelete.emplace_back(shape->handlers.indexOf(handle));
+            }
+            for (auto index : toDelete)
+                shape->handlers.takeAt(index);
+
+            shape->currentHandler = nullptr;
+            shape->redraw();
+        }
+
+        void redo() override {
+            handle->setPos(redoPos.pos);
+            handle->type_ = redoPos.type;
+            handle->shape->currentHandler = handle;
+            handle->shape->redraw();
+        }
+
+    private:
+        QGraphicsScene* const graphicsScene;
+        const HandlePosN lastHandlePos;
+        const Data redoPos;
+        Handle* const handle;
+    };
+    App::undoStack()->push(new ShapeMoveCommand(std::move(lastHandlePos), this, scene()));
 }
 
 } // namespace Shapes

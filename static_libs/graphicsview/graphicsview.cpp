@@ -63,11 +63,6 @@ void setCursor(QWidget* w) {
     w->setCursor(QCursor { cursor, Mid, Mid });
 }
 
-static int rulCtr;
-
-using MovedShapesMap = std::unordered_map<QGraphicsItem*, QPointF>;
-static MovedShapesMap shUndoPos;
-
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
     , hRuler { new Ruler(Qt::Horizontal, this) }
@@ -231,7 +226,7 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
 }
 
 void GraphicsView::setRuler(bool ruller) {
-    rulCtr = 0;
+    rulerCtr = 0;
     ruler_ = ruller;
     scene()->update();
 }
@@ -553,15 +548,8 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
-        if (ruler_ && !(rulCtr++ & 0x1))
+        if (ruler_ && !(rulerCtr++ & 0x1))
             rulPt1 = mappedPos(event);
-        // это для отмены перемещения
-        shUndoPos.clear();
-        auto items { scene()->items() };
-        shUndoPos.reserve(items.size());
-        for (auto item : items)
-            if (item->type() == GiType::ShHandler)
-                shUndoPos.emplace(item, item->pos());
 
         if (auto item { scene()->itemAt(mapToScene(event->pos()), transform()) }; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
@@ -606,42 +594,6 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     } else {
         QGraphicsView::mouseReleaseEvent(event);
         emit mouseClickL(mappedPos(event));
-        auto shUndoPosTmp { shUndoPos };
-        if (shUndoPos.size()) {
-            for (auto [item, pos] : shUndoPos)
-                if (item->pos() == pos)
-                    shUndoPosTmp.erase(item);
-
-            class ShapeMoveCommand : public QUndoCommand {
-            public:
-                ShapeMoveCommand(const MovedShapesMap& shUndoPos, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
-                    : graphicsScene { graphicsScene }
-                    , shUndoPos { shUndoPos } {
-                    setText("Moved Shapes");
-                    shRedoPos.reserve(shUndoPos.size());
-                    for (auto [item, pos] : shUndoPos)
-                        shRedoPos.emplace(item, item->pos());
-                }
-
-                ~ShapeMoveCommand() { }
-
-                void undo() override {
-                    for (auto [item, pos] : shUndoPos)
-                        item->setPos(pos);
-                }
-
-                void redo() override {
-                    for (auto [item, pos] : shRedoPos)
-                        item->setPos(pos);
-                }
-
-            private:
-                QGraphicsScene* const graphicsScene;
-                const MovedShapesMap shUndoPos;
-                MovedShapesMap shRedoPos;
-            };
-            App::mainWindow()->undoStack().push(new ShapeMoveCommand(shUndoPosTmp, scene()));
-        }
     }
 }
 
@@ -652,7 +604,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
     hRuler->setCursorPos(event->pos());
     point = mappedPos(event);
     //    if (event->button() == Qt::RightButton)
-    if (ruler_ && rulCtr & 0x1)
+    if (ruler_ && rulerCtr & 0x1)
         rulPt2 = point;
 
     emit mouseMove(point);
@@ -665,7 +617,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     static std::unordered_map<int, int> gridLinesX, gridLinesY;
     gridLinesX.clear(), gridLinesY.clear();
     auto draw = [&](const auto sc) {
-        qreal y, x;
+        double y, x;
         if (sc >= 1.0) {
             int top = floor(rect.top());
             int left = floor(rect.left());
