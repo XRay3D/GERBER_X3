@@ -63,14 +63,16 @@ void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // группово�
     const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
     for (auto& [shape, hPos] : hInitPos) {
         for (size_t i = 0, e = hPos.size(); i < e; ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(hPos[i] + dp);
+            shape->handlers[i]->setPos(hPos[i] + dp);
         shape->redraw();
     }
 }
 
 void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
-
     QGraphicsItem::mousePressEvent(event);
+    if (currentHandler)
+        return;
+    currentHandler = {};
     hInitPos.clear();
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
@@ -103,12 +105,12 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), { Qt::CheckStateRole });
+        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
     }
     return GraphicsItem::itemChange(change, value);
 }
 
-void Shape::updateOtherHandlers(Handle* h) { currentHandler = h, redraw(); }
+void Shape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(); }
 
 void Shape::changeColor() {
     //    animation.setStartValue(bodyColor_);

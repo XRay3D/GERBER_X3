@@ -63,10 +63,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 add_subdirectory(profile)
 add_subdirectory(pocketoffset)
 
-#add_subdirectory(drill)
-#add_subdirectory(hatching)
-#add_subdirectory(pocketraster)
-#add_subdirectory(thermal)
-#add_subdirectory(voroni)
+add_subdirectory(drill)
+add_subdirectory(hatching)
+add_subdirectory(pocketraster)
+add_subdirectory(thermal)
+add_subdirectory(voroni)
 
 

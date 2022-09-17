@@ -48,9 +48,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-#add_subdirectory(dxf)
-#add_subdirectory(excellon)
-#add_subdirectory(gerber)
+add_subdirectory(dxf)
+add_subdirectory(excellon)
+add_subdirectory(gerber)
 #add_subdirectory(hpgl)
 
 

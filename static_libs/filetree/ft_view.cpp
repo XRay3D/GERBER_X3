@@ -201,55 +201,59 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
-            menu.addSeparator();
-            menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
-                QDialog d(this);
-                d.setWindowTitle(tr("Transform"));
-                QLabel la("A:", &d);
-                QLabel lx("X:", &d);
-                QLabel ly("Y:", &d);
-                DoubleSpinBox dsbxA(&d);
-                DoubleSpinBox dsbxX(&d);
-                DoubleSpinBox dsbxY(&d);
-                dsbxA.setRange(-360, +360);
-                dsbxX.setRange(-1000, +1000);
-                dsbxY.setRange(-1000, +1000);
-                QFormLayout layout(&d);
-                layout.addRow(&la, &dsbxA);
-                layout.addRow(&lx, &dsbxX);
-                layout.addRow(&ly, &dsbxY);
-                // QPushButton button(tr("Apply"), &d);
-                // layout.addRow(new QWidget(&d), &button);
-                d.resize({0, 0});
+            auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+            if (file) {
+                menu.addSeparator();
+                menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
+                    QDialog d(this);
+                    d.setWindowTitle(tr("Transform"));
+                    QLabel la("Angle:", &d);
+                    QLabel lx("Pos X:", &d);
+                    QLabel ly("Pos Y:", &d);
+                    DoubleSpinBox dsbxA(&d);
+                    DoubleSpinBox dsbxX(&d);
+                    DoubleSpinBox dsbxY(&d);
+                    dsbxA.setRange(-360, +360);
+                    dsbxX.setRange(-1000, +1000);
+                    dsbxY.setRange(-1000, +1000);
+                    QFormLayout layout(&d);
+                    layout.addRow(&la, &dsbxA);
+                    layout.addRow(&lx, &dsbxX);
+                    layout.addRow(&ly, &dsbxY);
+                    // QPushButton button(tr("Apply"), &d);
+                    // layout.addRow(new QWidget(&d), &button);
+                    d.resize({0, 0});
 
-                auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+                    auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
 
-                //                if (file->itemGroup()->size()) {
-                auto transform = file->transform();
-                dsbxA.setValue(qRadiansToDegrees(asin(transform.m12())));
-                transform = transform.rotateRadians(-transform.m12());
-                dsbxX.setValue(transform.dx());
-                dsbxY.setValue(transform.dy());
-                //                }
+                    //                if (file->itemGroup()->size()) {
+                    auto transform = file->transform();
+                    dsbxA.setValue(qRadiansToDegrees(asin(transform.m12())));
+                    transform = transform.rotateRadians(-transform.m12());
+                    dsbxX.setValue(transform.dx());
+                    dsbxY.setValue(transform.dy());
+                    //                }
 
-                auto setTransform = [&](double) {
-                    QTransform transform;
-                    transform.translate(dsbxX.value(), dsbxY.value());
-                    transform.rotate(dsbxA.value());
-                    for (auto&& index : selectedRows) {
-                        auto file = App::project()->file(index.data(FileTree::Id).toInt());
-                        file->setTransform(transform);
-                    }
-                };
+                    auto setTransform = [&](double) {
+                        QTransform transform;
+                        transform.translate(dsbxX.value(), dsbxY.value());
+                        transform.rotate(dsbxA.value());
+                        for (auto&& index : selectedRows) {
+                            auto file = App::project()->file(index.data(FileTree::Id).toInt());
+                            if (file)
+                                file->setTransform(transform);
+                        }
+                    };
 
-                connect(&dsbxA, &QDoubleSpinBox::valueChanged, setTransform);
-                connect(&dsbxX, &QDoubleSpinBox::valueChanged, setTransform);
-                connect(&dsbxY, &QDoubleSpinBox::valueChanged, setTransform);
-                // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
-                // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
+                    connect(&dsbxA, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxX, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxY, &QDoubleSpinBox::valueChanged, setTransform);
+                    // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
+                    // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
 
-                d.exec();
-            });
+                    d.exec();
+                });
+            }
         }
     }
 

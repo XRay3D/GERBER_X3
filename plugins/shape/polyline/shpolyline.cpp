@@ -27,6 +27,7 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
     handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[1]->setPos(pt1);
+    handlers[2]->setPos(pt1);
     handlers[3]->setPos(pt2);
 
     redraw();
@@ -78,7 +79,7 @@ void PolyLine::redraw() {
 
     Path& path = paths_.front();
     path.clear();
-    for (size_t i = 1, e = handlers.size(); i < e; ++i) {
+    for (size_t i {1}, e = handlers.size(); i < e; ++i) {
         if (handlers[i]->hType() == Handle::Corner)
             path.emplace_back((handlers[i]->pos()));
     }
@@ -93,8 +94,8 @@ void PolyLine::redraw() {
         handlers[0]->setVisible(true);
     } else
         handlers[0]->setVisible(false);
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString PolyLine::name() const { return QObject::tr("Line"); }
@@ -102,29 +103,24 @@ QString PolyLine::name() const { return QObject::tr("Line"); }
 QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
 
 void PolyLine::setPt(const QPointF& pt) {
-    handlers[handlers.size() - 2]->QGraphicsItem::setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
-    handlers.back()->Handle::setPos(pt);
-    redraw();
+    handlers[handlers.size() - 2]->setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
+    handlers.back()->setPos(pt);
+    updateOtherHandlers(nullptr);
 }
 
 bool PolyLine::addPt(const QPointF& pt) {
-    Handle* h1 = handlers.back().get();
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Adder));
-
-    Handle* h2 = handlers.back().get();
-    handlers.back()->QGraphicsItem::setPos(pt);
-
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.back()->QGraphicsItem::setPos(pt);
-    h2->QGraphicsItem::setPos(QLineF(h1->pos(), pt).center());
-
-    redraw();
+    auto pos = handlers.back()->pos();
+    auto adder = handlers.emplace_back(std::make_unique<Handle>(this, Handle::Adder)).get();
+    handlers.emplace_back(std::make_unique<Handle>(this))->setPos(pt);
+    adder->setPos(QLineF(pos, pt).center());
+    updateOtherHandlers(nullptr);
     return !closed();
 }
 
-bool PolyLine::closed() { return handlers[1]->pos() == handlers.back()->pos(); }
+bool PolyLine::closed() const { return handlers[1]->pos() == handlers.back()->pos(); }
 
 QPointF PolyLine::centroid() {
+    return {};
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area
@@ -149,6 +145,7 @@ QPointF PolyLine::centroid() {
 }
 
 QPointF PolyLine::centroidFast() {
+    return {};
     QPointF centroid;
     double signedArea = 0.0;
     double a = 0.0; // Partial signed area

@@ -74,12 +74,13 @@ protected:
     // QGraphicsItem interface
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // Shape interface
-    virtual void updateOtherHandlers(Handle* handler);
+    virtual void updateOtherHandlers(Handle* handler, int mode = {});
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
     virtual Qt::ItemFlags flags(const QModelIndex& index) const;
