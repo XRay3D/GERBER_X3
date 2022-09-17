@@ -17,7 +17,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QObject>
-
+#include <atomic>
 namespace Shapes {
 class Node;
 class Shape;
@@ -25,6 +25,7 @@ class Shape;
 class Plugin : public QObject {
     Q_OBJECT
 
+    //    std::atomic<Shape*> item {};
     Shape* item {};
 
 public:
@@ -35,14 +36,13 @@ public:
     void updPoint(const QPointF& point);
     void finalizeShape();
 
-    [[nodiscard]] virtual QIcon icon() const = 0;
+    virtual QIcon icon() const = 0;
     [[nodiscard]] virtual Shape* createShape(const QPointF& point = {}) const = 0;
-    [[nodiscard]] virtual int type() const = 0;
+    virtual int type() const = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);
 
     QString folderName() const;
-
     const QJsonObject& info() const;
     void setInfo(const QJsonObject& info);
 

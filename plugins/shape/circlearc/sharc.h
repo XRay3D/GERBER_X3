@@ -19,7 +19,7 @@ namespace Shapes {
 class Arc final : public Shape {
 public:
     explicit Arc(QPointF center = {}, QPointF pt1 = {}, QPointF pt2 = {});
-    ~Arc();
+    ~Arc() override = default;
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShCirArc; }

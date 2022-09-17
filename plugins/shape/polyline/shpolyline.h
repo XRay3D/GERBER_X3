@@ -30,7 +30,7 @@ public:
 
     void setPt(const QPointF& pt) override;
     bool addPt(const QPointF& pt) override;
-    bool closed();
+    bool closed()const;
 
 private:
     QPointF centroid();
