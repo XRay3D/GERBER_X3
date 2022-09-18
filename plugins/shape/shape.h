@@ -57,7 +57,7 @@ public:
     // Shape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
-    virtual bool addPt(const QPointF& point) { return false; };
+    virtual bool addPt(const QPointF& point) { return currentHandler = nullptr, false; };
     virtual void setPt(const QPointF& point) = 0;
     Node* node() const;
     void finalize() { isFinal = true; }

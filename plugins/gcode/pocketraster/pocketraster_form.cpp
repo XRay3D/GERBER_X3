@@ -47,7 +47,7 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->rbInside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
 
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
+    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
 
     connect(leName, &QLineEdit::textChanged, this, &PocketRasterForm::onNameTextChanged);
 
@@ -72,7 +72,7 @@ PocketRasterForm::~PocketRasterForm() {
 }
 
 void PocketRasterForm::createFile() {
-    const auto tool {ui->toolHolder->tool()};
+    const auto tool {ui->toolHolder1->tool()};
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -145,7 +145,7 @@ void PocketRasterForm::createFile() {
 }
 
 void PocketRasterForm::updateName() {
-    const auto& tool {ui->toolHolder->tool()};
+    const auto& tool {ui->toolHolder1->tool()};
     if (tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);

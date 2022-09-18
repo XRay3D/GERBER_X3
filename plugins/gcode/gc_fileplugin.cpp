@@ -15,7 +15,7 @@
 #include "file.h"
 #include "ft_view.h"
 #include "gc_file.h"
-#include "gc_node.h"
+//#include "gc_node.h"
 
 #include <QMessageBox>
 #include <QtWidgets>

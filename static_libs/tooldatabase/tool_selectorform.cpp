@@ -26,6 +26,10 @@ ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
     , counter {static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
     , toolFileName_ {App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
+    qDebug() << __FUNCTION__ << toolFileName_;
+    qDebug() << __FUNCTION__ << App::settingsPath();
+    qDebug() << __FUNCTION__ << parent->objectName();
+    qDebug() << __FUNCTION__ << QString::number(counter);
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");

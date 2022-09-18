@@ -214,13 +214,13 @@ private:
             return theta_normalized;
     }
 
-    Path drawCenterLine(const QList<double>& mod);
-    Path drawCircle(const QList<double>& mod);
-    Path drawOutlineCustomPolygon(const QList<double>& mod);
-    Path drawOutlineRegularPolygon(const QList<double>& mod);
-    Path drawVectorLine(const QList<double>& mod);
-    void drawMoire(const QList<double>& mod);
-    void drawThermal(const QList<double>& mod);
+    Path drawCenterLine(const mvector<double>& mod);
+    Path drawCircle(const mvector<double>& mod);
+    Path drawOutlineCustomPolygon(const mvector<double>& mod);
+    Path drawOutlineRegularPolygon(const mvector<double>& mod);
+    Path drawVectorLine(const mvector<double>& mod);
+    void drawMoire(const mvector<double>& mod);
+    void drawThermal(const mvector<double>& mod);
 };
 /////////////////////////////////////////////////////
 /// \brief The ApBlock class

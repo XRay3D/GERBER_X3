@@ -381,22 +381,23 @@ void ApMacro::draw() {
     VarMap macroCoefficients {coefficients_};
     mvector<QPair<bool, Path>> items;
     try {
-        for (int i = 0; i < modifiers_.size(); ++i) {
-            QString var(modifiers_[i]);
-            if (var.at(0) == '0') { // Skip Comment
-
+        //        for (int i = 0; i < modifiers_.size(); ++i) {
+        //            QString var(modifiers_[i]);
+        for (QString& var : modifiers_) {
+            if (var.at(0) == '0') // Skip Comment
                 continue;
-            }
 
-            QList<double> mod;
+            mvector<double> mod;
 
             if (var.contains('=')) {
                 QList<QString> stringList = var.split('=');
                 macroCoefficients[stringList.first()] = MathParser(&macroCoefficients).parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
             } else {
-                for (QString& var2 : var.split(',')) {
-                    mod.push_back(var2.contains('$') ? MathParser(&macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)) : var2.toDouble());
+                for (auto&& var2 : var.split(',')) {
+                    mod.push_back(var2.contains('$') ?
+                            MathParser(&macroCoefficients).parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)) :
+                            var2.toDouble());
                 }
             }
 
@@ -477,7 +478,7 @@ void ApMacro::draw() {
     }
 }
 
-Path ApMacro::drawCenterLine(const QList<double>& mod) {
+Path ApMacro::drawCenterLine(const mvector<double>& mod) {
     enum {
         Width = 2,
         Height,
@@ -498,7 +499,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod) {
     return polygon;
 }
 
-Path ApMacro::drawCircle(const QList<double>& mod) {
+Path ApMacro::drawCircle(const mvector<double>& mod) {
     enum {
         Diameter = 2,
         CenterX,
@@ -518,7 +519,7 @@ Path ApMacro::drawCircle(const QList<double>& mod) {
     return polygon;
 }
 
-void ApMacro::drawMoire(const QList<double>& mod) {
+void ApMacro::drawMoire(const mvector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -569,7 +570,7 @@ void ApMacro::drawMoire(const QList<double>& mod) {
     }
 }
 
-Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod) {
+Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         X,
@@ -584,13 +585,13 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod) {
             static_cast<cInt>(mod[X + j * 2] * uScale),
             static_cast<cInt>(mod[Y + j * 2] * uScale)));
 
-    if (mod.size() > (num * 2 + 3) && mod.last() > 0)
-        RotatePath(polygon, mod.last());
+    if (mod.size() > (num * 2 + 3) && mod.back() > 0)
+        RotatePath(polygon, mod.back());
 
     return polygon;
 }
 
-Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod) {
+Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         CenterX,
@@ -624,7 +625,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod) {
     return polygon;
 }
 
-void ApMacro::drawThermal(const QList<double>& mod) {
+void ApMacro::drawThermal(const mvector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -663,7 +664,7 @@ void ApMacro::drawThermal(const QList<double>& mod) {
     }
 }
 
-Path ApMacro::drawVectorLine(const QList<double>& mod) {
+Path ApMacro::drawVectorLine(const mvector<double>& mod) {
     enum {
         Width = 2,
         StartX,

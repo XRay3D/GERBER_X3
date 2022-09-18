@@ -218,7 +218,7 @@
     </layout>
    </item>
    <item row="0" column="0" colspan="3">
-    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
+    <widget class="ToolSelectorForm" name="toolHolder1" native="true"/>
    </item>
    <item row="6" column="2">
     <widget class="QComboBox" name="cbxPass">

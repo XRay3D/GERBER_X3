@@ -21,20 +21,6 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-find_package(Boost)
-#if(Boost_FOUND)
-#    include_directories(${INCLUDE_DIRECTORIES} ${Boost_INCLUDE_DIRS})
-#    add_definitions(-D_USE_BOOST_)
-#endif()
-
-if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIR})
-    message(${Boost_INCLUDE_DIR})
-    add_definitions( "-D_USE_BOOST_" )
-else()
-    message("Boost not found!!!" FATAL_ERROR)
-endif()
-
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)

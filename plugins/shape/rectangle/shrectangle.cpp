@@ -95,8 +95,6 @@ QString Rectangle::name() const { return QObject::tr("Rectangle"); }
 QIcon Rectangle::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
 void Rectangle::setPt(const QPointF& pt) {
-    if (handlers[Point3]->pos() == pt)
-        return;
     handlers[Point3]->setPos(pt);
     updateOtherHandlers(handlers[Point3].get());
 }
