@@ -99,7 +99,7 @@ public:
     static auto* layoutFrames() { return app_->layoutFrames_; }
     static auto* mainWindow() { return app_->mainWindow_; }
     static auto* project() { return app_->project_; }
-    static auto* settingsPath() { return &app_->settingsPath_; }
+    static auto& settingsPath() { return app_->settingsPath_; }
     static auto* splashScreen() { return app_->splashScreen_; }
     static auto* undoStack() { return app_->undoStack_; }
 

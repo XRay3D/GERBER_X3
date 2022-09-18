@@ -34,9 +34,9 @@ public:
     void setRadius(double radius);
 
     enum {
-        Center,
         Point1,
         Point2,
+        Center,
         PtCount
     };
 

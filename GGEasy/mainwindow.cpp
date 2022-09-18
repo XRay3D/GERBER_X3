@@ -114,8 +114,8 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 100;
         int k = 100;
 
-        if (0) {
-            QDir dir(R"(C:\Users\X-Ray\YandexDisk\Табуретка2\Фрагмент3_)");
+        if (1) {
+            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber_file_format_examples 20181113)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget* parent)
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (1)
+        if (0)
             //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/Downloads/ФАЛЬШПАНЕЛИ РАСХОДОМЕТРИЯ-dxf/725327.003 Панель EL-SV-11-R-AG-измен.dxf)"); });
             QTimer::singleShot(i += k, [this] { loadFile(R"(D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf)"); });
 

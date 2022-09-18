@@ -10,11 +10,12 @@
  ********************************************************************************/
 #pragma once
 
-#include "../tooldatabase/tool.h"
-#include "app.h"
 #include "ft_view.h"
-#include "myclipper.h"
-#include "settings.h"
+#include "plugindata.h"
+//#include "settings.h"
+//#include "app.h"
+//#include "myclipper.h"
+//#include "tool.h"
 
 #include <QJsonObject>
 #include <QMenu>
@@ -35,12 +36,12 @@ public:
     virtual void writeSettings(MySettings& settings) = 0;
 };
 
-class FilePlugin : public QObject {
+class FilePlugin : public QObject, public PluginData {
     Q_OBJECT
 
 public:
     explicit FilePlugin(QObject* parent = nullptr)
-        : QObject {parent} { App app; }
+        : QObject {parent} { }
     virtual ~FilePlugin() = default;
 
     virtual bool thisIsIt(const QString& fileName) = 0;
@@ -66,9 +67,6 @@ public:
 
     virtual void updateFileModel([[maybe_unused]] FileInterface* file) {};
 
-    const QJsonObject& info() const { return info_; }
-    void setInfo(const QJsonObject& info) { info_ = info; }
-
 signals:
     void fileError(const QString& fileName, const QString& error);
     void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning);
@@ -77,9 +75,6 @@ signals:
 
 public slots:
     virtual FileInterface* parseFile(const QString& fileName, int type) = 0;
-
-protected:
-    QJsonObject info_;
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.FilePlugin"

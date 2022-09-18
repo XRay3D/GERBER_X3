@@ -236,8 +236,7 @@ void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         void redo() override {
             handle->setPos(redoPos.pos);
             handle->type_ = redoPos.type;
-            handle->shape->currentHandler = handle;
-            handle->shape->redraw();
+            handle->shape->updateOtherHandlers(handle);
         }
 
     private:

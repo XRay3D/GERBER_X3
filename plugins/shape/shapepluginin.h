@@ -11,6 +11,7 @@
 #pragma once
 
 #include "ft_view.h"
+#include "plugindata.h"
 #include "shape.h"
 
 #include <QJsonObject>
@@ -22,7 +23,7 @@ namespace Shapes {
 class Node;
 class Shape;
 
-class Plugin : public QObject {
+class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
     //    std::atomic<Shape*> item {};
@@ -43,14 +44,11 @@ public:
     void createMainMenu(QMenu& menu, FileTree::View* tv);
 
     QString folderName() const;
-    const QJsonObject& info() const;
-    void setInfo(const QJsonObject& info);
 
 signals:
     void actionUncheck(bool = false);
 
 protected:
-    QJsonObject info_;
     enum { IconSize = 24 };
 };
 

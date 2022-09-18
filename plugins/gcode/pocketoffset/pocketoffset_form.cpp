@@ -28,7 +28,7 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     , ui(new Ui::PocketOffsetForm)
     , names {tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
-    ui->toolHolder->label()->setText("Tool 1:");
+    ui->toolHolder1->label()->setText("Tool 1:");
     ui->toolHolder2->label()->setText("Tool 2:");
     ui->toolHolder3->label()->setText("Tool 3:");
     ui->toolHolder4->label()->setText("Tool 4:");
@@ -53,12 +53,14 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
     connect(ui->sbxToolQty, qOverload<int>(&QSpinBox::valueChanged), this, &PocketOffsetForm::rb_clicked);
 
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
+    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
     connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
 
     connect(leName, &QLineEdit::textChanged, this, &PocketOffsetForm::onNameTextChanged);
+
+    connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &PocketOffsetForm::onSbxStepsValueChanged);
 
     //
 
@@ -81,7 +83,7 @@ PocketOffsetForm::~PocketOffsetForm() {
 
 void PocketOffsetForm::createFile() {
     const Tool tool[] {
-        ui->toolHolder->tool(),
+        ui->toolHolder1->tool(),
         ui->toolHolder2->tool(),
         ui->toolHolder3->tool(),
         ui->toolHolder4->tool()};
@@ -175,7 +177,7 @@ void PocketOffsetForm::createFile() {
     createToolpath();
 }
 
-void PocketOffsetForm::on_sbxSteps_valueChanged(int arg1) {
+void PocketOffsetForm::onSbxStepsValueChanged(int arg1) {
     ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
 }
 
@@ -188,7 +190,7 @@ void PocketOffsetForm::updatePixmap() {
 }
 
 void PocketOffsetForm::rb_clicked() {
-    const auto tool {ui->toolHolder->tool()};
+    const auto tool {ui->toolHolder1->tool()};
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;

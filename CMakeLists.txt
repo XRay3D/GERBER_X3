@@ -44,6 +44,15 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
+find_package(Boost)
+if (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIR})
+    message(${Boost_INCLUDE_DIR})
+    add_definitions( "-D_USE_BOOST_" )
+else()
+    message("Boost not found!!!" FATAL_ERROR)
+endif()
+
 include_directories(
     GGEasy
     external_dependencies/compile-time-regular-expressions/single-header

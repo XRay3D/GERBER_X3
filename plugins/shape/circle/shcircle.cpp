@@ -60,8 +60,6 @@ QString Circle::name() const { return QObject::tr("Circle"); }
 QIcon Circle::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Circle::setPt(const QPointF& pt) {
-    if (handlers[Point1]->pos() == pt)
-        return;
     handlers[Point1]->setPos(pt);
     redraw();
 }

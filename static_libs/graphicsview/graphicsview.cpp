@@ -60,18 +60,18 @@ void setCursor(QWidget* w) {
     p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
     p.drawLine(0, Mid, Size, Mid);
     p.drawLine(Mid, 0, Mid, Size);
-    w->setCursor(QCursor { cursor, Mid, Mid });
+    w->setCursor(QCursor {cursor, Mid, Mid});
 }
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler { new Ruler(Qt::Horizontal, this) }
-    , vRuler { new Ruler(Qt::Vertical, this) }
-    , gridLayout { new QGridLayout(this) } {
+    , hRuler {new Ruler(Qt::Horizontal, this)}
+    , vRuler {new Ruler(Qt::Vertical, this)}
+    , gridLayout {new QGridLayout(this)} {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
-    setOptimizationFlag(DontAdjustForAntialiasing);
+        setOptimizationFlag(DontAdjustForAntialiasing);
     setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
@@ -248,9 +248,9 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
 
 void GraphicsView::setScale(double s) noexcept {
     const auto trf(transform());
-    setTransform({ +s /*11*/, trf.m12(), trf.m13(),
+    setTransform({+s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
-        /*      */ trf.m31(), trf.m32(), trf.m33() });
+        /*      */ trf.m31(), trf.m32(), trf.m33()});
 }
 
 double GraphicsView::getScale() noexcept { return transform().m11(); }
@@ -277,13 +277,13 @@ QRectF GraphicsView::getViewRect() {
     QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
 
-    QRectF visible_scene_rect(transform().inverted().mapRect({ topLeft, bottomRight }));
+    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
 
     return visible_scene_rect;
 }
 
 QRectF GraphicsView::getSelectedBoundingRect() {
-    auto selectedItems { scene()->selectedItems() };
+    auto selectedItems {scene()->selectedItems()};
 
     if (selectedItems.isEmpty())
         return {};
@@ -366,44 +366,49 @@ void GraphicsView::updateRuler() {
 
 void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
 
-    QLineF line { rulPt2, rulPt1 };
+    QLineF line {rulPt2, rulPt1};
     const double length = line.length();
     if (qFuzzyIsNull(length))
         return;
-    const QRectF rect(QPointF(std::min(rulPt1.x(), rulPt2.x()), std::min(rulPt1.y(), rulPt2.y())), QPointF(std::max(rulPt1.x(), rulPt2.x()), std::max(rulPt1.y(), rulPt2.y())));
+    //    const QRectF rect(
+    //        QPointF(std::min(rulPt1.x(), rulPt2.x()), std::min(rulPt1.y(), rulPt2.y())),
+    //        QPointF(std::max(rulPt1.x(), rulPt2.x()), std::max(rulPt1.y(), rulPt2.y())));
+    const QRectF rect {rulPt1, rulPt2};
     const double angle = line.angle();
 
-    QFont font;
-    //    font.setPixelSize(16);
     const auto text {
-        QString(App::settings().inch() ? "  ∆X: %1 in\n"
-                                         "  ∆Y: %2 in\n"
-                                         "  ∆/: %3 in\n"
-                                         "  Area: %4 in²\n"
-                                         "  Angle: %5°"
-                                       : "  ∆X: %1 mm\n"
-                                         "  ∆Y: %2 mm\n"
-                                         "  ∆/: %3 mm\n"
-                                         "  Area: %4 mm²\n"
-                                         "  Angle: %5°")
-            .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-            .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-            .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
-            .arg((rect.width() / (App::settings().inch() ? 25.4 : 1.0)) * (rect.height() / (App::settings().inch() ? 25.4 : 1.0)), 4, 'f', 3, '0')
-            .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+        App::settings().inch() ?
+            QString(" ∆X: %1 in\n"
+                    " ∆Y: %2 in\n"
+                    " ∆/: %3 in\n"
+                    " Area: %4 in²\n"
+                    " Angle: %5°")
+                .arg(rect.width() / 25.4, 4, 'f', 3, '0')
+                .arg(rect.height() / 25.4, 4, 'f', 3, '0')
+                .arg(length / 25.4, 4, 'f', 3, '0')
+                .arg((rect.width() / 25.4) * (rect.height() / 25.4), 4, 'f', 3, '0')
+                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0') :
+            QString(
+                " ∆X: %1 mm\n"
+                " ∆Y: %2 mm\n"
+                " ∆/: %3 mm\n"
+                " Area: %4 mm²\n"
+                " Angle: %5°")
+                .arg(rect.width(), 4, 'f', 3, '0')
+                .arg(rect.height(), 4, 'f', 3, '0')
+                .arg(length, 4, 'f', 3, '0')
+                .arg(rect.width() * rect.height(), 4, 'f', 3, '0')
+                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+
     };
 
-    const auto textRect { QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text) };
-
     const double scaleFactor = App::graphicsView()->scaleFactor();
+    const double crossLength = 20.0 * scaleFactor;
 
     painter->setPen(QPen(Qt::green, 0.0));
     // draw rect
     //    painter->setBrush(QColor(127, 127, 127, 100));
     //    painter->drawRect(rect);
-
-    const double crossLength = 20.0 * scaleFactor;
-
     // draw cross
     auto drawCross = [&](auto pt) {
         painter->drawLine(pt - QPointF(0, crossLength), pt + QPointF(0, crossLength));
@@ -423,20 +428,20 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->drawLine(line);
 
     // draw text
-    auto pt { rect.center() };
-    pt.rx() -= textRect.width() * 0.5 * scaleFactor;
-    pt.ry() += textRect.height() * 0.5 * scaleFactor;
-
-    pt.rx() = std::clamp(pt.x(), rect_.left(), rect_.right() - textRect.width() * scaleFactor);
-    pt.ry() = std::clamp(pt.y(), rect_.top() + textRect.height() * scaleFactor, rect_.bottom());
+    const auto size {QFontMetrics(font()).size(Qt::AlignLeft | Qt::AlignJustify | Qt::TextDontClip, text)};
+    auto pt {rect.center()};
+    pt.rx() -= size.width() * 0.5 * scaleFactor;
+    pt.ry() += size.height() * 0.5 * scaleFactor;
+    pt.rx() = std::clamp(pt.x(), rect_.left(), rect_.right() - size.width() * scaleFactor);
+    pt.ry() = std::clamp(pt.y(), rect_.top() + size.height() * scaleFactor, rect_.bottom());
     painter->translate(pt);
     painter->scale(scaleFactor, -scaleFactor);
-    painter->setFont(font);
+    painter->setFont(font());
 
     painter->setRenderHint(QPainter::TextAntialiasing);
-    painter->fillRect(textRect, QColor { 0, 0, 0, 127 });
+    painter->fillRect(QRect {{}, size}, QColor {0, 0, 0, 127});
     painter->setBrush(Qt::white);
-    painter->drawText(textRect, Qt::AlignLeft, text);
+    painter->drawText(QRect {{}, size}, Qt::AlignLeft, text);
 }
 
 class name : public QGraphicsItem {
@@ -450,7 +455,7 @@ class name : public QGraphicsItem {
 
 public:
     name(QPointF pos, Qt::Orientation orientation)
-        : orientation { orientation } {
+        : orientation {orientation} {
         setFlags(ItemIsSelectable | ItemIsMovable);
         orientation == Qt::Horizontal ? setPos(0, pos.y()) : setPos(pos.x(), 0);
     }
@@ -460,12 +465,12 @@ public:
     // QGraphicsItem interface
     QRectF boundingRect() const override {
         qDebug(__FUNCTION__);
-        auto sceneRect { scene()->sceneRect() };
+        auto sceneRect {scene()->sceneRect()};
         auto k = 2 * scaleFactor();
         if (orientation == Qt::Horizontal) {
-            return { sceneRect.left(), -k, sceneRect.width(), k * 2 };
+            return {sceneRect.left(), -k, sceneRect.width(), k * 2};
         } else {
-            return { -k, sceneRect.top(), k * 2, sceneRect.height() };
+            return {-k, sceneRect.top(), k * 2, sceneRect.height()};
         }
     }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override {
@@ -481,7 +486,7 @@ protected:
 
 void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData { event->mimeData() };
+    auto mimeData {event->mimeData()};
 
     if (mimeData->hasFormat(Ruler::mimeType()))
         event->acceptProposedAction();
@@ -495,7 +500,7 @@ void GraphicsView::dragMoveEvent(QDragMoveEvent* event) { event->acceptProposedA
 
 void GraphicsView::dropEvent(QDropEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData { event->mimeData() };
+    auto mimeData {event->mimeData()};
     for (QUrl& var : mimeData->urls())
         emit fileDroped(var.path().remove(0, 1));
 
@@ -551,12 +556,12 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         if (ruler_ && !(rulerCtr++ & 0x1))
             rulPt1 = mappedPos(event);
 
-        if (auto item { scene()->itemAt(mapToScene(event->pos()), transform()) }; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
+        if (auto item {scene()->itemAt(mapToScene(event->pos()), transform())}; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
             mimeData->setText(Ruler::mimeType());
             mimeData->setData(Ruler::mimeType(), QByteArray::fromRawData(reinterpret_cast<const char*>(item), sizeof(item)));
 
-            QPixmap pixmapIcon { Ruler::Breadth, Ruler::Breadth };
+            QPixmap pixmapIcon {Ruler::Breadth, Ruler::Breadth};
             pixmapIcon.fill(Qt::magenta);
 
             QDrag* drag = new QDrag(this);
@@ -613,7 +618,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     const double scale = App::settings().gridStep(hRuler->zoom());
-    const double lineWidth { 0 }; //{ 2.0 / transform().m11() };
+    const double lineWidth {0}; //{ 2.0 / transform().m11() };
     static std::unordered_map<int, int> gridLinesX, gridLinesY;
     gridLinesX.clear(), gridLinesY.clear();
     auto draw = [&](const auto sc) {
@@ -639,7 +644,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     };
 
     const QColor color[4] {
-        { 255, 0, 0, 127 }, // рисовние нулей красным
+        {255, 0, 0, 127}, // рисовние нулей красным
         App::settings().guiColor(GuiColors::Grid01),
         App::settings().guiColor(GuiColors::Grid05),
         App::settings().guiColor(GuiColors::Grid10),
@@ -667,14 +672,14 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     for (int colorIndex {}; auto&& vec : lines) {
-        painter->setPen({ color[colorIndex++], lineWidth });
+        painter->setPen({color[colorIndex++], lineWidth});
         painter->drawLines(vec.data(), vec.size());
     }
 
-    auto k { 100 / transform().m11() };
-    painter->setPen({ Qt::red, 0.0 /*2.0 / transform().m11()*/ });
-    painter->drawLine(QLineF { point.x() - k, point.y(), point.x() + k, point.y() });
-    painter->drawLine(QLineF { point.x(), point.y() - k, point.x(), point.y() + k });
+    auto k {100 / transform().m11()};
+    painter->setPen({Qt::red, 0.0 /*2.0 / transform().m11()*/});
+    painter->drawLine(QLineF {point.x() - k, point.y(), point.x() + k, point.y()});
+    painter->drawLine(QLineF {point.x(), point.y() - k, point.x(), point.y() + k});
 
     if (ruler_)
         drawRuller(painter, rect);
@@ -781,16 +786,16 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 
 //    QFont font;
 //    font.setPixelSize(16);
-//    const QString text = QString(App::settings().inch() ? "  ∆X: %1 in\n"
-//                                                          "  ∆Y: %2 in\n"
-//                                                          "  ∆/: %3 in\n"
-//                                                          "  Area: %4 in²\n"
-//                                                          "  Angle: %5°" :
-//                                                          "  ∆X: %1 mm\n"
-//                                                          "  ∆Y: %2 mm\n"
-//                                                          "  ∆/: %3 mm\n"
-//                                                          "  Area: %4 mm²\n"
-//                                                          "  Angle: %5°")
+//    const QString text = QString(App::settings().inch() ? "∆X: %1 in\n"
+//                                                          "∆Y: %2 in\n"
+//                                                          "∆/: %3 in\n"
+//                                                          "Area: %4 in²\n"
+//                                                          "Angle: %5°" :
+//                                                          "∆X: %1 mm\n"
+//                                                          "∆Y: %2 mm\n"
+//                                                          "∆/: %3 mm\n"
+//                                                          "Area: %4 mm²\n"
+//                                                          "Angle: %5°")
 //                             .arg(rect.width() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
 //                             .arg(rect.height() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
 //                             .arg(length / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')

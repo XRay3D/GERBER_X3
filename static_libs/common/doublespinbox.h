@@ -17,58 +17,27 @@
 class DoubleSpinBox : public QDoubleSpinBox {
     //    Q_OBJECT
 public:
-    explicit DoubleSpinBox(QWidget* parent = nullptr)
-        : QDoubleSpinBox(parent) {
-        lineEdit()->installEventFilter(this);
-        setToolTipDuration(0);
-    }
-    void setRange(double min, double max) {
-        QDoubleSpinBox::setRange(min, max);
-        setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
-    }
-    void setMaximum(double max) {
-        QDoubleSpinBox::setMaximum(max);
-        setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
-    }
-    void setMinimum(double min) {
-        QDoubleSpinBox::setMinimum(min);
-        setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
-    }
-    void flicker() {
-        if (qFuzzyIsNull(value()))
-            for (int i = 0, t = 0; i < 3; ++i) {
-                QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::red);
-                QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::normal);
-            }
-    }
+    explicit DoubleSpinBox(QWidget* parent = nullptr);
+    void setRange(double min, double max);
+    void setMaximum(double max);
+    void setMinimum(double min);
+    void flicker();
 
     // QObject interface
-    bool eventFilter(QObject* watched, QEvent* event) override {
-        if (event->type() == QEvent::MouseButtonRelease)
-            lineEdit()->setSelection(0, lineEdit()->text().length() - suffix().length()); //->selectAll();
-        return QDoubleSpinBox::eventFilter(watched, event);
-    }
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    void red() { setStyleSheet("QWidget{ background-color: red; }"); }
-    void normal() { setStyleSheet(""); }
-
+    void red();
+    void normal();
+    mutable QString str;
     // QWidget interface
 protected:
-    void keyPressEvent(QKeyEvent* event) override {
-        //    if (event->key() == Qt::Key_Backspace) {
-        //        QString text(lineEdit()->text());
-        //        int start = lineEdit()->selectionStart();
-        //        text.remove(--start, 1);
-        //        lineEdit()->setText(text);
-        //        lineEdit()->setSelection(start, 100);
-        //        return;
-        //    }
-        if (event->text() == '.' || event->text() == ',') {
-            QKeyEvent ke(event->type(), Qt::Key_Comma, event->modifiers(), QLocale().decimalPoint());
-            QDoubleSpinBox::keyPressEvent(&ke);
-        } else
-            QDoubleSpinBox::keyPressEvent(event);
-        //    lineEdit()->setSelection(lineEdit()->cursorPosition(), 100);
-    }
+    void keyPressEvent(QKeyEvent* event) override;
+
+public:
+    // QAbstractSpinBox interface
+    double valueFromText(const QString& text) const override;
+    QString textFromValue(double value) const override;
+    QValidator::State validate(QString& input, int& pos) const override;
+    void fixup(QString& input) const override;
 };

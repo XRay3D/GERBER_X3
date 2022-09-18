@@ -81,6 +81,13 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
+//    DoubleSpinBox dsbx;
+//    dsbx.resize(500, 50);
+//    dsbx.setRange(-9999, +9999);
+//    dsbx.show();
+//    dsbx.setSuffix(" mm");
+//    return app.exec();
+
     //#ifdef Q_OS_WIN
     //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
     //    if (settings.value("AppsUseLightTheme") == 0) {
@@ -104,10 +111,10 @@ int main(int argc, char** argv) {
 #endif
 
     [[maybe_unused]] App appSingleton;
-    *App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
 
-    if (QDir dir(*App::settingsPath()); !dir.exists())
-        dir.mkpath(*App::settingsPath());
+    if (QDir dir(App::settingsPath()); !dir.exists())
+        dir.mkpath(App::settingsPath());
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 

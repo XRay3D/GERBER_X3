@@ -32,10 +32,6 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
 
 QString Plugin::folderName() const { return QObject::tr("Shapes"); }
 
-const QJsonObject& Plugin::info() const { return info_; }
-
-void Plugin::setInfo(const QJsonObject& info) { info_ = info; }
-
 } // namespace Shapes
 
 #include "moc_shapepluginin.cpp"

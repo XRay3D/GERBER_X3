@@ -30,11 +30,10 @@ Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
     handlers.emplace_back(std::make_unique<Handle>(this));
     handlers.emplace_back(std::make_unique<Handle>(this));
 
-    handlers[Center]->setPos(center);
     handlers[Point1]->setPos(pt1);
     handlers[Point2]->setPos(pt2);
+    handlers[Center]->setPos(center);
 
-    currentHandler = handlers[Point2].get();
     redraw();
 
     App::graphicsView()->scene()->addItem(this);
@@ -153,19 +152,16 @@ QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
 bool Arc::addPt(const QPointF& pt) {
     if (!ptCtr++) {
-        currentHandler = handlers[Center].get();
-        //        QLineF line(handlers[Point1]->pos(), handlers[Point2]->pos());
-        //        radius_ = line.length() / 2;
-        //        currentHandler->setPos(line.center());
-        redraw();
+        handlers[Point2 + ptCtr].get()->setPos(pt);
+        updateOtherHandlers(handlers[Point2 + ptCtr].get());
         return true;
     }
     return currentHandler = nullptr, false;
 }
 
 void Arc::setPt(const QPointF& pt) {
-    currentHandler->setPos(pt);
-    redraw();
+    handlers[Point2 + ptCtr].get()->setPos(pt);
+    updateOtherHandlers(handlers[Point2 + ptCtr].get());
 }
 
 double Arc::radius() const { return radius_; }

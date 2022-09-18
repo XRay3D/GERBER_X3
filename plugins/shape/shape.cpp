@@ -110,7 +110,7 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
     return GraphicsItem::itemChange(change, value);
 }
 
-void Shape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(); }
+void Shape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
 
 void Shape::changeColor() {
     //    animation.setStartValue(bodyColor_);

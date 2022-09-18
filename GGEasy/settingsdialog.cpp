@@ -151,7 +151,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         button->setIcon(QIcon::fromTheme("folder"));
         button->setMinimumWidth(QFontMetrics(font()).boundingRect(button->text()).width() + 32);
         ui.buttonBox->addButton(button, QDialogButtonBox::ResetRole);
-        connect(button, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl(*App::settingsPath(), QUrl::TolerantMode)); });
+        connect(button, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl(App::settingsPath(), QUrl::TolerantMode)); });
     }
 
     ui.buttonBox->button(QDialogButtonBox::Ok)->setIcon(QIcon::fromTheme("dialog-ok-apply"));
