@@ -117,8 +117,8 @@ double GraphicsItem::scaleFactor() const {
 };
 
 QRectF GraphicsItem::boundingRect() const {
-    // FIXME   if (App::graphicsView()->scene()->boundingRect())
-    //        return shape_.toFillPolygon(transform()).boundingRect();
+    if (App::graphicsView()->boundingRectFl())
+        return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }
 

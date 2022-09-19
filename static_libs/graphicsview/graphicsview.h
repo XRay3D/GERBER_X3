@@ -47,6 +47,7 @@ public:
     void setViewRect(const QRectF& r);
     QRectF getViewRect();
     QRectF getSelectedBoundingRect();
+    bool boundingRectFl() const { return boundingRect_; }
 
 signals:
     void fileDroped(const QString&);
