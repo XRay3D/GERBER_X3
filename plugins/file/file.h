@@ -79,6 +79,30 @@ class FileInterface {
     }
 
 public:
+    struct Transform {
+        double angle {};
+        QPointF translate {};
+        QPointF scale { 1, 1 };
+
+        friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
+            stream << tr.angle << tr.translate << tr.scale;
+            return stream;
+        }
+
+        friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
+            stream >> tr.angle >> tr.translate >> tr.scale;
+            return stream;
+        }
+
+        operator QTransform() const {
+            QTransform t;
+            t.rotate(angle);
+            t.translate(translate.x(), translate.y());
+            t.scale(scale.x(), scale.y());
+            return t;
+        }
+    };
+
     FileInterface()
         : itemGroups_(1, new GiGroup) {
     }
@@ -150,13 +174,14 @@ public:
     const QColor& color() const { return color_; }
     virtual void setColor(const QColor& color) { color_ = color; }
 
-    void setTransform([[maybe_unused]] const QTransform& transform) {
+    void setTransform([[maybe_unused]] const Transform& transform) {
         transform_ = transform;
+        QTransform t { transform };
         for (auto* ig : itemGroups_)
             for (auto* gi : *ig)
-                gi->setTransform(transform);
+                gi->setTransform(t);
     }
-    const QTransform& transform() const { return transform_; }
+    const auto& transform() const { return transform_; }
 
     const int& id() const { return id_; }
     void setId(int id) { id_ = id; }
@@ -185,7 +210,8 @@ protected:
     mutable bool visible_ = false;
     mvector<GiGroup*> itemGroups_;
     mvector<QString> lines_;
-    QTransform transform_;
+    //    QTransform transform_;
+    Transform transform_;
 };
 
 #define FileInterface_iid "ru.xray3d.XrSoft.GGEasy.FileInterface"
