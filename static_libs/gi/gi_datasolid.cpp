@@ -44,6 +44,8 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
+    //    for (auto&& poly : shape_.toFillPolygons())
+    //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
 
     //    pen_.setWidthF(option->state & QStyle::State_Selected

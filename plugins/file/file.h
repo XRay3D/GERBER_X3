@@ -96,8 +96,8 @@ public:
 
         operator QTransform() const {
             QTransform t;
-            t.rotate(angle);
             t.translate(translate.x(), translate.y());
+            t.rotate(angle);
             t.scale(scale.x(), scale.y());
             return t;
         }

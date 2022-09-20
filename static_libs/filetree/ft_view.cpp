@@ -108,7 +108,7 @@ void View::hideOther() {
     QTimer::singleShot(100, [this, rowCount] { emit model_->dataChanged(
                                                    menuIndex_.sibling(0, 0),
                                                    menuIndex_.sibling(rowCount - 1, 0),
-                                                   { Qt::CheckStateRole }); });
+                                                   {Qt::CheckStateRole}); });
 }
 
 void View::closeFile() {
@@ -189,7 +189,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         }
     } else {
         reinterpret_cast<Node*>(menuIndex_.internalId())->menu(menu, this);
-        if (auto selectedRows { selectionModel()->selectedRows().toVector() }; selectedRows.count() > 1) {
+        if (auto selectedRows {selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
             // FIXME rename Action in future.
             menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
@@ -199,7 +199,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             });
         }
         {
-            auto selectedRows { selectionModel()->selectedRows().toVector() };
+            auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
             auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
@@ -207,6 +207,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                     QDialog dialog(this);
+                    dialog.setMaximumSize(0, 0);
                     dialog.setWindowTitle(tr("Transform"));
                     QLabel la("Angle:", &dialog);
                     QLabel lx("Translate X:", &dialog);
@@ -219,20 +220,24 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                     DoubleSpinBox dsbxScX(&dialog);
                     DoubleSpinBox dsbxScY(&dialog);
                     dsbxAng.setRange(-360, +360);
+                    dsbxAng.setSuffix(tr(" °"));
+                    dsbxScX.setRange(-10, +10);
+                    dsbxScY.setRange(-10, +10);
                     dsbxTrX.setRange(-1000, +1000);
+                    dsbxTrX.setSuffix(tr(" mm"));
                     dsbxTrY.setRange(-1000, +1000);
-                    dsbxScX.setRange(-10, +10);
-                    dsbxScX.setRange(-10, +10);
+                    dsbxTrY.setSuffix(tr(" mm"));
                     QFormLayout layout(&dialog);
                     layout.addRow(&la, &dsbxAng);
                     layout.addRow(&lx, &dsbxTrX);
                     layout.addRow(&ly, &dsbxTrY);
                     layout.addRow(&lsx, &dsbxScX);
                     layout.addRow(&lsy, &dsbxScY);
+                    layout.setLabelAlignment(Qt::AlignRight);
 
                     // QPushButton button(tr("Apply"), &d);
                     // layout.addRow(new QWidget(&d), &button);
-                    dialog.resize({ 0, 0 });
+                    dialog.resize({0, 0});
 
                     auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
 
@@ -245,6 +250,12 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                     dsbxScY.setValue(transform.scale.y());
 
                     auto setTransform = [&] {
+                        transform = {
+                            .angle = dsbxAng.value(),
+                            .translate {dsbxTrX.value(), dsbxTrY.value()},
+                            .scale {dsbxScX.value(), dsbxScY.value()},
+                        };
+
                         for (auto&& index : selectedRows) {
                             auto file = App::project()->file(index.data(FileTree::Id).toInt());
                             if (file)
