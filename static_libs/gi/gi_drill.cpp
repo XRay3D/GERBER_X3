@@ -43,7 +43,7 @@ void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
-    painter->drawPolygon(shape_.toFillPolygon());
+    painter->drawPath(shape_);
 
     pen_.setColor(pathColor_);
     painter->strokePath(shape_, pen_);
