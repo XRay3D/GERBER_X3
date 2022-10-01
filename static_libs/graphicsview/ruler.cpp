@@ -17,20 +17,20 @@
 #include "app.h"
 
 #include <QDebug>
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QLabel>
+#include <QMimeData>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTextDocument>
 #include <QTextFormat>
-#include <QtMath>
-
-#include <QDrag>
-#include <QDragEnterEvent>
-#include <QMimeData>
-
-#include <QLabel>
 #include <QWindow>
+#include <QtMath>
+#include <cstring>
 
-static QLabel* createDragLabel(const QString& text, QWidget* parent) {
+static QLabel* createDragLabel(const QString& text, QWidget* parent)
+{
     QLabel* label = new QLabel(text, parent);
     label->setAutoFillBackground(true);
     label->setFrameShape(QFrame::Panel);
@@ -41,8 +41,9 @@ static QLabel* createDragLabel(const QString& text, QWidget* parent) {
 static QString hotSpotMimeDataKey() { return QStringLiteral("application/x-hotspot"); }
 
 Ruler::Ruler(Qt::Orientation rulerType, QWidget* parent)
-    : QWidget {parent}
-    , orientation_ {rulerType} {
+    : QWidget { parent }
+    , orientation_ { rulerType }
+{
     setMouseTracking(mouseTracking);
     setAcceptDrops(true);
 
@@ -51,34 +52,39 @@ Ruler::Ruler(Qt::Orientation rulerType, QWidget* parent)
     // setFont(txtFont);
 }
 
-void Ruler::setOrigin(const double newOrigin) {
+void Ruler::setOrigin(const double newOrigin)
+{
     if (!qFuzzyCompare(origin_, newOrigin)) {
         origin_ = newOrigin;
         update();
     }
 }
 
-void Ruler::setRulerUnit(const double newRulerUnit) {
+void Ruler::setRulerUnit(const double newRulerUnit)
+{
     if (!qFuzzyCompare(rulerUnit_, newRulerUnit)) {
         rulerUnit_ = newRulerUnit;
         update();
     }
 }
 
-void Ruler::setRulerZoom(const double newRulerZoom) {
+void Ruler::setRulerZoom(const double newRulerZoom)
+{
     if (!qFuzzyCompare(rulerZoom_, newRulerZoom)) {
         rulerZoom_ = newRulerZoom;
         update();
     }
 }
 
-void Ruler::setCursorPos(const QPoint newCursorPos) {
+void Ruler::setCursorPos(const QPoint newCursorPos)
+{
     cursorPos = newCursorPos; // this->mapFromGlobal(cursorPos_);
     // cursorPos += QPoint(RulerBreadth, RulerBreadth);
     update();
 }
 
-void Ruler::setMouseTrack(const bool track) {
+void Ruler::setMouseTrack(const bool track)
+{
     if (mouseTracking != track) {
         mouseTracking = track;
         setMouseTracking(mouseTracking);
@@ -86,18 +92,20 @@ void Ruler::setMouseTrack(const bool track) {
     }
 }
 
-void Ruler::mouseMoveEvent(QMouseEvent* event) {
+void Ruler::mouseMoveEvent(QMouseEvent* event)
+{
     QWidget::mouseMoveEvent(event);
     cursorPos = event->pos();
     update();
 }
 
-void Ruler::paintEvent(QPaintEvent* event) {
+void Ruler::paintEvent(QPaintEvent* event)
+{
     Q_UNUSED(event)
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
-    painter.setPen(QPen(Qt::darkGray, 0.0));            // zero width pen is cosmetic pen
-    QRectF rulerRect(rect());                           // We want to work with floating point, so we are considering the rect as QRectF
+    painter.setPen(QPen(Qt::darkGray, 0.0)); // zero width pen is cosmetic pen
+    QRectF rulerRect(rect()); // We want to work with floating point, so we are considering the rect as QRectF
 
     // at first fill the rect
     painter.fillRect(rulerRect, App::settings().guiColor(GuiColors::Background));
@@ -142,7 +150,8 @@ void Ruler::paintEvent(QPaintEvent* event) {
     }
 }
 
-void Ruler::dragEnterEvent(QDragEnterEvent* event) {
+void Ruler::dragEnterEvent(QDragEnterEvent* event)
+{
     //    if (event->mimeData()->hasText()) {
     //        if (event->source() == this) {
     //            event->setDropAction(Qt::MoveAction);
@@ -162,7 +171,8 @@ void Ruler::dragEnterEvent(QDragEnterEvent* event) {
         event->ignore();
 }
 
-void Ruler::dragMoveEvent(QDragMoveEvent* event) {
+void Ruler::dragMoveEvent(QDragMoveEvent* event)
+{
     event->acceptProposedAction();
     //    if (event->mimeData()->hasFormat(mimeType())) {
     //        event->setDropAction(Qt::MoveAction);
@@ -172,7 +182,8 @@ void Ruler::dragMoveEvent(QDragMoveEvent* event) {
     //    }
 }
 
-void Ruler::dropEvent(QDropEvent* event) {
+void Ruler::dropEvent(QDropEvent* event)
+{
     //    if (event->mimeData()->hasFormat(mimeType())) {
     //        QByteArray pieceData = event->mimeData()->data(mimeType());
     //        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
@@ -187,7 +198,7 @@ void Ruler::dropEvent(QDropEvent* event) {
     //    } else {
     //        event->ignore();
     //    }
-    auto mimeData {event->mimeData()};
+    auto mimeData { event->mimeData() };
     if (mimeData->hasText() && mimeData->data(mimeType()).size() == sizeof(void*)) {
         void* ptr {};
         std::memcpy(ptr, mimeData->data(mimeType()).data(), sizeof(ptr));
@@ -229,12 +240,13 @@ void Ruler::dropEvent(QDropEvent* event) {
     //    }
 }
 
-void Ruler::mousePressEvent(QMouseEvent* event) {
+void Ruler::mousePressEvent(QMouseEvent* event)
+{
     QMimeData* mimeData = new QMimeData;
     mimeData->setText(mimeType());
-    mimeData->setData(mimeType(), QByteArray {1, static_cast<char>(orientation_)});
+    mimeData->setData(mimeType(), QByteArray { 1, static_cast<char>(orientation_) });
 
-    QPixmap pixmapIcon {Breadth, Breadth};
+    QPixmap pixmapIcon { Breadth, Breadth };
     pixmapIcon.fill(Qt::Horizontal == orientation_ ? Qt::red : Qt::green);
 
     QDrag* drag = new QDrag(this);
@@ -248,7 +260,8 @@ void Ruler::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin) {
+void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin)
+{
     // Flagging whether we are horizontal or vertical only to reduce
     // to cheching many times
     bool isHorzRuler = Qt::Horizontal == orientation_;
@@ -278,7 +291,8 @@ void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMet
     }
 }
 
-void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
+void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition)
+{
     const auto isHorzRuler = (Qt::Horizontal == orientation_);
     const auto K = gridStep * tickKoef * (App::settings().inch() ? 1.0 / 25.4 : 1.0);
 
@@ -301,7 +315,7 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, d
             /*y2*/ isHorzRuler ? rect.bottom() - startPosition : current);
         if (drawText) [[unlikely]] {
             painter->save();
-            auto number {QString::number(startTickNo * K)};
+            auto number { QString::number(startTickNo * K) };
 
             if (startTickNo) [[likely]]
                 number = ((isHorzRuler ^ (step > 0.0)) ? "-" : "+") + number;
@@ -324,7 +338,8 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, d
     painter->drawLines(lines.data(), lines.size());
 }
 
-void Ruler::DrawMousePosTick(QPainter* painter) {
+void Ruler::DrawMousePosTick(QPainter* painter)
+{
     QPoint starPt = cursorPos;
     QPoint endPt;
     if (Qt::Horizontal == orientation_) {
