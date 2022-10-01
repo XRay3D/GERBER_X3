@@ -21,6 +21,8 @@
 
 class GCodePlugin;
 
+
+class FilePlugin;
 namespace Shapes {
 class Plugin;
 class Handle;

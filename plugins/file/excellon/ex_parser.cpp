@@ -263,15 +263,15 @@ bool Parser::parsePos(const QString& line) {
             return false;
 
         if (X) {
-            state_.rawPos.X = CtreCapTo(X);
+            state_.rawPos.X = CtreCapTo(X).toString();
             parseNumber(CtreCapTo(X), state_.pos.rx());
         }
         if (Y) {
-            state_.rawPos.Y = CtreCapTo(Y);
+            state_.rawPos.Y = CtreCapTo(Y).toString();
             parseNumber(CtreCapTo(Y), state_.pos.ry());
         }
         if (A)
-            state_.rawPos.A = CtreCapTo(A);
+            state_.rawPos.A = CtreCapTo(A).toString();
 
         switch (state_.wm) {
         case DrillMode:
