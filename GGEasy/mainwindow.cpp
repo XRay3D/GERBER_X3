@@ -546,7 +546,7 @@ void MainWindow::saveGCodeFile(int id) {
         return;
     auto* file = project_->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCode::GCUtils::getLastDir().append(file->shortName()),
+        GCode::GCFile::getLastDir().append(file->shortName()),
         tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
 
     if (name.isEmpty())
@@ -579,7 +579,7 @@ void MainWindow::saveSelectedGCodeFiles() {
     for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
-                QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
+                QString name(GCode::GCFile::getLastDir().append(file->shortName()));
                 if (!name.endsWith(GCode::Settings::fileExtension()))
                     name += QStringList({"_TS", "_BS"})[file->side()];
 
@@ -594,7 +594,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
+            QString name(GCode::GCFile::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith(GCode::Settings::fileExtension()))
                 name += QStringList({"_TS", "_BS"})[files.first()->side()];
 

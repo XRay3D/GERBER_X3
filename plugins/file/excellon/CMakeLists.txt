@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 
-project(excellon LANGUAGES CXX)
+project(flexcellon LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
@@ -42,7 +42,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     gcode
     graphicsview
     tooldatabase
-    File_Plugins
+    file_plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

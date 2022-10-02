@@ -19,12 +19,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
@@ -50,7 +44,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     #    graphicsview
     #    shape
     #    tooldatabase
-    File_Plugins
+    file_plugins
     clipper
     gi
     Qt${QT_VERSION_MAJOR}::Core

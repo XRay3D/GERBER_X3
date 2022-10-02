@@ -32,8 +32,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
-include(${CMAKE_SOURCE_DIR}/CXXModules.cmake)
-include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
+#include(${CMAKE_SOURCE_DIR}/CXXModules.cmake)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -89,12 +88,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
-    # Define target properties for Android with Qt 6 as:
-    #    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+# Define target properties for Android with Qt 6 as:
+#    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
-    qt_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
+qt_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
 else()
     if(ANDROID)
         add_library(${PROJECT_NAME} SHARED
@@ -102,13 +101,13 @@ else()
         )
     # Define properties for Android with Qt 5 after find_package() calls as:
     #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(${PROJECT_NAME}
-            ${PROJECT_SOURCES}
-        )
-    endif()
+else()
+    add_executable(${PROJECT_NAME}
+        ${PROJECT_SOURCES}
+    )
+endif()
 
-    qt5_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
+qt5_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -164,7 +163,34 @@ if(WIN32)
         COMMENT "Deploying Qt..."
     )
 elseif (UNIX)#LINUX
-    #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
+
+    find_program(Q_MAKE_EXE qmake)
+
+    find_program(CQT_EXE cqtdeployer)
+
+    if(NOT EXISTS ${CQT_EXE})
+        message("the cqtdeployer not exits please install the cqtdeployer and run cmake again!")
+        return()
+    endif()
+
+    add_custom_target(
+        deploy
+        COMMAND cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5
+        COMMENT "Deploy: cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5"
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+
+
+#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND "${CMAKE_COMMAND}" -E
+#        env PATH="${_QT_BIN_DIR}" "cqtdeployer"
+#        -bin    $<TARGET_FILE:${PROJECT_NAME}>
+#        -qmake  ${QT_QMAKE_EXECUTABLE}
+#        qif
+#        COMMENT "Deploying Qt..."
+#    )
+
+#    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
 #install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})

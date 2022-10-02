@@ -12,16 +12,14 @@
 
 #include "datastream.h"
 
-#include "file_plugin.h"
-#include "plugintypes.h"
-
-#include "gi_group.h"
-#include "splashscreen.h"
-#include <ft_node.h>
-#include <myclipper.h>
-
 #include "app.h"
+#include "file_plugin.h"
+#include "ft_node.h"
+#include "gi_group.h"
+#include "myclipper.h"
+#include "plugintypes.h"
 #include "project.h"
+#include "splashscreen.h"
 
 #include <QApplication>
 #include <QDateTime>
@@ -36,7 +34,8 @@ class FileInterface {
     //    friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<FileInterface>& file);
     //    friend QDataStream& operator>>(QDataStream& stream, QSharedPointer<FileInterface>& file);
 
-    friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file) {
+    friend QDataStream& operator<<(QDataStream& stream, const FileInterface& file)
+    {
         stream << static_cast<int>(file.type());
         file.write(stream);
         stream << file.id_;
@@ -54,7 +53,8 @@ class FileInterface {
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, FileInterface& file) {
+    friend QDataStream& operator>>(QDataStream& stream, FileInterface& file)
+    {
         file.read(stream);
         stream >> file.id_;
         stream >> file.itemsType_;
@@ -84,17 +84,20 @@ public:
         QPointF translate {};
         QPointF scale { 1, 1 };
 
-        friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
+        friend QDataStream& operator<<(QDataStream& stream, const Transform& tr)
+        {
             stream << tr.angle << tr.translate << tr.scale;
             return stream;
         }
 
-        friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
+        friend QDataStream& operator>>(QDataStream& stream, Transform& tr)
+        {
             stream >> tr.angle >> tr.translate >> tr.scale;
             return stream;
         }
 
-        operator QTransform() const {
+        operator QTransform() const
+        {
             QTransform t;
             t.translate(translate.x(), translate.y());
             t.rotate(angle);
@@ -104,7 +107,8 @@ public:
     };
 
     FileInterface()
-        : itemGroups_(1, new GiGroup) {
+        : itemGroups_(1, new GiGroup)
+    {
     }
     virtual ~FileInterface() { qDeleteAll(itemGroups_); }
 
@@ -112,7 +116,8 @@ public:
     QString name() const { return name_; }
     void setFileName(const QString& fileName) { name_ = fileName; }
 
-    void addToScene() const {
+    void addToScene() const
+    {
         for (const auto var : itemGroups_) {
             if (var && var->size()) {
                 var->addToScene();
@@ -121,7 +126,8 @@ public:
         }
     }
 
-    GiGroup* itemGroup(int type = -1) const {
+    GiGroup* itemGroup(int type = -1) const
+    {
         const int size(static_cast<int>(itemGroups_.size()));
         if (type == -1 && 0 <= itemsType_ && itemsType_ < size)
             return itemGroups_[itemsType_];
@@ -137,7 +143,8 @@ public:
 
     mvector<QString>& lines() { return lines_; }
     const mvector<QString>& lines() const { return lines_; }
-    const QString lines2() const {
+    const QString lines2() const
+    {
         QString rstr;
         for (auto&& str : lines_)
             rstr.append(str).append('\n');
@@ -150,7 +157,8 @@ public:
         CutoffGroup,
     };
 
-    virtual void initFrom(FileInterface* file) {
+    virtual void initFrom(FileInterface* file)
+    {
         id_ = file->id();
         node_ = file->node();
         // node_->setId(&id_);
@@ -174,7 +182,8 @@ public:
     const QColor& color() const { return color_; }
     virtual void setColor(const QColor& color) { color_ = color; }
 
-    void setTransform([[maybe_unused]] const Transform& transform) {
+    void setTransform([[maybe_unused]] const Transform& transform)
+    {
         transform_ = transform;
         QTransform t { transform };
         for (auto* ig : itemGroups_)
