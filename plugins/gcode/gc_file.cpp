@@ -103,13 +103,10 @@ void calcArcs(Path path) {
 namespace GCode {
 
 File::File()
-    : GCUtils()
-    , FileInterface() {
-}
+    : GCFile() { }
 
 File::File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths)
-    : GCUtils(std::move(gcp))
-    , FileInterface()
+    : GCFile(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
     if (gcp_.tools.front().diameter()) {
@@ -170,21 +167,6 @@ void File::saveDrill(const QPointF& offset) {
 
 void File::saveLaserPocket(const QPointF& offset) {
     saveLaserProfile(offset);
-    //    lines_.push_back(Settings::laserDynamOn());
-    //    mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
-    //    for (mvector<QPolygonF>& paths : toolPathss) {
-    //        startPath(paths.front().front());
-    //        bool skip = true;
-    //        for (auto& path : paths) {
-    //            for (QPointF& point : path) {
-    //                if (skip)
-    //                    skip = false;
-    //                else
-    //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-    //            }
-    //        }
-    //        endPath();
-    //    }
 }
 
 void File::saveMillingPocket(const QPointF& offset) {
@@ -237,13 +219,6 @@ void File::saveMillingProfile(const QPointF& offset) {
                         lines_.emplace_back(formated({g1(), z(depths[k]), feed(plungeRate())}));
                         auto sp(savePath(path, spindleSpeed()));
                         lines_.append(sp);
-                        //                    bool skip = true;
-                        //                    for (QPointF& point : path) {
-                        //                        if (skip)
-                        //                            skip = false;
-                        //                        else
-                        //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                        //                    }
                     }
                     endPath();
                     paths.erase(paths.begin() + j--);
@@ -252,13 +227,6 @@ void File::saveMillingProfile(const QPointF& offset) {
                     lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                     auto sp(savePath(path, spindleSpeed()));
                     lines_.append(sp);
-                    //                    bool skip = true;
-                    //                    for (QPointF& point : path) {
-                    //                        if (skip)
-                    //                            skip = false;
-                    //                        else
-                    //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                    //                    }
                     endPath();
                 }
             }
@@ -276,13 +244,6 @@ void File::saveLaserProfile(const QPointF& offset) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
-            //            }
             endPath();
         }
     }
@@ -301,13 +262,6 @@ void File::saveMillingRaster(const QPointF& offset) {
                 lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                 auto sp(savePath(path, spindleSpeed()));
                 lines_.append(sp);
-                //                bool skip = true;
-                //                for (QPointF& point : path) {
-                //                    if (skip)
-                //                        skip = false;
-                //                    else
-                //                        lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                //                }
                 endPath();
             }
         }
@@ -327,23 +281,9 @@ void File::saveLaserHLDI(const QPointF& offset) {
         if (i++ % 2) {
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
-            //            }
         } else {
             auto sp(savePath(path, 0));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(static_cast<int>(0)) }));
-            //            }
         }
     }
     if (pathss.size() > 1) {
@@ -352,13 +292,6 @@ void File::saveLaserHLDI(const QPointF& offset) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-            //            }
             endPath();
         }
     }
@@ -481,6 +414,7 @@ void File::genGcodeAndTile() {
             case Profile:
             case Thermal:
             case Raster:
+            case Hatching:
                 if (toolType() == Tool::Laser)
                     saveLaserProfile(offset);
                 else

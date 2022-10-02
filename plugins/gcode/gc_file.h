@@ -25,7 +25,7 @@ struct GCObj : QObject {
     //    virtual ~GCObj() { }
 };
 
-class File : private GCUtils, public FileInterface {
+class File : public GCFile {
     friend class ::GiGcPath;
     friend class ::MainWindow;
 

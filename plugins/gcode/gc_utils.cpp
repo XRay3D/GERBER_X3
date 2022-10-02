@@ -14,16 +14,15 @@
 #include "app.h"
 #include "math.h"
 #include "project.h"
-#include "settings.h"
 #include <QFileInfo>
 
 namespace GCode {
 
-GCUtils::GCUtils(GCodeParams&& gcp)
+GCFile::GCFile(GCodeParams&& gcp)
     : gcp_(std::move(gcp)) {
 }
 
-QString GCUtils::getLastDir() {
+QString GCFile::getLastDir() {
     if (Settings::sameFolder() && !redirected)
         lastDir = QFileInfo(App::project()->name()).absolutePath();
     else if (lastDir.isEmpty()) {
@@ -36,7 +35,7 @@ QString GCUtils::getLastDir() {
     return lastDir += '/';
 }
 
-void GCUtils::setLastDir(QString dirPath) {
+void GCFile::setLastDir(QString dirPath) {
     dirPath = QFileInfo(dirPath).absolutePath();
     if (Settings::sameFolder() && !redirected) {
         redirected = QFileInfo(App::project()->name()).absolutePath() != dirPath;
@@ -50,7 +49,7 @@ void GCUtils::setLastDir(QString dirPath) {
     }
 }
 
-mvector<double> GCUtils::getDepths() {
+mvector<double> GCFile::getDepths() {
     const auto gDepth {gcp_.getDepth()};
     if (gDepth < gcp_.getTool().passDepth() || qFuzzyCompare(gDepth, gcp_.getTool().passDepth()))
         return {-gDepth - gcp_.getTool().getDepth()};
