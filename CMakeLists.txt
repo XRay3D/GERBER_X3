@@ -31,7 +31,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(
         -Winvalid-pch
-        -fmodules-ts
+#        -fmodules-ts
     )
 # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
 # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
@@ -68,6 +68,8 @@ include_directories(
     static_libs/graphicsview
     static_libs/tooldatabase
 )
+
+include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 # plugins
 add_subdirectory(static_libs)

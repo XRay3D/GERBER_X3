@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 
-project(circle LANGUAGES CXX)
+project(shcircle LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -26,14 +26,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-add_library(circle SHARED
+add_library(${PROJECT_NAME} SHARED
     shcircle.cpp
     shcircle.h
     circle.json
 )
 
 
-target_link_libraries(circle PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     common
     filetree
@@ -48,7 +48,7 @@ target_link_libraries(circle PRIVATE
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    target_link_libraries(circle PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
 

@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 
-project(dxf LANGUAGES CXX)
+project(fldxf LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -25,10 +25,6 @@ file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
-
-#add_subdirectory(entities)
-#add_subdirectory(section)
-#add_subdirectory(tables)
 
 add_library(${PROJECT_NAME} SHARED
     ${HEADERS}
@@ -45,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
     graphicsview
     tooldatabase
-    File_Plugins
+    file_plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     #    Qt${QT_VERSION_MAJOR}::OpenGL

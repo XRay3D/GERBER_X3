@@ -440,13 +440,13 @@ Tool File::getTool() const { return gcp_.getTool(); }
 void File::addInfo() {
     const static auto side_ {GCObj::tr("Top|Bottom").split('|')};
     if (Settings::info()) {
-        lines_.emplace_back(GCObj::tr(";\t              Name: %1").arg(shortName()));
-        lines_.emplace_back(GCObj::tr(";\t              Tool: %1").arg(gcp_.getTool().name()));
-        lines_.emplace_back(GCObj::tr(";\t    Tool passDepth: %1").arg(gcp_.getTool().passDepth()));
-        lines_.emplace_back(GCObj::tr(";\t     Tool stepover: %1").arg(gcp_.getTool().stepover()));
-        lines_.emplace_back(GCObj::tr(";\tTool feedRate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
-        lines_.emplace_back(GCObj::tr(";\t             Depth: %1").arg(gcp_.getDepth()));
-        lines_.emplace_back(GCObj::tr(";\t              Side: %1").arg(side_[side()]));
+        lines_.emplace_back(GCObj::tr(";\t           Name: %1").arg(shortName()));
+        lines_.emplace_back(GCObj::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
+        lines_.emplace_back(GCObj::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
+        lines_.emplace_back(GCObj::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
+        lines_.emplace_back(GCObj::tr(";\tTool Pass Depth: %1").arg(gcp_.getTool().passDepth()));
+        lines_.emplace_back(GCObj::tr(";\t          Depth: %1").arg(gcp_.getDepth()));
+        lines_.emplace_back(GCObj::tr(";\t           Side: %1").arg(side_[side()]));
     }
 }
 

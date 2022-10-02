@@ -10,6 +10,13 @@
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+else()
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+endif()
 
 # plugins shape
 add_subdirectory(shape)
