@@ -9,21 +9,22 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "file.h"
 #include "gc_types.h"
 #include <QList>
 #include <QString>
-#include <myclipper.h>
 
 class Project;
 
 namespace GCode {
 
-class GCUtils {
+class GCFile : public FileInterface {
     friend class ::Project;
 
 public:
-    GCUtils(GCodeParams&& gcp);
-    GCUtils() {};
+    GCFile(GCodeParams&& gcp);
+    GCFile() {};
 
     inline double feedRate() { return feedRate_; }
     inline double plungeRate() { return plungeRate_; }
@@ -68,7 +69,7 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    inline static const mvector<QChar> cmdList {'G', 'X', 'Y', 'Z', 'F', 'S'};
+    inline static const mvector<QChar> cmdList { 'G', 'X', 'Y', 'Z', 'F', 'S' };
 
     mvector<double> getDepths();
 
@@ -76,17 +77,20 @@ protected:
     QString lastValues[6];
     Code gCode_ = GNull;
 
-    inline QString g0() {
+    inline QString g0()
+    {
         gCode_ = G00;
         return "G0";
     }
 
-    inline QString g1() {
+    inline QString g1()
+    {
         gCode_ = G01;
         return "G1";
     }
 
-    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed) {
+    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed)
+    {
         mvector<QString> lines;
         lines.reserve(path.size());
         bool skip = true;
@@ -94,12 +98,13 @@ protected:
             if (skip)
                 skip = false;
             else
-                lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
+                lines.emplace_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed) }));
         }
         return lines;
     }
 
-    QString formated(const mvector<QString>& data) {
+    QString formated(const mvector<QString>& data)
+    {
         QString ret;
         for (const QString& str : data) {
             const int index = cmdList.indexOf(str.front().toUpper());
@@ -118,12 +123,15 @@ protected:
     inline QString z(double val) { return 'Z' + format(val); }
     inline QString feed(double val) { return 'F' + format(val); }
     inline QString speed(int val) { return 'S' + QString::number(val); }
-    inline QString format(double val) {
+    inline QString format(double val)
+    {
         QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
         if (str.contains('e'))
             return QString::number(val, 'f', 3);
         return str;
     }
+
+    virtual void pathsToGCode() { }
 };
 
 } // namespace GCode
