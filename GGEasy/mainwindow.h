@@ -22,7 +22,6 @@
 #include <QTranslator>
 #include <QUndoStack>
 
-
 namespace GCode {
 class File;
 }

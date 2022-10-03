@@ -46,7 +46,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
-    QTransform t { file->transform() };
+    QTransform t {file->transform()};
     auto mapPaths = [t](Paths paths) {
         for (auto&& path : paths)
             path = t.map(path);
@@ -72,7 +72,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
             if (!ap.flashed())
                 continue;
 
-            auto name { ap.name() };
+            auto name {ap.name()};
             if (ap.withHole()) {
                 drillDiameter = ap.drillDiameter();
                 name += tr(", drill Ø%1mm").arg(drillDiameter);
@@ -82,16 +82,16 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
                 drillDiameter = ap.minSize();
             }
             qDebug() << ap.type() << "ap.apSize()" << ap.apSize();
-            retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
+            retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
 
             // draw aperture
-            if (!retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw.size()) {
+            if (!retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw.size()) {
                 auto state = gbrObj.state();
                 state.setCurPos({});
-                retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw = ap.draw(state);
+                retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw = ap.draw(state);
                 QTransform transform {};
                 transform.rotate(file->transform().angle);
-                for (auto&& path : retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw)
+                for (auto&& path : retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw)
                     path = transform.map(path);
             }
         }
@@ -192,7 +192,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
         QTextStream in(&file);
         QString line;
         while (in.readLineInto(&line)) {
-            auto data { toU16StrView(line) };
+            auto data {toU16StrView(line)};
             if (*ctre::range<pattern>(data).begin())
                 return true;
         }

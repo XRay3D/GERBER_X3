@@ -20,7 +20,8 @@ namespace Shapes {
 class Circle final : public Shape {
 public:
     explicit Circle(QPointF center = {}, QPointF pt = {});
-    ~Circle()override = default;;
+    ~Circle() override = default;
+    ;
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShCircle; }

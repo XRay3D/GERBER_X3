@@ -86,7 +86,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
         file.close();
 
         // emit fileProgress(file_->shortName(), progress, progressCtr);
-        Timer t { "Section Parser" };
+        Timer t {"Section Parser"};
 
         for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
             if (*it == "SECTION")
@@ -155,11 +155,11 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         auto const dxfFile = static_cast<File*>(file);
-        QTransform t { dxfFile->transform() };
+        QTransform t {dxfFile->transform()};
         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
             for (auto&& go : layer->graphicObjects())
                 if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
-                    retData[{ ctr, circle->radius * 2, false, name + ": CIRCLE" }].posOrPath.emplace_back(t.map(circle->centerPoint));
+                    retData[{ctr, circle->radius * 2, false, name + ": CIRCLE"}].posOrPath.emplace_back(t.map(circle->centerPoint));
             ctr++;
         }
         return retData;

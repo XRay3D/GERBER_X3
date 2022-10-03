@@ -71,7 +71,7 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
-        setOptimizationFlag(DontAdjustForAntialiasing);
+    setOptimizationFlag(DontAdjustForAntialiasing);
     setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);

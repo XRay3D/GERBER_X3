@@ -271,7 +271,7 @@ void MainWindow::createActionsFile() {
     fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
 
     // Export PDF
-    // FIXME       auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
+    // FIXME       action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
     //        action->setStatusTip(tr("Export to PDF file"));
     //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
 
@@ -297,7 +297,8 @@ void MainWindow::createActionsFile() {
 void MainWindow::createActionsEdit() {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->setObjectName(QStringLiteral("editMenu"));
-    auto action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
+    QAction* action;
+    action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
     auto dsaShortcut = new QShortcut(this);                                      // Инициализируем объект
@@ -327,8 +328,10 @@ void MainWindow::createActionsService() {
     toolpathToolBar->addAction(redoAct);
     toolpathToolBar->addAction(undoAct);
     toolpathToolBar->addSeparator();
+
+    QAction* action;
     // Settings
-    auto action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
+    action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));
     // Separator
     // toolpathToolBar->addSeparator();
@@ -374,8 +377,9 @@ void MainWindow::createActionsService() {
 
 void MainWindow::createActionsHelp() {
     helpMenu = menuBar()->addMenu(tr("&Help"));
+    QAction* action;
     // About
-    auto action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
+    action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
     action->setStatusTip(tr("Show the application's About box"));
     // About Qt
     action = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
@@ -398,40 +402,40 @@ void MainWindow::createActionsZoom() {
     zoomToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(zoomToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    { // Fit best
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
-        action->setShortcut(QKeySequence::FullScreen);
-        vievMenu->addAction(action);
-    }
-    { // 100%
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
-        action->setShortcut(tr("Ctrl+0"));
-        vievMenu->addAction(action);
-    }
-    { // Zoom in
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
-        action->setShortcut(QKeySequence::ZoomIn);
-        vievMenu->addAction(action);
-    }
-    { // Zoom out
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
-        action->setShortcut(QKeySequence::ZoomOut);
-        vievMenu->addAction(action);
-    }
-    { // Separator
-        zoomToolBar->addSeparator();
-        vievMenu->addSeparator();
-    }
-    { // Zoom to selected
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
-        action->setShortcut(QKeySequence("F12"));
-        vievMenu->addAction(action);
-    }
+    QAction* action;
+    // Fit best
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
+    action->setShortcut(QKeySequence::FullScreen);
+    vievMenu->addAction(action);
+
+    // 100%
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
+    action->setShortcut(tr("Ctrl+0"));
+    vievMenu->addAction(action);
+
+    // Zoom in
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
+    action->setShortcut(QKeySequence::ZoomIn);
+    vievMenu->addAction(action);
+
+    // Zoom out
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
+    action->setShortcut(QKeySequence::ZoomOut);
+    vievMenu->addAction(action);
+
+    // Separator
+    zoomToolBar->addSeparator();
+    vievMenu->addSeparator();
+
+    // Zoom to selected
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
+    action->setShortcut(QKeySequence("F12"));
+    vievMenu->addAction(action);
 }
 
 void MainWindow::createActionsToolPath() {

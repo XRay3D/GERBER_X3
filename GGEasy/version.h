@@ -10,8 +10,8 @@
  ********************************************************************************/
 #pragma once
 
-#define VER_FILEVERSION     0, 8, 6, 0
-#define VER_FILEVERSION_STR "0.8.6.0"
+#define VER_FILEVERSION     VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_TWEAK
+#define VER_FILEVERSION_STR VERSION_STR
 
 #define VER_PRODUCTVERSION     VER_FILEVERSION
 #define VER_PRODUCTVERSION_STR VER_FILEVERSION_STR

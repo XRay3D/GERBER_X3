@@ -10,7 +10,7 @@
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-project(GGEasy VERSION 0.8 LANGUAGES CXX)
+project(GGEasy VERSION 0.8.6.4 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,7 +39,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
-add_definitions(-DBUILD_DATE="${DT}")
+add_definitions(
+    -DBUILD_DATE="${DT}"
+    -DVERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    -DVERSION_MINOR=${PROJECT_VERSION_MINOR}
+    -DVERSION_PATCH=${PROJECT_VERSION_PATCH}
+    -DVERSION_TWEAK=${PROJECT_VERSION_TWEAK}
+    -DVERSION_STR="${PROJECT_VERSION}"
+)
+
+message(${PROJECT_VERSION})
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
