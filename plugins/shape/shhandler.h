@@ -7,42 +7,40 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
-#include "settings.h"
 #include "shape.h"
 #include <QGraphicsItem>
 
 namespace Shapes {
-class Handler final : public QGraphicsItem {
+class Handle final : public QGraphicsItem {
     friend class Shape;
-    friend QDataStream& operator<<(QDataStream& stream, const ShapeInterface& shape);
-    friend QDataStream& operator>>(QDataStream& stream, ShapeInterface& shape);
+    friend QDataStream& operator<<(QDataStream& stream, const Shapes::Shape& shape);
+    friend QDataStream& operator>>(QDataStream& stream, Shapes::Shape& shape);
 
 public:
-    enum HType : int {
+    enum Type : int {
         Adder,
         Center,
         Corner,
     };
-    explicit Handler(Shapes::Shape* shape, HType type = Corner);
-    ~Handler();
+    explicit Handle(Shapes::Shape* shape, Type type = Corner);
+    ~Handle();
+
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    void setPos(const QPointF& pos);
+    int type() const override { return GiType::ShHandler; }
 
-    HType hType() const;
-    void setHType(const HType& value);
-    QRectF rect() const;
+    Type hType() const;
+    void setHType(Type value);
 
 private:
+    QRectF rect;
     Shape* const shape;
-    HType hType_;
-    mvector<QPointF> pt;
+    Type type_;
     QPointF lastPos;
-    void savePos();
     bool pressed {};
 
 protected:

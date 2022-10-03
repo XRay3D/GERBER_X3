@@ -18,66 +18,43 @@
 namespace Shapes {
 class Arc final : public Shape {
 public:
-    explicit Arc(QPointF center, QPointF pt, QPointF pt2);
-    explicit Arc() { }
-    ~Arc();
+    explicit Arc(QPointF center = {}, QPointF pt1 = {}, QPointF pt2 = {});
+    ~Arc() override = default;
 
     // QGraphicsItem interface
-    int type() const override { return static_cast<int>(GiType::ShCirArc); }
+    int type() const override { return GiType::ShCirArc; }
     void redraw() override;
     // Shape interface
     QString name() const override;
     QIcon icon() const override;
 
-    void setPt(const QPointF& pt);
-    void setPt2(const QPointF& pt);
+    bool addPt(const QPointF& pt) override;
+    void setPt(const QPointF& pt) override;
     double radius() const;
     void setRadius(double radius);
 
     enum {
-        Center,
         Point1,
         Point2,
+        Center,
         PtCount
     };
 
-    // Shape interface
-    //    bool setData(const QModelIndex& index, const QVariant& value, int role) override { }
-    //    Qt::ItemFlags flags(const QModelIndex& index) const override { }
-    //    QVariant data(const QModelIndex& index, int role) const override { }
-    //    void menu(QMenu& menu, FileTree::View* tv) const override { }
 private:
     mutable double radius_ {};
-
-protected:
-    // Shape interface
-    void updateOtherHandlers(Handler* handler) override;
+    int ptCtr {};
 };
 
-class Plugin : public ShapePlugin {
+class PluginImpl : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "circlearc.json")
-    Q_INTERFACES(ShapePlugin)
-
-    Arc* shape = nullptr;
-    int ctr = 0;
+    Q_INTERFACES(Shapes::Plugin)
 
 public:
-    Plugin();
-    virtual ~Plugin() override;
-
-    // ShapePlugin interface
-public:
+    // Shapes::Plugin interface
     int type() const override;
-
     QIcon icon() const override;
-    Shape* createShape() override;
-    Shape* createShape(const QPointF& point) override;
-    bool addShapePoint(const QPointF& value) override;
-    void updateShape(const QPointF& value) override;
-    void finalizeShape() override;
-
-signals:
+    Shape* createShape(const QPointF& point) const override;
 };
 
 } // namespace Shapes

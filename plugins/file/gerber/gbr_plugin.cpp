@@ -46,20 +46,20 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
-
-    auto mapPaths = [file](Paths paths) {
+    QTransform t { file->transform() };
+    auto mapPaths = [t](Paths paths) {
         for (auto&& path : paths)
-            path = file->transform().map(path);
+            path = t.map(path);
         return paths;
     };
 
-    auto mapPos = [file](auto pos) {
-        pos = file->transform().map(pos);
+    auto mapPos = [t](auto pos) {
+        pos = t.map(pos);
         return pos;
     };
 
     if (plugin->type() == ::GCode::Drill) {
-        Drill::Preview retData;
+        DrillPlugin::Preview retData;
         double drillDiameter {};
 
         auto const gbrFile = static_cast<File*>(file);
@@ -72,7 +72,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
             if (!ap.flashed())
                 continue;
 
-            auto name {ap.name()};
+            auto name { ap.name() };
             if (ap.withHole()) {
                 drillDiameter = ap.drillDiameter();
                 name += tr(", drill Ø%1mm").arg(drillDiameter);
@@ -82,16 +82,16 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
                 drillDiameter = ap.minSize();
             }
             qDebug() << ap.type() << "ap.apSize()" << ap.apSize();
-            retData[{gbrObj.state().aperture(), drillDiameter, false, name}].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
+            retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].posOrPath.emplace_back(mapPos(gbrObj.state().curPos()));
 
             // draw aperture
-            if (!retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw.size()) {
+            if (!retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw.size()) {
                 auto state = gbrObj.state();
                 state.setCurPos({});
-                retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw = ap.draw(state);
+                retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw = ap.draw(state);
                 QTransform transform {};
-                transform.rotateRadians(asin(file->transform().m12()));
-                for (auto&& path : retData[{gbrObj.state().aperture(), drillDiameter, false, name}].draw)
+                transform.rotate(file->transform().angle);
+                for (auto&& path : retData[{ gbrObj.state().aperture(), drillDiameter, false, name }].draw)
                     path = transform.map(path);
             }
         }
@@ -192,7 +192,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
         QTextStream in(&file);
         QString line;
         while (in.readLineInto(&line)) {
-            auto data {toU16StrView(line)};
+            auto data { toU16StrView(line) };
             if (*ctre::range<pattern>(data).begin())
                 return true;
         }
@@ -293,3 +293,5 @@ void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
 }
 
 } // namespace Gerber
+
+#include "moc_gbr_plugin.cpp"

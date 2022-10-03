@@ -145,3 +145,5 @@ Component::Component(File::Function function, const QStringList& list)
 }
 
 } // namespace Gerber::Attr
+
+#include "moc_gbr_attrfilefunction.cpp"

@@ -12,6 +12,9 @@
  *******************************************************************************/
 #include "dxf_insert.h"
 
+#include "dxf_block.h"
+#include "dxf_types.h"
+
 namespace Dxf {
 
 InsertEntity::InsertEntity(Blocks& blocks, SectionParser* sp)

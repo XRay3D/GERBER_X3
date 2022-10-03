@@ -19,50 +19,46 @@
 class ShTextDialog;
 
 namespace Shapes {
+
 class Text final : public Shape {
     friend ShTextDialog;
     friend Shape;
 
 public:
-    explicit Text(QPointF pt1);
-    explicit Text() { }
+    explicit Text(QPointF pt1 = {});
     ~Text() = default;
 
     enum {
-        BotCenter = 1,
-        BotLeft,
-        BotRight,
-        Center,
-        CenterLeft,
-        CenterRight,
-        TopCenter,
-        TopLeft,
-        TopRight,
+        // clang-format off
+        BotCenter =   Qt::AlignBottom | Qt::AlignHCenter,
+        BotLeft =     Qt::AlignBottom | Qt::AlignLeft,
+        BotRight =    Qt::AlignBottom | Qt::AlignRight,
+
+        Center =      Qt::AlignHCenter | Qt::AlignVCenter,
+        CenterLeft =  Qt::AlignHCenter | Qt::AlignLeft,
+        CenterRight = Qt::AlignHCenter | Qt::AlignRight,
+
+        TopCenter =   Qt::AlignTop | Qt::AlignHCenter,
+        TopLeft =     Qt::AlignTop | Qt::AlignLeft,
+        TopRight =    Qt::AlignTop | Qt::AlignRight,
+        // clang-format on
     };
 
     struct InternalData {
         friend QDataStream& operator<<(QDataStream& stream, const InternalData& d);
         friend QDataStream& operator>>(QDataStream& stream, InternalData& d);
-        InternalData()
-            : font("")
-            , text("Text")
-            , side(Top)
-            , angle(0.0)
-            , height(10.0)
-            , xy(0.0)
-            , handleAlign(BotLeft) {
-        }
-        QString font;
-        QString text;
-        Side side;
-        double angle;
-        double height;
-        double xy;
-        int handleAlign;
+
+        QString font {};
+        QString text {"Text"};
+        Side side {Top};
+        double angle {0.0};
+        double height {10.0};
+        double xy {100.0};
+        int handleAlign {BotLeft};
     };
 
     // QGraphicsItem interface
-    int type() const override;
+    int type() const override { return GiType::ShText; }
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // Shape interface
 
@@ -70,6 +66,7 @@ public:
     void redraw() override;
     QString name() const override;
     QIcon icon() const override;
+    void setPt(const QPointF& point) override;
 
     QString text() const;
     void setText(const QString& value);
@@ -90,38 +87,24 @@ protected:
 private:
     InternalData iData;
     InternalData iDataCopy;
-    inline static InternalData lastUsedIData;
-    static void saveIData();
-    static InternalData loadIData();
+    void saveIData();
+    InternalData loadIData();
 
     void save();
     void restore();
     void ok();
 };
 
-class PluginText : public ShapePlugin {
+class PluginImpl : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "text.json")
-    Q_INTERFACES(ShapePlugin)
-
-    Text* shape = nullptr;
+    Q_INTERFACES(Shapes::Plugin)
 
 public:
-    PluginText();
-    virtual ~PluginText() override;
-
     // ShapePluginTextInterface interface
-public:
     int type() const override;
-
     QIcon icon() const override;
-    Shape* createShape() override;
-    Shape* createShape(const QPointF& point) override;
-    bool addShapePoint(const QPointF& value) override;
-    void updateShape(const QPointF& value) override;
-    void finalizeShape() override;
-
-signals:
+    Shape* createShape(const QPointF& point) const override;
 };
 
 } // namespace Shapes

@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "ft_view.h"
 
 #include "ft_node.h"
@@ -20,6 +20,7 @@
 
 #include "file.h"
 #include "file_plugin.h"
+#include "qcheckbox.h"
 #include "shapepluginin.h"
 
 #include <QFileDialog>
@@ -113,7 +114,7 @@ void View::hideOther() {
 void View::closeFile() {
     model_->removeRow(menuIndex_.row(), menuIndex_.parent());
     //    if (App::drillForm())
-    //        App::drillForm()->on_pbClose_clicked();
+    //        App::drillForm().on_pbClose_clicked();
 }
 
 void View::closeFiles() {
@@ -201,55 +202,79 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
-            menu.addSeparator();
-            menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
-                QDialog d(this);
-                d.setWindowTitle(tr("Transform"));
-                QLabel la("A:", &d);
-                QLabel lx("X:", &d);
-                QLabel ly("Y:", &d);
-                DoubleSpinBox dsbxA(&d);
-                DoubleSpinBox dsbxX(&d);
-                DoubleSpinBox dsbxY(&d);
-                dsbxA.setRange(-360, +360);
-                dsbxX.setRange(-1000, +1000);
-                dsbxY.setRange(-1000, +1000);
-                QFormLayout layout(&d);
-                layout.addRow(&la, &dsbxA);
-                layout.addRow(&lx, &dsbxX);
-                layout.addRow(&ly, &dsbxY);
-                // QPushButton button(tr("Apply"), &d);
-                // layout.addRow(new QWidget(&d), &button);
-                d.resize({0, 0});
+            auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+            if (file) {
+                menu.addSeparator();
+                menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
+                    QDialog dialog(this);
+                    dialog.setMaximumSize(0, 0);
+                    dialog.setWindowTitle(tr("Transform"));
+                    QLabel la("Angle:", &dialog);
+                    QLabel lx("Translate X:", &dialog);
+                    QLabel ly("Translate Y:", &dialog);
+                    QLabel lsx("Scale X:", &dialog);
+                    QLabel lsy("Scale Y:", &dialog);
+                    DoubleSpinBox dsbxAng(&dialog);
+                    DoubleSpinBox dsbxTrX(&dialog);
+                    DoubleSpinBox dsbxTrY(&dialog);
+                    DoubleSpinBox dsbxScX(&dialog);
+                    DoubleSpinBox dsbxScY(&dialog);
+                    dsbxAng.setRange(-360, +360);
+                    dsbxAng.setSuffix(tr(" °"));
+                    dsbxScX.setRange(-10, +10);
+                    dsbxScY.setRange(-10, +10);
+                    dsbxTrX.setRange(-1000, +1000);
+                    dsbxTrX.setSuffix(tr(" mm"));
+                    dsbxTrY.setRange(-1000, +1000);
+                    dsbxTrY.setSuffix(tr(" mm"));
+                    QFormLayout layout(&dialog);
+                    layout.addRow(&la, &dsbxAng);
+                    layout.addRow(&lx, &dsbxTrX);
+                    layout.addRow(&ly, &dsbxTrY);
+                    layout.addRow(&lsx, &dsbxScX);
+                    layout.addRow(&lsy, &dsbxScY);
+                    layout.setLabelAlignment(Qt::AlignRight);
 
-                auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+                    // QPushButton button(tr("Apply"), &d);
+                    // layout.addRow(new QWidget(&d), &button);
+                    dialog.resize({0, 0});
 
-                //                if (file->itemGroup()->size()) {
-                auto transform = file->transform();
-                dsbxA.setValue(qRadiansToDegrees(asin(transform.m12())));
-                transform = transform.rotateRadians(-transform.m12());
-                dsbxX.setValue(transform.dx());
-                dsbxY.setValue(transform.dy());
-                //                }
+                    auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
 
-                auto setTransform = [&](double) {
-                    QTransform transform;
-                    transform.translate(dsbxX.value(), dsbxY.value());
-                    transform.rotate(dsbxA.value());
-                    for (auto&& index : selectedRows) {
-                        auto file = App::project()->file(index.data(FileTree::Id).toInt());
-                        file->setTransform(transform);
-                    }
-                };
+                    auto transform = file->transform();
 
-                connect(&dsbxA, &QDoubleSpinBox::valueChanged, setTransform);
-                connect(&dsbxX, &QDoubleSpinBox::valueChanged, setTransform);
-                connect(&dsbxY, &QDoubleSpinBox::valueChanged, setTransform);
-                // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
-                // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
+                    dsbxAng.setValue(transform.angle);
+                    dsbxTrX.setValue(transform.translate.x());
+                    dsbxTrY.setValue(transform.translate.y());
+                    dsbxScX.setValue(transform.scale.x());
+                    dsbxScY.setValue(transform.scale.y());
 
-                d.exec();
-            });
+                    auto setTransform = [&] {
+                        transform = {
+                            .angle = dsbxAng.value(),
+                            .translate {dsbxTrX.value(), dsbxTrY.value()},
+                            .scale {dsbxScX.value(), dsbxScY.value()},
+                        };
+
+                        for (auto&& index : selectedRows) {
+                            auto file = App::project()->file(index.data(FileTree::Id).toInt());
+                            if (file)
+                                file->setTransform(transform);
+                        }
+                    };
+
+                    connect(&dsbxAng, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxTrX, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxTrY, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxScX, &QDoubleSpinBox::valueChanged, setTransform);
+                    connect(&dsbxScY, &QDoubleSpinBox::valueChanged, setTransform);
+
+                    // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
+                    // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
+
+                    dialog.exec();
+                });
+            }
         }
     }
 
@@ -280,3 +305,5 @@ void View::mouseDoubleClickEvent(QMouseEvent* event) {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_view.cpp"

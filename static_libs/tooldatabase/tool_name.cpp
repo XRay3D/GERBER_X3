@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 
 #include "tool_name.h"
 #include <QHBoxLayout>
@@ -34,3 +34,5 @@ void ToolName::setTool(const Tool& tool) {
     lblName->setText(tool.name());
     setToolTip(tool.note());
 }
+
+#include "moc_tool_name.cpp"

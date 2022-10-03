@@ -15,7 +15,7 @@
 #include "pocketraster.h"
 #include "ui_pocketrasterform.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -47,7 +47,7 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->rbInside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
 
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
+    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
 
     connect(leName, &QLineEdit::textChanged, this, &PocketRasterForm::onNameTextChanged);
 
@@ -72,7 +72,7 @@ PocketRasterForm::~PocketRasterForm() {
 }
 
 void PocketRasterForm::createFile() {
-    const auto tool {ui->toolHolder->tool()};
+    const auto tool {ui->toolHolder1->tool()};
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -84,9 +84,9 @@ void PocketRasterForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* item : App::scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (static_cast<GiType>(item->type())) {
+        switch (item->type()) {
         case GiType::DataSolid:
         case GiType::DataPath:
             if (!file) {
@@ -98,7 +98,7 @@ void PocketRasterForm::createFile() {
                         return;
                 }
             }
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid)
+            if (item->type() == GiType::DataSolid)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
@@ -145,7 +145,7 @@ void PocketRasterForm::createFile() {
 }
 
 void PocketRasterForm::updateName() {
-    const auto& tool {ui->toolHolder->tool()};
+    const auto& tool {ui->toolHolder1->tool()};
     if (tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);
@@ -189,3 +189,5 @@ void PocketRasterForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1
 
 void PocketRasterForm::editFile(GCode::File* /*file*/) {
 }
+
+#include "moc_pocketraster_form.cpp"

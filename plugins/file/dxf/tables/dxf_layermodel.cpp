@@ -189,3 +189,5 @@ void ItemsTypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
 void ItemsTypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
 } // namespace Dxf
+
+#include "moc_dxf_layermodel.cpp"

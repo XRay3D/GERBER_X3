@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "ft_typedelegate.h"
 
 #include "file.h"
@@ -53,3 +53,5 @@ void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, cons
 void TypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
 } // namespace FileTree
+
+#include "moc_ft_typedelegate.cpp"

@@ -123,3 +123,5 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_sourcedialog.cpp"

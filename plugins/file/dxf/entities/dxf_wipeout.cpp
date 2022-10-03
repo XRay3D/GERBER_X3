@@ -10,9 +10,12 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "wipeout.h"
+#include "dxf_wipeout.h"
+#include "dxf_file.h"
+
 namespace Dxf {
-WIPEOUT::WIPEOUT(SectionParser* sp)
-    : Entity(sp) {
-}
+
+Wipeout::Wipeout(SectionParser* sp)
+    : Entity(sp) { }
+
 } // namespace Dxf

@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "depthform.h"
 #include "app.h"
 #include "doublespinbox.h"
@@ -153,3 +153,5 @@ void DepthForm::retranslateUi(QWidget* Form) {
     rbCustom->setText(QApplication::translate("DepthForm", "U", nullptr));
     rbCustom->setToolTip(QApplication::translate("DepthForm", "User", nullptr));
 }
+
+#include "moc_depthform.cpp"

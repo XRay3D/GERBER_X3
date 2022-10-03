@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "colorselector.h"
 
 #include <QColorDialog>
@@ -107,3 +107,5 @@ void ColorSelector::resetColor() {
 }
 
 void ColorSelector::updateName() { lineEdit->setText(color_.name(QColor::HexArgb).toUpper()); }
+
+#include "moc_colorselector.cpp"

@@ -128,3 +128,5 @@ Node* Model::getItem(const QModelIndex& index) const {
 }
 
 } // namespace Thermal
+
+#include "moc_thermal_model.cpp"

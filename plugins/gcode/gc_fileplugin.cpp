@@ -9,13 +9,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 
 #include "gc_fileplugin.h"
 #include "file.h"
 #include "ft_view.h"
 #include "gc_file.h"
-#include "gc_node.h"
+//#include "gc_node.h"
 
 #include <QMessageBox>
 #include <QtWidgets>
@@ -74,7 +74,6 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
         Tab(QWidget* parent = nullptr)
             : SettingsTabInterface(parent) {
             setObjectName(QString::fromUtf8("tabGCode"));
-            qDebug() << this;
             auto /**/ verticalLayout1 = new QVBoxLayout(this);
             /**/ verticalLayout1->setObjectName(QString::fromUtf8("/**/verticalLayout1"));
             /**/ verticalLayout1->setContentsMargins(6, 6, 6, 6);
@@ -320,3 +319,5 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 FileInterface* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
 
 } // namespace GCode
+
+#include "moc_gc_fileplugin.cpp"

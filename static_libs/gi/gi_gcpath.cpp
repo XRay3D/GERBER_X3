@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_gcpath.h"
 
 #include "gcode.h"
@@ -90,7 +90,7 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 #endif
 }
 
-int GiGcPath::type() const { return static_cast<int>(GiType::Path); }
+int GiGcPath::type() const { return GiType::Path_; }
 
 Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
 #ifdef QT_DEBUG

@@ -12,5 +12,16 @@
 namespace Dxf {
 struct Dimension final : Entity {
     Dimension(SectionParser* sp);
+    Type type() const override { return Type::DIMENSION; }
+    GraphicObject toGo() const override {
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        return {};
+    }
+    void parse(CodeData& code) override {
+        do {
+            data.push_back(code);
+            code = sp->nextCode();
+        } while (code.code() != 0);
+    }
 };
 } // namespace Dxf

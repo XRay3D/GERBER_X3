@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "mleaderstyle.h"
+#include "dxf_mleaderstyle.h"
 namespace Dxf {
-MLEADERSTYLE::MLEADERSTYLE(SectionParser* sp)
+MLeaderStyle::MLeaderStyle(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

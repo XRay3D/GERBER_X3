@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "viewport.h"
+#include "dxf_viewport.h"
 namespace Dxf {
-VIEWPORT::VIEWPORT(SectionParser* sp)
+Viewport::Viewport(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

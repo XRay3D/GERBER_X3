@@ -61,3 +61,5 @@ AbstractTable::Type AbstractTable::toType(const QString& key) {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_abstracttable.cpp"

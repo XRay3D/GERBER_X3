@@ -11,34 +11,69 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shrectangle.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "shhandler.h"
 #include <QIcon>
+#include <ranges>
 
 namespace Shapes {
 
 Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
     paths_.resize(1);
+    paths_.front().resize(5);
     handlers.reserve(PtCount);
 
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
-    handlers.emplace_back(std::make_unique<Handler>(this));
-    handlers.emplace_back(std::make_unique<Handler>(this));
-    handlers.emplace_back(std::make_unique<Handler>(this));
-    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[Point1]->setPos(pt1);
     handlers[Point3]->setPos(pt2);
-
+    currentHandler = handlers[Point1].get();
     redraw();
 
-    App::scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
 
-Rectangle::~Rectangle() { }
-
 void Rectangle::redraw() {
-    handlers[Center]->QGraphicsItem::setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center());
+
+    auto updCenter = [this] {
+        handlers[Center]->setPos(QLineF(
+            handlers[Point1]->pos(),
+            handlers[Point3]->pos())
+                                     .center());
+    };
+    auto updCorner = [this](int src, int p1, int p2) {
+        handlers[p1]->setPos(handlers[src]->x(), currentHandler->y());
+        handlers[p2]->setPos(currentHandler->x(), handlers[src]->y());
+    };
+
+    switch (handlers.indexOf(currentHandler)) {
+    case Center: {
+        QRectF rect(handlers[Point1]->pos(), handlers[Point3]->pos());
+        rect.moveCenter(handlers[Center]->pos());
+        auto center { handlers[Center]->pos() };
+        handlers[Point1]->setPos(rect.topLeft());
+        handlers[Point2]->setPos(rect.topRight());
+        handlers[Point3]->setPos(rect.bottomRight());
+        handlers[Point4]->setPos(rect.bottomLeft());
+    } break;
+    case Point1:
+        updCorner(Point3, Point2, Point4), updCenter();
+        break;
+    case Point2:
+        updCorner(Point4, Point1, Point3), updCenter();
+        break;
+    case Point3:
+        updCorner(Point1, Point2, Point4), updCenter();
+        break;
+    case Point4:
+        updCorner(Point2, Point1, Point3), updCenter();
+        break;
+    }
+
     paths_.front() = {
         handlers[Point1]->pos(),
         handlers[Point2]->pos(),
@@ -46,74 +81,34 @@ void Rectangle::redraw() {
         handlers[Point4]->pos(),
         handlers[Point1]->pos(),
     };
+
     if (Area(paths_.front()) < 0)
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(paths_.front());
-    setPos({1, 1}); //костыли    //update();
-    setPos({0, 0});
+    setPos({ 1, 1 }); //костыли    //update();
+    setPos({ 0, 0 });
 }
 
 QString Rectangle::name() const { return QObject::tr("Rectangle"); }
 
 QIcon Rectangle::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-void Rectangle::updateOtherHandlers(Handler* handler) {
-    switch (handlers.indexOf(handler)) {
-    case Center:
-        return;
-    case Point1:
-        handlers[Point2]->QGraphicsItem::setPos(handlers[Point3]->pos().x(), handler->pos().y());
-        handlers[Point4]->QGraphicsItem::setPos(handler->pos().x(), handlers[Point3]->pos().y());
-        break;
-    case Point2:
-        handlers[Point1]->QGraphicsItem::setPos(handlers[Point4]->pos().x(), handler->pos().y());
-        handlers[Point3]->QGraphicsItem::setPos(handler->pos().x(), handlers[Point4]->pos().y());
-        break;
-    case Point3:
-        handlers[Point2]->QGraphicsItem::setPos(handlers[Point1]->pos().x(), handler->pos().y());
-        handlers[Point4]->QGraphicsItem::setPos(handler->pos().x(), handlers[Point1]->pos().y());
-        break;
-    case Point4:
-        handlers[Point1]->QGraphicsItem::setPos(handlers[Point2]->pos().x(), handler->pos().y());
-        handlers[Point3]->QGraphicsItem::setPos(handler->pos().x(), handlers[Point2]->pos().y());
-        break;
-    }
-}
-
 void Rectangle::setPt(const QPointF& pt) {
     handlers[Point3]->setPos(pt);
     updateOtherHandlers(handlers[Point3].get());
-    redraw();
 }
 
 ////////////////////////////////////////////////////////////
-/// \brief Plugin::Plugin
+/// \brief PluginImpl::PluginImpl
 ///
-Plugin::Plugin() { }
 
-Plugin::~Plugin() { }
+int PluginImpl::type() const { return GiType::ShRectangle; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShRectangle); }
+QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-QIcon Plugin::icon() const { return QIcon::fromTheme("draw-rectangle"); }
-
-Shape* Plugin::createShape() { return shape = new Rectangle(); }
-
-Shape* Plugin::createShape(const QPointF& point) { return shape = new Rectangle(point, point); }
-
-bool Plugin::addShapePoint(const QPointF&) { return false; }
-
-void Plugin::updateShape(const QPointF& point) {
-    if (shape)
-        shape->setPt(point);
-}
-
-void Plugin::finalizeShape() {
-    if (shape)
-        shape->finalize();
-    shape = nullptr;
-    emit actionUncheck();
-}
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point + QPointF { 10, 10 }); }
 
 } // namespace Shapes
+
+#include "moc_shrectangle.cpp"

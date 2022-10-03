@@ -1089,3 +1089,5 @@ bool Parser::parseUnitMode(const QString& gLine) {
 }
 
 } // namespace Gerber
+
+#include "moc_gbrparser.cpp"

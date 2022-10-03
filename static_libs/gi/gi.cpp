@@ -14,20 +14,20 @@
  * "A generic solution to polygon clipping"                                     *
  * Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
  * http://portal.acm.org/citation.cfm?id=129906                                 *
- *******************************************************************************/
+ ********************************************************************************/
 
 #include "gi.h"
 #include "file.h"
 #include "gi_group.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
 
 GraphicsItem::GraphicsItem(FileInterface* file)
-    : animation(this, "bodyColor")
-    , visibleAnim(this, "opacity")
-    , file_(file)
+    : //    animation(this, "bodyColor")
+      //    , visibleAnim(this, "opacity")     ,
+    file_(file)
     , pen_(QPen(Qt::white, 0.0))
     , colorPtr_(file ? &file->color() : nullptr)
     , color_(Qt::white)
@@ -35,12 +35,12 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     , pathColor_(Qt::transparent)
 
 {
-    animation.setDuration(100);
-    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    //    animation.setDuration(100);
+    //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     connect(this, &GraphicsItem::colorChanged, [this] { update(); });
-    visibleAnim.setDuration(100);
-    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
+    //    visibleAnim.setDuration(100);
+    //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
     QGraphicsItem::setVisible(false);
 
     //    connect(this, &QGraphicsObject::rotationChanged, [] { qDebug("rotationChanged"); });
@@ -72,13 +72,14 @@ void GraphicsItem::setPenColorPtr(const QColor* penColor) {
 void GraphicsItem::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
     //        return;
-    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
-    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
-    visibleAnim.start();
-    if (visible) {
-        setOpacity(0.0);
-        QGraphicsObject::setVisible(visible);
-    }
+    //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
+    //    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
+    //    visibleAnim.start();
+    //    if (visible) {
+    //        setOpacity(0.0);
+    setOpacity(1.0 * visible);
+    QGraphicsObject::setVisible(visible);
+    //    }
 }
 
 const FileInterface* GraphicsItem::file() const { return file_; }
@@ -116,9 +117,11 @@ double GraphicsItem::scaleFactor() const {
 };
 
 QRectF GraphicsItem::boundingRect() const {
-    if (App::scene()->boundingRect())
+    if (App::graphicsView()->boundingRectFl())
         return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }
 
 QPainterPath GraphicsItem::shape() const { return shape_; }
+
+#include "moc_gi.cpp"

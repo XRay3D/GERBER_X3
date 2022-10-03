@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "tool_treeview.h"
 #include "tool_item.h"
 
@@ -144,3 +144,5 @@ void ToolTreeView::updateItem() {
         update(index);
     }
 }
+
+#include "moc_tool_treeview.cpp"

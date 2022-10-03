@@ -3,7 +3,7 @@
 #include "drill_form.h"
 #include "qwidget.h"
 
-namespace Drill {
+namespace DrillPlugin {
 
 class Header : public QHeaderView {
     Q_OBJECT
@@ -38,4 +38,4 @@ private:
     Model* model() const;
 };
 
-} // namespace Drill
+} // namespace DrillPlugin

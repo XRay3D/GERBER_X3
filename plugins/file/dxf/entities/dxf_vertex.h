@@ -22,9 +22,12 @@ public:
     //    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
-    GraphicObject toGo() const override { return {}; }
-    void write(QDataStream&) const override { }
-    void read(QDataStream&) override { }
+    GraphicObject toGo() const override {
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        return {};
+    }
+    // void write(QDataStream&) const override { }
+    // void read(QDataStream&) override { }
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbVertex)

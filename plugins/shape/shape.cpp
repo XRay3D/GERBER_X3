@@ -9,10 +9,10 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "shape.h"
 #include "ft_view.h"
-#include "scene.h"
+#include "qgraphicsscene.h"
 #include "shhandler.h"
 #include "shnode.h"
 
@@ -36,15 +36,15 @@ Shape::Shape()
 Shape::~Shape() { }
 
 void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    if (App::scene()->drawPdf()) [[unlikely]] {
-        pathColor_ = Qt::black;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
-    } else [[likely]] {
-        pathColor_ = bodyColor_;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) [[unlikely]] {
+    //        pathColor_ = Qt::black;
+    //        pathColor_.setAlpha(255);
+    //        pen_.setColor(pathColor_);
+    //    } else [[likely]] {
+    pathColor_ = bodyColor_;
+    pathColor_.setAlpha(255);
+    pen_.setColor(pathColor_);
+    //    }
 
     painter->setPen(pen_);
     painter->setBrush(bodyColor_);
@@ -63,22 +63,25 @@ void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // группово�
     const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
     for (auto& [shape, hPos] : hInitPos) {
         for (size_t i = 0, e = hPos.size(); i < e; ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(hPos[i] + dp);
+            shape->handlers[i]->setPos(hPos[i] + dp);
         shape->redraw();
     }
 }
 
-void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
-{
+void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
     QGraphicsItem::mousePressEvent(event);
+    if (currentHandler)
+        return;
+    currentHandler = {};
     hInitPos.clear();
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for (auto item : scene()->selectedItems()) {
-        if (static_cast<GiType>(item->type()) >= GiType::ShCircle) {
+        if (item->type() >= GiType::ShCircle) {
             auto* shape = static_cast<Shape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
-            for (auto& h : shape->handlers) {
+            for (auto&& h : shape->handlers) {
+                h->setFlag(ItemSendsScenePositionChanges, false);
                 hInitPos[shape].emplace_back(h->pos());
             }
         }
@@ -107,10 +110,10 @@ QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVari
     return GraphicsItem::itemChange(change, value);
 }
 
-void Shape::updateOtherHandlers(Handler*) { }
+void Shape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
 
 void Shape::changeColor() {
-    animation.setStartValue(bodyColor_);
+    //    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
@@ -129,8 +132,8 @@ void Shape::changeColor() {
         break;
     }
 
-    animation.setEndValue(bodyColor_);
-    animation.start();
+    //    animation.setEndValue(bodyColor_);
+    //    animation.start();
 }
 
 Node* Shape::node() const { return node_; }
@@ -211,37 +214,35 @@ void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
 }
 
 // write to project
-void Shape::write_(QDataStream& stream) const {
+void Shape::write(QDataStream& stream) const {
     stream << bool(GraphicsItem::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
     for (const auto& item : handlers) {
         stream << item->pos();
-        stream << item->hType_;
+        stream << item->type_;
     }
-    write(stream);
 }
 
 // read from project
-void Shape::read_(QDataStream& stream) {
+void Shape::read(QDataStream& stream) {
+    stream >> isFinal;
+    setFlag(ItemIsSelectable, isFinal);
+
     isFinal = true;
-    {
-        bool fl;
-        stream >> fl;
-        setFlag(ItemIsSelectable, fl);
-    }
+
     qint32 size;
     stream >> size;
     handlers.reserve(size);
-    while (size--) {
-        QPointF pos;
-        int type;
+    QPointF pos;
+    Handle::Type type;
+    for (int i {}; i < size; ++i) {
         stream >> pos;
         stream >> type;
-        handlers.emplace_back(std::make_unique<Handler>(this, static_cast<Handler::HType>(type)));
-        handlers.back()->QGraphicsItem::setPos(pos);
-        handlers.back()->setVisible(false);
+        if (handlers.size() < size)
+            handlers.emplace_back(std::make_unique<Handle>(this, type));
+        handlers[i]->QGraphicsItem::setPos(pos);
+        handlers[i]->setVisible(false);
     }
-    read(stream);
     redraw();
 }
 

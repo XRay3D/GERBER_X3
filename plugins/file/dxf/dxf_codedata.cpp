@@ -22,7 +22,7 @@ QDebug operator<<(QDebug debug, const CodeData& c) {
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr /*  */ (std::is_same_v<T, double>) {
-            debug << "Dou ";
+            debug << "F64 ";
         } else if constexpr (std::is_same_v<T, int16_t>) {
             debug << "I16 ";
         } else if constexpr (std::is_same_v<T, int32_t>) {
@@ -179,3 +179,5 @@ QVariant CodeData::value() const {
 }
 
 } // namespace Dxf
+
+#include "moc_dxf_codedata.cpp"

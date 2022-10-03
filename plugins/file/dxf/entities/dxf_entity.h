@@ -12,6 +12,7 @@
 
 #include "dxf_codedata.h"
 #include "dxf_graphicobject.h"
+#include "dxf_types.h"
 #include "section/dxf_sectionparser.h"
 #include <QLineF>
 #include <QObject>
@@ -236,5 +237,7 @@ public:
 
     };
 };
+
+std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp);
 
 } // namespace Dxf

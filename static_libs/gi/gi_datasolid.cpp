@@ -9,12 +9,11 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_datasolid.h"
 
 #include "file.h"
 #include "graphicsview.h"
-#include "scene.h"
 #include <QElapsedTimer>
 #include <QPainter>
 #include <QPropertyAnimation>
@@ -36,15 +35,17 @@ GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
 GiDataSolid::~GiDataSolid() { }
 
 void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    if (App::scene()->drawPdf()) {
-        painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen);
-        painter->drawPath(shape_);
-        return;
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    //        painter->setBrush(Qt::black);
+    //        painter->setPen(Qt::NoPen);
+    //        painter->drawPath(shape_);
+    //        return;
+    //    }
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
+    //    for (auto&& poly : shape_.toFillPolygons())
+    //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
 
     //    pen_.setWidthF(option->state & QStyle::State_Selected
@@ -55,7 +56,7 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
     painter->strokePath(shape_, pen_);
 }
 
-int GiDataSolid::type() const { return static_cast<int>(GiType::DataSolid); }
+int GiDataSolid::type() const { return GiType::DataSolid; }
 
 void GiDataSolid::redraw() {
     //    shape_ = QPainterPath();
@@ -93,7 +94,7 @@ void GiDataSolid::changeColor() {
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
 
-    animation.setStartValue(bodyColor_);
+    //    animation.setStartValue(bodyColor_);
 
     bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
 
@@ -131,6 +132,6 @@ void GiDataSolid::changeColor() {
         break;
     }
 
-    animation.setEndValue(bodyColor_);
-    animation.start();
+    //    animation.setEndValue(bodyColor_);
+    //    animation.start();
 }

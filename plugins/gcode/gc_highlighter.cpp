@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gc_highlighter.h"
 #include "mvector.h"
 #include <QBoxLayout>
@@ -109,3 +109,5 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
 }
 
 Dialog::~Dialog() { }
+
+#include "moc_gc_highlighter.cpp"

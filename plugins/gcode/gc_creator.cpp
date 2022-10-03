@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gc_creator.h"
 #include "gc_file.h"
 #include "gc_types.h"
@@ -242,7 +242,7 @@ void Creator::stacking(Paths& paths) {
     }
     sortPolyNodeByNesting(polyTree);
     returnPss.clear();
-    /***********************************************************************************************/
+    /************************************************************************************************/
 
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
         QList<std::iterator_traits<Path::iterator>::difference_type> list;
@@ -309,7 +309,7 @@ void Creator::stacking(Paths& paths) {
         }
         // PROG setProgInc();
     };
-    /***********************************************************************************************/
+    /************************************************************************************************/
     // PROG .3setProgMax(polyTree.Total());
     stacker({polyTree.GetFirst(), false});
 
@@ -894,3 +894,5 @@ bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret) 
 }
 
 } // namespace GCode
+
+#include "moc_gc_creator.cpp"

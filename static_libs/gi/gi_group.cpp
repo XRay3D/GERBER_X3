@@ -9,12 +9,13 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_group.h"
-#include "scene.h"
+#include "graphicsview.h"
 
 GiGroup::~GiGroup() {
-    if (App::scene() && App::scene()->items().size())
+    auto scene {App::graphicsView()->scene()};
+    if (scene && scene->items().size())
         qDeleteAll(*this);
 }
 
@@ -41,7 +42,7 @@ void GiGroup::setSelected(const mvector<int>& ids) {
 
 void GiGroup::addToScene(QGraphicsScene* scene) {
     for (auto item : *this)
-        (scene ? scene : App::scene())->addItem(item);
+        (scene ? scene : App::graphicsView()->scene())->addItem(item);
 }
 
 void GiGroup::setBrushColor(const QColor& color) {

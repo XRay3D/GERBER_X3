@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "oleframe.h"
+#include "dxf_oleframe.h"
 namespace Dxf {
-OLEFRAME::OLEFRAME(SectionParser* sp)
+OleFrame::OleFrame(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

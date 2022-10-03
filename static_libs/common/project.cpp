@@ -9,15 +9,14 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include <project.h>
 
 #include "file.h"
 #include "ft_model.h"
+#include "graphicsview.h"
 
 #include "shapepluginin.h"
-
-#include <scene.h>
 
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -45,18 +44,18 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<ShapeInterface>& shape) {
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape) {
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<ShapeInterface>& shape) {
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape) {
     int type;
     stream >> type;
     if (App::shapePlugins().contains(type)) {
         shape.reset(App::shapePlugin(type)->createShape());
         stream >> *shape;
-        App::scene()->addItem(shape.get());
+        App::graphicsView()->scene()->addItem(shape.get());
     }
     return stream;
 }
@@ -316,7 +315,7 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types) {
     return rfiles;
 }
 
-ShapeInterface* Project::shape(int id) {
+Shapes::Shape* Project::shape(int id) {
     QMutexLocker locker(&mutex_);
     return shapes_[id].get();
 }
@@ -345,7 +344,7 @@ int Project::addFile(FileInterface* file) {
     return file->id();
 }
 
-int Project::addShape(ShapeInterface* const shape) {
+int Project::addShape(Shapes::Shape* const shape) {
     QMutexLocker locker(&mutex_);
     if (!shape)
         return -1;
@@ -515,3 +514,5 @@ void Project::setGlue(double glue) {
     glue_ = glue;
     setChanged();
 }
+
+#include "moc_project.cpp"

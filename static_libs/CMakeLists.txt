@@ -7,13 +7,15 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+#********************************************************************************/
+cmake_minimum_required(VERSION 3.20)
+
 
 project(Static_Libs)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#include (${CMAKE_SOURCE_DIR}/CXXModules.cmake)
 include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})

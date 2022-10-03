@@ -9,12 +9,11 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "shhandler.h"
 #include "app.h"
 #include "doublespinbox.h"
 #include "graphicsview.h"
-#include "scene.h"
 
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
@@ -55,12 +54,79 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     painter->restore();
 }
 
-Handler::Handler(Shape* shape, HType type)
+Handle::Handle(Shape* shape, Type type)
     : shape(shape)
-    , hType_(type) {
+    , type_(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
-    switch (hType_) {
+    App::graphicsView()->scene()->addItem(this);
+    App::shapeHandlers().emplace_back(this);
+    setHType(type);
+}
+
+Handle::~Handle() {
+    App::shapeHandlers().removeOne(this);
+}
+
+QRectF Handle::boundingRect() const { return rect; }
+
+void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+    static const QColor cc[] {
+        Qt::yellow,
+        Qt::red,
+        Qt::green,
+    };
+
+    auto c = cc[type_];
+
+    if (option->state & QStyle::State_MouseOver)
+        drawPos(painter, pos());
+    else
+        c.setAlpha(100);
+
+    painter->setBrush(c);
+    painter->setPen(QPen(Qt::black, 0.0));
+
+    static double scale;
+    if (scale != App::graphicsView()->scaleFactor()) {
+        double scale = App::graphicsView()->scaleFactor();
+        const double k = Size * scale;
+        const double s = k * 2;
+        rect = {QPointF(-k, -k), QSizeF(s, s)};
+    }
+
+    if (!pressed)
+        painter->drawEllipse(rect);
+}
+
+// void Handler::setPos(const QPointF& pos) {
+//     QGraphicsItem::setPos(pos);
+//     if (hType_ == Center) {
+//         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
+//             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
+//     } else if (shape->isFinal) { // прилипание
+//         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
+//         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
+//         for (Handler* h : App::shapeHandlers()) {
+//             if (h != this &&                                          //
+//                 (h->shape != shape || (fl && h->hType() != Adder)) && //
+//                 h->shape->isVisible() &&                              //
+//                 QLineF(h->pos(), pos).length() < k                    //
+//             ) {
+//                 QGraphicsItem::setPos(h->pos());
+//                 break;
+//             }
+//         }
+//         shape->updateOtherHandlers(this);
+//     }
+//     shape->redraw();
+// }
+
+Handle::Type Handle::hType() const { return type_; }
+
+void Handle::setHType(Type value) {
+    type_ = value;
+    switch (type_) {
     case Adder:
         setZValue(std::numeric_limits<double>::max() - 2);
         break;
@@ -71,88 +137,13 @@ Handler::Handler(Shape* shape, HType type)
         setZValue(std::numeric_limits<double>::max() - 1);
         break;
     }
-    App::scene()->addItem(this);
-    App::shapeHandlers().emplace_back(this);
 }
 
-Handler::~Handler() {
-    App::shapeHandlers().removeOne(this);
-}
-
-QRectF Handler::boundingRect() const { return rect(); }
-
-void Handler::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    painter->setPen(Qt::NoPen);
-    QColor c;
-    switch (hType_) {
-    case Adder:
-        c = QColor(Qt::yellow);
-        break;
-    case Center:
-        c = QColor(Qt::red);
-        break;
-    case Corner:
-        c = QColor(Qt::green);
-        break;
-    }
-    if (option->state & QStyle::State_MouseOver) {
-        drawPos(painter, pos());
-    } else
-        c.setAlpha(100);
-    painter->setBrush(c);
-    painter->setPen(QPen(Qt::black, 0.0));
-    if (!pressed)
-        painter->drawEllipse(rect());
-}
-
-void Handler::setPos(const QPointF& pos) {
-    QGraphicsItem::setPos(pos);
-    if (hType_ == Center) {
-        for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
-            shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
-    } else if (shape->isFinal) { // прилипание
-        const double k = App::graphicsView()->scaleFactor() * StickingDistance;
-        const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
-        for (Handler* h : App::shapeHandlers()) {
-            if (h != this &&                                          //
-                (h->shape != shape || (fl && h->hType() != Adder)) && //
-                h->shape->isVisible() &&                              //
-                QLineF(h->pos(), pos).length() < k                    //
-            ) {
-                QGraphicsItem::setPos(h->pos());
-                break;
-            }
-        }
-        shape->updateOtherHandlers(this);
-    }
-    shape->redraw();
-}
-
-Handler::HType Handler::hType() const { return hType_; }
-
-void Handler::setHType(const HType& value) { hType_ = value; }
-
-QRectF Handler::rect() const {
-    const double scale = App::graphicsView()->scaleFactor();
-    const double k = Size * scale;
-    const double s = k * 2;
-    return {QPointF(-k, -k), QSizeF(s, s)};
-}
-
-void Handler::savePos() {
-    if (hType_ != Center)
-        return;
-    pt.clear();
-    pt.reserve(shape->handlers.size());
-    for (auto& item : shape->handlers)
-        pt.emplace_back(item->pos());
-}
-
-void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
-    savePos();
+void Handle::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+    //    savePos();
     class Dialog : public QDialog {
     public:
-        Dialog(Handler* h) {
+        Dialog(Handle* h) {
             setWindowFlags(Qt::Popup);
             setModal(false);
             // clang-format off
@@ -163,51 +154,98 @@ void Handler::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 ds->setDecimals(3);
                 ds->setRange(-1000, +1000);
                 ds->setSuffix(QObject::tr(" mm"));
-                ds->setValue(type == X ? h->pos().x() : h->pos().y());
-                connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                    [h, type](auto val) {
-                        if (type == X)
-                            h->setPos({val, h->pos().y()});
-                        else
-                            h->setPos({h->pos().x(), val});
-                        h->shape->updateOtherHandlers(h);
-                        h->shape->redraw();
-                    });
+                ds->setValue(type == X ? h->x() : h->y());
+                connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged), [h, type](auto val) {
+                    type == X ? h->setX(val) : h->setY(val);
+                    h->shape->updateOtherHandlers(h);
+                });
                 return ds;
             };
-
-            auto gl = new QGridLayout(this);
-            gl->addWidget(new QLabel("X:", this), 0, 0);
-            gl->addWidget(new QLabel("Y:", this), 1, 0);
-            gl->addWidget(dsbx(X), 0, 1);
-            gl->addWidget(dsbx(Y), 1, 1);
+            auto gl = new QFormLayout(this);
+            gl->addRow(new QLabel("X:", this), dsbx(X));
+            gl->addRow(new QLabel("Y:", this), dsbx(Y));
             gl->setContentsMargins(6, 6, 6, 6);
         }
         ~Dialog() = default;
-        void leaveEvent(QEvent*) override { reject(); };
+        void leaveEvent(QEvent* event) override { event->accept(), reject(); };
     } dialog(this);
     dialog.move(event->screenPos());
     dialog.exec();
 }
 
-void Handler::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
+void Handle::hoverEnterEvent(QGraphicsSceneHoverEvent* event) { shape->hoverEnterEvent(event); }
 
-void Handler::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
+void Handle::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) { shape->hoverLeaveEvent(event); }
 
-void Handler::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+void Handle::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
+    shape->updateOtherHandlers(this);
 }
 
-void Handler::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    savePos();
-    pressed = true;
+struct Data {
+    QPointF pos;
+    Handle::Type type;
+};
+using HandlePosN = std::unordered_map<Handle*, Data>;
+static HandlePosN lastHandlePos;
+
+void Handle::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    lastPos = pos();
+    for (auto&& handle : shape->handlers)
+        lastHandlePos.emplace(handle.get(), Data {handle->pos(), handle->type_});
     QGraphicsItem::mousePressEvent(event);
+    pressed = true;
 }
 
-void Handler::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     pressed = false;
     QGraphicsItem::mouseReleaseEvent(event);
+
+    class ShapeMoveCommand : public QUndoCommand {
+    public:
+        ShapeMoveCommand(HandlePosN&& lastHandlePos, Handle* handle, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
+            : QUndoCommand {parent}
+            , graphicsScene {graphicsScene}
+            , lastHandlePos {std::move(lastHandlePos)}
+            , redoPos {handle->pos(), handle->type_}
+            , handle {handle} {
+            setText("Shape Handle Moved");
+        }
+
+        ~ShapeMoveCommand() { }
+
+        void undo() override {
+            auto shape {lastHandlePos.begin()->first->shape};
+
+            mvector<int> toDelete;
+            for (auto&& handle : shape->handlers) {
+                if (lastHandlePos.contains(handle.get())) {
+                    auto [pos, type] = lastHandlePos.at(handle.get());
+                    handle->setPos(pos), handle->type_ = type;
+                } else
+                    toDelete.emplace_back(shape->handlers.indexOf(handle));
+            }
+            for (auto index : toDelete)
+                shape->handlers.takeAt(index);
+
+            shape->currentHandler = nullptr;
+            shape->redraw();
+        }
+
+        void redo() override {
+            handle->setPos(redoPos.pos);
+            handle->type_ = redoPos.type;
+            handle->shape->updateOtherHandlers(handle);
+        }
+
+    private:
+        QGraphicsScene* const graphicsScene;
+        const HandlePosN lastHandlePos;
+        const Data redoPos;
+        Handle* const handle;
+    };
+    App::undoStack()->push(new ShapeMoveCommand(std::move(lastHandlePos), this, scene()));
 }
 
 } // namespace Shapes

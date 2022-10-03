@@ -23,7 +23,7 @@ public:
     ~PocketOffsetForm() override;
 
 private slots:
-    void on_sbxSteps_valueChanged(int arg1);
+    void onSbxStepsValueChanged(int arg1);
     void onNameTextChanged(const QString& arg1);
 
 private:

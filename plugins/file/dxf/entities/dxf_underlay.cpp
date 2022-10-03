@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "underlay.h"
+#include "dxf_underlay.h"
 namespace Dxf {
-UNDERLAY::UNDERLAY(SectionParser* sp)
+Underlay::Underlay(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

@@ -9,13 +9,12 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_datapath.h"
 
 #include "file.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "scene.h"
 #include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -33,10 +32,6 @@ GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
-    if (!timer.isActive()) {
-        timer.start(50);
-        connect(&timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
-    }
 }
 
 void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
@@ -68,7 +63,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawPath(shape_);
 }
 
-int GiDataPath::type() const { return static_cast<int>(GiType::DataPath); }
+int GiDataPath::type() const { return GiType::DataPath; }
 
 QPainterPath GiDataPath::shape() const { return selectionShape_; }
 

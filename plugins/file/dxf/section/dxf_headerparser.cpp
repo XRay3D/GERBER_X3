@@ -18,6 +18,7 @@ namespace Dxf {
 SectionHEADER::SectionHEADER(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
     , header(file->header()) {
+    parse();
 }
 
 void SectionHEADER::parse() {

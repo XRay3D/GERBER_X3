@@ -10,7 +10,6 @@
  *******************************************************************************/
 #pragma once
 
-#include "dxf_block.h"
 #include "dxf_entity.h"
 
 namespace Dxf {
@@ -23,7 +22,10 @@ public:
     void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
-    GraphicObject toGo() const override { return {}; }
+    GraphicObject toGo() const override {
+        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        return {};
+    }
     void write(QDataStream& stream) const override { }
     void read(QDataStream& stream) override { }
 
@@ -31,9 +33,9 @@ public:
 
     enum DataEnum {
         SubclassMrker = 100,       // Subclass marker (AcDbBlockReference)
-        VariableAttributes = 66,   /* Variable attributes-follow flag (optional; default = 0);
-                         if the value of attributes-follow flag is 1,
-                         a series of attribute entities is expected to follow the insert, terminated by a seqend entity*/
+        VariableAttributes = 66,   // Variable attributes-follow flag (optional; default = 0);
+                                   // if the value of attributes-follow flag is 1,
+                                   // a series of attribute entities is expected to follow the insert, terminated by a seqend entity*/
         BlockName = 2,             // Block name
         InsPtX = 10,               // Insertion point (in OCS) // DXF: X value; APP: 3D point
         InsPtY = 20,               // DXF: Y value of insertion point (in OCS)

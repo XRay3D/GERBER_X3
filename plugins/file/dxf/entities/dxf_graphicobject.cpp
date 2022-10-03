@@ -42,9 +42,7 @@ QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
     return stream;
 }
 
-size_t GraphicObject::entityId() const {
-    return entityId_;
-}
+size_t GraphicObject::entityId() const { return entityId_; }
 
 GraphicObject::GraphicObject()
     : AbstrGraphicObject {{}} { }

@@ -108,3 +108,5 @@ QDataStream& operator>>(QDataStream& stream, Component& c) {
 }
 
 } // namespace Gerber::Comp
+
+#include "moc_gbrcomp_onent.cpp"

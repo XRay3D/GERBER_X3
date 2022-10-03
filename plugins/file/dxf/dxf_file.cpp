@@ -26,6 +26,7 @@
 #include "dxf_node.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -134,6 +135,7 @@ Layer* File::layer(const QString& name) {
 FileType File::type() const { return FileType::Dxf; }
 
 void File::createGi() {
+    Timer t {__FUNCTION__};
 
     for (auto& [name, layer] : layers_)
         for (auto& go : layer->graphicObjects_)
@@ -153,10 +155,10 @@ void File::createGi() {
             }
 
             Clipper clipper; // Clipper
-
+            const bool empty {layer->groupedPaths_.empty()};
             for (auto& go : layer->graphicObjects_) {
-                if (layer->groupedPaths_.empty() && go.paths().size())
-                    clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
+                if (empty && go.paths().size())
+                    clipper.AddPaths(go.paths(), ptSubject, true);
 
                 if (go.path().size() > 1) {
                     auto gItem = new GiDataPath(go.path(), this);
@@ -171,9 +173,8 @@ void File::createGi() {
                 }
             }
 
-            if (layer->groupedPaths_.empty()) {
-                clipper.Execute(ctUnion, mergedPaths_, pftNonZero); // Clipper
-                //                dbgPaths(mergedPaths_, "mergedPaths_", true);
+            if (empty) {
+                clipper.Execute(ctUnion, mergedPaths_, pftNonZero);
                 layer->groupedPaths_ = std::move(groupedPaths());
                 for (auto& paths : layer->groupedPaths_)
                     CleanPolygons(paths, uScale * 0.0005);
@@ -192,7 +193,7 @@ void File::createGi() {
             layer->itemGroupPath = igPath;
 
             if (layer->itemsType_ == ItemsType::Null) {
-                layer->setItemsType(ItemsType::Normal);
+                layer->setItemsType(ItemsType::Both);
                 layer->setVisible(true);
             } else
                 layer->setVisible(visible_);

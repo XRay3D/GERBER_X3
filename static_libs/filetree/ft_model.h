@@ -7,14 +7,15 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include <QAbstractItemModel>
 
 class FileInterface;
-
-class ShapeInterface;
+namespace Shapes {
+class Shape;
+}
 class Project;
 
 namespace FileTree {
@@ -82,7 +83,7 @@ private:
     const QString mimeType;
 
     void addFile(FileInterface* file);
-    void addShape(ShapeInterface* shape);
+    void addShape(Shapes::Shape* shape);
 };
 
 } // namespace FileTree

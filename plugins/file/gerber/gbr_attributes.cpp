@@ -312,3 +312,5 @@ void Aperture::parse(const QStringList& list) {
 }
 
 } // namespace Gerber::Attr
+
+#include "moc_gbr_attributes.cpp"

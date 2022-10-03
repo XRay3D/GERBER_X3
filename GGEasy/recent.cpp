@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "recent.h"
 
 #include "mainwindow.h"
@@ -115,3 +115,5 @@ void Recent::openRecentFile() {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
         mainWindow->loadFile(action->data().toString());
 }
+
+#include "moc_recent.cpp"
