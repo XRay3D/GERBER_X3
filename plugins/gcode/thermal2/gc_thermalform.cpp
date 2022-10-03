@@ -327,3 +327,5 @@ void ThermalForm::on_dsbxAreaMax_editingFinished() {
         createTPI(nullptr);
     }
 }
+
+#include "moc_gc_thermalform.cpp"

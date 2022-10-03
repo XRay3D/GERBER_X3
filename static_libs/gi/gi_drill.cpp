@@ -9,11 +9,11 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_drill.h"
 
-#include "scene.h"
-#include <graphicsview.h>
+#include "graphicsview.h"
+#include "myclipper.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -34,16 +34,16 @@ GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int too
 
 void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
-    if (App::scene()->drawPdf()) {
-        painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen);
-        painter->drawPath(shape_);
-        return;
-    }
+    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    //        painter->setBrush(Qt::black);
+    //        painter->setPen(Qt::NoPen);
+    //        painter->drawPath(shape_);
+    //        return;
+    //    }
 
     painter->setBrush(bodyColor_);
     painter->setPen(Qt::NoPen);
-    painter->drawPolygon(shape_.toFillPolygon());
+    painter->drawPath(shape_);
 
     pen_.setColor(pathColor_);
     painter->strokePath(shape_, pen_);
@@ -72,7 +72,7 @@ Paths GiDrill::paths(int alternate) const {
 }
 
 void GiDrill::changeColor() {
-    animation.setStartValue(bodyColor_);
+    //    animation.setStartValue(bodyColor_);
 
     switch (colorState) {
     case Default:
@@ -103,8 +103,8 @@ void GiDrill::changeColor() {
         break;
     }
 
-    animation.setEndValue(bodyColor_);
-    animation.start();
+    //    animation.setEndValue(bodyColor_);
+    //    animation.start();
 }
 
 void GiDrill::create() {
@@ -113,10 +113,12 @@ void GiDrill::create() {
     if (!path_.size()) {
         return;
     } else if (path_.size() == 1) {
-        path_ = CirclePath(diameter_ ? diameter_ * uScale : uScale, path_.front());
-        ReversePath(path_);
-        path_.push_back(path_.front());
-        shape_.addPolygon(path_);
+        //        path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
+        //        ReversePath(path_);
+        //        path_.push_back(path_.front());
+        // shape_.addPolygon(path_);
+        shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
+        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
         Paths paths;

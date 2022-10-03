@@ -8,9 +8,10 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-project(rectangle LANGUAGES CXX)
+
+project(shrectangle LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -25,13 +26,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-add_library(rectangle SHARED
+add_library(${PROJECT_NAME} SHARED
     rectangle.json
     shrectangle.cpp
     shrectangle.h
 )
 
-target_link_libraries(rectangle PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     common
     filetree
@@ -46,7 +47,7 @@ target_link_libraries(rectangle PRIVATE
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    target_link_libraries(rectangle PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
 

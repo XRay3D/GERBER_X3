@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include "mvector.h"
@@ -29,22 +29,16 @@ enum FileVersion {
 };
 
 class FileInterface;
-class ShapeInterface;
+namespace Shapes {
+class Shape;
+}
 class QFile;
 class QFileSystemWatcher;
 enum class FileType;
 
-#if __cplusplus > 201703L
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
-using ShapesMap = std::map<int, std::shared_ptr<ShapeInterface>>;
-#else
-struct FilesMap : std::map<int, std::shared_ptr<FileInterface>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-struct ShapesMap : std::map<int, std::shared_ptr<ShapeInterface>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-#endif
+using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
+
 class Project : public QObject {
     Q_OBJECT
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file);
@@ -94,8 +88,8 @@ public:
     int contains(const QString& name);
 
     // Shape
-    int addShape(ShapeInterface* const shape);
-    ShapeInterface* shape(int id);
+    int addShape(Shapes::Shape* const shape);
+    Shapes::Shape* shape(int id);
     void deleteShape(int id);
 
     // Project

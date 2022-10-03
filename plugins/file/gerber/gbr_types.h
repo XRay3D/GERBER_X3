@@ -27,21 +27,7 @@ public:
 
 class AbstractAperture;
 
-#if __cplusplus > 201703L
 using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
-
-#else
-struct ApertureMap : std::map<int, std::shared_ptr<AbstractAperture>> {
-    using M = std::map<int, std::shared_ptr<AbstractAperture>>;
-    bool contains(int key) const { return find(key) != end(); }
-    M& map() { return *this; }
-    const M& map() const { return *this; }
-};
-struct VarMap : std::map<QString, double> {
-    using M = std::map<QString, double>;
-    bool contains(const QString& key) const { return find(key) != end(); }
-};
-#endif
 
 enum ZeroOmissionMode {
     OmitLeadingZeros,

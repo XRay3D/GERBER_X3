@@ -15,7 +15,6 @@
 
 #include "ex_file.h"
 #include "graphicsview.h"
-#include "scene.h"
 #include <cmath>
 
 #include "ex_settingstab.h"
@@ -65,12 +64,12 @@ FormatDialog::~FormatDialog() {
 void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for (QGraphicsItem* item : App::scene()->selectedItems()) {
-        if (static_cast<GiType>(item->type()) == GiType::Drill) {
+    for (QGraphicsItem* item : App::graphicsView()->scene()->selectedItems()) {
+        if (item->type() == GiType::Drill) {
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (static_cast<GiType>(item->type()) != GiType::Drill) {
+        if (item->type() != GiType::Drill) {
             pair.second = item->boundingRect().center();
             ++c;
         }
@@ -132,3 +131,5 @@ void FormatDialog::on_pbSetAsDefault_clicked() {
 }
 
 } // namespace Excellon
+
+#include "moc_ex_formatdialog.cpp"

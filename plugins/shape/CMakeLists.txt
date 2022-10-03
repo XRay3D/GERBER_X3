@@ -7,8 +7,9 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+#********************************************************************************/
+cmake_minimum_required(VERSION 3.20)
+
 
 project(shape)
 set(CMAKE_CXX_STANDARD 20)
@@ -18,15 +19,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
-
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -48,9 +42,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-#add_subdirectory(circle)
-#add_subdirectory(circlearc)
-#add_subdirectory(polyline)
-#add_subdirectory(rectangle)
-#add_subdirectory(text)
+add_subdirectory(circle)
+add_subdirectory(circlearc)
+add_subdirectory(polyline)
+add_subdirectory(rectangle)
+add_subdirectory(text)
 

@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include "file.h"
@@ -25,7 +25,7 @@ struct GCObj : QObject {
     //    virtual ~GCObj() { }
 };
 
-class File : private GCUtils, public FileInterface {
+class File : public GCFile {
     friend class ::GiGcPath;
     friend class ::MainWindow;
 

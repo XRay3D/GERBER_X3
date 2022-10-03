@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "dimension.h"
+#include "dxf_dimension.h"
 namespace Dxf {
-DIMENSION::DIMENSION(SectionParser* sp)
+Dimension::Dimension(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

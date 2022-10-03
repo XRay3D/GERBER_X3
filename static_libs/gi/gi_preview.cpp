@@ -9,11 +9,10 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gi_preview.h"
 
 #include "graphicsview.h"
-#include "scene.h"
 #include "tool_pch.h"
 #include <QPainter>
 #include <QPropertyAnimation>
@@ -37,7 +36,7 @@ GiAbstractPreview::GiAbstractPreview()
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
-    App::scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
 
 void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
@@ -131,3 +130,5 @@ QVariant GiAbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change,
     }
     return QGraphicsItem::itemChange(change, value);
 }
+
+#include "moc_gi_preview.cpp"

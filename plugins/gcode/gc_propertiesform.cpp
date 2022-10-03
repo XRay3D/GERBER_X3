@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gc_propertiesform.h"
 #include "ui_gcodepropertiesform.h"
 
@@ -165,3 +165,5 @@ void GCodePropertiesForm::on_pbResetZero_clicked() {
     ui->dsbxZeroX->setValue(0);
     ui->dsbxZeroY->setValue(0);
 }
+
+#include "moc_gc_propertiesform.cpp"

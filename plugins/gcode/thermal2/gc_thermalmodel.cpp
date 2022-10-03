@@ -124,3 +124,5 @@ ThermalNode* ThermalModel::getItem(const QModelIndex& index) const {
     }
     return rootItem;
 }
+
+#include "moc_gc_thermalmodel.cpp"

@@ -7,13 +7,12 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
+#include "graphicsview.h"
 #include "mvector.h"
-#include "scene.h"
 
-#include <QGraphicsItem>
 #include <span>
 
 bool updateRect();

@@ -10,10 +10,11 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 
 #include "gc_fileplugin.h"
 #include "gc_plugin.h"
+#include "splashscreen.h"
 
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -24,8 +25,46 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QTextCodec>
+#endif
 
-void translation(QApplication* app);
+#include <algorithm>
+#include <qapplication.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+    QByteArray localMsg = msg.toUtf8();
+    const char* file = context.file ? context.file : "";
+    //    const char* function = context.function ? context.function : "";
+
+    const char* file_ {file};
+    while (*file > 0) {
+        if (*file == '\\')
+            file_ = file + 1;
+        ++file;
+    }
+    file = file_;
+
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+        break;
+    case QtInfoMsg:
+        fprintf(stdout, "Info: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+        break;
+    }
+}
 
 int main(int argc, char** argv) {
     //    qInstallMessageHandler(myMessageOutput);
@@ -34,12 +73,20 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    // qInstallMessageHandler(myMessageOutput);
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
     Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
+
+//    DoubleSpinBox dsbx;
+//    dsbx.resize(500, 50);
+//    dsbx.setRange(-9999, +9999);
+//    dsbx.show();
+//    dsbx.setSuffix(" mm");
+//    return app.exec();
 
     //#ifdef Q_OS_WIN
     //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -58,6 +105,10 @@ int main(int argc, char** argv) {
     QApplication::setApplicationName("GGEasy");
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+#endif
 
     [[maybe_unused]] App appSingleton;
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
@@ -79,9 +130,8 @@ int main(int argc, char** argv) {
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
         QSharedMemory nix_fix_shared_memory("GGEasyMemory");
-        if (nix_fix_shared_memory.attach()) {
+        if (nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
-        }
 #endif
         MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
@@ -99,11 +149,9 @@ int main(int argc, char** argv) {
         parser.process(app);
         if (is_running) {
             system("pause");
-            if (parser.positionalArguments().length()) {
-                for (const QString& fileName : parser.positionalArguments()) {
+            if (parser.positionalArguments().length())
+                for (const QString& fileName : parser.positionalArguments())
                     instance()->loadFile(fileName);
-                }
-            }
             return 1;
         } else {
         }
@@ -146,7 +194,7 @@ int main(int argc, char** argv) {
                         App::filePlugins().emplace(file->type(), file);
                         continue;
                     }
-                    if (auto* shape = qobject_cast<ShapePlugin*>(pobj); shape) {
+                    if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
                         shape->setInfo(loader.metaData().value("MetaData").toObject());
                         App::shapePlugins().emplace(shape->type(), shape);
                         continue;
@@ -159,6 +207,7 @@ int main(int argc, char** argv) {
                 }
             }
         }
+
         if (1) { // add dummy gcode plugin
             auto parser = new GCode::Plugin(&app);
             App::filePlugins().emplace(parser->type(), parser);
@@ -183,9 +232,9 @@ int main(int argc, char** argv) {
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");
     parser.process(app);
-    for (const QString& fileName : parser.positionalArguments()) {
+
+    for (const QString& fileName : parser.positionalArguments())
         mainWin.loadFile(fileName);
-    }
 
     mainWin.show();
     splash->finish(&mainWin);

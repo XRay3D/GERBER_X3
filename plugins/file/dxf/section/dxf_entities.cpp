@@ -22,6 +22,7 @@ SectionENTITIES::SectionENTITIES(File* file, Codes::iterator from, Codes::iterat
     : SectionParser(from, to, file)
     , sp(this)
     , blocks(file->blocks()) {
+    parse();
 }
 
 SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* sp)
@@ -54,78 +55,96 @@ void SectionENTITIES::parse() {
 
 std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     key = Entity::toType(code);
+
+    return createEntity(key, blocks, sp);
+
     switch (key) {
     case Entity::ACAD_PROXY_ENTITY:
-        break;
+        break; // return std::make_shared<ACADProxyEntity>(sp);
     case Entity::ARC:
-        return std::make_shared<Arc>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Arc>(sp);
     case Entity::ATTDEF:
-        return std::make_shared<AttDef>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<AttDef>(sp);
     case Entity::ATTRIB:
-        return std::make_shared<Attrib>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Attrib>(sp);
     case Entity::BODY:
-        break;
+        return std::make_shared<Body>(sp);
     case Entity::CIRCLE:
-        return std::make_shared<Circle>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Circle>(sp);
     case Entity::DIMENSION:
-        break;
+        return std::make_shared<Dummy /*Dimension*/>(sp);
     case Entity::ELLIPSE:
-        return std::make_shared<Ellipse>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Ellipse>(sp);
     case Entity::HATCH:
-        return std::make_shared<Hatch>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Hatch>(sp);
     case Entity::HELIX:
+        return std::make_shared<Helix>(sp);
     case Entity::IMAGE:
-        break;
+        return std::make_shared<Image>(sp);
     case Entity::INSERT:
-        return std::make_shared<InsertEntity>(blocks, sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<InsertEntity>(blocks, sp);
     case Entity::LEADER:
+        return std::make_shared<Leader>(sp);
     case Entity::LIGHT:
-        break;
+        return std::make_shared<Light>(sp);
     case Entity::LINE:
-        return std::make_shared<Line>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Line>(sp);
     case Entity::LWPOLYLINE:
-        return std::make_shared<LwPolyline>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<LwPolyline>(sp);
     case Entity::MESH:
+        return std::make_shared<Mesh>(sp);
     case Entity::MLEADER:
+        return std::make_shared<MLeader>(sp);
     case Entity::MLEADERSTYLE:
+        return std::make_shared<MLeaderStyle>(sp);
     case Entity::MLINE:
-        break;
+        return std::make_shared<MLine>(sp);
     case Entity::MTEXT:
-        return std::make_shared<MText>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<MText>(sp);
     case Entity::OLE2FRAME:
+        return std::make_shared<Ole2Frame>(sp);
     case Entity::OLEFRAME:
-        break;
+        return std::make_shared<OleFrame>(sp);
     case Entity::POINT:
-        return std::make_shared<Point>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Point>(sp);
     case Entity::POLYLINE:
-        return std::make_shared<PolyLine>(sp); // entities.append(make_shared<Dummy>(sp, Entity::POLYLINE));
+        return std::make_shared<PolyLine>(sp);
     case Entity::RAY:
+        return std::make_shared<Ray>(sp);
     case Entity::REGION:
+        return std::make_shared<Region>(sp);
     case Entity::SECTION:
+        return std::make_shared<Section>(sp);
     case Entity::SEQEND:
-        return std::make_shared<SeqEnd>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<SeqEnd>(sp);
     case Entity::SHAPE:
-        break;
+        return std::make_shared<Shape>(sp);
     case Entity::SOLID:
-        return std::make_shared<Solid>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Solid>(sp);
     case Entity::SPLINE:
-        return std::make_shared<Spline>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Spline>(sp);
     case Entity::SUN:
+        return std::make_shared<Sun>(sp);
     case Entity::SURFACE:
+        return std::make_shared<Surface>(sp);
     case Entity::TABLE:
-        break;
+        return std::make_shared<Table>(sp);
     case Entity::TEXT:
-        return std::make_shared<Text>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Text>(sp);
     case Entity::TOLERANCE:
+        return std::make_shared<Tolerance>(sp);
     case Entity::TRACE:
+        return std::make_shared<Trace>(sp);
     case Entity::UNDERLAY:
+        return std::make_shared<Underlay>(sp);
     case Entity::VERTEX:
-        break;
+        return std::make_shared<Vertex>(sp);
     case Entity::VIEWPORT:
-        return std::make_shared<Dummy>(sp); // return std::make_shared<Dummy>(sp);
+        return std::make_shared<Viewport>(sp);
     case Entity::WIPEOUT:
+        return std::make_shared<Dummy /*Wipeout*/>(sp);
     case Entity::XLINE:
-        break;
+        return std::make_shared<XLine>(sp);
     default:
         throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
     }

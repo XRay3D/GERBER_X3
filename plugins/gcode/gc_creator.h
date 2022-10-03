@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 #include "gc_types.h"
 #include <myclipper.h>
@@ -16,13 +16,14 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <source_location>
 #include <sstream>
 
-#ifdef __GNUC__
+#if  __has_include(<source_location>)
+#include <source_location>
 using sl = std::source_location;
 #else
-using sl = std::source_location;
+#include <experimental/source_location>
+using sl = std::experimental::source_location;
 #endif
 
 using namespace ClipperLib;

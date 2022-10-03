@@ -13,7 +13,7 @@
 #include "gc_gidrillpreview.h"
 #include "utils.h"
 
-namespace Drill {
+namespace DrillPlugin {
 
 GiPreview::GiPreview(PosOrPath&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
     : hv {std::move(hv)}
@@ -148,4 +148,4 @@ Paths GiPreview::offset() const {
     return offset(paths().front(), sourceDiameter_);
 }
 
-} // namespace Drill
+} // namespace DrillPlugin

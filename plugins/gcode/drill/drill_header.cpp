@@ -15,7 +15,7 @@
 
 #include <QTableView>
 
-namespace Drill {
+namespace DrillPlugin {
 
 Header::Header(Qt::Orientation orientation, QWidget* parent)
     : QHeaderView(orientation, parent) {
@@ -113,4 +113,5 @@ bool Header::checked(int index) const { return model()->useForCalc(index); }
 
 Model* Header::model() const { return static_cast<Model*>(static_cast<QTableView*>(parent())->model()); }
 
-} // namespace Drill
+} // namespace DrillPlugin
+#include "moc_drill_header.cpp"

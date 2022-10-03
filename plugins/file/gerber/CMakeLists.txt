@@ -8,9 +8,10 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-project(gerber LANGUAGES CXX)
+
+project(flgerber LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -42,7 +43,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     graphicsview
     #    thermal
     tooldatabase
-    File_Plugins
+    file_plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

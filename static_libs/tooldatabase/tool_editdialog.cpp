@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "tool_editdialog.h"
 
 #include "ui_tooleditdialog.h"
@@ -33,3 +33,5 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
 Tool ToolEditDialog::tool() const { return ui->toolEdit->tool_; }
 
 void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }
+
+#include "moc_tool_editdialog.cpp"

@@ -13,9 +13,9 @@
 #include "profile.h"
 #include "gc_file.h"
 #include "gi_bridge.h"
+#include "graphicsview.h"
 #include "mainwindow.h"
 #include "profile_form.h"
-#include "scene.h"
 #include <numbers>
 
 namespace GCode {
@@ -172,8 +172,8 @@ void ProfileCreator::cornerTrimming() {
 void ProfileCreator::makeBridges() {
     // find Bridges
     mvector<GiBridge*> bridgeItems;
-    for (QGraphicsItem* item : App::scene()->items()) {
-        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
+        if (item->type() == GiType::Bridge)
             bridgeItems.push_back(static_cast<GiBridge*>(item));
     }
     // create Bridges

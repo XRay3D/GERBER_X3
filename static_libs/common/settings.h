@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 #include <QColor>
 #include <QDebug>
@@ -140,8 +140,8 @@ struct GuiColors {
         Background,
         Pin,
         CutArea,
-        Grid1,
-        Grid5,
+        Grid01,
+        Grid05,
         Grid10,
         Hole,
         Home,

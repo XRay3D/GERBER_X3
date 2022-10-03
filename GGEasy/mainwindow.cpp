@@ -10,21 +10,25 @@
  * License: *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt *
- *******************************************************************************/
+ ********************************************************************************/
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 #include "aboutform.h"
+#include "file.h"
+#include "file_plugin.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
+#include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "gi_point.h"
+#include "graphicsview.h"
 #include "plugindialog.h"
 #include "project.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
+//#include "qt.h"
 
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -39,25 +43,25 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui {new Ui::MainWindow}
     , recentFiles {this, "recentFiles"}
     , recentProjects {this, "recentProjects"}
     , project_ {new Project {this}}
     , actionGroup {this}
     , reloadQuestion {this} {
     App::setMainWindow(this);
+    App::setUndoStack(&undoStack_);
 
-    ui->setupUi(this);
+    ui.setupUi(this);
 
     initWidgets();
     LayoutFrames* lfp;
-    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
-    ui->graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(new GiPin());
-    ui->graphicsView->scene()->addItem(lfp = new LayoutFrames());
+    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
+    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
     GCodePropertiesForm(); // init default vars;
 
@@ -82,22 +86,20 @@ MainWindow::MainWindow(QWidget* parent)
 
     parserThread.start(QThread::HighestPriority);
 
-    connect(ui->graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+    connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
 
     // Shapes::Constructor
-    connect(ui->graphicsView, &GraphicsView::mouseMove, &ShapePlugin::updateShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickR, &ShapePlugin::finalizeShape_);
-    connect(ui->graphicsView, &GraphicsView::mouseClickL, &ShapePlugin::addShapePoint_);
+
     // status bar
-    connect(ui->graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
-        ui->statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
+    connect(ui.graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
+        ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
-    ui->treeView->setModel(new FileTree::Model(ui->treeView));
+    ui.treeView->setModel(new FileTree::Model(ui.treeView));
 
-    connect(ui->treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
-    connect(ui->treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
-    connect(ui->treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
+    connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
+    connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
     App::toolHolder().readTools();
     setCurrentFile(QString());
@@ -105,12 +107,15 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
+    connect(&GiDataPath::timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
+    GiDataPath::timer.start(50);
+
     if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
         int i = 100;
         int k = 100;
 
-        if (0) {
-            QDir dir(R"(C:\Users\X-Ray\YandexDisk\Табуретка2\Фрагмент3_)");
+        if (1) {
+            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber_file_format_examples 20181113)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
@@ -125,7 +130,8 @@ MainWindow::MainWindow(QWidget* parent)
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
         if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(C:\Users\X-Ray\YandexDisk\ТабуреткаD57_Голубая/D57.dxf)"); });
+            //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/Downloads/ФАЛЬШПАНЕЛИ РАСХОДОМЕТРИЯ-dxf/725327.003 Панель EL-SV-11-R-AG-измен.dxf)"); });
+            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
@@ -141,8 +147,8 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
-
-        QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
+        if (0)
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
     }
 }
 
@@ -170,7 +176,7 @@ bool MainWindow::closeProject() {
         App::fileModel()->closeProject();
         setCurrentFile(QString());
         project_->close();
-        // ui->graphicsView->scene()->clear();
+        // ui.graphicsView->scene()->clear();
         return true;
     }
     return false;
@@ -224,52 +230,50 @@ void MainWindow::createActionsFile() {
 
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(fileToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
+    QAction* action;
+    // New
+    action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+    action->setShortcuts(QKeySequence::New);
+    action->setStatusTip(tr("Create a new file"));
+    fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
 
-    { // New
-        auto action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
-        action->setShortcuts(QKeySequence::New);
-        action->setStatusTip(tr("Create a new file"));
-        fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
-    }
-    { // Open
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
-        action->setShortcuts(QKeySequence::Open);
-        action->setStatusTip(tr("Open an existing file"));
-        fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
-    }
-    { // Save
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
-        action->setShortcuts(QKeySequence::Save);
-        action->setStatusTip(tr("Save the document to disk"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
-    }
-    { // Save As
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
-        action->setShortcuts(QKeySequence::SaveAs);
-        action->setStatusTip(tr("Save the document under a new name"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
-    }
-    { // Close project
-        closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
-        closeAllAct_->setShortcuts(QKeySequence::Close);
-        closeAllAct_->setStatusTip(tr("Close project"));
-        // closeAllAct_->setEnabled(false);
-        fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
-    }
+    // Open
+    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action->setShortcuts(QKeySequence::Open);
+    action->setStatusTip(tr("Open an existing file"));
+    fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+
+    // Save
+    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    action->setShortcuts(QKeySequence::Save);
+    action->setStatusTip(tr("Save the document to disk"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+
+    // Save As
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    action->setShortcuts(QKeySequence::SaveAs);
+    action->setStatusTip(tr("Save the document under a new name"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+
+    // Close project
+    closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+    closeAllAct_->setShortcuts(QKeySequence::Close);
+    closeAllAct_->setStatusTip(tr("Close project"));
+    // closeAllAct_->setEnabled(false);
+    fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
 
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
-    { // Save Selected Tool Paths
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
-        action->setStatusTip(tr("Save selected toolpaths"));
-        fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
-    }
-    { // Export PDF
-        auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
-        action->setStatusTip(tr("Export to PDF file"));
-        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::scene(), &Scene::renderPdf);
-    }
+    // Save Selected Tool Paths
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    action->setStatusTip(tr("Save selected toolpaths"));
+    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+
+    // Export PDF
+    // FIXME       auto action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
+    //        action->setStatusTip(tr("Export to PDF file"));
+    //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -278,17 +282,16 @@ void MainWindow::createActionsFile() {
     recentProjects.createMenu(fileMenu, tr("Recent Projects..."));
 
     fileMenu->addSeparator();
-    {
-        auto action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
-        action->setShortcuts(QKeySequence::Print);
-        action->setStatusTip(tr("Print"));
-    }
+
+    action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
+    action->setShortcuts(QKeySequence::Print);
+    action->setStatusTip(tr("Print"));
+
     fileMenu->addSeparator();
-    {
-        auto action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
-        action->setShortcuts(QKeySequence::Quit);
-        action->setStatusTip(tr("Exit the application"));
-    }
+
+    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+    action->setShortcuts(QKeySequence::Quit);
+    action->setStatusTip(tr("Exit the application"));
 }
 
 void MainWindow::createActionsEdit() {
@@ -303,13 +306,15 @@ void MainWindow::createActionsEdit() {
 
     editMenu->addSeparator();
 
-    action = editMenu->addAction(tr("Undo"));
-    action->setEnabled(false);
-    action->setShortcut(QKeySequence::Undo);
+    undoAct = undoStack_.createUndoAction(this, tr("Undo"));
+    undoAct->setShortcut(QKeySequence::Undo);
+    undoAct->setIcon(QIcon::fromTheme("edit-undo"));
+    editMenu->addAction(undoAct);
 
-    action = editMenu->addAction(tr("Redo"));
-    action->setEnabled(false);
-    action->setShortcut(QKeySequence::Redo);
+    redoAct = undoStack_.createRedoAction(this, tr("Redo"));
+    redoAct->setShortcut(QKeySequence::Redo);
+    redoAct->setIcon(QIcon::fromTheme("edit-redo"));
+    editMenu->addAction(redoAct);
 }
 
 void MainWindow::createActionsService() {
@@ -319,6 +324,9 @@ void MainWindow::createActionsService() {
     toolpathToolBar->setObjectName("tbService");
     toolpathToolBar->setToolTip(tr("Service"));
 
+    toolpathToolBar->addAction(redoAct);
+    toolpathToolBar->addAction(undoAct);
+    toolpathToolBar->addSeparator();
     // Settings
     auto action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));
@@ -343,7 +351,7 @@ void MainWindow::createActionsService() {
             App::home()->resetPos(false);
             App::zero()->resetPos(false);
         }
-        ui->graphicsView->zoomFit();
+        ui.graphicsView->zoomFit();
     }));
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
@@ -352,7 +360,7 @@ void MainWindow::createActionsService() {
     action->setCheckable(true);
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(""), tr("Ruller"), ui->graphicsView, &GraphicsView::setRuler));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
@@ -391,26 +399,26 @@ void MainWindow::createActionsZoom() {
     connect(zoomToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
     { // Fit best
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui->graphicsView, &GraphicsView::zoomFit);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
         action->setShortcut(QKeySequence::FullScreen);
         vievMenu->addAction(action);
     }
     { // 100%
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui->graphicsView, &GraphicsView::zoom100);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
         action->setShortcut(tr("Ctrl+0"));
         vievMenu->addAction(action);
     }
     { // Zoom in
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui->graphicsView, &GraphicsView::zoomIn);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
         action->setShortcut(QKeySequence::ZoomIn);
         vievMenu->addAction(action);
     }
     { // Zoom out
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui->graphicsView, &GraphicsView::zoomOut);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
         action->setShortcut(QKeySequence::ZoomOut);
         vievMenu->addAction(action);
     }
@@ -419,8 +427,8 @@ void MainWindow::createActionsZoom() {
         vievMenu->addSeparator();
     }
     { // Zoom to selected
-        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
-        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui->graphicsView, &GraphicsView::zoomToSelected);
+        zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
+        auto action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
         action->setShortcut(QKeySequence("F12"));
         vievMenu->addAction(action);
     }
@@ -458,18 +466,23 @@ void MainWindow::createActionsShape() {
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    for (auto& [type, ptr] : App::shapePlugins()) {
-        auto action = toolBar->addAction(ptr->icon(), ptr->info().value("Name").toString());
+    for (auto& [type, shPlugin] : App::shapePlugins()) {
+        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value("Name").toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
-        // FIXME connect(ptr, &FilePlugin::actionUncheck(bool)), action, SLOT(setChecked(bool)));
-        connect(action, &QAction::toggled, [shInt = ptr, this](bool checked) {
+        connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
+        connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
             if (checked) {
-                ShapePlugin::finalizeShape_();
-                ShapePlugin::setShapePI(shInt);
+                connect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                connect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                connect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
                 setDockWidget(new QPushButton);
-            } else
-                ShapePlugin::finalizeShape_();
+            } else {
+                shPlugin->finalizeShape();
+                disconnect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                disconnect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                disconnect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+            }
         });
     }
 
@@ -478,16 +491,16 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        auto selectedItems(App::scene()->selectedItems());
+        auto selectedItems(App::graphicsView()->scene()->selectedItems());
         Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
-            if (static_cast<GiType>(clipItem->type()) >= GiType::ShCircle)
+            if (clipItem->type() >= GiType::ShCircle)
                 clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
         }
 
         QList<GraphicsItem*> rmi;
         for (QGraphicsItem* item : selectedItems) {
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid) {
+            if (item->type() == GiType::DataSolid) {
                 auto gitem = static_cast<GiDataSolid*>(item);
                 Clipper clipper;
                 clipper.AddPaths(gitem->paths(), ptSubject, true);
@@ -533,7 +546,7 @@ void MainWindow::saveGCodeFile(int id) {
         return;
     auto* file = project_->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCode::GCUtils::getLastDir().append(file->shortName()),
+        GCode::GCFile::getLastDir().append(file->shortName()),
         tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
 
     if (name.isEmpty())
@@ -566,7 +579,7 @@ void MainWindow::saveSelectedGCodeFiles() {
     for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
-                QString name(GCode::GCUtils::getLastDir().append(file->shortName()));
+                QString name(GCode::GCFile::getLastDir().append(file->shortName()));
                 if (!name.endsWith(GCode::Settings::fileExtension()))
                     name += QStringList({"_TS", "_BS"})[file->side()];
 
@@ -581,7 +594,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::GCUtils::getLastDir().append(files.first()->getTool().nameEnc()));
+            QString name(GCode::GCFile::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith(GCode::Settings::fileExtension()))
                 name += QStringList({"_TS", "_BS"})[files.first()->side()];
 
@@ -679,24 +692,22 @@ void MainWindow::writeSettings() {
 
 void MainWindow::selectAll() {
     if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items())
-            if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::Preview)
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
+            if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
-        for (QGraphicsItem* item : App::scene()->items())
-            if (const auto type = static_cast<GiType>(item->type());
-                type == GiType::Preview)
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
+            if (item->type() == GiType::Preview)
                 item->setSelected(true);
     } else {
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
 }
 
 void MainWindow::deSelectAll() {
-    for (QGraphicsItem* item : App::scene()->items())
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items())
         if (item->isVisible())
             item->setSelected(false);
 }
@@ -705,9 +716,9 @@ void MainWindow::printDialog() {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
-        ScopedTrue sTrue(App::scene()->drawPdf_);
+        // FIXME       ScopedTrue sTrue(App::graphicsView()->scene()->drawPdf_);
         QRectF rect;
-        for (QGraphicsItem* item : App::scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
@@ -722,7 +733,7 @@ void MainWindow::printDialog() {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        App::scene()->render(&painter,
+        App::graphicsView()->scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect,
             Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
@@ -780,7 +791,6 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::resetToolPathsActions() {
-    qWarning(__FUNCTION__);
     delete dockWidget_->widget();
     dockWidget_->setWidget(nullptr);
     dockWidget_->setVisible(false);
@@ -866,7 +876,7 @@ void MainWindow::addFileToPro(FileInterface* file) {
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    ui->graphicsView->zoomFit();
+    ui.graphicsView->zoomFit();
 }
 
 QString MainWindow::strippedName(const QString& fullFileName) {
@@ -877,7 +887,7 @@ QMenu* MainWindow::createPopupMenu() {
     QMenu* menu = QMainWindow::createPopupMenu();
     menu->removeAction(dockWidget_->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
-    menu->removeAction(ui->treeDockWidget->toggleViewAction());
+    menu->removeAction(ui.treeDockWidget->toggleViewAction());
 
     menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
     menu->addAction(tr("Icon size = 48"), [this]() { setIconSize(QSize(48, 48)); });
@@ -887,6 +897,10 @@ QMenu* MainWindow::createPopupMenu() {
 
     return menu;
 }
+
+const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
+
+QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
 
 void MainWindow::translate(const QString& locale) {
     static std::vector<std::unique_ptr<QTranslator>> translators;
@@ -907,7 +921,7 @@ void MainWindow::loadFile(const QString& fileName) {
         if (closeProject()) {
             project_->open(fileName);
             setCurrentFile(fileName);
-            QTimer::singleShot(100, Qt::CoarseTimer, ui->graphicsView, &GraphicsView::zoomFit);
+            QTimer::singleShot(100, Qt::CoarseTimer, ui.graphicsView, &GraphicsView::zoomFit);
             return;
         }
     } else {
@@ -1214,7 +1228,7 @@ void MainWindow::showEvent(QShowEvent* event) {
 void MainWindow::changeEvent(QEvent* event) {
     // В случае получения события изменения языка приложения
     if (event->type() == QEvent::LanguageChange)
-        ui->retranslateUi(this); // переведём окно заново
+        ui.retranslateUi(this); // переведём окно заново
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -1240,3 +1254,62 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
     }
     return QMainWindow::eventFilter(watched, event);
 }
+
+void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
+    if (MainWindow->objectName().isEmpty())
+        MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
+    MainWindow->resize(1600, 1000);
+    MainWindow->setWindowTitle(QString::fromUtf8("[*] GGEasy"));
+    MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
+    centralwidget = new QWidget(MainWindow);
+    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+    horizontalLayout = new QHBoxLayout(centralwidget);
+    horizontalLayout->setSpacing(0);
+    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setContentsMargins(3, 3, 3, 3);
+    graphicsView = new GraphicsView(centralwidget);
+    graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
+    graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    graphicsView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+
+    horizontalLayout->addWidget(graphicsView);
+
+    MainWindow->setCentralWidget(centralwidget);
+    menubar = new QMenuBar(MainWindow);
+    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menubar->setGeometry(QRect(0, 0, 1600, 26));
+    MainWindow->setMenuBar(menubar);
+    statusbar = new QStatusBar(MainWindow);
+    statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    MainWindow->setStatusBar(statusbar);
+    treeDockWidget = new QDockWidget(MainWindow);
+    treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
+    treeDockWidget->setMinimumSize(QSize(100, 119));
+    treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    widget = new QWidget();
+    widget->setObjectName(QString::fromUtf8("widget"));
+    verticalLayout = new QVBoxLayout(widget);
+    verticalLayout->setSpacing(6);
+    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setContentsMargins(3, 3, 3, 3);
+    treeView = new FileTree::View(widget);
+    treeView->setObjectName(QString::fromUtf8("treeView"));
+    treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    verticalLayout->addWidget(treeView);
+
+    treeDockWidget->setWidget(widget);
+    MainWindow->addDockWidget(Qt::LeftDockWidgetArea, treeDockWidget);
+
+    retranslateUi(MainWindow);
+
+    QMetaObject::connectSlotsByName(MainWindow);
+}
+
+void MainWindow::Ui::retranslateUi(QMainWindow* MainWindow) {
+    treeDockWidget->setWindowTitle(QCoreApplication::translate("MainWindow", "Files", nullptr));
+    (void)MainWindow;
+}
+
+#include "moc_mainwindow.cpp"

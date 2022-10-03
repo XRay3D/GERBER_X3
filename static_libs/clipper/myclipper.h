@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include "clipper.hpp"
@@ -15,31 +15,30 @@
 #include <QIcon>
 #include <QPolygonF>
 
-// QDebug operator<<(QDebug debug, const IntPoint& p)
-//{
-//     //QDebugStateSaver saver(debug);
-//     debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-//     return debug;
-// }
-
 Q_DECLARE_METATYPE(ClipperLib::IntPoint)
 
-using namespace ClipperLib;
+using Pathss = mvector /*mvector*/<ClipperLib::Paths>;
 
-using Pathss = mvector /*mvector*/<Paths>;
+double Perimeter(const ClipperLib::Path& path);
 
-double Perimeter(const Path& path);
+ClipperLib::Path CirclePath(double diametr, const ClipperLib::IntPoint& center = {});
 
-Path CirclePath(double diametr, const IntPoint& center = IntPoint());
-Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
-void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
-void TranslatePath(Path& path, const IntPoint& pos);
+ClipperLib::Path RectanglePath(double width, double height, const ClipperLib::IntPoint& center = {});
 
-void mergeSegments(Paths& paths, double glue = 0.0);
-void mergePaths(Paths& paths, const double dist = 0.0);
+void RotatePath(ClipperLib::Path& poligon, double angle, const ClipperLib::IntPoint& center = {});
+
+void TranslatePath(ClipperLib::Path& path, const ClipperLib::IntPoint& pos);
+
+void mergeSegments(ClipperLib::Paths& paths, double glue = 0.0);
+
+void mergePaths(ClipperLib::Paths& paths, const double dist = 0.0);
 
 enum { IconSize = 24 };
-QIcon drawIcon(const Paths& paths);
+
+QIcon drawIcon(const ClipperLib::Paths& paths);
+
 QIcon drawDrillIcon(QColor color = Qt::black);
 
-Paths& normalize(Paths& paths);
+ClipperLib::Paths& normalize(ClipperLib::Paths& paths);
+
+using namespace ClipperLib;

@@ -18,6 +18,7 @@ namespace Dxf {
 SectionTABLES::SectionTABLES(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
     , layers(file->layers()) {
+    parse();
 }
 
 SectionTABLES::~SectionTABLES() {

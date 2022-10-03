@@ -7,8 +7,9 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+#********************************************************************************/
+cmake_minimum_required(VERSION 3.20)
+
 
 project(graphicsview LANGUAGES CXX)
 
@@ -23,15 +24,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
 add_library(graphicsview STATIC
-    edid.cpp
-    edid.h
-    graphicsview.cpp
-    graphicsview.h
-    ruler.cpp
-    ruler.h
-    scene.cpp
-    scene.h
+    ${HEADERS}
+    ${SOURCES}
 )
 
 target_link_libraries(graphicsview PRIVATE

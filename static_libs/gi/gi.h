@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
 #include <myclipper.h>
@@ -18,7 +18,7 @@ using namespace ClipperLib;
 #include <QPen>
 #include <QPropertyAnimation>
 
-enum class GiType {
+enum /*class*/ GiType : int {
     DataPath = QGraphicsItem::UserType,
     DataSolid,
     Drill,
@@ -28,7 +28,7 @@ enum class GiType {
     MarkPin,
     MarkZero,
 
-    Path = QGraphicsItem::UserType + 200,
+    Path_ = QGraphicsItem::UserType + 200,
     Bridge,
 
     Preview = QGraphicsItem::UserType + 300, // Form
@@ -38,16 +38,21 @@ enum class GiType {
 
     Error = QGraphicsItem::UserType + 400, // Form
 
-    ShCircle = QGraphicsItem::UserType + 500,
+    ShapeBegin = QGraphicsItem::UserType + 500,
+    ShCircle = ShapeBegin,
     ShRectangle,
     ShPolyLine,
     ShCirArc,
     ShText,
+    ShHandler,
+    ShapeEnd
 };
 
 class FileInterface;
 class GiGroup;
-class ShapeInterface;
+namespace Shapes {
+class Shape;
+}
 
 class GraphicsItem : public QGraphicsObject {
 
@@ -78,11 +83,11 @@ public:
 
     virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
     virtual void setPaths(Paths paths, int alternate = {}) {
-        auto t {transform()};
-        auto a {qRadiansToDegrees(asin(t.m12()))};
+        auto t { transform() };
+        auto a { qRadiansToDegrees(asin(t.m12())) };
         t = t.rotateRadians(-t.m12());
-        auto x {t.dx()};
-        auto y {t.dy()};
+        auto x { t.dx() };
+        auto y { t.dy() };
         shape_ = {};
         t = {};
         t.translate(-x, -y);
@@ -92,7 +97,9 @@ public:
         redraw();
     }
     virtual void redraw() { }
-
+    // QGraphicsItem interface
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
     void setVisible(bool visible);
 
     const FileInterface* file() const;
@@ -104,8 +111,8 @@ public:
     virtual void changeColor() = 0;
 
 protected:
-    QPropertyAnimation animation;
-    QPropertyAnimation visibleAnim;
+    //    QPropertyAnimation animation;
+    //    QPropertyAnimation visibleAnim;
 
     mutable QRectF boundingRect_;
 
@@ -136,9 +143,4 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
-
-public:
-    // QGraphicsItem interface
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
 };

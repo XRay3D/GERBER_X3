@@ -127,3 +127,5 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
 }
 
 } // namespace Hpgl
+
+#include "moc_hpgl_sourcedialog.cpp"

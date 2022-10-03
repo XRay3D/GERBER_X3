@@ -25,12 +25,12 @@
  * and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
  * September 24-28, 2005 , Long Beach, California, USA                          *
  * http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
- *******************************************************************************/
+ ********************************************************************************/
 
 /********************************************************************************
  * This is a translation of the Delphi Clipper library and the naming style     *
  * used has retained a Delphi flavour.                                          *
- *******************************************************************************/
+ ********************************************************************************/
 #include "clipper.hpp"
 #include "app.h"
 
@@ -2517,7 +2517,7 @@ void GetHorzDirection(TEdge& HorzEdge, Direction& Dir, cInt& Left, cInt& Right) 
  * and with other non-horizontal edges [*]. Once these intersections are        *
  * processed, intermediate HEs then 'promote' the Edge above (NextInLML) into   *
  * the AEL. These 'promoted' edges may in turn intersect [%] with other HEs.    *
- *******************************************************************************/
+ ********************************************************************************/
 
 void Clipper::ProcessHorizontal(TEdge* horzEdge) {
     Direction dir;

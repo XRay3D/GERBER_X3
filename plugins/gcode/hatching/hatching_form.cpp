@@ -15,7 +15,7 @@
 #include "hatching.h"
 #include "ui_hatchingform.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -84,9 +84,9 @@ void HatchingForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* item : App::scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (static_cast<GiType>(item->type())) {
+        switch (item->type()) {
         case GiType::DataSolid:
         case GiType::DataPath:
             if (!file) {
@@ -98,7 +98,7 @@ void HatchingForm::createFile() {
                         return;
                 }
             }
-            if (static_cast<GiType>(item->type()) == GiType::DataSolid)
+            if (item->type() == GiType::DataSolid)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
@@ -189,3 +189,5 @@ void HatchingForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void HatchingForm::editFile(GCode::File* /*file*/) {
 }
+
+#include "moc_hatching_form.cpp"

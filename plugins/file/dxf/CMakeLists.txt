@@ -8,9 +8,10 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-project(dxf LANGUAGES CXX)
+
+project(fldxf LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -20,14 +21,10 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
-
-add_subdirectory(entities)
-add_subdirectory(section)
-add_subdirectory(tables)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 add_library(${PROJECT_NAME} SHARED
     ${HEADERS}
@@ -44,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
     graphicsview
     tooldatabase
-    File_Plugins
+    file_plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     #    Qt${QT_VERSION_MAJOR}::OpenGL

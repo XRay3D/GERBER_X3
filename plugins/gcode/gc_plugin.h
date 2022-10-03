@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QJsonObject>
+#include "plugindata.h"
 
 class QAction;
 class QMenu;
 class QToolBar;
 class QWidget;
 
-class GCodePlugin : public QObject {
+class GCodePlugin : public QObject, public PluginData {
     Q_OBJECT
 
 public:
@@ -22,14 +22,10 @@ public:
 
     [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);
 
-    const QJsonObject& info() const;
-    void setInfo(const QJsonObject& info);
-
 signals:
     void setDockWidget(QWidget* w);
 
 protected:
-    QJsonObject info_;
     enum { IconSize = 24 };
 };
 

@@ -21,7 +21,6 @@
 #include "gi_preview.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "scene.h"
 #include "settings.h"
 #include "tool_pch.h"
 
@@ -33,7 +32,7 @@
 #include <QThread>
 #include <QTimer>
 
-namespace Drill {
+namespace DrillPlugin {
 
 Paths offset(const Path& path, double offset, bool fl = false) {
     ClipperOffset cpOffset;
@@ -211,7 +210,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
                 auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
         }
 
-        App::scene()->update();
+        App::graphicsView()->scene()->update();
     } catch (const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;
@@ -594,4 +593,6 @@ void Form::updateName() { }
 
 void Form::editFile(GCode::File* file) { }
 
-} // namespace Drill
+} // namespace DrillPlugin
+
+#include "moc_drill_form.cpp"

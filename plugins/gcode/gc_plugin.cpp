@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gc_plugin.h"
 #include "app.h"
 
@@ -39,6 +39,5 @@ QAction* GCodePlugin::addAction(QMenu* menu, QToolBar* toolbar) {
     return action;
 }
 
-const QJsonObject& GCodePlugin::info() const { return info_; }
 
-void GCodePlugin::setInfo(const QJsonObject& info) { info_ = info; }
+#include "moc_gc_plugin.cpp"

@@ -15,7 +15,7 @@
 #include "ui_voronoiform.h"
 #include "voronoi.h"
 
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -88,9 +88,9 @@ void VoronoiForm::createFile() {
         return {};
     };
 
-    for (auto* item : App::scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
-        switch (static_cast<GiType>(item->type())) {
+        switch (item->type()) {
         case GiType::DataSolid:
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
             break;
@@ -155,3 +155,5 @@ void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
     ui->label_4->setVisible(index);
     ui->dsbxPrecision->setVisible(index);
 }
+
+#include "moc_voronoi_form.cpp"

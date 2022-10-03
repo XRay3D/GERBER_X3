@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #ifdef GBR_
 #include "gbr_node.h"
 #include "radiodelegate.h"
@@ -86,3 +86,5 @@ void RadioDelegate::commitAndCloseEditor() {
     // emit closeEditor(editor);
 }
 #endif
+
+#include "moc_ft_radiodelegate.cpp"

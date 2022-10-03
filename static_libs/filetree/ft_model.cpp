@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "ft_model.h"
 
 #include "file.h"
@@ -62,7 +62,7 @@ void Model::addFile(FileInterface* file) {
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
-void Model::addShape(ShapeInterface* shape) {
+void Model::addShape(Shapes::Shape* shape) {
     if (!shape)
         return;
 
@@ -336,3 +336,5 @@ Node* Model::getItem(const QModelIndex& index) const {
 }
 
 } // namespace FileTree
+
+#include "moc_ft_model.cpp"

@@ -7,13 +7,11 @@
 #* License:                                                                     *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
-cmake_minimum_required(VERSION 3.16)
+#********************************************************************************/
+cmake_minimum_required(VERSION 3.20)
 
-#set(PROJECT_NAME "GGEasy")
+project(GGEasy VERSION 0.8 LANGUAGES CXX)
 
-#project(${PROJECT_NAME} LANGUAGES CXX)
-project(GGEasy)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -24,45 +22,6 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_EXTENSIONS OFF)
-#set(PREBUILT_MODULE_PATH ${CMAKE_BINARY_DIR}/modules)
-
-#function(add_module name)
-#    file(MAKE_DIRECTORY ${PREBUILT_MODULE_PATH})
-#    add_custom_target(${name}.pcm
-#            COMMAND
-#                ${CMAKE_CXX_COMPILER}
-#                -std=c++20
-#                -stdlib=libc++
-#                -fmodules
-#                -c
-#                ${CMAKE_CURRENT_SOURCE_DIR}/${ARGN}
-#                -Xclang -emit-module-interface
-#                -o ${PREBUILT_MODULE_PATH}/${name}.pcm
-
-#            )
-#endfunction()
-
-#add_compile_options(-fmodules)
-#add_compile_options(-stdlib=libc++)
-#add_compile_options(-fbuiltin-module-map)
-#add_compile_options(-fimplicit-module-maps)
-#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
-
-#add_module(module module.h)
-##add_dependencies(${PROJECT_NAME} module.pcm)
-##add_library(${PROJECT_NAME} module.pcm)
-
-#add_compile_options(-fmodules)
-#add_compile_options(-stdlib=libc++)
-#add_compile_options(-fbuiltin-module-map)
-#add_compile_options(-fimplicit-module-maps)
-#add_compile_options(-fprebuilt-module-path=${PREBUILT_MODULE_PATH})
-
-
-# QtCreator supports the following variables for Android, which are identical to qmake Android variables.
-# Check http://doc.qt.io/qt-5/deployment-android.html for more information.
-# They need to be set before the find_package(Qt5 ...) call.
 
 #if(ANDROID)
 # set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
@@ -73,7 +32,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # endif()
 #endif()
 
-include (${CMAKE_SOURCE_DIR}/PATHS.cmake)
+#include(${CMAKE_SOURCE_DIR}/CXXModules.cmake)
 
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -82,72 +41,84 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}")
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
-    #    Concurrent
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
+    Widgets
+    LinguistTools
     Core
     Gui
     LinguistTools
     OpenGL
     PrintSupport
     Widgets
-    REQUIRED
 )
+
+# WINDOWS APP ICON
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
+
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE QRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qrc)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.ts)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-include_directories (
-    ${INCLUDE_DIRECTORIES}
-    ../plugins/shape/shape
-    ../static_libs/clipper
-    ../static_libs/common
-    ../static_libs/filetree
-    ../static_libs/gerber
-    ../static_libs/gi
-    ../static_libs/graphicsview
-    ../static_libs/thermal
-    ../static_libs/tooldatabase
-)
-
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
-    qt6_add_resources(RESOURCES res/resources.qrc)
+    qt6_add_resources(RESOURCES ${QRC_FILES})
 else()
-    qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/translations ${TS_FILES})
-    qt5_add_resources(RESOURCES res/resources.qrc)
+    qt5_add_resources(RESOURCES ${QRC_FILES})
 endif()
 
-
-# WINDOWS APP ICON
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
-
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
-
-add_executable(${PROJECT_NAME}
-    ${TS_FILES}
-    ${SOURCES}
-    ${HEADERS}
-    ${UIS}
-    ${RESOURCES}
+set(PROJECT_SOURCES
     ${APP_ICON_RESOURCE_WINDOWS}
-    ${MAGIC_GET}
+    ${HEADERS}
+    ${QRC_FILES}
+    ${RESOURCES}
+    ${SOURCES}
+    ${TS_FILES}
+    ${UIS}
 )
+
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(${PROJECT_NAME}
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+    )
+# Define target properties for Android with Qt 6 as:
+#    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+
+qt_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
+else()
+    if(ANDROID)
+        add_library(${PROJECT_NAME} SHARED
+            ${PROJECT_SOURCES}
+        )
+    # Define properties for Android with Qt 5 after find_package() calls as:
+    #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+else()
+    add_executable(${PROJECT_NAME}
+        ${PROJECT_SOURCES}
+    )
+endif()
+
+qt5_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     common
     filetree
+    gcode
     gi
     graphicsview
     shape
-    #    thermal
     tooldatabase
-    gcode
-    #    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::OpenGL
@@ -159,7 +130,22 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE_GUI_IDENTIFIER xr.ggeasy.com
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+install(TARGETS ${PROJECT_NAME}
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(${PROJECT_NAME})
+endif()
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
@@ -177,32 +163,61 @@ if(WIN32)
         COMMENT "Deploying Qt..."
     )
 elseif (UNIX)#LINUX
-    #    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
-endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${PATHS}")
+    find_program(Q_MAKE_EXE qmake)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
-        LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
-        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-        LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    find_program(CQT_EXE cqtdeployer)
+
+    if(NOT EXISTS ${CQT_EXE})
+        message("the cqtdeployer not exits please install the cqtdeployer and run cmake again!")
+        return()
+    endif()
+
+    add_custom_target(
+        deploy
+        COMMAND cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5
+        COMMENT "Deploy: cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5"
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
+
+
+#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND "${CMAKE_COMMAND}" -E
+#        env PATH="${_QT_BIN_DIR}" "cqtdeployer"
+#        -bin    $<TARGET_FILE:${PROJECT_NAME}>
+#        -qmake  ${QT_QMAKE_EXECUTABLE}
+#        qif
+#        COMMENT "Deploying Qt..."
+#    )
+
+#    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
-set(TARGETS ${PROJECT_NAME})
+#install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
 
-foreach(TNAME ${TARGETS})
-    target_compile_features(${TNAME} PUBLIC  cxx_std_20)
-    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_BINARY_DIR})
-    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
-endforeach()
+#set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${PATHS}")
 
-# COPY TRANSLATIONS
-file(GLOB_RECURSE QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qm)
-foreach(QM_FILE ${QM_FILES})
-    get_filename_component(QM_NAME ${QM_FILE} NAME)
-    configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
-    #    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
-endforeach()
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    set_target_properties(${PROJECT_NAME} PROPERTIES
+#        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
+#        LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
+#        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+#        LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+#    )
+#endif()
+
+#set(TARGETS ${PROJECT_NAME})
+
+#foreach(TNAME ${TARGETS})
+#    target_compile_features(${TNAME} PUBLIC  cxx_std_20)
+#    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_BINARY_DIR})
+#    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
+#endforeach()
+
+## COPY TRANSLATIONS
+#file(GLOB_RECURSE QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qm)
+#foreach(QM_FILE ${QM_FILES})
+#    get_filename_component(QM_NAME ${QM_FILE} NAME)
+#    configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
+#    #    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
+#endforeach()

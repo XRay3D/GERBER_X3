@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "tolerance.h"
+#include "dxf_tolerance.h"
 namespace Dxf {
-TOLERANCE::TOLERANCE(SectionParser* sp)
+Tolerance::Tolerance(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

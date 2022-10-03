@@ -15,7 +15,7 @@
 #include "ui_profileform.h"
 
 #include "gi_bridge.h"
-#include "scene.h"
+#include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
@@ -78,8 +78,8 @@ ProfileForm::~ProfileForm() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for (QGraphicsItem* giItem : App::scene()->items()) {
-        if (static_cast<GiType>(giItem->type()) == GiType::Bridge)
+    for (QGraphicsItem* giItem : App::graphicsView()->scene()->items()) {
+        if (giItem->type() == GiType::Bridge)
             delete giItem;
     }
     delete ui;
@@ -98,9 +98,9 @@ void ProfileForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* sItem : App::scene()->selectedItems()) {
+    for (auto* sItem : App::graphicsView()->scene()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
-        switch (static_cast<GiType>(sItem->type())) {
+        switch (sItem->type()) {
         case GiType::DataSolid:
         case GiType::DataPath:
             if (!file) {
@@ -112,7 +112,7 @@ void ProfileForm::createFile() {
                         return;
                 }
             }
-            if (static_cast<GiType>(sItem->type()) == GiType::DataSolid)
+            if (sItem->type() == GiType::DataSolid)
                 wPaths.append(gi->paths());
             else
                 wRawPaths.append(gi->paths());
@@ -147,8 +147,8 @@ void ProfileForm::createFile() {
     gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
-    for (QGraphicsItem* item : App::scene()->items()) {
-        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
+        if (item->type() == GiType::Bridge)
             brv.push_back(item->pos());
     }
     if (!brv.isEmpty()) {
@@ -184,7 +184,7 @@ void ProfileForm::onAddBridgeClicked() {
             delete brItem;
     }
     brItem = new GiBridge(lenght_, size_, side, brItem);
-    App::scene()->addItem(brItem);
+    App::graphicsView()->scene()->addItem(brItem);
     brItem->setVisible(true);
     brItem->setOpacity(1.0);
 }
@@ -192,8 +192,8 @@ void ProfileForm::onAddBridgeClicked() {
 void ProfileForm::updateBridge() {
     lenght_ = ui->dsbxBridgeLenght->value();
     size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    for (QGraphicsItem* item : App::scene()->items()) {
-        if (static_cast<GiType>(item->type()) == GiType::Bridge)
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
+        if (item->type() == GiType::Bridge)
             static_cast<GiBridge*>(item)->update();
     }
 }
@@ -285,7 +285,7 @@ void ProfileForm::editFile(GCode::File* file) {
             ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
             //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
             //                brItem = new BridgeItem(lenght_, size_, side, brItem);
-            //                App::scene()->addItem(brItem);
+            //                 App::graphicsView()->scene()->addItem(brItem);
             //                brItem->setPos(pos);
             //                brItem->lastPos_ = pos;
             //            }
@@ -295,3 +295,5 @@ void ProfileForm::editFile(GCode::File* file) {
         }
     }
 }
+
+#include "moc_profile_form.cpp"

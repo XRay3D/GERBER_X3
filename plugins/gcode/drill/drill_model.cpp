@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QPainter>
 
-namespace Drill {
+namespace DrillPlugin {
 
 Model::Model(QString type, int rowCount, QObject* parent)
     : QAbstractTableModel(parent)
@@ -158,4 +158,6 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-} // namespace Drill
+} // namespace DrillPlugin
+
+#include "moc_drill_model.cpp"

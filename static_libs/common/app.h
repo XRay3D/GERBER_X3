@@ -7,126 +7,85 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
-#include "../tooldatabase/tool.h"
 #include "settings.h"
+#include "tool.h"
 
 #include <QDebug>
 #include <QObject>
 #include <QSharedMemory>
 #include <map>
 #include <mvector.h>
-namespace Drill {
-class Form;
-}
-class FilePlugin;
+
 class GCodePlugin;
-class GCodePropertiesForm;
-class GraphicsView;
-class LayoutFrames;
-class MainWindow;
-class Project;
-class Scene;
-class ShapePlugin;
-class SplashScreen;
+
+
+class FilePlugin;
+namespace Shapes {
+class Plugin;
+class Handle;
+} // namespace Shapes
 
 namespace FileTree {
 class View;
 class Model;
-
 } // namespace FileTree
 
-namespace Shapes {
-class Handler;
+namespace DrillPlugin {
+class Form;
+} // namespace DrillPlugin
 
-} // namespace Shapes
+using Handlers = mvector<Shapes::Handle*>;
 
-using Handlers = mvector<Shapes::Handler*>;
+using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/      // > ;
+using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>; /*PIS*/ // > ;
+using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/     // > ;
 
-// union PIF {
-//     FilePlugin* plug;
-//     QObject* obj;
-// };
-// union PIS {
-//     ShapePlugin* plug;
-//     QObject* obj;
-// };
-// union PIG {
-//     GCodePlugin* plug;
-//     QObject* obj;
-// };
-
-// template <class T>
-// struct Plug {
-//     T* plug;
-//     //    QObject* obj;
-// };
-// template <class T>
-// Plug(T*, QObject*) -> Plug<T>;
-
-//#if __cplusplus > 201703L
-using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/   // > ;
-using ShapeInterfacesMap = std::map<int, ShapePlugin*>; /*PIS*/ // > ;
-using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/  // > ;
-//#else
-// struct FileInterfacesMap : std::map<int, PIF> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-// struct ShapeInterfacesMap : std::map<int, PIS> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-// struct GCodeInterfaceMap : std::map<int, PIG> {
-//    bool contains(int key) const { return find(key) != end(); }
-//};
-//#endif
 class App {
     inline static App* app_ = nullptr;
 
-    Drill::Form* drillForm_ = nullptr;
-    FileTree::Model* fileModel_ = nullptr;
-    FileTree::View* fileTreeView_ = nullptr;
-    GCodePropertiesForm* gCodePropertiesForm_ = nullptr;
-    GraphicsView* graphicsView_ = nullptr;
+    class DrillPlugin::Form* drillForm_ = nullptr;
+    class FileTree::Model* fileModel_ = nullptr;
+    class FileTree::View* fileTreeView_ = nullptr;
+    class GCodePropertiesForm* gCodePropertiesForm_ = nullptr;
+    class GraphicsView* graphicsView_ = nullptr;
 
-    LayoutFrames* layoutFrames_ = nullptr;
-    class GiMarker* markers[4];
-    class GiPin* pins[2];
+    class LayoutFrames* layoutFrames_ = nullptr;
+    class GiMarker* markers[2];
+    //    class GiPin* pins[2];
 
-    MainWindow* mainWindow_ = nullptr;
-    Project* project_ = nullptr;
-    Scene* scene_ = nullptr;
-    SplashScreen* splashScreen_ = nullptr;
+    class MainWindow* mainWindow_ = nullptr;
+    class QUndoStack* undoStack_ = nullptr;
+    class Project* project_ = nullptr;
+    class SplashScreen* splashScreen_ = nullptr;
 
     FileInterfacesMap filePlugins_;
     GCodeInterfaceMap gCodePlugin_;
     ShapeInterfacesMap shapePlugin_;
 
     AppSettings appSettings_;
-    ToolHolder toolHolder_;
     Handlers handlers_;
     QSettings settings_;
-
     QString settingsPath_;
+    ToolHolder toolHolder_;
 
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
     App(App&&) = delete;
     App(const App&) = delete;
 
-    QSharedMemory sharedMemory {"AppSettings"};
+    QSharedMemory sharedMemory { "AppSettings" };
 
 public:
     explicit App() {
         if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
-            // qDebug("App create");
             app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
         } else if (sharedMemory.attach(QSharedMemory::ReadOnly)) {
-            // qDebug("App attach");
             app_ = *reinterpret_cast<App**>(sharedMemory.data());
         } else {
-            qDebug() << app_ << sharedMemory.errorString();
+            qDebug() << "App" << app_ << sharedMemory.errorString();
         }
     }
 
@@ -142,11 +101,11 @@ public:
     static auto* layoutFrames() { return app_->layoutFrames_; }
     static auto* mainWindow() { return app_->mainWindow_; }
     static auto* project() { return app_->project_; }
-    static auto* scene() { return app_->scene_; }
-    static auto* splashScreen() { return app_->splashScreen_; }
     static auto& settingsPath() { return app_->settingsPath_; }
+    static auto* splashScreen() { return app_->splashScreen_; }
+    static auto* undoStack() { return app_->undoStack_; }
 
-    static void setDrillForm(Drill::Form* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
+    static void setDrillForm(DrillPlugin::Form* drillForm) { (app_->drillForm_ && drillForm) ? exit(-1) : (app_->drillForm_ = drillForm, void()); }
     static void setFileModel(FileTree::Model* fileModel) { (app_->fileModel_ && fileModel) ? exit(-2) : (app_->fileModel_ = fileModel, void()); }
     static void setFileTreeView(FileTree::View* fileTreeView) { (app_->fileTreeView_ && fileTreeView) ? exit(-3) : (app_->fileTreeView_ = fileTreeView, void()); }
     static void setGCodePropertiesForm(GCodePropertiesForm* gCodePropertiesForm) { (app_->gCodePropertiesForm_ && gCodePropertiesForm) ? exit(-4) : (app_->gCodePropertiesForm_ = gCodePropertiesForm, void()); }
@@ -154,13 +113,13 @@ public:
     static void setLayoutFrames(LayoutFrames* layoutFrames) { (app_->layoutFrames_ && layoutFrames) ? exit(-6) : (app_->layoutFrames_ = layoutFrames, void()); }
     static void setMainWindow(MainWindow* mainWindow) { (app_->mainWindow_ && mainWindow) ? exit(-7) : (app_->mainWindow_ = mainWindow, void()); }
     static void setProject(Project* project) { (app_->project_ && project) ? exit(-8) : (app_->project_ = project, void()); }
-    static void setScene(Scene* scene) { (app_->scene_ && scene) ? exit(-9) : (app_->scene_ = scene, void()); }
     static void setSplashScreen(SplashScreen* splashScreen) { (app_->splashScreen_ && splashScreen) ? exit(-10) : (app_->splashScreen_ = splashScreen, void()); }
+    static void setUndoStack(QUndoStack* undoStack) { (app_->undoStack_ && undoStack) ? exit(-8) : (app_->undoStack_ = undoStack, void()); }
 
     static FilePlugin* filePlugin(int type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app_->filePlugins_; }
 
-    static ShapePlugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
+    static Shapes::Plugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app_->shapePlugin_; }
 
     static GCodePlugin* gCodePlugin(int type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }

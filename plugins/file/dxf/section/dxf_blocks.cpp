@@ -17,6 +17,7 @@ namespace Dxf {
 SectionBLOCKS::SectionBLOCKS(File* file, Codes::iterator from, Codes::iterator to)
     : SectionParser(from, to, file)
     , blocks(file->blocks()) {
+    parse();
 }
 
 void SectionBLOCKS::parse() {

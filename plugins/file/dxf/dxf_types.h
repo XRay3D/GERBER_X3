@@ -53,33 +53,12 @@ using GraphicObjects = std::vector<GraphicObject>;
 using EntitiesUP = std::vector<std::shared_ptr<Entity>>;
 using Entities = std::vector<Entity*>;
 
-#if __cplusplus > 201703L
 using Blocks = std::map<QString, Block*>;
 using HeaderData = std::map<QString, std::map<int, QVariant>>;
 using Layers = std::map<QString, Layer*>;
 using Sections = std::map<int, SectionParser*>;
 using Styles = std::map<QString, Style*>;
 using Tables = std::map<int, QVector<AbstractTable*>>;
-#else
-struct Blocks : std::map<QString, Block*> {
-    bool contains(const QString& key) const { return find(key) != end(); }
-};
-struct HeaderData : std::map<QString, std::map<int, QVariant>> {
-    bool contains(const QString& key) const { return find(key) != end(); }
-};
-struct Layers : std::map<QString, Layer*> {
-    bool contains(const QString& key) const { return find(key) != end(); }
-};
-struct Sections : std::map<int, SectionParser*> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-struct Styles : std::map<QString, Style*> {
-    bool contains(const QString& key) const { return find(key) != end(); }
-};
-struct Tables : std::map<int, QVector<AbstractTable*>> {
-    bool contains(int key) const { return find(key) != end(); }
-};
-#endif
 
 class Settings {
 protected:

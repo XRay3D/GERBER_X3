@@ -10,9 +10,9 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "xline.h"
+#include "dxf_xline.h"
 namespace Dxf {
-XLINE::XLINE(SectionParser* sp)
+XLine::XLine(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

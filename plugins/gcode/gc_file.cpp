@@ -9,7 +9,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #include "gc_file.h"
 
 #include "gc_node.h"
@@ -34,9 +34,9 @@ void calcArcs(Path path) {
     //        return;
     //    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
     //        QGraphicsLineItem* item;
-    //        item = App::scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
+    //        item = App::graphicsView()->scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
     //        item->setPos(pos);
-    //        item = App::scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
+    //        item = App::graphicsView()->scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
     //        item->setPos(pos);
     //    };
 
@@ -64,7 +64,7 @@ void calcArcs(Path path) {
     //        line = line.normalVector();
     //        if (beg.isNull())
     //            beg = poly[i];
-    //        //                App::scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
+    //        //                App::graphicsView()->scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
     //        if (normals.size()) {
     //            QPointF intersectionPoint;
     //#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -83,7 +83,7 @@ void calcArcs(Path path) {
     //                double r = QLineF(center, beg).length();
     //                QRectF rect(-r, -r, +r * 2, +r * 2);
 
-    //                App::scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
+    //                App::graphicsView()->scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
     //                ctr = {};
     //                center = {};
     //                beg = {};
@@ -103,13 +103,10 @@ void calcArcs(Path path) {
 namespace GCode {
 
 File::File()
-    : GCUtils()
-    , FileInterface() {
-}
+    : GCFile() { }
 
 File::File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths)
-    : GCUtils(std::move(gcp))
-    , FileInterface()
+    : GCFile(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
     if (gcp_.tools.front().diameter()) {
@@ -170,21 +167,6 @@ void File::saveDrill(const QPointF& offset) {
 
 void File::saveLaserPocket(const QPointF& offset) {
     saveLaserProfile(offset);
-    //    lines_.push_back(Settings::laserDynamOn());
-    //    mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
-    //    for (mvector<QPolygonF>& paths : toolPathss) {
-    //        startPath(paths.front().front());
-    //        bool skip = true;
-    //        for (auto& path : paths) {
-    //            for (QPointF& point : path) {
-    //                if (skip)
-    //                    skip = false;
-    //                else
-    //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-    //            }
-    //        }
-    //        endPath();
-    //    }
 }
 
 void File::saveMillingPocket(const QPointF& offset) {
@@ -237,13 +219,6 @@ void File::saveMillingProfile(const QPointF& offset) {
                         lines_.emplace_back(formated({g1(), z(depths[k]), feed(plungeRate())}));
                         auto sp(savePath(path, spindleSpeed()));
                         lines_.append(sp);
-                        //                    bool skip = true;
-                        //                    for (QPointF& point : path) {
-                        //                        if (skip)
-                        //                            skip = false;
-                        //                        else
-                        //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                        //                    }
                     }
                     endPath();
                     paths.erase(paths.begin() + j--);
@@ -252,13 +227,6 @@ void File::saveMillingProfile(const QPointF& offset) {
                     lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                     auto sp(savePath(path, spindleSpeed()));
                     lines_.append(sp);
-                    //                    bool skip = true;
-                    //                    for (QPointF& point : path) {
-                    //                        if (skip)
-                    //                            skip = false;
-                    //                        else
-                    //                            lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                    //                    }
                     endPath();
                 }
             }
@@ -276,13 +244,6 @@ void File::saveLaserProfile(const QPointF& offset) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
-            //            }
             endPath();
         }
     }
@@ -301,13 +262,6 @@ void File::saveMillingRaster(const QPointF& offset) {
                 lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
                 auto sp(savePath(path, spindleSpeed()));
                 lines_.append(sp);
-                //                bool skip = true;
-                //                for (QPointF& point : path) {
-                //                    if (skip)
-                //                        skip = false;
-                //                    else
-                //                        lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-                //                }
                 endPath();
             }
         }
@@ -327,23 +281,9 @@ void File::saveLaserHLDI(const QPointF& offset) {
         if (i++ % 2) {
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed()) }));
-            //            }
         } else {
             auto sp(savePath(path, 0));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(static_cast<int>(0)) }));
-            //            }
         }
     }
     if (pathss.size() > 1) {
@@ -352,13 +292,6 @@ void File::saveLaserHLDI(const QPointF& offset) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
             lines_.append(sp);
-            //            bool skip = true;
-            //            for (QPointF& point : path) {
-            //                if (skip)
-            //                    skip = false;
-            //                else
-            //                    lines_.push_back(formated({ g1(), x(point.x()), y(point.y()), feed(feedRate()) }));
-            //            }
             endPath();
         }
     }
@@ -481,6 +414,7 @@ void File::genGcodeAndTile() {
             case Profile:
             case Thermal:
             case Raster:
+            case Hatching:
                 if (toolType() == Tool::Laser)
                     saveLaserProfile(offset);
                 else
@@ -506,13 +440,13 @@ Tool File::getTool() const { return gcp_.getTool(); }
 void File::addInfo() {
     const static auto side_ {GCObj::tr("Top|Bottom").split('|')};
     if (Settings::info()) {
-        lines_.emplace_back(GCObj::tr(";\t              Name: %1").arg(shortName()));
-        lines_.emplace_back(GCObj::tr(";\t              Tool: %1").arg(gcp_.getTool().name()));
-        lines_.emplace_back(GCObj::tr(";\t    Tool passDepth: %1").arg(gcp_.getTool().passDepth()));
-        lines_.emplace_back(GCObj::tr(";\t     Tool stepover: %1").arg(gcp_.getTool().stepover()));
-        lines_.emplace_back(GCObj::tr(";\tTool feedRate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
-        lines_.emplace_back(GCObj::tr(";\t             Depth: %1").arg(gcp_.getDepth()));
-        lines_.emplace_back(GCObj::tr(";\t              Side: %1").arg(side_[side()]));
+        lines_.emplace_back(GCObj::tr(";\t           Name: %1").arg(shortName()));
+        lines_.emplace_back(GCObj::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
+        lines_.emplace_back(GCObj::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
+        lines_.emplace_back(GCObj::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
+        lines_.emplace_back(GCObj::tr(";\tTool Pass Depth: %1").arg(gcp_.getTool().passDepth()));
+        lines_.emplace_back(GCObj::tr(";\t          Depth: %1").arg(gcp_.getDepth()));
+        lines_.emplace_back(GCObj::tr(";\t           Side: %1").arg(side_[side()]));
     }
 }
 

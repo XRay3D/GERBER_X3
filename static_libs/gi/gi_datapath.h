@@ -7,7 +7,7 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 #include "gi.h"
 #include <QTimer>
@@ -32,6 +32,7 @@ class GiDataPath : public GraphicsItem {
 
     void redraw() override { update(); }
     void changeColor() override { }
+    friend class MainWindow;
 
 public:
     GiDataPath(const Path& path, FileInterface* file);

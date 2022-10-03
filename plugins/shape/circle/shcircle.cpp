@@ -11,8 +11,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shcircle.h"
+#include "graphicsview.h"
 #include "math.h"
-#include "scene.h"
 #include "shhandler.h"
 #include <QIcon>
 
@@ -24,18 +24,16 @@ Circle::Circle(QPointF center, QPointF pt)
 
     handlers.reserve(PtCount);
 
-    handlers.emplace_back(std::make_unique<Handler>(this, Handler::Center));
-    handlers.emplace_back(std::make_unique<Handler>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
+    handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[Center]->setPos(center);
     handlers[Point1]->setPos(pt);
 
     redraw();
 
-    App::scene()->addItem(this);
+    App::graphicsView()->scene()->addItem(this);
 }
-
-Circle::~Circle() { }
 
 void Circle::redraw() {
     radius_ = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
@@ -45,17 +43,16 @@ void Circle::redraw() {
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
-    for (int i = 0; i < intSteps; i++) {
+    for (int i = 0; i <= intSteps; i++) {
         const double theta = delta_angle * i;
         path.emplace_back(IntPoint(
             static_cast<cInt>(radius * cos(theta)) + center.X,
             static_cast<cInt>(radius * sin(theta)) + center.Y));
     }
-    path.push_back(path.front());
     shape_ = QPainterPath();
     shape_.addPolygon(path);
-    setPos({1, 1}); //костыли    //update();
-    setPos({0, 0});
+    setPos({ 1, 1 }); //костыли    //update();
+    setPos({ 0, 0 });
 }
 
 QString Circle::name() const { return QObject::tr("Circle"); }
@@ -63,8 +60,6 @@ QString Circle::name() const { return QObject::tr("Circle"); }
 QIcon Circle::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Circle::setPt(const QPointF& pt) {
-    if (handlers[Point1]->pos() == pt)
-        return;
     handlers[Point1]->setPos(pt);
     redraw();
 }
@@ -81,34 +76,13 @@ void Circle::setRadius(double radius) {
 ////////////////////////////////////////////////////////////
 /// \brief Plugin::Plugin
 ///
-Plugin::Plugin() { }
 
-Plugin::~Plugin() { }
+int PluginImpl::type() const { return GiType::ShCircle; }
 
-int Plugin::type() const { return static_cast<int>(GiType::ShCircle); }
+QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
-QIcon Plugin::icon() const { return QIcon::fromTheme("draw-ellipse"); }
-
-Shape* Plugin::createShape() { return new Circle(); }
-
-Shape* Plugin::createShape(const QPointF& point) {
-    return shape = new Circle(point, point);
-}
-
-bool Plugin::addShapePoint(const QPointF&) {
-    return false;
-}
-
-void Plugin::updateShape(const QPointF& point) {
-    if (shape)
-        shape->setPt(point);
-}
-
-void Plugin::finalizeShape() {
-    if (shape)
-        shape->finalize();
-    shape = nullptr;
-    emit actionUncheck();
-}
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF { 5, 0 }); }
 
 } // namespace Shapes
+
+#include "moc_shcircle.cpp"

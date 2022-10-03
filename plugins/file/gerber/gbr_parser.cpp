@@ -598,39 +598,39 @@ bool Parser::parseAperture(const QString& gLine) {
         auto paramList {CtreCapTo(paramList_).toString().split('X')};
         double hole = 0.0, rotation = 0.0;
         auto& apertures = file->apertures_;
-        switch (*apType.data()) {
-        case 'C': // Circle
-            if (paramList.size() > 1)
-                hole = toDouble(paramList[1]);
-            apertures[aperture] = std::make_shared<ApCircle>(toDouble(paramList[0]), hole, file);
-            break;
-        case 'R': // Rectangle
-            if (paramList.size() > 2)
-                hole = toDouble(paramList[2]);
-            if (paramList.size() < 2)
-                paramList << paramList[0];
-            apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
-            break;
-        case 'O': // Obround
-            qDebug() << paramList;
-            if (paramList.size() > 2)
-                hole = toDouble(paramList[2]);
-            apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
-            break;
-        case 'P': // Polygon
-            if (paramList.length() > 2)
-                rotation = toDouble(paramList[2], false, false);
-            if (paramList.length() > 3)
-                hole = toDouble(paramList[3]);
-            apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file));
-            break;
-        case 'M': // Macro
-        default:
+        if (apType.size() == 1) {
+            switch (*apType.data()) {
+            case 'C': // Circle
+                if (paramList.size() > 1)
+                    hole = toDouble(paramList[1]);
+                apertures[aperture] = std::make_shared<ApCircle>(toDouble(paramList[0]), hole, file);
+                break;
+            case 'R': // Rectangle
+                if (paramList.size() > 2)
+                    hole = toDouble(paramList[2]);
+                if (paramList.size() < 2)
+                    paramList << paramList[0];
+                apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
+                break;
+            case 'O': // Obround
+                qDebug() << paramList;
+                if (paramList.size() > 2)
+                    hole = toDouble(paramList[2]);
+                apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
+                break;
+            case 'P': // Polygon
+                if (paramList.length() > 2)
+                    rotation = toDouble(paramList[2], false, false);
+                if (paramList.length() > 3)
+                    hole = toDouble(paramList[3]);
+                apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file));
+                break;
+            }
+        } else {
             VarMap macroCoeff;
             for (int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
             apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split('*'), macroCoeff, file));
-            break;
         }
         if (attAper.function_)
             aperFunctionMap[aperture] = attAper;

@@ -7,35 +7,37 @@
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
 
-#include "dockwidget.h"
-#include "file.h"
-#include "file_plugin.h"
 #include "recent.h"
 
 #include <QActionGroup>
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QStack>
 #include <QThread>
 #include <QTimer>
 #include <QTranslator>
-#include <qevent.h>
+#include <QUndoStack>
+
 
 namespace GCode {
 class File;
 }
 
+namespace FileTree {
+class View;
+}
+
+class FileInterface;
+class GraphicsView;
 class Project;
+class QHBoxLayout;
 class QProgressDialog;
 class QToolBar;
-class Scene;
-
-namespace Ui {
-class MainWindow;
-}
+class QVBoxLayout;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -49,25 +51,14 @@ public:
 
     // QMainWindow interface
     QMenu* createPopupMenu() override;
-    const QDockWidget* dockWidget() const { return dockWidget_; }
-    QDockWidget* dockWidget() { return dockWidget_; }
+    const QDockWidget* dockWidget() const;
+    QDockWidget* dockWidget();
 
     static void translate(const QString& locale);
     void loadFile(const QString& fileName);
     static void updateTheme();
 
-    //    template <class T>
-    //    void createDockWidget() {
-    //        if (dynamic_cast<T*>(dockWidget_->widget()))
-    //            return;
-
-    //        auto dwContent = new T(dockWidget_);
-    //        dwContent->setObjectName(typeid(T).name());
-
-    //        dockWidget_->pop();
-    //        dockWidget_->push(dwContent);
-    //        dockWidget_->show();
-    //    }
+    QUndoStack& undoStack() { return undoStack_; }
 
 signals:
     void parseFile(const QString& filename, int type);
@@ -79,12 +70,13 @@ private slots:
     void setDockWidget(QWidget* dwContent);
 
 private:
-    Ui::MainWindow* ui;
     QDockWidget* dockWidget_ = nullptr;
     Recent recentFiles;
     Recent recentProjects;
 
     QAction* closeAllAct_ = nullptr;
+    QAction* redoAct = nullptr;
+    QAction* undoAct = nullptr;
 
     QMenu* fileMenu = nullptr;
     QMenu* helpMenu = nullptr;
@@ -96,6 +88,7 @@ private:
     QToolBar* fileToolBar = nullptr;
     QToolBar* toolpathToolBar = nullptr;
     QToolBar* zoomToolBar = nullptr;
+    QUndoStack undoStack_;
 
     Project* project_;
     bool openFlag;
@@ -161,4 +154,19 @@ protected:
     // QObject interface
 public:
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+private:
+    struct Ui {
+        QWidget* centralwidget;
+        QHBoxLayout* horizontalLayout;
+        GraphicsView* graphicsView;
+        QMenuBar* menubar;
+        QStatusBar* statusbar;
+        QDockWidget* treeDockWidget;
+        QWidget* widget;
+        QVBoxLayout* verticalLayout;
+        FileTree::View* treeView;
+        void setupUi(QMainWindow* MainWindow);       // setupUi
+        void retranslateUi(QMainWindow* MainWindow); // retranslateUi
+    } ui;
 };
