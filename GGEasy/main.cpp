@@ -81,12 +81,12 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
-//    DoubleSpinBox dsbx;
-//    dsbx.resize(500, 50);
-//    dsbx.setRange(-9999, +9999);
-//    dsbx.show();
-//    dsbx.setSuffix(" mm");
-//    return app.exec();
+    //    DoubleSpinBox dsbx;
+    //    dsbx.resize(500, 50);
+    //    dsbx.setRange(-9999, +9999);
+    //    dsbx.show();
+    //    dsbx.setSuffix(" mm");
+    //    return app.exec();
 
     //#ifdef Q_OS_WIN
     //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);

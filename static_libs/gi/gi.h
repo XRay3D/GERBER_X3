@@ -83,11 +83,11 @@ public:
 
     virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
     virtual void setPaths(Paths paths, int alternate = {}) {
-        auto t { transform() };
-        auto a { qRadiansToDegrees(asin(t.m12())) };
+        auto t {transform()};
+        auto a {qRadiansToDegrees(asin(t.m12()))};
         t = t.rotateRadians(-t.m12());
-        auto x { t.dx() };
-        auto y { t.dy() };
+        auto x {t.dx()};
+        auto y {t.dy()};
         shape_ = {};
         t = {};
         t.translate(-x, -y);

@@ -51,8 +51,8 @@ void Circle::redraw() {
     }
     shape_ = QPainterPath();
     shape_.addPolygon(path);
-    setPos({ 1, 1 }); //костыли    //update();
-    setPos({ 0, 0 });
+    setPos({1, 1}); //костыли    //update();
+    setPos({0, 0});
 }
 
 QString Circle::name() const { return QObject::tr("Circle"); }
@@ -81,7 +81,7 @@ int PluginImpl::type() const { return GiType::ShCircle; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF { 5, 0 }); }
+Shape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF {5, 0}); }
 
 } // namespace Shapes
 

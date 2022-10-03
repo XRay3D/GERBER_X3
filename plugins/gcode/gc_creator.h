@@ -18,7 +18,7 @@
 #include <mutex>
 #include <sstream>
 
-#if  __has_include(<source_location>)
+#if __has_include(<source_location>)
 #include <source_location>
 using sl = std::source_location;
 #else

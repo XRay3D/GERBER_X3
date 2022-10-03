@@ -39,5 +39,4 @@ QAction* GCodePlugin::addAction(QMenu* menu, QToolBar* toolbar) {
     return action;
 }
 
-
 #include "moc_gc_plugin.cpp"

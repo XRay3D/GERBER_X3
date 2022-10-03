@@ -21,7 +21,6 @@
 
 class GCodePlugin;
 
-
 class FilePlugin;
 namespace Shapes {
 class Plugin;
@@ -76,7 +75,7 @@ class App {
     App(App&&) = delete;
     App(const App&) = delete;
 
-    QSharedMemory sharedMemory { "AppSettings" };
+    QSharedMemory sharedMemory {"AppSettings"};
 
 public:
     explicit App() {

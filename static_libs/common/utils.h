@@ -15,13 +15,13 @@ using seconds__ = std::ratio<1>;
 using minutes__ = std::ratio<60>;
 using hours__ = std::ratio<3600>;
 template <class T = seconds__>
-requires                                 //
-    std::is_same_v<T, ns_> ||  //
-    std::is_same_v<T, us_> || //
-    std::is_same_v<T, ms_> || //
-    std::is_same_v<T, seconds__> ||      //
-    std::is_same_v<T, minutes__> ||      //
-    std::is_same_v<T, hours__>           //
+requires                            //
+    std::is_same_v<T, ns_> ||       //
+    std::is_same_v<T, us_> ||       //
+    std::is_same_v<T, ms_> ||       //
+    std::is_same_v<T, seconds__> || //
+    std::is_same_v<T, minutes__> || //
+    std::is_same_v<T, hours__>      //
 
 struct Timer {
 #if defined(__gnu_linux__) || defined(__GNUC__)
