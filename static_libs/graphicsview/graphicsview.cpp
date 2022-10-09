@@ -444,7 +444,7 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->drawText(QRect {{}, size}, Qt::AlignLeft, text);
 }
 
-class name : public QGraphicsItem {
+class GiGuide : public QGraphicsItem {
 
     Qt::Orientation orientation;
     double scaleFactor() const {
@@ -454,12 +454,12 @@ class name : public QGraphicsItem {
     };
 
 public:
-    name(QPointF pos, Qt::Orientation orientation)
+    GiGuide(QPointF pos, Qt::Orientation orientation)
         : orientation {orientation} {
         setFlags(ItemIsSelectable | ItemIsMovable);
         orientation == Qt::Horizontal ? setPos(0, pos.y()) : setPos(pos.x(), 0);
     }
-    ~name() override = default;
+    ~GiGuide() override = default;
 
 public:
     // QGraphicsItem interface
@@ -505,7 +505,7 @@ void GraphicsView::dropEvent(QDropEvent* event) {
         emit fileDroped(var.path().remove(0, 1));
 
     if (mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
-        scene()->addItem(new name(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+        scene()->addItem(new GiGuide(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
     }
 
     event->accept();
