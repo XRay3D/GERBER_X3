@@ -10,6 +10,5 @@ liberapay: # Replace with a single Liberapay username
 issuehunt: # Replace with a single IssueHunt username
 otechie: # Replace with a single Otechie username
 custom: [
-'https://money.yandex.ru/quickpay/shop-widget?account=41001660660552&quickpay=shop&payment-type-choice=on&mobile-payment-type-choice=on&writer=seller&targets=%D0%9F%D0%BE%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5&default-sum=&button-text=03&successURL=',
 'https://boosty.to/x-ray_3d'
 ]
