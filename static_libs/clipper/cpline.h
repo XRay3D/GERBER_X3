@@ -8,13 +8,13 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-//#pragma once
+// #pragma once
 //
 //
 
-//#include "clipper.hpp"
-//#include <QPolygonF>
-// using namespace ClipperLib;
+// #include "clipper.hpp"
+// #include <QPolygonF>
+//  using namespace ClipperLib;
 
 ///*******************************************************************************
 // * class IntLine

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -231,10 +231,6 @@ void GraphicsView::setRuler(bool ruller) {
     scene()->update();
 }
 
-double GraphicsView::scaleFactor() {
-    return 1.0 / getScale();
-}
-
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
     if (event->modifiers() & Qt::AltModifier || App::settings().snap()) {
         const double gs = App::settings().gridStep(transform().m11());
@@ -252,8 +248,6 @@ void GraphicsView::setScale(double s) noexcept {
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
         /*      */ trf.m31(), trf.m32(), trf.m33()});
 }
-
-double GraphicsView::getScale() noexcept { return transform().m11(); }
 
 void GraphicsView::setOpenGL(bool useOpenGL) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -377,28 +371,27 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     const double angle = line.angle();
 
     const auto text {
-        App::settings().inch() ?
-            QString(" ∆X: %1 in\n"
-                    " ∆Y: %2 in\n"
-                    " ∆/: %3 in\n"
-                    " Area: %4 in²\n"
-                    " Angle: %5°")
-                .arg(rect.width() / 25.4, 4, 'f', 3, '0')
-                .arg(rect.height() / 25.4, 4, 'f', 3, '0')
-                .arg(length / 25.4, 4, 'f', 3, '0')
-                .arg((rect.width() / 25.4) * (rect.height() / 25.4), 4, 'f', 3, '0')
-                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0') :
-            QString(
-                " ∆X: %1 mm\n"
-                " ∆Y: %2 mm\n"
-                " ∆/: %3 mm\n"
-                " Area: %4 mm²\n"
-                " Angle: %5°")
-                .arg(rect.width(), 4, 'f', 3, '0')
-                .arg(rect.height(), 4, 'f', 3, '0')
-                .arg(length, 4, 'f', 3, '0')
-                .arg(rect.width() * rect.height(), 4, 'f', 3, '0')
-                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+        App::settings().inch() ? QString(" ∆X: %1 in\n"
+                                         " ∆Y: %2 in\n"
+                                         " ∆/: %3 in\n"
+                                         " Area: %4 in²\n"
+                                         " Angle: %5°")
+                                     .arg(rect.width() / 25.4, 4, 'f', 3, '0')
+                                     .arg(rect.height() / 25.4, 4, 'f', 3, '0')
+                                     .arg(length / 25.4, 4, 'f', 3, '0')
+                                     .arg((rect.width() / 25.4) * (rect.height() / 25.4), 4, 'f', 3, '0')
+                                     .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0') :
+                                 QString(
+                                     " ∆X: %1 mm\n"
+                                     " ∆Y: %2 mm\n"
+                                     " ∆/: %3 mm\n"
+                                     " Area: %4 mm²\n"
+                                     " Angle: %5°")
+                                     .arg(rect.width(), 4, 'f', 3, '0')
+                                     .arg(rect.height(), 4, 'f', 3, '0')
+                                     .arg(length, 4, 'f', 3, '0')
+                                     .arg(rect.width() * rect.height(), 4, 'f', 3, '0')
+                                     .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
 
     };
 
@@ -505,7 +498,15 @@ void GraphicsView::dropEvent(QDropEvent* event) {
         emit fileDroped(var.path().remove(0, 1));
 
     if (mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
+//<<<<<<< Updated upstream
         scene()->addItem(new GiGuide(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+//=======
+//#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+//        scene()->addItem(new name(mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+//#else
+//        scene()->addItem(new name(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+//#endif
+//>>>>>>> Stashed changes
     }
 
     event->accept();
@@ -520,19 +521,19 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         //        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         //        QGraphicsView::mouseReleaseEvent(&releaseEvent);
         //        setDragMode(ScrollHandDrag);
         //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         //        QGraphicsView::mousePressEvent(&fakeEvent);
-        //#else
+        // #else
         QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mousePressEvent(&fakeEvent);
-        //#endif
+        // #endif
     } else if (event->button() == Qt::RightButton) {
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
@@ -580,11 +581,11 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-        //#else
+        // #else
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-        //#endif
+        // #endif
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
         setDragMode(NoDrag);
         setInteractive(true);

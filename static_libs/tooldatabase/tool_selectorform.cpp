@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -26,10 +26,6 @@ ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
     , counter {static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
     , toolFileName_ {App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
-    qDebug() << __FUNCTION__ << toolFileName_;
-    qDebug() << __FUNCTION__ << App::settingsPath();
-    qDebug() << __FUNCTION__ << parent->objectName();
-    qDebug() << __FUNCTION__ << QString::number(counter);
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");

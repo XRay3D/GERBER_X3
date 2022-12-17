@@ -1,7 +1,7 @@
-//#pragma once
+// #pragma once
 
-//#include <QDockWidget>
-//#include <QStack>
+// #include <QDockWidget>
+// #include <QStack>
 
 // class DockWidget : public QDockWidget {
 //     Q_OBJECT

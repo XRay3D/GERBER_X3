@@ -38,16 +38,16 @@
 
 // use_int32: When enabled 32bit ints are used instead of 64bit ints. This
 // improve performance but coordinate values are limited to the range +/- 46340
-//#define use_int32
+// #define use_int32
 
 // use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
-//#define use_xyz
+// #define use_xyz
 
 // use_lines: Enables line clipping. Adds a very minor cost to performance.
 #define use_lines
 
 // use_deprecated: Enables temporary support for the obsolete functions
-//#define use_deprecated
+// #define use_deprecated
 
 #include <cstdlib>
 #include <cstring>

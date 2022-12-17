@@ -117,11 +117,11 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    });
     //    verticalLayout->addWidget(pbPrev);
 
-    //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    //    verticalLayout->setMargin(6);
-    //#else
-    //    verticalLayout->setContentsMargins(6, 6, 6, 6);
-    //#endif
+    // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    //     verticalLayout->setMargin(6);
+    // #else
+    //     verticalLayout->setContentsMargins(6, 6, 6, 6);
+    // #endif
 
     //    verticalLayout->setSpacing(6);
 }

@@ -1019,15 +1019,15 @@ bool Parser::parseLineInterpolation(const QString& gLine) {
             dcode = static_cast<const DCode>(match.cap(2).toInt());
 
         switch (dcode) {
-        case D01: //перемещение в указанную точку x-y с открытым затвором засветки
+        case D01: // перемещение в указанную точку x-y с открытым затвором засветки
             m_state.setDCode(dcode);
             m_path.push_back(m_state.curPos());
             break;
-        case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
+        case D02: // перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();
             m_state.setDCode(dcode);
             break;
-        case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
+        case D03: // перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             addPath();
             m_state.setDCode(dcode);
             addFlash();

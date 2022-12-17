@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -17,6 +17,9 @@ project(GERBER_X3)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 add_definitions(
     -DQT_MESSAGELOGCONTEXT# qDebug()
     -DCTRE
@@ -24,8 +27,6 @@ add_definitions(
 )
 #add_definitions("-D__cpp_consteval")# source_location
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 20)
-set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -50,7 +51,7 @@ if (Boost_FOUND)
     message(${Boost_INCLUDE_DIR})
     add_definitions( "-D_USE_BOOST_" )
 else()
-    message("Boost not found!!!" FATAL_ERROR)
+    message(FATAL_ERROR "Boost not found!!!")
 endif()
 
 include_directories(
@@ -80,19 +81,19 @@ add_subdirectory(plugins)
 # main app
 add_subdirectory(GGEasy)
 
-target_precompile_headers(GGEasy
-    #    PUBLIC
-    #    qt.h
-    PRIVATE
-    #    [["other_header.h"]]
-    <QtWidgets>
-    <QtCore>
-    <forward_list>
-    <list>
-    <map>
-    <ranges>
-    <span>
-    <unordered_map>
-    <vector>
-)
+#target_precompile_headers(GGEasy
+#    #    PUBLIC
+#    #    qt.h
+#    PRIVATE
+#    #    [["other_header.h"]]
+#    <QtWidgets>
+#    <QtCore>
+#    <forward_list>
+#    <list>
+#    <map>
+#    <ranges>
+#    <span>
+#    <unordered_map>
+#    <vector>
+#)
 

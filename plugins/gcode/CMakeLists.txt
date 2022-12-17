@@ -1,17 +1,17 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  01 February 2020                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-
 project(gcode)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -39,13 +39,8 @@ link_directories(
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    #    common
-    #    filetree
-    #    graphicsview
-    #    shape
-    #    tooldatabase
-    file_plugins
     clipper
+    file_plugins
     gi
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
@@ -53,9 +48,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 #add_subdirectory(thermal2)
-
-add_subdirectory(profile)
 add_subdirectory(pocketoffset)
+add_subdirectory(profile)
 
 add_subdirectory(drill)
 add_subdirectory(hatching)

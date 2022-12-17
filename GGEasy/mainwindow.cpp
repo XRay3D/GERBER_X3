@@ -28,7 +28,7 @@
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
-//#include "qt.h"
+// #include "qt.h"
 
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -114,7 +114,7 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 100;
         int k = 100;
 
-        if (1) {
+        if (0) {
             QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber_file_format_examples 20181113)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
@@ -129,9 +129,9 @@ MainWindow::MainWindow(QWidget* parent)
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (0)
+        if (1)
             //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/Downloads/ФАЛЬШПАНЕЛИ РАСХОДОМЕТРИЯ-dxf/725327.003 Панель EL-SV-11-R-AG-измен.dxf)"); });
-            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/QtPro/MAN2/МАН2_SCH_PCB/V2/МАН2_МСИС_V2_.dxf)"); });
+            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/ESAMP/ELECTROSTATIC_AMP/T/ELECTROSTATIC_AMP_A.fst)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });

@@ -1,4 +1,4 @@
-//#pragma once
+// #pragma once
 
 // class Style : public QProxyStyle {
 //     Q_OBJECT

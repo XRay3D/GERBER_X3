@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -66,7 +66,7 @@ Vec2::operator bool() { return !is_null(); }
 bool Vec2::operator==(Vec2 other) { return qFuzzyCompare(x, other.x) && qFuzzyCompare(y, other.y); }
 
 bool Vec2::operator<(Vec2 other) {
-    //# accepts also tuples, for more convenience at testing
+    // # accepts also tuples, for more convenience at testing
     if (qFuzzyCompare(x, other.x))
         return y < other.y;
     else
@@ -117,7 +117,7 @@ double Vec2::angle_between(Vec2 other) {
         counter clockwise orientation.
         */
     double cos_theta = normalize().dot(other.normalize());
-    //# avoid domain errors caused by doubleing point imprecision:
+    // # avoid domain errors caused by doubleing point imprecision:
     if (cos_theta < -1.0)
         cos_theta = -1.0;
     else if (cos_theta > 1.0)

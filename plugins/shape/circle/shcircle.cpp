@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -51,7 +51,7 @@ void Circle::redraw() {
     }
     shape_ = QPainterPath();
     shape_.addPolygon(path);
-    setPos({1, 1}); //костыли    //update();
+    setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
 }
 

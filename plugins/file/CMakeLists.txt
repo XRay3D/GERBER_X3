@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  01 February 2020                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -45,7 +45,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 add_subdirectory(dxf)
 add_subdirectory(excellon)
 add_subdirectory(gerber)
-#add_subdirectory(hpgl)
 
+#add_subdirectory(file)
+#add_subdirectory(TopoR)
+
+#add_subdirectory(hpgl)
 
 

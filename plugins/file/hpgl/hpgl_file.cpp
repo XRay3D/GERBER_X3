@@ -12,10 +12,10 @@
  *******************************************************************************/
 #include "hpgl_file.h"
 
-//#include "section/dxf_classes.h"
-//#include "section/dxf_objects.h"
-//#include "section/dxf_thumbnailimage.h"
-//#include "gc_creator.h" //////////////////////
+// #include "section/dxf_classes.h"
+// #include "section/dxf_objects.h"
+// #include "section/dxf_thumbnailimage.h"
+// #include "gc_creator.h" //////////////////////
 
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
