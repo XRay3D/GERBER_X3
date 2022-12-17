@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -116,7 +116,9 @@ public:
     }
 
     template <typename V>
-    auto getValue(V& val, const char* name, V def = {}) const requires std::is_arithmetic_v<V> {
+    auto getValue(V& val, const char* name, V def = {}) const
+        requires std::is_arithmetic_v<V>
+    {
         if constexpr (std::is_floating_point_v<V>) {
             val = QSettings::value(name, def).toDouble();
             return val;
@@ -129,7 +131,9 @@ public:
     }
 
     template <typename V>
-    auto setValue(V val, const char* name) requires std::is_arithmetic_v<V> {
+    auto setValue(V val, const char* name)
+        requires std::is_arithmetic_v<V>
+    {
         QSettings::setValue(name, val);
         return val;
     }

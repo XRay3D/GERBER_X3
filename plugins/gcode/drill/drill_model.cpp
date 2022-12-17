@@ -3,17 +3,17 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_model.h"
 #include "drill_form.h"
+#include "drill_gi_preview.h"
 #include "drill_header.h"
-#include "gc_gidrillpreview.h"
 #include "tool_pch.h"
 
 #include <QBitmap>

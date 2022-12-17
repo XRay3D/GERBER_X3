@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -36,11 +36,11 @@ public:
 
     void setRuler(bool ruller);
 
-    double scaleFactor();
+    double scaleFactor() const noexcept { return 1.0 / getScale(); }
     QPointF mappedPos(QMouseEvent* event) const;
 
     void setScale(double s) noexcept;
-    double getScale() noexcept;
+    double getScale() const noexcept { return transform().m11(); }
 
     void setOpenGL(bool useOpenGL);
 

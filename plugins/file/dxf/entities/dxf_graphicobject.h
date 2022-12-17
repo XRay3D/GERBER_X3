@@ -1,7 +1,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
  * License:                                                                     *
@@ -11,7 +11,7 @@
 #pragma once
 
 #include "datastream.h"
-//#include "dxf_entity.h"
+// #include "dxf_entity.h"
 #include "plugintypes.h"
 #include <myclipper.h>
 

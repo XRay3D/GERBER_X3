@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
  * License:                                                                     *
@@ -449,15 +449,15 @@ void Parser::circularRout() {
     parseNumber(state_.rawPos.A, radius);
 
     auto CalcCircleCenter = [this](QPointF a, QPointF b, float r) {
-        //находим центр отрезка ab
+        // находим центр отрезка ab
         QPointF c = (a + b) / 2;
-        //находим перпендикуляр, нормируем его
+        // находим перпендикуляр, нормируем его
         QPointF n = QLineF(QPointF(), a - b).normalVector().unitVector().p2();
         //        n = new Vector2(n.Y, -n.X); //поворот на 90 градусов ;)
-        //находим высоту искомого центра на отрезок
+        // находим высоту искомого центра на отрезок
         double l = QLineF(QPointF(), a - b).length() / 2;
         double d = sqrt(r * r - l * l);
-        //находм две точки
+        // находм две точки
         QPointF x1 = c + n * d;
         QPointF x2 = c - n * d;
         return state_.gCode == G03 ? (x1) : (x2);

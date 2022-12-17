@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -14,9 +14,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 //// INTERNAL FUNCTIONS
 
-//#if defined(_MSC_VER) && !defined(__cplusplus)
-//#define inline __inline
-//#endif
+// #if defined(_MSC_VER) && !defined(__cplusplus)
+// #define inline __inline
+// #endif
 
 //// jcv_point
 
@@ -56,7 +56,7 @@
 
 //// Structs
 
-//#pragma pack(push, 1)
+// #pragma pack(push, 1)
 
 // typedef struct _jcv_halfedge {
 //     jcv_edge* edge;
@@ -110,7 +110,7 @@
 //    jcv_rect rect;
 //};
 
-//#pragma pack(pop)
+// #pragma pack(pop)
 
 // static const int JCV_DIRECTION_LEFT = 0;
 // static const int JCV_DIRECTION_RIGHT = 1;

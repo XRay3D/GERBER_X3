@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -12,10 +12,10 @@
 
 #include "ft_view.h"
 #include "plugindata.h"
-//#include "settings.h"
-//#include "app.h"
-//#include "myclipper.h"
-//#include "tool.h"
+// #include "settings.h"
+// #include "app.h"
+// #include "myclipper.h"
+// #include "tool.h"
 
 #include <QJsonObject>
 #include <QMenu>

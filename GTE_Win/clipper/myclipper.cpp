@@ -67,15 +67,15 @@ double Length(const IntPoint& pt1, const IntPoint& pt2) {
 // static inline bool qt_is_finite(double d)
 //{
 //     uchar* ch = (uchar*)&d;
-//#ifdef QT_ARMFPA
+// #ifdef QT_ARMFPA
 //     return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
-//#else
+// #else
 //     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
 //         return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
 //     } else {
 //         return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
 //     }
-//#endif
+// #endif
 // }
 
 Path CirclePath(double diametr, const IntPoint& center) {

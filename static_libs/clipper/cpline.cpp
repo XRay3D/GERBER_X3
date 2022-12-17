@@ -11,27 +11,27 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
-//#include "line.h"
-//#include "qdatastream.h"
-//#include "qdebug.h"
-//#include "qmath"
+// #include "line.h"
+// #include "qdatastream.h"
+// #include "qdebug.h"
+// #include "qmath"
 
-//#ifndef two_pi
-//#define two_pi 6.28318530717958647692528676655900576
-//#endif
+// #ifndef two_pi
+// #define two_pi 6.28318530717958647692528676655900576
+// #endif
 
 // static inline bool qt_is_finite(double d)
 //{
 //     uchar* ch = (uchar*)&d;
-//#ifdef QT_ARMFPA
+// #ifdef QT_ARMFPA
 //     return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
-//#else
+// #else
 //     if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
 //         return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
 //     } else {
 //         return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
 //     }
-//#endif
+// #endif
 // }
 
 // double IntLine::length() const
@@ -82,10 +82,10 @@
 //    double len = qSqrt(x * x + y * y);
 //    IntLine f(p1(), IntPoint(pt1.X + x / len, pt1.Y + y / len));
 
-//#ifndef QT_NO_DEBUG
-//    if (qAbs(f.length() - 1) >= 0.001)
-//        qWarning("QLine::unitVector: New line does not have unit length");
-//#endif
+// #ifndef QT_NO_DEBUG
+//     if (qAbs(f.length() - 1) >= 0.001)
+//         qWarning("QLine::unitVector: New line does not have unit length");
+// #endif
 
 //    return f;
 //}

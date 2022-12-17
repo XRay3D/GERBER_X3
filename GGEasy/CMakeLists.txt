@@ -1,12 +1,12 @@
 #/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* Author : Damir Bakiev *
+#* Version : na *
+#* Date : 03 October 2022 *
+#* Website : na *
+#* Copyright : Damir Bakiev 2016-2022 *
+#* License : *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
+#* http://www.boost.org/LICENSE_1_0.txt *
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
@@ -93,31 +93,25 @@ set(PROJECT_SOURCES
 
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-
-qt_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
+    qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES} )
+    # Define target properties for Android with Qt 6 as:
+    # set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    # ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+    qt_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
 else()
     if(ANDROID)
-        add_library(${PROJECT_NAME} SHARED
-            ${PROJECT_SOURCES}
-        )
-    # Define properties for Android with Qt 5 after find_package() calls as:
-    #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-else()
-    add_executable(${PROJECT_NAME}
-        ${PROJECT_SOURCES}
-    )
+        add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES} )
+        # Define properties for Android with Qt 5 after find_package() calls as:
+        # set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+    else()
+        add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+    endif()
+    qt5_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
 endif()
 
-qt5_create_translation(QM_FILES ${OUTPUT_DIRECTORY} ${TS_FILES})
-endif()
+message("--> "${QM_FILES})
+message("--> "${TS_FILES}})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -190,16 +184,16 @@ elseif (UNIX)#LINUX
     )
 
 
-#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#        COMMAND "${CMAKE_COMMAND}" -E
-#        env PATH="${_QT_BIN_DIR}" "cqtdeployer"
-#        -bin    $<TARGET_FILE:${PROJECT_NAME}>
-#        -qmake  ${QT_QMAKE_EXECUTABLE}
-#        qif
-#        COMMENT "Deploying Qt..."
-#    )
+# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+# COMMAND "${CMAKE_COMMAND}" -E
+# env PATH="${_QT_BIN_DIR}" "cqtdeployer"
+# -bin $<TARGET_FILE:${PROJECT_NAME}>
+# -qmake ${QT_QMAKE_EXECUTABLE}
+# qif
+# COMMENT "Deploying Qt..."
+# )
 
-#    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
+# cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()
 
 #install(TARGETS ${PROJECT_NAME} DESTINATION ${OUTPUT_DIRECTORY})
@@ -207,26 +201,26 @@ endif()
 #set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}${PATHS}")
 
 #if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    set_target_properties(${PROJECT_NAME} PROPERTIES
-#        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
-#        LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
-#        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-#        LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-#    )
+# set_target_properties(${PROJECT_NAME} PROPERTIES
+# LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
+# LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE"
+# LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+# LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+# )
 #endif()
 
 #set(TARGETS ${PROJECT_NAME})
 
 #foreach(TNAME ${TARGETS})
-#    target_compile_features(${TNAME} PUBLIC  cxx_std_20)
-#    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_BINARY_DIR})
-#    #  target_include_directories(${TNAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
+# target_compile_features(${TNAME} PUBLIC cxx_std_20)
+# # target_include_directories(${TNAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+# # target_include_directories(${TNAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 #endforeach()
 
 ## COPY TRANSLATIONS
 #file(GLOB_RECURSE QM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qm)
 #foreach(QM_FILE ${QM_FILES})
-#    get_filename_component(QM_NAME ${QM_FILE} NAME)
-#    configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
-#    #    file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
+# get_filename_component(QM_NAME ${QM_FILE} NAME)
+# configure_file(${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}" COPYONLY)
+# # file(COPY_FILE ${QM_FILE} "${OUTPUT_DIRECTORY}/translations/${QM_NAME}")
 #endforeach()

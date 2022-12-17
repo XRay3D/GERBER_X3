@@ -1,7 +1,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
  * License:                                                                     *
@@ -16,21 +16,21 @@
 #include <map>
 #include <type_traits>
 
-//#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-// template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
-// inline QDataStream& operator>>(QDataStream& s, E& e) {
-//    qint32 i;
-//    s >> i;
-//    e = static_cast<E>(i);
-//    return s;
-//}
+// #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+//  template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
+//  inline QDataStream& operator>>(QDataStream& s, E& e) {
+//     qint32 i;
+//     s >> i;
+//     e = static_cast<E>(i);
+//     return s;
+// }
 
 // template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
 // inline QDataStream& operator<<(QDataStream& s, E e) {
 //     s << static_cast<qint32>(e);
 //     return s;
 // }
-//#endif
+// #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 template <class T1, class T2>
@@ -84,7 +84,7 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
 //     }
 //     return s;
 // }
-//#endif
+// #endif
 
 template <typename T>
 inline QDataStream& operator>>(QDataStream& s, mvector<T>& c) {

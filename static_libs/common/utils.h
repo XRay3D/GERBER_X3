@@ -15,7 +15,7 @@ using seconds__ = std::ratio<1>;
 using minutes__ = std::ratio<60>;
 using hours__ = std::ratio<3600>;
 template <class T = seconds__>
-requires                            //
+    requires                        //
     std::is_same_v<T, ns_> ||       //
     std::is_same_v<T, us_> ||       //
     std::is_same_v<T, ms_> ||       //
@@ -117,10 +117,10 @@ Overload(Ts...) -> Overload<Ts...>;
 
 template <typename Cap>
 concept CapContent = requires(Cap a) {
-    std::is_pointer_v<decltype(a.data())>;
-    { a.size() } -> std::convertible_to<size_t>;
-    { a.operator bool() } -> std::convertible_to<bool>;
-};
+                         std::is_pointer_v<decltype(a.data())>;
+                         { a.size() } -> std::convertible_to<size_t>;
+                         { a.operator bool() } -> std::convertible_to<bool>;
+                     };
 
 template <CapContent Cap>
 QDebug operator<<(QDebug debug, Cap& cap) {

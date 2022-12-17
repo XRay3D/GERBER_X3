@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Angus Johnson                                                   *
  * Version   :  6.4.2                                                           *
- * Date      :  27 February 2017                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  http://www.angusj.com                                           *
  * Copyright :  Angus Johnson 2010-2017                                         *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  * Attributions:                                                                *

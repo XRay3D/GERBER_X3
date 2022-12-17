@@ -4,10 +4,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -26,7 +26,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QTextCodec>
+    #include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -88,12 +88,12 @@ int main(int argc, char** argv) {
     //    dsbx.setSuffix(" mm");
     //    return app.exec();
 
-    //#ifdef Q_OS_WIN
-    //    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-    //    if (settings.value("AppsUseLightTheme") == 0) {
-    //        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-    //    }
-    //#endif
+    // #ifdef Q_OS_WIN
+    //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
+    //     if (settings.value("AppsUseLightTheme") == 0) {
+    //         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    //     }
+    // #endif
 
 #ifdef linux
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
@@ -171,11 +171,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-#ifdef QT_DEBUG
+    #ifdef QT_DEBUG
         const QString suffix("*.so");
-#else
+    #else
         const QString suffix("*.so");
-#endif
+    #endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else
@@ -204,6 +204,7 @@ int main(int argc, char** argv) {
                         App::gCodePlugins().emplace(gCode->type(), gCode);
                         continue;
                     }
+                    qDebug() << str << loader.errorString();
                 }
             }
         }
