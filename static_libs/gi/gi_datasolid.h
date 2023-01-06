@@ -16,10 +16,10 @@ class File;
 }
 
 class GiDataSolid final : public GraphicsItem {
-    Paths& paths_;
+    PathsD& paths_;
 
 public:
-    explicit GiDataSolid(Paths& paths_, FileInterface* file);
+    explicit GiDataSolid(PathsD& paths_, FileInterface* file);
     ~GiDataSolid() override;
 
     // QGraphicsItem interface
@@ -28,7 +28,7 @@ public:
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
-    void setPaths(Paths paths, int alternate = {}) override;
+    void setPaths(PathsD paths, int alternate = {}) override;
     // GraphicsItem interface
     void changeColor() override;
 };

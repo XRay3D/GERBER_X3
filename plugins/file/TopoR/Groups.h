@@ -18,7 +18,7 @@
 /// </summary>
 class Groups : public QSerializer {
     Q_GADGET
-        QS_SERIALIZABLE
+    QS_SERIALIZABLE
     /// <summary>
     /// Описание групп слоёв.
     /// </summary>
@@ -28,7 +28,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -36,7 +35,7 @@ public:
         /// Ссылка на слой или ссылка на группу слоёв.
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
-        
+
         // ORIGINAL LINE: [XmlElement("LayerRef", typeof(LayerRef)), XmlElement("LayerGroupRef", typeof(LayerGroupRef))] public List<Object> _LayerRefs;
         std::vector<std::variant<LayerRef, LayerGroupRef>> _LayerRefs;
         bool ShouldSerialize_LayerRefs();
@@ -57,7 +56,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -65,7 +63,7 @@ public:
         /// Ссылка на цепь или ссылка на группу цепей.
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
-        
+
         // ORIGINAL LINE: [XmlElement("NetRef", typeof(NetRef)), XmlElement("NetGroupRef", typeof(NetGroupRef))] public List<Object> _NetRefs;
         std::vector<std::variant<NetRef, NetGroupRef>> _NetRefs;
         bool ShouldSerialize_NetRefs();
@@ -80,7 +78,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -88,7 +85,7 @@ public:
         /// Ссылка на компонент на плате или ссылка на группу компонентов.
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
-        
+
         // ORIGINAL LINE: [XmlElement("CompInstanceRef", typeof(CompInstanceRef)), XmlElement("CompGroupRef", typeof(CompGroupRef))] public List<Object> _CompRefs;
         std::vector<std::variant<CompInstanceRef, CompGroupRef>> _CompRefs;
         bool ShouldSerialize_CompRefs();
@@ -98,28 +95,27 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    
     // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
     QString _version;
 
     /// <summary>
     /// Группы слоёв.
     /// </summary>
-    
+
     // ORIGINAL LINE: [XmlArray("LayerGroups")][XmlArrayItem("LayerGroup")] public List<LayerGroup> _LayerGroups;
     std::vector<LayerGroup*> _LayerGroups;
     bool ShouldSerialize_LayerGroups();
     /// <summary>
     /// Группы цепей.
     /// </summary>
-    
+
     // ORIGINAL LINE: [XmlArray("NetGroups")][XmlArrayItem("NetGroup")] public List<NetGroup> _NetGroups;
     std::vector<NetGroup*> _NetGroups;
     bool ShouldSerialize_NetGroups();
     /// <summary>
     /// Группы компонентов.
     /// </summary>
-    
+
     // ORIGINAL LINE: [XmlArray("CompGroups")][XmlArrayItem("CompGroup")] public List<CompGroup> _CompGroups;
     std::vector<CompGroup*> _CompGroups;
     bool ShouldSerialize_CompGroups();

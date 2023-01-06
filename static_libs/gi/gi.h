@@ -11,7 +11,7 @@
 #pragma once
 
 #include <myclipper.h>
-using namespace ClipperLib;
+using namespace Clipper2Lib;
 
 #include <QAnimationGroup>
 #include <QGraphicsItem>
@@ -81,8 +81,8 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
-    virtual void setPaths(Paths paths, int alternate = {}) {
+    virtual PathsD paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
+    virtual void setPaths(PathsD paths, int alternate = {}) {
         auto t {transform()};
         auto a {qRadiansToDegrees(asin(t.m12()))};
         t = t.rotateRadians(-t.m12());

@@ -428,7 +428,7 @@ void Parser::addFlash() {
 
     AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     ap->setUsed();
-    Paths paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
+    PathsD paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if (ap->withHole())
         paths.emplace_back(ap->drawDrill(state_));
@@ -483,29 +483,29 @@ void Parser::resetStep() {
     path_.push_back(state_.curPos());
 }
 
-IntPoint Parser::parsePosition(const QString& xyStr) {
+PointD Parser::parsePosition(const QString& xyStr) {
     auto data {toU16StrView(xyStr)};
     static constexpr ctll::fixed_string ptrnPosition(R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"); // fixed_string("(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+");
     if (auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
         cInt tmp = 0;
         if (x && parseNumber(CtreCapTo(x), tmp, file->format().xInteger, file->format().xDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().X = tmp : state_.curPos().X += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().x = tmp : state_.curPos().x += tmp;
         tmp = 0;
         if (y && parseNumber(CtreCapTo(y), tmp, file->format().yInteger, file->format().yDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().Y = tmp : state_.curPos().Y += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().y = tmp : state_.curPos().y += tmp;
     }
 
-    if (2.0e-310 > state_.curPos().X && state_.curPos().X > 0.0)
+    if (2.0e-310 > state_.curPos().x && state_.curPos().x > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
-    if (2.0e-310 > state_.curPos().Y && state_.curPos().Y > 0.0)
+    if (2.0e-310 > state_.curPos().y && state_.curPos().y > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
 
     return state_.curPos();
 }
 
-Path Parser::arc(const IntPoint& center, double radius, double start, double stop) {
+PathD Parser::arc(const PointD& center, double radius, double start, double stop) {
     const double da_sign[4] = {0, 0, -1.0, +1.0};
-    Path points;
+    PathD points;
 
     const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
 
@@ -519,7 +519,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     double delta_angle = da_sign[state_.interpolation()] * angle * 1.0 / steps;
     for (int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
-        points.emplace_back(IntPoint(
+        points.emplace_back(PointD(
             static_cast<cInt>(center.X + radius * cos(theta)),
             static_cast<cInt>(center.Y + radius * sin(theta))));
     }
@@ -527,17 +527,17 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     return points;
 }
 
-Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center) {
+PathD Parser::arc(PointD p1, PointD p2, PointD center) {
     double radius = sqrt(pow((center.X - p1.X), 2) + pow((center.Y - p1.Y), 2));
     double start = atan2(p1.Y - center.Y, p1.X - center.X);
     double stop = atan2(p2.Y - center.Y, p2.X - center.X);
     return arc(center, radius, start, stop);
 }
 
-Paths Parser::createLine() {
+PathsD Parser::createLine() {
     if (file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
-    Paths solution;
+    PathsD solution;
     if (!file->apertures_.contains(state_.aperture())) {
         QString str;
         for (const auto& [ap, apPtr] : file->apertures_)
@@ -553,7 +553,7 @@ Paths Parser::createLine() {
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
-        offset.AddPath(path_, jtSquare, etOpenSquare);
+        offset.AddPath(path_, JoinType::Square, EndType::OpenSquare);
         offset.Execute(solution, size);
         if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
@@ -562,7 +562,7 @@ Paths Parser::createLine() {
         if (qFuzzyIsNull(size))
             return {};
         ClipperOffset offset;
-        offset.AddPath(path_, jtRound, etOpenRound);
+        offset.AddPath(path_, JoinType::Round, EndType::OpenRound);
         offset.Execute(solution, size);
         if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
@@ -570,7 +570,7 @@ Paths Parser::createLine() {
     return solution;
 }
 
-Paths Parser::createPolygon() {
+PathsD Parser::createPolygon() {
     if (Area(path_) > 0.0) {
         if (state_.imgPolarity() == Negative)
             ReversePath(path_);
@@ -735,15 +735,15 @@ void Parser::closeStepRepeat() {
     addPath();
     for (int y = 0; y < stepRepeat_.y; ++y) {
         for (int x = 0; x < stepRepeat_.x; ++x) {
-            const IntPoint pt(static_cast<cInt>(stepRepeat_.i * x), static_cast<cInt>(stepRepeat_.j * y));
+            const PointD pt(static_cast<cInt>(stepRepeat_.i * x), static_cast<cInt>(stepRepeat_.j * y));
             for (GraphicObject& go : stepRepeat_.storage) {
-                Paths paths(go.paths());
-                for (Path& path : paths)
+                PathsD paths(go.paths());
+                for (PathD& path : paths)
                     TranslatePath(path, pt);
-                Path path(go.path());
+                PathD path(go.path());
                 TranslatePath(path, pt);
                 auto state = go.state();
-                state.setCurPos({state.curPos().X + pt.X, state.curPos().Y + pt.Y});
+                state.setCurPos({state.curPos().x + pt.X, state.curPos().y + pt.Y});
                 file->graphicObjects_.emplace_back(GraphicObject(goId_++, state, paths, go.gFile(), path));
             }
         }
@@ -882,8 +882,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         if (!cg.size() && state_.gCode() != G02 && state_.gCode() != G03)
             return false;
         cInt x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().X;
-        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().Y;
+        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().x;
+        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().y;
         parseNumber(CtreCapTo(ci), i, file->format().xInteger, file->format().xDecimal);
         parseNumber(CtreCapTo(cj), j, file->format().yInteger, file->format().yDecimal);
         // Set operation code if provided
@@ -930,9 +930,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             return true;
         }
 
-        const IntPoint& curPos = state_.curPos();
+        const PointD& curPos = state_.curPos();
 
-        const IntPoint centerPos[4] = {
+        const PointD centerPos[4] = {
             {curPos.X + i, curPos.Y + j},
             {curPos.X - i, curPos.Y + j},
             {curPos.X + i, curPos.Y - j},
@@ -942,7 +942,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         bool valid = false;
 
         path_.push_back(state_.curPos());
-        Path arcPolygon;
+        PathD arcPolygon;
         switch (state_.quadrant()) {
         case Multi: // G75
         {
@@ -950,13 +950,13 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (state_.curPos() == IntPoint(x, y)) ? start : atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
+            const double stop = (state_.curPos() == PointD(x, y)) ? start : atan2(-centerPos[0].y + y, -centerPos[0].x + x); // Stop angle
 
-            arcPolygon = arc(IntPoint(centerPos[0].X, centerPos[0].Y), radius1, start, stop);
-            // arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
+            arcPolygon = arc(PointD(centerPos[0].x, centerPos[0].y), radius1, start, stop);
+            // arcPolygon = arc(curPos, PointD(x, y), centerPos[0]);
             //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
             //  Точной конечной точкой является указанная (x, y). Заменить.
-            state_.curPos() = IntPoint {x, y};
+            state_.curPos() = PointD {x, y};
             if (arcPolygon.size())
                 arcPolygon.back() = state_.curPos();
             else
@@ -965,19 +965,19 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         case Single: // G74
             for (int c = 0; c < 4; ++c) {
                 const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
-                const double radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
+                const double radius2 = sqrt(pow(centerPos[c].x - x, 2.0) + pow(centerPos[c].y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
                 if (qAbs(radius2 - radius1) > (5e-4 * uScale)) // Недействительный центр.
                     continue;
                 // Correct i and j and return true; as with multi-quadrant.
-                i = centerPos[c].X - state_.curPos().X;
-                j = centerPos[c].Y - state_.curPos().Y;
+                i = centerPos[c].x - state_.curPos().x;
+                j = centerPos[c].y - state_.curPos().y;
                 // Углы
                 const double start = atan2(-j, -i);
-                const double stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
+                const double stop = atan2(-centerPos[c].y + y, -centerPos[c].x + x);
                 const double angle = arcAngle(start, stop);
                 if (angle < (pi + 1e-5) * 0.5) {
-                    arcPolygon = arc(IntPoint(centerPos[c].X, centerPos[c].Y), radius1, start, stop);
+                    arcPolygon = arc(PointD(centerPos[c].x, centerPos[c].y), radius1, start, stop);
                     // Replace with exact values
                     state_.setCurPos({x, y});
                     if (arcPolygon.size())

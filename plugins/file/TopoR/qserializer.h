@@ -28,16 +28,16 @@
 
 /* JSON */
 #ifdef QS_HAS_JSON
-    #include <QJsonArray>
-    #include <QJsonDocument>
-    #include <QJsonObject>
-    #include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #endif
 
 /* XML */
 #ifdef QS_HAS_XML
-    #include <QtXml/QDomDocument>
-    #include <QtXml/QDomElement>
+#include <QtXml/QDomDocument>
+#include <QtXml/QDomElement>
 #endif
 
 /* META OBJECT SYSTEM */
@@ -103,15 +103,15 @@ public:
     QJsonObject toJson() const {
         QJsonObject json;
         for (int i {}; i < metaObject()->propertyCount(); ++i) {
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
             if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>())) {
                 continue;
             }
-    #else
+#else
             if (metaObject()->property(i).metaType().id() != QMetaType::QJsonValue) {
                 continue;
             }
-    #endif
+#endif
 
             json.insert(metaObject()->property(i).name(), metaObject()->property(i).readOnGadget(this).toJsonValue());
         }
@@ -130,15 +130,15 @@ public:
             QStringList keys = json.keys();
             int propCount = metaObject()->propertyCount();
             for (int i {}; i < propCount; ++i) {
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>())) {
                     continue;
                 }
-    #else
+#else
                 if (metaObject()->property(i).metaType().id() != QMetaType::QJsonValue) {
                     continue;
                 }
-    #endif
+#endif
 
                 for (auto key : json.keys()) {
                     if (key == metaObject()->property(i).name()) {
@@ -162,15 +162,15 @@ public:
         QDomDocument doc;
         QDomElement el = doc.createElement(metaObject()->className());
         for (int i {}; i < metaObject()->propertyCount(); ++i) {
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
             if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QDomNode>())) {
                 continue;
             }
-    #else
+#else
             if (metaObject()->property(i).metaType().id() != qMetaTypeId<QDomNode>()) {
                 continue;
             }
-    #endif
+#endif
             el.appendChild(QDomNode(metaObject()->property(i).readOnGadget(this).value<QDomNode>()));
         }
         doc.appendChild(el);
@@ -228,225 +228,225 @@ public:                               \
 
 /* Create JSON property and methods for primitive type field*/
 #ifdef QS_HAS_JSON
-    #define QS_JSON_FIELD(type, name)                                          \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonValue val = QJsonValue::fromVariant(QVariant(name));          \
-            return val;                                                        \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            name = varname.toVariant().value<type>();                          \
-        }
+#define QS_JSON_FIELD(type, name)                                          \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonValue val = QJsonValue::fromVariant(QVariant(name));          \
+        return val;                                                        \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        name = varname.toVariant().value<type>();                          \
+    }
 #else
-    #define QS_JSON_FIELD(type, name)
+#define QS_JSON_FIELD(type, name)
 #endif
 
 /* Create XML property and methods for primitive type field*/
 #ifdef QS_HAS_XML
-    #define QS_XML_FIELD(type, name)                                                         \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                   \
-    private:                                                                                 \
-        QDomNode GET(xml, name)() const {                                                    \
-            QDomDocument doc;                                                                \
-            QString strname = #name;                                                         \
-            QDomElement element = doc.createElement(strname);                                \
-            QDomText valueOfProp = doc.createTextNode(QVariant::fromValue(name).toString()); \
-            element.appendChild(valueOfProp);                                                \
-            doc.appendChild(element);                                                        \
-            return QDomNode(doc);                                                            \
-        }                                                                                    \
-        void SET(xml, name)(const QDomNode& node) {                                          \
-            if (!node.isNull() && node.isElement()) {                                        \
-                QDomElement domElement = node.toElement();                                   \
-                if (domElement.tagName() == #name)                                           \
-                    name = QVariant(domElement.text()).value<type>();                        \
-            }                                                                                \
-        }
+#define QS_XML_FIELD(type, name)                                                         \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                   \
+private:                                                                                 \
+    QDomNode GET(xml, name)() const {                                                    \
+        QDomDocument doc;                                                                \
+        QString strname = #name;                                                         \
+        QDomElement element = doc.createElement(strname);                                \
+        QDomText valueOfProp = doc.createTextNode(QVariant::fromValue(name).toString()); \
+        element.appendChild(valueOfProp);                                                \
+        doc.appendChild(element);                                                        \
+        return QDomNode(doc);                                                            \
+    }                                                                                    \
+    void SET(xml, name)(const QDomNode& node) {                                          \
+        if (!node.isNull() && node.isElement()) {                                        \
+            QDomElement domElement = node.toElement();                                   \
+            if (domElement.tagName() == #name)                                           \
+                name = QVariant(domElement.text()).value<type>();                        \
+        }                                                                                \
+    }
 #else
-    #define QS_XML_FIELD(type, name)
+#define QS_XML_FIELD(type, name)
 #endif
 
 /* Create XML property and methods for primitive type field*/
 #ifdef QS_HAS_XML
-    #define QS_XML_ATTR(type, name)                                                          \
-        Q_PROPERTY(QDomNode name READ GET(xml_attr, name) WRITE SET(xml_attr, name))         \
-    private:                                                                                 \
-        QDomNode GET(xml_attr, name)() const {                                               \
-            QDomDocument doc;                                                                \
-            QString strname = #name;                                                         \
-            QDomElement element = doc.createElement(strname);                                \
-            QDomText valueOfProp = doc.createTextNode(QVariant::fromValue(name).toString()); \
-            element.appendChild(valueOfProp);                                                \
-            doc.appendChild(element);                                                        \
-            return QDomNode(doc);                                                            \
-        }                                                                                    \
-        void SET(xml_attr, name)(const QDomNode& node) {                                     \
-            if (!node.isNull()) {                                                            \
-                name = QVariant(node.nodeValue()).value<type>();                             \
-                qDebug() << "4" << name << node.nodeValue() << #name;                        \
-            }                                                                                \
-        }
+#define QS_XML_ATTR(type, name)                                                          \
+    Q_PROPERTY(QDomNode name READ GET(xml_attr, name) WRITE SET(xml_attr, name))         \
+private:                                                                                 \
+    QDomNode GET(xml_attr, name)() const {                                               \
+        QDomDocument doc;                                                                \
+        QString strname = #name;                                                         \
+        QDomElement element = doc.createElement(strname);                                \
+        QDomText valueOfProp = doc.createTextNode(QVariant::fromValue(name).toString()); \
+        element.appendChild(valueOfProp);                                                \
+        doc.appendChild(element);                                                        \
+        return QDomNode(doc);                                                            \
+    }                                                                                    \
+    void SET(xml_attr, name)(const QDomNode& node) {                                     \
+        if (!node.isNull()) {                                                            \
+            name = QVariant(node.nodeValue()).value<type>();                             \
+            qDebug() << "4" << name << node.nodeValue() << #name;                        \
+        }                                                                                \
+    }
 #else
-    #define QS_XML_ATTR(type, name)
+#define QS_XML_ATTR(type, name)
 #endif
 
 /* Generate JSON-property and methods for primitive type objects */
 /* This collection must be provide method append(T) (it's can be QList, QVector)    */
 #ifdef QS_HAS_JSON
-    #define QS_JSON_ARRAY(itemType, name)                                      \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonArray val;                                                    \
-            for (int i {}; i < name.size(); ++i)                               \
-                val.push_back(name.at(i));                                     \
-            return QJsonValue::fromVariant(val);                               \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            if (!varname.isArray())                                            \
-                return;                                                        \
-            name.clear();                                                      \
-            QJsonArray val = varname.toArray();                                \
-            for (auto item : val) {                                            \
-                itemType tmp;                                                  \
-                tmp = item.toVariant().value<itemType>();                      \
-                name.append(tmp);                                              \
-            }                                                                  \
-        }
+#define QS_JSON_ARRAY(itemType, name)                                      \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonArray val;                                                    \
+        for (int i {}; i < name.size(); ++i)                               \
+            val.push_back(name.at(i));                                     \
+        return QJsonValue::fromVariant(val);                               \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        if (!varname.isArray())                                            \
+            return;                                                        \
+        name.clear();                                                      \
+        QJsonArray val = varname.toArray();                                \
+        for (auto item : val) {                                            \
+            itemType tmp;                                                  \
+            tmp = item.toVariant().value<itemType>();                      \
+            name.append(tmp);                                              \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_ARRAY(itemType, name)
+#define QS_JSON_ARRAY(itemType, name)
 #endif
 
 /* Generate XML-property and methods for primitive type objects */
 /* This collection must be provide method append(T) (it's can be QList, QVector)    */
 #ifdef QS_HAS_XML
-    #define QS_XML_ARRAY(itemType, name)                                            \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))          \
-    private:                                                                        \
-        QDomNode GET(xml, name)() const {                                           \
-            QDomDocument doc;                                                       \
-            QString strname = #name;                                                \
-            QDomElement arrayXml = doc.createElement(QString(strname));             \
-            arrayXml.setAttribute("type", "array");                                 \
-                                                                                    \
-            for (int i {}; i < name.size(); ++i) {                                  \
-                itemType item = name.at(i);                                         \
-                QDomElement itemXml = doc.createElement("item");                    \
-                itemXml.setAttribute("type", #itemType);                            \
-                itemXml.setAttribute("index", i);                                   \
-                itemXml.appendChild(doc.createTextNode(QVariant(item).toString())); \
-                arrayXml.appendChild(itemXml);                                      \
-            }                                                                       \
-                                                                                    \
-            doc.appendChild(arrayXml);                                              \
-            return QDomNode(doc);                                                   \
-        }                                                                           \
-        void SET(xml, name)(const QDomNode& node) {                                 \
-            QDomNode domNode = node.firstChild();                                   \
-            name.clear();                                                           \
-            while (!domNode.isNull()) {                                             \
-                if (domNode.isElement()) {                                          \
-                    QDomElement domElement = domNode.toElement();                   \
-                    name.append(QVariant(domElement.text()).value<itemType>());     \
-                }                                                                   \
-                domNode = domNode.nextSibling();                                    \
-            }                                                                       \
-        }
+#define QS_XML_ARRAY(itemType, name)                                            \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))          \
+private:                                                                        \
+    QDomNode GET(xml, name)() const {                                           \
+        QDomDocument doc;                                                       \
+        QString strname = #name;                                                \
+        QDomElement arrayXml = doc.createElement(QString(strname));             \
+        arrayXml.setAttribute("type", "array");                                 \
+                                                                                \
+        for (int i {}; i < name.size(); ++i) {                                  \
+            itemType item = name.at(i);                                         \
+            QDomElement itemXml = doc.createElement("item");                    \
+            itemXml.setAttribute("type", #itemType);                            \
+            itemXml.setAttribute("index", i);                                   \
+            itemXml.appendChild(doc.createTextNode(QVariant(item).toString())); \
+            arrayXml.appendChild(itemXml);                                      \
+        }                                                                       \
+                                                                                \
+        doc.appendChild(arrayXml);                                              \
+        return QDomNode(doc);                                                   \
+    }                                                                           \
+    void SET(xml, name)(const QDomNode& node) {                                 \
+        QDomNode domNode = node.firstChild();                                   \
+        name.clear();                                                           \
+        while (!domNode.isNull()) {                                             \
+            if (domNode.isElement()) {                                          \
+                QDomElement domElement = domNode.toElement();                   \
+                name.append(QVariant(domElement.text()).value<itemType>());     \
+            }                                                                   \
+            domNode = domNode.nextSibling();                                    \
+        }                                                                       \
+    }
 #else
-    #define QS_XML_ARRAY(itemType, name)
+#define QS_XML_ARRAY(itemType, name)
 #endif
 
 /* Generate JSON-property and methods for some custom class */
 /* Custom type must be provide methods fromJson and toJson or inherit from QSerializer */
 #ifdef QS_HAS_JSON
-    #define QS_JSON_OBJECT(type, name)                                         \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonObject val = name.toJson();                                   \
-            return QJsonValue(val);                                            \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            if (!varname.isObject())                                           \
-                return;                                                        \
-            name.fromJson(varname);                                            \
-        }
+#define QS_JSON_OBJECT(type, name)                                         \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonObject val = name.toJson();                                   \
+        return QJsonValue(val);                                            \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        if (!varname.isObject())                                           \
+            return;                                                        \
+        name.fromJson(varname);                                            \
+    }
 #else
-    #define QS_JSON_OBJECT(type, name)
+#define QS_JSON_OBJECT(type, name)
 #endif
 
 /* Generate XML-property and methods for some custom class */
 /* Custom type must be provide methods fromJson and toJson or inherit from QSerializer */
 #ifdef QS_HAS_XML
-    #define QS_XML_OBJECT(type, name)                                      \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name)) \
-    private:                                                               \
-        QDomNode GET(xml, name)() const {                                  \
-            return name.toXml();                                           \
-        }                                                                  \
-        void SET(xml, name)(const QDomNode& node) {                        \
-            name.fromXml(node);                                            \
-        }
+#define QS_XML_OBJECT(type, name)                                      \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name)) \
+private:                                                               \
+    QDomNode GET(xml, name)() const {                                  \
+        return name.toXml();                                           \
+    }                                                                  \
+    void SET(xml, name)(const QDomNode& node) {                        \
+        name.fromXml(node);                                            \
+    }
 #else
-    #define QS_XML_OBJECT(type, name)
+#define QS_XML_OBJECT(type, name)
 #endif
 
 /* Generate JSON-property and methods for collection of custom type objects */
 /* Custom item type must be provide methods fromJson and toJson or inherit from QSerializer */
 /* This collection must be provide method append(T) (it's can be QList, QVector)    */
 #ifdef QS_HAS_JSON
-    #define QS_JSON_ARRAY_OBJECTS(itemType, name)                              \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonArray val;                                                    \
-            for (int i {}; i < name.size(); ++i)                               \
-                val.push_back(name.at(i).toJson());                            \
-            return QJsonValue::fromVariant(val);                               \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            if (!varname.isArray())                                            \
-                return;                                                        \
-            name.clear();                                                      \
-            QJsonArray val = varname.toArray();                                \
-            for (int i {}; i < val.size(); ++i) {                              \
-                itemType tmp;                                                  \
-                tmp.fromJson(val.at(i));                                       \
-                name.append(tmp);                                              \
-            }                                                                  \
-        }
+#define QS_JSON_ARRAY_OBJECTS(itemType, name)                              \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonArray val;                                                    \
+        for (int i {}; i < name.size(); ++i)                               \
+            val.push_back(name.at(i).toJson());                            \
+        return QJsonValue::fromVariant(val);                               \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        if (!varname.isArray())                                            \
+            return;                                                        \
+        name.clear();                                                      \
+        QJsonArray val = varname.toArray();                                \
+        for (int i {}; i < val.size(); ++i) {                              \
+            itemType tmp;                                                  \
+            tmp.fromJson(val.at(i));                                       \
+            name.append(tmp);                                              \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_ARRAY_OBJECTS(itemType, name)
+#define QS_JSON_ARRAY_OBJECTS(itemType, name)
 #endif
 
 /* Generate XML-property and methods for collection of custom type objects  */
 /* Custom type must be provide methods fromXml and toXml or inherit from QSerializer */
 /* This collection must be provide method append(T) (it's can be QList, QVector)    */
 #ifdef QS_HAS_XML
-    #define QS_XML_ARRAY_OBJECTS(itemType, name)                           \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name)) \
-    private:                                                               \
-        QDomNode GET(xml, name)() const {                                  \
-            QDomDocument doc;                                              \
-            QDomElement element = doc.createElement(#name);                \
-            element.setAttribute("type", "array");                         \
-            for (int i {}; i < name.size(); ++i)                           \
-                element.appendChild(name.at(i).toXml());                   \
-            doc.appendChild(element);                                      \
-            return QDomNode(doc);                                          \
-        }                                                                  \
-        void SET(xml, name)(const QDomNode& node) {                        \
-            name.clear();                                                  \
-            QDomNodeList nodesList = node.childNodes();                    \
-            for (int i {}; i < nodesList.size(); ++i) {                    \
-                itemType tmp;                                              \
-                tmp.fromXml(nodesList.at(i));                              \
-                name.emplace_back(std::move(tmp));                         \
-            }                                                              \
-        }
+#define QS_XML_ARRAY_OBJECTS(itemType, name)                           \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name)) \
+private:                                                               \
+    QDomNode GET(xml, name)() const {                                  \
+        QDomDocument doc;                                              \
+        QDomElement element = doc.createElement(#name);                \
+        element.setAttribute("type", "array");                         \
+        for (int i {}; i < name.size(); ++i)                           \
+            element.appendChild(name.at(i).toXml());                   \
+        doc.appendChild(element);                                      \
+        return QDomNode(doc);                                          \
+    }                                                                  \
+    void SET(xml, name)(const QDomNode& node) {                        \
+        name.clear();                                                  \
+        QDomNodeList nodesList = node.childNodes();                    \
+        for (int i {}; i < nodesList.size(); ++i) {                    \
+            itemType tmp;                                              \
+            tmp.fromXml(nodesList.at(i));                              \
+            name.emplace_back(std::move(tmp));                         \
+        }                                                              \
+    }
 #else
-    #define QS_XML_ARRAY_OBJECTS(itemType, name)
+#define QS_XML_ARRAY_OBJECTS(itemType, name)
 #endif
 
 /* Generate JSON-property and methods for dictionary of simple fields (int, bool, QString, ...)  */
@@ -454,29 +454,29 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, QString>, QMap<int,int>, ...*/
 #ifdef QS_HAS_JSON
-    #define QS_JSON_QT_DICT(map, name)                                         \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonObject val;                                                   \
-            for (auto p = name.constBegin(); p != name.constEnd(); ++p) {      \
-                val.insert(                                                    \
-                    QVariant(p.key()).toString(),                              \
-                    QJsonValue::fromVariant(QVariant(p.value())));             \
-            }                                                                  \
-            return val;                                                        \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            QJsonObject val = varname.toObject();                              \
-            name.clear();                                                      \
-            for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
-                name.insert(                                                   \
-                    QVariant(p.key()).value<map::key_type>(),                  \
-                    QVariant(p.value()).value<map::mapped_type>());            \
-            }                                                                  \
-        }
+#define QS_JSON_QT_DICT(map, name)                                         \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonObject val;                                                   \
+        for (auto p = name.constBegin(); p != name.constEnd(); ++p) {      \
+            val.insert(                                                    \
+                QVariant(p.key()).toString(),                              \
+                QJsonValue::fromVariant(QVariant(p.value())));             \
+        }                                                                  \
+        return val;                                                        \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        QJsonObject val = varname.toObject();                              \
+        name.clear();                                                      \
+        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+            name.insert(                                                   \
+                QVariant(p.key()).value<map::key_type>(),                  \
+                QVariant(p.value()).value<map::mapped_type>());            \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_QT_DICT(map, name)
+#define QS_JSON_QT_DICT(map, name)
 #endif
 
 /* Generate XML-property and methods for dictionary of simple fields (int, bool, QString, ...)  */
@@ -484,38 +484,38 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, QString>, QMap<int,int>, ...*/
 #ifdef QS_HAS_XML
-    #define QS_XML_QT_DICT(map, name)                                                                   \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
-    private:                                                                                            \
-        QDomNode GET(xml, name)() const {                                                               \
-            QDomDocument doc;                                                                           \
-            QDomElement element = doc.createElement(#name);                                             \
-            element.setAttribute("type", "map");                                                        \
-            for (auto p = name.begin(); p != name.end(); ++p) {                                         \
-                QDomElement e = doc.createElement("item");                                              \
-                e.setAttribute("key", QVariant(p.key()).toString());                                    \
-                e.setAttribute("value", QVariant(p.value()).toString());                                \
-                element.appendChild(e);                                                                 \
-            }                                                                                           \
-            doc.appendChild(element);                                                                   \
-            return QDomNode(doc);                                                                       \
-        }                                                                                               \
-        void SET(xml, name)(const QDomNode& node) {                                                     \
-            if (!node.isNull() && node.isElement()) {                                                   \
-                QDomElement root = node.toElement();                                                    \
-                if (root.tagName() == #name) {                                                          \
-                    QDomNodeList childs = root.childNodes();                                            \
-                                                                                                        \
-                    for (int i {}; i < childs.size(); ++i) {                                            \
-                        QDomElement item = childs.at(i).toElement();                                    \
-                        name.insert(QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
-                            QVariant(item.attributeNode("value").value()).value<map::mapped_type>());   \
-                    }                                                                                   \
-                }                                                                                       \
-            }                                                                                           \
-        }
+#define QS_XML_QT_DICT(map, name)                                                                   \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
+private:                                                                                            \
+    QDomNode GET(xml, name)() const {                                                               \
+        QDomDocument doc;                                                                           \
+        QDomElement element = doc.createElement(#name);                                             \
+        element.setAttribute("type", "map");                                                        \
+        for (auto p = name.begin(); p != name.end(); ++p) {                                         \
+            QDomElement e = doc.createElement("item");                                              \
+            e.setAttribute("key", QVariant(p.key()).toString());                                    \
+            e.setAttribute("value", QVariant(p.value()).toString());                                \
+            element.appendChild(e);                                                                 \
+        }                                                                                           \
+        doc.appendChild(element);                                                                   \
+        return QDomNode(doc);                                                                       \
+    }                                                                                               \
+    void SET(xml, name)(const QDomNode& node) {                                                     \
+        if (!node.isNull() && node.isElement()) {                                                   \
+            QDomElement root = node.toElement();                                                    \
+            if (root.tagName() == #name) {                                                          \
+                QDomNodeList childs = root.childNodes();                                            \
+                                                                                                    \
+                for (int i {}; i < childs.size(); ++i) {                                            \
+                    QDomElement item = childs.at(i).toElement();                                    \
+                    name.insert(QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
+                        QVariant(item.attributeNode("value").value()).value<map::mapped_type>());   \
+                }                                                                                   \
+            }                                                                                       \
+        }                                                                                           \
+    }
 #else
-    #define QS_XML_QT_DICT(map, name)
+#define QS_XML_QT_DICT(map, name)
 #endif
 
 /* Generate JSON-property and methods for dictionary of custom type objects  */
@@ -523,31 +523,31 @@ public:                               \
 /* This collection must be provide method inserv(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, CustomSerializableType> */
 #ifdef QS_HAS_JSON
-    #define QS_JSON_QT_DICT_OBJECTS(map, name)                                 \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonObject val;                                                   \
-            for (auto p = name.begin(); p != name.end(); ++p) {                \
-                val.insert(                                                    \
-                    QVariant::fromValue(p.key()).toString(),                   \
-                    p.value().toJson());                                       \
-            }                                                                  \
-            return val;                                                        \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            QJsonObject val = varname.toObject();                              \
-            name.clear();                                                      \
-            for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
-                map::mapped_type tmp;                                          \
-                tmp.fromJson(p.value());                                       \
-                name.insert(                                                   \
-                    QVariant(p.key()).value<map::key_type>(),                  \
-                    tmp);                                                      \
-            }                                                                  \
-        }
+#define QS_JSON_QT_DICT_OBJECTS(map, name)                                 \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonObject val;                                                   \
+        for (auto p = name.begin(); p != name.end(); ++p) {                \
+            val.insert(                                                    \
+                QVariant::fromValue(p.key()).toString(),                   \
+                p.value().toJson());                                       \
+        }                                                                  \
+        return val;                                                        \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        QJsonObject val = varname.toObject();                              \
+        name.clear();                                                      \
+        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+            map::mapped_type tmp;                                          \
+            tmp.fromJson(p.value());                                       \
+            name.insert(                                                   \
+                QVariant(p.key()).value<map::key_type>(),                  \
+                tmp);                                                      \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_QT_DICT_OBJECTS(map, name)
+#define QS_JSON_QT_DICT_OBJECTS(map, name)
 #endif
 
 /* Generate XML-property and methods for dictionary of custom type objects  */
@@ -555,40 +555,40 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, CustomSerializableType> */
 #ifdef QS_HAS_XML
-    #define QS_XML_QT_DICT_OBJECTS(map, name)                                                           \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
-    private:                                                                                            \
-        QDomNode GET(xml, name)() const {                                                               \
-            QDomDocument doc;                                                                           \
-            QDomElement element = doc.createElement(#name);                                             \
-            element.setAttribute("type", "map");                                                        \
-            for (auto p = name.begin(); p != name.end(); ++p) {                                         \
-                QDomElement e = doc.createElement("item");                                              \
-                e.setAttribute("key", QVariant(p.key()).toString());                                    \
-                e.appendChild(p.value().toXml());                                                       \
-                element.appendChild(e);                                                                 \
-            }                                                                                           \
-            doc.appendChild(element);                                                                   \
-            return QDomNode(doc);                                                                       \
-        }                                                                                               \
-        void SET(xml, name)(const QDomNode& node) {                                                     \
-            if (!node.isNull() && node.isElement()) {                                                   \
-                QDomElement root = node.toElement();                                                    \
-                if (root.tagName() == #name) {                                                          \
-                    QDomNodeList childs = root.childNodes();                                            \
-                                                                                                        \
-                    for (int i {}; i < childs.size(); ++i) {                                            \
-                        QDomElement item = childs.at(i).toElement();                                    \
-                        map::mapped_type tmp;                                                           \
-                        tmp.fromXml(item.firstChild());                                                 \
-                        name.insert(QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
-                            tmp);                                                                       \
-                    }                                                                                   \
-                }                                                                                       \
-            }                                                                                           \
-        }
+#define QS_XML_QT_DICT_OBJECTS(map, name)                                                           \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
+private:                                                                                            \
+    QDomNode GET(xml, name)() const {                                                               \
+        QDomDocument doc;                                                                           \
+        QDomElement element = doc.createElement(#name);                                             \
+        element.setAttribute("type", "map");                                                        \
+        for (auto p = name.begin(); p != name.end(); ++p) {                                         \
+            QDomElement e = doc.createElement("item");                                              \
+            e.setAttribute("key", QVariant(p.key()).toString());                                    \
+            e.appendChild(p.value().toXml());                                                       \
+            element.appendChild(e);                                                                 \
+        }                                                                                           \
+        doc.appendChild(element);                                                                   \
+        return QDomNode(doc);                                                                       \
+    }                                                                                               \
+    void SET(xml, name)(const QDomNode& node) {                                                     \
+        if (!node.isNull() && node.isElement()) {                                                   \
+            QDomElement root = node.toElement();                                                    \
+            if (root.tagName() == #name) {                                                          \
+                QDomNodeList childs = root.childNodes();                                            \
+                                                                                                    \
+                for (int i {}; i < childs.size(); ++i) {                                            \
+                    QDomElement item = childs.at(i).toElement();                                    \
+                    map::mapped_type tmp;                                                           \
+                    tmp.fromXml(item.firstChild());                                                 \
+                    name.insert(QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
+                        tmp);                                                                       \
+                }                                                                                   \
+            }                                                                                       \
+        }                                                                                           \
+    }
 #else
-    #define QS_XML_QT_DICT_OBJECTS(map, name)
+#define QS_XML_QT_DICT_OBJECTS(map, name)
 #endif
 
 /* Generate JSON-property and methods for dictionary of simple fields (int, bool, QString, ...)  */
@@ -596,65 +596,65 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be std::map)    */
 /* THIS IS FOR STL DICTIONARY TYPES, for example std::map<int, QString>, std::map<int,int>, ...*/
 #ifdef QS_HAS_JSON
-    #define QS_JSON_STL_DICT(map, name)                                        \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonObject val;                                                   \
-            for (auto p : name) {                                              \
-                val.insert(                                                    \
-                    QVariant::fromValue(p.first).toString(),                   \
-                    QJsonValue::fromVariant(QVariant(p.second)));              \
-            }                                                                  \
-            return val;                                                        \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            QJsonObject val = varname.toObject();                              \
-            name.clear();                                                      \
-            for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
-                name.insert(std::pair<map::key_type, map::mapped_type>(        \
-                    QVariant(p.key()).value<map::key_type>(),                  \
-                    QVariant(p.value()).value<map::mapped_type>()));           \
-            }                                                                  \
-        }
+#define QS_JSON_STL_DICT(map, name)                                        \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonObject val;                                                   \
+        for (auto p : name) {                                              \
+            val.insert(                                                    \
+                QVariant::fromValue(p.first).toString(),                   \
+                QJsonValue::fromVariant(QVariant(p.second)));              \
+        }                                                                  \
+        return val;                                                        \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        QJsonObject val = varname.toObject();                              \
+        name.clear();                                                      \
+        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+            name.insert(std::pair<map::key_type, map::mapped_type>(        \
+                QVariant(p.key()).value<map::key_type>(),                  \
+                QVariant(p.value()).value<map::mapped_type>()));           \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_STL_DICT(map, name)
+#define QS_JSON_STL_DICT(map, name)
 #endif
 
 #ifdef QS_HAS_XML
-    #define QS_XML_STL_DICT(map, name)                                                                 \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                             \
-    private:                                                                                           \
-        QDomNode GET(xml, name)() const {                                                              \
-            QDomDocument doc;                                                                          \
-            QDomElement element = doc.createElement(#name);                                            \
-            element.setAttribute("type", "map");                                                       \
-            for (auto p : name) {                                                                      \
-                QDomElement e = doc.createElement("item");                                             \
-                e.setAttribute("key", QVariant(p.first).toString());                                   \
-                e.setAttribute("value", QVariant(p.second).toString());                                \
-                element.appendChild(e);                                                                \
-            }                                                                                          \
-            doc.appendChild(element);                                                                  \
-            return QDomNode(doc);                                                                      \
-        }                                                                                              \
-        void SET(xml, name)(const QDomNode& node) {                                                    \
-            if (!node.isNull() && node.isElement()) {                                                  \
-                QDomElement root = node.toElement();                                                   \
-                if (root.tagName() == #name) {                                                         \
-                    QDomNodeList childs = root.childNodes();                                           \
-                                                                                                       \
-                    for (int i {}; i < childs.size(); ++i) {                                           \
-                        QDomElement item = childs.at(i).toElement();                                   \
-                        name.insert(std::pair<map::key_type, map::mapped_type>(                        \
-                            QVariant(item.attributeNode("key").value()).value<map::key_type>(),        \
-                            QVariant(item.attributeNode("value").value()).value<map::mapped_type>())); \
-                    }                                                                                  \
-                }                                                                                      \
-            }                                                                                          \
-        }
+#define QS_XML_STL_DICT(map, name)                                                                 \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                             \
+private:                                                                                           \
+    QDomNode GET(xml, name)() const {                                                              \
+        QDomDocument doc;                                                                          \
+        QDomElement element = doc.createElement(#name);                                            \
+        element.setAttribute("type", "map");                                                       \
+        for (auto p : name) {                                                                      \
+            QDomElement e = doc.createElement("item");                                             \
+            e.setAttribute("key", QVariant(p.first).toString());                                   \
+            e.setAttribute("value", QVariant(p.second).toString());                                \
+            element.appendChild(e);                                                                \
+        }                                                                                          \
+        doc.appendChild(element);                                                                  \
+        return QDomNode(doc);                                                                      \
+    }                                                                                              \
+    void SET(xml, name)(const QDomNode& node) {                                                    \
+        if (!node.isNull() && node.isElement()) {                                                  \
+            QDomElement root = node.toElement();                                                   \
+            if (root.tagName() == #name) {                                                         \
+                QDomNodeList childs = root.childNodes();                                           \
+                                                                                                   \
+                for (int i {}; i < childs.size(); ++i) {                                           \
+                    QDomElement item = childs.at(i).toElement();                                   \
+                    name.insert(std::pair<map::key_type, map::mapped_type>(                        \
+                        QVariant(item.attributeNode("key").value()).value<map::key_type>(),        \
+                        QVariant(item.attributeNode("value").value()).value<map::mapped_type>())); \
+                }                                                                                  \
+            }                                                                                      \
+        }                                                                                          \
+    }
 #else
-    #define QS_XML_STL_DICT(map, name)
+#define QS_XML_STL_DICT(map, name)
 #endif
 
 /* Generate JSON-property and methods for dictionary of custom type objects */
@@ -662,31 +662,31 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be std::map)    */
 /* THIS IS FOR STL DICTIONARY TYPES, for example std::map<int, CustomSerializableType> */
 #ifdef QS_HAS_JSON
-    #define QS_JSON_STL_DICT_OBJECTS(map, name)                                \
-        Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
-    private:                                                                   \
-        QJsonValue GET(json, name)() const {                                   \
-            QJsonObject val;                                                   \
-            for (auto p : name) {                                              \
-                val.insert(                                                    \
-                    QVariant::fromValue(p.first).toString(),                   \
-                    p.second.toJson());                                        \
-            }                                                                  \
-            return val;                                                        \
-        }                                                                      \
-        void SET(json, name)(const QJsonValue& varname) {                      \
-            QJsonObject val = varname.toObject();                              \
-            name.clear();                                                      \
-            for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
-                map::mapped_type tmp;                                          \
-                tmp.fromJson(p.value());                                       \
-                name.insert(std::pair<map::key_type, map::mapped_type>(        \
-                    QVariant(p.key()).value<map::key_type>(),                  \
-                    tmp));                                                     \
-            }                                                                  \
-        }
+#define QS_JSON_STL_DICT_OBJECTS(map, name)                                \
+    Q_PROPERTY(QJsonValue name READ GET(json, name) WRITE SET(json, name)) \
+private:                                                                   \
+    QJsonValue GET(json, name)() const {                                   \
+        QJsonObject val;                                                   \
+        for (auto p : name) {                                              \
+            val.insert(                                                    \
+                QVariant::fromValue(p.first).toString(),                   \
+                p.second.toJson());                                        \
+        }                                                                  \
+        return val;                                                        \
+    }                                                                      \
+    void SET(json, name)(const QJsonValue& varname) {                      \
+        QJsonObject val = varname.toObject();                              \
+        name.clear();                                                      \
+        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+            map::mapped_type tmp;                                          \
+            tmp.fromJson(p.value());                                       \
+            name.insert(std::pair<map::key_type, map::mapped_type>(        \
+                QVariant(p.key()).value<map::key_type>(),                  \
+                tmp));                                                     \
+        }                                                                  \
+    }
 #else
-    #define QS_JSON_STL_DICT_OBJECTS(map, name)
+#define QS_JSON_STL_DICT_OBJECTS(map, name)
 #endif
 
 /* Generate XML-property and methods for dictionary of custom type objects */
@@ -694,41 +694,41 @@ public:                               \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be std::map)    */
 /* THIS IS FOR STL DICTIONARY TYPES, for example std::map<int, CustomSerializableType> */
 #ifdef QS_HAS_XML
-    #define QS_XML_STL_DICT_OBJECTS(map, name)                                                  \
-        Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                      \
-    private:                                                                                    \
-        QDomNode GET(xml, name)() const {                                                       \
-            QDomDocument doc;                                                                   \
-            QDomElement element = doc.createElement(#name);                                     \
-            element.setAttribute("type", "map");                                                \
-            for (auto p : name) {                                                               \
-                QDomElement e = doc.createElement("item");                                      \
-                e.setAttribute("key", QVariant(p.first).toString());                            \
-                e.appendChild(p.second.toXml());                                                \
-                element.appendChild(e);                                                         \
-            }                                                                                   \
-            doc.appendChild(element);                                                           \
-            return QDomNode(doc);                                                               \
-        }                                                                                       \
-        void SET(xml, name)(const QDomNode& node) {                                             \
-            if (!node.isNull() && node.isElement()) {                                           \
-                QDomElement root = node.toElement();                                            \
-                if (root.tagName() == #name) {                                                  \
-                    QDomNodeList childs = root.childNodes();                                    \
-                                                                                                \
-                    for (int i {}; i < childs.size(); ++i) {                                    \
-                        QDomElement item = childs.at(i).toElement();                            \
-                        map::mapped_type tmp;                                                   \
-                        tmp.fromXml(item.firstChild());                                         \
-                        name.insert(std::pair<map::key_type, map::mapped_type>(                 \
-                            QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
-                            tmp));                                                              \
-                    }                                                                           \
-                }                                                                               \
-            }                                                                                   \
-        }
+#define QS_XML_STL_DICT_OBJECTS(map, name)                                                  \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                      \
+private:                                                                                    \
+    QDomNode GET(xml, name)() const {                                                       \
+        QDomDocument doc;                                                                   \
+        QDomElement element = doc.createElement(#name);                                     \
+        element.setAttribute("type", "map");                                                \
+        for (auto p : name) {                                                               \
+            QDomElement e = doc.createElement("item");                                      \
+            e.setAttribute("key", QVariant(p.first).toString());                            \
+            e.appendChild(p.second.toXml());                                                \
+            element.appendChild(e);                                                         \
+        }                                                                                   \
+        doc.appendChild(element);                                                           \
+        return QDomNode(doc);                                                               \
+    }                                                                                       \
+    void SET(xml, name)(const QDomNode& node) {                                             \
+        if (!node.isNull() && node.isElement()) {                                           \
+            QDomElement root = node.toElement();                                            \
+            if (root.tagName() == #name) {                                                  \
+                QDomNodeList childs = root.childNodes();                                    \
+                                                                                            \
+                for (int i {}; i < childs.size(); ++i) {                                    \
+                    QDomElement item = childs.at(i).toElement();                            \
+                    map::mapped_type tmp;                                                   \
+                    tmp.fromXml(item.firstChild());                                         \
+                    name.insert(std::pair<map::key_type, map::mapped_type>(                 \
+                        QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
+                        tmp));                                                              \
+                }                                                                           \
+            }                                                                               \
+        }                                                                                   \
+    }
 #else
-    #define QS_XML_STL_DICT_OBJECTS(map, name)
+#define QS_XML_STL_DICT_OBJECTS(map, name)
 #endif
 
 /* BIND: */

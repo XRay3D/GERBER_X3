@@ -14,9 +14,9 @@
 
 #include "mainwindow.h"
 
+#include <QFileInfo>
 #include <QMenu>
 #include <QSettings>
-#include <QFileInfo>
 
 Recent::Recent(MainWindow* mainWindow, QString&& recentFilesKey)
     : QObject(mainWindow)

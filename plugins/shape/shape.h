@@ -52,7 +52,7 @@ public:
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     // GraphicsItem interface
-    Paths paths(int alternate = {}) const override;
+    PathsD paths(int alternate = {}) const override;
     void changeColor() override;
     // Shape interface
     virtual QString name() const = 0;
@@ -65,7 +65,7 @@ public:
 protected:
     Handle* currentHandler {};
     mutable mvector<std::unique_ptr<Handle>> handlers;
-    Paths paths_;
+    PathsD paths_;
     Node* node_;
     std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                             // групповое перемещение

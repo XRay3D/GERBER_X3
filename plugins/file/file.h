@@ -130,7 +130,7 @@ public:
 
     const mvector<GiGroup*>& itemGroups() const { return itemGroups_; }
 
-    Paths mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
+    PathsD mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
     Pathss groupedPaths() const { return groupedPaths_; }
 
     mvector<QString>& lines() { return lines_; }
@@ -192,7 +192,7 @@ public:
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
-    virtual Paths merge() const = 0;
+    virtual PathsD merge() const = 0;
 
     LayerTypes layerTypes_;
     FileTree::Node* node_ = nullptr;
@@ -204,7 +204,7 @@ protected:
     Side side_ = Top;
     int id_ = -1;
     int itemsType_ = -1;
-    mutable Paths mergedPaths_;
+    mutable PathsD mergedPaths_;
     mutable bool visible_ = false;
     mvector<GiGroup*> itemGroups_;
     mvector<QString> lines_;

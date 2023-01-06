@@ -698,7 +698,7 @@ void SettingsDialog::Ui::retranslateUi(QDialog* SettingsDialog) {
     labelAPIcon->setText(QString());
     chbxScaleHZMarkers->setText(QCoreApplication::translate("SettingsDialog", "Scale Home/Zero Markers", nullptr));
     chbxScalePinMarkers->setText(QCoreApplication::translate("SettingsDialog", "Scale Pin Markers", nullptr));
-    groupBox_4->setTitle(QCoreApplication::translate("SettingsDialog", "ClipperLib arcs aprox", nullptr));
+    groupBox_4->setTitle(QCoreApplication::translate("SettingsDialog", "Clipper2Lib arcs aprox", nullptr));
     minimumCircleSegmentsLabel->setText(QCoreApplication::translate("SettingsDialog", "Minimum points of circle aproximation:", nullptr));
     minimumCircleSegmentLengthLabel->setText(QCoreApplication::translate("SettingsDialog", "The minimum length of circle aproximation:", nullptr));
     dsbxMinCircleSegmentLength->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));

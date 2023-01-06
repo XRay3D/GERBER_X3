@@ -26,7 +26,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QTextCodec>
+#include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -161,6 +161,17 @@ int main(int argc, char** argv) {
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
 
+    { // TRANSLATE
+        QSettings settings;
+        settings.beginGroup("MainWindow");
+        QString locale(settings.value("locale").toString());
+        if (locale.isEmpty())
+            locale = QLocale().name().left(2);
+        settings.setValue("locale", locale);
+        settings.endGroup();
+        MainWindow::translate(locale);
+    }
+
     {
         /*
         Platform        Valid suffixes
@@ -171,11 +182,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
         const QString suffix("*.so");
-    #else
+#else
         const QString suffix("*.so");
-    #endif
+#endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else
@@ -213,15 +224,6 @@ int main(int argc, char** argv) {
             auto parser = new GCode::Plugin(&app);
             App::filePlugins().emplace(parser->type(), parser);
         }
-
-        QSettings settings;
-        settings.beginGroup("MainWindow");
-        QString locale(settings.value("locale").toString());
-        if (locale.isEmpty())
-            locale = QLocale().name().left(2);
-        settings.setValue("locale", locale);
-        settings.endGroup();
-        MainWindow::translate(locale);
     }
 
     SettingsDialog().accept();

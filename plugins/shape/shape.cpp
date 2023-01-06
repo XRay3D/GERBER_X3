@@ -55,7 +55,7 @@ QRectF Shape::boundingRect() const { return shape_.boundingRect(); }
 
 QPainterPath Shape::shape() const { return shape_; }
 
-Paths Shape::paths(int) const { return paths_; }
+PathsD Shape::paths(int) const { return paths_; }
 
 void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
 {

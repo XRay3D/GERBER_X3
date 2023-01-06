@@ -17,7 +17,7 @@
 /// </summary>
 class NetList : public QSerializer {
     Q_GADGET
-        QS_SERIALIZABLE
+    QS_SERIALIZABLE
     /// <summary>
     /// Раздел «Текущий список соединени
     /// </summary>
@@ -27,7 +27,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -46,7 +45,6 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-
     // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
     QString _version;
 

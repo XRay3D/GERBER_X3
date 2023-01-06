@@ -16,7 +16,7 @@ class GiError : public QGraphicsItem {
     const double area_;
 
 public:
-    GiError(const Paths& paths, double area);
+    GiError(const PathsD& paths, double area);
     double area() const;
 
     // QGraphicsItem interface

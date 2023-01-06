@@ -16,7 +16,7 @@ class GiDrill final : public GraphicsItem {
     using GraphicsItem::update;
 
 public:
-    GiDrill(const Path& path, double diameter, FileInterface* file, int toolId);
+    GiDrill(const PathD& path, double diameter, FileInterface* file, int toolId);
     ~GiDrill() override { }
 
     // QGraphicsItem interface
@@ -24,13 +24,13 @@ public:
     int type() const override { return int(GiType::Drill); }
 
     // GraphicsItem interface
-    Paths paths(int alternate = {}) const override;
+    PathsD paths(int alternate = {}) const override;
     void changeColor() override;
 
     bool isSlot();
     double diameter() const { return diameter_; }
     void setDiameter(double diameter);
-    void update(const Path& path, double diameter);
+    void update(const PathD& path, double diameter);
 
     int toolId() const { return toolId_; }
     void setToolId(int newToolId) {
@@ -41,7 +41,7 @@ public:
 private:
     void create();
     double diameter_ = 0.0;
-    Path path_;
+    PathD path_;
     QPolygonF fillPolygon;
     int toolId_ = -1;
 };

@@ -20,12 +20,13 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <ranges>
+#include <set>
 
 #ifdef __GNUC__
 QTimer GiDataPath::timer;
 #endif
 
-GiDataPath::GiDataPath(const Path& path, FileInterface* file)
+GiDataPath::GiDataPath(const PathD& path, FileInterface* file)
     : GraphicsItem(file) {
     shape_.addPolygon(path);
     updateSelection();
@@ -71,11 +72,10 @@ void GiDataPath::updateSelection() const {
     if (const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
         scale_ = scale;
         selectionShape_ = QPainterPath();
-        Paths tmpPpath;
         ClipperOffset offset;
-        offset.AddPath(shape_.toSubpathPolygons().front(), jtSquare, ClipperLib::etOpenSquare);
-        offset.Execute(tmpPpath, 5 * uScale * scale_);
-        for (const Path& path : qAsConst(tmpPpath))
+        offset.AddPath(PathD{shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
+        auto tmpPpath {offset.Execute(5 * uScale * scale_)};
+        for (auto&& path : tmpPpath)
             selectionShape_.addPolygon(path);
         boundingRect_ = selectionShape_.boundingRect();
     }

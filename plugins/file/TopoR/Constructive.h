@@ -17,7 +17,7 @@
 /// </summary>
 class Constructive : public QSerializer {
     Q_GADGET
-        QS_SERIALIZABLE
+    QS_SERIALIZABLE
     /// <summary>
     /// Описание контура платы и вырезов в плате.
     /// </summary>
@@ -30,7 +30,6 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
             float _lineWidth = 0.0F;
 
@@ -59,7 +58,6 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
             float _lineWidth = 0.0F;
 
@@ -85,7 +83,6 @@ public:
         /// Описание контура платы.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlArray("Contour")][XmlArrayItem("Shape")] public List<Shape_Contour> _Contours;
         std::vector<Shape_Contour*> _Contours;
         bool ShouldSerialize_Contours();
@@ -107,7 +104,6 @@ public:
         /// Задаёт угол в градусах c точностью до тысячных долей.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
         float _angle = 0.0F;
 
@@ -122,7 +118,6 @@ public:
             delete _NetRef;
             delete _Org;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _fixedSpecified
         bool getFixedSpecified() const;
@@ -170,7 +165,6 @@ public:
                 /// Тип запрета трассировки.
                 /// </summary>
             public:
-
                 // ORIGINAL LINE: [XmlAttribute("role")] public role _role;
                 role _role = static_cast<role>(0);
 
@@ -201,7 +195,6 @@ public:
                 /// Сторона объекта.
                 /// </summary>
             public:
-
                 // ORIGINAL LINE: [XmlAttribute("side")] public side _side;
                 side _side = static_cast<side>(0);
             };
@@ -267,7 +260,6 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-
     // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
     QString _version;
 

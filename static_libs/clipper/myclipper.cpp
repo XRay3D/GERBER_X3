@@ -15,31 +15,32 @@
 #include <QElapsedTimer>
 #include <QLineF>
 #include <myclipper.h>
+#include <numbers>
 
-ClipperLib::Path CirclePath(double diametr, const ClipperLib::IntPoint& center) {
+Clipper2Lib::PathD CirclePath(double diametr, const Clipper2Lib::PointD& center) {
     if (diametr == 0.0)
-        return Path();
+        return Clipper2Lib::PathD();
 
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
-    ClipperLib::Path poligon(intSteps);
+    Clipper2Lib::PathD poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = ClipperLib::IntPoint(
-            static_cast<ClipperLib::cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
-            static_cast<ClipperLib::cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
+        poligon[i] = Clipper2Lib::PointD(
+            static_cast<Clipper2Lib::cInt>(cos(i * 2 * std::numbers::pi / intSteps) * radius) + center.x,
+            static_cast<Clipper2Lib::cInt>(sin(i * 2 * std::numbers::pi / intSteps) * radius) + center.y);
     }
     return poligon;
 }
 
-ClipperLib::Path RectanglePath(double width, double height, const ClipperLib::IntPoint& center) {
+Clipper2Lib::PathD RectanglePath(double width, double height, const Clipper2Lib::PointD& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    ClipperLib::Path poligon {
-        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(-halfWidth + center.X), static_cast<ClipperLib::cInt>(+halfHeight + center.Y)),
-        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(-halfWidth + center.X), static_cast<ClipperLib::cInt>(-halfHeight + center.Y)),
-        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(+halfWidth + center.X), static_cast<ClipperLib::cInt>(-halfHeight + center.Y)),
-        ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(+halfWidth + center.X), static_cast<ClipperLib::cInt>(+halfHeight + center.Y)),
+    Clipper2Lib::PathD poligon {
+        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(-halfWidth + center.x), static_cast<Clipper2Lib::cInt>(+halfHeight + center.y)),
+        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(-halfWidth + center.x), static_cast<Clipper2Lib::cInt>(-halfHeight + center.y)),
+        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(+halfWidth + center.x), static_cast<Clipper2Lib::cInt>(-halfHeight + center.y)),
+        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(+halfWidth + center.x), static_cast<Clipper2Lib::cInt>(+halfHeight + center.y)),
     };
     if (Area(poligon) < 0.0)
         ReversePath(poligon);
@@ -47,40 +48,40 @@ ClipperLib::Path RectanglePath(double width, double height, const ClipperLib::In
     return poligon;
 }
 
-void RotatePath(Path& poligon, double angle, const ClipperLib::IntPoint& center) {
+void RotatePath(PathD& poligon, double angle, const Clipper2Lib::PointD& center) {
     const bool fl = Area(poligon) < 0;
-    for (ClipperLib::IntPoint& pt : poligon) {
+    for (Clipper2Lib::PointD& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
         const double length = center.distTo(pt);
-        pt = ClipperLib::IntPoint(static_cast<ClipperLib::cInt>(cos(dAangle) * length), static_cast<ClipperLib::cInt>(sin(dAangle) * length));
-        pt.X += center.X;
-        pt.Y += center.Y;
+        pt = Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(cos(dAangle) * length), static_cast<Clipper2Lib::cInt>(sin(dAangle) * length));
+        pt.x += center.x;
+        pt.y += center.y;
     }
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const ClipperLib::IntPoint& pos) {
-    if (pos.X == 0 && pos.Y == 0)
+void TranslatePath(PathD& path, const Clipper2Lib::PointD& pos) {
+    if (pos.x == 0 && pos.y == 0)
         return;
     for (auto& pt : path) {
-        pt.X += pos.X;
-        pt.Y += pos.Y;
+        pt.x += pos.x;
+        pt.y += pos.y;
     }
 }
 
-double Perimeter(const Path& path) {
+double Perimeter(const PathD& path) {
     double p = 0.0;
     for (size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
-        double x = path[j].X - path[i].X;
-        double y = path[j].Y - path[i].Y;
+        double x = path[j].x - path[i].x;
+        double y = path[j].y - path[i].y;
         p += x * x + y * y;
         j = i;
     }
     return sqrt(p);
 }
 
-void mergeSegments(Paths& paths, double glue) {
+void mergeSegments(PathsD& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
@@ -92,15 +93,15 @@ void mergeSegments(Paths& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                ClipperLib::IntPoint pib = paths[i].back();
-                ClipperLib::IntPoint pjf = paths[j].front();
+                Clipper2Lib::PointD pib = paths[i].back();
+                Clipper2Lib::PointD pjf = paths[j].front();
                 if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                ClipperLib::IntPoint pif = paths[i].front();
-                ClipperLib::IntPoint pjb = paths[j].back();
+                Clipper2Lib::PointD pif = paths[i].front();
+                Clipper2Lib::PointD pjb = paths[j].back();
                 if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -127,15 +128,15 @@ void mergeSegments(Paths& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                ClipperLib::IntPoint pib = paths[i].back();
-                ClipperLib::IntPoint pjf = paths[j].front();
+                Clipper2Lib::PointD pib = paths[i].back();
+                Clipper2Lib::PointD pjf = paths[j].front();
                 if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                ClipperLib::IntPoint pif = paths[i].front();
-                ClipperLib::IntPoint pjb = paths[j].back();
+                Clipper2Lib::PointD pif = paths[i].front();
+                Clipper2Lib::PointD pjb = paths[j].back();
                 if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -152,8 +153,8 @@ void mergeSegments(Paths& paths, double glue) {
     } while (size != paths.size());
 }
 
-void mergePaths(Paths& paths, const double dist) {
-    //    msg = tr("Merge Paths");
+void mergePaths(PathsD& paths, const double dist) {
+    //    msg = tr("Merge PathsD");
     size_t max;
     do {
         max = paths.size();
@@ -223,7 +224,7 @@ void mergePaths(Paths& paths, const double dist) {
 #include <QPainterPath>
 #include <QPixmap>
 
-QIcon drawIcon(const Paths& paths) {
+QIcon drawIcon(const PathsD& paths) {
     static QMutex m;
     QMutexLocker l(&m);
 
@@ -269,28 +270,28 @@ QIcon drawDrillIcon(QColor color) {
     return pixmap;
 }
 
-Paths& normalize(Paths& paths) {
-    PolyTree polyTree;
-    Clipper clipper;
-    clipper.AddPaths(paths, ptSubject, true);
-    IntRect r(clipper.GetBounds());
-    ClipperLib::Path outer = {
-        ClipperLib::IntPoint(r.left - uScale, r.top - uScale),
-        ClipperLib::IntPoint(r.right + uScale, r.top - uScale),
-        ClipperLib::IntPoint(r.right + uScale, r.bottom + uScale),
-        ClipperLib::IntPoint(r.left - uScale, r.bottom + uScale),
+PathsD& normalize(PathsD& paths) {
+    PolyTreeD polyTree;
+    ClipperD clipper;
+    clipper.AddSubject(paths); //    clipper.AddPaths(paths, PathType::Subject, true);
+    RectD r(GetBounds(paths));
+    Clipper2Lib::PathD outer = {
+        Clipper2Lib::PointD(r.left - uScale, r.top - uScale),
+        Clipper2Lib::PointD(r.right + uScale, r.top - uScale),
+        Clipper2Lib::PointD(r.right + uScale, r.bottom + uScale),
+        Clipper2Lib::PointD(r.left - uScale, r.bottom + uScale),
     };
     // ReversePath(outer);
-    clipper.AddPath(outer, ptSubject, true);
-    clipper.Execute(ctDifference, paths, pftEvenOdd);
+    clipper.AddSubject({outer}); //      clipper.AddPath(outer, PathType::Subject, true);
+    clipper.Execute(ClipType::Difference, FillRule::EvenOdd, paths);
     paths.erase(paths.begin());
     ReversePaths(paths);
     //    /****************************/
     //    std::function<void(PolyNode*)> grouping = [&grouping](PolyNode* node) {
-    //         ClipperLib::Paths paths;
+    //         Clipper2Lib::PathsD paths;
 
     //        if (node->IsHole()) {
-    //            Path& path = node->Contour;
+    //            PathD& path = node->Contour;
     //            paths.push_back(path);
     //            for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
     //                path = node->Childs[i]->Contour;

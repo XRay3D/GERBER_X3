@@ -32,7 +32,7 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     // GraphicsItem interface
-    Paths paths(int alternate = {}) const override;
+    PathsD paths(int alternate = {}) const override;
     void changeColor() override { }
 
     void setSelected(bool selected) { selected_ = selected; }

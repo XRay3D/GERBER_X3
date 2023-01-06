@@ -10,7 +10,6 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-
 project(shcirclearc LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -26,12 +25,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-add_library(${PROJECT_NAME} SHARED
+set(PROJECT_SOURCES
     circlearc.json
     sharc.cpp
     sharc.h
 )
 
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -50,7 +50,3 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
-
-
-
-#target_compile_definitions(circlearc PRIVATE CIRCLEARC_LIBRARY)

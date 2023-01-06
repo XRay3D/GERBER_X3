@@ -48,7 +48,7 @@ public:
     virtual int toolId() const = 0;
 
     virtual void updateTool() = 0;
-    virtual Paths paths() const = 0;
+    virtual PathsD paths() const = 0;
     virtual bool fit(double depth) const = 0;
 
     void changeColor();

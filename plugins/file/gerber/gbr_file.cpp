@@ -30,15 +30,15 @@
 
 namespace Gerber {
 
-Path GraphicObject::elipse() const { return (state_.dCode() == D03
-                                                && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle) ?
+PathD GraphicObject::elipse() const { return (state_.dCode() == D03
+                                                 && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle) ?
         path_ :
-        Path(); } // circle
-Paths GraphicObject::elipseW() const { return (state_.dCode() == D03
-                                                  && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
-                                                  && gFile_->apertures()->at(state_.aperture())->withHole()) ?
+        PathD(); } // circle
+PathsD GraphicObject::elipseW() const { return (state_.dCode() == D03
+                                                   && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
+                                                   && gFile_->apertures()->at(state_.aperture())->withHole()) ?
         paths_ :
-        Paths(); }
+        PathsD(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
@@ -64,27 +64,26 @@ File::File(const QString& fileName)
     itemGroups_.append({new GiGroup, new GiGroup});
     name_ = fileName;
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                       GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
- "without width and without contacts")                                                          },
-        {Components,     GbrObj::tr("Components"),                                                                   GbrObj::tr("Show components")}
-    };
+        {Normal, GbrObj::tr("Normal"), GbrObj::tr("Normal view")},
+        {ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\n"
+                                                           "without width and without contacts")},
+        {Components, GbrObj::tr("Components"), GbrObj::tr("Show components")}};
 }
 
 File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
-Paths File::merge() const {
+PathsD File::merge() const {
     QElapsedTimer t;
     t.start();
     mergedPaths_.clear();
     size_t i = 0;
 
     if constexpr (1) {
-        std::list<Paths> pathList;
+        std::list<PathsD> pathList;
         {
-            std::list<std::map<int, Paths>> pathListMap; // FIXME V826. Consider replacing standard container with a different one. to vector
+            std::list<std::map<int, PathsD>> pathListMap; // FIXME V826. Consider replacing standard container with a different one. to vector
             int exp = -1;
             for (auto& go : graphicObjects_) {
                 if (exp != go.state().imgPolarity()) {
@@ -104,11 +103,11 @@ Paths File::merge() const {
                     for (int i {}; i < paths.size(); ++i) {
                         auto& path = paths[i];
                         if (path.back() == path.front()) {
-                            offset.AddPath(paths[i], ClipperLib::jtRound, ClipperLib::etClosedLine);
+                            offset.AddPath(paths[i], Clipper2Lib::JoinType::Round, Clipper2Lib::EndType::ClosedLine);
                             paths.erase(paths.begin() + i--);
                         }
                     }
-                    offset.AddPaths(paths, ClipperLib::jtRound, ClipperLib::etOpenRound);
+                    offset.AddPaths(paths, Clipper2Lib::JoinType::Round, Clipper2Lib::EndType::OpenRound);
                     offset.Execute(paths, apertures_.at(aperture)->apSize() * uScale * 0.5);
                     // pathList.back().append(std::move(paths));
                     pathList.back().append(paths);
@@ -118,40 +117,40 @@ Paths File::merge() const {
 
         while (i < graphicObjects_.size()) {
             Clipper clipper;
-            clipper.AddPaths(mergedPaths_, ptSubject, true);
+            clipper.AddPaths(mergedPaths_, PathType::Subject, true);
             const auto exp = graphicObjects_.at(i).state().imgPolarity(); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
             do {
                 if (graphicObjects_[i].state().type() == Line) {
                     ++i;
                 } else {
                     const GraphicObject& go = graphicObjects_.at(i++);
-                    clipper.AddPaths(go.paths(), ptClip, true);
+                    clipper.AddPaths(go.paths(), PathType::Clip, true);
                 }
             } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
 
             if (exp)
                 ReversePaths(pathList.front());
-            clipper.AddPaths(pathList.front(), ptClip, true);
+            clipper.AddPaths(pathList.front(), PathType::Clip, true);
             pathList.pop_front();
 
             if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
-                clipper.Execute(ctUnion, mergedPaths_, pftPositive);
+                clipper.Execute(ClipType::Union, mergedPaths_, FillRule::Positive);
             else
-                clipper.Execute(ctDifference, mergedPaths_, pftNonZero);
+                clipper.Execute(ClipType::Difference, mergedPaths_, FillRule::NonZero);
         }
     } else {
         while (i < graphicObjects_.size()) {
             Clipper clipper;
-            clipper.AddPaths(mergedPaths_, ptSubject, true);
+            clipper.AddPaths(mergedPaths_, PathType::Subject, true);
             const auto exp = graphicObjects_.at(i).state().imgPolarity();
             do {
                 const GraphicObject& go = graphicObjects_.at(i++);
-                clipper.AddPaths(go.paths(), ptClip, true);
+                clipper.AddPaths(go.paths(), PathType::Clip, true);
             } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
             if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
-                clipper.Execute(ctUnion, mergedPaths_, pftPositive);
+                clipper.Execute(ClipType::Union, mergedPaths_, FillRule::Positive);
             else
-                clipper.Execute(ctDifference, mergedPaths_, pftNonZero);
+                clipper.Execute(ClipType::Difference, mergedPaths_, FillRule::NonZero);
         }
     }
 
@@ -162,9 +161,9 @@ Paths File::merge() const {
 
 const QList<Comp::Component>& File::components() const { return components_; }
 
-void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
-    Path path;
-    Paths paths;
+void File::grouping(PolyTreeD* node, Pathss* pathss, File::Group group) {
+    PathD path;
+    PathsD paths;
     switch (group) {
     case CutoffGroup:
         if (!node->IsHole()) {
@@ -199,20 +198,20 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
 
 Pathss& File::groupedPaths(File::Group group, bool fl) {
     if (groupedPaths_.empty()) {
-        PolyTree polyTree;
+        PolyTreeD polyTree;
         Clipper clipper;
-        clipper.AddPaths(mergedPaths(), ptSubject, true);
+        clipper.AddPaths(mergedPaths(), PathType::Subject, true);
         IntRect r(clipper.GetBounds());
         int k = /*uScale*/ 1;
-        Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)};
+        PathD outer = {
+            PointD(r.left - k, r.bottom + k),
+            PointD(r.right + k, r.bottom + k),
+            PointD(r.right + k, r.top - k),
+            PointD(r.left - k, r.top - k)};
         if (fl)
             ReversePath(outer);
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftNonZero);
+        clipper.AddPath(outer, PathType::Subject, true);
+        clipper.Execute(ClipType::Union, polyTree, FillRule::NonZero);
         grouping(polyTree.GetFirst(), &groupedPaths_, group);
     }
     return groupedPaths_;
@@ -307,7 +306,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     if constexpr (1) { // fill copper
-        for (Paths& paths : groupedPaths()) {
+        for (PathsD& paths : groupedPaths()) {
             GraphicsItem* item = new GiDataSolid(paths, this);
             itemGroups_[Normal]->push_back(item);
         }
@@ -321,13 +320,13 @@ void File::createGi() {
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr (1) { // add aperture paths
-        auto contains = [&](const Path& path) -> bool {
+        auto contains = [&](const PathD& path) -> bool {
             constexpr double k = 0.001 * uScale;
-            for (const Path& chPath : checkList) { // find copy
+            for (const PathD& chPath : checkList) { // find copy
                 size_t counter = 0;
                 if (chPath.size() == path.size()) {
-                    for (const IntPoint& p1 : chPath) {
-                        for (const IntPoint& p2 : path) {
+                    for (const PointD& p1 : chPath) {
+                        for (const PointD& p2 : path) {
                             if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
                                 ++counter;
                                 break;
@@ -344,9 +343,9 @@ void File::createGi() {
         for (const GraphicObject& go : graphicObjects_) {
             if (!go.path().empty()) {
                 if (Settings::simplifyRegions() && go.path().front() == go.path().back()) {
-                    Paths paths;
+                    PathsD paths;
                     SimplifyPolygon(go.path(), paths);
-                    for (Path& path : paths) {
+                    for (PathD& path : paths) {
                         path.push_back(path.front());
                         if (!Settings::skipDuplicates()) {
                             checkList.push_front(path);

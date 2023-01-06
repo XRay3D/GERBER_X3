@@ -498,15 +498,11 @@ void GraphicsView::dropEvent(QDropEvent* event) {
         emit fileDroped(var.path().remove(0, 1));
 
     if (mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
-//<<<<<<< Updated upstream
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        scene()->addItem(new GiGuide(mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+#else
         scene()->addItem(new GiGuide(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
-//=======
-//#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-//        scene()->addItem(new name(mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
-//#else
-//        scene()->addItem(new name(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
-//#endif
-//>>>>>>> Stashed changes
+#endif
     }
 
     event->accept();

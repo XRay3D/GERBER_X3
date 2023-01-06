@@ -96,7 +96,7 @@ QPointF GiBridge::calculate(const QPointF& pos) {
                 type == GiType::Drill ||     //
                 type == GiType::DataSolid || //
                 type == GiType::DataPath) {
-                for (const Path& path : gi->paths()) {
+                for (const PathD& path : gi->paths()) {
                     for (size_t i = 0, s = path.size(); i < s; ++i) {
                         const QPointF pt1(path[i]);
                         const QPointF pt2(path[(i + 1) % s]);
@@ -143,7 +143,7 @@ void GiBridge::update() {
     QGraphicsItem::update();
 }
 
-IntPoint GiBridge::getPoint(const int side) const {
+PointD GiBridge::getPoint(const int side) const {
     QLineF l2(0, 0, size_ / 2, 0);
     l2.translate(pos());
     switch (side) {
@@ -156,7 +156,7 @@ IntPoint GiBridge::getPoint(const int side) const {
         l2.setAngle(angle_);
         return (l2.p2());
     }
-    return IntPoint();
+    return PointD();
 }
 
 QLineF GiBridge::getPath() const {
@@ -185,7 +185,7 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths GiBridge::paths(int) const { return Paths(); }
+PathsD GiBridge::paths(int) const { return PathsD(); }
 
 int GiBridge::type() const { return GiType::Bridge; }
 

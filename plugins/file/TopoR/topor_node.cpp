@@ -98,23 +98,23 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
-//    menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
-//        QDialog* dialog = new QDialog;
-//        dialog->setObjectName(QString::fromUtf8("dialog"));
-//        dialog->resize(600, 600);
-//        // Dialog->resize(400, 300);
-//        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-//        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-//        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-//        textBrowser->setFont(QFont("JetBrains Mono"));
-//        new SyntaxHighlighter(textBrowser->document());
-//        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-//        verticalLayout->addWidget(textBrowser);
-//        for (const QString& str : file->lines())
-//            textBrowser->append(str);
-//        dialog->exec();
-//        delete dialog;
-//    });
+    //    menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
+    //        QDialog* dialog = new QDialog;
+    //        dialog->setObjectName(QString::fromUtf8("dialog"));
+    //        dialog->resize(600, 600);
+    //        // Dialog->resize(400, 300);
+    //        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+    //        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    //        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+    //        textBrowser->setFont(QFont("JetBrains Mono"));
+    //        new SyntaxHighlighter(textBrowser->document());
+    //        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+    //        verticalLayout->addWidget(textBrowser);
+    //        for (const QString& str : file->lines())
+    //            textBrowser->append(str);
+    //        dialog->exec();
+    //        delete dialog;
+    //    });
     menu.addSeparator();
     //    if (!FormatDialog::showed()) {
     //        menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {

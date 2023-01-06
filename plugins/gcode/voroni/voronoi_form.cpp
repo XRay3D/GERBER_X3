@@ -11,18 +11,18 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
- #include "voronoi_form.h"
- #include "ui_voronoiform.h"
- #include "voronoi.h"
+#include "voronoi_form.h"
+#include "ui_voronoiform.h"
+#include "voronoi.h"
 
- #include "graphicsview.h"
- #include "settings.h"
- #include <QMessageBox>
+#include "graphicsview.h"
+#include "settings.h"
+#include <QMessageBox>
 
- VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
-     : GcFormBase(plugin, new GCode::VoronoiCreator, parent)
-     , ui(new Ui::VoronoiForm) {
-     ui->setupUi(content);
+VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
+    : GcFormBase(plugin, new GCode::VoronoiCreator, parent)
+    , ui(new Ui::VoronoiForm) {
+    ui->setupUi(content);
 
     setWindowTitle(tr("Voronoi Toolpath"));
 
@@ -34,12 +34,12 @@
     settings.getValue(ui->dsbxWidth);
     settings.getValue(ui->dsbxOffset, 1.0);
     settings.getValue(ui->cbxSolver);
- #ifdef _USE_CGAL_
- #else
-//    ui->cbxSolver->setCurrentIndex(0);
-//    ui->cbxSolver->setEnabled(false);
- #endif
-     settings.endGroup();
+#ifdef _USE_CGAL_
+#else
+    //    ui->cbxSolver->setCurrentIndex(0);
+    //    ui->cbxSolver->setEnabled(false);
+#endif
+    settings.endGroup();
 
     connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
     connect(leName, &QLineEdit::textChanged, this, &VoronoiForm::onNameTextChanged);
@@ -51,23 +51,23 @@
     updateButtonIconSize();
 }
 
- VoronoiForm::~VoronoiForm() {
-     MySettings settings;
-     settings.beginGroup("VoronoiForm");
-     settings.setValue(ui->dsbxPrecision);
-     settings.setValue(ui->dsbxWidth);
-     settings.setValue(ui->cbxSolver);
-     settings.setValue(ui->dsbxOffset);
-     settings.endGroup();
-     delete ui;
- }
+VoronoiForm::~VoronoiForm() {
+    MySettings settings;
+    settings.beginGroup("VoronoiForm");
+    settings.setValue(ui->dsbxPrecision);
+    settings.setValue(ui->dsbxWidth);
+    settings.setValue(ui->cbxSolver);
+    settings.setValue(ui->dsbxOffset);
+    settings.endGroup();
+    delete ui;
+}
 
- void VoronoiForm::createFile() {
-     const auto tool {ui->toolHolder->tool()};
-     if (!tool.isValid()) {
-         tool.errorMessageBox(this);
-         return;
-     }
+void VoronoiForm::createFile() {
+    const auto tool {ui->toolHolder->tool()};
+    if (!tool.isValid()) {
+        tool.errorMessageBox(this);
+        return;
+    }
 
     Paths wPaths;
     Paths wRawPaths;
@@ -130,30 +130,30 @@
     createToolpath();
 }
 
- void VoronoiForm::updateName() {
-     leName->setText(tr("Voronoi"));
-     setWidth(0.0);
- }
+void VoronoiForm::updateName() {
+    leName->setText(tr("Voronoi"));
+    setWidth(0.0);
+}
 
- void VoronoiForm::onNameTextChanged(const QString& arg1) {
-     fileName_ = arg1;
- }
+void VoronoiForm::onNameTextChanged(const QString& arg1) {
+    fileName_ = arg1;
+}
 
- void VoronoiForm::setWidth(double) {
-     const auto tool {ui->toolHolder->tool()};
-     const double d = tool.getDiameter(dsbxDepth->value());
-     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
-         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));
-         ui->dsbxWidth->setValue(d + 0.05);
-     }
- }
+void VoronoiForm::setWidth(double) {
+    const auto tool {ui->toolHolder->tool()};
+    const double d = tool.getDiameter(dsbxDepth->value());
+    if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
+        QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));
+        ui->dsbxWidth->setValue(d + 0.05);
+    }
+}
 
- void VoronoiForm::editFile(GCode::File* /*file*/) {
- }
+void VoronoiForm::editFile(GCode::File* /*file*/) {
+}
 
- void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
-     ui->label_4->setVisible(index);
-     ui->dsbxPrecision->setVisible(index);
- }
+void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
+    ui->label_4->setVisible(index);
+    ui->dsbxPrecision->setVisible(index);
+}
 
- #include "moc_voronoi_form.cpp"
+#include "moc_voronoi_form.cpp"

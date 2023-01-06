@@ -16,7 +16,7 @@
 /// </summary>
 class ComponentsOnBoard : public QSerializer {
     Q_GADGET
-        QS_SERIALIZABLE
+    QS_SERIALIZABLE
     /// <summary>
     /// Описание компонента на плате.
     /// </summary>
@@ -34,7 +34,6 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
             int _padNum = 0;
 
@@ -67,7 +66,6 @@ public:
             /// Ссылка на монтажное отверстие в посадочном месте.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("mntholeRef")] public string _mntholeRef;
             QString _mntholeRef;
 
@@ -111,7 +109,6 @@ public:
                 /// Задаёт угол в градусах c точностью до тысячных долей.
                 /// </summary>
             public:
-
                 // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
                 float _angle = 0.0F;
 
@@ -126,7 +123,6 @@ public:
                     delete _TextStyleRef;
                     delete _Org;
                 }
-
 
                 // ORIGINAL LINE: [XmlIgnore] public bool _mirrorSpecified
                 bool getMirrorSpecified() const;
@@ -174,7 +170,6 @@ public:
             /// Тип предопределённого атрибута компонента.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("type")] public type _type;
             type _type = static_cast<type>(0);
 
@@ -205,7 +200,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -243,7 +237,6 @@ public:
             delete _FootprintRef;
             delete _Org;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _fixedSpecified
         bool getFixedSpecified() const;
@@ -312,7 +305,6 @@ public:
         /// Сторона объекта.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("side")] public side _side;
         side _side = static_cast<side>(0);
 
@@ -334,7 +326,6 @@ public:
             delete _NetRef;
             delete _Org;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _fixedSpecified
         bool getFixedSpecified() const;
@@ -365,7 +356,6 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-
     // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
     QString _version;
 

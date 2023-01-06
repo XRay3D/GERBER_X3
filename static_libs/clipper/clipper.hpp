@@ -314,14 +314,14 @@ struct Paths : mvector<Path> {
 };
 
 // inline Path& operator<<(Path& poly, const IntPoint& p)
-//{
-//     poly.push_back(p);
-//     return poly;
+// {
+//  poly.push_back(p);
+//  return poly;
 // }
 // inline Paths& operator<<(Paths& polys, const Path& p)
-//{
-//     polys.push_back(p);
-//     return polys;
+// {
+//  polys.push_back(p);
+//  return polys;
 // }
 
 std::ostream& operator<<(std::ostream& s, const IntPoint& p);
@@ -357,6 +357,11 @@ enum JoinType {
     jtRound,
     jtMiter
 };
+// namespace name {
+//     struct jtSquare : std::integral_constant<int, 0> { };
+//     struct jtRound : std::integral_constant<int, 1> { };
+//     struct jtMiter : std::integral_constant<int, 2> { };
+// } // namespace name
 
 enum EndType {
     etClosedPolygon,
@@ -368,6 +373,8 @@ enum EndType {
 
 class PolyNode;
 typedef mvector<PolyNode*> PolyNodes;
+
+class ClipperOffset;
 
 class PolyNode {
 public:
@@ -386,7 +393,8 @@ private:
     // PolyNode& operator =(PolyNode& other);
     size_t Index; // node index in Parent.Childs
     bool m_IsOpen;
-    JoinType m_jointype;
+    int /*JoinType*/ m_jointype;
+    std::function<void(int, int, double)> m_jointype_f;
     EndType m_endtype;
     PolyNode* GetNextSiblingUp() const;
     void AddChild(PolyNode& child);
@@ -454,10 +462,10 @@ struct OutPt;
 struct OutRec;
 struct Join;
 
-typedef mvector /*mvector*/<OutRec*> PolyOutList;
-typedef mvector /*mvector*/<TEdge*> EdgeList;
-typedef mvector /*mvector*/<Join*> JoinList;
-typedef mvector /*mvector*/<IntersectNode*> IntersectList;
+typedef mvector<OutRec*> PolyOutList;
+typedef mvector<TEdge*> EdgeList;
+typedef mvector<Join*> JoinList;
+typedef mvector<IntersectNode*> IntersectList;
 
 //------------------------------------------------------------------------------
 
@@ -491,7 +499,7 @@ protected:
     void DeleteFromAEL(TEdge* e);
     void UpdateEdgeIntoAEL(TEdge*& e);
 
-    typedef mvector /*mvector*/<LocalMinimum> MinimaList;
+    typedef mvector<LocalMinimum> MinimaList;
     MinimaList::iterator m_CurrentLM;
     MinimaList m_MinimaList;
 
@@ -523,20 +531,10 @@ private:
 class Clipper : public virtual ClipperBase {
 public:
     Clipper(int initOptions = 0);
-    bool Execute(ClipType clipType,
-        Paths& solution,
-        PolyFillType fillType = pftEvenOdd);
-    bool Execute(ClipType clipType,
-        Paths& solution,
-        PolyFillType subjFillType,
-        PolyFillType clipFillType);
-    bool Execute(ClipType clipType,
-        PolyTree& polytree,
-        PolyFillType fillType = pftEvenOdd);
-    bool Execute(ClipType clipType,
-        PolyTree& polytree,
-        PolyFillType subjFillType,
-        PolyFillType clipFillType);
+    bool Execute(ClipType clipType, Paths& solution, PolyFillType fillType = pftEvenOdd);
+    bool Execute(ClipType clipType, Paths& solution, PolyFillType subjFillType, PolyFillType clipFillType);
+    bool Execute(ClipType clipType, PolyTree& polytree, PolyFillType fillType = pftEvenOdd);
+    bool Execute(ClipType clipType, PolyTree& polytree, PolyFillType subjFillType, PolyFillType clipFillType);
     bool ReverseSolution() { return m_ReverseOutput; }
     void ReverseSolution(bool value) { m_ReverseOutput = value; }
     bool StrictlySimple() { return m_StrictSimple; }
@@ -621,8 +619,8 @@ class ClipperOffset {
 public:
     ClipperOffset(double miterLimit = 2.0, double roundPrecision = 0.25);
     ~ClipperOffset();
-    void AddPath(const Path& path, JoinType joinType, EndType endType);
-    void AddPaths(const Paths& paths, JoinType joinType, EndType endType);
+    void AddPath(const Path& path, /*JoinType*/ int joinType, EndType endType);
+    void AddPaths(const Paths& paths, /*JoinType*/ int joinType, EndType endType);
     void Execute(Paths& solution, double delta);
     void Execute(PolyTree& solution, double delta);
     void Clear();
@@ -633,7 +631,7 @@ private:
     Paths m_destPolys;
     Path m_srcPoly;
     Path m_destPoly;
-    mvector /*mvector*/<DoublePoint> m_normals;
+    mvector<DoublePoint> m_normals;
     double m_delta, m_sinA, m_sin, m_cos;
     double m_miterLim, m_StepsPerRad;
     IntPoint m_lowest;
@@ -641,10 +639,10 @@ private:
 
     void FixOrientations();
     void DoOffset(double delta);
-    void OffsetPoint(int j, int& k, JoinType jointype);
-    void DoSquare(int j, int k);
+    void OffsetPoint(int j, int& k, /*JoinType*/ int jointype);
+    void DoSquare(int j, int k, double = {});
     void DoMiter(int j, int k, double r);
-    void DoRound(int j, int k);
+    void DoRound(int j, int k, double = {});
 };
 //------------------------------------------------------------------------------
 
