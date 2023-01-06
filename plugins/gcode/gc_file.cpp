@@ -28,7 +28,7 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-void calcArcs(Path path) {
+void calcArcs(PathD path) {
     return;
     //    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
     //        return;
@@ -105,7 +105,7 @@ namespace GCode {
 File::File()
     : GCFile() { }
 
-File::File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths)
+File::File(const Pathss& toolPathss, GCodeParams&& gcp, const PathsD& pocketPaths)
     : GCFile(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
@@ -302,7 +302,7 @@ const GCodeParams& File::gcp() const { return gcp_; }
 mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     mvector<mvector<QPolygonF>> pathss;
     pathss.reserve(toolPathss_.size());
-    for (const Paths& paths : toolPathss_) {
+    for (const PathsD& paths : toolPathss_) {
         pathss.emplace_back(normalizedPaths(offset, paths));
         //        pathss.push_back(toQPolygons(paths));
     }
@@ -335,7 +335,7 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     return pathss;
 }
 
-mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_) {
+mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const PathsD& paths_) {
     mvector<QPolygonF> paths(paths_.empty() ? toolPathss_.front() : paths_);
 
     for (QPolygonF& path : paths)
@@ -506,7 +506,7 @@ mvector<QString> File::gCodeText() const { return lines_; }
 
 void File::createGiDrill() {
     GraphicsItem* item;
-    for (const IntPoint& point : toolPathss_.front().front()) {
+    for (const PointD& point : toolPathss_.front().front()) {
         item = new GiDrill({point}, gcp_.getTool().diameter(), this, gcp_.getTool().id());
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -522,7 +522,7 @@ void File::createGiPocket() {
     if (pocketPaths_.size()) {
         //        {
         //            ClipperOffset offset(uScale);
-        //            offset.AddPaths(pocketPaths_, jtRound, etClosedPolygon);
+        //            offset.AddPaths(pocketPaths_, JoinType::Round, EndType::ClosedPolygon);
         //            offset.Execute(pocketPaths_, uScale * gcp_.getToolDiameter() * 0.5);
         //        }
         item = new GiDataSolid(pocketPaths_, nullptr);
@@ -534,11 +534,11 @@ void File::createGiPocket() {
     }
     g0path_.reserve(toolPathss_.size());
     size_t i = 0;
-    for (const Paths& paths : toolPathss_) {
+    for (const PathsD& paths : toolPathss_) {
         int k = static_cast<int>((toolPathss_.size() > 1) ? (300.0 / (toolPathss_.size() - 1)) * i : 0);
         debugColor.emplace_back(QSharedPointer<QColor>(new QColor(QColor::fromHsv(k, 255, 255, 255))));
 
-        for (const Path& path : paths) {
+        for (const PathD& path : paths) {
             item = new GiGcPath(path, this);
 #ifdef QT_DEBUG
             item->setPenColorPtr(debugColor.back().data());
@@ -549,7 +549,7 @@ void File::createGiPocket() {
         }
 
         {
-            Paths g1path;
+            PathsD g1path;
             for (size_t j = 0; j < paths.size() - 1; ++j)
                 g1path.push_back({paths[j].back(), paths[j + 1].front()});
             item = new GiGcPath(g1path);
@@ -573,14 +573,14 @@ void File::createGiPocket() {
 
 void File::createGiProfile() {
     GraphicsItem* item;
-    for (const Paths& paths : toolPathss_) {
+    for (const PathsD& paths : toolPathss_) {
         item = new GiGcPath(paths, this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
     size_t i = 0;
-    for (const Paths& paths : toolPathss_) {
+    for (const PathsD& paths : toolPathss_) {
         item = new GiGcPath(toolPathss_[i], this);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
@@ -613,7 +613,7 @@ void File::createGiRaster() {
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->push_back(item);
     } else {
-        for (const Paths& paths : toolPathss_) {
+        for (const PathsD& paths : toolPathss_) {
             item = new GiGcPath(paths, this);
             item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -621,7 +621,7 @@ void File::createGiRaster() {
         }
     }
     size_t i = 0;
-    for (const Paths& paths : toolPathss_) {
+    for (const PathsD& paths : toolPathss_) {
         item = new GiGcPath(paths, this);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
@@ -637,7 +637,7 @@ void File::createGiRaster() {
 }
 
 void File::createGiLaser() {
-    Paths paths;
+    PathsD paths;
     paths.reserve(toolPathss_.front().size() / 2 + 1);
     g0path_.reserve(paths.size());
     for (size_t i = 0; i < toolPathss_.front().size(); ++i) {
@@ -666,7 +666,7 @@ void File::createGiLaser() {
         item->setPenColorPtr(color);
         itemGroup()->push_back(item);
         //        ClipperOffset offset;
-        //        offset.AddPaths(g0path_, jtRound, etOpenRound);
+        //        offset.AddPaths(g0path_, JoinType::Round, EndType::OpenRound);
         //        offset.Execute(g0path_,uScale*gcp_.getToolDiameter());
         //        item = new GcPathItem(g0path_, this);
         //        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));

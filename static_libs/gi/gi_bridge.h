@@ -32,7 +32,7 @@ public:
     int type() const override;
     void setNewPos(const QPointF& pos);
     // GraphicsItem interface
-    Paths paths(int alternate = {}) const override;
+    PathsD paths(int alternate = {}) const override;
 
     bool ok() const;
     double lenght() const;
@@ -40,7 +40,7 @@ public:
 
     void update();
 
-    IntPoint getPoint(const int side) const;
+    PointD getPoint(const int side) const;
     QLineF getPath() const;
 
     void setOk(bool ok);

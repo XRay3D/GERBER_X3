@@ -10,20 +10,20 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
- #include "profile_form.h"
- #include "profile.h"
- #include "ui_profileform.h"
+#include "profile_form.h"
+#include "profile.h"
+#include "ui_profileform.h"
 
- #include "gi_bridge.h"
- #include "graphicsview.h"
- #include "settings.h"
- #include <QMessageBox>
+#include "gi_bridge.h"
+#include "graphicsview.h"
+#include "settings.h"
+#include <QMessageBox>
 
- ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
-     : GcFormBase(plugin, new GCode::ProfileCreator, parent)
-     , ui(new Ui::ProfileForm) {
-     ui->setupUi(content);
-     setWindowTitle(tr("Profile Toolpath"));
+ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
+    : GcFormBase(plugin, new GCode::ProfileCreator, parent)
+    , ui(new Ui::ProfileForm) {
+    ui->setupUi(content);
+    setWindowTitle(tr("Profile Toolpath"));
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
@@ -65,18 +65,18 @@
     connect(ui->pbAddBridge, &QPushButton::clicked, this, &ProfileForm::onAddBridgeClicked);
 }
 
- ProfileForm::~ProfileForm() {
-     MySettings settings;
-     settings.beginGroup("ProfileForm");
-     settings.setValue(ui->dsbxBridgeLenght);
-     settings.setValue(ui->rbClimb);
-     settings.setValue(ui->rbConventional);
-     settings.setValue(ui->rbInside);
-     settings.setValue(ui->rbOn);
-     settings.setValue(ui->rbOutside);
-     settings.setValue(ui->cbxTrimming);
-     settings.setValue(varName(trimming_));
-     settings.endGroup();
+ProfileForm::~ProfileForm() {
+    MySettings settings;
+    settings.beginGroup("ProfileForm");
+    settings.setValue(ui->dsbxBridgeLenght);
+    settings.setValue(ui->rbClimb);
+    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rbInside);
+    settings.setValue(ui->rbOn);
+    settings.setValue(ui->rbOutside);
+    settings.setValue(ui->cbxTrimming);
+    settings.setValue(varName(trimming_));
+    settings.endGroup();
 
     for (QGraphicsItem* giItem : App::graphicsView()->scene()->items()) {
         if (giItem->type() == GiType::Bridge)
@@ -85,13 +85,13 @@
     delete ui;
 }
 
- void ProfileForm::createFile() {
-     usedItems_.clear();
-     const auto tool {ui->toolHolder->tool()};
-     if (!tool.isValid()) {
-         tool.errorMessageBox(this);
-         return;
-     }
+void ProfileForm::createFile() {
+    usedItems_.clear();
+    const auto tool {ui->toolHolder->tool()};
+    if (!tool.isValid()) {
+        tool.errorMessageBox(this);
+        return;
+    }
 
     Paths wPaths;
     Paths wRawPaths;
@@ -163,60 +163,60 @@
     emit createToolpath();
 }
 
- void ProfileForm::updateName() {
-     leName->setText(names[side]);
-     updateBridge();
- }
+void ProfileForm::updateName() {
+    leName->setText(names[side]);
+    updateBridge();
+}
 
- void ProfileForm::resizeEvent(QResizeEvent* event) {
-     updatePixmap();
-     QWidget::resizeEvent(event);
- }
+void ProfileForm::resizeEvent(QResizeEvent* event) {
+    updatePixmap();
+    QWidget::resizeEvent(event);
+}
 
- void ProfileForm::showEvent(QShowEvent* event) {
-     updatePixmap();
-     QWidget::showEvent(event);
- }
+void ProfileForm::showEvent(QShowEvent* event) {
+    updatePixmap();
+    QWidget::showEvent(event);
+}
 
- void ProfileForm::onAddBridgeClicked() {
-     if (brItem) {
-         if (!brItem->ok())
-             delete brItem;
-     }
-     brItem = new GiBridge(lenght_, size_, side, brItem);
-     App::graphicsView()->scene()->addItem(brItem);
-     brItem->setVisible(true);
-     brItem->setOpacity(1.0);
- }
+void ProfileForm::onAddBridgeClicked() {
+    if (brItem) {
+        if (!brItem->ok())
+            delete brItem;
+    }
+    brItem = new GiBridge(lenght_, size_, side, brItem);
+    App::graphicsView()->scene()->addItem(brItem);
+    brItem->setVisible(true);
+    brItem->setOpacity(1.0);
+}
 
- void ProfileForm::updateBridge() {
-     lenght_ = ui->dsbxBridgeLenght->value();
-     size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-     for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
-         if (item->type() == GiType::Bridge)
-             static_cast<GiBridge*>(item)->update();
-     }
- }
+void ProfileForm::updateBridge() {
+    lenght_ = ui->dsbxBridgeLenght->value();
+    size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
+        if (item->type() == GiType::Bridge)
+            static_cast<GiBridge*>(item)->update();
+    }
+}
 
- void ProfileForm::updatePixmap() {
-     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
-     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
- }
+void ProfileForm::updatePixmap() {
+    int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
+    ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
+}
 
- void ProfileForm::rb_clicked() {
-     if (ui->rbOn->isChecked()) {
-         side = GCode::On;
-         ui->cbxTrimming->setText(tr("Trimming"));
-         ui->cbxTrimming->setChecked(trimming_ & Trimming::Line);
-     } else if (ui->rbOutside->isChecked()) {
-         side = GCode::Outer;
-         ui->cbxTrimming->setText(tr("Corner Trimming"));
-         ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
-     } else if (ui->rbInside->isChecked()) {
-         side = GCode::Inner;
-         ui->cbxTrimming->setText(tr("Corner Trimming"));
-         ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
-     }
+void ProfileForm::rb_clicked() {
+    if (ui->rbOn->isChecked()) {
+        side = GCode::On;
+        ui->cbxTrimming->setText(tr("Trimming"));
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Line);
+    } else if (ui->rbOutside->isChecked()) {
+        side = GCode::Outer;
+        ui->cbxTrimming->setText(tr("Corner Trimming"));
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
+    } else if (ui->rbInside->isChecked()) {
+        side = GCode::Inner;
+        ui->cbxTrimming->setText(tr("Corner Trimming"));
+        ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
+    }
 
     if (ui->rbClimb->isChecked())
         direction = GCode::Climb;
@@ -229,9 +229,9 @@
     updatePixmap();
 }
 
- void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
- void ProfileForm::editFile(GCode::File* file) {
+void ProfileForm::editFile(GCode::File* file) {
 
     GCode::GCodeParams gcp_ {file->gcp()};
 
@@ -296,4 +296,4 @@
     }
 }
 
- #include "moc_profile_form.cpp"
+#include "moc_profile_form.cpp"

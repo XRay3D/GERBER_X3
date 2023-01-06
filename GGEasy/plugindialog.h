@@ -18,6 +18,8 @@ class QTreeWidget;
 class QVBoxLayout;
 
 class DialogAboutPlugins : public QDialog {
+    Q_OBJECT
+
     QDialogButtonBox* buttonBox;
     QTreeWidget* treeWidget;
     QVBoxLayout* verticalLayout;

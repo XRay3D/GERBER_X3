@@ -36,7 +36,7 @@ bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
 
 int Plugin::type() const { return int(FileType::GCode); }
 
-QString Plugin::folderName() const { return tr("Tool Paths"); }
+QString Plugin::folderName() const { return tr("Tool PathsD"); }
 
 FileInterface* Plugin::createFile() { return new File(); }
 
@@ -47,7 +47,7 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
         if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
     });
-    menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
+    menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool PathsD..."),
         tv, &FileTree::View::saveSelectedGCodeFiles);
 }
 

@@ -58,6 +58,17 @@ protected:
 
     QString fileName_;
 
+    QString trOutside {tr("Outside")};
+    QString trDepth {tr("Depth:")};
+    QString trTool {tr("Tool:")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+    //    QString trOutside {tr("Outside")};
+
     bool editMode_ = false;
     int fileId {-1};
 

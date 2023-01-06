@@ -18,13 +18,13 @@ class File;
 
 class GiGcPath : public GraphicsItem {
 public:
-    GiGcPath(const Paths& paths, GCode::File* file = nullptr);
-    GiGcPath(const Path& path, GCode::File* file = nullptr);
+    GiGcPath(const PathsD& paths, GCode::File* file = nullptr);
+    GiGcPath(const PathD& path, GCode::File* file = nullptr);
     ~GiGcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    Paths paths(int alternate = {}) const override;
+    PathsD paths(int alternate = {}) const override;
 
 private:
     GCode::File* gcFile_;

@@ -3566,13 +3566,24 @@ void ClipperOffset::Clear() {
 }
 //------------------------------------------------------------------------------
 
-void ClipperOffset::AddPath(const Path& path, JoinType joinType, EndType endType) {
+void ClipperOffset::AddPath(const Path& path, /*JoinType*/ int joinType, EndType endType) {
     int highI = (int)path.size() - 1;
     if (highI < 0)
         return;
     PolyNode* newNode = new PolyNode();
     newNode->m_jointype = joinType;
     newNode->m_endtype = endType;
+    switch (joinType) {
+    case jtSquare:
+        newNode->m_jointype_f = std::bind(&ClipperOffset::DoSquare, *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        break;
+    case jtRound:
+        newNode->m_jointype_f = std::bind(&ClipperOffset::DoRound, *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        break;
+    case jtMiter:
+        newNode->m_jointype_f = std::bind(&ClipperOffset::DoMiter, *this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        break;
+    }
 
     // strip duplicate points from path and also get index to the lowest point ...
     if (endType == etClosedLine || endType == etClosedPolygon)
@@ -3607,7 +3618,7 @@ void ClipperOffset::AddPath(const Path& path, JoinType joinType, EndType endType
 }
 //------------------------------------------------------------------------------
 
-void ClipperOffset::AddPaths(const Paths& paths, JoinType joinType, EndType endType) {
+void ClipperOffset::AddPaths(const Paths& paths, /*JoinType*/ int joinType, EndType endType) {
     for (Paths::size_type i = 0; i < paths.size(); ++i)
         AddPath(paths[i], joinType, endType);
 }
@@ -3864,7 +3875,7 @@ void ClipperOffset::DoOffset(double delta) {
 }
 //------------------------------------------------------------------------------
 
-void ClipperOffset::OffsetPoint(int j, int& k, JoinType jointype) {
+void ClipperOffset::OffsetPoint(int j, int& k, /*JoinType*/ int jointype) {
     // cross product ...
     m_sinA = (m_normals[k].X * m_normals[j].Y - m_normals[j].X * m_normals[k].Y);
     if (std::fabs(m_sinA * m_delta) < 1.0) {
@@ -3872,7 +3883,8 @@ void ClipperOffset::OffsetPoint(int j, int& k, JoinType jointype) {
         double cosA = (m_normals[k].X * m_normals[j].X + m_normals[j].Y * m_normals[k].Y);
         if (cosA > 0) // angle => 0 degrees
         {
-            m_destPoly.emplace_back(IntPoint(Round(m_srcPoly[j].X + m_normals[k].X * m_delta),
+            m_destPoly.emplace_back(IntPoint(
+                Round(m_srcPoly[j].X + m_normals[k].X * m_delta),
                 Round(m_srcPoly[j].Y + m_normals[k].Y * m_delta)));
             return;
         }
@@ -3883,33 +3895,37 @@ void ClipperOffset::OffsetPoint(int j, int& k, JoinType jointype) {
         m_sinA = -1.0;
 
     if (m_sinA * m_delta < 0) {
-        m_destPoly.emplace_back(IntPoint(Round(m_srcPoly[j].X + m_normals[k].X * m_delta),
+        m_destPoly.emplace_back(IntPoint(
+            Round(m_srcPoly[j].X + m_normals[k].X * m_delta),
             Round(m_srcPoly[j].Y + m_normals[k].Y * m_delta)));
         m_destPoly.push_back(m_srcPoly[j]);
-        m_destPoly.emplace_back(IntPoint(Round(m_srcPoly[j].X + m_normals[j].X * m_delta),
+        m_destPoly.emplace_back(IntPoint(
+            Round(m_srcPoly[j].X + m_normals[j].X * m_delta),
             Round(m_srcPoly[j].Y + m_normals[j].Y * m_delta)));
-    } else
-        switch (jointype) {
-        case jtMiter: {
-            double r = 1 + (m_normals[j].X * m_normals[k].X + m_normals[j].Y * m_normals[k].Y);
-            if (r >= m_miterLim)
-                DoMiter(j, k, r);
-            else
-                DoSquare(j, k);
-            break;
-        }
-        case jtSquare:
-            DoSquare(j, k);
-            break;
-        case jtRound:
-            DoRound(j, k);
-            break;
-        }
+    } else {
+
+        //        switch (jointype) {
+        //        case jtMiter: {
+        //            double r = 1 + (m_normals[j].X * m_normals[k].X + m_normals[j].Y * m_normals[k].Y);
+        //            if (r >= m_miterLim)
+        //                DoMiter(j, k, r);
+        //            else
+        //                DoSquare(j, k);
+        //            break;
+        //        }
+        //        case jtSquare:
+        //            DoSquare(j, k);
+        //            break;
+        //        case jtRound:
+        //            DoRound(j, k);
+        //            break;
+        //        }
+    }
     k = j;
 }
 //------------------------------------------------------------------------------
 
-void ClipperOffset::DoSquare(int j, int k) {
+void ClipperOffset::DoSquare(int j, int k, double) {
     double dx = std::tan(std::atan2(m_sinA,
                              m_normals[k].X * m_normals[j].X + m_normals[k].Y * m_normals[j].Y)
         / 4);
@@ -3924,7 +3940,8 @@ void ClipperOffset::DoSquare(int j, int k) {
 
 void ClipperOffset::DoMiter(int j, int k, double r) {
     double q = m_delta / r;
-    m_destPoly.emplace_back(IntPoint(Round(m_srcPoly[j].X + (m_normals[k].X + m_normals[j].X) * q),
+    m_destPoly.emplace_back(IntPoint(
+        Round(m_srcPoly[j].X + (m_normals[k].X + m_normals[j].X) * q),
         Round(m_srcPoly[j].Y + (m_normals[k].Y + m_normals[j].Y) * q)));
 }
 //------------------------------------------------------------------------------
@@ -3941,7 +3958,7 @@ auto angle(DoublePoint p) {
         a += two_pi;
     return a;
 }
-void ClipperOffset::DoRound(int j, int k) {
+void ClipperOffset::DoRound(int j, int k, double) {
 
     double a = std::atan2(m_sinA,
         m_normals[k].X * m_normals[j].X + m_normals[k].Y * m_normals[j].Y);

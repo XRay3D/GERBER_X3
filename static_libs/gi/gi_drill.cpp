@@ -18,9 +18,9 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace ClipperLib;
+using namespace Clipper2Lib;
 
-GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int toolId)
+GiDrill::GiDrill(const PathD& path, double diameter, FileInterface* file, int toolId)
     : GraphicsItem {file}
     , diameter_ {diameter}
     , path_ {path}
@@ -60,14 +60,14 @@ void GiDrill::setDiameter(double diameter) {
     update();
 }
 
-void GiDrill::update(const Path& path, double diameter) {
+void GiDrill::update(const PathD& path, double diameter) {
     diameter_ = diameter;
     path_ = path;
     create();
     update();
 }
 
-Paths GiDrill::paths(int alternate) const {
+PathsD GiDrill::paths(int alternate) const {
     return {transform().map(path_)};
 }
 
@@ -121,11 +121,10 @@ void GiDrill::create() {
         path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        Paths paths;
         ClipperOffset offset;
-        offset.AddPath(path_, jtRound, etOpenRound);
-        offset.Execute(paths, diameter_ * 0.5 * uScale);
-        for (Path& path : paths) {
+        offset.AddPath(path_, JoinType::Round, EndType::Round);
+        auto paths {offset.Execute(diameter_ * 0.5 * uScale)};
+        for (auto&& path : paths) {
             path.push_back(path.front());
             shape_.addPolygon(path);
         }

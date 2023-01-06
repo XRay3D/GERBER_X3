@@ -19,23 +19,23 @@
 #include <sstream>
 
 #if __has_include(<source_location>)
-#include <source_location>
+    #include <source_location>
 using sl = std::source_location;
 #else
-#include <experimental/source_location>
+    #include <experimental/source_location>
 using sl = std::experimental::source_location;
 #endif
 
-using namespace ClipperLib;
+using namespace Clipper2Lib;
 
-void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
+void dbgPaths(PathsD ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
 
 class GiError;
 
 class ProgressCancel {
     static inline size_t max_ = 0;
     static inline size_t current_ = 0;
-    //    static inline ClipperLib::ClipperBase* clipper_ = nullptr;
+    //    static inline Clipper2Lib::ClipperBase* clipper_ = nullptr;
     static inline bool cancel_ = false;
 
 public:
@@ -49,8 +49,8 @@ public:
     //    static GCode::Creator* creator() { return creator_; }
     //    static void setCreator(GCode::Creator* creator) { creator_ = creator; }
 
-    //    static void setClipper(ClipperLib::ClipperBase* clipper) { clipper_ = clipper; }
-    //    static ClipperLib::ClipperBase* clipper() { return clipper_; }
+    //    static void setClipper(Clipper2Lib::ClipperBase* clipper) { clipper_ = clipper; }
+    //    static Clipper2Lib::ClipperBase* clipper() { return clipper_; }
 
     static size_t max() { return max_; }
     static void setMax(size_t max) { max_ = max; }
@@ -86,21 +86,21 @@ class Creator : public QObject, public ProgressCancel {
 public:
     Creator();
     void reset();
-    //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
+    //    Creator(const PathsD& workingPaths, const bool convent, SideOfMilling side);
     ~Creator() override;
 
     File* file() const;
 
     std::pair<int, int> getProgress();
 
-    void addRawPaths(Paths rawPaths);
+    void addRawPaths(PathsD rawPaths);
     void addSupportPaths(Pathss supportPaths);
-    void addPaths(const Paths& paths);
+    void addPaths(const PathsD& paths);
 
     Pathss& groupedPaths(Grouping group, cInt k = uScale, bool fl = {});
 
-    /*static*/ Paths& sortB(Paths& src);
-    /*static*/ Paths& sortBE(Paths& src);
+    /*static*/ PathsD& sortB(PathsD& src);
+    /*static*/ PathsD& sortBE(PathsD& src);
 
     /*static*/ Pathss& sortB(Pathss& src);
     /*static*/ Pathss& sortBE(Pathss& src);
@@ -128,14 +128,16 @@ signals:
 protected:
     bool createability(bool side);
 
-    bool pointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr);
-    void stacking(Paths& paths);
-    void mergeSegments(Paths& paths, double glue = 0.0);
+    bool pointOnPolygon(const QLineF& l2, const PathD& path, PointD* ret = nullptr);
+    void stacking(PathsD& paths);
+    void mergeSegments(PathsD& paths, double glue = 0.0);
 
-    void mergePaths(Paths& paths, const double dist = 0.0);
+    void mergePaths(PathsD& paths, const double dist = 0.0);
 
-    void markPolyNodeByNesting(PolyNode& polynode);
-    void sortPolyNodeByNesting(PolyNode& polynode);
+    void markPolyTreeDByNesting(PolyTreeD& polynode);
+    void sortPolyTreeDByNesting(PolyTreeD& polynode);
+
+    std::unordered_map<void*, int> Nesting;
 
     virtual void create() = 0;
     virtual GCodeType type() = 0;
@@ -146,9 +148,9 @@ protected:
     //    static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
-    Paths workingPs;
-    Paths workingRawPs;
-    Paths returnPs;
+    PathsD workingPs;
+    PathsD workingRawPs;
+    PathsD returnPs;
     Pathss returnPss;
     Pathss supportPss;
     Pathss groupedPss;

@@ -35,7 +35,7 @@
 #include <QtWidgets>
 #include <forward_list>
 
-static auto IntPointConverter = QMetaType::registerConverter(&IntPoint::toString);
+static auto IntPointConverter = QMetaType::registerConverter(&PointD::toString);
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -110,28 +110,28 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&GiDataPath::timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
     GiDataPath::timer.start(50);
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
+    while (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
         int i = 100;
         int k = 100;
 
         if (0) {
-            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber_file_format_examples 20181113)");
+            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber-layer-format-x3-example-fabrication-data-with-component-layers_en\ciaa_acc)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
-            if (dir.exists())
-                for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
-                    str = dir.path() + '/' + str;
-                    QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                    // break;
-                }
+            if (!dir.exists())
+                break;
+            for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
+                str = dir.path() + '/' + str;
+                QTimer::singleShot(i += k, [this, str] { loadFile(str); });
+                // break;
+            }
         }
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
         if (1)
-            //            QTimer::singleShot(i += k, [this] { loadFile(R"(D:/Downloads/ФАЛЬШПАНЕЛИ РАСХОДОМЕТРИЯ-dxf/725327.003 Панель EL-SV-11-R-AG-измен.dxf)"); });
-            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/ESAMP/ELECTROSTATIC_AMP/T/ELECTROSTATIC_AMP_A.fst)"); });
+            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/G2G/test files/Ucamco/gerber-layer-format-x3-example-fabrication-data-with-component-layers_en/ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
@@ -149,6 +149,7 @@ MainWindow::MainWindow(QWidget* parent)
         }
         if (0)
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
+        break;
     }
 }
 
@@ -265,10 +266,10 @@ void MainWindow::createActionsFile() {
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
-    // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    // Save Selected Tool PathsD
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool PathsD..."), this, &MainWindow::saveSelectedGCodeFiles);
     action->setStatusTip(tr("Save selected toolpaths"));
-    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool PathsD..."), this, &MainWindow::saveSelectedGCodeFiles);
 
     // Export PDF
     // FIXME       action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
@@ -442,7 +443,7 @@ void MainWindow::createActionsToolPath() {
     if (!App::gCodePlugins().size())
         return;
 
-    QMenu* menu = menuBar()->addMenu(tr("&Paths"));
+    QMenu* menu = menuBar()->addMenu(tr("&PathsD"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
@@ -496,7 +497,7 @@ void MainWindow::createActionsShape() {
         qDebug("На переделке");
 
         auto selectedItems(App::graphicsView()->scene()->selectedItems());
-        Paths clipPaths;
+        PathsD clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
             if (clipItem->type() >= GiType::ShCircle)
                 clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
@@ -507,10 +508,10 @@ void MainWindow::createActionsShape() {
             if (item->type() == GiType::DataSolid) {
                 auto gitem = static_cast<GiDataSolid*>(item);
                 Clipper clipper;
-                clipper.AddPaths(gitem->paths(), ptSubject, true);
-                clipper.AddPaths(clipPaths, ptClip, true);
-                Paths paths;
-                clipper.Execute(type, paths, pftEvenOdd, pftPositive);
+                clipper.AddPaths(gitem->paths(), PathType::Subject, true);
+                clipper.AddPaths(clipPaths, PathType::Clip, true);
+                PathsD paths;
+                clipper.Execute(type, paths, FillRule::EvenOdd, FillRule::Positive);
                 if (paths.empty()) {
                     rmi.push_back(gitem);
                 } else {
@@ -522,10 +523,10 @@ void MainWindow::createActionsShape() {
         for (GraphicsItem* item : rmi)
             delete item->file()->itemGroup()->takeAt(item);
     };
-    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ctUnion); });
-    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ctDifference); });
-    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [executor] { executor(ctXor); });
-    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [executor] { executor(ctIntersection); });
+    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ClipType::Union); });
+    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ClipType::Difference); });
+    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [executor] { executor(ClipType::Xor); });
+    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [executor] { executor(ClipType::Intersection); });
 }
 
 void MainWindow::customContextMenuForToolBar(const QPoint& pos) {

@@ -40,15 +40,15 @@ protected:
     void reset(const QString& fileName);
     void resetStep();
 
-    IntPoint parsePosition(const QString& xyStr);
-    Path arc(const IntPoint& center, double radius, double start, double stop);
-    Path arc(IntPoint p1, IntPoint p2, IntPoint center);
+    PointD parsePosition(const QString& xyStr);
+    PathD arc(const PointD& center, double radius, double start, double stop);
+    PathD arc(PointD p1, PointD p2, PointD center);
 
-    Paths createLine();
-    Paths createPolygon();
+    PathsD createLine();
+    PathsD createPolygon();
 
-    ClipperLib::Clipper clipper_;
-    ClipperLib::ClipperOffset offset_;
+    Clipper2Lib::Clipper clipper_;
+    Clipper2Lib::ClipperOffset offset_;
 
     QMap<QString, QString> apertureMacro_;
 
@@ -64,7 +64,7 @@ protected:
 
     QStack<WorkingType> abSrIdStack_;
 
-    Path path_;
+    PathD path_;
     State state_;
     QString currentGerbLine_;
 

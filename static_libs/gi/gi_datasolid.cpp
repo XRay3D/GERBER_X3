@@ -19,10 +19,10 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
+GiDataSolid::GiDataSolid(PathsD& paths, FileInterface* file)
     : GraphicsItem(file)
     , paths_ {paths} {
-    for (Path path : paths) {
+    for (PathD path : paths) {
         if (path.size() && path.back() != path.front())
             path.push_back(path.front());
         shape_.addPolygon(path);
@@ -60,7 +60,7 @@ int GiDataSolid::type() const { return GiType::DataSolid; }
 
 void GiDataSolid::redraw() {
     //    shape_ = QPainterPath();
-    //    for (Path path : qAsConst(paths_)) {
+    //    for (PathD path : qAsConst(paths_)) {
     //        path.push_back(path.front());
     //        shape_.addPolygon(path);
     //    }
@@ -69,7 +69,7 @@ void GiDataSolid::redraw() {
     // update();
 }
 
-void GiDataSolid::setPaths(Paths paths, int alternate) {
+void GiDataSolid::setPaths(PathsD paths, int alternate) {
     auto t {transform()};
     auto a {qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());

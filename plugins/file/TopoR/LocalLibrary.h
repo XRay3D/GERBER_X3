@@ -17,7 +17,7 @@
 /// </summary>
 class LocalLibrary : public QSerializer {
     Q_GADGET
-        QS_SERIALIZABLE
+    QS_SERIALIZABLE
 public:
     class BasePad {
         /// <summary>
@@ -39,7 +39,6 @@ public:
         /// Диаметр окружности, круга, овала.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("diameter", DataType = "float")] public float _diameter;
         float _diameter = 0.0F;
     };
@@ -53,7 +52,6 @@ public:
         /// Диаметр окружности, круга, овала.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("diameter", DataType = "float")] public float _diameter;
         float _diameter = 0.0F;
 
@@ -95,7 +93,6 @@ public:
         /// Ширина прямоугольной контактной площадки.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("width", DataType = "float")] public float _width;
         float _width = 0.0F;
 
@@ -115,7 +112,6 @@ public:
         virtual ~PadRect() {
             delete _Shift;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _handlingSpecified
         bool getHandlingSpecified() const;
@@ -198,7 +194,6 @@ public:
         /// </summary>
         /// <remarks>! Минимум 3 элемента</remarks>
     public:
-
         // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
         std::vector<Dot*> _Dots;
         bool ShouldSerialize_Dots();
@@ -213,7 +208,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -240,7 +234,6 @@ public:
         virtual ~Padstack() {
             delete _Thermal;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _metallizedSpecified
         bool getMetallizedSpecified() const;
@@ -310,7 +303,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -330,7 +322,6 @@ public:
         virtual ~Viastack() {
             delete _LayerRange;
         }
-
 
         // ORIGINAL LINE: [XmlIgnore] public bool _viaOnPinSpecified
         bool getViaOnPinSpecified() const;
@@ -368,7 +359,6 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
             float _lineWidth = 0.0F;
 
@@ -401,7 +391,6 @@ public:
             /// Ссылка на слой.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
@@ -427,7 +416,6 @@ public:
             /// Идентификатор неименованных объектов.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("id")] public string _id;
             QString _id;
 
@@ -459,7 +447,6 @@ public:
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
             QString _name;
 
@@ -488,7 +475,6 @@ public:
                 delete _TextStyleRef;
                 delete _Org;
             }
-
 
             // ORIGINAL LINE: [XmlIgnore] public bool _mirrorSpecified
             bool getMirrorSpecified() const;
@@ -531,7 +517,6 @@ public:
             /// Номер контактной площадки (вывода) посадочного места.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
             int _padNum = 0;
 
@@ -562,7 +547,6 @@ public:
                 delete _Org;
             }
 
-
             // ORIGINAL LINE: [XmlIgnore] public bool _flippedSpecified
             bool getFlippedSpecified() const;
 
@@ -585,7 +569,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -663,7 +646,6 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("pinNum", DataType = "int")] public int _pinNum;
             int _pinNum = 0;
 
@@ -712,7 +694,6 @@ public:
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
             QString _name;
 
@@ -728,7 +709,6 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
         QString _name;
 
@@ -764,7 +744,6 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-
             // ORIGINAL LINE: [XmlAttribute("pinNum", DataType = "int")] public int _pinNum;
             int _pinNum = 0;
 
@@ -794,7 +773,6 @@ public:
         /// Ссылка на схемный компонент.
         /// </summary>
     public:
-
         // ORIGINAL LINE: [XmlElement("ComponentRef")] public ComponentRef _ComponentRef;
         ComponentRef* _ComponentRef;
 
@@ -823,7 +801,6 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-
     // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
     QString _version;
 

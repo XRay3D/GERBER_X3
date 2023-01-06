@@ -706,9 +706,8 @@ Public License instead of this License.  But first, please read
 <context>
     <name>ColorSelector</name>
     <message>
-        <location filename="../../static_libs/common/colorselector.cpp" line="94"/>
         <source>Reset</source>
-        <translation>Сброс</translation>
+        <translation type="vanished">Сброс</translation>
     </message>
 </context>
 <context>
@@ -721,195 +720,170 @@ Public License instead of this License.  But first, please read
 <context>
     <name>ComponentsDialog</name>
     <message>
-        <location filename="../../file_plugins/gerber/compdialog.cpp" line="92"/>
         <source>Dialog</source>
-        <translation>Редактор</translation>
+        <translation type="vanished">Редактор</translation>
     </message>
 </context>
 <context>
     <name>DepthForm</name>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="150"/>
-        <source>Form</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="161"/>
         <source>C</source>
-        <translation>М</translation>
+        <translation type="vanished">М</translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="162"/>
         <source>Copper</source>
-        <translation>Медь</translation>
+        <translation type="vanished">Медь</translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="158"/>
         <source>B</source>
-        <translation>П</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="102"/>
-        <location filename="../../static_libs/common/depthform.cpp" line="156"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="130"/>
-        <source>Depth:</source>
-        <translation>Глубина:</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="159"/>
-        <source>Board</source>
-        <translation>Плата</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="164"/>
-        <source>U</source>
-        <translation>Р</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="165"/>
-        <source>User</source>
-        <translation>Ручной</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="153"/>
-        <source> mm</source>
-        <translation> мм</translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="151"/>
-        <location filename="../../static_libs/common/depthform.cpp" line="154"/>
-        <source>Cutting depth</source>
-        <translation>Глубина врезания</translation>
-    </message>
-</context>
-<context>
-    <name>Dialog</name>
-    <message>
-        <location filename="../plugindialog.cpp" line="117"/>
-        <source>About Plugins...</source>
-        <translation>О плагинах ...</translation>
-    </message>
-    <message>
-        <location filename="../plugindialog.cpp" line="120"/>
-        <source>Name</source>
-        <translation>Название</translation>
-    </message>
-    <message>
-        <location filename="../plugindialog.cpp" line="121"/>
-        <source>Version</source>
-        <translation>Версия</translation>
-    </message>
-    <message>
-        <location filename="../plugindialog.cpp" line="122"/>
-        <source>Author</source>
-        <translation>Автор</translation>
-    </message>
-</context>
-<context>
-    <name>DoubleSpinBox</name>
-    <message>
-        <location filename="../../static_libs/common/doublespinbox.h" line="29"/>
-        <location filename="../../static_libs/common/doublespinbox.h" line="34"/>
-        <location filename="../../static_libs/common/doublespinbox.h" line="39"/>
-        <source>Range from %1 to %2.</source>
-        <translation>От %1 до %2.</translation>
-    </message>
-</context>
-<context>
-    <name>DrillForm</name>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="20"/>
-        <source>Form</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/drillform/drillform.ui" line="78"/>
-        <source>Drill Toolpath</source>
-        <translation>Сверловка</translation>
+        <translation type="vanished">П</translation>
     </message>
     <message>
         <source>Depth:</source>
         <translation type="vanished">Глубина:</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="107"/>
+        <source>Board</source>
+        <translation type="vanished">Плата</translation>
+    </message>
+    <message>
+        <source>U</source>
+        <translation type="vanished">Р</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation type="vanished">Ручной</translation>
+    </message>
+    <message>
+        <source> mm</source>
+        <translation type="vanished"> мм</translation>
+    </message>
+    <message>
+        <source>Cutting depth</source>
+        <translation type="vanished">Глубина врезания</translation>
+    </message>
+</context>
+<context>
+    <name>Dialog</name>
+    <message>
+        <location filename="../plugindialog.cpp" line="107"/>
+        <source>About Plugins...</source>
+        <translation>О плагинах ...</translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="110"/>
+        <source>Name</source>
+        <translation>Название</translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="111"/>
+        <source>Version</source>
+        <translation>Версия</translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="112"/>
+        <source>Author</source>
+        <translation>Автор</translation>
+    </message>
+</context>
+<context>
+    <name>DialogAboutPlugins</name>
+    <message>
+        <location filename="../plugindialog.cpp" line="59"/>
+        <source>File Plugins</source>
+        <translation>Плагины файлов</translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="64"/>
+        <source>Shape Plugins</source>
+        <translation>Плагины граф. примитивов</translation>
+    </message>
+    <message>
+        <location filename="../plugindialog.cpp" line="69"/>
+        <source>GCode Plugins</source>
+        <translation>Плагины создания УП</translation>
+    </message>
+</context>
+<context>
+    <name>DoubleSpinBox</name>
+    <message>
+        <source>Range from %1 to %2.</source>
+        <translation type="vanished">От %1 до %2.</translation>
+    </message>
+</context>
+<context>
+    <name>DrillForm</name>
+    <message>
+        <source>Drill Toolpath</source>
+        <translation type="vanished">Сверловка</translation>
+    </message>
+    <message>
+        <source>Depth:</source>
+        <translation type="vanished">Глубина:</translation>
+    </message>
+    <message>
         <source>File:</source>
-        <translation>Файл:</translation>
+        <translation type="vanished">Файл:</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="38"/>
         <source>Zoom To Selected</source>
-        <translation>Увеличить до выбранных</translation>
+        <translation type="vanished">Увеличить до выбранных</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="170"/>
         <source>Work Type</source>
-        <translation>Тип работы</translation>
+        <translation type="vanished">Тип работы</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="188"/>
         <source>Only drilling</source>
-        <translation>Только сверловка</translation>
+        <translation type="vanished">Только сверловка</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="202"/>
         <source>Profile</source>
-        <translation>Профиль</translation>
+        <translation type="vanished">Профиль</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="280"/>
         <source>Pick Up Tools</source>
-        <translation>Подобрать инструменты</translation>
+        <translation type="vanished">Подобрать инструменты</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="195"/>
         <source>Pocket</source>
-        <translation>Карман</translation>
+        <translation type="vanished">Карман</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="212"/>
         <source>Side</source>
-        <translation>Сторона</translation>
+        <translation type="vanished">Сторона</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="237"/>
         <source>In</source>
-        <translation>Внутри</translation>
+        <translation type="vanished">Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="244"/>
         <source>Out</source>
-        <translation>Снаружи</translation>
+        <translation type="vanished">Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="230"/>
         <source>On</source>
-        <translation>Поверху</translation>
+        <translation type="vanished">Поверху</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="117"/>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation type="vanished">Направление</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="145"/>
         <source>Conventional</source>
-        <translation>Встречное</translation>
+        <translation type="vanished">Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="135"/>
         <source>Climb</source>
-        <translation>Попутное</translation>
+        <translation type="vanished">Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="88"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.ui" line="155"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
         <source>, drill Ø%1mm</source>
@@ -920,60 +894,47 @@ Public License instead of this License.  But first, please read
         <translation type="vanished">Ø%1мм</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="252"/>
         <source>No data to process.</source>
-        <translation>Нет данных для расчёта.</translation>
+        <translation type="vanished">Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="548"/>
         <source>&amp;Select Tool</source>
-        <translation>&amp;Выбрать инструмент</translation>
+        <translation type="vanished">&amp;Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="93"/>
-        <location filename="../forms/drillform/drillform.cpp" line="572"/>
         <source>&quot; not suitable for T</source>
-        <translation>&quot; не подходит для Т</translation>
+        <translation type="vanished">&quot; не подходит для Т</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="70"/>
         <source>&amp;Choose a Tool for everyone</source>
-        <translation>&amp;Выбрать инструмент для всех</translation>
+        <translation type="vanished">&amp;Выбрать инструмент для всех</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="103"/>
         <source>&amp;Remove Tool for everyone</source>
-        <translation>&amp;Удалить инструмент для всех</translation>
+        <translation type="vanished">&amp;Удалить инструмент для всех</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillform.cpp" line="585"/>
         <source>&amp;Remove Tool</source>
-        <translation>&amp;Убрать инструмент</translation>
+        <translation type="vanished">&amp;Убрать инструмент</translation>
     </message>
 </context>
 <context>
     <name>DrillModel</name>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="87"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="152"/>
-        <location filename="../forms/drillform/drillmodel.cpp" line="154"/>
         <source>Tool</source>
-        <translation>Инструмент</translation>
+        <translation type="vanished">Инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="87"/>
         <source>Slot</source>
-        <translation>Слот</translation>
+        <translation type="vanished">Слот</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="122"/>
         <source>Select Tool</source>
-        <translation>Выбрать инструмент</translation>
+        <translation type="vanished">Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="../forms/drillform/drillmodel.cpp" line="152"/>
         <source>Aperture</source>
-        <translation>Апертура</translation>
+        <translation type="vanished">Апертура</translation>
     </message>
 </context>
 <context>
@@ -986,106 +947,84 @@ Public License instead of this License.  But first, please read
 <context>
     <name>Dxf::DxfObj</name>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="46"/>
         <source>Normal</source>
-        <translation>Нормальный</translation>
+        <translation type="vanished">Нормальный</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="46"/>
         <source>Displays paths with pen width and fill.</source>
-        <translation>Отображает контуры с шириной пера и заливкой.</translation>
+        <translation type="vanished">Отображает контуры с шириной пера и заливкой.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="47"/>
         <source>Paths</source>
-        <translation>Контуры</translation>
+        <translation type="vanished">Контуры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="47"/>
         <source>Displays paths without pen width.</source>
-        <translation>Отображает контуры без ширины пера.</translation>
+        <translation type="vanished">Отображает контуры без ширины пера.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="48"/>
         <source>Both</source>
-        <translation>Оба</translation>
+        <translation type="vanished">Оба</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_file.cpp" line="48"/>
         <source>Displays paths without and with pen width.</source>
-        <translation>Отображает контуры без пера и с шириной пера.</translation>
+        <translation type="vanished">Отображает контуры без пера и с шириной пера.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="45"/>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="293"/>
         <source>Colorize</source>
-        <translation>Раскрасить</translation>
+        <translation type="vanished">Раскрасить</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="129"/>
         <source>Section HEADER</source>
-        <translation>Раздел HEADER</translation>
+        <translation type="vanished">Раздел HEADER</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="286"/>
         <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
+        <translation type="vanished">&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="287"/>
         <source>&amp;Show source</source>
-        <translation>&amp;Показать источник</translation>
+        <translation type="vanished">&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="306"/>
         <source>&amp;Layers</source>
-        <translation>&amp;Слои</translation>
+        <translation type="vanished">&amp;Слои</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="311"/>
         <source>Header</source>
-        <translation>Заголовок</translation>
+        <translation type="vanished">Заголовок</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="317"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
+        <translation type="vanished">&amp;Закрыть</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_node.cpp" line="407"/>
         <source>Change color</source>
-        <translation>Сменить цвет</translation>
+        <translation type="vanished">Сменить цвет</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.cpp" line="98"/>
         <source>Next</source>
-        <translation>Следующий</translation>
+        <translation type="vanished">Следующий</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.cpp" line="111"/>
         <source>Prev</source>
-        <translation>Предыдущий</translation>
+        <translation type="vanished">Предыдущий</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="56"/>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="81"/>
         <source>Data</source>
-        <translation>Данные</translation>
+        <translation type="vanished">Данные</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="56"/>
         <source>Code</source>
-        <translation>Код</translation>
+        <translation type="vanished">Код</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="77"/>
         <source>Line</source>
-        <translation>Строка в файле</translation>
+        <translation type="vanished">Строка в файле</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_sourcedialog.h" line="79"/>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
 </context>
 <context>
@@ -1137,132 +1076,103 @@ type</translatorcomment>
 <context>
     <name>Dxf::Plugin</name>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_plugin.cpp" line="205"/>
         <source>Dxf Files</source>
-        <translation>Файлы Dxf</translation>
+        <translation type="vanished">Файлы Dxf</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_plugin.cpp" line="351"/>
         <source>Ø%1mm</source>
-        <translation>Ø%1мм</translation>
+        <translation type="vanished">Ø%1мм</translation>
     </message>
 </context>
 <context>
     <name>DxfObj</name>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="301"/>
         <source>SectionParser is null!</source>
-        <translation>SectionParser имеет значение null!</translation>
+        <translation type="vanished">SectionParser имеет значение null!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="303"/>
         <source>File in SectionParser is null!</source>
-        <translation>Файл в SectionParser пуст!</translation>
+        <translation type="vanished">Файл в SectionParser пуст!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_entity.cpp" line="305"/>
         <source>Layer &apos;%1&apos; not found in file!</source>
-        <translation>Слой &quot;%1&quot; не найден в файле!</translation>
+        <translation type="vanished">Слой &quot;%1&quot; не найден в файле!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_hatch.cpp" line="160"/>
         <source>Unimplemented edge type in HATCH: %1</source>
-        <translation>Не реализованный тип кромки в штриховки: %1</translation>
+        <translation type="vanished">Не реализованный тип кромки в штриховки: %1</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_hatch.cpp" line="162"/>
         <source>Unknown edge type in HATCH: %1</source>
-        <translation>Неизвестный тип кромки в штриховки: %1</translation>
+        <translation type="vanished">Неизвестный тип кромки в штриховки: %1</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/entities/dxf_solid.cpp" line="115"/>
         <source>Unsupported type Solid: corners %1!</source>
-        <translation>Неподдерживаемый тип Solid: углы %1!</translation>
+        <translation type="vanished">Неподдерживаемый тип Solid: углы %1!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/section/dxf_blocks.cpp" line="35"/>
-        <source>blockName ERR!</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/dxf/section/dxf_entities.cpp" line="136"/>
         <source>Unknown Entity: %1, %2</source>
-        <translation>Неизвестная сущность: %1, %2</translation>
+        <translation type="vanished">Неизвестная сущность: %1, %2</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/section/dxf_entities.cpp" line="138"/>
         <source>Not implemented: %1, %2</source>
-        <translation>Не реализовано: %1, %2</translation>
+        <translation type="vanished">Не реализовано: %1, %2</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="72"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="84"/>
         <source>Empty layer</source>
-        <translation>Пустой слой</translation>
+        <translation type="vanished">Пустой слой</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="81"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="176"/>
         <source>Solid</source>
-        <translation>Нормальный</translation>
+        <translation type="vanished">Нормальный</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="81"/>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="176"/>
         <source>Paths</source>
-        <translation>Контуры</translation>
+        <translation type="vanished">Контуры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="136"/>
         <source>Visible
 &amp; color</source>
-        <translation>Видимость
+        <translation type="vanished">Видимость
 и цвет</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="138"/>
         <source>Entity
 count</source>
-        <translation>Кол-во
+        <translation type="vanished">Кол-во
 сущностей</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/tables/dxf_layermodel.cpp" line="140"/>
         <source>Visible
 type</source>
-        <translation>Отображаемый
+        <translation type="vanished">Отображаемый
 тип</translation>
     </message>
 </context>
 <context>
     <name>ErrorDialog</name>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="186"/>
         <source>Uncut places:</source>
-        <translation>Непрорезы:</translation>
+        <translation type="vanished">Непрорезы:</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="202"/>
         <source>Continue</source>
-        <translation>Продолжить</translation>
+        <translation type="vanished">Продолжить</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="203"/>
         <source>Break</source>
-        <translation>Прервать</translation>
+        <translation type="vanished">Прервать</translation>
     </message>
 </context>
 <context>
     <name>ErrorModel</name>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="106"/>
         <source>Position</source>
-        <translation>Расположение</translation>
+        <translation type="vanished">Расположение</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/errordialog.cpp" line="108"/>
         <source>Area mm²</source>
-        <translation>Площадь</translation>
+        <translation type="vanished">Площадь</translation>
     </message>
 </context>
 <context>
@@ -1283,92 +1193,59 @@ type</source>
 <context>
     <name>Excellon::Plugin</name>
     <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="97"/>
         <source>Excellon</source>
-        <translation>Файлы Excellon</translation>
+        <translation type="vanished">Файлы Excellon</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/explugin.cpp" line="240"/>
         <source>Tool Ø%1mm</source>
-        <translation>Ø%1мм</translation>
+        <translation type="vanished">Ø%1мм</translation>
     </message>
 </context>
 <context>
     <name>ExcellonDialog</name>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="14"/>
         <source>Excellon Format</source>
-        <translation>Формат Excellon</translation>
+        <translation type="vanished">Формат Excellon</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="35"/>
         <source>Units</source>
-        <translation>Единицы</translation>
+        <translation type="vanished">Единицы</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="53"/>
         <source>Inches</source>
-        <translation>Дюймы</translation>
+        <translation type="vanished">Дюймы</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="60"/>
         <source>Millimeters</source>
-        <translation>Миллиметры</translation>
+        <translation type="vanished">Миллиметры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="105"/>
         <source>Format</source>
-        <translation>Формат</translation>
+        <translation type="vanished">Формат</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="142"/>
-        <source>:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="70"/>
         <source>Zeroes</source>
-        <translation>Нули</translation>
+        <translation type="vanished">Нули</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="88"/>
         <source>Leading</source>
-        <translation>Ведущие</translation>
+        <translation type="vanished">Ведущие</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="95"/>
         <source>Trailing</source>
-        <translation>Замыкающие</translation>
+        <translation type="vanished">Замыкающие</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="165"/>
         <source>Offset</source>
-        <translation>Смещение</translation>
+        <translation type="vanished">Смещение</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="171"/>
-        <source>X:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="194"/>
-        <source>Y:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="217"/>
-        <source>x1.0</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="224"/>
         <source>Flatten by selected</source>
-        <translation>Свести по выбранным</translation>
+        <translation type="vanished">Свести по выбранным</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/excellondialog.ui" line="234"/>
         <source>Set as default</source>
-        <translation>Установить по умолчанию</translation>
+        <translation type="vanished">Установить по умолчанию</translation>
     </message>
 </context>
 <context>
@@ -1428,100 +1305,85 @@ type</source>
 <context>
     <name>FileTree::Model</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="171"/>
         <source>Name</source>
-        <translation>Название</translation>
+        <translation type="vanished">Название</translation>
     </message>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="173"/>
         <source>Side</source>
-        <translation>Сторона</translation>
+        <translation type="vanished">Сторона</translation>
     </message>
     <message>
-        <location filename="../../static_libs/filetree/ft_model.cpp" line="175"/>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
 </context>
 <context>
     <name>FileTree::SideDelegate</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_sidedelegate.cpp" line="28"/>
         <source>Top|Bottom</source>
-        <translation>Верх|Низ</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
 </context>
 <context>
     <name>FileTree::View</name>
     <message>
-        <location filename="../../static_libs/filetree/ft_view.cpp" line="201"/>
         <source>Delete Selected</source>
-        <translation>Удалить (закрыть) выбраннное</translation>
+        <translation type="vanished">Удалить (закрыть) выбраннное</translation>
     </message>
 </context>
 <context>
     <name>FormsUtil</name>
     <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="66"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/formsutil/formsutil.cpp" line="66"/>
         <source>The tool doesn`t fit in the Working items!</source>
-        <translation>Инструмент не вписывается в рабочие элементы!</translation>
+        <translation type="vanished">Инструмент не вписывается в рабочие элементы!</translation>
     </message>
 </context>
 <context>
     <name>GCode::Creator</name>
     <message>
-        <location filename="../gcode/gccreator.cpp" line="472"/>
         <source>Merge Paths</source>
-        <translation>Слияние путей</translation>
+        <translation type="vanished">Слияние путей</translation>
     </message>
     <message>
-        <location filename="../gcode/gccreator.cpp" line="653"/>
         <source>Creativity check</source>
-        <translation>Проверка ошибок</translation>
+        <translation type="vanished">Проверка ошибок</translation>
     </message>
 </context>
 <context>
     <name>GCode::Plugin</name>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="34"/>
         <source>Tool Paths</source>
-        <translation>УП</translation>
+        <translation type="vanished">УП</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="50"/>
         <source>&amp;Delete All Toolpaths</source>
-        <translation>Удалить &amp;все УП</translation>
+        <translation type="vanished">Удалить &amp;все УП</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="51"/>
         <source>Really?</source>
-        <translation>В самом деле?</translation>
+        <translation type="vanished">В самом деле?</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="54"/>
         <source>&amp;Save Selected Tool Paths...</source>
-        <translation>&amp;Сохранить выбранные УП...</translation>
+        <translation type="vanished">&amp;Сохранить выбранные УП...</translation>
     </message>
 </context>
 <context>
     <name>GCode::VoronoiBoost</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoiboost.cpp" line="102"/>
         <source>Calc BOOST Voronoi</source>
-        <translation>Вороной BOOST</translation>
+        <translation type="vanished">Вороной BOOST</translation>
     </message>
 </context>
 <context>
     <name>GCode::VoronoiCgal</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoicgal.cpp" line="87"/>
         <source>Calc CGAL Voronoi</source>
-        <translation>Вороной CGAL</translation>
+        <translation type="vanished">Вороной CGAL</translation>
     </message>
 </context>
 <context>
@@ -1531,9 +1393,8 @@ type</source>
         <translation type="vanished">Рассчёт Вороного</translation>
     </message>
     <message>
-        <location filename="../gcode/voroni/gcvoronoi.cpp" line="89"/>
         <source>Create Offset</source>
-        <translation>Создать отступ</translation>
+        <translation type="vanished">Создать отступ</translation>
     </message>
     <message>
         <source>Merge Paths</source>
@@ -1547,68 +1408,47 @@ type</source>
 <context>
     <name>GCode::VoronoiJc</name>
     <message>
-        <location filename="../gcode/voroni/gcvoronoijc.cpp" line="120"/>
         <source>Merge Segments</source>
-        <translation>Объединение сегментов</translation>
+        <translation type="vanished">Объединение сегментов</translation>
     </message>
 </context>
 <context>
     <name>GCodePropertiesForm</name>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="14"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="70"/>
         <source>G-Code Properties</source>
-        <translation>Параметры G-кода</translation>
+        <translation type="vanished">Параметры G-кода</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="80"/>
         <source>Material</source>
-        <translation>Материал</translation>
+        <translation type="vanished">Материал</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="101"/>
         <source>Board Thickness</source>
-        <translation>Толщина платы</translation>
+        <translation type="vanished">Толщина платы</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="111"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="134"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="184"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="207"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="238"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="305"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="321"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="347"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="363"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="457"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="496"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="563"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="127"/>
         <source>Copper Thickness</source>
-        <translation>Толщина меди</translation>
+        <translation type="vanished">Толщина меди</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="257"/>
         <source>Markers Position</source>
-        <translation>Позиции маркеров</translation>
+        <translation type="vanished">Позиции маркеров</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="275"/>
         <source>Home</source>
-        <translation>Дом (конечная поз. УП)</translation>
+        <translation type="vanished">Дом (конечная поз. УП)</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="285"/>
         <source>Zero</source>
-        <translation>Ноль УП</translation>
+        <translation type="vanished">Ноль УП</translation>
     </message>
     <message>
         <source>Y Pos</source>
@@ -1619,15 +1459,8 @@ type</source>
         <translation type="vanished">Поз. X</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="379"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="386"/>
-        <source>0</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="399"/>
         <source>Layout</source>
-        <translation>Раскладка</translation>
+        <translation type="vanished">Раскладка</translation>
     </message>
     <message>
         <source>X Steps</source>
@@ -1646,69 +1479,52 @@ type</source>
         <translation type="vanished">Ноль УП</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="337"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="476"/>
         <source>Y</source>
-        <translation>Y</translation>
+        <translation type="vanished">Y</translation>
     </message>
     <message>
         <source>Home Position</source>
         <translation type="vanished">Дом УП</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="153"/>
         <source>G0 Properties</source>
-        <translation>Параметры G0</translation>
+        <translation type="vanished">Параметры G0</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="174"/>
         <source>Clearence Z</source>
-        <translation>Клиренс Z</translation>
+        <translation type="vanished">Клиренс Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="197"/>
         <source>Plunge Z</source>
-        <translation>Нач. погр. Z</translation>
+        <translation type="vanished">Нач. погр. Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="228"/>
         <source>Safe Z</source>
-        <translation>Безопасная Z</translation>
+        <translation type="vanished">Безопасная Z</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="295"/>
-        <source>X</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="437"/>
         <source>X </source>
-        <translation>X</translation>
+        <translation type="vanished">X</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="417"/>
         <source>Steps</source>
-        <translation>Шаги</translation>
+        <translation type="vanished">Шаги</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="427"/>
         <source>Space</source>
-        <translation>Пробел</translation>
+        <translation type="vanished">Пробел</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="518"/>
         <source>for Aperture paths</source>
-        <translation>Расстояние меньше которого пути апертур объединяются в одну</translation>
+        <translation type="vanished">Расстояние меньше которого пути апертур объединяются в одну</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="547"/>
         <source>Glue</source>
-        <translation>Клей</translation>
+        <translation type="vanished">Клей</translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="588"/>
         <source>Ok</source>
-        <translation>Применить</translation>
+        <translation type="vanished">Применить</translation>
     </message>
 </context>
 <context>
@@ -1756,166 +1572,135 @@ name</source>
 <context>
     <name>Gerber::GbrObj</name>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="41"/>
         <source>unsorted</source>
-        <translation>Несортированные</translation>
+        <translation type="vanished">Несортированные</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="127"/>
         <source>Ref Des</source>
-        <translation>Условное
+        <translation type="vanished">Условное
 обозначение</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="129"/>
         <source>Manufacturer
 part
 number</source>
-        <translation>Номер
+        <translation type="vanished">Номер
 детали
 производителя</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="133"/>
         <source>Value</source>
-        <translation>Значение</translation>
+        <translation type="vanished">Значение</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="135"/>
         <source>Mount
 type</source>
-        <translation>Тип
+        <translation type="vanished">Тип
 монтажа</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="138"/>
         <source>Footprint
 name</source>
-        <translation>Название
+        <translation type="vanished">Название
 пос. места</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="141"/>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="144"/>
         <source>Package
 name</source>
-        <translation>Название
+        <translation type="vanished">Название
 корпуса</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compmodel.cpp" line="147"/>
         <source>Height</source>
-        <translation>Высота</translation>
+        <translation type="vanished">Высота</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/compnode.cpp" line="129"/>
         <source>TH|SMD|BGA|Other</source>
-        <translation>Отверстрие|SMD|BGA|Другое</translation>
+        <translation type="vanished">Отверстрие|SMD|BGA|Другое</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbraperture.cpp" line="663"/>
         <source>Bad outline (regular polygon) macro!</source>
-        <translation>Плохой контур (правильный многоугольник) макрос!</translation>
+        <translation type="vanished">Плохой контур (правильный многоугольник) макрос!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbraperture.cpp" line="698"/>
         <source>Bad thermal macro!</source>
-        <translation>Плохой тепловой макрос!</translation>
+        <translation type="vanished">Плохой тепловой макрос!</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="74"/>
         <source>Rotation: %1
 </source>
-        <translation>Вращение: %1
+        <translation type="vanished">Вращение: %1
 </translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="75"/>
         <source>Value: %1
 </source>
-        <translation>Значение: %1
+        <translation type="vanished">Значение: %1
 </translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrcomponent.cpp" line="76"/>
         <source>Footprint: %1
 </source>
-        <translation>Пос. место: %1
+        <translation type="vanished">Пос. место: %1
 </translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="70"/>
         <source>Normal</source>
-        <translation>Нормальный</translation>
+        <translation type="vanished">Нормальный</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="70"/>
         <source>Normal view</source>
-        <translation>Нормальный вид</translation>
+        <translation type="vanished">Нормальный вид</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>
         <source>Aperture paths</source>
-        <translation>Пути апертуры</translation>
+        <translation type="vanished">Пути апертуры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="71"/>
         <source>Displays only aperture paths of copper
 without width and without contacts</source>
-        <translation>Отображает только апертурные траектории меди
+        <translation type="vanished">Отображает только апертурные траектории меди
 без ширины и без контактов</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="73"/>
         <source>Components</source>
-        <translation>Компоненты (РЭК)</translation>
+        <translation type="vanished">Компоненты (РЭК)</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrfile.cpp" line="73"/>
         <source>Show components</source>
-        <translation>Показать компоненты</translation>
+        <translation type="vanished">Показать компоненты</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="163"/>
         <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
+        <translation type="vanished">&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="166"/>
         <source>&amp;Show source</source>
-        <translation>&amp;Показать источник</translation>
+        <translation type="vanished">&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="193"/>
         <source>Show &amp;Components</source>
-        <translation>Показать &amp;РЭК</translation>
+        <translation type="vanished">Показать &amp;РЭК</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="200"/>
         <source>Change color</source>
-        <translation>Сменить цвет</translation>
+        <translation type="vanished">Сменить цвет</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrnode.cpp" line="212"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
+        <translation type="vanished">&amp;Закрыть</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="458"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="584"/>
         <source>Aperture %1 not found! Available %2</source>
-        <translation>Апертура %1 не найдена! Доступно %2</translation>
+        <translation type="vanished">Апертура %1 не найдена! Доступно %2</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="534"/>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="537"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
-        <translation>номер строки %1: «%2»,  ошибочное значение.</translation>
+        <translation type="vanished">номер строки %1: «%2»,  ошибочное значение.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrparser.cpp" line="590"/>
         <source>Aperture D%1 (%2) not supported!</source>
-        <translation>Апертура D%1 (%2) не поддерживается!</translation>
+        <translation type="vanished">Апертура D%1 (%2) не поддерживается!</translation>
     </message>
 </context>
 <context>
@@ -1977,206 +1762,163 @@ without width and without contacts.</source>
 <context>
     <name>Gerber::Plugin</name>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="142"/>
         <source>Gerber Files</source>
-        <translation>Файлы Gerber</translation>
+        <translation type="vanished">Файлы Gerber</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="320"/>
         <source>, drill Ø%1mm</source>
-        <translation>, отверстие Ø%1мм</translation>
+        <translation type="vanished">, отверстие Ø%1мм</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="421"/>
         <source>All</source>
-        <translation>Все</translation>
+        <translation type="vanished">Все</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="472"/>
         <source>Lines</source>
-        <translation>Проводники</translation>
+        <translation type="vanished">Проводники</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="479"/>
         <source>Line</source>
-        <translation>Линия</translation>
+        <translation type="vanished">Линия</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="485"/>
         <source>Regions</source>
-        <translation>Полигоны</translation>
+        <translation type="vanished">Полигоны</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="499"/>
         <source>Region</source>
-        <translation>Полигон</translation>
+        <translation type="vanished">Полигон</translation>
     </message>
 </context>
 <context>
     <name>HatchingForm</name>
     <message>
-        <location filename="../forms/hatchingform.ui" line="14"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="74"/>
         <source>Crosshatch Toolpath</source>
-        <translation>УП Штриховка</translation>
+        <translation type="vanished">УП Штриховка</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="96"/>
         <source>Aligin</source>
-        <translation>Размещение</translation>
+        <translation type="vanished">Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="117"/>
         <source>Outside</source>
-        <translation>Снаружи</translation>
+        <translation type="vanished">Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="130"/>
         <source>Inside</source>
-        <translation>Внутри</translation>
+        <translation type="vanished">Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="143"/>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation type="vanished">Направление</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="164"/>
         <source>Climb</source>
-        <translation>Попутное</translation>
+        <translation type="vanished">Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="177"/>
         <source>Conventional</source>
-        <translation>Встречное</translation>
+        <translation type="vanished">Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="253"/>
         <source>Raster Angle:</source>
-        <translation>Угол растра:</translation>
+        <translation type="vanished">Угол растра:</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="266"/>
-        <source> °</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/hatchingform.ui" line="285"/>
         <source>Profile Pass:</source>
-        <translation>Профиль:</translation>
+        <translation type="vanished">Профиль:</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="299"/>
         <source>No Profile Pass</source>
-        <translation>Без профиля</translation>
+        <translation type="vanished">Без профиля</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="304"/>
         <source>First</source>
-        <translation>В начале</translation>
+        <translation type="vanished">В начале</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="309"/>
         <source>Last</source>
-        <translation>В конце</translation>
+        <translation type="vanished">В конце</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="323"/>
         <source>Hatch step:</source>
-        <translation>Шаг штриховки:</translation>
+        <translation type="vanished">Шаг штриховки:</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="333"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="382"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="402"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.ui" line="412"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
         <source>Raster On</source>
-        <translation>Растр поверху</translation>
+        <translation type="vanished">Растр поверху</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
         <source>Hatching Outside</source>
-        <translation>Штриховка снаружи</translation>
+        <translation type="vanished">Штриховка снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="25"/>
         <source>Hatching Inside</source>
-        <translation>Штриховка внутри</translation>
+        <translation type="vanished">Штриховка внутри</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="104"/>
-        <location filename="../forms/hatchingform.cpp" line="130"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="104"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/hatchingform.cpp" line="130"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
 </context>
 <context>
     <name>Hpgl::DxfObj</name>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="36"/>
         <source>Normal</source>
-        <translation>Нормальный</translation>
+        <translation type="vanished">Нормальный</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="36"/>
         <source>Displays paths with pen width and fill.</source>
-        <translation>Отображает контуры с шириной пера и заливкой.</translation>
+        <translation type="vanished">Отображает контуры с шириной пера и заливкой.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="37"/>
         <source>Paths</source>
-        <translation>Контуры</translation>
+        <translation type="vanished">Контуры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_file.cpp" line="37"/>
         <source>Displays paths without pen width.</source>
-        <translation>Отображает контуры без ширины пера.</translation>
+        <translation type="vanished">Отображает контуры без ширины пера.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_node.cpp" line="42"/>
         <source>Colorize</source>
-        <translation>Раскрасить</translation>
+        <translation type="vanished">Раскрасить</translation>
     </message>
 </context>
 <context>
     <name>Hpgl::Plugin</name>
     <message>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="58"/>
         <source>Dxf Files</source>
-        <translation>Файлы HPGL</translation>
+        <translation type="vanished">Файлы HPGL</translation>
     </message>
 </context>
 <context>
@@ -2197,91 +1939,86 @@ Would you like to continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../mainwindow.ui" line="73"/>
+        <location filename="../mainwindow.cpp" line="1316"/>
         <source>Files</source>
         <translation>Файлы</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="218"/>
+        <location filename="../mainwindow.cpp" line="221"/>
         <source>Ready</source>
         <translation>Готов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="223"/>
+        <location filename="../mainwindow.cpp" line="225"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="226"/>
         <location filename="../mainwindow.cpp" line="228"/>
+        <location filename="../mainwindow.cpp" line="230"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="234"/>
-        <location filename="../mainwindow.cpp" line="237"/>
+        <location filename="../mainwindow.cpp" line="236"/>
+        <location filename="../mainwindow.cpp" line="239"/>
         <source>&amp;New project</source>
         <translation>&amp;Новый проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="236"/>
+        <location filename="../mainwindow.cpp" line="238"/>
         <source>Create a new file</source>
         <translation>Создать новый файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="240"/>
-        <location filename="../mainwindow.cpp" line="243"/>
+        <location filename="../mainwindow.cpp" line="242"/>
+        <location filename="../mainwindow.cpp" line="245"/>
         <source>&amp;Open...</source>
         <translation>&amp;Открыть...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="242"/>
+        <location filename="../mainwindow.cpp" line="244"/>
         <source>Open an existing file</source>
         <translation>Открыть существующий файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="246"/>
-        <location filename="../mainwindow.cpp" line="249"/>
+        <location filename="../mainwindow.cpp" line="248"/>
+        <location filename="../mainwindow.cpp" line="251"/>
         <source>&amp;Save project</source>
         <translation>&amp;Сохранить проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="248"/>
+        <location filename="../mainwindow.cpp" line="250"/>
         <source>Save the document to disk</source>
         <translation>Сохранить проект на диск</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="252"/>
-        <location filename="../mainwindow.cpp" line="255"/>
+        <location filename="../mainwindow.cpp" line="254"/>
+        <location filename="../mainwindow.cpp" line="257"/>
         <source>Save project &amp;As...</source>
         <translation>Сохранить проект и &amp;как ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="254"/>
+        <location filename="../mainwindow.cpp" line="256"/>
         <source>Save the document under a new name</source>
         <translation>Сохранить проект под новым именем</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="269"/>
-        <location filename="../mainwindow.cpp" line="271"/>
         <source>&amp;Save Selected Tool Paths...</source>
-        <translation>Сохранить выбранные &amp;УП...</translation>
+        <translation type="vanished">Сохранить выбранные &amp;УП...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="271"/>
         <source>Save selected toolpaths</source>
         <translation>Сохранить выбранные УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="274"/>
-        <location filename="../mainwindow.cpp" line="276"/>
         <source>&amp;Export PDF...</source>
-        <translation>&amp;Экспорт PDF...</translation>
+        <translation type="vanished">&amp;Экспорт PDF...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="275"/>
         <source>Export to PDF file</source>
-        <translation>Экспорт в файл PDF</translation>
+        <translation type="vanished">Экспорт в файл PDF</translation>
     </message>
     <message>
         <source>Recent...</source>
@@ -2292,14 +2029,14 @@ Would you like to continue?</source>
         <translation type="vanished">Очистить список</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="258"/>
-        <location filename="../mainwindow.cpp" line="262"/>
-        <location filename="../mainwindow.cpp" line="939"/>
+        <location filename="../mainwindow.cpp" line="260"/>
+        <location filename="../mainwindow.cpp" line="264"/>
+        <location filename="../mainwindow.cpp" line="873"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation>&amp;Закрыть проект &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="260"/>
+        <location filename="../mainwindow.cpp" line="262"/>
         <source>Close project</source>
         <translation>Закрыть проект</translation>
     </message>
@@ -2324,7 +2061,7 @@ Would you like to continue?</source>
         <translation>Выйти из приложения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="301"/>
+        <location filename="../mainwindow.cpp" line="299"/>
         <source>&amp;Edit</source>
         <translation>Правка</translation>
     </message>
@@ -2334,12 +2071,12 @@ Would you like to continue?</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="330"/>
+        <location filename="../mainwindow.cpp" line="335"/>
         <source>&amp;Settings</source>
         <translation>&amp;Параметры</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="331"/>
+        <location filename="../mainwindow.cpp" line="336"/>
         <source>Show the application&apos;s settings box</source>
         <translation>Показать окно настроек приложения</translation>
     </message>
@@ -2350,93 +2087,99 @@ Would you like to continue?</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="359"/>
+        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="272"/>
+        <source>&amp;Save Selected Tool PathsD...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="367"/>
         <source>Ruller</source>
         <translation>Линейка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="365"/>
+        <location filename="../mainwindow.cpp" line="373"/>
         <source>Resize</source>
         <translation>Изменить размер</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="377"/>
+        <location filename="../mainwindow.cpp" line="380"/>
         <source>&amp;Help</source>
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="379"/>
+        <location filename="../mainwindow.cpp" line="383"/>
         <source>&amp;About</source>
         <translation>&amp;О G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="380"/>
+        <location filename="../mainwindow.cpp" line="384"/>
         <source>Show the application&apos;s About box</source>
         <translation>Показать окно приложения O G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="382"/>
+        <location filename="../mainwindow.cpp" line="386"/>
         <source>About &amp;Qt</source>
         <translation>О &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="383"/>
+        <location filename="../mainwindow.cpp" line="387"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Показать окно о библиотеки Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="387"/>
+        <location filename="../mainwindow.cpp" line="391"/>
         <source>About &amp;Plugins…</source>
         <translation>О &amp;плагинах…</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="388"/>
+        <location filename="../mainwindow.cpp" line="392"/>
         <source>Show loaded plugins…</source>
         <translation>Показать загруженные плагины…</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="393"/>
+        <location filename="../mainwindow.cpp" line="396"/>
         <source>&amp;Viev</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="396"/>
-        <location filename="../mainwindow.cpp" line="398"/>
+        <location filename="../mainwindow.cpp" line="399"/>
+        <location filename="../mainwindow.cpp" line="401"/>
         <source>Zoom ToolBar</source>
         <translation>Панель Увеличение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="404"/>
-        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="408"/>
+        <location filename="../mainwindow.cpp" line="409"/>
         <source>Fit best</source>
         <translation>Вписать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="410"/>
-        <location filename="../mainwindow.cpp" line="411"/>
+        <location filename="../mainwindow.cpp" line="414"/>
+        <location filename="../mainwindow.cpp" line="415"/>
         <source>100%</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="412"/>
+        <location filename="../mainwindow.cpp" line="416"/>
         <source>Ctrl+0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="416"/>
-        <location filename="../mainwindow.cpp" line="417"/>
+        <location filename="../mainwindow.cpp" line="420"/>
+        <location filename="../mainwindow.cpp" line="421"/>
         <source>Zoom in</source>
         <translation>Увеличить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="422"/>
-        <location filename="../mainwindow.cpp" line="423"/>
+        <location filename="../mainwindow.cpp" line="426"/>
+        <location filename="../mainwindow.cpp" line="427"/>
         <source>Zoom out</source>
         <translation>Уменьшить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="432"/>
-        <location filename="../mainwindow.cpp" line="433"/>
+        <location filename="../mainwindow.cpp" line="436"/>
+        <location filename="../mainwindow.cpp" line="437"/>
         <source>Zoom to selected</source>
         <translation>Увеличить выбранное</translation>
     </message>
@@ -2457,48 +2200,42 @@ Would you like to continue?</source>
         <translation type="vanished">Выбор</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="303"/>
+        <location filename="../mainwindow.cpp" line="302"/>
         <source>Select all</source>
         <translation>Выбрать все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="441"/>
         <source>&amp;Paths</source>
-        <translation>&amp;УП</translation>
+        <translation type="vanished">&amp;УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="443"/>
-        <location filename="../mainwindow.cpp" line="445"/>
+        <location filename="../mainwindow.cpp" line="448"/>
+        <location filename="../mainwindow.cpp" line="450"/>
         <source>Toolpath</source>
         <translation>Путь инструмента</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="454"/>
         <source>Pro&amp;file</source>
-        <translation>&amp;Профиль</translation>
+        <translation type="vanished">&amp;Профиль</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="460"/>
         <source>&amp;Pocket</source>
-        <translation>&amp;Карман</translation>
+        <translation type="vanished">&amp;Карман</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="472"/>
         <source>&amp;Voronoi</source>
-        <translation>Диаграмма &amp;Вороного</translation>
+        <translation type="vanished">Диаграмма &amp;Вороного</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="478"/>
         <source>&amp;Thermal Insulation</source>
-        <translation>&amp;Теплоизоляция</translation>
+        <translation type="vanished">&amp;Теплоизоляция</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="486"/>
         <source>&amp;Drilling</source>
-        <translation>&amp;Сверловка</translation>
+        <translation type="vanished">&amp;Сверловка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="336"/>
+        <location filename="../mainwindow.cpp" line="341"/>
         <source>&amp;G-Code Properties</source>
         <translation>П&amp;араметры G-кода</translation>
     </message>
@@ -2513,28 +2250,26 @@ Would you like to continue?</source>
         <translation>Последние проекты...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="340"/>
+        <location filename="../mainwindow.cpp" line="348"/>
         <source>Tool Base</source>
         <translation>База инструментов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="344"/>
+        <location filename="../mainwindow.cpp" line="352"/>
         <source>Autoplace All Refpoints</source>
         <translation>Авторазмещение всех опорных точек</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="466"/>
         <source>&amp;PocketR</source>
-        <translation>Карман &amp;Растроввый</translation>
+        <translation type="vanished">Карман &amp;Растроввый</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="494"/>
         <source>&amp;Crosshatch</source>
-        <translation>&amp;Штриховка</translation>
+        <translation type="vanished">&amp;Штриховка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="510"/>
-        <location filename="../mainwindow.cpp" line="512"/>
+        <location filename="../mainwindow.cpp" line="467"/>
+        <location filename="../mainwindow.cpp" line="469"/>
         <source>Graphics Items</source>
         <translation>Графические элементы</translation>
     </message>
@@ -2551,27 +2286,27 @@ Would you like to continue?</source>
         <translation type="vanished">Линия</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="562"/>
+        <location filename="../mainwindow.cpp" line="526"/>
         <source>Union</source>
         <translation>Объединение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="563"/>
+        <location filename="../mainwindow.cpp" line="527"/>
         <source>Difference</source>
         <translation>Разница</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="564"/>
+        <location filename="../mainwindow.cpp" line="528"/>
         <source>Exclusion</source>
         <translation>Исключение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="565"/>
+        <location filename="../mainwindow.cpp" line="529"/>
         <source>Intersection</source>
         <translation>Пересечение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="312"/>
+        <location filename="../mainwindow.cpp" line="311"/>
         <source>Undo</source>
         <translation>Отменить</translation>
     </message>
@@ -2581,7 +2316,7 @@ Would you like to continue?</source>
         <translation>Повторить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="363"/>
         <source>Snap to grid</source>
         <translation>Привязка к сетке</translation>
     </message>
@@ -2610,63 +2345,68 @@ Would you like to continue?</source>
         <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1173"/>
-        <location filename="../mainwindow.cpp" line="1202"/>
+        <location filename="../mainwindow.cpp" line="1195"/>
+        <location filename="../mainwindow.cpp" line="1222"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1175"/>
+        <location filename="../mainwindow.cpp" line="1197"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation>Любой (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1202"/>
+        <location filename="../mainwindow.cpp" line="1222"/>
         <source>Project (*.g2g)</source>
         <translation>Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="873"/>
+        <location filename="../mainwindow.cpp" line="810"/>
         <source>Do you want to close this project?</source>
         <translation>Закрыть этот проект?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="592"/>
+        <location filename="../mainwindow.cpp" line="446"/>
+        <source>&amp;PathsD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="553"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="594"/>
+        <location filename="../mainwindow.cpp" line="555"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="657"/>
+        <location filename="../mainwindow.cpp" line="615"/>
         <source>;	Contains files:</source>
         <translation>;	Содержит файлы:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="835"/>
+        <location filename="../mainwindow.cpp" line="776"/>
         <source>File open errors</source>
         <translation>Ошибки открытия файлов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="873"/>
-        <location filename="../mainwindow.cpp" line="879"/>
-        <location filename="../mainwindow.cpp" line="922"/>
-        <location filename="../mainwindow.cpp" line="1016"/>
+        <location filename="../mainwindow.cpp" line="810"/>
+        <location filename="../mainwindow.cpp" line="816"/>
+        <location filename="../mainwindow.cpp" line="857"/>
+        <location filename="../mainwindow.cpp" line="933"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="879"/>
+        <location filename="../mainwindow.cpp" line="816"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>Документ был изменен.
 Вы хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1017"/>
+        <location filename="../mainwindow.cpp" line="934"/>
         <source>Do you want to reload file %1?</source>
         <translation>Перезагрузить файл %1?</translation>
     </message>
@@ -2677,12 +2417,12 @@ Do you want to save your changes?</source>
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="919"/>
+        <location filename="../mainwindow.cpp" line="854"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="923"/>
+        <location filename="../mainwindow.cpp" line="858"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Невозможно записать файл%1:
@@ -2693,58 +2433,61 @@ Do you want to save your changes?</source>
         <translation type="vanished">Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="980"/>
+        <location filename="../mainwindow.cpp" line="897"/>
         <source>Icon size = 24</source>
         <translation>Размер иконки = 24</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="981"/>
+        <location filename="../mainwindow.cpp" line="898"/>
         <source>Icon size = 48</source>
         <translation>Размер иконки = 48</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="982"/>
+        <location filename="../mainwindow.cpp" line="899"/>
         <source>Icon size = 72</source>
         <translation>Размер иконки = 72</translation>
     </message>
     <message>
-        <location filename="../../GTE_Win/mainwindow.ui" line="14"/>
         <source>MainWindow</source>
-        <translation>GGEasy</translation>
+        <translation type="vanished">GGEasy</translation>
+    </message>
+</context>
+<context>
+    <name>Parser</name>
+    <message>
+        <source>Aperture %1 not found!</source>
+        <translation type="obsolete">Апертура %1 не найдена!</translation>
     </message>
     <message>
-        <location filename="../../GTE_Win/mainwindow.ui" line="21"/>
-        <source>TextLabel</source>
-        <translation></translation>
+        <source>line num %1: &apos;%2&apos;, error value.</source>
+        <translation type="obsolete">номер строки %1: «%2»,  ошибочное значение.</translation>
+    </message>
+    <message>
+        <source>Aperture D%1 (%2) not supported!</source>
+        <translation type="obsolete">Апертура D%1 (%2) не поддерживается!</translation>
     </message>
 </context>
 <context>
     <name>Pin</name>
     <message>
-        <location filename="../point.cpp" line="377"/>
         <source>&amp;Create path for Pins</source>
-        <translation>&amp;Создать УП для булавок</translation>
+        <translation type="vanished">&amp;Создать УП для булавок</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="400"/>
-        <location filename="../point.cpp" line="413"/>
         <source>Set Depth</source>
-        <translation>Установить глубину</translation>
+        <translation type="vanished">Установить глубину</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="426"/>
         <source>Pin_</source>
-        <translation>Булавка</translation>
+        <translation type="vanished">Булавка</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="431"/>
         <source>Fixed</source>
-        <translation>Фиксация</translation>
+        <translation type="vanished">Фиксация</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="439"/>
         <source>Used</source>
-        <translation>Использовать в УП</translation>
+        <translation type="vanished">Использовать в УП</translation>
     </message>
 </context>
 <context>
@@ -2916,273 +2659,212 @@ Area:</source>
 <context>
     <name>PocketOffsetForm</name>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="20"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="91"/>
         <source>Pocket Offset Toolpath</source>
-        <translation>Карман</translation>
+        <translation type="vanished">Карман</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="106"/>
         <source>Aligin</source>
-        <translation>Размещение</translation>
+        <translation type="vanished">Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="127"/>
         <source>Outside</source>
-        <translation>Снаружи</translation>
+        <translation type="vanished">Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="140"/>
         <source>Inside</source>
-        <translation>Внутри</translation>
+        <translation type="vanished">Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="153"/>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation type="vanished">Направление</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="174"/>
         <source>Climb</source>
-        <translation>Попутное</translation>
+        <translation type="vanished">Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="187"/>
         <source>Conventional</source>
-        <translation>Встречное</translation>
+        <translation type="vanished">Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="242"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="290"/>
         <source>Steps:</source>
-        <translation>Шаги:</translation>
+        <translation type="vanished">Шаги:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="319"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="335"/>
         <source>Qty of
 tools:</source>
-        <translation>Кол-во
+        <translation type="vanished">Кол-во
 инструментов:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.ui" line="356"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
         <source>Pocket On</source>
         <translation type="vanished">Карман поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
         <source>Pocket Outside</source>
-        <translation>Карман снаружи</translation>
+        <translation type="vanished">Карман снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
         <source>Pocket Inside</source>
-        <translation>Карман внутри</translation>
+        <translation type="vanished">Карман внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="29"/>
         <source>Pockert On</source>
-        <translation>Unused</translation>
+        <translation type="vanished">Unused</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="71"/>
-        <location filename="../forms/pocketoffsetform.cpp" line="189"/>
         <source> - Infinity</source>
-        <translation> - До заполнения</translation>
+        <translation type="vanished"> - До заполнения</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="125"/>
-        <location filename="../forms/pocketoffsetform.cpp" line="151"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="125"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/pocketoffsetform.cpp" line="151"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
 </context>
 <context>
     <name>PocketRasterForm</name>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="14"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="74"/>
         <source>Pocket Raster Toolpath</source>
-        <translation>Карман растровый</translation>
+        <translation type="vanished">Карман растровый</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="96"/>
         <source>Aligin</source>
-        <translation>Размещение</translation>
+        <translation type="vanished">Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="117"/>
         <source>Outside</source>
-        <translation>Снаружи</translation>
+        <translation type="vanished">Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="130"/>
         <source>Inside</source>
-        <translation>Внутри</translation>
+        <translation type="vanished">Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="169"/>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation type="vanished">Направление</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="190"/>
         <source>Climb</source>
-        <translation>Попутное</translation>
+        <translation type="vanished">Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="203"/>
         <source>Conventional</source>
-        <translation>Встречное</translation>
+        <translation type="vanished">Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="140"/>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="146"/>
         <source>Milling</source>
-        <translation>Фрезеровка</translation>
+        <translation type="vanished">Фрезеровка</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="156"/>
         <source>HLDI</source>
-        <translation>HLDI</translation>
+        <translation type="vanished">HLDI</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="279"/>
         <source>Raster Angle:</source>
-        <translation>Угол растра:</translation>
+        <translation type="vanished">Угол растра:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="298"/>
         <source>Profile Pass:</source>
-        <translation>Профиль:</translation>
+        <translation type="vanished">Профиль:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="314"/>
         <source>Acceleration:</source>
-        <translation>Ускорение:</translation>
+        <translation type="vanished">Ускорение:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="327"/>
-        <source> °</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketrasterform.ui" line="341"/>
         <source>No Profile Pass</source>
-        <translation>Без профиля</translation>
+        <translation type="vanished">Без профиля</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="346"/>
         <source>First</source>
-        <translation>В начале</translation>
+        <translation type="vanished">В начале</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="351"/>
         <source>Last</source>
-        <translation>В конце</translation>
+        <translation type="vanished">В конце</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="359"/>
-        <source> mm/c²</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/pocketrasterform.ui" line="405"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="425"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.ui" line="435"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
         <source>Raster On</source>
-        <translation>Растр поверху</translation>
+        <translation type="vanished">Растр поверху</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
         <source>Raster Outside</source>
-        <translation>Растр снаружи</translation>
+        <translation type="vanished">Растр снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="25"/>
         <source>Raster Inside</source>
-        <translation>Растр внутри</translation>
+        <translation type="vanished">Растр внутри</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="104"/>
-        <location filename="../forms/pocketrasterform.cpp" line="130"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="104"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/pocketrasterform.cpp" line="130"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
 </context>
 <context>
     <name>ProfileForm</name>
     <message>
-        <location filename="../forms/profileform.ui" line="20"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="74"/>
         <source>Profile Toolpath</source>
-        <translation>Профиль</translation>
+        <translation type="vanished">Профиль</translation>
     </message>
     <message>
         <source>Depth:</source>
@@ -3201,131 +2883,102 @@ Would you like to continue?</source>
         <translation type="vanished">Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="235"/>
         <source>Aligin</source>
-        <translation>Размещение</translation>
+        <translation type="vanished">Размещение</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="253"/>
         <source>Outside</source>
-        <translation>Снаружи</translation>
+        <translation type="vanished">Снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="263"/>
         <source>Inside</source>
-        <translation>Внутри</translation>
+        <translation type="vanished">Внутри</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="270"/>
         <source>On</source>
-        <translation>Поверху</translation>
+        <translation type="vanished">Поверху</translation>
     </message>
     <message>
         <source>Strip???</source>
         <translation type="vanished">Подрезка</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="105"/>
-        <source>Trimming??? Corner Trimming</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../forms/profileform.ui" line="112"/>
         <source>Direction</source>
-        <translation>Направление</translation>
+        <translation type="vanished">Направление</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="130"/>
         <source>Climb</source>
-        <translation>Попутное</translation>
+        <translation type="vanished">Попутное</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="140"/>
         <source>Conventional</source>
-        <translation>Встречное</translation>
+        <translation type="vanished">Встречное</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="169"/>
         <source>Bridges</source>
-        <translation>Мосты</translation>
+        <translation type="vanished">Мосты</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="193"/>
         <source>Lenght:</source>
-        <translation>Длина:</translation>
+        <translation type="vanished">Длина:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="203"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="225"/>
         <source>Add Bridge</source>
-        <translation>Добавить мост</translation>
+        <translation type="vanished">Добавить мост</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="298"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="308"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.ui" line="315"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
         <source>Working items from different files!</source>
         <translation type="vanished">Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="128"/>
-        <location filename="../forms/profileform.cpp" line="154"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="128"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="154"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="235"/>
         <source>Trimming</source>
-        <translation>Обрезка</translation>
+        <translation type="vanished">Обрезка</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="239"/>
-        <location filename="../forms/profileform.cpp" line="243"/>
         <source>Corner Trimming</source>
-        <translation>Подрезка углов</translation>
+        <translation type="vanished">Подрезка углов</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile On</source>
-        <translation>Профиль поверху</translation>
+        <translation type="vanished">Профиль поверху</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile Outside</source>
-        <translation>Профиль снаружи</translation>
+        <translation type="vanished">Профиль снаружи</translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="26"/>
         <source>Profile Inside</source>
-        <translation>Профиль внутри</translation>
+        <translation type="vanished">Профиль внутри</translation>
     </message>
 </context>
 <context>
@@ -3363,10 +3016,9 @@ Continue saving?</source>
         <translation type="vanished">Нет выбранных файлов УП.</translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="78"/>
         <source>External file &quot;%1&quot; has changed.
 Reload it into the project?</source>
-        <translation>Внешний файл &quot;%1&quot; изменился.
+        <translation type="vanished">Внешний файл &quot;%1&quot; изменился.
 Перезагрузить в проект?</translation>
     </message>
 </context>
@@ -3381,56 +3033,45 @@ Reload it into the project?</source>
         <translation type="vanished">Низ</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="156"/>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="176"/>
-        <location filename="../../file_plugins/excellon/drillitem.cpp" line="183"/>
         <source>Tool %1, Ø%2mm</source>
-        <translation>Инструмент%1, Ø%2 мм</translation>
+        <translation type="vanished">Инструмент%1, Ø%2 мм</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="41"/>
         <source>There are no selected items to define the border.
 The old border will be used.</source>
-        <translation>Нет выбранных элементов для определения границы.
+        <translation type="vanished">Нет выбранных элементов для определения границы.
 Будет использована предыдущая граница.</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="60"/>
         <source>G-Code Home Point</source>
-        <translation>Дом.УП</translation>
+        <translation type="vanished">Дом.УП</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="64"/>
         <source>G-Code Zero Point</source>
-        <translation>Ноль УП</translation>
+        <translation type="vanished">Ноль УП</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="215"/>
         <source>Fixed</source>
-        <translation>Фиксация</translation>
+        <translation type="vanished">Фиксация</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="221"/>
-        <location filename="../point.cpp" line="444"/>
         <source>&amp;Settings</source>
-        <translation>&amp;Параметры</translation>
+        <translation type="vanished">&amp;Параметры</translation>
     </message>
     <message>
-        <location filename="../point.cpp" line="510"/>
         <source>Pin %1
 X %2:Y %3</source>
-        <translation>Булавка %1
+        <translation type="vanished">Булавка %1
 X %2:Y %3</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tool.h" line="109"/>
+        <location filename="../../static_libs/tooldatabase/tool.h" line="111"/>
         <source>Default</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tool.cpp" line="240"/>
         <source>No valid tool...!!!</source>
-        <translation>Ошибка в инструменте...!!!</translation>
+        <translation type="vanished">Ошибка в инструменте...!!!</translation>
     </message>
     <message>
         <source>Bad outline (regular polygon) macro!</source>
@@ -3441,10 +3082,8 @@ X %2:Y %3</translation>
         <translation type="vanished">Плохой тепловой макрос!</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.cpp" line="31"/>
-        <location filename="../../static_libs/filetree/ft_node.cpp" line="28"/>
         <source>Top|Bottom</source>
-        <translation>Верх|Низ</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
     <message>
         <location filename="../settingsdialog.cpp" line="40"/>
@@ -3502,19 +3141,16 @@ X %2:Y %3</translation>
         <translation>Путь G0</translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="140"/>
         <source>&amp;Delete Toolpath</source>
-        <translation>&amp;Удалить УП</translation>
+        <translation type="vanished">&amp;Удалить УП</translation>
     </message>
     <message>
         <source>              Preparing: </source>
         <translation type="vanished">           Подготовка: </translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="127"/>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="108"/>
         <source>&amp;Hide other</source>
-        <translation>&amp;Скрыть другие</translation>
+        <translation type="vanished">&amp;Скрыть другие</translation>
     </message>
     <message>
         <source>&amp;Layers</source>
@@ -3541,114 +3177,91 @@ X %2:Y %3</translation>
         <translation type="vanished">Контуры</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="128"/>
         <source>&amp;Edit Format</source>
-        <translation>&amp;Редактировать формат</translation>
+        <translation type="vanished">&amp;Редактировать формат</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="133"/>
         <source>&amp;Close</source>
-        <translation>&amp;Закрыть</translation>
+        <translation type="vanished">&amp;Закрыть</translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="123"/>
         <source>&amp;Save Toolpath</source>
-        <translation>&amp;Сохранить УП</translation>
+        <translation type="vanished">&amp;Сохранить УП</translation>
     </message>
     <message>
-        <location filename="../gcode/gcnode.cpp" line="130"/>
-        <location filename="../../file_plugins/excellon/exnode.cpp" line="109"/>
         <source>&amp;Show source</source>
-        <translation>&amp;Показать источник</translation>
+        <translation type="vanished">&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/circlearc/sharc.cpp" line="90"/>
         <source>Arc</source>
-        <translation>Дуга</translation>
+        <translation type="vanished">Дуга</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/circle/shcircle.cpp" line="65"/>
         <source>Circle</source>
-        <translation>Круг</translation>
+        <translation type="vanished">Круг</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shape.cpp" line="204"/>
         <source>&amp;Delete object &quot;%1&quot;</source>
-        <translation>&amp;Удалить фигуру &quot;%1&quot;</translation>
+        <translation type="vanished">&amp;Удалить фигуру &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shape.cpp" line="207"/>
         <source>&amp;Visible &quot;%1&quot;</source>
-        <translation>&amp;Видимый &quot;%1&quot;</translation>
+        <translation type="vanished">&amp;Видимый &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="224"/>
         <source>&amp;Edit Text</source>
-        <translation>&amp;Редактировать текст</translation>
+        <translation type="vanished">&amp;Редактировать текст</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/polyline/shpolyline.cpp" line="62"/>
         <source>Line</source>
-        <translation>Линия</translation>
+        <translation type="vanished">Линия</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/rectangle/shrectangle.cpp" line="60"/>
         <source>Rectangle</source>
-        <translation>Прямоугольник</translation>
+        <translation type="vanished">Прямоугольник</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="252"/>
-        <location filename="../../shape_plugins/text/shtext.cpp" line="285"/>
         <source>Text</source>
-        <translation>Текст</translation>
+        <translation type="vanished">Текст</translation>
     </message>
     <message>
         <source>TH|SMD|BGA|Other</source>
         <translation type="vanished">Отверстрие|SMD|BGA|Другое</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/shape/shhandler.cpp" line="175"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../../static_libs/gi/thermalpreviewitem.cpp" line="144"/>
         <source>Exclude from the calculation</source>
-        <translation>Исключить из расчета</translation>
+        <translation type="vanished">Исключить из расчета</translation>
     </message>
     <message>
-        <location filename="../../static_libs/gi/thermalpreviewitem.cpp" line="153"/>
         <source>Include in the calculation</source>
-        <translation>Включить в расчет</translation>
+        <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../interfaces/file.h" line="70"/>
         <source>Preparing: </source>
-        <translation>Подготовка: </translation>
+        <translation type="vanished">Подготовка: </translation>
     </message>
     <message>
-        <location filename="../interfaces/pluginfile.h" line="72"/>
         <source>&amp;Close All Files</source>
-        <translation>&amp;Закрыть все файлы</translation>
+        <translation type="vanished">&amp;Закрыть все файлы</translation>
     </message>
     <message>
-        <location filename="../interfaces/pluginfile.h" line="73"/>
-        <location filename="../interfaces/shapepluginin.h" line="106"/>
         <source>Really?</source>
-        <translation>В самом деле?</translation>
+        <translation type="vanished">В самом деле?</translation>
     </message>
     <message>
-        <location filename="../interfaces/shapepluginin.h" line="105"/>
         <source>&amp;Delete All Shapes</source>
-        <translation>&amp;Удалить все фигуры</translation>
+        <translation type="vanished">&amp;Удалить все фигуры</translation>
     </message>
     <message>
-        <location filename="../interfaces/shapepluginin.h" line="110"/>
         <source>Shapes</source>
-        <translation>Фигуры</translation>
+        <translation type="vanished">Фигуры</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="151"/>
+        <location filename="../main.cpp" line="200"/>
         <source>Load plugin %1
 
 
@@ -3659,35 +3272,33 @@ X %2:Y %3</translation>
 </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="634"/>
-        <location filename="../mainwindow.cpp" line="649"/>
+        <location filename="../mainwindow.cpp" line="592"/>
+        <location filename="../mainwindow.cpp" line="607"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="636"/>
-        <location filename="../mainwindow.cpp" line="651"/>
+        <location filename="../mainwindow.cpp" line="594"/>
+        <location filename="../mainwindow.cpp" line="609"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="688"/>
+        <location filename="../mainwindow.cpp" line="646"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="402"/>
         <source>Untitled.g2g</source>
-        <translation>Без названия.g2g</translation>
+        <translation type="vanished">Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../../static_libs/common/project.cpp" line="419"/>
         <source>Board dimensions may have changed.
 It is advisable to perform automatic placement of the pins
 by selecting the necessary work items.
 
 Continue saving?</source>
-        <translation>Размеры платы могли измениться.
+        <translation type="vanished">Размеры платы могли измениться.
 Желательно выполнить автоматическое размещение штифтов,
 выбрав необходимые рабочие элементы.
 
@@ -3697,12 +3308,12 @@ Continue saving?</source>
 <context>
     <name>Recent</name>
     <message>
-        <location filename="../recent.cpp" line="36"/>
+        <location filename="../recent.cpp" line="37"/>
         <source>Clear Recent</source>
         <translation>Очистить недавнее</translation>
     </message>
     <message>
-        <location filename="../recent.cpp" line="110"/>
+        <location filename="../recent.cpp" line="105"/>
         <source>&amp;%1 %2</source>
         <translation>&amp;%1 %2</translation>
     </message>
@@ -3710,26 +3321,27 @@ Continue saving?</source>
 <context>
     <name>Scene</name>
     <message>
-        <location filename="../../static_libs/graphicsview/scene.cpp" line="55"/>
         <source>Save PDF file</source>
-        <translation>Сохранить файл PDF</translation>
+        <translation type="vanished">Сохранить файл PDF</translation>
     </message>
     <message>
-        <location filename="../../static_libs/graphicsview/scene.cpp" line="55"/>
         <source>File(*.pdf)</source>
-        <translation>Файл (*.PDF)</translation>
+        <translation type="vanished">Файл (*.PDF)</translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
         <location filename="../settingsdialog.ui" line="14"/>
+        <location filename="../settingsdialog.cpp" line="640"/>
         <source>Settings[*]</source>
         <translation>Настройки[*]</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="46"/>
         <location filename="../settingsdialog.ui" line="64"/>
+        <location filename="../settingsdialog.cpp" line="641"/>
+        <location filename="../settingsdialog.cpp" line="666"/>
         <source>UI</source>
         <translation>Пользовательский интерфейс</translation>
     </message>
@@ -3739,116 +3351,139 @@ Continue saving?</source>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="89"/>
+        <location filename="../settingsdialog.cpp" line="642"/>
         <source>7</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="94"/>
+        <location filename="../settingsdialog.cpp" line="643"/>
         <source>8</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="99"/>
+        <location filename="../settingsdialog.cpp" line="644"/>
         <source>9</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="104"/>
+        <location filename="../settingsdialog.cpp" line="645"/>
         <source>10</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="109"/>
+        <location filename="../settingsdialog.cpp" line="646"/>
         <source>11</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="114"/>
+        <location filename="../settingsdialog.cpp" line="647"/>
         <source>12</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="119"/>
+        <location filename="../settingsdialog.cpp" line="648"/>
         <source>13</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="124"/>
+        <location filename="../settingsdialog.cpp" line="649"/>
         <source>14</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="135"/>
+        <location filename="../settingsdialog.cpp" line="651"/>
         <source>Language:</source>
         <translation>Язык:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="145"/>
+        <location filename="../settingsdialog.cpp" line="652"/>
         <source>Font Size:</source>
         <translation>Размер шрифта:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="156"/>
+        <location filename="../settingsdialog.cpp" line="653"/>
         <source>System</source>
         <translation>Системная</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="161"/>
+        <location filename="../settingsdialog.cpp" line="654"/>
         <source>Light Blue</source>
         <translation>Светло-синяя</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="166"/>
+        <location filename="../settingsdialog.cpp" line="655"/>
         <source>Light Red</source>
         <translation>Светло-красная</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="171"/>
+        <location filename="../settingsdialog.cpp" line="656"/>
         <source>Dark Blue</source>
         <translation>Темно-синяя</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="176"/>
+        <location filename="../settingsdialog.cpp" line="657"/>
         <source>Dark Red</source>
         <translation>Темно-красная</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="184"/>
+        <location filename="../settingsdialog.cpp" line="659"/>
         <source>Theme:</source>
         <translation>Тема:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="197"/>
+        <location filename="../settingsdialog.cpp" line="660"/>
         <source>Viewer</source>
         <translation>Окно просмотра</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="215"/>
+        <location filename="../settingsdialog.cpp" line="661"/>
         <source>Open GL</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="222"/>
+        <location filename="../settingsdialog.cpp" line="662"/>
         <source>Anti aliasing</source>
         <translation>Сглаживание</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="229"/>
+        <location filename="../settingsdialog.cpp" line="663"/>
         <source>Smooth scaling / shearing</source>
         <translation>Плавное масштабирование / сдвиг</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="249"/>
+        <location filename="../settingsdialog.cpp" line="665"/>
         <source>Colors</source>
         <translation>Цвета</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="579"/>
+        <location filename="../settingsdialog.cpp" line="699"/>
         <source>Scale Home/Zero Markers</source>
         <translation>Масштабировать маркеры &quot;Дом&quot;/&quot;Ноль УП&quot;</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="586"/>
+        <location filename="../settingsdialog.cpp" line="700"/>
         <source>Scale Pin Markers</source>
         <translation>Масштабировать маркеры &quot;Булавка&quot;</translation>
     </message>
@@ -3863,11 +3498,13 @@ Continue saving?</source>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="614"/>
+        <location filename="../settingsdialog.cpp" line="702"/>
         <source>Minimum points of circle aproximation:</source>
         <translation>Мин. кол-во точек аппроксимации круга:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="631"/>
+        <location filename="../settingsdialog.cpp" line="703"/>
         <source>The minimum length of circle aproximation:</source>
         <translation>Мин. длина ребра окружности:</translation>
     </message>
@@ -3879,28 +3516,27 @@ Continue saving?</source>
         <location filename="../settingsdialog.ui" line="534"/>
         <location filename="../settingsdialog.ui" line="553"/>
         <location filename="../settingsdialog.ui" line="638"/>
+        <location filename="../settingsdialog.cpp" line="673"/>
+        <location filename="../settingsdialog.cpp" line="675"/>
+        <location filename="../settingsdialog.cpp" line="684"/>
+        <location filename="../settingsdialog.cpp" line="686"/>
+        <location filename="../settingsdialog.cpp" line="695"/>
+        <location filename="../settingsdialog.cpp" line="697"/>
+        <location filename="../settingsdialog.cpp" line="704"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="202"/>
-        <source>Gerber</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="203"/>
         <source>Cleaning Polygons</source>
-        <translation>Очистка полигонов</translation>
+        <translation type="vanished">Очистка полигонов</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="204"/>
         <source>Skip duplicates</source>
-        <translation>Пропустить дубликаты</translation>
+        <translation type="vanished">Пропустить дубликаты</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/gerber/gbrplugin.cpp" line="205"/>
         <source>Simplify Regions</source>
-        <translation>Упростить контур заливки меди / маски</translation>
+        <translation type="vanished">Упростить контур заливки меди / маски</translation>
     </message>
     <message>
         <source>G-Code</source>
@@ -3911,43 +3547,32 @@ Continue saving?</source>
         <translation type="vanished">Добавить комментарий с параметрами в начало G-кода</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="120"/>
-        <location filename="../gcode/gcplugin.cpp" line="154"/>
         <source>Start with:</source>
-        <translation>Начинать с:</translation>
+        <translation type="vanished">Начинать с:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="128"/>
-        <location filename="../gcode/gcplugin.cpp" line="162"/>
         <source>Finish with:</source>
-        <translation>Завершить с:</translation>
+        <translation type="vanished">Завершить с:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="136"/>
-        <location filename="../gcode/gcplugin.cpp" line="170"/>
         <source>The format of the line with the coordinates:</source>
-        <translation>Формат строки с координатами:</translation>
+        <translation type="vanished">Формат строки с координатами:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="140"/>
-        <location filename="../gcode/gcplugin.cpp" line="174"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - only if the value has changed.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - always.&lt;/p&gt;&lt;p&gt;If one of the commands &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; and&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; is missing, it will not be inserted into the G-code.&lt;/p&gt;&lt;p&gt;If there is a space between the teams, then it will also be inserted into the G-code.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;По умолчанию &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - только если значение изменилось.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - всегда.&lt;/p&gt;&lt;p&gt;Если одна из команд &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; и&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; отсутствует, она не будет вставлена в G-код.&lt;/p&gt;&lt;p&gt;Если между командами есть пробел, он также будет вставлен в G-код.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;По умолчанию &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - только если значение изменилось.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - всегда.&lt;/p&gt;&lt;p&gt;Если одна из команд &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; и&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; отсутствует, она не будет вставлена в G-код.&lt;/p&gt;&lt;p&gt;Если между командами есть пробел, он также будет вставлен в G-код.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="90"/>
         <source>Save the G-Code to the project folder.</source>
-        <translation>Сохраните G-код в папку проекта.</translation>
+        <translation type="vanished">Сохраните G-код в папку проекта.</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="102"/>
         <source>File Extension:</source>
-        <translation>Расширение файла:</translation>
+        <translation type="vanished">Расширение файла:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="96"/>
         <source>Add a comment with the parameters G-Сode</source>
-        <translation>Добавить комментарий с параметрами G-Сode</translation>
+        <translation type="vanished">Добавить комментарий с параметрами G-Сode</translation>
     </message>
     <message>
         <source>Language</source>
@@ -3955,292 +3580,260 @@ Continue saving?</source>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="236"/>
+        <location filename="../settingsdialog.cpp" line="664"/>
         <source>Animated selection for paths</source>
         <translation>Анимированное выделение</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="143"/>
         <source>Milling</source>
-        <translation>Фрезерование</translation>
+        <translation type="vanished">Фрезерование</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="177"/>
         <source>Laser</source>
-        <translation>Лазер</translation>
+        <translation type="vanished">Лазер</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="188"/>
         <source>Milling sequence:</source>
-        <translation>Последовательность фрезерования:</translation>
+        <translation type="vanished">Последовательность фрезерования:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="198"/>
         <source>Profile</source>
-        <translation>Профиль</translation>
+        <translation type="vanished">Профиль</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="204"/>
         <source>Simplify Hldi</source>
-        <translation>Упростить HLDI</translation>
+        <translation type="vanished">Упростить HLDI</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="224"/>
         <source>HLDI</source>
-        <translation>HLDI</translation>
+        <translation type="vanished">HLDI</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="230"/>
         <source>Spindle / Laser Control Code</source>
-        <translation>Код управления шпинделем / лазером</translation>
+        <translation type="vanished">Код управления шпинделем / лазером</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="239"/>
         <source>Spindle On:</source>
-        <translation>Включение шпинделя:</translation>
+        <translation type="vanished">Включение шпинделя:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="248"/>
         <source>Constant Laser Power Mode On:</source>
-        <translation>Включение режима постоянной мощности лазера:</translation>
+        <translation type="vanished">Включение режима постоянной мощности лазера:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="257"/>
         <source>Dynamic Laser Power Mode On:</source>
-        <translation>Включение режима динамической мощности лазера:</translation>
+        <translation type="vanished">Включение режима динамической мощности лазера:</translation>
     </message>
     <message>
-        <location filename="../gcode/gcplugin.cpp" line="265"/>
         <source>Spindle/Laser Off:</source>
-        <translation>Выключение шпинделя / лазера:</translation>
+        <translation type="vanished">Выключение шпинделя / лазера:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="277"/>
+        <location filename="../settingsdialog.cpp" line="705"/>
         <source>Utils</source>
         <translation>Утилиты</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="283"/>
+        <location filename="../settingsdialog.cpp" line="667"/>
         <source>Auto-placement for pins and markers</source>
         <translation>Авто-размещение для булавок и маркеров</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="301"/>
+        <location filename="../settingsdialog.cpp" line="668"/>
         <source>X offset</source>
         <translation>Смещение X</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="311"/>
+        <location filename="../settingsdialog.cpp" line="669"/>
         <source>Y offset</source>
         <translation>Смещение Y</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="321"/>
+        <location filename="../settingsdialog.cpp" line="670"/>
         <source>Place</source>
         <translation>Место</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="331"/>
+        <location filename="../settingsdialog.cpp" line="671"/>
         <source>Zero:</source>
         <translation>Нуль УП:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="398"/>
         <location filename="../settingsdialog.ui" line="493"/>
+        <location filename="../settingsdialog.cpp" line="676"/>
+        <location filename="../settingsdialog.cpp" line="687"/>
         <source>Top Left</source>
         <translation>Верхний левый</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="403"/>
         <location filename="../settingsdialog.ui" line="498"/>
+        <location filename="../settingsdialog.cpp" line="677"/>
+        <location filename="../settingsdialog.cpp" line="688"/>
         <source>Top Right</source>
         <translation>Верхний правый</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="408"/>
         <location filename="../settingsdialog.ui" line="503"/>
+        <location filename="../settingsdialog.cpp" line="678"/>
+        <location filename="../settingsdialog.cpp" line="689"/>
         <source>Bottom Left</source>
         <translation>Нижний левый</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="413"/>
         <location filename="../settingsdialog.ui" line="508"/>
+        <location filename="../settingsdialog.cpp" line="679"/>
+        <location filename="../settingsdialog.cpp" line="690"/>
         <source>Bottom Right</source>
         <translation>Нижний правый</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="418"/>
         <location filename="../settingsdialog.ui" line="513"/>
+        <location filename="../settingsdialog.cpp" line="680"/>
+        <location filename="../settingsdialog.cpp" line="691"/>
         <source>Always Zero</source>
         <translation>Всегда ноль</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="426"/>
+        <location filename="../settingsdialog.cpp" line="682"/>
         <source>Home:</source>
         <translation>Дом УП:</translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="521"/>
+        <location filename="../settingsdialog.cpp" line="693"/>
         <source>Pins:</source>
         <translation>Булавки:</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="154"/>
+        <location filename="../settingsdialog.cpp" line="150"/>
         <source>Open Settings Folder</source>
         <translation>Открыть папку с настройками</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.cpp" line="316"/>
+        <location filename="../settingsdialog.cpp" line="305"/>
         <source>The complete translation of the application will take
 effect after restarting the application.</source>
         <translation>Полный перевод приложения применится
 после перезапуска приложения.</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="63"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="137"/>
+        <location filename="../settingsdialog.cpp" line="701"/>
+        <source>Clipper2Lib arcs aprox</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Font</source>
-        <translation>Шрифт</translation>
+        <translation type="vanished">Шрифт</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="65"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="139"/>
         <source>Bold:</source>
-        <translation>Жирный:</translation>
+        <translation type="vanished">Жирный:</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="66"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="140"/>
         <source>Default Font:</source>
-        <translation>Шрифт по умолчанию:</translation>
+        <translation type="vanished">Шрифт по умолчанию:</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="67"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="141"/>
         <source>Italic:</source>
-        <translation>Курсив:</translation>
+        <translation type="vanished">Курсив:</translation>
     </message>
     <message>
-        <location filename="../../file_plugins/dxf/dxf_settingstab.cpp" line="68"/>
-        <location filename="../../file_plugins/hpgl/hpgl_plugin.cpp" line="142"/>
         <source>Override declared fonts in DXF:</source>
-        <translation>Переопределить объявленные шрифты в DXF:</translation>
+        <translation type="vanished">Переопределить объявленные шрифты в DXF:</translation>
     </message>
 </context>
 <context>
     <name>ShTextDialog</name>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="20"/>
         <source>Dialog</source>
-        <translation>Редактор </translation>
+        <translation type="vanished">Редактор </translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="140"/>
         <source>Italic</source>
-        <translation>Курсив</translation>
+        <translation type="vanished">Курсив</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="205"/>
-        <source>X/Y:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="215"/>
-        <source> %</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="45"/>
         <source>Align</source>
-        <translation>Расположение</translation>
+        <translation type="vanished">Расположение</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="182"/>
         <source>Height:</source>
-        <translation>Высота:</translation>
+        <translation type="vanished">Высота:</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="130"/>
         <source>Font:</source>
-        <translation>Шрифт:</translation>
+        <translation type="vanished">Шрифт:</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="192"/>
         <source>Angle:</source>
-        <translation>Угол:</translation>
+        <translation type="vanished">Угол:</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="120"/>
         <source>Bold</source>
-        <translation>Жирный:</translation>
+        <translation type="vanished">Жирный:</translation>
     </message>
     <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="172"/>
         <source> mm</source>
-        <translation> мм</translation>
-    </message>
-    <message>
-        <location filename="../../shape_plugins/text/shtextdialog.ui" line="153"/>
-        <source> °</source>
-        <translation></translation>
+        <translation type="vanished"> мм</translation>
     </message>
 </context>
 <context>
     <name>ThermalForm</name>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="14"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="51"/>
         <source>Area:</source>
-        <translation>Площадь:</translation>
+        <translation type="vanished">Площадь:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="71"/>
         <source>GroupBox</source>
-        <translation>Используемые типы</translation>
+        <translation type="vanished">Используемые типы</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="89"/>
         <source>Aperture</source>
-        <translation>Апертура</translation>
+        <translation type="vanished">Апертура</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="96"/>
         <source>Path</source>
-        <translation>Дорожка</translation>
+        <translation type="vanished">Дорожка</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="103"/>
         <source>Cop. Pour</source>
-        <translation>Заливка медью</translation>
+        <translation type="vanished">Заливка медью</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="136"/>
         <source>To </source>
-        <translation>До </translation>
+        <translation type="vanished">До </translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="139"/>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="258"/>
         <source> mm²</source>
-        <translation> мм²</translation>
+        <translation type="vanished"> мм²</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="195"/>
         <source>Thermal Insulation Toolpath</source>
-        <translation>Термоизоляция</translation>
+        <translation type="vanished">Термоизоляция</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="234"/>
         <source>Ignore Copper</source>
-        <translation>Игнорировать заливку медью</translation>
+        <translation type="vanished">Игнорировать заливку медью</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="255"/>
         <source>From </source>
-        <translation>От </translation>
+        <translation type="vanished">От </translation>
     </message>
     <message>
         <source>Exclude deselected thermals.</source>
@@ -4251,9 +3844,8 @@ effect after restarting the application.</source>
         <translation type="vanished">Инстр.:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="41"/>
         <source>File:</source>
-        <translation>Файл:</translation>
+        <translation type="vanished">Файл:</translation>
     </message>
     <message>
         <source>Select</source>
@@ -4268,29 +3860,24 @@ effect after restarting the application.</source>
         <translation type="vanished">Глубина:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="126"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="113"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.ui" line="152"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.cpp" line="179"/>
         <source>No data to process.</source>
-        <translation>Нет данных для расчёта.</translation>
+        <translation type="vanished">Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="../../static_libs/thermal/thermalform.cpp" line="219"/>
         <source>Thermal</source>
-        <translation>Термоизоляция</translation>
+        <translation type="vanished">Термоизоляция</translation>
     </message>
     <message>
         <source>All</source>
@@ -4316,332 +3903,256 @@ effect after restarting the application.</source>
 <context>
     <name>ThermalModel</name>
     <message>
-        <location filename="../../static_libs/thermal/thermalmodel.cpp" line="94"/>
         <source>     Name|Pos (X:Y)|Angle|Tickness|Count</source>
-        <translation>     Имя|Поз.(X:Y)|Угол|Ширина|Кол-во</translation>
+        <translation type="vanished">     Имя|Поз.(X:Y)|Угол|Ширина|Кол-во</translation>
     </message>
 </context>
 <context>
     <name>ToolDatabase</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.ui" line="14"/>
         <source>Tool Database[*]</source>
-        <translation>База инструментов[*]</translation>
+        <translation type="vanished">База инструментов[*]</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.ui" line="35"/>
         <source>New Tool</source>
-        <translation>Новый инструмент</translation>
+        <translation type="vanished">Новый инструмент</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.ui" line="42"/>
         <source>New Group</source>
-        <translation>Новая группа</translation>
+        <translation type="vanished">Новая группа</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.ui" line="49"/>
         <source>Copy</source>
-        <translation>Копировать</translation>
+        <translation type="vanished">Копировать</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.ui" line="56"/>
         <source>Delete</source>
-        <translation>Удалить</translation>
+        <translation type="vanished">Удалить</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooldatabase.cpp" line="55"/>
         <source>Invalid tool</source>
-        <translation>Ошибка в инструменте</translation>
+        <translation type="vanished">Ошибка в инструменте</translation>
     </message>
 </context>
 <context>
     <name>ToolEditDialog</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditdialog.ui" line="20"/>
         <source>Local Tool Edit[*]</source>
-        <translation>Локальная правка инструмента[*]</translation>
+        <translation type="vanished">Локальная правка инструмента[*]</translation>
     </message>
 </context>
 <context>
     <name>ToolEditForm</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="20"/>
         <source>Tool</source>
-        <translation>Инструмент</translation>
+        <translation type="vanished">Инструмент</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="41"/>
         <source>Tool Info</source>
-        <translation>Информация об инструменте</translation>
+        <translation type="vanished">Информация об инструменте</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="60"/>
         <source>Drill</source>
-        <translation>Сверло</translation>
+        <translation type="vanished">Сверло</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="65"/>
         <source>End Mill</source>
-        <translation>Фреза</translation>
+        <translation type="vanished">Фреза</translation>
     </message>
     <message>
         <source>Engraving</source>
         <translation type="vanished">Гравер</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="70"/>
         <source>Engraver</source>
-        <translation>Гравер</translation>
+        <translation type="vanished">Гравер</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="75"/>
         <source>Laser</source>
-        <translation>Лазер</translation>
+        <translation type="vanished">Лазер</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="188"/>
         <source>Units</source>
-        <translation>Единицы</translation>
+        <translation type="vanished">Единицы</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="91"/>
         <source>Name</source>
-        <translation>Название</translation>
+        <translation type="vanished">Название</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="113"/>
         <source>Tool Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="133"/>
         <source>Note</source>
-        <translation>Примечание</translation>
+        <translation type="vanished">Примечание</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="204"/>
         <source>mm</source>
-        <translation>Миллиметры</translation>
+        <translation type="vanished">Миллиметры</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="209"/>
         <source>inches</source>
-        <translation>Дюймы</translation>
+        <translation type="vanished">Дюймы</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="221"/>
         <source>mm/sec</source>
-        <translation>мм/сек</translation>
+        <translation type="vanished">мм/сек</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="226"/>
         <source>mm/min</source>
-        <translation>мм/мин</translation>
+        <translation type="vanished">мм/мин</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="231"/>
         <source>cm/min</source>
-        <translation>см/мин</translation>
+        <translation type="vanished">см/мин</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="236"/>
         <source>m/min</source>
-        <translation>м/мин</translation>
+        <translation type="vanished">м/мин</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="167"/>
         <source>Geometry</source>
-        <translation>Геометрия</translation>
+        <translation type="vanished">Геометрия</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="246"/>
         <source>Diameter</source>
-        <translation>Диаметр</translation>
+        <translation type="vanished">Диаметр</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="253"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="323"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="371"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="426"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="269"/>
         <source>Side Angle</source>
-        <translation>Боковой угол</translation>
+        <translation type="vanished">Боковой угол</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="276"/>
-        <source> °</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="295"/>
         <source>Cutting Parameters</source>
-        <translation>Параметры резания</translation>
+        <translation type="vanished">Параметры резания</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="316"/>
         <source>Pass or Depth</source>
-        <translation>Проход / Глубина</translation>
+        <translation type="vanished">Проход / Глубина</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="348"/>
         <source>Stepover</source>
-        <translation>Отступ</translation>
+        <translation type="vanished">Отступ</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="387"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="442"/>
-        <source> %</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="405"/>
         <source>One-turn Cut</source>
-        <translation>Подача на оборот</translation>
+        <translation type="vanished">Подача на оборот</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="466"/>
         <source>Feed Speeds</source>
-        <translation>Скорости подач</translation>
+        <translation type="vanished">Скорости подач</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="490"/>
         <source>Spindle Speed</source>
-        <translation>Скорость вращения шпинделя</translation>
+        <translation type="vanished">Скорость вращения шпинделя</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="497"/>
         <source> r.p.m.</source>
-        <translation> об/мин</translation>
+        <translation type="vanished"> об/мин</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="513"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="545"/>
         <source>If checked then automatic calculate!</source>
-        <translation>Если установлено - автоматический расчет!</translation>
+        <translation type="vanished">Если установлено - автоматический расчет!</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="522"/>
         <source>Feed Rate</source>
-        <translation>Скорость подачи</translation>
+        <translation type="vanished">Скорость подачи</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="529"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="558"/>
         <source> mm/sec</source>
-        <translation> мм/сек</translation>
+        <translation type="vanished"> мм/сек</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="551"/>
         <source>Plunge Rate</source>
-        <translation>Скорость погружения</translation>
+        <translation type="vanished">Скорость погружения</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.ui" line="580"/>
         <source>Apply</source>
-        <translation>Применить</translation>
+        <translation type="vanished">Применить</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="91"/>
         <source>If the offset value is more than 50%, unmilled areas are possible.
 These errors do not appear in the visualization.</source>
         <comment>При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации.</comment>
-        <translation>При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации.</translation>
+        <translation type="vanished">При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации.</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="197"/>
         <source>Pass</source>
-        <translation>Проход</translation>
+        <translation type="vanished">Проход</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="208"/>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="219"/>
         <source>Depth</source>
-        <translation>Глубина</translation>
+        <translation type="vanished">Глубина</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="354"/>
         <source>End Mill (Ø%1 mm)</source>
-        <translation>Фреза (Ø%1 мм)</translation>
+        <translation type="vanished">Фреза (Ø%1 мм)</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="357"/>
         <source>Engrave (%2° %1 mm tip)</source>
-        <translation>Гравер (наконечник %1 мм, %2°)</translation>
+        <translation type="vanished">Гравер (наконечник %1 мм, %2°)</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="360"/>
         <source>Drill (Ø%1 mm)</source>
-        <translation>Сверло (Ø%1 мм)</translation>
+        <translation type="vanished">Сверло (Ø%1 мм)</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooleditform.cpp" line="363"/>
         <source>Laser (Ø%1 mm)</source>
-        <translation>Лазер (Ø%1 mm)</translation>
+        <translation type="vanished">Лазер (Ø%1 mm)</translation>
     </message>
 </context>
 <context>
     <name>ToolModel</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolmodel.cpp" line="156"/>
         <source>Name|Note|Id</source>
-        <translation>Имя|Примечание|Id</translation>
+        <translation type="vanished">Имя|Примечание|Id</translation>
     </message>
 </context>
 <context>
     <name>ToolSelectorForm</name>
     <message>
-        <location filename="../../static_libs/common/depthform.cpp" line="101"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="129"/>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="175"/>
         <source>Tool:</source>
-        <translation>Инстр.:</translation>
+        <translation type="vanished">Инстр.:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="171"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="173"/>
         <source>Tool %1:</source>
-        <translation>Инстр. %1:</translation>
+        <translation type="vanished">Инстр. %1:</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="176"/>
         <source>Edit</source>
-        <translation>Правка</translation>
+        <translation type="vanished">Правка</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/toolselectorform.cpp" line="177"/>
         <source>Select</source>
-        <translation>Выбрать</translation>
+        <translation type="vanished">Выбрать</translation>
     </message>
 </context>
 <context>
     <name>ToolTreeView</name>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="71"/>
         <source>New Group</source>
-        <translation>Новая группа</translation>
+        <translation type="vanished">Новая группа</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="93"/>
         <source>New Tool </source>
-        <translation>Новый инструмент </translation>
+        <translation type="vanished">Новый инструмент </translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="102"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../../static_libs/tooldatabase/tooltreeview.cpp" line="102"/>
         <source>Are you sure you want to delete the item and all content?</source>
-        <translation>Вы уверены, что хотите удалить элемент и все данные?</translation>
+        <translation type="vanished">Вы уверены, что хотите удалить элемент и все данные?</translation>
     </message>
 </context>
 <context>
@@ -4714,14 +4225,12 @@ These errors do not appear in the visualization.</source>
 <context>
     <name>VoronoiForm</name>
     <message>
-        <location filename="../forms/voronoiform.ui" line="14"/>
         <source>Form</source>
-        <translation>Форма</translation>
+        <translation type="vanished">Форма</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="68"/>
         <source>Voronoi Toolpath</source>
-        <translation>Диаграмма Вороного</translation>
+        <translation type="vanished">Диаграмма Вороного</translation>
     </message>
     <message>
         <source>Depth:</source>
@@ -4740,93 +4249,74 @@ These errors do not appear in the visualization.</source>
         <translation type="vanished">Редакт.</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="124"/>
         <source>Precision:</source>
-        <translation>Точность:</translation>
+        <translation type="vanished">Точность:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="131"/>
-        <location filename="../forms/voronoiform.ui" line="166"/>
-        <location filename="../forms/voronoiform.ui" line="192"/>
         <source> mm</source>
-        <translation> мм</translation>
+        <translation type="vanished"> мм</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="221"/>
         <source>Name:</source>
-        <translation>Название:</translation>
+        <translation type="vanished">Название:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="97"/>
         <source>Solver:</source>
-        <translation>Решатель:</translation>
+        <translation type="vanished">Решатель:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="110"/>
         <source>JC_VORONOI</source>
-        <translation>JC_VORONOI</translation>
+        <translation type="vanished">JC_VORONOI</translation>
     </message>
     <message>
         <source>CGAL</source>
         <translation type="vanished">CGAL</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="105"/>
         <source>BOOST</source>
-        <translation>BOOST</translation>
+        <translation type="vanished">BOOST</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="159"/>
         <source>Frame Offset:</source>
-        <translation>Отступ рамки:</translation>
+        <translation type="vanished">Отступ рамки:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="185"/>
         <source>Width:</source>
-        <translation>Расширение:</translation>
+        <translation type="vanished">Расширение:</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="231"/>
         <source>Create</source>
-        <translation>Создать</translation>
+        <translation type="vanished">Создать</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.ui" line="238"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="vanished">Закрыть</translation>
     </message>
     <message>
         <source>Working items from different files!</source>
         <translation type="vanished">Рабочие элементы из разных файлов!</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="92"/>
-        <location filename="../forms/voronoiform.cpp" line="121"/>
-        <location filename="../forms/voronoiform.cpp" line="157"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="92"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="121"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="143"/>
         <source>Voronoi</source>
-        <translation>Вороной</translation>
+        <translation type="vanished">Вороной</translation>
     </message>
     <message>
-        <location filename="../forms/voronoiform.cpp" line="157"/>
         <source>The width must be larger than the tool diameter!</source>
-        <translation>Ширина должна быть больше диаметра инструмента!</translation>
+        <translation type="vanished">Ширина должна быть больше диаметра инструмента!</translation>
     </message>
 </context>
 </TS>

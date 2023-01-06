@@ -8,26 +8,26 @@
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
 // *******************************************************************************/
-//#pragma once
+// #pragma once
 
-//#include <QSyntaxHighlighter>
+// #include <QSyntaxHighlighter>
 
-//class QTextDocument;
+// class QTextDocument;
 
-//namespace TopoR {
+// namespace TopoR {
 
-//class SyntaxHighlighter : public QSyntaxHighlighter {
-//    Q_OBJECT
-//public:
-//    explicit SyntaxHighlighter(QTextDocument* parent);
+// class SyntaxHighlighter : public QSyntaxHighlighter {
+//     Q_OBJECT
+// public:
+//     explicit SyntaxHighlighter(QTextDocument* parent);
 
-//signals:
+// signals:
 
 //    // QSyntaxHighlighter interface
-//protected:
+// protected:
 //    void highlightBlock(const QString& text) override;
 
-//private:
-//};
+// private:
+// };
 
 //} // namespace TopoR

@@ -28,7 +28,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace ClipperLib;
+using namespace Clipper2Lib;
 
 bool updateRect() {
     QRectF rect(App::graphicsView()->getSelectedBoundingRect());

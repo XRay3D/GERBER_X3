@@ -235,17 +235,17 @@ void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
     QMutexLocker locker(&mutex_);
-    IntPoint topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    IntPoint botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    PointD topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    PointD botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
     for (const auto& [id, filePtr] : files_) {
         if (filePtr && filePtr->itemGroup()->isVisible()) {
             for (const GraphicsItem* const item : *filePtr->itemGroup()) {
-                for (const Path& path : item->paths()) {
-                    for (const IntPoint& pt : path) {
-                        topLeft.X = qMin(pt.X, topLeft.X);
-                        topLeft.Y = qMin(pt.Y, topLeft.Y);
-                        botRight.X = std::max(pt.X, botRight.X);
-                        botRight.Y = std::max(pt.Y, botRight.Y);
+                for (const PathD& path : item->paths()) {
+                    for (const PointD& pt : path) {
+                        topLeft.x = std::min(pt.x, topLeft.x);
+                        topLeft.y = std::min(pt.y, topLeft.y);
+                        botRight.x = std::max(pt.x, botRight.x);
+                        botRight.y = std::max(pt.y, botRight.y);
                     }
                 }
             }
@@ -339,7 +339,7 @@ int Project::addFile(FileInterface* file) {
         App::fileModel()->addFile(file);
         setChanged();
         watcher.addPath(file->name());
-        qDebug() << "watcher" << watcher.files();
+        //        qDebug() << "watcher" << watcher.files();
     }
     return file->id();
 }
