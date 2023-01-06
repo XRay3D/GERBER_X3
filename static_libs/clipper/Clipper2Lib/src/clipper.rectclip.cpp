@@ -17,9 +17,9 @@ namespace Clipper2Lib {
 // Miscellaneous methods
 //------------------------------------------------------------------------------
 
-inline PointInPolygonResult Path1ContainsPath2(Path64 path1, Path64 path2) {
+inline PointInPolygonResult Path1ContainsPath2(PathI path1, PathI path2) {
     PointInPolygonResult result = PointInPolygonResult::IsOn;
-    for (const Point64& pt : path2) {
+    for (const PointI& pt : path2) {
         result = PointInPolygon(pt, path1);
         if (result != PointInPolygonResult::IsOn)
             break;
@@ -27,8 +27,8 @@ inline PointInPolygonResult Path1ContainsPath2(Path64 path1, Path64 path2) {
     return result;
 }
 
-inline bool GetLocation(const Rect64& rec,
-    const Point64& pt, Location& loc) {
+inline bool GetLocation(const RectI& rec,
+    const PointI& pt, Location& loc) {
     if (pt.x == rec.left && pt.y >= rec.top && pt.y <= rec.bottom) {
         loc = Location::Left;
         return false;
@@ -54,8 +54,8 @@ inline bool GetLocation(const Rect64& rec,
     return true;
 }
 
-inline bool GetIntersection(const Path64& rectPath,
-    const Point64& p, const Point64& p2, Location& loc, Point64& ip) {
+inline bool GetIntersection(const PathI& rectPath,
+    const PointI& p, const PointI& p2, Location& loc, PointI& ip) {
     // gets the intersection closest to 'p'
     // when Result = false, loc will remain unchanged
     switch (loc) {
@@ -145,7 +145,7 @@ inline bool AreOpposites(Location prev, Location curr) {
 }
 
 inline bool IsClockwise(Location prev, Location curr,
-    Point64 prev_pt, Point64 curr_pt, Point64 rect_mp) {
+    PointI prev_pt, PointI curr_pt, PointI rect_mp) {
     if (AreOpposites(prev, curr))
         return CrossProduct(prev_pt, rect_mp, curr_pt) < 0;
     else
@@ -173,7 +173,7 @@ void RectClip::AddCorner(Location& loc, bool isClockwise) {
     }
 }
 
-void RectClip::GetNextLocation(const Path64& path,
+void RectClip::GetNextLocation(const PathI& path,
     Location& loc, int& i, int highI) {
     switch (loc) {
     case Location::Left:
@@ -257,9 +257,9 @@ void RectClip::GetNextLocation(const Path64& path,
     } // switch
 }
 
-Path64 RectClip::Execute(const Path64& path) {
+PathI RectClip::Execute(const PathI& path) {
     if (rect_.IsEmpty() || path.size() < 3)
-        return Path64();
+        return PathI();
 
     result_.clear();
     start_locs_.clear();
@@ -288,8 +288,8 @@ Path64 RectClip::Execute(const Path64& path) {
 
         if (i > highI)
             break;
-        Point64 ip, ip2;
-        Point64 prev_pt = (i) ? path[static_cast<size_t>(i - 1)] : path[highI];
+        PointI ip, ip2;
+        PointI prev_pt = (i) ? path[static_cast<size_t>(i - 1)] : path[highI];
 
         crossing_loc = loc;
         if (!GetIntersection(rectPath_, path[i], prev_pt, crossing_loc, ip)) {
@@ -364,11 +364,11 @@ Path64 RectClip::Execute(const Path64& path) {
     if (first_cross_ == Location::Inside) {
         if (starting_loc == Location::Inside)
             return path;
-        Rect64 tmp_rect = Bounds(path);
+        RectI tmp_rect = Bounds(path);
         if (tmp_rect.Contains(rect_) && Path1ContainsPath2(path, rectPath_) != PointInPolygonResult::IsOutside)
             return rectPath_;
         else
-            return Path64();
+            return PathI();
     }
 
     if (loc != Location::Inside && (loc != first_cross_ || start_locs_.size() > 2)) {
@@ -387,16 +387,16 @@ Path64 RectClip::Execute(const Path64& path) {
     }
 
     if (result_.size() < 3)
-        return Path64();
+        return PathI();
 
     // tidy up duplicates and collinear segments
-    Path64 res;
+    PathI res;
     res.reserve(result_.size());
     size_t k = 0;
     highI = static_cast<int>(result_.size()) - 1;
-    Point64 prev_pt = result_[highI];
+    PointI prev_pt = result_[highI];
     res.push_back(result_[0]);
-    Path64::const_iterator cit;
+    PathI::const_iterator cit;
     for (cit = result_.cbegin() + 1; cit != result_.cend(); ++cit) {
         if (CrossProduct(prev_pt, res[k], *cit)) {
             prev_pt = res[k++];
@@ -406,16 +406,16 @@ Path64 RectClip::Execute(const Path64& path) {
     }
 
     if (k < 2)
-        return Path64();
+        return PathI();
     // and a final check for collinearity
     else if (!CrossProduct(res[0], res[k - 1], res[k]))
         res.pop_back();
     return res;
 }
 
-Paths64 RectClipLines::Execute(const Path64& path) {
+PathsI RectClipLines::Execute(const PathI& path) {
     result_.clear();
-    Paths64 result;
+    PathsI result;
     if (rect_.IsEmpty() || path.size() == 0)
         return result;
 
@@ -443,8 +443,8 @@ Paths64 RectClipLines::Execute(const Path64& path) {
         GetNextLocation(path, loc, i, highI);
         if (i > highI)
             break;
-        Point64 ip, ip2;
-        Point64 prev_pt = path[static_cast<size_t>(i - 1)];
+        PointI ip, ip2;
+        PointI prev_pt = path[static_cast<size_t>(i - 1)];
 
         crossing_loc = loc;
         if (!GetIntersection(rectPath_, path[i], prev_pt, crossing_loc, ip)) {

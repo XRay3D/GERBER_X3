@@ -26,20 +26,20 @@ private:
     void createProfile(const Tool& tool, const double depth);
     void trimmingOpenPaths(Paths& paths);
 
-    IntPoint from;
+    Point from;
 
     void cornerTrimming();
     void makeBridges();
 
     void reorder();
-    void reduceDistance(IntPoint& from, Path& to);
+    void reduceDistance(Point& from, Path& to);
     enum NodeType {
         ntAny,
         ntOpen,
         ntClosed
     };
     void polyTreeToPaths(PolyTree& polytree, Paths& rpaths);
-    //    void addPolyNodeToPaths(PolyNode& polynode, NodeType nodetype, Paths& paths);
+    //    void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths& paths);
     //    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
     //    void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 

@@ -17,30 +17,30 @@
 #include <myclipper.h>
 #include <numbers>
 
-Clipper2Lib::PathD CirclePath(double diametr, const Clipper2Lib::PointD& center) {
+Path CirclePath(double diametr, const Point& center) {
     if (diametr == 0.0)
-        return Clipper2Lib::PathD();
+        return Path();
 
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
-    Clipper2Lib::PathD poligon(intSteps);
+    Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = Clipper2Lib::PointD(
-            static_cast<Clipper2Lib::cInt>(cos(i * 2 * std::numbers::pi / intSteps) * radius) + center.x,
-            static_cast<Clipper2Lib::cInt>(sin(i * 2 * std::numbers::pi / intSteps) * radius) + center.y);
+        poligon[i] = Point(
+            static_cast<Point::Type>(cos(i * 2 * pi / intSteps) * radius) + center.x,
+            static_cast<Point::Type>(sin(i * 2 * pi / intSteps) * radius) + center.y);
     }
     return poligon;
 }
 
-Clipper2Lib::PathD RectanglePath(double width, double height, const Clipper2Lib::PointD& center) {
+Path RectanglePath(double width, double height, const Point& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Clipper2Lib::PathD poligon {
-        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(-halfWidth + center.x), static_cast<Clipper2Lib::cInt>(+halfHeight + center.y)),
-        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(-halfWidth + center.x), static_cast<Clipper2Lib::cInt>(-halfHeight + center.y)),
-        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(+halfWidth + center.x), static_cast<Clipper2Lib::cInt>(-halfHeight + center.y)),
-        Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(+halfWidth + center.x), static_cast<Clipper2Lib::cInt>(+halfHeight + center.y)),
+    Path poligon {
+        Point(static_cast<Point::Type>(-halfWidth + center.x), static_cast<Point::Type>(+halfHeight + center.y)),
+        Point(static_cast<Point::Type>(-halfWidth + center.x), static_cast<Point::Type>(-halfHeight + center.y)),
+        Point(static_cast<Point::Type>(+halfWidth + center.x), static_cast<Point::Type>(-halfHeight + center.y)),
+        Point(static_cast<Point::Type>(+halfWidth + center.x), static_cast<Point::Type>(+halfHeight + center.y)),
     };
     if (Area(poligon) < 0.0)
         ReversePath(poligon);
@@ -48,12 +48,12 @@ Clipper2Lib::PathD RectanglePath(double width, double height, const Clipper2Lib:
     return poligon;
 }
 
-void RotatePath(PathD& poligon, double angle, const Clipper2Lib::PointD& center) {
+void RotatePath(Path& poligon, double angle, const Point& center) {
     const bool fl = Area(poligon) < 0;
-    for (Clipper2Lib::PointD& pt : poligon) {
+    for (Point& pt : poligon) {
         const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
         const double length = center.distTo(pt);
-        pt = Clipper2Lib::PointD(static_cast<Clipper2Lib::cInt>(cos(dAangle) * length), static_cast<Clipper2Lib::cInt>(sin(dAangle) * length));
+        pt = Point(static_cast<Point::Type>(cos(dAangle) * length), static_cast<Point::Type>(sin(dAangle) * length));
         pt.x += center.x;
         pt.y += center.y;
     }
@@ -61,7 +61,7 @@ void RotatePath(PathD& poligon, double angle, const Clipper2Lib::PointD& center)
         ReversePath(poligon);
 }
 
-void TranslatePath(PathD& path, const Clipper2Lib::PointD& pos) {
+void TranslatePath(Path& path, const Point& pos) {
     if (pos.x == 0 && pos.y == 0)
         return;
     for (auto& pt : path) {
@@ -70,7 +70,7 @@ void TranslatePath(PathD& path, const Clipper2Lib::PointD& pos) {
     }
 }
 
-double Perimeter(const PathD& path) {
+double Perimeter(const Path& path) {
     double p = 0.0;
     for (size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
         double x = path[j].x - path[i].x;
@@ -81,7 +81,7 @@ double Perimeter(const PathD& path) {
     return sqrt(p);
 }
 
-void mergeSegments(PathsD& paths, double glue) {
+void mergeSegments(Paths& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
@@ -93,15 +93,15 @@ void mergeSegments(PathsD& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                Clipper2Lib::PointD pib = paths[i].back();
-                Clipper2Lib::PointD pjf = paths[j].front();
+                Point pib = paths[i].back();
+                Point pjf = paths[j].front();
                 if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Clipper2Lib::PointD pif = paths[i].front();
-                Clipper2Lib::PointD pjb = paths[j].back();
+                Point pif = paths[i].front();
+                Point pjb = paths[j].back();
                 if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -128,15 +128,15 @@ void mergeSegments(PathsD& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                Clipper2Lib::PointD pib = paths[i].back();
-                Clipper2Lib::PointD pjf = paths[j].front();
+                Point pib = paths[i].back();
+                Point pjf = paths[j].front();
                 if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Clipper2Lib::PointD pif = paths[i].front();
-                Clipper2Lib::PointD pjb = paths[j].back();
+                Point pif = paths[i].front();
+                Point pjb = paths[j].back();
                 if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -153,8 +153,8 @@ void mergeSegments(PathsD& paths, double glue) {
     } while (size != paths.size());
 }
 
-void mergePaths(PathsD& paths, const double dist) {
-    //    msg = tr("Merge PathsD");
+void mergePaths(Paths& paths, const double dist) {
+    //    msg = tr("Merge Paths");
     size_t max;
     do {
         max = paths.size();
@@ -224,7 +224,7 @@ void mergePaths(PathsD& paths, const double dist) {
 #include <QPainterPath>
 #include <QPixmap>
 
-QIcon drawIcon(const PathsD& paths) {
+QIcon drawIcon(const Paths& paths) {
     static QMutex m;
     QMutexLocker l(&m);
 
@@ -270,16 +270,16 @@ QIcon drawDrillIcon(QColor color) {
     return pixmap;
 }
 
-PathsD& normalize(PathsD& paths) {
-    PolyTreeD polyTree;
-    ClipperD clipper;
+Paths& normalize(Paths& paths) {
+    PolyTree polyTree;
+    Clipper clipper;
     clipper.AddSubject(paths); //    clipper.AddPaths(paths, PathType::Subject, true);
-    RectD r(GetBounds(paths));
-    Clipper2Lib::PathD outer = {
-        Clipper2Lib::PointD(r.left - uScale, r.top - uScale),
-        Clipper2Lib::PointD(r.right + uScale, r.top - uScale),
-        Clipper2Lib::PointD(r.right + uScale, r.bottom + uScale),
-        Clipper2Lib::PointD(r.left - uScale, r.bottom + uScale),
+    Rect r(Bounds(paths));
+    Path outer = {
+        Point(r.left - uScale, r.top - uScale),
+        Point(r.right + uScale, r.top - uScale),
+        Point(r.right + uScale, r.bottom + uScale),
+        Point(r.left - uScale, r.bottom + uScale),
     };
     // ReversePath(outer);
     clipper.AddSubject({outer}); //      clipper.AddPath(outer, PathType::Subject, true);
@@ -287,19 +287,19 @@ PathsD& normalize(PathsD& paths) {
     paths.erase(paths.begin());
     ReversePaths(paths);
     //    /****************************/
-    //    std::function<void(PolyNode*)> grouping = [&grouping](PolyNode* node) {
-    //         Clipper2Lib::PathsD paths;
+    //    std::function<void(PolyTree*)> grouping = [&grouping](PolyTree* node) {
+    //         Paths paths;
 
     //        if (node->IsHole()) {
-    //            PathD& path = node->Contour;
+    //            Path& path = node->Polygon();
     //            paths.push_back(path);
-    //            for (size_t i = 0, end = node->ChildCount(); i < end; ++i) {
-    //                path = node->Childs[i]->Contour;
+    //            for (size_t i = 0, end = node->Count(); i < end; ++i) {
+    //                path = node->Childs[i]->Polygon();
     //                paths.push_back(path);
     //            }
     //            groupedPss.push_back(paths);
     //        }
-    //        for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
+    //        for (size_t i = 0, end = node->Count(); i < end; ++i)
     //            grouping(node->Childs[i], group);
     //    };
     //    /*********************************/

@@ -15,7 +15,7 @@
 
 namespace Thermal {
 
-Node::Node(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, Model* model)
+Node::Node(const QIcon& icon, const QString& name, const ThParam& par, const Point& pos, AbstractThermPrGi* item, Model* model)
     : container(false)
     , icon(icon)
     , name(name)
@@ -202,7 +202,7 @@ int Node::count() const { return par.count; }
 
 ThParam Node::getParam() const { return par; }
 
-IntPoint Node::pos() const { return pos_; }
+Point Node::pos() const { return pos_; }
 
 AbstractThermPrGi* Node::item() const { return item_; }
 

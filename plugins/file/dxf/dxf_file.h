@@ -67,7 +67,7 @@ private:
         CutoffGroup,
     };
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
-    void grouping(PolyNode* node, Pathss* pathss, Group group);
+    void grouping(PolyTree& node, Group group);
 
     // FileInterface interface
 public:

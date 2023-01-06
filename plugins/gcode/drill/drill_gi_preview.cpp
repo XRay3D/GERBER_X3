@@ -64,8 +64,8 @@ void GiPreview::updateTool() {
                 const double lineKoeff = diameter * 0.7;
                 Paths tmpPpath;
                 ClipperOffset offset;
-                offset.AddPath(val, jtRound, etOpenRound);
-                offset.Execute(tmpPpath, diameter * 0.5 * uScale);
+                offset.AddPath(Path {val}, JoinType::Round, EndType::Round);
+                tmpPpath = offset.Execute(diameter * 0.5 * uScale);
                 for (Path& path : tmpPpath) {
                     path.push_back(path.front());
                     painterPath.addPolygon(path);
@@ -73,7 +73,7 @@ void GiPreview::updateTool() {
                 Path path(val);
 
                 if (path.size()) {
-                    for (auto&& point : path) {
+                    for (QPointF point : path) {
                         painterPath.moveTo(point - QPointF(0.0, lineKoeff));
                         painterPath.lineTo(point + QPointF(0.0, lineKoeff));
                         painterPath.moveTo(point - QPointF(lineKoeff, 0.0));
@@ -129,10 +129,9 @@ int GiPreview::toolId() const {
 
 Paths GiPreview::offset(const Path& path, double offset) {
     ClipperOffset cOffset;
-    Paths retPaths;
-    // cpOffset.AddPath(path, jtRound, etClosedLine);
-    cOffset.AddPath(path, jtRound, etOpenRound);
-    cOffset.Execute(retPaths, offset * 0.5 * uScale);
+    // cpOffset.AddPath(path, JoinType::Round, EndType::Round);
+    cOffset.AddPath(path, JoinType::Round, EndType::Round);
+    Paths retPaths = cOffset.Execute(offset * uScale);
     for (Path& path : retPaths)
         path.push_back(path.front());
     qDebug() << __FUNCTION__ << retPaths.size();

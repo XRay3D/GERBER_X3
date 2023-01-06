@@ -24,9 +24,7 @@
 
 static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
 
-using namespace Clipper2Lib;
-
-void dbgPaths(PathsD ps, const QString& fileName, bool close, const Tool& tool) {
+void dbgPaths(Paths ps, const QString& fileName, bool close, const Tool& tool) {
     if (ps.empty())
         return;
 
@@ -35,7 +33,7 @@ void dbgPaths(PathsD ps, const QString& fileName, bool close, const Tool& tool) 
             ps.erase(ps.begin() + i--);
 
     if (close)
-        for (PathD& p : ps)
+        for (Path& p : ps)
             p.push_back(p.front());
 
     // assert(ps.isEmpty());
@@ -88,41 +86,42 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, cInt k, bool fl) {
-    //    PolyTreeD polyTree;
-    //    Clipper clipper;
-    //    clipper.AddPaths(workingPs, PathType::Subject, true);
-    //    IntRect r(clipper.GetBounds());
-    //    PathD outer = {
-    //        PointD(r.left - k, r.top - k),
-    //        PointD(r.right + k, r.top - k),
-    //        PointD(r.right + k, r.bottom + k),
-    //        PointD(r.left - k, r.bottom + k),
-    //    };
-    //    // ReversePath(outer);
-    //    clipper.AddPath(outer, PathType::Subject, true);
-    //    clipper.Execute(ClipType::Union, polyTree, FillRule::NonZero);
-    //    /****************************/
-    //    std::function<void(PolyTreeD*)> grouping = [&grouping, group, this](PolyTreeD* node) {
-    //        if ((group == CutoffPaths) ^ node->IsHole()) {
-    //            PathsD paths;
-    //            paths.reserve(node->ChildCount() + 1);
-    //            paths.emplace_back(std::move(node->Contour));
-    //            for (auto&& child : node->Childs)
-    //                paths.emplace_back(std::move(child->Contour));
-    //            groupedPss.emplace_back(std::move(paths));
-    //        }
-    //        for (auto&& child : node->Childs)
-    //            grouping(child);
-    //    };
-    //    /*********************************/
-    //    groupedPss.clear();
-    //    grouping(polyTree.GetFirst());
+Pathss& Creator::groupedPaths(Grouping group, Point::Type k, bool fl) {
+    qDebug(__FUNCTION__);
+    PolyTree polyTree;
+    Clipper clipper;
+    clipper.AddSubject(workingPs);
+    Rect r(Bounds(workingPs));
+    Path outer = {
+        Point(r.left - k, r.top - k),
+        Point(r.right + k, r.top - k),
+        Point(r.right + k, r.bottom + k),
+        Point(r.left - k, r.bottom + k),
+    };
+    // ReversePath(outer);
+    clipper.AddSubject({outer});
+    clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+    /****************************/
+    std::function<void(PolyTree&)> grouping = [&grouping, group, this](PolyTree& node) {
+        if ((group == CutoffPaths) ^ node.IsHole()) {
+            Paths paths;
+            paths.reserve(node.Count() + 1);
+            paths.emplace_back(std::move(node.Polygon()));
+            for (auto&& child : node)
+                paths.emplace_back(std::move(child->Polygon()));
+            groupedPss.emplace_back(std::move(paths));
+        }
+        for (auto&& child : node)
+            grouping(*child);
+    };
+    /*********************************/
+    groupedPss.clear();
+    grouping(polyTree);
 
-    //    if (!fl && group == CutoffPaths) {
-    //        if (groupedPss.size() > 1 && groupedPss.front().size() == 2)
-    //            groupedPss.erase(groupedPss.begin());
-    //    }
+    if (!fl && group == CutoffPaths) {
+        if (groupedPss.size() > 1 && groupedPss.front().size() == 2)
+            groupedPss.erase(groupedPss.begin());
+    }
 
     return groupedPss;
 }
@@ -130,58 +129,63 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k, bool fl) {
 /// \brief Creator::addRawPaths
 /// \param paths
 ///
-void Creator::addRawPaths(PathsD rawPaths) {
+void Creator::addRawPaths(Paths rawPaths) {
+    qDebug(__FUNCTION__);
+
     if (rawPaths.empty())
         return;
 
-    //    //    if (gcp_.side() == On) {
-    //    //        workingRawPs_.push_back(rawPaths);
-    //    //        return;
-    //    //    }
-
-    //    for (size_t i = 0; i < rawPaths.size(); ++i)
-    //        if (rawPaths[i].size() < 2)
-    //            rawPaths.erase(rawPaths.begin() + i--);
-
-    //    const double glueLen = App::project()->glue() * uScale;
-    //    Clipper clipper;
-    //    for (size_t i = 0; i < rawPaths.size(); ++i) {
-    //        PointD& pf = rawPaths[i].front();
-    //        PointD& pl = rawPaths[i].back();
-    //        if (rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < glueLen)) {
-    //            clipper.AddPath(rawPaths[i], PathType::Subject, true);
-    //            rawPaths.erase(rawPaths.begin() + i--);
-    //        }
+    //    if (gcp_.side() == On) {
+    //        workingRawPs_.push_back(rawPaths);
+    //        return;
     //    }
 
-    //    mergeSegments(rawPaths, App::project()->glue() * uScale);
+    for (size_t i = 0; i < rawPaths.size(); ++i)
+        if (rawPaths[i].size() < 2)
+            rawPaths.erase(rawPaths.begin() + i--);
 
-    //    for (PathD& path : rawPaths) {
-    //        PointD& pf = path.front();
-    //        PointD& pl = path.back();
-    //        if (path.size() > 3 && (pf == pl || pf.distTo(pl) < glueLen))
-    //            clipper.AddPath(path, PathType::Subject, true);
-    //        else
-    //            workingRawPs.push_back(path);
-    //    }
+    const double glueLen = App::project()->glue() * uScale;
+    Clipper clipper;
+    for (size_t i = 0; i < rawPaths.size(); ++i) {
+        Point& pf = rawPaths[i].front();
+        Point& pl = rawPaths[i].back();
+        if (rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < glueLen)) {
+            clipper.AddSubject({rawPaths[i]});
+            rawPaths.erase(rawPaths.begin() + i--);
+        }
+    }
 
-    //    IntRect r(clipper.GetBounds());
-    //    int k = uScale;
-    //    PathsD paths;
-    //    clipper.AddPath({{r.left - k, r.bottom + k},
-    //                        {r.right + k, r.bottom + k},
-    //                        {r.right + k, r.top - k},
-    //                        {r.left - k, r.top - k}},
-    //        PathType::Clip, true);
-    //    clipper.Execute(ClipType::Xor, paths, FillRule::EvenOdd);
-    //    workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
+    mergeSegments(rawPaths, App::project()->glue() * uScale);
+
+    for (Path& path : rawPaths) {
+        Point& pf = path.front();
+        Point& pl = path.back();
+        if (path.size() > 3 && (pf == pl || pf.distTo(pl) < glueLen))
+            clipper.AddSubject({path});
+        else
+            workingRawPs.push_back(path);
+    }
+
+    Rect r(Bounds(rawPaths));
+    int k = uScale;
+    Paths paths;
+    clipper.AddClip({
+        {{r.left - k, r.bottom + k},
+         {r.right + k, r.bottom + k},
+         {r.right + k, r.top - k},
+         {r.left - k, r.top - k}}
+    });
+    clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
+    workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
 void Creator::addSupportPaths(Pathss supportPaths) { supportPss.append(supportPaths); }
 
-void Creator::addPaths(const PathsD& paths) { workingPs.append(paths); }
+void Creator::addPaths(const Paths& paths) { workingPs.append(paths); }
 
 void Creator::createGc() {
+    qDebug(__FUNCTION__);
+
     try {
         if (type() == Profile || //
             type() == Pocket ||  //
@@ -220,110 +224,121 @@ std::pair<int, int> Creator::getProgress() {
     return {static_cast<int>(max()), static_cast<int>(current())};
 }
 
-void Creator::stacking(PathsD& paths) {
+void Creator::stacking(Paths& paths) {
+    qDebug(__FUNCTION__);
+
     if (paths.empty())
         return;
-    //    Timer t("stacking");
+    Timer t("stacking");
 
-    //    PolyTreeD polyTree;
-    //    {
-    //        Timer t("stacking 1");
-    //        Clipper clipper;
-    //        clipper.AddPaths(paths, PathType::Subject, true);
-    //        IntRect r(clipper.GetBounds());
-    //        int k = uScale;
-    //        PathD outer = {PointD(r.left - k, r.bottom + k), PointD(r.right + k, r.bottom + k),
-    //            PointD(r.right + k, r.top - k), PointD(r.left - k, r.top - k)};
-    //        clipper.AddPath(outer, PathType::Subject, true);
-    //        clipper.Execute(ClipType::Union, polyTree, FillRule::EvenOdd);
-    //        paths.clear();
-    //    }
-    //    sortPolyTreeDByNesting(polyTree);
-    //    returnPss.clear();
-    //    /************************************************************************************************/
+    PolyTree polyTree;
+    {
+        Timer t("stacking 1");
+        Clipper clipper;
+        clipper.AddSubject(paths);
+        Rect r(Bounds(paths));
+        int k = uScale;
+        Path outer {
+            Point(r.left - k, r.bottom + k),
+            Point(r.right + k, r.bottom + k),
+            Point(r.right + k, r.top - k),
+            Point(r.left - k, r.top - k)};
+        clipper.AddSubject({outer});
+        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        paths.clear();
+    }
+    sortPolyTreeByNesting(polyTree);
+    returnPss.clear();
+    /************************************************************************************************/
 
-    //    auto mathBE = [this](PathsD& paths, PathD& path, std::pair<size_t, size_t> idx) -> bool {
-    //        QList<std::iterator_traits<PathD::iterator>::difference_type> list;
-    //        list.push_back(idx.first);
-    //        for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
-    //            double d = std::numeric_limits<double>::max();
-    //            PointD pt;
-    //            for (const PointD& pts : paths[i - 1]) {
-    //                double l = pts.distTo(paths[i][index]);
-    //                if (d >= l) {
-    //                    d = l;
-    //                    pt = pts;
-    //                }
-    //            }
-    //            if (d <= toolDiameter) {
-    //                list.prepend(paths[i - 1].indexOf(pt));
-    //                index = list.front();
-    //            } else
-    //                return false;
-    //        }
-    //        for (size_t i = 0; i < paths.size(); ++i)
-    //            std::rotate(paths[i].begin(), paths[i].begin() + list[i], paths[i].end());
-    //        std::rotate(path.begin(), path.begin() + idx.second, path.end());
-    //        return true;
-    //    };
+    auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+        QList<std::iterator_traits<Path::iterator>::difference_type> list;
+        list.push_back(idx.first);
+        for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
+            double d = std::numeric_limits<double>::max();
+            Point pt;
+            for (const Point& pts : paths[i - 1]) {
+                double l = pts.distTo(paths[i][index]);
+                if (d >= l) {
+                    d = l;
+                    pt = pts;
+                }
+            }
+            if (d <= toolDiameter) {
+                list.prepend(paths[i - 1].indexOf(pt));
+                index = list.front();
+            } else
+                return false;
+        }
+        for (size_t i = 0; i < paths.size(); ++i)
+            std::rotate(paths[i].begin(), paths[i].begin() + list[i], paths[i].end());
+        std::rotate(path.begin(), path.begin() + idx.second, path.end());
+        return true;
+    };
 
-    //    using Worck = std::pair<PolyTreeD*, bool>;
-    //    std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
-    //        auto [node, newPaths] = w;
-    //        if (!returnPss.empty() || newPaths) {
-    //            PathD path(node->Contour);
-    //            if (!(gcp_.convent() ^ !node->IsHole()) ^ !(gcp_.side() == Outer))
-    //                ReversePath(path);
-    //            //            if (App::settings().gbrCleanPolygons())
-    //            //                CleanPolygon(path, uScale * 0.0005);
-    //            if (returnPss.empty() || newPaths) {
-    //                returnPss.push_back({path});
-    //            } else {
-    //                // check distance;
-    //                std::pair<size_t, size_t> idx;
-    //                double d = std::numeric_limits<double>::max();
-    //                for (size_t id = 0; id < returnPss.back().back().size(); ++id) {
-    //                    const PointD& ptd = returnPss.back().back()[id];
-    //                    for (size_t is = 0; is < path.size(); ++is) {
-    //                        const PointD& pts = path[is];
-    //                        const double l = ptd.distTo(pts);
-    //                        if (d >= l) {
-    //                            d = l;
-    //                            idx.first = id;
-    //                            idx.second = is;
-    //                        }
-    //                    }
-    //                }
-    //                if (d <= toolDiameter && mathBE(returnPss.back(), path, idx))
-    //                    returnPss.back().push_back(path);
-    //                else
-    //                    returnPss.push_back({path});
-    //            }
-    //            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-    //                stacker({node->Childs[i], static_cast<bool>(i)});
-    //        } else { // Start from here
-    //            for (size_t i = 0, end = node->ChildCount(); i < end; ++i)
-    //                stacker({node->Childs[i], true});
-    //        }
-    //        // PROG setProgInc();
-    //    };
-    //    /************************************************************************************************/
-    //    // PROG .3setProgMax(polyTree.Total());
-    //    stacker({polyTree.GetFirst(), false});
+    using Worck = std::pair<PolyTree*, bool>;
+    std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
+        auto [node, newPaths] = w;
+        if (!returnPss.empty() || newPaths) {
+            Path path(node->Polygon());
+            if (!(gcp_.convent() ^ !node->IsHole()) ^ !(gcp_.side() == Outer))
+                ReversePath(path);
+            //            if (App::settings().gbrCleanPolygons())
+            //                CleanPolygon(path, uScale * 0.0005);
+            if (returnPss.empty() || newPaths) {
+                returnPss.push_back({path});
+            } else {
+                // check distance;
+                std::pair<size_t, size_t> idx;
+                double d = std::numeric_limits<double>::max();
+                for (size_t id = 0; id < returnPss.back().back().size(); ++id) {
+                    const Point& ptd = returnPss.back().back()[id];
+                    for (size_t is = 0; is < path.size(); ++is) {
+                        const Point& pts = path[is];
+                        const double l = ptd.distTo(pts);
+                        if (d >= l) {
+                            d = l;
+                            idx.first = id;
+                            idx.second = is;
+                        }
+                    }
+                }
+                if (d <= toolDiameter && mathBE(returnPss.back(), path, idx))
+                    returnPss.back().push_back(path);
+                else
+                    returnPss.push_back({path});
+            }
+            // for (size_t i = 0, end = node->Count(); i < end; ++i)
+            //      stacker({(*node)[i]->get(), static_cast<bool>(i)});
+            for (size_t i {}; auto&& var : *node)
+                stacker({var.get(), static_cast<bool>(i++)});
+        } else { // Start from here
+            for (auto&& var : *node)
+                stacker({var.get(), true});
+            // for (size_t i = 0, end = node->Count(); i < end; ++i)
+            //     stacker({(*node)[i]->get(), true});
+        }
+        // PROG setProgInc();
+    };
+    /************************************************************************************************/
+    // PROG .3setProgMax(polyTree.Total());
+    stacker({&polyTree, false});
 
-    //    for (PathsD& retPaths : returnPss) {
-    //        std::reverse(retPaths.begin(), retPaths.end());
-    //        for (size_t i = 0; i < retPaths.size(); ++i) {
-    //            if (retPaths[i].empty())
-    //                retPaths.erase(retPaths.begin() + i--);
-    //        }
-    //        for (PathD& path : retPaths)
-    //            path.push_back(path.front());
-    //    }
-    //    sortB(returnPss);
+    for (Paths& retPaths : returnPss) {
+        std::reverse(retPaths.begin(), retPaths.end());
+        for (size_t i = 0; i < retPaths.size(); ++i) {
+            if (retPaths[i].empty())
+                retPaths.erase(retPaths.begin() + i--);
+        }
+        for (Path& path : retPaths)
+            path.push_back(path.front());
+    }
+    sortB(returnPss);
 }
 
-void Creator::mergeSegments(PathsD& paths, double glue) {
+void Creator::mergeSegments(Paths& paths, double glue) {
+    qDebug(__FUNCTION__);
+
     size_t size;
     do {
         size = paths.size();
@@ -335,15 +350,15 @@ void Creator::mergeSegments(PathsD& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                PointD pib = paths[i].back();
-                PointD pjf = paths[j].front();
+                Point pib = paths[i].back();
+                Point pjf = paths[j].front();
                 if (pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                PointD pif = paths[i].front();
-                PointD pjb = paths[j].back();
+                Point pif = paths[i].front();
+                Point pjb = paths[j].back();
                 if (pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -370,15 +385,15 @@ void Creator::mergeSegments(PathsD& paths, double glue) {
                     continue;
                 if (i >= paths.size())
                     break;
-                PointD pib = paths[i].back();
-                PointD pjf = paths[j].front();
+                Point pib = paths[i].back();
+                Point pjf = paths[j].front();
                 if (pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                PointD pif = paths[i].front();
-                PointD pjb = paths[j].back();
+                Point pif = paths[i].front();
+                Point pjb = paths[j].back();
                 if (pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
@@ -395,8 +410,10 @@ void Creator::mergeSegments(PathsD& paths, double glue) {
     } while (size != paths.size());
 }
 
-void Creator::mergePaths(PathsD& paths, const double dist) {
-    msg = tr("Merge PathsD");
+void Creator::mergePaths(Paths& paths, const double dist) {
+    qDebug(__FUNCTION__);
+
+    msg = tr("Merge Paths");
     size_t max;
 
     auto append = [&](size_t& i, size_t& j) {
@@ -449,42 +466,47 @@ void Creator::mergePaths(PathsD& paths, const double dist) {
     } while (max != paths.size());
 }
 
-void Creator::markPolyTreeDByNesting(PolyTreeD& polynode) {
+void Creator::markPolyTreeDByNesting(PolyTree& polynode) {
+    qDebug(__FUNCTION__);
+
     int nestCtr = 0;
-    //    Nesting.clear();
-    //    std::function<int(PolyTreeD&)> sorter = [&sorter, &nestCtr, this](PolyTreeD& polynode) {
-    //        ++nestCtr;
-    //        for (auto node : polynode)
-    //            sorter(*node);
-    //        return Nesting[&polynode] = nestCtr--;
-    //    };
-    //    sorter(polynode);
+    nesting.clear();
+    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
+        ++nestCtr;
+        for (auto&& node : polynode)
+            sorter(*node);
+        return nesting[&polynode] = nestCtr--;
+    };
+    sorter(polynode);
 }
 
-void Creator::sortPolyTreeDByNesting(PolyTreeD& polynode) {
+void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
+    qDebug(__FUNCTION__);
+
     int nestCtr = 0;
-    //    Nesting.clear();
-    //    std::function<int(PolyTreeD&)> sorter = [&sorter, &nestCtr, this](PolyTreeD& polynode) {
-    //        ++nestCtr;
-    //        Nesting[&polynode] = nestCtr;
-    //        switch (polynode.Count()) {
-    //        case 0:
-    //            return nestCtr--;
-    //        case 1:
-    //            return std::max(nestCtr--, sorter(*polynode.begin()->get()));
-    //        default:
-    //            std::map<int, std::vector<PolyTreeD*>, std::greater<>> map;
-    //            for (auto &&node : polynode)
-    //                map[sorter(*node)].emplace_back(node);
-    //            size_t i = polynode.Count();
-    //            for (auto& [nest, nodes] : map) {
-    //                for (auto node : nodes)
-    //                    polynode.childs_[--i] = node;
-    //            }
-    //            return std::max(nestCtr--, map.begin()->first);
-    //        }
-    //    };
-    //    sorter(polynode);
+    nesting.clear();
+    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
+        ++nestCtr;
+        nesting[&polynode] = nestCtr;
+        switch (polynode.Count()) {
+        case 0:
+            return nestCtr--;
+        case 1:
+            return std::max(nestCtr--, sorter(*polynode.begin()->get()));
+        default:
+            std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
+            for (auto&& node : polynode)
+                map[sorter(*node)].emplace_back(std::move(node));
+            size_t i = polynode.Count();
+            auto it = polynode.end(); // std::reverse_iterator(polynode);
+            for (auto&& [nest, nodes] : map) {
+                for (auto&& node : nodes)
+                    *(--it) = std::move(node);
+            }
+            return std::max(nestCtr--, map.begin()->first);
+        }
+    };
+    sorter(polynode);
 }
 
 static int condition = 0;
@@ -505,6 +527,8 @@ void Creator::continueCalc(bool fl) { // direct connection!!
 }
 
 bool Creator::createability(bool side) {
+    qDebug(__FUNCTION__);
+
     Timer t("createability");
     //    if (0) {
     //        if (side == CopperPaths)
@@ -512,26 +536,26 @@ bool Creator::createability(bool side) {
     //        else
     //            groupedPaths(CutoffPaths, gcp_.tools.front().getDiameter(gcp_.getDepth()) * uScale + 100);
 
-    //        //    PathsD wpe;
+    //        //    Paths wpe;
     //        const double toolDiameter = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
     //        const double toolRadius = toolDiameter * 0.5;
-    //        const double testArea = toolDiameter * toolDiameter - std::numbers::pi * toolRadius * toolRadius;
+    //        const double testArea = toolDiameter * toolDiameter - pi * toolRadius * toolRadius;
 
-    //        PathsD srcPaths;
+    //        Paths srcPaths;
     //        for (size_t pIdx = 0; pIdx < groupedPss.size(); ++pIdx) {
     //            srcPaths.append(groupedPss[pIdx]);
     //        }
 
-    //        PathsD frPaths;
+    //        Paths frPaths;
     //        {
     //            ClipperOffset offset(uScale);
-    //            offset.AddPaths(srcPaths, JoinType::Round, EndType::ClosedPolygon);
-    //            offset.Execute(frPaths, -toolRadius);
+    //            offset.AddPaths(srcPaths, JoinType::Round, EndType::Polygon);
+    //            frPaths = offset.Execute(-toolRadius);
     //            //        if (App::settings().gbrCleanPolygons())
     //            //            CleanPolygons(frPaths, uScale * 0.0005);
     //            offset.Clear();
-    //            offset.AddPaths(frPaths, JoinType::Round, EndType::ClosedPolygon);
-    //            offset.Execute(frPaths, toolRadius + 100);
+    //            offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
+    //            frPaths = offset.Execute(toolRadius + 100);
     //        }
     //        if (side == CopperPaths)
     //            ReversePaths(srcPaths);
@@ -543,24 +567,24 @@ bool Creator::createability(bool side) {
     //        }
     //        QString last(msg);
     //        if (!frPaths.empty()) {
-    //            PolyTreeD polyTree;
+    //            PolyTree polyTree;
     //            {
     //                Clipper clipper;
     //                clipper.AddPaths(frPaths, PathType::Subject, true);
-    //                IntRect rect(clipper.GetBounds());
+    //                Rect rect(clipper.GetBounds());
     //                int k = uScale;
-    //                PathD outer = {PointD(rect.left - k, rect.bottom + k), PointD(rect.right + k, rect.bottom + k),
-    //                    PointD(rect.right + k, rect.top - k), PointD(rect.left - k, rect.top - k)};
+    //                Path outer = {Point(rect.left - k, rect.bottom + k), Point(rect.right + k, rect.bottom + k),
+    //                    Point(rect.right + k, rect.top - k), Point(rect.left - k, rect.top - k)};
     //                clipper.AddPath(outer, PathType::Subject, true);
     //                clipper.Execute(ClipType::Union, polyTree, FillRule::EvenOdd);
     //            }
 
-    //            auto test = [&srcPaths, side](PolyTreeD* node) -> bool {
-    //                if (node->ChildCount() > 0) {
+    //            auto test = [&srcPaths, side](PolyTree* node) -> bool {
+    //                if (node->Count() > 0) {
     //                    return true;
     //                } else {
     //                    QSet<size_t> skip;
-    //                    for (auto& point : node->Contour) {
+    //                    for (auto& point : node->Polygon()) {
     //                        for (size_t i = 0; i < srcPaths.size(); ++i) {
     //                            if (skip.contains(i))
     //                                continue;
@@ -582,27 +606,27 @@ bool Creator::createability(bool side) {
     //            setCurrent();
 
     //            msg = tr("Creativity check");
-    //            const std::function<void(PolyTreeDD*, double)> creator = [&creator, test, testArea, this](PolyTreeD* node, double area) {
+    //            const std::function<void(PolyTreeDD*, double)> creator = [&creator, test, testArea, this](PolyTree* node, double area) {
     //                if (node && !node->IsHole()) { // init run
-    //                    for (size_t i = 0; i < node->ChildCount(); ++i) {
-    //                        if (area = -Area(node->Childs[i]->Contour); testArea < area) {
+    //                    for (size_t i = 0; i < node->Count(); ++i) {
+    //                        if (area = -Area(node->Childs[i]->Polygon()); testArea < area) {
     //                            if (test(node->Childs[i])) {
     //                                creator(node->Childs[i], area);
     //                            }
     //                        }
     //                    }
     //                } else {
-    //                    static PathsD paths;
+    //                    static Paths paths;
     //                    paths.clear();
-    //                    paths.reserve(node->ChildCount() + 1);
-    //                    paths.push_back(std::move(node->Contour)); // init path
-    //                    for (size_t i = 0; i < node->ChildCount(); ++i) {
-    //                        area += Area(node->Childs[i]->Contour);
-    //                        paths.push_back(std::move(node->Childs[i]->Contour));
+    //                    paths.reserve(node->Count() + 1);
+    //                    paths.push_back(std::move(node->Polygon())); // init path
+    //                    for (size_t i = 0; i < node->Count(); ++i) {
+    //                        area += Area(node->Childs[i]->Polygon());
+    //                        paths.push_back(std::move(node->Childs[i]->Polygon()));
     //                    }
     //                    incCurrent();
     //                    items.push_back(new GiError(paths, area * dScale * dScale));
-    //                    for (size_t i = 0; i < node->ChildCount(); ++i) {
+    //                    for (size_t i = 0; i < node->Count(); ++i) {
     //                        creator(node->Childs[i], area);
     //                    }
     //                }
@@ -618,34 +642,34 @@ bool Creator::createability(bool side) {
     //        const double toolDiameter = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
     //        const double toolRadius = toolDiameter * 0.5;
     //        const double testArea = toolDiameter * toolDiameter - pi * toolRadius * toolRadius;
-    //        PathsD nonCutPaths;
+    //        Paths nonCutPaths;
 
     //        constexpr auto k = 1;
 
     //        groupedPaths(CopperPaths);
 
-    //        auto mill = [](PathsD& paths, double offset1, double offset2) {
+    //        auto mill = [](Paths& paths, double offset1, double offset2) {
     //            Timer t("mill");
-    //            PathsD retPaths;
+    //            Paths retPaths;
 
     //            ReversePaths(paths);
 
     //            ClipperOffset offset(uScale);
-    //            offset.AddPaths(paths, JoinType::Round, EndType::ClosedPolygon);
-    //            offset.Execute(retPaths, offset1);
+    //            offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+    //            retPaths = offset.Execute(offset1);
     //            // dbgPaths(retPaths, "mill 1");
 
     //            offset.Clear();
-    //            offset.AddPaths(retPaths, JoinType::Round, EndType::ClosedPolygon);
-    //            offset.Execute(retPaths, offset2);
+    //            offset.AddPaths(retPaths, JoinType::Round, EndType::Polygon);
+    //            retPaths = offset.Execute(offset2);
     //            // dbgPaths(retPaths, "mill 2");
 
     //            return retPaths;
     //        };
 
-    //        auto nonCuts = [](const PathsD& subject, const PathsD& clip) {
+    //        auto nonCuts = [](const Paths& subject, const Paths& clip) {
     //            Timer t("nonCuts");
-    //            PathsD retPaths;
+    //            Paths retPaths;
 
     //            Clipper clipper;
     //            clipper.AddPaths(subject, PathType::Subject);
@@ -653,13 +677,13 @@ bool Creator::createability(bool side) {
     //            clipper.Execute(ClipType::Difference, retPaths, FillRule::Positive);
 
     //            ClipperOffset offset(uScale);
-    //            offset.AddPaths(retPaths, Clipper2Lib::JoinType::Miter, EndType::ClosedPolygon);
-    //            offset.Execute(retPaths, k);
+    //            offset.AddPaths(retPaths, Clipper2Lib::JoinType::Miter, EndType::Polygon);
+    //            retPaths = offset.Execute(k);
     //            return retPaths;
     //        };
 
     //        if (side == CutoffPaths) { // FIXME V547 Expression is always true.
-    //            PathsD srcPaths;
+    //            Paths srcPaths;
     //            mvector<QPainterPath> srcPPaths;
     //            mvector<QPainterPath> nonCutPPaths;
     //            srcPPaths.reserve(groupedPss.size());
@@ -695,7 +719,7 @@ bool Creator::createability(bool side) {
 
     //        } else {
     //            for (auto srcPaths : groupedPss) {
-    //                PathsD nonCutPaths_;
+    //                Paths nonCutPaths_;
     //                mvector<QPainterPath> srcPPaths;
     //                mvector<QPainterPath> nonCutPPaths;
 
@@ -741,7 +765,7 @@ bool Creator::createability(bool side) {
     //            }
     //        }
 
-    //        std::erase_if(nonCutPaths, [](PathD& path) { return !path.size(); }); // убрать пустые
+    //        std::erase_if(nonCutPaths, [](Path& path) { return !path.size(); }); // убрать пустые
 
     //        std::ranges::for_each(nonCutPaths, [this](auto&& path) {
     //            items.push_back(new GiError({path}, Area(path) * dScale * dScale));
@@ -763,8 +787,10 @@ void Creator::setGcp(const GCodeParams& gcp) {
     reset();
 }
 
-PathsD& Creator::sortB(PathsD& src) {
-    PointD startPt(App::home()->pos() + App::zero()->pos());
+Paths& Creator::sortB(Paths& src) {
+    qDebug(__FUNCTION__);
+
+    Point startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -782,8 +808,10 @@ PathsD& Creator::sortB(PathsD& src) {
     return src;
 }
 
-PathsD& Creator::sortBE(PathsD& src) {
-    PointD startPt(App::home()->pos() + App::zero()->pos());
+Paths& Creator::sortBE(Paths& src) {
+    qDebug(__FUNCTION__);
+
+    Point startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         // PROG //PROG .3setProgMaxAndVal(src.size(), firstIdx);
         size_t swapIdx = firstIdx;
@@ -818,7 +846,9 @@ PathsD& Creator::sortBE(PathsD& src) {
 }
 
 Pathss& Creator::sortB(Pathss& src) {
-    PointD startPt(App::home()->pos() + App::zero()->pos());
+    qDebug(__FUNCTION__);
+
+    Point startPt(App::home()->pos() + App::zero()->pos());
     for (size_t i = 0; i < src.size(); ++i) {
         if (src[i].empty())
             src.erase(src.begin() + i--);
@@ -841,7 +871,9 @@ Pathss& Creator::sortB(Pathss& src) {
 }
 
 Pathss& Creator::sortBE(Pathss& src) {
-    PointD startPt(App::home()->pos() + App::zero()->pos());
+    qDebug(__FUNCTION__);
+
+    Point startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -874,14 +906,16 @@ Pathss& Creator::sortBE(Pathss& src) {
     return src;
 }
 
-bool Creator::pointOnPolygon(const QLineF& l2, const PathD& path, PointD* ret) {
+bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
+    qDebug(__FUNCTION__);
+
     const size_t cnt = path.size();
     if (cnt < 2)
         return false;
     QPointF p;
     for (size_t i = 0; i < cnt; ++i) {
-        const PointD& pt1 = path[(i + 1) % cnt];
-        const PointD& pt2 = path[i];
+        const Point& pt1 = path[(i + 1) % cnt];
+        const Point& pt2 = path[i];
         QLineF l1(pt1, pt2);
         if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
             if (ret)

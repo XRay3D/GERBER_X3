@@ -49,8 +49,8 @@ public:
     virtual QString name() const = 0;
     virtual bool fit(double toolDiam) const = 0;
 
-    PathD drawDrill(const State& state);
-    PathsD draw(const State& state, bool notApBlock = {});
+    Path drawDrill(const State& state);
+    Paths draw(const State& state, bool notApBlock = {});
 
     bool flashed() const noexcept { return isFlashed_; }
     bool used() const noexcept { return isUsed_; }
@@ -67,7 +67,7 @@ protected:
     double size_ {};
     double minSize_ {};
     const File* file_;
-    PathsD paths_;
+    Paths paths_;
     bool isFlashed_ {};
     bool isUsed_ {};
 
@@ -75,7 +75,7 @@ protected:
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
 
-    void transform(PathD& poligon, const State& state);
+    void transform(Path& poligon, const State& state);
 };
 
 /////////////////////////////////////////////////////
@@ -203,10 +203,10 @@ private:
     QList<QString> modifiers_;
     VarMap coefficients_;
 
-    double Angle(const PointD& pt1, const PointD& pt2) {
+    double Angle(const Point& pt1, const Point& pt2) {
         const double dx = pt2.x - pt1.x;
         const double dy = pt2.y - pt1.y;
-        const double theta = atan2(-dy, dx) * 360.0 / (2 * std::numbers::pi);
+        const double theta = atan2(-dy, dx) * 360.0 / (2 * pi);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
         if (qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
@@ -214,11 +214,11 @@ private:
             return theta_normalized;
     }
 
-    PathD drawCenterLine(const mvector<double>& mod);
-    PathD drawCircle(const mvector<double>& mod);
-    PathD drawOutlineCustomPolygon(const mvector<double>& mod);
-    PathD drawOutlineRegularPolygon(const mvector<double>& mod);
-    PathD drawVectorLine(const mvector<double>& mod);
+    Path drawCenterLine(const mvector<double>& mod);
+    Path drawCircle(const mvector<double>& mod);
+    Path drawOutlineCustomPolygon(const mvector<double>& mod);
+    Path drawOutlineRegularPolygon(const mvector<double>& mod);
+    Path drawVectorLine(const mvector<double>& mod);
     void drawMoire(const mvector<double>& mod);
     void drawThermal(const mvector<double>& mod);
 };

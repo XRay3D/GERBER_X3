@@ -33,7 +33,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
 
         toolDiameter = tool.getDiameter(depth);
 
-        const double dOffset = (gcp_.side() == Outer) ? +toolDiameter * uScale * 0.5 : -toolDiameter * uScale * 0.5;
+        const double dOffset = ((gcp_.side() == Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
 
         if (gcp_.side() == On) {
             if (gcp_.params[GCodeParams::Trimming].toBool())
@@ -43,13 +43,13 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
             if (workingPs.size()) {
                 ClipperOffset offset;
                 for (Paths& paths : groupedPaths(CopperPaths))
-                    offset.AddPaths(paths, jtRound, etClosedPolygon);
-                offset.Execute(returnPs, dOffset);
+                    offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+                returnPs = offset.Execute(dOffset);
             }
             if (workingRawPs.size()) {
                 ClipperOffset offset;
-                offset.AddPaths(workingRawPs, jtRound, etOpenRound);
-                offset.Execute(workingRawPs, dOffset);
+                offset.AddPaths(workingRawPs, JoinType::Round, EndType::Round);
+                workingRawPs = offset.Execute(dOffset);
                 if (!workingRawPs.empty())
                     returnPs.append(workingRawPs);
             }
@@ -107,12 +107,12 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
             Paths ps;
             {
                 ClipperOffset offset;
-                offset.AddPath(p, jtMiter, etOpenButt);
-                offset.Execute(ps, dOffset + 100);
+                offset.AddPath(p, JoinType::Miter, EndType::Butt);
+                ps = offset.Execute(dOffset + 100);
                 // dbgPaths(ps, {}, "offset+");
                 offset.Clear();
-                offset.AddPath(ps.front(), jtMiter, etClosedPolygon);
-                offset.Execute(ps, -dOffset);
+                offset.AddPath(ps.front(), JoinType::Miter, EndType::Polygon);
+                ps = offset.Execute(-dOffset);
                 // dbgPaths(ps, {}, "offset-");
                 if (ps.empty()) {
                     paths.remove(i--);
@@ -121,9 +121,9 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
             }
             {
                 Clipper clipper;
-                clipper.AddPath(p, ptSubject, false);
-                clipper.AddPaths(ps, ptClip, true);
-                clipper.Execute(ctIntersection, ps, pftPositive);
+                clipper.AddOpenSubject({p});
+                clipper.AddClip(ps);
+                clipper.Execute(ClipType::Intersection, FillRule::Positive, ps); // FIXME open paths ???
                 // dbgPaths(ps, {}, "clip-");
                 p = ps.front();
             }
@@ -180,9 +180,9 @@ void ProfileCreator::makeBridges() {
     if (bridgeItems.size()) {
         for (auto& returnPs_ : returnPss) {
             const Path& path = returnPs_.front();
-            std::vector<std::pair<GiBridge*, IntPoint>> biStack;
+            std::vector<std::pair<GiBridge*, Point>> biStack;
             biStack.reserve(bridgeItems.size());
-            IntPoint pt;
+            Point pt;
             for (GiBridge* bi : bridgeItems) {
                 if (pointOnPolygon(bi->getPath(), path, &pt))
                     biStack.emplace_back(bi, pt);
@@ -192,28 +192,30 @@ void ProfileCreator::makeBridges() {
                 // create frame
                 {
                     ClipperOffset offset;
-                    offset.AddPath(path, jtMiter, etClosedLine);
-                    offset.Execute(paths, +toolDiameter * uScale * 0.1);
+                    offset.AddPath(path, JoinType::Miter, EndType::Round);
+                    paths = offset.Execute(+toolDiameter * uScale * 0.1);
 
                     Clipper clipper;
-                    clipper.AddPaths(paths, ptSubject, true);
+                    clipper.AddSubject(paths);
                     for (const auto& bip : biStack) {
-                        clipper.AddPath(CirclePath((bip.first->lenght() + toolDiameter) * uScale, bip.second), ptClip, true);
+                        clipper.AddClip({CirclePath((bip.first->lenght() + toolDiameter) * uScale, bip.second)});
                     }
-                    clipper.Execute(ctIntersection, paths, pftPositive);
+                    clipper.Execute(ClipType::Intersection, FillRule::Positive, paths);
                 }
                 // cut toolPath
                 {
                     Clipper clipper;
-                    clipper.AddPath(path, ptSubject, false);
-                    clipper.AddPaths(paths, ptClip, true);
-                    PolyTree polytree;
-                    clipper.Execute(ctDifference, polytree, pftPositive);
-                    PolyTreeToPaths(polytree, paths);
+                    clipper.AddOpenSubject({path});
+                    clipper.AddClip(paths);
+                    //                    PolyTree polytree;
+                    clipper.Execute(ClipType::Difference, FillRule::Positive, /*polytree*/ paths, paths);
+                    //                    polyTreeToPaths(polytree, paths);
                 }
                 // merge result toolPaths
                 mergeSegments(paths);
                 sortBE(paths);
+
+                std::erase_if(paths, [](auto& path) { return path.size() == 0; });
 
                 auto check = [&paths, &path] {
                     for (size_t i = 0, end = path.size() - 1; i < end; ++i) {
@@ -245,13 +247,13 @@ void ProfileCreator::makeBridges() {
 }
 
 void ProfileCreator::reorder() {
-    //    returnPss = { returnPs };
+    //    returnPss = {returnPs};
     //    return;
     PolyTree polyTree;
     {
         Clipper clipper;
-        clipper.AddPaths(returnPs, ptSubject);
-        IntRect r(clipper.GetBounds());
+        clipper.AddSubject(returnPs);
+        Rect r(Bounds(returnPs));
         int k = uScale;
         Path outer = {
             { r.left - k, r.bottom + k},
@@ -259,8 +261,8 @@ void ProfileCreator::reorder() {
             {r.right + k,    r.top - k},
             { r.left - k,    r.top - k}
         };
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+        clipper.AddSubject({outer});
+        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
         returnPs.clear();
     }
 
@@ -279,7 +281,7 @@ void ProfileCreator::reorder() {
     }
 }
 
-void ProfileCreator::reduceDistance(IntPoint& from, Path& to) {
+void ProfileCreator::reduceDistance(Point& from, Path& to) {
     double d = std::numeric_limits<double>::max();
     int ctr2 = 0, idx = 0;
     for (auto pt2 : to) {
@@ -295,26 +297,30 @@ void ProfileCreator::reduceDistance(IntPoint& from, Path& to) {
 
 void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     rpaths.clear();
-    rpaths.reserve(polytree.Total());
 
-    std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths;
+    //    auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
+    //        return i;
+    //    };
+    //    rpaths.reserve(Total(polytree));
+
+    std::function<void(PolyTree&, ProfileCreator::NodeType)> addPolyNodeToPaths;
 
     if (!Settings::profileSort()) { // Grouping by nesting
 
-        markPolyNodeByNesting(polytree);
+        markPolyTreeDByNesting(polytree);
 
         std::map<int, Paths> pathsMap;
-        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
+        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, ProfileCreator::NodeType nodetype) {
             bool match = true;
             if (nodetype == ntClosed)
-                match = !polynode.IsOpen();
+                match = true; //! polynode.IsOpen();// FIXME
             else if (nodetype == ntOpen)
                 return;
 
-            if (!polynode.Contour.empty() && match)
-                pathsMap[polynode.Nesting].emplace_back(std::move(polynode.Contour));
+            if (!polynode.Polygon().empty() && match)
+                pathsMap[nesting[&polynode]].emplace_back(std::move(polynode.Polygon()));
 
-            for (auto node : polynode.Childs)
+            for (auto&& node : polynode)
                 addPolyNodeToPaths(*node, nodetype);
         };
         addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
@@ -328,31 +334,32 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
             rpaths.append(paths);
         }
     } else { // Grouping by nesting depth
-        sortPolyNodeByNesting(polytree);
-        IntPoint from = App::settings().mkrZeroOffset();
-        std::function<void(PolyNode&, ProfileCreator::NodeType)> addPolyNodeToPaths =
-            [&addPolyNodeToPaths, &rpaths, &from, this](PolyNode& polynode, ProfileCreator::NodeType nodetype) {
+        sortPolyTreeByNesting(polytree);
+        Point from = App::settings().mkrZeroOffset();
+        std::function<void(PolyTree&, ProfileCreator::NodeType)> addPolyNodeToPaths =
+            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCreator::NodeType nodetype) {
                 bool match = true;
                 if (nodetype == ntClosed)
-                    match = !polynode.IsOpen();
+                    match = true; //! polynode.IsOpen(); FIXME
                 else if (nodetype == ntOpen)
                     return;
 
-                if (!polynode.Contour.empty() && match && polynode.Nesting > 2) {
-                    reduceDistance(from, polynode.Contour);
-                    rpaths.emplace_back(std::move(polynode.Contour));
+                if (!polynode.Polygon().empty() && match && nesting[std::addressof(polynode)] > 2) {
+                    auto path {polynode.Polygon()};
+                    reduceDistance(from, path);
+                    rpaths.emplace_back(std::move(path));
                 }
 
-                //                std::map<int, std::vector<PolyNode*>, std::greater<>> map;
+                //                std::map<int, std::vector<PolyTree*>, std::greater<>> map;
                 //                for (auto node : polynode.Childs)
                 //                    map[node->Nesting].emplace_back(node);
-                //                size_t i = polynode.ChildCount();
+                //                size_t i = polynode.Count();
                 //                for (auto& [nest, nodes] : map) {
                 //                    for (auto node : nodes)
                 //                        polynode.Childs[--i] = node;
                 //                }
 
-                for (auto node : polynode.Childs)
+                for (auto&& node : polynode)
                     addPolyNodeToPaths(*node, nodetype);
             };
 
@@ -360,19 +367,19 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     }
 }
 
-// void ProfileCreator::addPolyNodeToPaths(PolyNode& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
+// void ProfileCreator::addPolyNodeToPaths(PolyTree& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
 //{
 //     bool match = true;
 //     if (nodetype == ntClosed)
 //         match = !polynode.IsOpen();
 //     else if (nodetype == ntOpen)
 //         return;
-//     if (!polynode.Contour.empty() && match) {
-//         reduceDistance(from, polynode.Contour);
-//         polynode.Contour.push_back(polynode.Contour.front());
-//         paths.push_back(std::move(polynode.Contour));
+//     if (!polynode.Polygon().empty() && match) {
+//         reduceDistance(from, polynode.Polygon());
+//         polynode.Polygon().push_back(polynode.Polygon().front());
+//         paths.push_back(std::move(polynode.Polygon()));
 //     }
-//     for (size_t i = 0; i < polynode.ChildCount(); ++i)
+//     for (size_t i = 0; i < polynode.Count(); ++i)
 //         addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
 // }
 
@@ -388,9 +395,9 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 //     paths.resize(0);
 //     paths.reserve(polytree.Total());
 //     //Open paths are top level only, so ...
-//     for (size_t i = 0; i < polytree.ChildCount(); ++i)
+//     for (size_t i = 0; i < polytree.Count(); ++i)
 //         if (polytree.Childs[i]->IsOpen())
-//             paths.push_back(polytree.Childs[i]->Contour);
+//             paths.push_back(polytree.Childs[i]->Polygon());
 // }
 
 } // namespace GCode

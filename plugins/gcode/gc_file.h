@@ -31,7 +31,7 @@ class File : public GCFile {
 
 public:
     explicit File();
-    explicit File(const Pathss& toolPathss, GCodeParams&& gcp, const PathsD& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
     FileType type() const override { return FileType::GCode; }
@@ -39,11 +39,11 @@ public:
 
 private:
     ////////////////////////////////////////
-    PathsD pocketPaths_; /////
+    Paths pocketPaths_; /////
     Pathss toolPathss_; /////
 
     mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
-    mvector<QPolygonF> normalizedPaths(const QPointF& offset, const PathsD& paths_ = {});
+    mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
 
     void initSave();
     void genGcodeAndTile();
@@ -75,7 +75,7 @@ private:
 
     // FileInterface interfaces
 protected:
-    virtual PathsD merge() const override { return {}; }
+    virtual Paths merge() const override { return {}; }
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 

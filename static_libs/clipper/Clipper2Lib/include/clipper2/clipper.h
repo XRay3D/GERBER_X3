@@ -21,21 +21,28 @@
 
 namespace Clipper2Lib {
 
-static const Rect64 MaxInvalidRect64 = Rect64(
-    (std::numeric_limits<int64_t>::max)(),
-    (std::numeric_limits<int64_t>::max)(),
-    (std::numeric_limits<int64_t>::lowest)(),
-    (std::numeric_limits<int64_t>::lowest)());
+template <typename T>
+static const Rect<T> MaxInvalidRect = Rect<T>(
+    std::numeric_limits<T>::max(),
+    std::numeric_limits<T>::max(),
+    std::numeric_limits<T>::lowest(),
+    std::numeric_limits<T>::lowest());
+
+static const RectI MaxInvalidRectI = RectI(
+    std::numeric_limits<IntType>::max(),
+    std::numeric_limits<IntType>::max(),
+    std::numeric_limits<IntType>::lowest(),
+    std::numeric_limits<IntType>::lowest());
 
 static const RectD MaxInvalidRectD = RectD(
-    (std::numeric_limits<double>::max)(),
-    (std::numeric_limits<double>::max)(),
-    (std::numeric_limits<double>::lowest)(),
-    (std::numeric_limits<double>::lowest)());
+    std::numeric_limits<double>::max(),
+    std::numeric_limits<double>::max(),
+    std::numeric_limits<double>::lowest(),
+    std::numeric_limits<double>::lowest());
 
-inline Paths64 BooleanOp(ClipType cliptype, FillRule fillrule,
-    const Paths64& subjects, const Paths64& clips) {
-    Paths64 result;
+inline PathsI BooleanOp(ClipType cliptype, FillRule fillrule,
+    const PathsI& subjects, const PathsI& clips) {
+    PathsI result;
     Clipper64 clipper;
     clipper.AddSubject(subjects);
     clipper.AddClip(clips);
@@ -44,8 +51,8 @@ inline Paths64 BooleanOp(ClipType cliptype, FillRule fillrule,
 }
 
 inline void BooleanOp(ClipType cliptype, FillRule fillrule,
-    const Paths64& subjects, const Paths64& clips, PolyTree64& solution) {
-    Paths64 sol_open;
+    const PathsI& subjects, const PathsI& clips, PolyTreeI& solution) {
+    PathsI sol_open;
     Clipper64 clipper;
     clipper.AddSubject(subjects);
     clipper.AddClip(clips);
@@ -74,7 +81,7 @@ inline void BooleanOp(ClipType cliptype, FillRule fillrule,
     clipper.Execute(cliptype, fillrule, polytree);
 }
 
-inline Paths64 Intersect(const Paths64& subjects, const Paths64& clips, FillRule fillrule) {
+inline PathsI Intersect(const PathsI& subjects, const PathsI& clips, FillRule fillrule) {
     return BooleanOp(ClipType::Intersection, fillrule, subjects, clips);
 }
 
@@ -82,7 +89,7 @@ inline PathsD Intersect(const PathsD& subjects, const PathsD& clips, FillRule fi
     return BooleanOp(ClipType::Intersection, fillrule, subjects, clips, decimal_prec);
 }
 
-inline Paths64 Union(const Paths64& subjects, const Paths64& clips, FillRule fillrule) {
+inline PathsI Union(const PathsI& subjects, const PathsI& clips, FillRule fillrule) {
     return BooleanOp(ClipType::Union, fillrule, subjects, clips);
 }
 
@@ -90,8 +97,8 @@ inline PathsD Union(const PathsD& subjects, const PathsD& clips, FillRule fillru
     return BooleanOp(ClipType::Union, fillrule, subjects, clips, decimal_prec);
 }
 
-inline Paths64 Union(const Paths64& subjects, FillRule fillrule) {
-    Paths64 result;
+inline PathsI Union(const PathsI& subjects, FillRule fillrule) {
+    PathsI result;
     Clipper64 clipper;
     clipper.AddSubject(subjects);
     clipper.Execute(ClipType::Union, fillrule, result);
@@ -107,7 +114,7 @@ inline PathsD Union(const PathsD& subjects, FillRule fillrule, int decimal_prec 
     return result;
 }
 
-inline Paths64 Difference(const Paths64& subjects, const Paths64& clips, FillRule fillrule) {
+inline PathsI Difference(const PathsI& subjects, const PathsI& clips, FillRule fillrule) {
     return BooleanOp(ClipType::Difference, fillrule, subjects, clips);
 }
 
@@ -115,7 +122,7 @@ inline PathsD Difference(const PathsD& subjects, const PathsD& clips, FillRule f
     return BooleanOp(ClipType::Difference, fillrule, subjects, clips, decimal_prec);
 }
 
-inline Paths64 Xor(const Paths64& subjects, const Paths64& clips, FillRule fillrule) {
+inline PathsI Xor(const PathsI& subjects, const PathsI& clips, FillRule fillrule) {
     return BooleanOp(ClipType::Xor, fillrule, subjects, clips);
 }
 
@@ -123,7 +130,7 @@ inline PathsD Xor(const PathsD& subjects, const PathsD& clips, FillRule fillrule
     return BooleanOp(ClipType::Xor, fillrule, subjects, clips, decimal_prec);
 }
 
-inline Paths64 InflatePaths(const Paths64& paths, double delta,
+inline PathsI InflatePaths(const PathsI& paths, double delta,
     JoinType jt, EndType et, double miter_limit = 2.0) {
     ClipperOffset clip_offset(miter_limit);
     clip_offset.AddPaths(paths, jt, et);
@@ -135,16 +142,16 @@ inline PathsD InflatePaths(const PathsD& paths, double delta,
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
     ClipperOffset clip_offset(miter_limit);
-    clip_offset.AddPaths(ScalePaths<int64_t, double>(paths, scale), jt, et);
-    Paths64 tmp = clip_offset.Execute(delta * scale);
-    return ScalePaths<double, int64_t>(tmp, 1 / scale);
+    clip_offset.AddPaths(ScalePaths<IntType>(paths, scale), jt, et);
+    PathsI tmp = clip_offset.Execute(delta * scale);
+    return ScalePaths<double>(tmp, 1 / scale);
 }
 
-inline Path64 TranslatePath(const Path64& path, int64_t dx, int64_t dy) {
-    Path64 result;
+inline PathI TranslatePath(const PathI& path, IntType dx, IntType dy) {
+    PathI result;
     result.reserve(path.size());
-    for (const Point64& pt : path)
-        result.push_back(Point64(pt.x + dx, pt.y + dy));
+    for (const PointI& pt : path)
+        result.push_back(PointI(pt.x + dx, pt.y + dy));
     return result;
 }
 
@@ -156,10 +163,10 @@ inline PathD TranslatePath(const PathD& path, double dx, double dy) {
     return result;
 }
 
-inline Paths64 TranslatePaths(const Paths64& paths, int64_t dx, int64_t dy) {
-    Paths64 result;
+inline PathsI TranslatePaths(const PathsI& paths, IntType dx, IntType dy) {
+    PathsI result;
     result.reserve(paths.size());
-    for (const Path64& path : paths)
+    for (const PathI& path : paths)
         result.push_back(TranslatePath(path, dx, dy));
     return result;
 }
@@ -172,9 +179,10 @@ inline PathsD TranslatePaths(const PathsD& paths, double dx, double dy) {
     return result;
 }
 
-inline Rect64 Bounds(const Path64& path) {
-    Rect64 rec = MaxInvalidRect64;
-    for (const Point64& pt : path) {
+template <typename T>
+inline Rect<T> Bounds(const Path<T>& path) {
+    Rect<T> rec = MaxInvalidRect<T>;
+    for (const Point<T>& pt : path) {
         if (pt.x < rec.left)
             rec.left = pt.x;
         if (pt.x > rec.right)
@@ -185,14 +193,15 @@ inline Rect64 Bounds(const Path64& path) {
             rec.bottom = pt.y;
     }
     if (rec.IsEmpty())
-        return Rect64();
+        return Rect<T>();
     return rec;
 }
 
-inline Rect64 Bounds(const Paths64& paths) {
-    Rect64 rec = MaxInvalidRect64;
-    for (const Path64& path : paths)
-        for (const Point64& pt : path) {
+template <typename T>
+inline Rect<T> Bounds(const Paths<T>& paths) {
+    Rect<T> rec = MaxInvalidRect<T>;
+    for (const Path<T>& path : paths)
+        for (const Point<T>& pt : path) {
             if (pt.x < rec.left)
                 rec.left = pt.x;
             if (pt.x > rec.right)
@@ -203,72 +212,37 @@ inline Rect64 Bounds(const Paths64& paths) {
                 rec.bottom = pt.y;
         }
     if (rec.IsEmpty())
-        return Rect64();
+        return Rect<T>();
     return rec;
 }
 
-inline RectD Bounds(const PathD& path) {
-    RectD rec = MaxInvalidRectD;
-    for (const PointD& pt : path) {
-        if (pt.x < rec.left)
-            rec.left = pt.x;
-        if (pt.x > rec.right)
-            rec.right = pt.x;
-        if (pt.y < rec.top)
-            rec.top = pt.y;
-        if (pt.y > rec.bottom)
-            rec.bottom = pt.y;
-    }
-    if (rec.IsEmpty())
-        return RectD();
-    return rec;
-}
-
-inline RectD Bounds(const PathsD& paths) {
-    RectD rec = MaxInvalidRectD;
-    for (const PathD& path : paths)
-        for (const PointD& pt : path) {
-            if (pt.x < rec.left)
-                rec.left = pt.x;
-            if (pt.x > rec.right)
-                rec.right = pt.x;
-            if (pt.y < rec.top)
-                rec.top = pt.y;
-            if (pt.y > rec.bottom)
-                rec.bottom = pt.y;
-        }
-    if (rec.IsEmpty())
-        return RectD();
-    return rec;
-}
-
-inline Path64 RectClip(const Rect64& rect, const Path64& path) {
+inline PathI RectClip(const RectI& rect, const PathI& path) {
     if (rect.IsEmpty() || path.empty())
-        return Path64();
-    Rect64 pathRec = Bounds(path);
+        return PathI();
+    RectI pathRec = Bounds(path);
     if (!rect.Intersects(pathRec))
-        return Path64();
+        return PathI();
     if (rect.Contains(pathRec))
         return path;
     class RectClip rc(rect);
     return rc.Execute(path);
 }
 
-inline Paths64 RectClip(const Rect64& rect, const Paths64& paths) {
+inline PathsI RectClip(const RectI& rect, const PathsI& paths) {
     if (rect.IsEmpty() || paths.empty())
-        return Paths64();
+        return PathsI();
     class RectClip rc(rect);
-    Paths64 result;
+    PathsI result;
     result.reserve(paths.size());
 
-    for (const Path64& p : paths) {
-        Rect64 pathRec = Bounds(p);
+    for (const PathI& p : paths) {
+        RectI pathRec = Bounds(p);
         if (!rect.Intersects(pathRec))
             continue;
         else if (rect.Contains(pathRec))
             result.push_back(p);
         else {
-            Path64 p2 = rc.Execute(p);
+            PathI p2 = rc.Execute(p);
             if (!p2.empty())
                 result.push_back(std::move(p2));
         }
@@ -281,10 +255,10 @@ inline PathD RectClip(const RectD& rect, const PathD& path, int precision = 2) {
         return PathD();
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
-    Rect64 r = ScaleRect<int64_t, double>(rect, scale);
+    RectI r = ScaleRect<IntType, double>(rect, scale);
     class RectClip rc(r);
-    Path64 p = ScalePath<int64_t, double>(path, scale);
-    return ScalePath<double, int64_t>(rc.Execute(p), 1 / scale);
+    PathI p = ScalePath<IntType, double>(path, scale);
+    return ScalePath<double, IntType>(rc.Execute(p), 1 / scale);
 }
 
 inline PathsD RectClip(const RectD& rect, const PathsD& paths, int precision = 2) {
@@ -292,7 +266,7 @@ inline PathsD RectClip(const RectD& rect, const PathsD& paths, int precision = 2
         return PathsD();
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
-    Rect64 r = ScaleRect<int64_t, double>(rect, scale);
+    RectI r = ScaleRect<IntType, double>(rect, scale);
     class RectClip rc(r);
     PathsD result;
     result.reserve(paths.size());
@@ -303,20 +277,20 @@ inline PathsD RectClip(const RectD& rect, const PathsD& paths, int precision = 2
         else if (rect.Contains(pathRec))
             result.push_back(path);
         else {
-            Path64 p = ScalePath<int64_t, double>(path, scale);
+            PathI p = ScalePath<IntType, double>(path, scale);
             p = rc.Execute(p);
             if (!p.empty())
-                result.push_back(ScalePath<double, int64_t>(p, 1 / scale));
+                result.push_back(ScalePath<double, IntType>(p, 1 / scale));
         }
     }
     return result;
 }
 
-inline Paths64 RectClipLines(const Rect64& rect, const Path64& path) {
-    Paths64 result;
+inline PathsI RectClipLines(const RectI& rect, const PathI& path) {
+    PathsI result;
     if (rect.IsEmpty() || path.empty())
         return result;
-    Rect64 pathRec = Bounds(path);
+    RectI pathRec = Bounds(path);
     if (!rect.Intersects(pathRec))
         return result;
     if (rect.Contains(pathRec)) {
@@ -327,19 +301,19 @@ inline Paths64 RectClipLines(const Rect64& rect, const Path64& path) {
     return rcl.Execute(path);
 }
 
-inline Paths64 RectClipLines(const Rect64& rect, const Paths64& paths) {
-    Paths64 result;
+inline PathsI RectClipLines(const RectI& rect, const PathsI& paths) {
+    PathsI result;
     if (rect.IsEmpty() || paths.empty())
         return result;
     class RectClipLines rcl(rect);
-    for (const Path64& p : paths) {
-        Rect64 pathRec = Bounds(p);
+    for (const PathI& p : paths) {
+        RectI pathRec = Bounds(p);
         if (!rect.Intersects(pathRec))
             continue;
         else if (rect.Contains(pathRec))
             result.push_back(p);
         else {
-            Paths64 pp = rcl.Execute(p);
+            PathsI pp = rcl.Execute(p);
             if (!pp.empty())
                 result.insert(result.end(), pp.begin(), pp.end());
         }
@@ -352,10 +326,10 @@ inline PathsD RectClipLines(const RectD& rect, const PathD& path, int precision 
         return PathsD();
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
-    Rect64 r = ScaleRect<int64_t, double>(rect, scale);
+    RectI r = ScaleRect<IntType, double>(rect, scale);
     class RectClipLines rcl(r);
-    Path64 p = ScalePath<int64_t, double>(path, scale);
-    return ScalePaths<double, int64_t>(rcl.Execute(p), 1 / scale);
+    PathI p = ScalePath<IntType, double>(path, scale);
+    return ScalePaths<double>(rcl.Execute(p), 1 / scale);
 }
 
 inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precision = 2) {
@@ -364,7 +338,7 @@ inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precisio
         return result;
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
-    Rect64 r = ScaleRect<int64_t, double>(rect, scale);
+    RectI r = ScaleRect<IntType, double>(rect, scale);
     class RectClipLines rcl(r);
     result.reserve(paths.size());
     for (const PathD& path : paths) {
@@ -374,11 +348,11 @@ inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precisio
         else if (rect.Contains(pathRec))
             result.push_back(path);
         else {
-            Path64 p = ScalePath<int64_t, double>(path, scale);
-            Paths64 pp = rcl.Execute(p);
+            PathI p = ScalePath<IntType, double>(path, scale);
+            PathsI pp = rcl.Execute(p);
             if (pp.empty())
                 continue;
-            PathsD ppd = ScalePaths<double, int64_t>(pp, 1 / scale);
+            PathsD ppd = ScalePaths<double>(pp, 1 / scale);
             result.insert(result.end(), ppd.begin(), ppd.end());
         }
     }
@@ -387,7 +361,7 @@ inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precisio
 
 namespace details {
 
-    inline void PolyPathToPaths64(const PolyPath64& polypath, Paths64& paths) {
+    inline void PolyPathToPaths64(const PolyPath64& polypath, PathsI& paths) {
         paths.push_back(polypath.Polygon());
         for (const auto& child : polypath)
             PolyPathToPaths64(*child, paths);
@@ -401,7 +375,7 @@ namespace details {
 
     inline bool PolyPath64ContainsChildren(const PolyPath64& pp) {
         for (const auto& child : pp) {
-            for (const Point64& pt : child->Polygon())
+            for (const PointI& pt : child->Polygon())
                 if (PointInPolygon(pt, pp.Polygon()) == PointInPolygonResult::IsOutside)
                     return false;
             if (child->Count() > 0 && !PolyPath64ContainsChildren(*child))
@@ -410,14 +384,14 @@ namespace details {
         return true;
     }
 
-    inline bool GetInt(std::string::const_iterator& iter, const std::string::const_iterator& end_iter, int64_t& val) {
+    inline bool GetInt(std::string::const_iterator& iter, const std::string::const_iterator& end_iter, IntType& val) {
         val = 0;
         bool is_neg = *iter == '-';
         if (is_neg)
             ++iter;
         std::string::const_iterator start_iter = iter;
         while (iter != end_iter && ((*iter >= '0') && (*iter <= '9'))) {
-            val = val * 10 + (static_cast<int64_t>(*iter++) - '0');
+            val = val * 10 + (static_cast<IntType>(*iter++) - '0');
         }
         if (is_neg)
             val = -val;
@@ -441,7 +415,7 @@ namespace details {
             }
             if (dec_pos != 1)
                 --dec_pos;
-            val = val * 10 + ((int64_t)(*iter++) - '0');
+            val = val * 10 + ((IntType)(*iter++) - '0');
         }
         if (iter == start_iter || dec_pos == 0)
             return false;
@@ -495,8 +469,8 @@ namespace details {
 
 } // namespace details
 
-inline Paths64 PolyTreeToPaths64(const PolyTree64& polytree) {
-    Paths64 result;
+inline PathsI PolyTreeToPaths64(const PolyTreeI& polytree) {
+    PathsI result;
     for (const auto& child : polytree)
         details::PolyPathToPaths64(*child, result);
     return result;
@@ -509,26 +483,26 @@ inline PathsD PolyTreeToPathsD(const PolyTreeD& polytree) {
     return result;
 }
 
-inline bool CheckPolytreeFullyContainsChildren(const PolyTree64& polytree) {
+inline bool CheckPolytreeFullyContainsChildren(const PolyTreeI& polytree) {
     for (const auto& child : polytree)
         if (child->Count() > 0 && !details::PolyPath64ContainsChildren(*child))
             return false;
     return true;
 }
 
-inline Path64 MakePath(const std::string& s) {
+inline PathI MakePath(const std::string& s) {
     const std::string skip_chars = " ,(){}[]";
-    Path64 result;
+    PathI result;
     std::string::const_iterator s_iter = s.cbegin();
     details::SkipUserDefinedChars(s_iter, s.cend(), skip_chars);
     while (s_iter != s.cend()) {
-        int64_t y = 0, x = 0;
+        IntType y = 0, x = 0;
         if (!details::GetInt(s_iter, s.cend(), x))
             break;
         details::SkipSpacesWithOptionalComma(s_iter, s.cend());
         if (!details::GetInt(s_iter, s.cend(), y))
             break;
-        result.push_back(Point64(x, y));
+        result.push_back(PointI(x, y));
         details::SkipUserDefinedChars(s_iter, s.cend(), skip_chars);
     }
     return result;
@@ -552,18 +526,18 @@ inline PathD MakePathD(const std::string& s) {
     return result;
 }
 
-inline Path64 TrimCollinear(const Path64& p, bool is_open_path = false) {
+inline PathI TrimCollinear(const PathI& p, bool is_open_path = false) {
     size_t len = p.size();
     if (len < 3) {
         if (!is_open_path || len < 2 || p[0] == p[1])
-            return Path64();
+            return PathI();
         else
             return p;
     }
 
-    Path64 dst;
+    PathI dst;
     dst.reserve(len);
-    Path64::const_iterator srcIt = p.cbegin(), prevIt, stop = p.cend() - 1;
+    PathI::const_iterator srcIt = p.cbegin(), prevIt, stop = p.cend() - 1;
 
     if (!is_open_path) {
         while (srcIt != stop && !CrossProduct(*stop, *srcIt, *(srcIt + 1)))
@@ -571,7 +545,7 @@ inline Path64 TrimCollinear(const Path64& p, bool is_open_path = false) {
         while (srcIt != stop && !CrossProduct(*(stop - 1), *stop, *srcIt))
             --stop;
         if (srcIt == stop)
-            return Path64();
+            return PathI();
     }
 
     prevIt = srcIt++;
@@ -591,7 +565,7 @@ inline Path64 TrimCollinear(const Path64& p, bool is_open_path = false) {
         while (dst.size() > 2 && !CrossProduct(dst[dst.size() - 1], dst[dst.size() - 2], dst[0]))
             dst.pop_back();
         if (dst.size() < 3)
-            return Path64();
+            return PathI();
     }
     return dst;
 }
@@ -599,9 +573,9 @@ inline Path64 TrimCollinear(const Path64& p, bool is_open_path = false) {
 inline PathD TrimCollinear(const PathD& path, int precision, bool is_open_path = false) {
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
-    Path64 p = ScalePath<int64_t, double>(path, scale);
+    PathI p = ScalePath<IntType, double>(path, scale);
     p = TrimCollinear(p, is_open_path);
-    return ScalePath<double, int64_t>(p, 1 / scale);
+    return ScalePath<double, IntType>(p, 1 / scale);
 }
 
 template <typename T>

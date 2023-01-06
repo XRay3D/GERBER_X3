@@ -87,8 +87,8 @@ GraphicObject Line::toGo() const {
 
     Paths paths;
     //    ClipperOffset offset;
-    //    offset.AddPath(p, jtRound, etOpenRound);
-    //    offset.Execute(paths, thickness * uScale);
+    //    offset.AddPath(p, JoinType::Round, EndType::Round);
+    //    paths = offset.Execute(thickness * uScale);
 
     return {id, p, paths};
 }

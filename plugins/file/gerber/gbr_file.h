@@ -61,20 +61,21 @@ public:
     const auto& graphicObjects2() const { return graphicObjects_; };
 
 protected:
-    PathsD merge() const override;
+    Paths merge() const override;
 
 private:
     QList<Comp::Component> components_;
     mvector<GraphicObject> graphicObjects_;
     ApertureMap apertures_;
-    void grouping(PolyTreeD *node, Pathss* pathss, Group group);
+    void grouping(PolyTree& node, Pathss* pathss);
     Format format_;
+    Group group_ {};
     // Layer layer = Copper;
     // Miror miror = Vertical;
     // QPointf offset;
 
     QVector<int> rawIndex;
-    std::forward_list<PathD> checkList;
+    std::forward_list<Path> checkList;
     static inline File* crutch;
 
     // FileTree::Node interface

@@ -26,9 +26,9 @@ using sl = std::source_location;
 using sl = std::experimental::source_location;
 #endif
 
-using namespace Clipper2Lib;
 
-void dbgPaths(PathsD ps, const QString& fileName, bool closed = false, const Tool& tool = {1});
+
+void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {0.});
 
 class GiError;
 
@@ -86,21 +86,21 @@ class Creator : public QObject, public ProgressCancel {
 public:
     Creator();
     void reset();
-    //    Creator(const PathsD& workingPaths, const bool convent, SideOfMilling side);
+    //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~Creator() override;
 
     File* file() const;
 
     std::pair<int, int> getProgress();
 
-    void addRawPaths(PathsD rawPaths);
+    void addRawPaths(Paths rawPaths);
     void addSupportPaths(Pathss supportPaths);
-    void addPaths(const PathsD& paths);
+    void addPaths(const Paths& paths);
 
-    Pathss& groupedPaths(Grouping group, cInt k = uScale, bool fl = {});
+    Pathss& groupedPaths(Grouping group, Point::Type k = uScale, bool fl = {});
 
-    /*static*/ PathsD& sortB(PathsD& src);
-    /*static*/ PathsD& sortBE(PathsD& src);
+    /*static*/ Paths& sortB(Paths& src);
+    /*static*/ Paths& sortBE(Paths& src);
 
     /*static*/ Pathss& sortB(Pathss& src);
     /*static*/ Pathss& sortBE(Pathss& src);
@@ -128,16 +128,16 @@ signals:
 protected:
     bool createability(bool side);
 
-    bool pointOnPolygon(const QLineF& l2, const PathD& path, PointD* ret = nullptr);
-    void stacking(PathsD& paths);
-    void mergeSegments(PathsD& paths, double glue = 0.0);
+    bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret = nullptr);
+    void stacking(Paths& paths);
+    void mergeSegments(Paths& paths, double glue = 0.0);
 
-    void mergePaths(PathsD& paths, const double dist = 0.0);
+    void mergePaths(Paths& paths, const double dist = 0.0);
 
-    void markPolyTreeDByNesting(PolyTreeD& polynode);
-    void sortPolyTreeDByNesting(PolyTreeD& polynode);
+    void markPolyTreeDByNesting(PolyTree& polynode);
+    void sortPolyTreeByNesting(PolyTree& polynode);
 
-    std::unordered_map<void*, int> Nesting;
+    std::unordered_map<void*, int> nesting;
 
     virtual void create() = 0;
     virtual GCodeType type() = 0;
@@ -148,16 +148,16 @@ protected:
     //    static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
-    PathsD workingPs;
-    PathsD workingRawPs;
-    PathsD returnPs;
+    Paths workingPs;
+    Paths workingRawPs;
+    Paths returnPs;
     Pathss returnPss;
     Pathss supportPss;
     Pathss groupedPss;
 
     double toolDiameter {};
     double dOffset {};
-    cInt stepOver {};
+    Point::Type stepOver {};
     GCodeParams gcp_;
 
     void isContinueCalc();

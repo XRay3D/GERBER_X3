@@ -17,11 +17,11 @@
 
 namespace Clipper2Lib {
 
-static const Rect64 invalid_rect = Rect64(
-    std::numeric_limits<int64_t>::max(),
-    std::numeric_limits<int64_t>::max(),
-    -std::numeric_limits<int64_t>::max(),
-    -std::numeric_limits<int64_t>::max());
+static const RectI invalid_rect = RectI(
+    std::numeric_limits<IntType>::max(),
+    std::numeric_limits<IntType>::max(),
+    -std::numeric_limits<IntType>::max(),
+    -std::numeric_limits<IntType>::max());
 
 // Every closed path (or polygon) is made up of a series of vertices forming
 // edges that alternate between going up (relative to the Y-axis) and going
@@ -30,10 +30,10 @@ static const Rect64 invalid_rect = Rect64(
 // vertices where descending bounds become ascending ones.
 
 struct Scanline {
-    int64_t y = 0;
+    IntType y = 0;
     Scanline* next = nullptr;
 
-    explicit Scanline(int64_t y_)
+    explicit Scanline(IntType y_)
         : y(y_) { }
 };
 
@@ -111,7 +111,7 @@ inline bool IsInvalidPath(OutPt* op) {
  *               +inf (180deg) <--- o ---> -inf (0deg)                          *
  *******************************************************************************/
 
-inline double GetDx(const Point64& pt1, const Point64& pt2) {
+inline double GetDx(const PointI& pt1, const PointI& pt2) {
     double dy = double(pt2.y - pt1.y);
     if (dy != 0)
         return double(pt2.x - pt1.x) / dy;
@@ -121,13 +121,13 @@ inline double GetDx(const Point64& pt1, const Point64& pt2) {
         return std::numeric_limits<double>::max();
 }
 
-inline int64_t TopX(const Active& ae, const int64_t currentY) {
+inline IntType TopX(const Active& ae, const IntType currentY) {
     if ((currentY == ae.top.y) || (ae.top.x == ae.bot.x))
         return ae.top.x;
     else if (currentY == ae.bot.y)
         return ae.bot.x;
     else
-        return ae.bot.x + static_cast<int64_t>(std::nearbyint(ae.dx * (currentY - ae.bot.y)));
+        return ae.bot.x + static_cast<IntType>(std::nearbyint(ae.dx * (currentY - ae.bot.y)));
     // nb: std::nearbyint (or std::round) substantially *improves* performance here
     // as it greatly improves the likelihood of edge adjacency in ProcessIntersectList().
 }
@@ -253,7 +253,7 @@ inline int PointCount(OutPt* op) {
     return cnt;
 }
 
-inline OutPt* InsertOp(const Point64& pt, OutPt* insertAfter) {
+inline OutPt* InsertOp(const PointI& pt, OutPt* insertAfter) {
     OutPt* result = new OutPt(pt, insertAfter->outrec);
     result->next = insertAfter->next;
     insertAfter->next->prev = result;
@@ -329,8 +329,8 @@ double Area(OutPt* op) {
     return result * 0.5;
 }
 
-inline double AreaTriangle(const Point64& pt1,
-    const Point64& pt2, const Point64& pt3) {
+inline double AreaTriangle(const PointI& pt1,
+    const PointI& pt2, const PointI& pt3) {
     return (static_cast<double>(pt3.y + pt1.y) * static_cast<double>(pt3.x - pt1.x) + static_cast<double>(pt1.y + pt2.y) * static_cast<double>(pt1.x - pt2.x) + static_cast<double>(pt2.y + pt3.y) * static_cast<double>(pt2.x - pt3.x));
 }
 
@@ -372,7 +372,7 @@ inline void UncoupleOutRec(Active ae) {
     outrec->back_edge = nullptr;
 }
 
-inline bool PtsReallyClose(const Point64& pt1, const Point64& pt2) {
+inline bool PtsReallyClose(const PointI& pt1, const PointI& pt2) {
     return (std::llabs(pt1.x - pt2.x) < 2) && (std::llabs(pt1.y - pt2.y) < 2);
 }
 
@@ -405,7 +405,7 @@ inline bool TestJoinWithPrev1(const Active& e) {
     return IsHotEdge(e) && !IsOpen(e) && e.prev_in_ael && e.prev_in_ael->curr_x == e.curr_x && IsHotEdge(*e.prev_in_ael) && !IsOpen(*e.prev_in_ael) && (CrossProduct(e.prev_in_ael->top, e.bot, e.top) == 0);
 }
 
-inline bool TestJoinWithPrev2(const Active& e, const Point64& curr_pt) {
+inline bool TestJoinWithPrev2(const Active& e, const PointI& curr_pt) {
     return IsHotEdge(e) && !IsOpen(e) && e.prev_in_ael && !IsOpen(*e.prev_in_ael) && IsHotEdge(*e.prev_in_ael) && (e.prev_in_ael->top.y < e.bot.y) && (std::llabs(TopX(*e.prev_in_ael, curr_pt.y) - curr_pt.x) < 2) && (CrossProduct(e.prev_in_ael->top, curr_pt, e.top) == 0);
 }
 
@@ -415,7 +415,7 @@ inline bool TestJoinWithNext1(const Active& e) {
     return IsHotEdge(e) && !IsOpen(e) && e.next_in_ael && (e.next_in_ael->curr_x == e.curr_x) && IsHotEdge(*e.next_in_ael) && !IsOpen(*e.next_in_ael) && (CrossProduct(e.next_in_ael->top, e.bot, e.top) == 0);
 }
 
-inline bool TestJoinWithNext2(const Active& e, const Point64& curr_pt) {
+inline bool TestJoinWithNext2(const Active& e, const PointI& curr_pt) {
     return IsHotEdge(e) && !IsOpen(e) && e.next_in_ael && !IsOpen(*e.next_in_ael) && IsHotEdge(*e.next_in_ael) && (e.next_in_ael->top.y < e.bot.y) && (std::llabs(TopX(*e.next_in_ael, curr_pt.y) - curr_pt.x) < 2) && (CrossProduct(e.next_in_ael->top, curr_pt, e.top) == 0);
 }
 
@@ -437,7 +437,7 @@ void ClipperBase::DeleteEdges(Active*& e) {
 
 void ClipperBase::CleanUp() {
     DeleteEdges(actives_);
-    scanline_list_ = std::priority_queue<int64_t>();
+    scanline_list_ = std::priority_queue<IntType>();
     intersect_nodes_.clear();
     DisposeAllOutRecs();
 }
@@ -499,30 +499,30 @@ void ClipperBase::SetZ(const Active& e1, const Active& e2, Point64& ip) {
 }
 #endif
 
-void ClipperBase::AddPath(const Path64& path, PathType polytype, bool is_open) {
-    Paths64 tmp;
+void ClipperBase::AddPath(const PathI& path, PathType polytype, bool is_open) {
+    PathsI tmp;
     tmp.push_back(path);
     AddPaths(tmp, polytype, is_open);
 }
 
-void ClipperBase::AddPaths(const Paths64& paths, PathType polytype, bool is_open) {
+void ClipperBase::AddPaths(const PathsI& paths, PathType polytype, bool is_open) {
     if (is_open)
         has_open_paths_ = true;
     minima_list_sorted_ = false;
 
-    Path64::size_type total_vertex_count = 0;
-    for (const Path64& path : paths)
+    PathI::size_type total_vertex_count = 0;
+    for (const PathI& path : paths)
         total_vertex_count += path.size();
     if (total_vertex_count == 0)
         return;
     Vertex *vertices = new Vertex[total_vertex_count], *v = vertices;
-    for (const Path64& path : paths) {
+    for (const PathI& path : paths) {
         // for each path create a circular double linked list of vertices
         Vertex *v0 = v, *curr_v = v, *prev_v = nullptr;
 
         v->prev = nullptr;
         int cnt = 0;
-        for (const Point64& pt : path) {
+        for (const PointI& pt : path) {
             if (prev_v) {
                 if (prev_v->pt == pt)
                     continue; // ie skips duplicates
@@ -598,11 +598,11 @@ void ClipperBase::AddPaths(const Paths64& paths, PathType polytype, bool is_open
     vertex_lists_.emplace_back(vertices);
 } // end AddPaths
 
-inline void ClipperBase::InsertScanline(int64_t y) {
+inline void ClipperBase::InsertScanline(IntType y) {
     scanline_list_.push(y);
 }
 
-bool ClipperBase::PopScanline(int64_t& y) {
+bool ClipperBase::PopScanline(IntType& y) {
     if (scanline_list_.empty())
         return false;
     y = scanline_list_.top();
@@ -612,7 +612,7 @@ bool ClipperBase::PopScanline(int64_t& y) {
     return true;
 }
 
-bool ClipperBase::PopLocalMinima(int64_t y, LocalMinima*& local_minima) {
+bool ClipperBase::PopLocalMinima(IntType y, LocalMinima*& local_minima) {
     if (current_locmin_iter_ == minima_list_.end() || (*current_locmin_iter_)->vertex->pt.y != y)
         return false;
     local_minima = (*current_locmin_iter_++);
@@ -851,7 +851,7 @@ bool IsValidAelOrder(const Active& resident, const Active& newcomer) {
             >= 0;
     }
 
-    int64_t y = newcomer.bot.y;
+    IntType y = newcomer.bot.y;
     bool newcomerIsLeft = newcomer.is_left_bound;
 
     if (resident.bot.y != y || resident.local_min->vertex->pt.y != y)
@@ -902,7 +902,7 @@ void InsertRightEdge(Active& e, Active& e2) {
     e.next_in_ael = &e2;
 }
 
-void ClipperBase::InsertLocalMinimaIntoAEL(int64_t bot_y) {
+void ClipperBase::InsertLocalMinimaIntoAEL(IntType bot_y) {
     LocalMinima* local_minima;
     Active *left_bound, *right_bound;
     // Add any local minima (if any) at BotY ...
@@ -1021,7 +1021,7 @@ inline bool ClipperBase::PopHorz(Active*& e) {
 }
 
 OutPt* ClipperBase::AddLocalMinPoly(Active& e1, Active& e2,
-    const Point64& pt, bool is_new) {
+    const PointI& pt, bool is_new) {
     OutRec* outrec = new OutRec();
     outrec->idx = (unsigned)outrec_list_.size();
     outrec_list_.push_back(outrec);
@@ -1067,7 +1067,7 @@ OutPt* ClipperBase::AddLocalMinPoly(Active& e1, Active& e2,
     return op;
 }
 
-OutPt* ClipperBase::AddLocalMaxPoly(Active& e1, Active& e2, const Point64& pt) {
+OutPt* ClipperBase::AddLocalMaxPoly(Active& e1, Active& e2, const PointI& pt) {
     if (IsFront(e1) == IsFront(e2)) {
         if (IsOpenEnd(e1))
             SwapFrontBackSides(*e1.outrec);
@@ -1154,7 +1154,7 @@ void ClipperBase::JoinOutrecPaths(Active& e1, Active& e2) {
     e2.outrec = nullptr;
 }
 
-OutPt* ClipperBase::AddOutPt(const Active& e, const Point64& pt) {
+OutPt* ClipperBase::AddOutPt(const Active& e, const PointI& pt) {
     OutPt* new_op = nullptr;
 
     // Outrec.OutPts: a circular doubly-linked-list of POutPt where ...
@@ -1226,7 +1226,7 @@ void ClipperBase::DoSplitOp(OutRec* outrec, OutPt* splitOp) {
     OutPt* nextNextOp = splitOp->next->next;
     outrec->pts = prevOp;
 
-    Point64 ip;
+    PointI ip;
     GetIntersectPoint(prevOp->pt, splitOp->pt,
         splitOp->next->pt, nextNextOp->pt, ip);
 
@@ -1378,7 +1378,7 @@ void ClipperBase::CompleteSplit(OutPt* op1, OutPt* op2, OutRec& outrec) {
     }
 }
 
-OutPt* ClipperBase::StartOpenPath(Active& e, const Point64& pt) {
+OutPt* ClipperBase::StartOpenPath(Active& e, const PointI& pt) {
     OutRec* outrec = new OutRec();
     outrec->idx = outrec_list_.size();
     outrec_list_.push_back(outrec);
@@ -1440,7 +1440,7 @@ Active* FindEdgeWithMatchingLocMin(Active* e) {
     return result;
 }
 
-OutPt* ClipperBase::IntersectEdges(Active& e1, Active& e2, const Point64& pt) {
+OutPt* ClipperBase::IntersectEdges(Active& e1, Active& e2, const PointI& pt) {
     // MANAGE OPEN PATH INTERSECTIONS SEPARATELY ...
     if (has_open_paths_ && (IsOpen(e1) || IsOpen(e2))) {
         if (IsOpen(e1) && IsOpen(e2))
@@ -1622,7 +1622,7 @@ OutPt* ClipperBase::IntersectEdges(Active& e1, Active& e2, const Point64& pt) {
 #endif
         SwapOutrecs(e1, e2);
     } else {
-        int64_t e1Wc2, e2Wc2;
+        IntType e1Wc2, e2Wc2;
         switch (fillrule_) {
         case FillRule::EvenOdd:
         case FillRule::NonZero:
@@ -1689,7 +1689,7 @@ inline void ClipperBase::DeleteFromAEL(Active& e) {
     delete &e;
 }
 
-inline void ClipperBase::AdjustCurrXAndCopyToSEL(const int64_t top_y) {
+inline void ClipperBase::AdjustCurrXAndCopyToSEL(const IntType top_y) {
     Active* e = actives_;
     sel_ = e;
     while (e) {
@@ -1706,7 +1706,7 @@ bool ClipperBase::ExecuteInternal(ClipType ct, FillRule fillrule, bool use_polyt
     fillrule_ = fillrule;
     using_polytree_ = use_polytrees;
     Reset();
-    int64_t y;
+    IntType y;
     if (ct == ClipType::None || !PopScanline(y))
         return true;
 
@@ -1729,17 +1729,17 @@ bool ClipperBase::ExecuteInternal(ClipType ct, FillRule fillrule, bool use_polyt
     return succeeded_;
 }
 
-void ClipperBase::DoIntersections(const int64_t top_y) {
+void ClipperBase::DoIntersections(const IntType top_y) {
     if (BuildIntersectList(top_y)) {
         ProcessIntersectList();
         intersect_nodes_.clear();
     }
 }
 
-void ClipperBase::AddNewIntersectNode(Active& e1, Active& e2, int64_t top_y) {
-    Point64 ip;
+void ClipperBase::AddNewIntersectNode(Active& e1, Active& e2, IntType top_y) {
+    PointI ip;
     if (!GetIntersectPoint(e1.bot, e1.top, e2.bot, e2.top, ip))
-        ip = Point64(e1.curr_x, top_y); // parallel edges
+        ip = PointI(e1.curr_x, top_y); // parallel edges
 
     // rounding errors can occasionally place the calculated intersection
     // point either below or above the scanbeam, so check and correct ...
@@ -1769,7 +1769,7 @@ void ClipperBase::AddNewIntersectNode(Active& e1, Active& e2, int64_t top_y) {
     intersect_nodes_.push_back(IntersectNode(&e1, &e2, ip));
 }
 
-bool ClipperBase::BuildIntersectList(const int64_t top_y) {
+bool ClipperBase::BuildIntersectList(const IntType top_y) {
     if (!actives_ || !actives_->next_in_ael)
         return false;
 
@@ -1880,7 +1880,7 @@ void ClipperBase::SwapPositionsInAEL(Active& e1, Active& e2) {
 }
 
 bool ClipperBase::ResetHorzDirection(const Active& horz,
-    const Active* max_pair, int64_t& horz_left, int64_t& horz_right) {
+    const Active* max_pair, IntType& horz_left, IntType& horz_right) {
     if (horz.bot.x == horz.top.x) {
         // the horizontal edge is going nowhere ...
         horz_left = horz.curr_x;
@@ -1901,13 +1901,13 @@ bool ClipperBase::ResetHorzDirection(const Active& horz,
 }
 
 inline bool HorzIsSpike(const Active& horzEdge) {
-    Point64 nextPt = NextVertex(horzEdge)->pt;
+    PointI nextPt = NextVertex(horzEdge)->pt;
     return (nextPt.y == horzEdge.bot.y) && (horzEdge.bot.x < horzEdge.top.x) != (horzEdge.top.x < nextPt.x);
 }
 
 inline void TrimHorz(Active& horzEdge, bool preserveCollinear) {
     bool wasTrimmed = false;
-    Point64 pt = NextVertex(horzEdge)->pt;
+    PointI pt = NextVertex(horzEdge)->pt;
     while (pt.y == horzEdge.top.y) {
         // always trim 180 deg. spikes (in closed paths)
         // but otherwise break if preserveCollinear = true
@@ -1942,9 +1942,9 @@ void ClipperBase::DoHorizontal(Active& horz)
  *         /              |        /       |       /                            *
  *******************************************************************************/
 {
-    Point64 pt;
+    PointI pt;
     bool horzIsOpen = IsOpen(horz);
-    int64_t y = horz.bot.y;
+    IntType y = horz.bot.y;
     Vertex* vertex_max = nullptr;
     Active* max_pair = nullptr;
 
@@ -1959,14 +1959,14 @@ void ClipperBase::DoHorizontal(Active& horz)
         }
     }
 
-    int64_t horz_left, horz_right;
+    IntType horz_left, horz_right;
     bool is_left_to_right = ResetHorzDirection(horz, max_pair, horz_left, horz_right);
 
     if (IsHotEdge(horz))
 #ifdef USINGZ
         AddOutPt(horz, Point64(horz.curr_x, y, horz.bot.z));
 #else
-        AddOutPt(horz, Point64(horz.curr_x, y));
+        AddOutPt(horz, PointI(horz.curr_x, y));
 #endif
 
     OutPt* op;
@@ -2029,7 +2029,7 @@ void ClipperBase::DoHorizontal(Active& horz)
                 }
             }
 
-            pt = Point64(e->curr_x, horz.bot.y);
+            pt = PointI(e->curr_x, horz.bot.y);
 
             if (is_left_to_right) {
                 op = IntersectEdges(horz, *e, pt);
@@ -2119,7 +2119,7 @@ void ClipperBase::DoHorizontal(Active& horz)
     }
 }
 
-void ClipperBase::DoTopOfScanbeam(const int64_t y) {
+void ClipperBase::DoTopOfScanbeam(const IntType y) {
     sel_ = nullptr; // sel_ is reused to flag horizontals (see PushHorz below)
     Active* e = actives_;
     while (e) {
@@ -2322,8 +2322,8 @@ inline bool GetHorzExtendedHorzSeg(OutPt*& op, OutPt*& op2) {
     }
 }
 
-inline bool HorzEdgesOverlap(int64_t x1a, int64_t x1b, int64_t x2a, int64_t x2b) {
-    const int64_t minOverlap = 2;
+inline bool HorzEdgesOverlap(IntType x1a, IntType x1b, IntType x2a, IntType x2b) {
+    const IntType minOverlap = 2;
     if (x1a > x1b + minOverlap) {
         if (x2a > x2b + minOverlap)
             return !((x1a <= x2b) || (x2a <= x1b));
@@ -2338,21 +2338,21 @@ inline bool HorzEdgesOverlap(int64_t x1a, int64_t x1b, int64_t x2a, int64_t x2b)
         return false;
 }
 
-inline bool ValueBetween(int64_t val, int64_t end1, int64_t end2) {
+inline bool ValueBetween(IntType val, IntType end1, IntType end2) {
     // NB accommodates axis aligned between where end1 == end2
     return ((val != end1) == (val != end2)) && ((val > end1) == (val < end2));
 }
 
-inline bool ValueEqualOrBetween(int64_t val, int64_t end1, int64_t end2) {
+inline bool ValueEqualOrBetween(IntType val, IntType end1, IntType end2) {
     return (val == end1) || (val == end2) || ((val > end1) == (val < end2));
 }
 
-inline bool PointBetween(Point64 pt, Point64 corner1, Point64 corner2) {
+inline bool PointBetween(PointI pt, PointI corner1, PointI corner2) {
     // NB points may not be collinear
     return ValueBetween(pt.x, corner1.x, corner2.x) && ValueBetween(pt.y, corner1.y, corner2.y);
 }
 
-inline bool PointEqualOrBetween(Point64 pt, Point64 corner1, Point64 corner2) {
+inline bool PointEqualOrBetween(PointI pt, PointI corner1, PointI corner2) {
     // NB points may not be collinear
     return ValueEqualOrBetween(pt.x, corner1.x, corner2.x) && ValueEqualOrBetween(pt.y, corner1.y, corner2.y);
 }
@@ -2510,8 +2510,8 @@ inline bool IsValidPath(OutPt* op) {
     return (op && op->next != op);
 }
 
-bool CollinearSegsOverlap(const Point64& seg1a, const Point64& seg1b,
-    const Point64& seg2a, const Point64& seg2b) {
+bool CollinearSegsOverlap(const PointI& seg1a, const PointI& seg1b,
+    const PointI& seg2a, const PointI& seg2b) {
     // precondition: seg1 and seg2 are collinear
     if (seg1a.x == seg1b.x) {
         if (seg2a.x != seg1a.x || seg2a.x != seg2b.x)
@@ -2734,11 +2734,11 @@ inline bool Path1InsidePath2(const OutRec* or1, const OutRec* or2) {
         return result == PointInPolygonResult::IsInside;
 }
 
-inline Rect64 GetBounds(const Path64& path) {
+inline RectI GetBounds(const PathI& path) {
     if (path.empty())
-        return Rect64();
-    Rect64 result = invalid_rect;
-    for (const Point64& pt : path) {
+        return RectI();
+    RectI result = invalid_rect;
+    for (const PointI& pt : path) {
         if (pt.x < result.left)
             result.left = pt.x;
         if (pt.x > result.right)
@@ -2751,12 +2751,12 @@ inline Rect64 GetBounds(const Path64& path) {
     return result;
 }
 
-bool BuildPath64(OutPt* op, bool reverse, bool isOpen, Path64& path) {
+bool BuildPath64(OutPt* op, bool reverse, bool isOpen, PathI& path) {
     if (op->next == op || (!isOpen && op->next == op->prev))
         return false;
 
     path.resize(0);
-    Point64 lastPt;
+    PointI lastPt;
     OutPt* op2;
     if (reverse) {
         lastPt = op->pt;
@@ -2830,7 +2830,7 @@ bool ClipperBase::DeepCheckOwner(OutRec* outrec, OutRec* owner) {
     }
 }
 
-void Clipper64::BuildPaths64(Paths64& solutionClosed, Paths64* solutionOpen) {
+void Clipper64::BuildPaths64(PathsI& solutionClosed, PathsI* solutionOpen) {
     solutionClosed.resize(0);
     solutionClosed.reserve(outrec_list_.size());
     if (solutionOpen) {
@@ -2842,7 +2842,7 @@ void Clipper64::BuildPaths64(Paths64& solutionClosed, Paths64* solutionOpen) {
         if (outrec->pts == nullptr)
             continue;
 
-        Path64 path;
+        PathI path;
         if (solutionOpen && outrec->is_open) {
             if (BuildPath64(outrec->pts, ReverseSolution, true, path))
                 solutionOpen->emplace_back(std::move(path));
@@ -2854,7 +2854,7 @@ void Clipper64::BuildPaths64(Paths64& solutionClosed, Paths64* solutionOpen) {
     }
 }
 
-void Clipper64::BuildTree64(PolyPath64& polytree, Paths64& open_paths) {
+void Clipper64::BuildTree64(PolyPath64& polytree, PathsI& open_paths) {
     polytree.Clear();
     open_paths.resize(0);
     if (has_open_paths_)
@@ -2864,7 +2864,7 @@ void Clipper64::BuildTree64(PolyPath64& polytree, Paths64& open_paths) {
         if (!outrec || !outrec->pts)
             continue;
         if (outrec->is_open) {
-            Path64 path;
+            PathI path;
             if (BuildPath64(outrec->pts, ReverseSolution, true, path))
                 open_paths.push_back(path);
             continue;
@@ -2909,7 +2909,7 @@ bool BuildPathD(OutPt* op, bool reverse, bool isOpen, PathD& path, double inv_sc
     if (op->next == op || (!isOpen && op->next == op->prev))
         return false;
     path.resize(0);
-    Point64 lastPt;
+    PointI lastPt;
     OutPt* op2;
     if (reverse) {
         lastPt = op->pt;

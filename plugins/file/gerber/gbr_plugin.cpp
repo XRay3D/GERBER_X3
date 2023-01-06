@@ -47,7 +47,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
 
 std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
     QTransform t {file->transform()};
-    auto mapPaths = [t](PathsD paths) {
+    auto mapPaths = [t](Paths paths) {
         for (auto&& path : paths)
             path = t.map(path);
         return paths;
@@ -103,7 +103,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
         Thermal::PreviewGiMap sourcePreview;
         auto gbrFile = static_cast<File*>(file);
 
-        auto testArea = [&param_](const PathsD& paths) {
+        auto testArea = [&param_](const Paths& paths) {
             const double areaMax = param_.areaMax;
             const double areaMin = param_.areaMin;
             const double area = Area(paths);
@@ -135,7 +135,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
                     && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
                     && go.path().front().distTo(go.path().back()) * dScale * 0.3 < apertures_.at(go.state().aperture())->minSize()
                     && testArea(go.paths()))
-                    mv.emplace_back(mapPaths(go.paths()), PointD {});
+                    mv.emplace_back(mapPaths(go.paths()), Point {});
         }
 
         if (param_.pour) {
@@ -151,7 +151,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
                 return go1->state().curPos();
             });
             for (auto& go : gos)
-                mv.emplace_back(mapPaths(go->paths()), PointD {});
+                mv.emplace_back(mapPaths(go->paths()), Point {});
         }
 
         return sourcePreview;

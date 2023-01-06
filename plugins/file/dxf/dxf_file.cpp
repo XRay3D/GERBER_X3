@@ -62,53 +62,53 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
     if (groupedPaths_.empty()) {
         PolyTree polyTree;
         Clipper clipper;
-        clipper.AddPaths(mergedPaths(), ptSubject, true);
-        IntRect r(clipper.GetBounds());
+        clipper.AddSubject(mergedPaths());
+        Rect r(Bounds(mergedPaths()));
         int k = /*uScale*/ 1;
         Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)};
+            Point(r.left - k, r.bottom + k),
+            Point(r.right + k, r.bottom + k),
+            Point(r.right + k, r.top - k),
+            Point(r.left - k, r.top - k)};
         if (fl)
             ReversePath(outer);
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftNonZero);
-        grouping(polyTree.GetFirst(), &groupedPaths_, group);
+        clipper.AddSubject({outer});
+        clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+        grouping(polyTree, group);
     }
     return groupedPaths_;
 }
 
-void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
+void File::grouping(PolyTree& node, File::Group group) {
     Path path;
     Paths paths;
     switch (group) {
     case CutoffGroup:
-        if (!node->IsHole()) {
-            path = node->Contour;
+        if (!node.IsHole()) {
+            path = node.Polygon();
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
-                path = node->Childs[i]->Contour;
+            for (size_t i = 0; i < node.Count(); ++i) {
+                path = node[i]->Polygon();
                 paths.push_back(path);
             }
-            pathss->push_back(paths);
+            groupedPaths_.push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
-            grouping(node->Childs[i], pathss, group);
+        for (size_t i = 0; i < node.Count(); ++i) {
+            grouping(*node[i], group);
         }
         break;
     case CopperGroup:
-        if (node->IsHole()) {
-            path = node->Contour;
+        if (node.IsHole()) {
+            path = node.Polygon();
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
-                path = node->Childs[i]->Contour;
+            for (size_t i = 0; i < node.Count(); ++i) {
+                path = node[i]->Polygon();
                 paths.push_back(path);
             }
-            pathss->push_back(paths);
+            groupedPaths_.push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
-            grouping(node->Childs[i], pathss, group);
+        for (size_t i = 0; i < node.Count(); ++i) {
+            grouping(*node[i], group);
         }
         break;
     }
@@ -158,7 +158,7 @@ void File::createGi() {
             const bool empty {layer->groupedPaths_.empty()};
             for (auto& go : layer->graphicObjects_) {
                 if (empty && go.paths().size())
-                    clipper.AddPaths(go.paths(), ptSubject, true);
+                    clipper.AddSubject(go.paths());
 
                 if (go.path().size() > 1) {
                     auto gItem = new GiDataPath(go.path(), this);
@@ -174,7 +174,7 @@ void File::createGi() {
             }
 
             if (empty) {
-                clipper.Execute(ctUnion, mergedPaths_, pftNonZero);
+                clipper.Execute(ClipType::Union, FillRule::NonZero, mergedPaths_);
                 layer->groupedPaths_ = std::move(groupedPaths());
                 for (auto& paths : layer->groupedPaths_)
                     CleanPolygons(paths, uScale * 0.0005);

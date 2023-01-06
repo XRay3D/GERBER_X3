@@ -18,8 +18,8 @@ class VoronoiJc : public virtual Creator {
 
 protected:
     struct Pair {
-        IntPoint first;
-        IntPoint second;
+        Point first;
+        Point second;
         int id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
@@ -30,7 +30,7 @@ protected:
     using Pairss = mvector<Pairs>;
     struct OrdPath {
         int count = 1;
-        IntPoint Pt;
+        Point Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;

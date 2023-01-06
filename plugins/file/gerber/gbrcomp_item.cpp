@@ -130,6 +130,6 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
         }
 }
 
-PathsD Item::paths(int) const { return {}; }
+Paths Item::paths(int) const { return {}; }
 
 } // namespace Gerber::Comp

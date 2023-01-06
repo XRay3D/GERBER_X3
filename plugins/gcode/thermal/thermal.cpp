@@ -32,8 +32,8 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
     {     // create tool path
         { // execute offset
             ClipperOffset offset;
-            offset.AddPaths(workingPs, jtRound, etClosedPolygon);
-            offset.Execute(returnPs, dOffset);
+            offset.AddPaths(workingPs, JoinType::Round, EndType::Polygon);
+            returnPs = offset.Execute(dOffset);
         }
         // fix direction
         if (gcp_.side() == ::GCode::Outer && !gcp_.convent())
@@ -58,37 +58,37 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 if (go->positive())
-                    offset.AddPaths(go->polyLineW(), jtRound, etClosedPolygon);
+                    offset.AddPaths(go->polyLineW(), JoinType::Round, EndType::Polygon);
             }
-            offset.Execute(framePaths, dOffset - 0.005 * uScale);
-            clipper.AddPaths(framePaths, ptSubject, true);
+            framePaths = offset.Execute(dOffset - 0.005 * uScale);
+            clipper.AddSubject(framePaths);
         }
         if (!gcp_.params[::GCode::GCodeParams::IgnoreCopper].toInt()) {
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 //                if (go->closed()) {
                 //                    if (go->positive())
-                offset.AddPaths(go->polygonWholes(), jtRound, etClosedPolygon);
+                offset.AddPaths(go->polygonWholes(), JoinType::Round, EndType::Polygon);
                 //                    else {
                 //                        Paths paths(go->polygonWholes());
                 //                        ReversePaths(paths);
-                //                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                //                        offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
                 //                    }
                 //                }
             }
-            offset.Execute(framePaths, dOffset - 0.005 * uScale);
-            clipper.AddPaths(framePaths, ptClip, true);
+            framePaths = offset.Execute(dOffset - 0.005 * uScale);
+            clipper.AddClip(framePaths);
         }
         for (const Paths& paths : supportPss)
-            clipper.AddPaths(paths, ptClip, true);
-        clipper.Execute(ctUnion, framePaths, pftEvenOdd);
+            clipper.AddClip(paths);
+        clipper.Execute(ClipType::Union, FillRule::EvenOdd, framePaths);
     }
 
     { // Execute
         Clipper clipper;
-        clipper.AddPaths(returnPs, ptSubject, false);
-        clipper.AddPaths(framePaths, ptClip, true);
-        clipper.Execute(ctDifference, returnPs, pftPositive);
+        clipper.AddOpenSubject(returnPs);
+        clipper.AddClip(framePaths);
+        clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
         sortBE(returnPs);
     }
 

@@ -36,9 +36,8 @@ namespace DrillPlugin {
 
 Paths offset(const Path& path, double offset, bool fl = false) {
     ClipperOffset cpOffset;
-    cpOffset.AddPath(path, jtRound, fl ? etClosedLine : etOpenRound);
-    Paths tmpPpaths;
-    cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
+    cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
+    Paths tmpPpaths = cpOffset.Execute(offset * uScale);
     for (Path& tmpPath : tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;
@@ -507,7 +506,7 @@ void Form::createFile() {
 
         for (auto [toolId, val] : pathsMap) {
             if (val.drillPath.size()) {
-                IntPoint point1((App::home()->pos()));
+                Point point1((App::home()->pos()));
                 { // sort by distance
                     size_t counter = 0;
                     while (counter < val.drillPath.size()) {

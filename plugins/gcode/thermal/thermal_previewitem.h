@@ -61,7 +61,7 @@ public:
     Paths bridge() const { return bridge_; }
     virtual bool isValid() const;
 
-    virtual IntPoint pos() const = 0;
+    virtual Point pos() const = 0;
     virtual Paths paths() const = 0;
     virtual void redraw() = 0;
 
@@ -131,11 +131,11 @@ protected:
 
 class PreviewItem final : public AbstractThermPrGi {
     const Paths& paths_;
-    const IntPoint pos_;
+    const Point pos_;
 
 public:
-    PreviewItem(const Paths& paths, const IntPoint pos, Tool& tool);
-    IntPoint pos() const override;
+    PreviewItem(const Paths& paths, const Point pos, Tool& tool);
+    Point pos() const override;
     Paths paths() const override;
     void redraw() override;
 

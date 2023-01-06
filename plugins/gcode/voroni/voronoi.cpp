@@ -15,14 +15,14 @@
 #include "jc_voronoi.h"
 
 namespace ClipperLib {
-inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
+inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
 } // namespace ClipperLib
 
 namespace GCode {
 
 inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0) {
-    return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y);
+    return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
 }
 
 void VoronoiCreator::create() {
@@ -53,9 +53,9 @@ void VoronoiCreator::create() {
         gcp_.gcType = Voronoi;
         { // создание пермычек.
             Clipper clipper;
-            clipper.AddPaths(workingRawPs, ptClip, true);
-            clipper.AddPaths(copy, ptSubject, false);
-            clipper.Execute(ctDifference, copy, pftNonZero);
+            clipper.AddClip(workingRawPs);
+            clipper.AddOpenSubject(copy);
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
             sortBE(copy);
             for (auto&& p : copy)
                 returnPss.push_back({p});
@@ -63,9 +63,9 @@ void VoronoiCreator::create() {
         dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.
             ClipperOffset offset(uScale);
-            offset.AddPaths(workingRawPs, jtRound, etClosedPolygon);
-            offset.AddPaths(copy, jtRound, etOpenRound);
-            offset.Execute(workingRawPs, dOffset + 10);
+            offset.AddPaths(workingRawPs, JoinType::Round, EndType::Polygon);
+            offset.AddPaths(copy, JoinType::Round, EndType::Round);
+            workingRawPs = offset.Execute(dOffset + 10);
         }
         // erase empty paths
         auto begin = returnPss.begin();
@@ -90,35 +90,36 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     const Path frame(returnPs.takeLast());
     { // create offset
         ClipperOffset offset;
-        offset.AddPaths(returnPs, jtRound /*jtMiter*/, etOpenRound);
-        offset.Execute(returnPs, width * uScale * 0.5);
+        offset.AddPaths(returnPs, JoinType::Round /*JoinType::Miter*/, EndType::Round);
+        returnPs = offset.Execute(width * uScale * 0.5);
     }
     { // fit offset to copper
         Clipper clipper;
-        clipper.AddPaths(returnPs, ptSubject, true);
+        clipper.AddSubject(returnPs);
         for (const Paths& paths : groupedPss)
-            clipper.AddPaths(paths, ptClip, true);
-        clipper.Execute(ctDifference, returnPs, pftPositive, pftNegative);
+            clipper.AddClip(paths);
+        // clipper.Execute(ClipType::Difference, returnPs, FillRule::Positive, FillRule::Negative);
+        clipper.Execute(ClipType::Difference, FillRule::Positive, returnPs);
     }
     if (0) { // cut to copper rect
         Clipper clipper;
-        clipper.AddPaths(returnPs, ptSubject, true);
-        clipper.AddPath(frame, ptClip, true);
-        clipper.Execute(ctIntersection, returnPs, pftNonZero);
+        clipper.AddSubject(returnPs);
+        clipper.AddClip({frame});
+        clipper.Execute(ClipType::Intersection, FillRule::NonZero, returnPs);
         CleanPolygons(returnPs, 0.001 * uScale);
     }
     { // create pocket
         ClipperOffset offset(uScale);
-        offset.AddPaths(returnPs, jtRound, etClosedPolygon);
+        offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
         Paths tmpPaths1;
-        offset.Execute(tmpPaths1, -dOffset);
+        tmpPaths1 = offset.Execute(-dOffset);
         workingRawPs = tmpPaths1;
         Paths tmpPaths;
         do {
             tmpPaths.append(tmpPaths1);
             offset.Clear();
-            offset.AddPaths(tmpPaths1, jtMiter, etClosedPolygon);
-            offset.Execute(tmpPaths1, -stepOver);
+            offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
+            tmpPaths1 = offset.Execute(-stepOver);
         } while (tmpPaths1.size());
         returnPs = tmpPaths;
     }

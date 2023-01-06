@@ -131,7 +131,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32)
+if(WIN32____)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
     # windeployqt
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)

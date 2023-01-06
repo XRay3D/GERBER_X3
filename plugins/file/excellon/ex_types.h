@@ -12,6 +12,7 @@
 #include "datastream.h"
 #include <QPolygonF>
 #include <type_traits>
+#include <numbers>
 
 class GiDrill;
 
@@ -207,25 +208,25 @@ struct State {
     void updatePos();
 
     struct Pos {
-        QString A;
-        QString X;
-        QString Y;
+        QString a;
+        QString x;
+        QString y;
         friend QDataStream& operator<<(QDataStream& stream, const Pos& p) {
-            stream << p.A;
-            stream << p.X;
-            stream << p.Y;
+            stream << p.a;
+            stream << p.x;
+            stream << p.y;
             return stream;
         }
         friend QDataStream& operator>>(QDataStream& stream, Pos& p) {
-            stream >> p.A;
-            stream >> p.X;
-            stream >> p.Y;
+            stream >> p.a;
+            stream >> p.x;
+            stream >> p.y;
             return stream;
         }
         void clear() {
-            A.clear();
-            X.clear();
-            Y.clear();
+            a.clear();
+            x.clear();
+            y.clear();
         }
     };
 

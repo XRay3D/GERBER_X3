@@ -203,7 +203,7 @@ class State {
     RegionMode region_ = Off;
     int aperture_ = 0;
     int lineNum_ = 0;
-    PointD curPos_;
+    Point curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_ = 1.0;
     double rotating_ = 0.0;
@@ -220,7 +220,7 @@ public:
         , region_(Off)
         , aperture_(0)
         , lineNum_(0)
-        , curPos_(PointD())
+        , curPos_(Point())
         , mirroring_(NoMirroring)
         , scaling_(1.0)
         , rotating_(0.0) {
@@ -252,9 +252,9 @@ public:
     inline int aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline PointD& curPos() { return curPos_; }
-    inline PointD curPos() const { return curPos_; }
-    inline void setCurPos(const PointD& curPos) { curPos_ = curPos; }
+    inline Point& curPos() { return curPos_; }
+    inline Point curPos() const { return curPos_; }
+    inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
 
     inline Mirroring mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
@@ -283,7 +283,7 @@ class GraphicObject final : public AbstrGraphicObject {
     }
 
     File* gFile_;
-    PathD path_;
+    Path path_;
     State state_;
 
 public:
@@ -294,9 +294,9 @@ public:
     GraphicObject(
         int /*id*/,
         const State& state,
-        const PathsD& paths,
+        const Paths& paths,
         File* gFile,
-        const PathD& path = PathD())
+        const Path& path = Path())
         : AbstrGraphicObject {paths}
         , gFile_(gFile)
         , path_(path)
@@ -305,29 +305,29 @@ public:
     inline File* gFile() const { return gFile_; }
     inline State state() const { return state_; }
 
-    inline PathD& rPath() override { return path_; }
-    inline PathsD& rPaths() override { return paths_; }
+    inline Path& rPath() override { return path_; }
+    inline Paths& rPaths() override { return paths_; }
 
-    const PathD& path() const override { return path_; }
-    const PathsD& paths() const override { return paths_; }
+    const Path& path() const override { return path_; }
+    const Paths& paths() const override { return paths_; }
 
-    PathD line() const override { return path_.size() == 2 ? path_ : PathD(); }
-    PathD lineW() const override { return path_.size() == 2 ? paths_.front() : PathD(); } // polygon
+    Path line() const override { return path_.size() == 2 ? path_ : Path(); }
+    Path lineW() const override { return path_.size() == 2 ? paths_.front() : Path(); } // polygon
 
-    PathD polyLine() const override { return closed() ? PathD() : path_; }
-    PathsD polyLineW() const override { return closed() ? PathsD() : paths_; } // closed
+    Path polyLine() const override { return closed() ? Path() : path_; }
+    Paths polyLineW() const override { return closed() ? Paths() : paths_; } // closed
 
-    PathD elipse() const override;   // { return gFile_.; } // circle
-    PathsD elipseW() const override; // { return {}; }
+    Path elipse() const override;   // { return gFile_.; } // circle
+    Paths elipseW() const override; // { return {}; }
 
-    PathD arc() const override { return {}; } // part of elipse
-    PathD arcW() const override { return {}; }
+    Path arc() const override { return {}; } // part of elipse
+    Path arcW() const override { return {}; }
 
-    PathD polygon() const override { return state_.type() == Region ? path_ : PathD(); }
-    PathsD polygonWholes() const override { return paths_; }
+    Path polygon() const override { return state_.type() == Region ? path_ : Path(); }
+    Paths polygonWholes() const override { return paths_; }
 
-    PathD hole() const override { return !positive() ? path_ : PathD(); }
-    PathsD holes() const override { return !positive() ? PathsD {paths_.front()} : paths_.mid(1); }
+    Path hole() const override { return !positive() ? path_ : Path(); }
+    Paths holes() const override { return !positive() ? Paths {paths_.front()} : paths_.mid(1); }
 
     bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                     // not hole
     bool closed() const override { return path_.size() ? path_.front() == path_.back() : paths_.front().front() == paths_.front().back(); } // front == back

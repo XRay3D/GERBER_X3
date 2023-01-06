@@ -25,30 +25,30 @@ enum class Location { Left,
 
 class RectClip {
 protected:
-    const Rect64 rect_;
-    const Point64 mp_;
-    const Path64 rectPath_;
-    Path64 result_;
+    const RectI rect_;
+    const PointI mp_;
+    const PathI rectPath_;
+    PathI result_;
     std::vector<Location> start_locs_;
 
-    void GetNextLocation(const Path64& path,
+    void GetNextLocation(const PathI& path,
         Location& loc, int& i, int highI);
     void AddCorner(Location prev, Location curr);
     void AddCorner(Location& loc, bool isClockwise);
 
 public:
-    RectClip(const Rect64& rect)
+    RectClip(const RectI& rect)
         : rect_(rect)
         , mp_(rect.MidPoint())
         , rectPath_(rect.AsPath()) { }
-    Path64 Execute(const Path64& path);
+    PathI Execute(const PathI& path);
 };
 
 class RectClipLines : public RectClip {
 public:
-    RectClipLines(const Rect64& rect)
+    RectClipLines(const RectI& rect)
         : RectClip(rect) {};
-    Paths64 Execute(const Path64& path);
+    PathsI Execute(const PathI& path);
 };
 
 } // namespace Clipper2Lib

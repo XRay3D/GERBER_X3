@@ -263,15 +263,15 @@ bool Parser::parsePos(const QString& line) {
             return false;
 
         if (X) {
-            state_.rawPos.X = CtreCapTo(X).toString();
+            state_.rawPos.x = CtreCapTo(X).toString();
             parseNumber(CtreCapTo(X), state_.pos.rx());
         }
         if (Y) {
-            state_.rawPos.Y = CtreCapTo(Y).toString();
+            state_.rawPos.y = CtreCapTo(Y).toString();
             parseNumber(CtreCapTo(Y), state_.pos.ry());
         }
         if (A)
-            state_.rawPos.A = CtreCapTo(A).toString();
+            state_.rawPos.a = CtreCapTo(A).toString();
 
         switch (state_.wm) {
         case DrillMode:
@@ -315,12 +315,12 @@ bool Parser::parseSlot(const QString& line) {
         state_.rawPosList.clear();
 
         if (X1) {
-            state_.rawPos.X = QString {CtreCapTo(X1)};
+            state_.rawPos.x = QString {CtreCapTo(X1)};
             parseNumber(CtreCapTo(X1), state_.pos.rx());
         }
 
         if (Y1) {
-            state_.rawPos.Y = QString {CtreCapTo(Y1)};
+            state_.rawPos.y = QString {CtreCapTo(Y1)};
             parseNumber(CtreCapTo(Y1), state_.pos.ry());
         }
 
@@ -328,12 +328,12 @@ bool Parser::parseSlot(const QString& line) {
         state_.path.append(state_.pos);
 
         if (X2) {
-            state_.rawPos.X = QString {CtreCapTo(X2)};
+            state_.rawPos.x = QString {CtreCapTo(X2)};
             parseNumber(CtreCapTo(X2), state_.pos.rx());
         }
 
         if (Y2) {
-            state_.rawPos.Y = QString {CtreCapTo(Y2)};
+            state_.rawPos.y = QString {CtreCapTo(Y2)};
             parseNumber(CtreCapTo(Y2), state_.pos.ry());
         }
 
@@ -446,14 +446,14 @@ bool Parser::parseNumber(QString Str, double& val) {
 void Parser::circularRout() {
 
     double radius = 0.0;
-    parseNumber(state_.rawPos.A, radius);
+    parseNumber(state_.rawPos.a, radius);
 
     auto CalcCircleCenter = [this](QPointF a, QPointF b, float r) {
         // находим центр отрезка ab
         QPointF c = (a + b) / 2;
         // находим перпендикуляр, нормируем его
         QPointF n = QLineF(QPointF(), a - b).normalVector().unitVector().p2();
-        //        n = new Vector2(n.Y, -n.X); //поворот на 90 градусов ;)
+        //        n = new Vector2(n.y, -n.x); //поворот на 90 градусов ;)
         // находим высоту искомого центра на отрезок
         double l = QLineF(QPointF(), a - b).length() / 2;
         double d = sqrt(r * r - l * l);

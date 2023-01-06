@@ -33,9 +33,9 @@ private:
 
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const cInt accDistance);
+    void addAcc(Paths& src, const Point::Type accDistance);
 
-    IntRect rect;
+    Rect rect;
 };
 
 } // namespace GCode

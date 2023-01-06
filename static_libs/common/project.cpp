@@ -235,13 +235,13 @@ void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
     QMutexLocker locker(&mutex_);
-    PointD topLeft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
-    PointD botRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    Point topLeft(std::numeric_limits<Point::Type>::max(), std::numeric_limits<Point::Type>::max());
+    Point botRight(std::numeric_limits<Point::Type>::min(), std::numeric_limits<Point::Type>::min());
     for (const auto& [id, filePtr] : files_) {
         if (filePtr && filePtr->itemGroup()->isVisible()) {
             for (const GraphicsItem* const item : *filePtr->itemGroup()) {
-                for (const PathD& path : item->paths()) {
-                    for (const PointD& pt : path) {
+                for (const Path& path : item->paths()) {
+                    for (const Point& pt : path) {
                         topLeft.x = std::min(pt.x, topLeft.x);
                         topLeft.y = std::min(pt.y, topLeft.y);
                         botRight.x = std::max(pt.x, botRight.x);

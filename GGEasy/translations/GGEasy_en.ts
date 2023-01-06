@@ -790,11 +790,6 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="446"/>
-        <source>&amp;PathsD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../mainwindow.cpp" line="553"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
@@ -874,6 +869,12 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="272"/>
+        <source>&amp;Save Selected Tool Paths...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="287"/>
         <source>P&amp;rint</source>
         <translation type="unfinished"></translation>
@@ -917,12 +918,6 @@ Public License instead of this License.  But first, please read
         <location filename="../mainwindow.cpp" line="325"/>
         <location filename="../mainwindow.cpp" line="327"/>
         <source>Service</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="270"/>
-        <location filename="../mainwindow.cpp" line="272"/>
-        <source>&amp;Save Selected Tool PathsD...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1022,8 +1017,9 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="446"/>
         <source>&amp;Paths</source>
-        <translation type="vanished">&amp;Toolpaths</translation>
+        <translation>&amp;Toolpaths</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="448"/>

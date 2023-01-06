@@ -45,37 +45,37 @@
 // };
 
 struct AbstrGraphicObject {
-    PathsD paths_;
-    AbstrGraphicObject(const PathsD& paths_)
+    Paths paths_;
+    AbstrGraphicObject(const Paths& paths_)
         : paths_ {paths_} { }
     virtual ~AbstrGraphicObject() { }
 
-    virtual PathD line() const = 0;  //{ return {}; }
-    virtual PathD lineW() const = 0; //{ return {}; } // closed
+    virtual Path line() const = 0;  //{ return {}; }
+    virtual Path lineW() const = 0; //{ return {}; } // closed
 
-    virtual PathD polyLine() const = 0;   //{ return {}; }
-    virtual PathsD polyLineW() const = 0; //{ return {}; } // closed
+    virtual Path polyLine() const = 0;   //{ return {}; }
+    virtual Paths polyLineW() const = 0; //{ return {}; } // closed
 
-    virtual PathD elipse() const = 0;   //{ return {}; } // circle
-    virtual PathsD elipseW() const = 0; //{ return {}; }
+    virtual Path elipse() const = 0;   //{ return {}; } // circle
+    virtual Paths elipseW() const = 0; //{ return {}; }
 
-    virtual PathD arc() const = 0;  //{ return {}; } // part of elipse
-    virtual PathD arcW() const = 0; //{ return {}; }
+    virtual Path arc() const = 0;  //{ return {}; } // part of elipse
+    virtual Path arcW() const = 0; //{ return {}; }
 
-    virtual PathD polygon() const = 0;        //{ return {}; }
-    virtual PathsD polygonWholes() const = 0; //{ return {}; }
+    virtual Path polygon() const = 0;        //{ return {}; }
+    virtual Paths polygonWholes() const = 0; //{ return {}; }
 
-    virtual PathD hole() const = 0;   //{ return {}; }
-    virtual PathsD holes() const = 0; //{ return {}; }
+    virtual Path hole() const = 0;   //{ return {}; }
+    virtual Paths holes() const = 0; //{ return {}; }
 
     virtual bool positive() const = 0; //{ return {}; } // not hole
     virtual bool closed() const = 0;   //{ return {}; } // front == back
 
-    virtual const PathD& path() const = 0;   //{ return {}; }
-    virtual const PathsD& paths() const = 0; //{ return {}; }
+    virtual const Path& path() const = 0;   //{ return {}; }
+    virtual const Paths& paths() const = 0; //{ return {}; }
 
-    virtual PathD& rPath() = 0;
-    virtual PathsD& rPaths() = 0;
+    virtual Path& rPath() = 0;
+    virtual Paths& rPaths() = 0;
 };
 
 enum class FileType {

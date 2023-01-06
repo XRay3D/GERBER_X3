@@ -34,7 +34,7 @@ struct ThParam2 {
     double areaMin = 0.0;
 };
 
-using PreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
+using PreviewGiMapValVec = mvector<std::pair<Paths, Point>>;
 using PreviewGiMapVal = std::map<QString, PreviewGiMapValVec>;
 using PreviewGiMap = std::map<int, PreviewGiMapVal>;
 

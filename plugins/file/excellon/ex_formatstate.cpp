@@ -17,9 +17,9 @@
 namespace Excellon {
 
 void State::updatePos() {
-    pos = QPointF(Parser::parseNumber(rawPos.X, *this), Parser::parseNumber(rawPos.Y, *this));
+    pos = QPointF(Parser::parseNumber(rawPos.x, *this), Parser::parseNumber(rawPos.y, *this));
     for (int i = 0; i < rawPosList.size(); ++i)
-        path[i] = QPointF(Parser::parseNumber(rawPosList[i].X, *this), Parser::parseNumber(rawPosList[i].Y, *this));
+        path[i] = QPointF(Parser::parseNumber(rawPosList[i].x, *this), Parser::parseNumber(rawPosList[i].y, *this));
 }
 
 double State::currentToolDiameter() const {

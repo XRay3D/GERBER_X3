@@ -33,7 +33,7 @@ private:
 
     void createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass);
 
-    IntRect rect;
+    Rect rect;
 };
 
 } // namespace GCode
