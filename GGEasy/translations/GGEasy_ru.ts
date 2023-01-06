@@ -2004,8 +2004,10 @@ Would you like to continue?</source>
         <translation>Сохранить проект под новым именем</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="272"/>
         <source>&amp;Save Selected Tool Paths...</source>
-        <translation type="vanished">Сохранить выбранные &amp;УП...</translation>
+        <translation>Сохранить выбранные &amp;УП...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="271"/>
@@ -2085,12 +2087,6 @@ Would you like to continue?</source>
         <location filename="../mainwindow.cpp" line="327"/>
         <source>Service</source>
         <translation>&amp;Инструменты</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="270"/>
-        <location filename="../mainwindow.cpp" line="272"/>
-        <source>&amp;Save Selected Tool PathsD...</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="367"/>
@@ -2205,8 +2201,9 @@ Would you like to continue?</source>
         <translation>Выбрать все</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="446"/>
         <source>&amp;Paths</source>
-        <translation type="vanished">&amp;УП</translation>
+        <translation>&amp;УП</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="448"/>
@@ -2364,11 +2361,6 @@ Would you like to continue?</source>
         <location filename="../mainwindow.cpp" line="810"/>
         <source>Do you want to close this project?</source>
         <translation>Закрыть этот проект?</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="446"/>
-        <source>&amp;PathsD</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="553"/>

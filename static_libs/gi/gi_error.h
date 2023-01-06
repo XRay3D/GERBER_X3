@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
 #include "gi.h"
 
 class GiError : public QGraphicsItem {
@@ -16,7 +17,7 @@ class GiError : public QGraphicsItem {
     const double area_;
 
 public:
-    GiError(const PathsD& paths, double area);
+    GiError(const Paths& paths, double area);
     double area() const;
 
     // QGraphicsItem interface

@@ -21,9 +21,9 @@
 #define QT_DEBUG
 // #undef QT_DEBUG
 
-GiGcPath::GiGcPath(const PathsD& paths, GCode::File* file)
+GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
     : gcFile_(file) {
-    for (const PathD& path : paths)
+    for (const Path& path : paths)
         shape_.addPolygon(path);
     double k;
     if (gcFile_)
@@ -36,7 +36,7 @@ GiGcPath::GiGcPath(const PathsD& paths, GCode::File* file)
 #endif
 }
 
-GiGcPath::GiGcPath(const PathD& path, GCode::File* file)
+GiGcPath::GiGcPath(const Path& path, GCode::File* file)
     : gcFile_(file) {
     shape_.addPolygon(path);
     double k;
@@ -92,7 +92,7 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
 int GiGcPath::type() const { return GiType::Path_; }
 
-PathsD GiGcPath::paths(int) const { return {} /*paths_*/; }
+Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
 #ifdef QT_DEBUG
 void GiGcPath::updateArrows() {
     sc_ = scaleFactor();

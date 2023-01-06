@@ -64,14 +64,14 @@ double GraphicObject::rotationAngle() const { return rotationAngle_; }
 
 void GraphicObject::setScale(double scaleX, double scaleY) {
     scaleX_ = scaleX, scaleY_ = scaleY;
-    auto scale = [](Path& path, double sx, double sy, const IntPoint& center = {}) {
+    auto scale = [](Path& path, double sx, double sy, const Point& center = {}) {
         const bool fl = Area(path) < 0;
-        for (IntPoint& pt : path) {
+        for (Point& pt : path) {
             const double dAangle = (pi * 2) - center.angleRadTo(pt);
             const double length = center.distTo(pt);
-            pt = IntPoint(static_cast<cInt>(cos(dAangle) * length * sx), static_cast<cInt>(sin(dAangle) * length * sy));
-            pt.X += center.X;
-            pt.Y += center.Y;
+            pt = Point(static_cast<Point::Type>(cos(dAangle) * length * sx), static_cast<Point::Type>(sin(dAangle) * length * sy));
+            pt.x += center.x;
+            pt.y += center.y;
         }
         if (fl != (Area(path) < 0))
             ReversePath(path);

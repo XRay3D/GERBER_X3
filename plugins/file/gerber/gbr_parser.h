@@ -32,7 +32,7 @@ protected:
     mvector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
-    bool parseNumber(QString Str, cInt& val, int integer, int decimal);
+    bool parseNumber(QString Str, Point::Type& val, int integer, int decimal);
 
     void addPath();
     void addFlash();
@@ -40,15 +40,15 @@ protected:
     void reset(const QString& fileName);
     void resetStep();
 
-    PointD parsePosition(const QString& xyStr);
-    PathD arc(const PointD& center, double radius, double start, double stop);
-    PathD arc(PointD p1, PointD p2, PointD center);
+    Point parsePosition(const QString& xyStr);
+    Path arc(const Point& center, double radius, double start, double stop);
+    Path arc(Point p1, Point p2, Point center);
 
-    PathsD createLine();
-    PathsD createPolygon();
+    Paths createLine();
+    Paths createPolygon();
 
-    Clipper2Lib::Clipper clipper_;
-    Clipper2Lib::ClipperOffset offset_;
+    Clipper clipper_;
+    ClipperOffset offset_;
 
     QMap<QString, QString> apertureMacro_;
 
@@ -64,7 +64,7 @@ protected:
 
     QStack<WorkingType> abSrIdStack_;
 
-    PathD path_;
+    Path path_;
     State state_;
     QString currentGerbLine_;
 

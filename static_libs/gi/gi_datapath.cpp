@@ -26,7 +26,7 @@
 QTimer GiDataPath::timer;
 #endif
 
-GiDataPath::GiDataPath(const PathD& path, FileInterface* file)
+GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     : GraphicsItem(file) {
     shape_.addPolygon(path);
     updateSelection();
@@ -73,7 +73,7 @@ void GiDataPath::updateSelection() const {
         scale_ = scale;
         selectionShape_ = QPainterPath();
         ClipperOffset offset;
-        offset.AddPath(PathD{shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
+        offset.AddPath(Path {shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
         auto tmpPpath {offset.Execute(5 * uScale * scale_)};
         for (auto&& path : tmpPpath)
             selectionShape_.addPolygon(path);

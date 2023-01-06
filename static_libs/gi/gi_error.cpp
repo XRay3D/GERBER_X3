@@ -16,9 +16,7 @@
 #include <QtMath>
 #include <numbers>
 
-using std::numbers::pi;
-
-GiError::GiError(const PathsD& paths, double area)
+GiError::GiError(const Paths& paths, double area)
     : area_(area) {
     for (auto& path : paths)
         shape_.addPolygon(path);

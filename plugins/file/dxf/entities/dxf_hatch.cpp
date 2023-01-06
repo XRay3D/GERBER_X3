@@ -216,8 +216,8 @@ GraphicObject Hatch::toGo() const {
         for (auto edge : edges[i])
             paths[i].append(Path(edge->toPolygon()));
     Clipper clipper;
-    clipper.AddPaths(paths, ptSubject);
-    clipper.Execute(ctUnion, paths, pftEvenOdd);
+    clipper.AddOpenSubject(paths); // FIXME AddSubject???
+    clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);
     // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
     return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths};
 }

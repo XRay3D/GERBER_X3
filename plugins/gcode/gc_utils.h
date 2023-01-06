@@ -65,7 +65,7 @@ protected:
         Size
     };
 
-    PathsD g0path_;
+    Paths g0path_;
 
     static inline QString lastDir;
     static inline bool redirected;

@@ -50,6 +50,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 # -ltbbD
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_definitions(-D_USE_MATH_DEFINES=1)
 endif()
 
 # FIND BOOST

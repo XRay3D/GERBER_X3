@@ -37,13 +37,13 @@ class ClipperOffset {
 private:
     class Group {
     public:
-        Paths64 paths_in_;
-        Paths64 paths_out_;
-        Path64 path_;
+        PathsI paths_in_;
+        PathsI paths_out_;
+        PathI path_;
         bool is_reversed_ = false;
         JoinType join_type_;
         EndType end_type_;
-        Group(const Paths64& paths, JoinType join_type, EndType end_type)
+        Group(const PathsI& paths, JoinType join_type, EndType end_type)
             : paths_in_(paths)
             , join_type_(join_type)
             , end_type_(end_type) { }
@@ -54,7 +54,7 @@ private:
     double temp_lim_ = 0.0;
     double steps_per_rad_ = 0.0;
     PathD norms;
-    Paths64 solution;
+    PathsI solution;
     std::vector<Group> groups_;
     JoinType join_type_ = JoinType::Square;
 
@@ -64,14 +64,14 @@ private:
     bool preserve_collinear_ = false;
     bool reverse_solution_ = false;
 
-    void DoSquare(Group& group, const Path64& path, size_t j, size_t k);
-    void DoMiter(Group& group, const Path64& path, size_t j, size_t k, double cos_a);
-    void DoRound(Group& group, const Path64& path, size_t j, size_t k, double angle);
-    void BuildNormals(const Path64& path);
-    void OffsetPolygon(Group& group, Path64& path);
-    void OffsetOpenJoined(Group& group, Path64& path);
-    void OffsetOpenPath(Group& group, Path64& path, EndType endType);
-    void OffsetPoint(Group& group, Path64& path, size_t j, size_t& k);
+    void DoSquare(Group& group, const PathI& path, size_t j, size_t k);
+    void DoMiter(Group& group, const PathI& path, size_t j, size_t k, double cos_a);
+    void DoRound(Group& group, const PathI& path, size_t j, size_t k, double angle);
+    void BuildNormals(const PathI& path);
+    void OffsetPolygon(Group& group, PathI& path);
+    void OffsetOpenJoined(Group& group, PathI& path);
+    void OffsetOpenPath(Group& group, PathI& path, EndType endType);
+    void OffsetPoint(Group& group, PathI& path, size_t j, size_t& k);
     void DoGroupOffset(Group& group, double delta);
 
 public:
@@ -86,8 +86,8 @@ public:
 
     ~ClipperOffset() { Clear(); };
 
-    void AddPath(const Path64& path, JoinType jt_, EndType et_);
-    void AddPaths(const Paths64& paths, JoinType jt_, EndType et_);
+    void AddPath(const PathI& path, JoinType jt_, EndType et_);
+    void AddPaths(const PathsI& paths, JoinType jt_, EndType et_);
     void AddPath(const PathD& p, JoinType jt_, EndType et_);
     void AddPaths(const PathsD& p, JoinType jt_, EndType et_);
     void Clear() {
@@ -95,7 +95,7 @@ public:
         norms.clear();
     };
 
-    Paths64 Execute(double delta);
+    PathsI Execute(double delta);
 
     double MiterLimit() const { return miter_limit_; }
     void MiterLimit(double miter_limit) { miter_limit_ = miter_limit; }

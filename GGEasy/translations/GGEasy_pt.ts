@@ -826,7 +826,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../mainwindow.cpp" line="270"/>
         <location filename="../mainwindow.cpp" line="272"/>
-        <source>&amp;Save Selected Tool PathsD...</source>
+        <source>&amp;Save Selected Tool Paths...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1018,7 +1018,7 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="446"/>
-        <source>&amp;PathsD</source>
+        <source>&amp;Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

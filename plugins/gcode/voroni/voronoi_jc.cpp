@@ -16,13 +16,13 @@
 #include "jc_voronoi.h"
 
 namespace ClipperLib {
-inline size_t qHash(const IntPoint& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(IntPoint))); }
+inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
 } // namespace ClipperLib
 
 namespace GCode {
 
-inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.X ^ tag.second.X) ^ ::qHash(tag.first.Y ^ tag.second.Y); }
+inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y); }
 
 void VoronoiJc::jcVoronoi() {
     const auto tolerance = gcp_.params[GCodeParams::Tolerance].toDouble();
@@ -32,23 +32,23 @@ void VoronoiJc::jcVoronoi() {
     CleanPolygons(workingPs, tolerance * 0.1 * uScale);
     groupedPaths(CopperPaths);
     int id = 0;
-    auto condei = [&points, tolerance, &id](IntPoint tmp, IntPoint point) { // split long segments
+    auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
         QLineF line(tmp, point);
         if (line.length() > tolerance) {
             for (size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
-                IntPoint pt((line.p2()));
-                points.push_back({static_cast<jcv_real>(pt.X), static_cast<jcv_real>(pt.Y), id});
+                Point pt((line.p2()));
+                points.push_back({static_cast<jcv_real>(pt.x), static_cast<jcv_real>(pt.y), id});
             }
         }
     };
     // PROG //PROG .3setProgMaxAndVal(7, 1); // progress
     for (const Paths& paths : groupedPss) {
         for (const Path& path : paths) {
-            IntPoint tmp(path.front());
-            for (const IntPoint& point : path) {
+            Point tmp(path.front());
+            for (const Point& point : path) {
                 condei(tmp, point);
-                points.push_back({static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id});
+                points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
                 tmp = point;
             }
             condei(tmp, path.front());
@@ -57,10 +57,10 @@ void VoronoiJc::jcVoronoi() {
     }
     // PROG //PROG .3setProgMaxAndVal(7, 2); // progress
     for (const Path& path : workingRawPs) {
-        IntPoint tmp(path.front());
-        for (const IntPoint& point : path) {
+        Point tmp(path.front());
+        for (const Point& point : path) {
             condei(tmp, point);
-            points.push_back({static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id});
+            points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
             tmp = point;
         }
         condei(tmp, path.front());
@@ -69,22 +69,22 @@ void VoronoiJc::jcVoronoi() {
 
     Clipper clipper;
     for (const Paths& paths : groupedPss) {
-        clipper.AddPaths(paths, ptClip, true);
+        clipper.AddClip(paths);
     }
-    clipper.AddPaths(workingRawPs, ptClip, true);
-    const IntRect r(clipper.GetBounds());
+    clipper.AddClip(workingRawPs);
+    const Rect r(/*Bounds(groupedPss) +*/ Bounds(workingRawPs)); // FIXME
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
+        const Point::Type fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
         };
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
-        auto toIntPoint = [](const jcv_edge* edge, int num) -> const IntPoint {
-            return {static_cast<cInt>(edge->pos[num].x), static_cast<cInt>(edge->pos[num].y)};
+        auto toIntPoint = [](const jcv_edge* edge, int num) -> const Point {
+            return {static_cast<Point::Type>(edge->pos[num].x), static_cast<Point::Type>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for (int i = 0; i < diagram.numsites; i++) {
@@ -122,7 +122,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     for (auto&& pair : pairs)
         pairsVec.push_back(pair);
 
-    std::ranges::sort(pairsVec, {}, [](const Pair& a) { return (a.first.Y + a.second.Y) / 2; });
+    std::ranges::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
 
     mvector<OrdPath> holder(pairsVec.size() * 2);
     QList<OrdPath*> merge;

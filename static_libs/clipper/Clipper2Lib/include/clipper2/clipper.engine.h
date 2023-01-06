@@ -57,20 +57,20 @@ constexpr enum VertexFlags operator|(enum VertexFlags a, enum VertexFlags b) {
 }
 
 struct Vertex {
-    Point64 pt;
+    PointI pt;
     Vertex* next = nullptr;
     Vertex* prev = nullptr;
     VertexFlags flags = VertexFlags::None;
 };
 
 struct OutPt {
-    Point64 pt;
+    PointI pt;
     OutPt* next = nullptr;
     OutPt* prev = nullptr;
     OutRec* outrec;
     Joiner* joiner = nullptr;
 
-    OutPt(const Point64& pt_, OutRec* outrec_)
+    OutPt(const PointI& pt_, OutRec* outrec_)
         : pt(pt_)
         , outrec(outrec_) {
         next = this;
@@ -81,7 +81,7 @@ struct OutPt {
 class PolyPath;
 class PolyPath64;
 class PolyPathD;
-using PolyTree64 = PolyPath64;
+using PolyTreeI = PolyPath64;
 using PolyTreeD = PolyPathD;
 
 struct OutRec;
@@ -97,8 +97,8 @@ struct OutRec {
     Active* back_edge = nullptr;
     OutPt* pts = nullptr;
     PolyPath* polypath = nullptr;
-    Rect64 bounds = {};
-    Path64 path;
+    RectI bounds = {};
+    PathI path;
     bool is_open = false;
     ~OutRec() {
         if (splits)
@@ -112,9 +112,9 @@ struct OutRec {
 ///////////////////////////////////////////////////////////////////
 
 struct Active {
-    Point64 bot;
-    Point64 top;
-    int64_t curr_x = 0; // current (updated at every new scanline)
+    PointI bot;
+    PointI top;
+    IntType curr_x = 0; // current (updated at every new scanline)
     double dx = 0.0;
     int wind_dx = 1; // 1 or -1 depending on winding direction
     int wind_cnt = 0;
@@ -148,14 +148,14 @@ struct LocalMinima {
 };
 
 struct IntersectNode {
-    Point64 pt;
+    PointI pt;
     Active* edge1;
     Active* edge2;
     IntersectNode()
-        : pt(Point64(0, 0))
+        : pt(PointI(0, 0))
         , edge1(NULL)
         , edge2(NULL) { }
-    IntersectNode(Active* e1, Active* e2, Point64& pt_)
+    IntersectNode(Active* e1, Active* e2, PointI& pt_)
         : pt(pt_)
         , edge1(e1)
         , edge2(e2) {
@@ -179,7 +179,7 @@ private:
     ClipType cliptype_ = ClipType::None;
     FillRule fillrule_ = FillRule::EvenOdd;
     FillRule fillpos = FillRule::Positive;
-    int64_t bot_y_ = 0;
+    IntType bot_y_ = 0;
     bool minima_list_sorted_ = false;
     bool using_polytree_ = false;
     Active* actives_ = nullptr;
@@ -188,13 +188,13 @@ private:
     std::vector<LocalMinima*> minima_list_; // pointers in case of memory reallocs
     std::vector<LocalMinima*>::iterator current_locmin_iter_;
     std::vector<Vertex*> vertex_lists_;
-    std::priority_queue<int64_t> scanline_list_;
+    std::priority_queue<IntType> scanline_list_;
     std::vector<IntersectNode> intersect_nodes_;
     std::vector<Joiner*> joiner_list_; // pointers in case of memory reallocs
     void Reset();
-    void InsertScanline(int64_t y);
-    bool PopScanline(int64_t& y);
-    bool PopLocalMinima(int64_t y, LocalMinima*& local_minima);
+    void InsertScanline(IntType y);
+    bool PopScanline(IntType& y);
+    bool PopLocalMinima(IntType y, LocalMinima*& local_minima);
     void DisposeAllOutRecs();
     void DisposeVerticesAndLocalMinima();
     void DeleteEdges(Active*& e);
@@ -203,28 +203,28 @@ private:
     inline bool IsContributingOpen(const Active& e) const;
     void SetWindCountForClosedPathEdge(Active& edge);
     void SetWindCountForOpenPathEdge(Active& e);
-    void InsertLocalMinimaIntoAEL(int64_t bot_y);
+    void InsertLocalMinimaIntoAEL(IntType bot_y);
     void InsertLeftEdge(Active& e);
     inline void PushHorz(Active& e);
     inline bool PopHorz(Active*& e);
-    inline OutPt* StartOpenPath(Active& e, const Point64& pt);
+    inline OutPt* StartOpenPath(Active& e, const PointI& pt);
     inline void UpdateEdgeIntoAEL(Active* e);
-    OutPt* IntersectEdges(Active& e1, Active& e2, const Point64& pt);
+    OutPt* IntersectEdges(Active& e1, Active& e2, const PointI& pt);
     inline void DeleteFromAEL(Active& e);
-    inline void AdjustCurrXAndCopyToSEL(const int64_t top_y);
-    void DoIntersections(const int64_t top_y);
-    void AddNewIntersectNode(Active& e1, Active& e2, const int64_t top_y);
-    bool BuildIntersectList(const int64_t top_y);
+    inline void AdjustCurrXAndCopyToSEL(const IntType top_y);
+    void DoIntersections(const IntType top_y);
+    void AddNewIntersectNode(Active& e1, Active& e2, IntType top_y);
+    bool BuildIntersectList(const IntType top_y);
     void ProcessIntersectList();
     void SwapPositionsInAEL(Active& edge1, Active& edge2);
-    OutPt* AddOutPt(const Active& e, const Point64& pt);
+    OutPt* AddOutPt(const Active& e, const PointI& pt);
     OutPt* AddLocalMinPoly(Active& e1, Active& e2,
-        const Point64& pt, bool is_new = false);
-    OutPt* AddLocalMaxPoly(Active& e1, Active& e2, const Point64& pt);
+        const PointI& pt, bool is_new = false);
+    OutPt* AddLocalMaxPoly(Active& e1, Active& e2, const PointI& pt);
     void DoHorizontal(Active& horz);
     bool ResetHorzDirection(const Active& horz, const Active* max_pair,
-        int64_t& horz_left, int64_t& horz_right);
-    void DoTopOfScanbeam(const int64_t top_y);
+        IntType& horz_left, IntType& horz_right);
+    void DoTopOfScanbeam(const IntType top_y);
     Active* DoMaxima(Active& e);
     void JoinOutrecPaths(Active& e1, Active& e2);
     void CompleteSplit(OutPt* op1, OutPt* op2, OutRec& outrec);
@@ -255,8 +255,8 @@ protected:
     void SetZ(const Active& e1, const Active& e2, Point64& pt);
 #endif
     void CleanUp(); // unlike Clear, CleanUp preserves added paths
-    void AddPath(const Path64& path, PathType polytype, bool is_open);
-    void AddPaths(const Paths64& paths, PathType polytype, bool is_open);
+    void AddPath(const PathI& path, PathType polytype, bool is_open);
+    void AddPaths(const PathsI& paths, PathType polytype, bool is_open);
 
 public:
     virtual ~ClipperBase();
@@ -264,7 +264,7 @@ public:
     bool ReverseSolution = false;
     void Clear();
 #ifdef USINGZ
-    int64_t DefaultZ = 0;
+    IntType DefaultZ = 0;
 #endif
 };
 
@@ -297,7 +297,7 @@ public:
         return result;
     }
 
-    virtual PolyPath* AddChild(const Path64& path) = 0;
+    virtual PolyPath* AddChild(const PathI& path) = 0;
 
     virtual void Clear() {};
     virtual size_t Count() const { return 0; }
@@ -315,10 +315,10 @@ public:
     }
 };
 
-class PolyPath64 : public PolyPath {
+class PolyPath64 final : public PolyPath {
 private:
     std::vector<std::unique_ptr<PolyPath64>> childs_;
-    Path64 polygon_;
+    PathI polygon_;
     typedef typename std::vector<std::unique_ptr<PolyPath64>>::const_iterator pp64_itor;
 
 public:
@@ -327,8 +327,10 @@ public:
     PolyPath64* operator[](size_t index) { return childs_[index].get(); }
     pp64_itor begin() const { return childs_.cbegin(); }
     pp64_itor end() const { return childs_.cend(); }
+    auto begin() { return childs_.begin(); }
+    auto end() { return childs_.end(); }
 
-    PolyPath64* AddChild(const Path64& path) override {
+    PolyPath64* AddChild(const PathI& path) override {
         auto p = std::make_unique<PolyPath64>(this);
         auto* result = childs_.emplace_back(std::move(p)).get();
         result->polygon_ = path;
@@ -343,10 +345,10 @@ public:
         return childs_.size();
     }
 
-    const Path64& Polygon() const { return polygon_; };
+    const PathI& Polygon() const { return polygon_; };
 
     double Area() const {
-        double result = Clipper2Lib::Area<int64_t>(polygon_);
+        double result = Clipper2Lib::Area(polygon_);
         for (const auto& child : childs_)
             result += child->Area();
         return result;
@@ -381,7 +383,7 @@ public:
     }
 };
 
-class PolyPathD : public PolyPath {
+class PolyPathD final : public PolyPath {
 private:
     std::vector<std::unique_ptr<PolyPathD>> childs_;
     double inv_scale_;
@@ -401,10 +403,10 @@ public:
 
     void SetInvScale(double value) { inv_scale_ = value; }
     double InvScale() { return inv_scale_; }
-    PolyPathD* AddChild(const Path64& path) override {
+    PolyPathD* AddChild(const PathI& path) override {
         auto p = std::make_unique<PolyPathD>(this);
         PolyPathD* result = childs_.emplace_back(std::move(p)).get();
-        result->polygon_ = ScalePath<double, int64_t>(path, inv_scale_);
+        result->polygon_ = ScalePath<double>(path, inv_scale_);
         return result;
     }
 
@@ -428,32 +430,32 @@ public:
 
 class Clipper64 : public ClipperBase {
 private:
-    void BuildPaths64(Paths64& solutionClosed, Paths64* solutionOpen);
-    void BuildTree64(PolyPath64& polytree, Paths64& open_paths);
+    void BuildPaths64(PathsI& solutionClosed, PathsI* solutionOpen);
+    void BuildTree64(PolyPath64& polytree, PathsI& open_paths);
 
 public:
 #ifdef USINGZ
     void SetZCallback(ZCallback64 cb) { zCallback_ = cb; }
 #endif
 
-    void AddSubject(const Paths64& subjects) {
+    void AddSubject(const PathsI& subjects) {
         AddPaths(subjects, PathType::Subject, false);
     }
-    void AddOpenSubject(const Paths64& open_subjects) {
+    void AddOpenSubject(const PathsI& open_subjects) {
         AddPaths(open_subjects, PathType::Subject, true);
     }
-    void AddClip(const Paths64& clips) {
+    void AddClip(const PathsI& clips) {
         AddPaths(clips, PathType::Clip, false);
     }
 
     bool Execute(ClipType clip_type,
-        FillRule fill_rule, Paths64& closed_paths) {
-        Paths64 dummy;
+        FillRule fill_rule, PathsI& closed_paths) {
+        PathsI dummy;
         return Execute(clip_type, fill_rule, closed_paths, dummy);
     }
 
     bool Execute(ClipType clip_type, FillRule fill_rule,
-        Paths64& closed_paths, Paths64& open_paths) {
+        PathsI& closed_paths, PathsI& open_paths) {
         closed_paths.clear();
         open_paths.clear();
         if (ExecuteInternal(clip_type, fill_rule, false))
@@ -462,13 +464,13 @@ public:
         return succeeded_;
     }
 
-    bool Execute(ClipType clip_type, FillRule fill_rule, PolyTree64& polytree) {
-        Paths64 dummy;
+    bool Execute(ClipType clip_type, FillRule fill_rule, PolyTreeI& polytree) {
+        PathsI dummy;
         return Execute(clip_type, fill_rule, polytree, dummy);
     }
 
     bool Execute(ClipType clip_type,
-        FillRule fill_rule, PolyTree64& polytree, Paths64& open_paths) {
+        FillRule fill_rule, PolyTreeI& polytree, PathsI& open_paths) {
         if (ExecuteInternal(clip_type, fill_rule, true)) {
             open_paths.clear();
             polytree.Clear();
@@ -531,15 +533,15 @@ public:
 #endif
 
     void AddSubject(const PathsD& subjects) {
-        AddPaths(ScalePaths<int64_t, double>(subjects, scale_), PathType::Subject, false);
+        AddPaths(ScalePaths<IntType>(subjects, scale_), PathType::Subject, false);
     }
 
     void AddOpenSubject(const PathsD& open_subjects) {
-        AddPaths(ScalePaths<int64_t, double>(open_subjects, scale_), PathType::Subject, true);
+        AddPaths(ScalePaths<IntType>(open_subjects, scale_), PathType::Subject, true);
     }
 
     void AddClip(const PathsD& clips) {
-        AddPaths(ScalePaths<int64_t, double>(clips, scale_), PathType::Clip, false);
+        AddPaths(ScalePaths<IntType>(clips, scale_), PathType::Clip, false);
     }
 
     bool Execute(ClipType clip_type, FillRule fill_rule, PathsD& closed_paths) {

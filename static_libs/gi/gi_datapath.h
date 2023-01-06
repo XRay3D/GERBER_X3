@@ -35,7 +35,7 @@ class GiDataPath : public GraphicsItem {
     friend class MainWindow;
 
 public:
-    GiDataPath(const PathD& path, FileInterface* file);
+    GiDataPath(const Path& path, FileInterface* file);
 
 protected:
     // QGraphicsItem interface

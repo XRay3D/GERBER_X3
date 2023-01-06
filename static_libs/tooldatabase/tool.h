@@ -23,8 +23,8 @@ class Tool {
 
 public:
     Tool();
-    Tool(int)
-        : diameter_(0) { }
+    Tool(double diameter)
+        : diameter_(diameter) { }
 
     enum Type {
         Drill,

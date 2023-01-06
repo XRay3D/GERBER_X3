@@ -35,7 +35,7 @@
 #include <QtWidgets>
 #include <forward_list>
 
-static auto IntPointConverter = QMetaType::registerConverter(&PointD::toString);
+static auto IntPointConverter = QMetaType::registerConverter(&Point::toString);
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -115,23 +115,23 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if (0) {
-            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber-layer-format-x3-example-fabrication-data-with-component-layers_en\ciaa_acc)");
+            QDir dir(R"(E:\YandexDisk\ESAMP\ELECTROSTATIC_AMP\TopoR)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if (!dir.exists())
                 break;
-            for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
+            for (QString str : dir.entryList({"*.dxf"}, QDir::Files)) {
                 str = dir.path() + '/' + str;
                 QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                // break;
+                //                break;
             }
         }
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (1)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(C:/Users/X-Ray/YandexDisk/G2G/test files/Ucamco/gerber-layer-format-x3-example-fabrication-data-with-component-layers_en/ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
+        if (0)
+            QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if (0) {
             QTimer::singleShot(i += k, [this] { selectAll(); });
@@ -140,10 +140,10 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
-        if (0) {
+        if (1) {
             i = 1000;
             // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
@@ -266,10 +266,10 @@ void MainWindow::createActionsFile() {
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
-    // Save Selected Tool PathsD
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool PathsD..."), this, &MainWindow::saveSelectedGCodeFiles);
+    // Save Selected Tool Paths
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
     action->setStatusTip(tr("Save selected toolpaths"));
-    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool PathsD..."), this, &MainWindow::saveSelectedGCodeFiles);
+    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
 
     // Export PDF
     // FIXME       action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
@@ -443,7 +443,7 @@ void MainWindow::createActionsToolPath() {
     if (!App::gCodePlugins().size())
         return;
 
-    QMenu* menu = menuBar()->addMenu(tr("&PathsD"));
+    QMenu* menu = menuBar()->addMenu(tr("&Paths"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
@@ -497,7 +497,7 @@ void MainWindow::createActionsShape() {
         qDebug("На переделке");
 
         auto selectedItems(App::graphicsView()->scene()->selectedItems());
-        PathsD clipPaths;
+        Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
             if (clipItem->type() >= GiType::ShCircle)
                 clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
@@ -508,10 +508,10 @@ void MainWindow::createActionsShape() {
             if (item->type() == GiType::DataSolid) {
                 auto gitem = static_cast<GiDataSolid*>(item);
                 Clipper clipper;
-                clipper.AddPaths(gitem->paths(), PathType::Subject, true);
-                clipper.AddPaths(clipPaths, PathType::Clip, true);
-                PathsD paths;
-                clipper.Execute(type, paths, FillRule::EvenOdd, FillRule::Positive);
+                clipper.AddSubject(gitem->paths());
+                clipper.AddClip(clipPaths);
+                Paths paths;
+                clipper.Execute(type, FillRule::EvenOdd, paths /*FillRule::Positive*/);
                 if (paths.empty()) {
                     rmi.push_back(gitem);
                 } else {

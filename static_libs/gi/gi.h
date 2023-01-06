@@ -10,13 +10,12 @@
  ********************************************************************************/
 #pragma once
 
-#include <myclipper.h>
-using namespace Clipper2Lib;
-
+#include "myclipper.h"
 #include <QAnimationGroup>
 #include <QGraphicsItem>
 #include <QPen>
 #include <QPropertyAnimation>
+#include <qmath.h>
 
 enum /*class*/ GiType : int {
     DataPath = QGraphicsItem::UserType,
@@ -81,8 +80,8 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual PathsD paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
-    virtual void setPaths(PathsD paths, int alternate = {}) {
+    virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
+    virtual void setPaths(Paths paths, int alternate = {}) {
         auto t {transform()};
         auto a {qRadiansToDegrees(asin(t.m12()))};
         t = t.rotateRadians(-t.m12());

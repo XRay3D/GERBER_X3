@@ -23,18 +23,20 @@
 #include <QPolygonF>
 #include <mvector.h>
 
-static constexpr auto uScale {1};
-static constexpr auto dScale {1};
+static constexpr auto uScale {100000};
+static constexpr auto dScale {1. / uScale};
 
 namespace Clipper2Lib {
 #ifdef __cpp_exceptions
 static const char* precision_error = "Precision exceeds the permitted range";
 #endif
 
+using IntType = int32_t;
+
 static const double PI = 3.141592653589793238;
-static const int64_t MAX_COORD = INT64_MAX >> 2;
-static const int64_t MIN_COORD = -MAX_COORD;
-static const int64_t INVALID = INT64_MAX;
+static const IntType MAX_COORD = std::numeric_limits<IntType>::max() >> 2;
+static const IntType MIN_COORD = -MAX_COORD;
+static const IntType INVALID = std::numeric_limits<IntType>::max();
 
 // By far the most widely used filling rules for polygons are EvenOdd
 // and NonZero, sometimes called Alternate and Winding respectively.
@@ -53,10 +55,10 @@ struct Point {
     T x;
     T y;
     #ifdef USINGZ
-    int64_t z;
+    IntType z;
 
     template <typename T2>
-    inline void Init(const T2 x_ = 0, const T2 y_ = 0, const int64_t z_ = 0) {
+    inline void Init(const T2 x_ = 0, const T2 y_ = 0, const IntType z_ = 0) {
         if constexpr (std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
             x = static_cast<T>(std::round(x_));
             y = static_cast<T>(std::round(y_));
@@ -74,7 +76,7 @@ struct Point {
         , z(0) {};
 
     template <typename T2>
-    Point(const T2 x_, const T2 y_, const int64_t z_ = 0) {
+    Point(const T2 x_, const T2 y_, const IntType z_ = 0) {
         Init(x_, y_);
         z = z_;
     }
@@ -153,7 +155,7 @@ struct Point {
 };
 
 // nb: using 'using' here (instead of typedef) as they can be used in templates
-using Point64 = Point<int64_t>;
+using Point64 = Point<IntType>;
 using PointD = Point<double>;
 
 template <typename T>
@@ -161,7 +163,7 @@ using Path = std::vector<Point<T>>;
 template <typename T>
 using Paths = std::vector<Path<T>>;
 
-using Path64 = Path<int64_t>;
+using Path64 = Path<IntType>;
 using PathD = Path<double>;
 using Paths64 = std::vector<Path64>;
 using PathsD = std::vector<PathD>;
@@ -170,13 +172,14 @@ using PathsD = std::vector<PathD>;
 
 template <typename T>
 struct Point {
+    using Type = T;
     T x;
     T y;
     #ifdef USINGZ
-    int64_t z;
+    IntType z;
 
     template <typename T2>
-    inline void Init(const T2 x_ = 0, const T2 y_ = 0, const int64_t z_ = 0) {
+    inline void Init(const T2 x_ = 0, const T2 y_ = 0, const IntType z_ = 0) {
         if constexpr (std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
             x = static_cast<T>(std::round(x_));
             y = static_cast<T>(std::round(y_));
@@ -194,7 +197,7 @@ struct Point {
         , z(0) {};
 
     template <typename T2>
-    Point(const T2 x_, const T2 y_, const int64_t z_ = 0) {
+    Point(const T2 x_, const T2 y_, const IntType z_ = 0) {
         Init(x_, y_);
         z = z_;
     }
@@ -405,8 +408,26 @@ struct Path : mvector<Point<T>> {
     Path(const QPolygonF& v) {
         MV::reserve(v.size());
         for (auto& pt : v)
-            MV::push_back(pt);
+            MV::emplace_back(pt);
     }
+
+    //    template <typename U>
+    //        requires(!std::is_same_v<T, U>)
+    //    Path(const Path<U>& v) {
+    //        MV::reserve(v.size());
+    //        for (auto& pt : v)
+    //            MV::emplace_back(pt);
+    //    }
+
+    //    template <typename U>
+    //        requires(!std::is_same_v<T, U>)
+    //    Path& operator=(const Path<U>& v) {
+    //        MV::clear();
+    //        MV::reserve(v.size());
+    //        for (auto& pt : v)
+    //            MV::emplace_back(pt);
+    //        return *this;
+    //    }
 
     operator QPolygonF() const {
         QPolygonF poly;
@@ -447,6 +468,24 @@ struct Paths : mvector<Path<T>> {
             MV::emplace_back(qpolygonf);
     }
 
+    //    template <typename U>
+    //        requires(!std::is_same_v<T, U>)
+    //    Paths(const Paths<U>& v) {
+    //        MV::reserve(v.size());
+    //        for (auto& path : v)
+    //            MV::emplace_back(path);
+    //    }
+
+    //    template <typename U>
+    //        requires(!std::is_same_v<T, U>)
+    //    auto& operator=(const Paths<U>& v) {
+    //        MV::clear();
+    //        MV::reserve(v.size());
+    //        for (auto& path : v)
+    //            MV::emplace_back(path);
+    //        return *this;
+    //    }
+
     operator mvector<QPolygonF>() const {
         mvector<QPolygonF> polys;
         polys.reserve(MV::size());
@@ -471,13 +510,13 @@ struct Paths : mvector<Path<T>> {
     //    int id {};
 };
 
-using Point64 = Point<int64_t>;
+using PointI = Point<IntType>;
 using PointD = Point<double>;
 
-using Path64 = Path<int64_t>;
+using PathI = Path<IntType>;
 using PathD = Path<double>;
 
-using Paths64 = Paths<int64_t>;
+using PathsI = Paths<IntType>;
 using PathsD = Paths<double>;
 #endif
 
@@ -529,7 +568,7 @@ inline Paths<T1> ScalePaths(const Paths<T2>& paths, double scale_x, double scale
 
 template <typename T1, typename T2>
 inline Paths<T1> ScalePaths(const Paths<T2>& paths, double scale) {
-    return ScalePaths<T1, T2>(paths, scale, scale);
+    return ScalePaths<T1>(paths, scale, scale);
 }
 
 template <typename T1, typename T2>
@@ -549,20 +588,20 @@ inline Paths<T1> TransformPaths(const Paths<T2>& paths) {
     return result;
 }
 
-inline PathD Path64ToPathD(const Path64& path) {
-    return TransformPath<double, int64_t>(path);
+inline PathD PathIToPathD(const PathI& path) {
+    return TransformPath<double, IntType>(path);
 }
 
-inline PathsD Paths64ToPathsD(const Paths64& paths) {
-    return TransformPaths<double, int64_t>(paths);
+inline PathsD PathsIToPathsD(const PathsI& paths) {
+    return TransformPaths<double, IntType>(paths);
 }
 
-inline Path64 PathDToPath64(const PathD& path) {
-    return TransformPath<int64_t, double>(path);
+inline PathI PathDToPathI(const PathD& path) {
+    return TransformPath<IntType, double>(path);
 }
 
-inline Paths64 PathsDToPaths64(const PathsD& paths) {
-    return TransformPaths<int64_t, double>(paths);
+inline PathsI PathsDToPathsI(const PathsD& paths) {
+    return TransformPaths<IntType, double>(paths);
 }
 
 template <typename T>
@@ -649,7 +688,7 @@ inline Paths<T> StripDuplicates(const Paths<T>& paths, bool is_closed_path) {
 template <typename T>
 struct Rect;
 
-using Rect64 = Rect<int64_t>;
+using RectI = Rect<IntType>;
 using RectD = Rect<double>;
 
 template <typename T>
@@ -716,6 +755,14 @@ struct Rect {
            << rect.left << "," << rect.top << "," << rect.right << "," << rect.bottom
            << ")";
         return os;
+    }
+
+    friend Rect<T> operator+(const Rect<T>& l, const Rect<T>& r) {
+        return Rect<T> {
+            std::min(l.left, r.left),
+            std::max(l.top, r.top),
+            std::max(l.right, r.right),
+            std::min(l.bottom, r.bottom)};
     }
 };
 
@@ -841,15 +888,15 @@ inline bool IsPositive(const Path<T>& poly) {
 static const double max_coord = static_cast<double>(MAX_COORD);
 static const double min_coord = static_cast<double>(MIN_COORD);
 
-inline int64_t CheckCastInt64(double val) {
+inline IntType CheckCastInt64(double val) {
     if ((val >= max_coord) || (val <= min_coord))
         return INVALID;
     else
-        return static_cast<int64_t>(val);
+        return static_cast<IntType>(val);
 }
 
-inline bool GetIntersectPoint(const Point64& ln1a, const Point64& ln1b,
-    const Point64& ln2a, const Point64& ln2b, Point64& ip) {
+inline bool GetIntersectPoint(const PointI& ln1a, const PointI& ln1b,
+    const PointI& ln2a, const PointI& ln2b, PointI& ip) {
     // https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
 
     double dx1 = static_cast<double>(ln1b.x - ln1a.x);
@@ -866,8 +913,8 @@ inline bool GetIntersectPoint(const Point64& ln1a, const Point64& ln1b,
     return (ip.x != INVALID && ip.y != INVALID);
 }
 
-inline bool SegmentsIntersect(const Point64& seg1a, const Point64& seg1b,
-    const Point64& seg2a, const Point64& seg2b, bool inclusive = false) {
+inline bool SegmentsIntersect(const PointI& seg1a, const PointI& seg1b,
+    const PointI& seg2a, const PointI& seg2b, bool inclusive = false) {
     if (inclusive) {
         double res1 = CrossProduct(seg1a, seg2a, seg2b);
         double res2 = CrossProduct(seg1b, seg2a, seg2b);
@@ -883,8 +930,8 @@ inline bool SegmentsIntersect(const Point64& seg1a, const Point64& seg1b,
     }
 }
 
-inline Point64 GetClosestPointOnSegment(const Point64& offPt,
-    const Point64& seg1, const Point64& seg2) {
+inline PointI GetClosestPointOnSegment(const PointI& offPt,
+    const PointI& seg1, const PointI& seg2) {
     if (seg1.x == seg2.x && seg1.y == seg2.y)
         return seg1;
     double dx = static_cast<double>(seg2.x - seg1.x);
@@ -894,9 +941,9 @@ inline Point64 GetClosestPointOnSegment(const Point64& offPt,
         q = 0;
     else if (q > 1)
         q = 1;
-    return Point64(
-        seg1.x + static_cast<int64_t>(nearbyint(q * dx)),
-        seg1.y + static_cast<int64_t>(nearbyint(q * dy)));
+    return PointI(
+        seg1.x + static_cast<IntType>(nearbyint(q * dx)),
+        seg1.y + static_cast<IntType>(nearbyint(q * dy)));
 }
 
 enum class PointInPolygonResult {

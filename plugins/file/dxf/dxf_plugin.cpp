@@ -279,7 +279,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 
 //    Paths offset(const Path& path, double offset) const {
 //        ClipperOffset cpOffset;
-//        cpOffset.AddPath(path, jtRound, etOpenRound);
+//        cpOffset.AddPath(path, JoinType::Round, EndType::Round);
 //        Paths tmpPpaths;
 //        cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
 //        for (Path& path : tmpPpaths)
@@ -294,7 +294,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //        toolPath_ = {};
 //        changeColor();
 //    }
-//    IntPoint pos() const override { return circle ? circle->centerPoint : go.pos(); }
+//    Point pos() const override { return circle ? circle->centerPoint : go.pos(); }
 //    Paths paths() const override {
 //        Paths paths { go.path() };
 //        return ReversePaths(paths);

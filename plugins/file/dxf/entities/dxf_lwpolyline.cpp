@@ -240,10 +240,9 @@ GraphicObject LwPolyline::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    Paths paths;
     ClipperOffset offset;
-    offset.AddPath(p.value(0), jtRound, polylineFlag == Closed ? etClosedLine : etOpenRound);
-    offset.Execute(paths, constantWidth * uScale * 0.5);
+    offset.AddPath(Path {p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
+    Paths paths {offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
 
     return {id, p.value(0), paths};
 }

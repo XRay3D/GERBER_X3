@@ -506,7 +506,7 @@ mvector<QString> File::gCodeText() const { return lines_; }
 
 void File::createGiDrill() {
     GraphicsItem* item;
-    for (const IntPoint& point : toolPathss_.front().front()) {
+    for (const Point& point : toolPathss_.front().front()) {
         item = new GiDrill({point}, gcp_.getTool().diameter(), this, gcp_.getTool().id());
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -522,7 +522,7 @@ void File::createGiPocket() {
     if (pocketPaths_.size()) {
         //        {
         //            ClipperOffset offset(uScale);
-        //            offset.AddPaths(pocketPaths_, jtRound, etClosedPolygon);
+        //            offset.AddPaths(pocketPaths_, JoinType::Round, EndType::Polygon);
         //            offset.Execute(pocketPaths_, uScale * gcp_.getToolDiameter() * 0.5);
         //        }
         item = new GiDataSolid(pocketPaths_, nullptr);
@@ -666,7 +666,7 @@ void File::createGiLaser() {
         item->setPenColorPtr(color);
         itemGroup()->push_back(item);
         //        ClipperOffset offset;
-        //        offset.AddPaths(g0path_, jtRound, etOpenRound);
+        //        offset.AddPaths(g0path_, JoinType::Round, EndType::Round);
         //        offset.Execute(g0path_,uScale*gcp_.getToolDiameter());
         //        item = new GcPathItem(g0path_, this);
         //        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));

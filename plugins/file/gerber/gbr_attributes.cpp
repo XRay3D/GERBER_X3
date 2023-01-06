@@ -306,7 +306,7 @@ void Aperture::parse(const QStringList& list) {
          * Size: Not specified
          * Comment: Project identifier
          */
-        qDebug() << (flashText_ = list);
+        flashText_ = list;
         break;
     }
 }

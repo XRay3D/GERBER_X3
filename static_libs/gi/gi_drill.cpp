@@ -18,9 +18,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace Clipper2Lib;
-
-GiDrill::GiDrill(const PathD& path, double diameter, FileInterface* file, int toolId)
+GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int toolId)
     : GraphicsItem {file}
     , diameter_ {diameter}
     , path_ {path}
@@ -60,14 +58,14 @@ void GiDrill::setDiameter(double diameter) {
     update();
 }
 
-void GiDrill::update(const PathD& path, double diameter) {
+void GiDrill::update(const Path& path, double diameter) {
     diameter_ = diameter;
     path_ = path;
     create();
     update();
 }
 
-PathsD GiDrill::paths(int alternate) const {
+Paths GiDrill::paths(int alternate) const {
     return {transform().map(path_)};
 }
 

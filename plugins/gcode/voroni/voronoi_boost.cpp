@@ -13,22 +13,22 @@
 #include "voronoi_boost.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
-#include "mvector.h"
+    #include "mvector.h"
 
-#include <cstdio>
-#include <vector>
+    #include <cstdio>
+    #include <vector>
 
-#pragma warning(push)
-#pragma warning(disable : 5055)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
-// Your function
-#include "voronoi_visual_utils.h"
-#include <boost/polygon/polygon.hpp>
-#include <boost/polygon/voronoi.hpp>
+    #pragma warning(push)
+    #pragma warning(disable : 5055)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+    // Your function
+    #include "voronoi_visual_utils.h"
+    #include <boost/polygon/polygon.hpp>
+    #include <boost/polygon/voronoi.hpp>
 
-#pragma GCC diagnostic pop
-#pragma warning(pop)
+    #pragma GCC diagnostic pop
+    #pragma warning(pop)
 
 using boost::polygon::high;
 using boost::polygon::low;
@@ -87,7 +87,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
     Path path;
     path.reserve(sampled_edge.size());
     for (const auto& p : sampled_edge)
-        path.emplace_back(static_cast<cInt>(p.x()), static_cast<cInt>(p.y()));
+        path.emplace_back(static_cast<Point::Type>(p.x()), static_cast<Point::Type>(p.y()));
     return path;
 }
 namespace GCode {
@@ -95,10 +95,10 @@ namespace GCode {
 void VoronoiBoost::boostVoronoi() {
     const double tolerance = gcp_.params[GCodeParams::Tolerance].toDouble() * uScale;
 
-    cInt minX = std::numeric_limits<cInt>::max(),
-         minY = std::numeric_limits<cInt>::max(),
-         maxX = std::numeric_limits<cInt>::min(),
-         maxY = std::numeric_limits<cInt>::min();
+    Point::Type minX = std::numeric_limits<Point::Type>::max(),
+                minY = std::numeric_limits<Point::Type>::max(),
+                maxX = std::numeric_limits<Point::Type>::min(),
+                maxY = std::numeric_limits<Point::Type>::min();
 
     int id = 0, id2 = 0;
     // add line segments to diagram
@@ -122,25 +122,25 @@ void VoronoiBoost::boostVoronoi() {
             for (size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
                 ifCancelThenThrow();
-                const IntPoint& point = path[i];
+                const Point& point = path[i];
                 vecId.emplace_back(id);
-                //                !i ? srcSegments.emplace_back(path.back().X, path.back().Y, point.X, point.Y /*, id, id2++*/)
-                //                   : srcSegments.emplace_back(path[i - 1].X, path[i - 1].Y, point.X, point.Y /*, id, id2++*/);
+                //                !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
+                //                   : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
                 !i ? srcSegments.emplace_back(
-                    point_type {static_cast<coordinate_type>(path.back().X), static_cast<coordinate_type>(path.back().Y)},
-                    point_type {static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y)}) :
+                    point_type {static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
+                    point_type {static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)}) :
                      srcSegments.emplace_back(
-                         point_type {static_cast<coordinate_type>(path[i - 1].X), static_cast<coordinate_type>(path[i - 1].Y)},
-                         point_type {static_cast<coordinate_type>(point.X), static_cast<coordinate_type>(point.Y)});
-                maxX = std::max(maxX, point.X);
-                maxY = std::max(maxY, point.Y);
-                minX = std::min(minX, point.X);
-                minY = std::min(minY, point.Y);
+                         point_type {static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
+                         point_type {static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
+                maxX = std::max(maxX, point.x);
+                maxY = std::max(maxY, point.y);
+                minX = std::min(minX, point.x);
+                minY = std::min(minY, point.y);
             }
         }
     }
-    const cInt kx = (maxX - minX) * 2;
-    const cInt ky = (maxY - minY) * 2;
+    const Point::Type kx = (maxX - minX) * 2;
+    const Point::Type ky = (maxY - minY) * 2;
     //    srcSegments.emplace_back(maxX + kx, minY - ky, maxX + kx, maxY + ky, ++id);
     //    srcSegments.emplace_back(maxX + kx, minY - ky, minX - kx, minY - ky, id);
     //    srcSegments.emplace_back(minX - kx, maxY + ky, maxX + kx, maxY + ky, id);
@@ -163,8 +163,8 @@ void VoronoiBoost::boostVoronoi() {
         point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << "max id:" << id;
-    //    const cInt kx = (maxX - minX) * 2;
-    //    const cInt ky = (maxY - minY) * 2;
+    //    const Point::Type kx = (maxX - minX) * 2;
+    //    const Point::Type ky = (maxY - minY) * 2;
 
     Paths segments;
     {
@@ -193,8 +193,8 @@ void VoronoiBoost::boostVoronoi() {
             auto color2 = id1(edge);
 
             if (v0 && v1) {
-                IntPoint p0 {static_cast<cInt>(v0->x()), static_cast<cInt>(v0->y())};
-                IntPoint p1 {static_cast<cInt>(v1->x()), static_cast<cInt>(v1->y())};
+                Point p0 {static_cast<Point::Type>(v0->x()), static_cast<Point::Type>(v0->y())};
+                Point p1 {static_cast<Point::Type>(v1->x()), static_cast<Point::Type>(v1->y())};
                 if (color1 != color2 && color1 && color2) {
                     if (set.emplace(Path {p0, p1}).second && set.emplace(Path {p1, p0}).second) {
                         if (edge.is_curved() && p0.distTo(p1) < tolerance) {
@@ -210,7 +210,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const cInt fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
+    const Point::Type fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
     Path frame {
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
@@ -220,9 +220,9 @@ void VoronoiBoost::boostVoronoi() {
     };
     {
         Clipper clipper;
-        clipper.AddPaths(segments, ptSubject, false);
-        clipper.AddPath(frame, ptClip, true);
-        clipper.Execute(ctIntersection, segments, pftNonZero);
+        clipper.AddOpenSubject(segments);
+        clipper.AddClip({frame});
+        clipper.Execute(ClipType::Intersection, FillRule::NonZero, segments, segments);
     }
 
     //    dbgPaths(segments, "segments");
