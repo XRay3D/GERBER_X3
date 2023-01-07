@@ -141,7 +141,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Model::Name:
             return name.size() ? name : pos_.toString();
             //        case Model::Position:
-            //            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.X * dScale).arg(pos_.Y * dScale).replace('.', ',');
+            //            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:

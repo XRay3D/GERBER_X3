@@ -752,7 +752,7 @@ void ApBlock::draw() {
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
     }
-    // CleanPolygons(paths_, 0.0009 * uScale);
+    // CleanPaths(paths_, 0.0009 * uScale);
     {
         Clipper clipperBase;
         clipperBase.AddSubject(paths_);

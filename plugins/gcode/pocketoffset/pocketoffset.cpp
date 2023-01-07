@@ -43,7 +43,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
             offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
             paths = offset.Execute(dOffset);
             //            if (App::settings().gbrCleanPolygons())
-            //                CleanPolygons(paths, uScale * 0.0005);
+            //                CleanPaths(paths, uScale * 0.0005);
             Paths tmpPaths;
             int counter = steps;
             if (counter > 1) {
@@ -60,13 +60,12 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
         }
     } else {
         ClipperOffset offset(uScale);
-        for (Paths paths : groupedPss) {
+        for (const Paths& paths : groupedPss)
             offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
-        }
-        Paths paths;
-        paths = offset.Execute(dOffset);
+
+        Paths paths = offset.Execute(dOffset);
         //        if (App::settings().gbrCleanPolygons())
-        //            CleanPolygons(paths, uScale * 0.0005);
+        //            CleanPaths(paths, uScale * 0.0005);
         int counter = steps;
         if (counter > 1) {
             do {
@@ -138,7 +137,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
         paths = offset.Execute(-dOffset);
         //        if (App::settings().gbrCleanPolygons())
-        //            CleanPolygons(paths, uScale * 0.0005);
+        //            CleanPaths(paths, uScale * 0.0005);
         fillPaths.append(paths);
         Paths offsetPaths;
         do {
@@ -218,7 +217,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 offset.AddPaths(fillPaths[i], JoinType::Round, EndType::Polygon);
                 tmp = offset.Execute(-dOffset + uScale * 0.001);
                 //                if (App::settings().gbrCleanPolygons())
-                //                    CleanPolygons(tmp, uScale * 0.0005);
+                //                    CleanPaths(tmp, uScale * 0.0005);
             }
             { // объединение рамок
                 Clipper cliper;
@@ -239,7 +238,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
             offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
             Paths wp = offset.Execute(-dOffset + 1); // + 1 <- поправка при расчёте впритык.
             //            if (App::settings().gbrCleanPolygons())
-            //                CleanPolygons(wp, uScale * 0.0005);
+            //                CleanPaths(wp, uScale * 0.0005);
 
             if (tIdx) { // обрезка текущего пути предыдущим
                 Clipper cliper;

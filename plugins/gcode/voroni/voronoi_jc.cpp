@@ -29,7 +29,7 @@ void VoronoiJc::jcVoronoi() {
 
     mvector<jcv_point> points;
     points.reserve(100000);
-    CleanPolygons(workingPs, tolerance * 0.1 * uScale);
+    CleanPaths(workingPs, tolerance * 0.1 * uScale);
     groupedPaths(CopperPaths);
     int id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
@@ -83,7 +83,7 @@ void VoronoiJc::jcVoronoi() {
         };
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
-        auto toIntPoint = [](const jcv_edge* edge, int num) -> const Point {
+        auto toPoint = [](const jcv_edge* edge, int num) -> const Point {
             return {static_cast<Point::Type>(edge->pos[num].x), static_cast<Point::Type>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
@@ -91,7 +91,7 @@ void VoronoiJc::jcVoronoi() {
             jcv_graphedge* graph_edge = sites[i].edges;
             while (graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
-                const Pair pair {toIntPoint(edge, 0), toIntPoint(edge, 1), sites[i].p.id};
+                const Pair pair {toPoint(edge, 0), toPoint(edge, 1), sites[i].p.id};
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
                     frame.insert(pair); // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)

@@ -106,7 +106,7 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
         clipper.AddSubject(returnPs);
         clipper.AddClip({frame});
         clipper.Execute(ClipType::Intersection, FillRule::NonZero, returnPs);
-        CleanPolygons(returnPs, 0.001 * uScale);
+        CleanPaths(returnPs, 0.001 * uScale);
     }
     { // create pocket
         ClipperOffset offset(uScale);
