@@ -18,7 +18,8 @@
 class GraphicsView;
 
 class GiBridge final : public GraphicsItem {
-    Q_OBJECT
+    //    Q_OBJECT
+    Q_GADGET
     friend class ProfileForm;
 
 public:
@@ -30,7 +31,7 @@ public:
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    void setNewPos(const QPointF& pos);
+    Q_INVOKABLE void setNewPos(const QPointF& pos);
     // GraphicsItem interface
     Paths paths(int alternate = {}) const override;
 

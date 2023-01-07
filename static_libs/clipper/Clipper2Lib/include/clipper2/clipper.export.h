@@ -728,7 +728,7 @@ inline CPathsD CreateCPathsD(const PathsI& pp, double scale) {
 }
 
 inline void InitCPolyPath64(CPolyTree64* cpt,
-    bool is_hole, const std::unique_ptr<PolyPath64>& pp) {
+    bool is_hole, const std::unique_ptr<PolyPathI>& pp) {
     cpt->polygon = CreateCPath64(pp->Polygon());
     cpt->is_hole = is_hole;
     size_t child_cnt = pp->Count();
@@ -738,7 +738,7 @@ inline void InitCPolyPath64(CPolyTree64* cpt,
         return;
     cpt->childs = new CPolyPath64[child_cnt];
     CPolyPath64* child = cpt->childs;
-    for (const std::unique_ptr<PolyPath64>& pp_child : *pp)
+    for (const std::unique_ptr<PolyPathI>& pp_child : *pp)
         InitCPolyPath64(child++, !is_hole, pp_child);
 }
 
@@ -753,7 +753,7 @@ inline CPolyTree64* CreateCPolyTree64(const PolyTreeI& pt) {
         return result;
     result->childs = new CPolyPath64[child_cnt];
     CPolyPath64* child = result->childs;
-    for (const std::unique_ptr<PolyPath64>& pp : pt)
+    for (const std::unique_ptr<PolyPathI>& pp : pt)
         InitCPolyPath64(child++, true, pp);
     return result;
 }
@@ -776,7 +776,7 @@ EXTERN_DLL_EXPORT void DisposeExportedCPolyTree64(CPolyTree64*& cpt) {
 }
 
 inline void InitCPolyPathD(CPolyTreeD* cpt,
-    bool is_hole, const std::unique_ptr<PolyPath64>& pp, double scale) {
+    bool is_hole, const std::unique_ptr<PolyPathI>& pp, double scale) {
     cpt->polygon = CreateCPathD(pp->Polygon(), scale);
     cpt->is_hole = is_hole;
     size_t child_cnt = pp->Count();
@@ -786,7 +786,7 @@ inline void InitCPolyPathD(CPolyTreeD* cpt,
         return;
     cpt->childs = new CPolyPathD[child_cnt];
     CPolyPathD* child = cpt->childs;
-    for (const std::unique_ptr<PolyPath64>& pp_child : *pp)
+    for (const std::unique_ptr<PolyPathI>& pp_child : *pp)
         InitCPolyPathD(child++, !is_hole, pp_child, scale);
 }
 
@@ -801,7 +801,7 @@ inline CPolyTreeD* CreateCPolyTreeD(const PolyTreeI& pt, double scale) {
         return result;
     result->childs = new CPolyPathD[child_cnt];
     CPolyPathD* child = result->childs;
-    for (const std::unique_ptr<PolyPath64>& pp : pt)
+    for (const std::unique_ptr<PolyPathI>& pp : pt)
         InitCPolyPathD(child++, true, pp, scale);
     return result;
 }

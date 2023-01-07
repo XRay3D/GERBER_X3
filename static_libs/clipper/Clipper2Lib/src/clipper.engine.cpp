@@ -2854,7 +2854,7 @@ void Clipper64::BuildPaths64(PathsI& solutionClosed, PathsI* solutionOpen) {
     }
 }
 
-void Clipper64::BuildTree64(PolyPath64& polytree, PathsI& open_paths) {
+void Clipper64::BuildTree64(PolyPathI& polytree, PathsI& open_paths) {
     polytree.Clear();
     open_paths.resize(0);
     if (has_open_paths_)

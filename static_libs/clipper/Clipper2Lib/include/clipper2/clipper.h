@@ -361,7 +361,7 @@ inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precisio
 
 namespace details {
 
-    inline void PolyPathToPaths64(const PolyPath64& polypath, PathsI& paths) {
+    inline void PolyPathToPaths64(const PolyPathI& polypath, PathsI& paths) {
         paths.push_back(polypath.Polygon());
         for (const auto& child : polypath)
             PolyPathToPaths64(*child, paths);
@@ -373,7 +373,7 @@ namespace details {
             PolyPathToPathsD(*child, paths);
     }
 
-    inline bool PolyPath64ContainsChildren(const PolyPath64& pp) {
+    inline bool PolyPath64ContainsChildren(const PolyPathI& pp) {
         for (const auto& child : pp) {
             for (const PointI& pt : child->Polygon())
                 if (PointInPolygon(pt, pp.Polygon()) == PointInPolygonResult::IsOutside)

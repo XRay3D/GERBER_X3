@@ -30,7 +30,7 @@ void VoronoiJc::jcVoronoi() {
     mvector<jcv_point> points;
     points.reserve(100000);
     CleanPaths(workingPs, tolerance * 0.1 * uScale);
-    groupedPaths(CopperPaths);
+    groupedPaths(Grouping::Copper);
     int id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
         QLineF line(tmp, point);

@@ -198,12 +198,12 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
 }
 
 void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
+    auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         App::fileModel()->removeRow(node_->row(), node_->index().parent());
     });
-    auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
-    action->setCheckable(true);
-    action->setChecked(isVisible());
+    // FIXME   action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { Shape::setVisible(fl); } /*this, &GraphicsItem::setVisible*/);
+    //    action->setCheckable(true);
+    //    action->setChecked(isVisible());
 
     action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<Shape*>(this)](bool fl) {
         item->setFlag(ItemIsSelectable, fl);

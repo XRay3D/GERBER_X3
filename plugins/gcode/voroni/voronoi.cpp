@@ -30,7 +30,7 @@ void VoronoiCreator::create() {
     const auto depth = gcp_.params[GCodeParams::Depth].toDouble();
     const auto width = gcp_.params[GCodeParams::Width].toDouble();
 
-    groupedPaths(CopperPaths);
+    groupedPaths(Grouping::Copper);
     switch (gcp_.params[GCodeParams::VorT].toInt()) {
     case 0:
         boostVoronoi();

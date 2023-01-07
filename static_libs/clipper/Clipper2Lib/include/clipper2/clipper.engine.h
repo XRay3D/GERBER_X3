@@ -79,9 +79,9 @@ struct OutPt {
 };
 
 class PolyPath;
-class PolyPath64;
+class PolyPathI;
 class PolyPathD;
-using PolyTreeI = PolyPath64;
+using PolyTreeI = PolyPathI;
 using PolyTreeD = PolyPathD;
 
 struct OutRec;
@@ -315,35 +315,32 @@ public:
     }
 };
 
-class PolyPath64 final : public PolyPath {
+class PolyPathI final : public PolyPath {
 private:
-    std::vector<std::unique_ptr<PolyPath64>> childs_;
+    std::vector<std::unique_ptr<PolyPathI>> childs_;
     PathI polygon_;
-    typedef typename std::vector<std::unique_ptr<PolyPath64>>::const_iterator pp64_itor;
+    typedef typename std::vector<std::unique_ptr<PolyPathI>>::const_iterator pp64_itor;
 
 public:
-    PolyPath64(PolyPath64* parent = nullptr)
+    PolyPathI(PolyPathI* parent = nullptr)
         : PolyPath(parent) { }
-    PolyPath64* operator[](size_t index) { return childs_[index].get(); }
+    PolyPathI* operator[](size_t index) { return childs_[index].get(); }
     pp64_itor begin() const { return childs_.cbegin(); }
     pp64_itor end() const { return childs_.cend(); }
+
     auto begin() { return childs_.begin(); }
     auto end() { return childs_.end(); }
 
-    PolyPath64* AddChild(const PathI& path) override {
-        auto p = std::make_unique<PolyPath64>(this);
+    PolyPathI* AddChild(const PathI& path) override {
+        auto p = std::make_unique<PolyPathI>(this);
         auto* result = childs_.emplace_back(std::move(p)).get();
         result->polygon_ = path;
         return result;
     }
 
-    void Clear() override {
-        childs_.resize(0);
-    }
+    void Clear() override { childs_.resize(0); }
 
-    size_t Count() const override {
-        return childs_.size();
-    }
+    size_t Count() const override { return childs_.size(); }
 
     const PathI& Polygon() const { return polygon_; };
 
@@ -354,7 +351,7 @@ public:
         return result;
     }
 
-    friend std::ostream& operator<<(std::ostream& outstream, const PolyPath64& polypath) {
+    friend std::ostream& operator<<(std::ostream& outstream, const PolyPathI& polypath) {
         const size_t level_indent = 4;
         const size_t coords_per_line = 4;
         const size_t last_on_line = coords_per_line - 1;
@@ -431,7 +428,7 @@ public:
 class Clipper64 : public ClipperBase {
 private:
     void BuildPaths64(PathsI& solutionClosed, PathsI* solutionOpen);
-    void BuildTree64(PolyPath64& polytree, PathsI& open_paths);
+    void BuildTree64(PolyPathI& polytree, PathsI& open_paths);
 
 public:
 #ifdef USINGZ

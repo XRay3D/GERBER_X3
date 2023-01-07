@@ -26,9 +26,7 @@ using sl = std::source_location;
 using sl = std::experimental::source_location;
 #endif
 
-
-
-void dbgPaths(Paths ps, const QString& fileName, bool closed = false, const Tool& tool = {0.});
+void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
 
 class GiError;
 
@@ -126,7 +124,7 @@ signals:
     void errorOccurred(int = 0);
 
 protected:
-    bool createability(bool side);
+    bool createability(SideOfMilling side);
 
     bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret = nullptr);
     void stacking(Paths& paths);

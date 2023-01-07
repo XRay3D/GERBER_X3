@@ -109,7 +109,8 @@ File::File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths
     : GCFile(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
-    if (gcp_.tools.front().diameter()) {
+    if (gcp_.gcType == GCodeType::Null) {
+    } else if (gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -719,6 +720,12 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     switch (gcp_.gcType) {
+    case GCode::Null: {
+        GraphicsItem* item;
+        for (const Paths& paths : toolPathss_)
+            for (const Path& path : paths)
+                itemGroup()->emplace_back(new GiDataPath(path, this))->setPenColorPtr(&gcp_.color);
+    } break;
     case GCode::Profile:
     case GCode::Thermal:
         createGiProfile();
@@ -756,6 +763,9 @@ void File::createGi() {
             calcArcs(path);
 
     switch (gcp_.gcType) {
+    case GCode::Null:
+        icon_ = decoration(gcp_.color, name_.front());
+        break;
     case GCode::Profile:
         icon_ = QIcon::fromTheme("profile-path");
         break;
