@@ -157,7 +157,7 @@ Paths File::merge() const {
     }
 
     if (Settings::cleanPolygons())
-        CleanPolygons(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
+        CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
     return mergedPaths_;
 }
 

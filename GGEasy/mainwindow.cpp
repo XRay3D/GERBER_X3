@@ -35,7 +35,7 @@
 #include <QtWidgets>
 #include <forward_list>
 
-static auto IntPointConverter = QMetaType::registerConverter(&Point::toString);
+static auto PointConverter = QMetaType::registerConverter(&Point::toString);
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -143,9 +143,9 @@ MainWindow::MainWindow(QWidget* parent)
         if (1) {
             i = 1000;
             // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
         if (0)
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });

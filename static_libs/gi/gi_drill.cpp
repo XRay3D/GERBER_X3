@@ -66,7 +66,9 @@ void GiDrill::update(const Path& path, double diameter) {
 }
 
 Paths GiDrill::paths(int alternate) const {
-    return {transform().map(path_)};
+    Path path {shape_.toFillPolygon(QTransform::fromScale(100, 100))};
+    path = QTransform::fromScale(0.01, 0.01).map(path);
+    return {transform().map(path)};
 }
 
 void GiDrill::changeColor() {
@@ -116,7 +118,7 @@ void GiDrill::create() {
         //        path_.push_back(path_.front());
         // shape_.addPolygon(path_);
         shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
-        path_ = shape_.toFillPolygon();
+        //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
         ClipperOffset offset;

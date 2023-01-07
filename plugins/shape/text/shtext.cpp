@@ -116,11 +116,11 @@ void Text::redraw() {
 
     Clipper clipper;
     for (auto& sp : painterPath.toSubpathPolygons(transform)) {
-        clipper.AddPath(sp, ClipperLib::ptClip);
+        clipper.AddClip({sp});
         //        paths_.push_back(sp);
         //        shape_.addPolygon(sp);
     }
-    clipper.Execute(ClipperLib::ctUnion, paths_, ClipperLib::pftNonZero);
+    clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
     for (auto& sp : paths_) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(sp);

@@ -121,8 +121,8 @@ void Arc::redraw() {
 
     int intSteps = App::settings().clpCircleSegments(radius_);
     const double stepAngle = two_pi / intSteps;
-    const cInt radius = static_cast<cInt>(radius_ * uScale);
-    const IntPoint center((handlers[Center]->pos()));
+    const Point::Type radius = static_cast<Point::Type>(radius_ * uScale);
+    const Point center((handlers[Center]->pos()));
     intSteps *= angle / two_pi;
 
     Path& path = paths_.front();
@@ -132,13 +132,13 @@ void Arc::redraw() {
     for (int i {}; i <= intSteps; i++) {
         const double angle = angle1 + stepAngle * i;
         path.emplace_back(
-            static_cast<cInt>(radius * cos(angle)) + center.X,
-            static_cast<cInt>(radius * sin(angle)) + center.Y);
+            static_cast<Point::Type>(radius * cos(angle)) + center.x,
+            static_cast<Point::Type>(radius * sin(angle)) + center.y);
     }
 
-    path.back() = IntPoint {
-        static_cast<cInt>(radius * cos(angle2)) + center.X,
-        static_cast<cInt>(radius * sin(angle2)) + center.Y};
+    path.back() = Point {
+        static_cast<Point::Type>(radius * cos(angle2)) + center.x,
+        static_cast<Point::Type>(radius * sin(angle2)) + center.y};
 
     shape_.addPolygon(path);
 

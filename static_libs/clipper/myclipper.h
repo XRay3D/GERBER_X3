@@ -19,6 +19,7 @@
 
 enum { IconSize = 24 };
 constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
+constexpr auto two_pi = std::numbers::pi * 2;
 using std::numbers::pi;
 
 class cancelException : public std::exception {
@@ -75,10 +76,14 @@ Paths& normalize(Paths& paths);
 //------------------------------------------------------------------------------
 
 template <typename T>
-inline void CleanPolygons(Clipper2Lib::Path<T>&, double) { }
+inline void CleanPaths(Clipper2Lib::Path<T>& path, double k) {
+    path = Clipper2Lib::RamerDouglasPeucker(path, k);
+}
 
 template <typename T>
-inline void CleanPolygons(Clipper2Lib::Paths<T>&, double) { }
+inline void CleanPaths(Clipper2Lib::Paths<T>& paths, double k) {
+    paths = Clipper2Lib::RamerDouglasPeucker(paths, k);
+}
 
 //------------------------------------------------------------------------------
 

@@ -177,7 +177,7 @@ void File::createGi() {
                 clipper.Execute(ClipType::Union, FillRule::NonZero, mergedPaths_);
                 layer->groupedPaths_ = std::move(groupedPaths());
                 for (auto& paths : layer->groupedPaths_)
-                    CleanPolygons(paths, uScale * 0.0005);
+                    CleanPaths(paths, uScale * 0.0005);
                 mergedPaths_.clear();
             }
 

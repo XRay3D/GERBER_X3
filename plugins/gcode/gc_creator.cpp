@@ -552,7 +552,7 @@ bool Creator::createability(bool side) {
     //            offset.AddPaths(srcPaths, JoinType::Round, EndType::Polygon);
     //            frPaths = offset.Execute(-toolRadius);
     //            //        if (App::settings().gbrCleanPolygons())
-    //            //            CleanPolygons(frPaths, uScale * 0.0005);
+    //            //            CleanPaths(frPaths, uScale * 0.0005);
     //            offset.Clear();
     //            offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
     //            frPaths = offset.Execute(toolRadius + 100);
