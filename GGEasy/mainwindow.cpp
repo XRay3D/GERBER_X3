@@ -164,8 +164,10 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         writeSettings();
         delete dockWidget_;
         qApp->closeAllWindows();
+        qApp->setQuitOnLastWindowClosed(false); /////????
         App::fileModel()->closeProject();
         event->accept();
+        exit(-222);
     } else {
         event->ignore();
     }

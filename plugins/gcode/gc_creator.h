@@ -31,32 +31,42 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool cl
 class GiError;
 
 class ProgressCancel {
-    static inline size_t max_ = 0;
-    static inline size_t current_ = 0;
-    //    static inline Clipper2Lib::ClipperBase* clipper_ = nullptr;
-    static inline bool cancel_ = false;
+    static inline size_t max_;
+    static inline size_t current_;
+    static inline bool cancel_;
 
 public:
     static void reset() {
-        current_ = {};
-        max_ = {};
-        //        clipper_ = {};
-        cancel_ = {};
+        current_ = 0;
+        max_ = 0;
+        cancel_ = 0;
     }
 
-    //    static GCode::Creator* creator() { return creator_; }
-    //    static void setCreator(GCode::Creator* creator) { creator_ = creator; }
-
-    //    static void setClipper(Clipper2Lib::ClipperBase* clipper) { clipper_ = clipper; }
-    //    static Clipper2Lib::ClipperBase* clipper() { return clipper_; }
-
+    /////////////////
+    /// \brief Progress max
+    /// \return
+    ///
     static size_t max() { return max_; }
+    /////////////////
+    /// \brief Progress setMax
+    /// \param max
+    ///
     static void setMax(size_t max) { max_ = max; }
 
+    /////////////////
+    /// \brief Progress current
+    /// \return
+    ///
     static size_t current() { return current_; }
+    /////////////////
+    /// \brief Progress setCurrent
+    /// \param current
+    ///
     static void setCurrent(size_t current = 0) { current_ = current; }
+    /////////////////
+    /// \brief Progress incCurrent
+    ///
     static void incCurrent() { ++current_; }
-
     static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(const sl location = sl::current()) {
         if (cancel_) {
@@ -97,6 +107,8 @@ public:
 
     Pathss& groupedPaths(Grouping group, Point::Type k = uScale, bool fl = {});
 
+    Path boundPaths(const Paths& paths, Point::Type k)const;
+
     /*static*/ Paths& sortB(Paths& src);
     /*static*/ Paths& sortBE(Paths& src);
 
@@ -124,7 +136,7 @@ signals:
     void errorOccurred(int = 0);
 
 protected:
-    bool createability(SideOfMilling side);
+    bool checkMilling(SideOfMilling side);
 
     bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret = nullptr);
     void stacking(Paths& paths);

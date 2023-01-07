@@ -21,6 +21,7 @@ GiError::GiError(const Paths& paths, double area)
     for (auto& path : paths)
         shape_.addPolygon(path);
     setFlag(ItemIsSelectable);
+    setZValue(std::numeric_limits<double>::max());
 }
 
 double GiError::area() const { return area_; }

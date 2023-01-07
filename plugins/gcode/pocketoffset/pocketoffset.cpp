@@ -71,7 +71,8 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
             do {
                 returnPs.append(paths);
                 offset.Clear();
-                offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
+                offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+                CleanPaths(paths, uScale * 0.001);
                 paths = offset.Execute(stepOver);
             } while (paths.size() && --counter);
         } else {
@@ -120,6 +121,9 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
     case Inner:
         groupedPaths(Grouping::Copper);
         break;
+    default:
+        emit fileReady(nullptr);
+        return;
     }
 
     setCurrent(0);
@@ -136,6 +140,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         ClipperOffset offset(uScale);
         offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
         paths = offset.Execute(-dOffset);
+        CleanPaths(paths, uScale * 0.001);
         //        if (App::settings().gbrCleanPolygons())
         //            CleanPaths(paths, uScale * 0.0005);
         fillPaths.append(paths);
@@ -147,6 +152,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
             offset.Clear();
             offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
             paths = offset.Execute(-stepOver);
+            CleanPaths(paths, uScale * 0.001);
         } while (paths.size());
         returnPs.append(offsetPaths);
     }
@@ -166,6 +172,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         ClipperOffset offset(uScale);
         offset.AddPaths(fillPaths, JoinType::Round, EndType::Polygon);
         fillPaths = offset.Execute(dOffset);
+        CleanPaths(fillPaths, uScale * 0.001);
     }
     file_ = new GCode::File(returnPss, std::move(gcp_), fillPaths);
     file_->setFileName(tool.nameEnc());
