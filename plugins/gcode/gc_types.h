@@ -14,6 +14,7 @@
 #include <tool.h>
 
 #include "mvector.h"
+#include "qcolor.h"
 #include <QDebug>
 #include <QVariant>
 #include <variant>
@@ -55,9 +56,9 @@ enum Direction {
     Conventional
 };
 
-enum Grouping {
-    CopperPaths,
-    CutoffPaths,
+enum class Grouping {
+    Copper,
+    Cutoff,
 };
 
 struct Variant : V {
@@ -180,6 +181,7 @@ public:
     std::map<int, Variant> params;
     GCodeType gcType = Null;
     mutable int fileId = -1;
+    QColor color;
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type) {
         stream >> type.tools;

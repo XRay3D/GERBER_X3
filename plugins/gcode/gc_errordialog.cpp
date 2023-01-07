@@ -215,7 +215,7 @@ ErrorDialog::ErrorDialog(mvector<GiError*>&& items, QWidget* parent)
 
     buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
     buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
-    setGeometry(parent->normalGeometry());
+    setGeometry(static_cast<QWidget*>(parent->parent())->geometry());
     startTimer(32);
 }
 

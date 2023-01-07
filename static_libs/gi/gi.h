@@ -53,20 +53,21 @@ namespace Shapes {
 class Shape;
 }
 
-class GraphicsItem : public QGraphicsObject {
+class GraphicsItem : public /*QGraphicsObject*/ QGraphicsItem {
 
     friend class GiGroup;
     friend class Project;
 
-    Q_OBJECT
-
+    //    Q_OBJECT
+    Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
 
     inline QColor bodyColor() { return bodyColor_; }
     inline void setBodyColor(const QColor& c) { bodyColor_ = c, colorChanged(); }
 
-signals:
-    void colorChanged();
+    // signals:
+public:
+    void colorChanged() { update(); };
 
 public:
     explicit GraphicsItem(FileInterface* file = nullptr);

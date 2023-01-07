@@ -34,7 +34,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
 
-    groupedPaths(CopperPaths);
+    groupedPaths(Grouping::Copper);
 
     if (gcp_.side() == Inner) {
         dOffset *= -1;
@@ -115,10 +115,10 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
     case On:
         break;
     case Outer:
-        groupedPaths(CutoffPaths, static_cast<Point::Type>(toolDiameter * 1.005));
+        groupedPaths(Grouping::Cutoff, static_cast<Point::Type>(toolDiameter * 1.005));
         break;
     case Inner:
-        groupedPaths(CopperPaths);
+        groupedPaths(Grouping::Copper);
         break;
     }
 
@@ -178,10 +178,10 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
     case On:
         return;
     case Outer:
-        groupedPaths(CutoffPaths, tools.front().getDiameter(depth) * 1.005 * uScale);
+        groupedPaths(Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);
         break;
     case Inner:
-        groupedPaths(CopperPaths);
+        groupedPaths(Grouping::Copper);
         break;
     }
 

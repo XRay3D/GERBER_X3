@@ -306,7 +306,7 @@ Paths& normalize(Paths& paths) {
     //    groupedPss.clear();
     //    grouping(polyTree.GetFirst(), group);
 
-    //    if (group == CutoffPaths) {
+    //    if (group == Grouping::Cutoff) {
     //        if (groupedPss.size() > 1 && groupedPss.front().size() == 2)
     //            groupedPss.erase(groupedPss.begin());
     //    }

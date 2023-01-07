@@ -34,10 +34,10 @@ void RasterCreator::create() {
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
     switch (gcp_.side()) {
     case Outer:
-        groupedPaths(CutoffPaths, static_cast<Point::Type>(toolDiameter + 5));
+        groupedPaths(Grouping::Cutoff, static_cast<Point::Type>(toolDiameter + 5));
         break;
     case Inner:
-        groupedPaths(CopperPaths);
+        groupedPaths(Grouping::Copper);
         break;
     case On:
         emit fileReady(nullptr);
@@ -245,10 +245,10 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
 
     switch (gcp_.side()) {
     case Outer:
-        groupedPaths(CutoffPaths, uScale);
+        groupedPaths(Grouping::Cutoff, uScale);
         break;
     case Inner:
-        groupedPaths(CopperPaths);
+        groupedPaths(Grouping::Copper);
         break;
     case On:
         emit fileReady(nullptr);

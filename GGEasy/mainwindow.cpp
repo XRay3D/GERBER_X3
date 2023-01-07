@@ -145,7 +145,7 @@ MainWindow::MainWindow(QWidget* parent)
             // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
         if (0)
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });

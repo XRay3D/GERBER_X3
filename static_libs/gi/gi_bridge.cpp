@@ -20,7 +20,7 @@ GiBridge::GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiB
     , side_(side)
     , lenght_(lenght)
     , size_(size) {
-    connect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
+    // FIXME   App::graphicsView()->connect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     path_.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
@@ -76,7 +76,7 @@ QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) 
 
 void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     lastPos_ = pos();
-    disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
+  // FIXME    App::graphicsView()->disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 
@@ -171,7 +171,8 @@ bool GiBridge::ok() const { return ok_; }
 
 QPainterPath GiBridge::shape() const { return path_; }
 
-void GiBridge::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { deleteLater(); }
+void GiBridge::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { /* FIXME deleteLater();*/
+}
 
 void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (ok_ && pos() == lastPos_) {
@@ -180,7 +181,7 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         ptr_->setPos(pos());
         ptr_->setVisible(true);
     } else if (!ok_) {
-        deleteLater();
+        //   FIXME     deleteLater();
     }
     QGraphicsItem::mouseReleaseEvent(event);
 }

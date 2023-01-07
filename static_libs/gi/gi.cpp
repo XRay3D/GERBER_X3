@@ -37,7 +37,7 @@ GraphicsItem::GraphicsItem(FileInterface* file)
 {
     //    animation.setDuration(100);
     //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(this, &GraphicsItem::colorChanged, [this] { update(); });
+    //    connect(this, &GraphicsItem::colorChanged, [this] { update(); });
     //    visibleAnim.setDuration(100);
     //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
@@ -78,7 +78,7 @@ void GraphicsItem::setVisible(bool visible) {
     //    if (visible) {
     //        setOpacity(0.0);
     setOpacity(1.0 * visible);
-    QGraphicsObject::setVisible(visible);
+    QGraphicsItem/*QGraphicsObject*/::setVisible(visible);
     //    }
 }
 

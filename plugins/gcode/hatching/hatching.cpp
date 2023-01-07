@@ -71,10 +71,10 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
 
     switch (gcp_.side()) {
     case Outer:
-        groupedPaths(CutoffPaths, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
+        groupedPaths(Grouping::Cutoff, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
         break;
     case Inner:
-        groupedPaths(CopperPaths);
+        groupedPaths(Grouping::Copper);
         break;
     case On:
         emit fileReady(nullptr);

@@ -104,9 +104,9 @@ QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const 
     } else if (change == ItemSelectedChange && App::settings().animSelection()) {
         if (value.toBool()) {
             updateSelection();
-            connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
         } else {
-            disconnect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //   FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
             update();
         }
     }

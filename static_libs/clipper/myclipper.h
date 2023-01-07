@@ -43,13 +43,16 @@ using Point = Clipper2Lib::PointI;
 using PolyTree = Clipper2Lib::PolyTreeI;
 using Rect = Clipper2Lib::RectI;
 // func
+using Clipper2Lib::Area;
 using Clipper2Lib::Bounds;
+using Clipper2Lib::PointInPolygon;
 // enum
 using Clipper2Lib::ClipType;
 using Clipper2Lib::EndType;
 using Clipper2Lib::FillRule;
 using Clipper2Lib::JoinType;
 using Clipper2Lib::PathType;
+using Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
 

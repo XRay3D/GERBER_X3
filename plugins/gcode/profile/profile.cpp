@@ -42,7 +42,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
         } else {
             if (workingPs.size()) {
                 ClipperOffset offset;
-                for (Paths& paths : groupedPaths(CopperPaths))
+                for (Paths& paths : groupedPaths(Grouping::Copper))
                     offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
                 returnPs = offset.Execute(dOffset);
             }
