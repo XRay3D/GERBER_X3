@@ -20,8 +20,8 @@ const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
 
 GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     : QWidget(parent)
-    , plugin {plugin}
-    , creator {tpc}
+    , plugin{plugin}
+    , creator{tpc}
     , progressDialog(new QProgressDialog(this)) {
 
     content = new QWidget(this);
@@ -52,16 +52,16 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
     grid->setContentsMargins(6, 6, 6, 6);
     grid->setSpacing(6);
 
-    int row {};
-    constexpr int rowSpan {1}, columnSpan {2};
-    grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan);           // row 0
-    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 1
-    grid->addWidget(content, ++row, 0, rowSpan, columnSpan);           // row 2
-    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 3
-    grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);          // row 4
-    grid->addWidget(leName, row, 1);                                   // row 4
-    grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan);          // row 5
-    grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan);           // row 6
+    int row{};
+    constexpr int rowSpan{1}, columnSpan{2};
+    grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan); // row 0
+    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan); // row 1
+    grid->addWidget(content, ++row, 0, rowSpan, columnSpan); // row 2
+    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan); // row 3
+    grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0); // row 4
+    grid->addWidget(leName, row, 1); // row 4
+    grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan); // row 5
+    grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan); // row 6
     grid->addWidget(new QWidget(this), ++row, 0, rowSpan, columnSpan); // row 7
     grid->setRowStretch(row, 1);
 
@@ -73,7 +73,7 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
     progressDialog->reset();
     connect(progressDialog, &QProgressDialog::canceled, this, &GcFormBase::cancel);
 
-    if (!tpc)
+    if(!tpc)
         return;
 
     connect(this, &GcFormBase::createToolpath, this, &GcFormBase::startProgress);
@@ -95,17 +95,17 @@ GcFormBase::~GcFormBase() {
 
 void GcFormBase::fileHandler(GCode::File* file) {
     qDebug() << __FUNCTION__ << file;
-    if (--fileCount == 0)
+    if(--fileCount == 0)
         cancel();
 
-    if (file == nullptr) {
+    if(file == nullptr) {
         QMessageBox::information(this, tr("Warning"), tr("The tool doesn`t fit in the Working items!"));
         return;
     }
 
     file->setFileName(fileName_ + "_" + file->name());
     file->setSide(boardSide);
-    if (fileId > -1) {
+    if(fileId > -1) {
         exit(-123456);
         //        App::project()->reload(fileId, file);
         //        editMode_ = false;
@@ -116,7 +116,7 @@ void GcFormBase::fileHandler(GCode::File* file) {
 }
 
 void GcFormBase::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && creator) {
+    if(event->timerId() == progressTimerId && progressDialog && creator) {
         const auto [max, val] = creator->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
@@ -125,9 +125,9 @@ void GcFormBase::timerEvent(QTimerEvent* event) {
 }
 
 void GcFormBase::addUsedGi(GraphicsItem* gi) {
-    if (gi->file()) {
+    if(gi->file()) {
         FileInterface const* file = gi->file();
-        if (file->type() == FileType::Gerber) {
+        if(file->type() == FileType::Gerber) {
 #ifdef GBR_
             usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
 #endif
@@ -144,7 +144,7 @@ void GcFormBase::cancel() {
 
 void GcFormBase::errorHandler(int) {
     stopProgress();
-    if (bool fl = ErrorDialog(std::move(creator->items), this).exec(); fl) {
+    if(bool fl = ErrorDialog(std::move(creator->items), this).exec(); fl) {
         startProgress();
         creator->continueCalc(fl);
     } else
@@ -152,7 +152,7 @@ void GcFormBase::errorHandler(int) {
 }
 
 void GcFormBase::startProgress() {
-    if (!fileCount)
+    if(!fileCount)
         fileCount = 1;
     creator->msg = fileName_;
     progressDialog->setLabelText(creator->msg);

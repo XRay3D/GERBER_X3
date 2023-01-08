@@ -19,10 +19,10 @@
 #include <sstream>
 
 #if __has_include(<source_location>)
-    #include <source_location>
+#include <source_location>
 using sl = std::source_location;
 #else
-    #include <experimental/source_location>
+#include <experimental/source_location>
 using sl = std::experimental::source_location;
 #endif
 
@@ -69,7 +69,8 @@ public:
     static void incCurrent() { ++current_; }
     static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(const sl location = sl::current()) {
-        if (cancel_) {
+        ++current_;
+        if(cancel_) [[unlikely]] {
             //            static std::stringstream ss;
             //            ss.clear();
             //            ss << "file: "
@@ -107,7 +108,7 @@ public:
 
     Pathss& groupedPaths(Grouping group, Point::Type k = uScale, bool fl = {});
 
-    Path boundPaths(const Paths& paths, Point::Type k)const;
+    Path boundPaths(const Paths& paths, Point::Type k) const;
 
     /*static*/ Paths& sortB(Paths& src);
     /*static*/ Paths& sortBE(Paths& src);
@@ -165,9 +166,9 @@ protected:
     Pathss supportPss;
     Pathss groupedPss;
 
-    double toolDiameter {};
-    double dOffset {};
-    Point::Type stepOver {};
+    double toolDiameter{};
+    double dOffset{};
+    Point::Type stepOver{};
     GCodeParams gcp_;
 
     void isContinueCalc();
