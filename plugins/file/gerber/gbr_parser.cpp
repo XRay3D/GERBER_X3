@@ -543,24 +543,35 @@ Paths Parser::createLine() {
     }
 
     if (file->apertures_[state_.aperture()]->type() == Rectangle) {
-        auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
-        if (!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
-            throw GbrObj::tr("Aperture D%1 (%2) not supported!").arg(state_.aperture()).arg(rect->name());
-        double size = rect->width_ * uScale * state_.scaling();
-        if (qFuzzyIsNull(size))
-            return {};
-        ClipperOffset offset;
-        offset.AddPath(path_, JoinType::Square, EndType::Square);
-        solution = offset.Execute(size);
+        if (Settings::wireMinkowskiSum())
+            solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State {file}).front(), path_, {});
+        else {
+            auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
+            if (!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
+                throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
+                                 "Only square Aperture or use Minkowski Sum")
+                    .arg(state_.aperture())
+                    .arg(rect->name());
+            double size = rect->width_ * uScale * state_.scaling();
+            if (qFuzzyIsNull(size))
+                return {};
+            solution = Clipper2Lib::InflatePaths({path_}, size, JoinType::Square, EndType::Square);
+        }
+
         if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
     } else {
         double size = file->apertures_[state_.aperture()]->apSize() * uScale * state_.scaling();
         if (qFuzzyIsNull(size))
             return {};
-        ClipperOffset offset;
-        offset.AddPath(path_, JoinType::Round, EndType::Round);
-        solution = offset.Execute(size);
+        if (Settings::wireMinkowskiSum())
+            solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
+        else
+            solution = Clipper2Lib::InflatePaths({path_}, size, JoinType::Round, EndType::Round);
+
+        //        ClipperOffset offset;
+        //        offset.AddPath(path_, JoinType::Round, EndType::Round);
+        //        solution = offset.Execute(size);
         if (state_.imgPolarity() == Negative)
             ReversePaths(solution);
     }

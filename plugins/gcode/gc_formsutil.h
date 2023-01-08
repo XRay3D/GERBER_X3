@@ -13,6 +13,7 @@
 #include "depthform.h"
 #include "gcode.h"
 
+#include <QButtonGroup>
 #include <QThread>
 #include <QtWidgets>
 

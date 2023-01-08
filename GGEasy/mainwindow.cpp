@@ -115,13 +115,13 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if(0) {
-            QDir dir(R"(E:\YandexDisk\ESAMP\ELECTROSTATIC_AMP\TopoR)");
+            QDir dir(R"(E:\YandexDisk\G2G\RefUcamco Gerber\pcb_fabrication_data_in_gerber_example_2)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if(!dir.exists())
                 break;
-            for(QString str : dir.entryList({"*.dxf"}, QDir::Files)) {
+            for(QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
                 str = dir.path() + '/' + str;
                 QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                 //                break;
