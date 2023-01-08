@@ -19,10 +19,10 @@
 #include <sstream>
 
 #if __has_include(<source_location>)
-#include <source_location>
+    #include <source_location>
 using sl = std::source_location;
 #else
-#include <experimental/source_location>
+    #include <experimental/source_location>
 using sl = std::experimental::source_location;
 #endif
 
@@ -70,7 +70,7 @@ public:
     static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(const sl location = sl::current()) {
         ++current_;
-        if(cancel_) [[unlikely]] {
+        if (cancel_) [[unlikely]] {
             //            static std::stringstream ss;
             //            ss.clear();
             //            ss << "file: "
@@ -131,6 +131,8 @@ public:
 
     mvector<GiError*> items;
 
+    bool checkMillingFl {};
+
 signals:
     void fileReady(GCode::File* file);
     void canceled();
@@ -166,9 +168,9 @@ protected:
     Pathss supportPss;
     Pathss groupedPss;
 
-    double toolDiameter{};
-    double dOffset{};
-    Point::Type stepOver{};
+    double toolDiameter {};
+    double dOffset {};
+    Point::Type stepOver {};
     GCodeParams gcp_;
 
     void isContinueCalc();

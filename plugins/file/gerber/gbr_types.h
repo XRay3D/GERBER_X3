@@ -210,21 +210,7 @@ class State {
 
 public:
     State(File* const file = nullptr)
-        : file_(file)
-        , dCode_(D02)
-        , gCode_(G01)
-        , imgPolarity_(Positive)
-        , interpolation_(Linear)
-        , type_(Aperture)
-        , quadrant_(Undef)
-        , region_(Off)
-        , aperture_(0)
-        , lineNum_(0)
-        , curPos_(Point())
-        , mirroring_(NoMirroring)
-        , scaling_(1.0)
-        , rotating_(0.0) {
-    }
+        : file_(file) { }
 
     inline File* file() const { return file_; }
 
@@ -356,12 +342,16 @@ protected:
     static inline bool simplifyRegions_;
     static inline bool skipDuplicates_;
 
+    static inline bool wireMinkowskiSum_;
+
 public:
     static bool cleanPolygons() { return cleanPolygons_; }
     static double cleanPolygonsDist() { return cleanPolygonsDist_; }
 
     static bool simplifyRegions() { return simplifyRegions_; }
     static bool skipDuplicates() { return skipDuplicates_; }
+
+    static bool wireMinkowskiSum() { return wireMinkowskiSum_; }
 };
 
 } // namespace Gerber

@@ -364,7 +364,7 @@ void ClipperOffset::DoGroupOffset(Group& group, double delta) {
     if(group.join_type_ == JoinType::Round || group.end_type_ == EndType::Round) {
         double arcTol = (arc_tolerance_ > floating_point_tolerance ? arc_tolerance_ : std::log10(2 + abs_group_delta_) * default_arc_tolerance); // empirically derived
         steps_per_rad_ = App::settings().clpCircleSegments(abs_group_delta_ * dScale);
-        qDebug("%s %f", __FUNCTION__, steps_per_rad_);
+        // qDebug("%s %f", __FUNCTION__, steps_per_rad_);
         // steps_per_rad_ = PI / std::acos(1 - arcTol / abs_group_delta_) / (PI * 2);
     }
 
