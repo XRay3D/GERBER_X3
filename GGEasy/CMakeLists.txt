@@ -146,7 +146,7 @@ if(WIN32____)
         \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt..."
     )
-elseif (UNIX)#LINUX
+elseif (UNIX____)#LINUX
 
     find_program(Q_MAKE_EXE qmake)
 
