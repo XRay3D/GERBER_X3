@@ -16,7 +16,6 @@
 #include "ui_drillform.h"
 
 #include "drill_gi_preview.h"
-#include "gc_errordialog.h"
 #include "gi_point.h"
 #include "gi_preview.h"
 #include "graphicsview.h"
@@ -387,9 +386,8 @@ void Form::updateState() {
 }
 
 void Form::errorOccurred() {
-
-    auto tpc = (GCode::Creator*)sender();
-    tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
+    // FIXME   auto tpc = (GCode::Creator*)sender();
+    // FIXME   tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
 QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }

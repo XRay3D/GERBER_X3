@@ -198,6 +198,7 @@ void MainWindow::initWidgets() {
 void MainWindow::createActions() {
     dockWidget_ = new QDockWidget(this);
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    // dockWidget_->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     dockWidget_->setObjectName(QStringLiteral("dwCreatePath"));
     dockWidget_->installEventFilter(this);
 

@@ -24,11 +24,11 @@
 #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#include <QPropertyAnimation>
-#include <QUndoCommand>
+    #include <QGLWidget>
+    #include <QPropertyAnimation>
+    #include <QUndoCommand>
 #else
-#include <QtOpenGLWidgets/QOpenGLWidget>
+    #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
 #include <QDragEnterEvent>
@@ -686,6 +686,11 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
 
 void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
     painter->fillRect(rect, Qt::black);
+}
+
+void GraphicsView::timerEvent(QTimerEvent* event) {
+    //    if (event->timerId() == timerId)
+    scene()->update();
 }
 
 template <class T>

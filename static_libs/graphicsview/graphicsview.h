@@ -49,6 +49,18 @@ public:
     QRectF getSelectedBoundingRect();
     bool boundingRectFl() const { return boundingRect_; }
 
+    void startUpdateTimer(int timeMs) {
+        if (timerId)
+            killTimer(timerId);
+        timerId = startTimer(timeMs);
+    }
+
+    void stopUpdateTimer() {
+        if (timerId)
+            killTimer(timerId);
+        timerId = 0;
+    }
+
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
@@ -70,6 +82,8 @@ private:
     QPointF point, rulPt1, rulPt2;
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
+
+    int timerId {};
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
@@ -84,6 +98,10 @@ protected:
 
     void drawForeground(QPainter* painter, const QRectF& rect) override;
     void drawBackground(QPainter* painter, const QRectF& rect) override;
+
+    // QObject interface
+protected:
+    void timerEvent(QTimerEvent* event) override;
 };
 
 #include "app.h"

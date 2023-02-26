@@ -62,6 +62,7 @@ protected:
     QString trOutside {tr("Outside")};
     QString trDepth {tr("Depth:")};
     QString trTool {tr("Tool:")};
+
     //    QString trOutside {tr("Outside")};
     //    QString trOutside {tr("Outside")};
     //    QString trOutside {tr("Outside")};
@@ -85,6 +86,15 @@ protected:
     QGridLayout* grid;
 
 private:
+    QDialogButtonBox* errBtnBox;
+    class TableView* errTable;
+
+    QWidget* ctrWidget;
+    QWidget* errWidget;
+
+    void errContinue();
+    void errBreak();
+
     void cancel();
     void errorHandler(int = 0);
 

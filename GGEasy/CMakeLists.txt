@@ -131,7 +131,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32____)
+if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
     # windeployqt
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
@@ -173,6 +173,6 @@ elseif (UNIX____)#LINUX
 # qif
 # COMMENT "Deploying Qt..."
 # )
-
 # cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
+
 endif()
