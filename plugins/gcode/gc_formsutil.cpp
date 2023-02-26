@@ -79,7 +79,7 @@ public:
 GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin {plugin}
-    , creator {tpc}
+    , gcCreator {tpc}
     , progressDialog(new QProgressDialog(this)) {
 
     content = new QWidget(this);
@@ -131,18 +131,18 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
     progressDialog->reset();
     connect(progressDialog, &QProgressDialog::canceled, this, &GcFormBase::cancel);
 
-    if (!tpc)
+    if (!gcCreator)
         return;
 
     connect(this, &GcFormBase::createToolpath, this, &GcFormBase::startProgress);
-    connect(this, &GcFormBase::createToolpath, tpc, &GCode::Creator::createGc);
+    connect(this, &GcFormBase::createToolpath, gcCreator, &GCode::Creator::createGc);
 
-    connect(tpc, &GCode::Creator::canceled, this, &GcFormBase::stopProgress);
-    connect(tpc, &GCode::Creator::errorOccurred, this, &GcFormBase::errorHandler);
-    connect(tpc, &GCode::Creator::fileReady, this, &GcFormBase::fileHandler);
+    connect(gcCreator, &GCode::Creator::canceled, this, &GcFormBase::stopProgress);
+    connect(gcCreator, &GCode::Creator::errorOccurred, this, &GcFormBase::errorHandler);
+    connect(gcCreator, &GCode::Creator::fileReady, this, &GcFormBase::fileHandler);
 
-    tpc->moveToThread(&thread);
-    connect(&thread, &QThread::finished, tpc, &QObject::deleteLater);
+    gcCreator->moveToThread(&thread);
+    connect(&thread, &QThread::finished, gcCreator, &QObject::deleteLater);
     thread.start(QThread::LowPriority /*HighestPriority*/);
 }
 
@@ -174,51 +174,55 @@ void GcFormBase::fileHandler(GCode::File* file) {
 }
 
 void GcFormBase::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && creator) {
-        const auto [max, val] = creator->getProgress();
+    if (event->timerId() == progressTimerId && progressDialog && gcCreator) {
+        const auto [max, val] = gcCreator->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-        progressDialog->setLabelText(creator->msg);
+        progressDialog->setLabelText(gcCreator->msg);
     }
 }
 
 void GcFormBase::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
         FileInterface const* file = gi->file();
-        if (file->type() == FileType::Gerber) {
-#ifdef GBR_
-            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
-#endif
-        } else {
-            usedItems_[{file->id(), -1}].push_back(gi->id());
-        }
+        //        if (file->type() == FileType::Gerber) {
+        // #ifdef GBR_
+        //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
+        // #endif
+        //        } else {
+        usedItems_[{file->id(), -1}].push_back(gi->id());
+        //        }
     }
 }
 
 void GcFormBase::cancel() {
-    creator->continueCalc({});
+    gcCreator->continueCalc({});
     stopProgress();
 }
 
 void GcFormBase::errorHandler(int) {
+    qDebug(__FUNCTION__);
+    gcCreator->checkMillingFl = false;
     stopProgress();
-    if (bool fl = ErrorDialog(std::move(creator->items), this).exec(); fl) {
+    if (bool fl = ErrorDialog(std::move(gcCreator->items), this).exec(); fl) {
         startProgress();
-        creator->continueCalc(fl);
+        gcCreator->continueCalc(fl);
     } else
-        creator->continueCalc(fl);
+        gcCreator->continueCalc(fl);
 }
 
 void GcFormBase::startProgress() {
+    qDebug(__FUNCTION__);
     if (!fileCount)
         fileCount = 1;
-    creator->msg = fileName_;
-    progressDialog->setLabelText(creator->msg);
+    gcCreator->msg = fileName_;
+    progressDialog->setLabelText(gcCreator->msg);
     progressTimerId = startTimer(100);
 }
 
 void GcFormBase::stopProgress() {
-    if (creator->checkMillingFl)
+    qDebug() << __FUNCTION__ << gcCreator->checkMillingFl;
+    if (gcCreator->checkMillingFl)
         return;
     killTimer(progressTimerId);
     progressTimerId = 0;

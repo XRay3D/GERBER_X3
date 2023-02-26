@@ -170,9 +170,9 @@ void PocketOffsetForm::createFile() {
     if (ui->sbxSteps->isVisible())
         gcp_.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
 
-    creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
-    creator->addRawPaths(wRawPaths);
+    gcCreator->setGcp(gcp_);
+    gcCreator->addPaths(wPaths);
+    gcCreator->addRawPaths(wRawPaths);
     fileCount = static_cast<int>(gcp_.tools.size());
     createToolpath();
 }

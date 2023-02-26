@@ -156,9 +156,9 @@ void ProfileForm::createFile() {
         gcp_.params[GCode::GCodeParams::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
-    creator->addRawPaths(wRawPaths);
+    gcCreator->setGcp(gcp_);
+    gcCreator->addPaths(wPaths);
+    gcCreator->addRawPaths(wRawPaths);
     fileCount = 1;
     emit createToolpath();
 }

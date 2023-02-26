@@ -26,6 +26,15 @@
 
 static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
 
+// struct dbg {
+//     dbg() { }
+//     template <class T>
+//     dbg(const T&) { }
+//     template <class T>
+//     dbg operator<<(const T&) { return *this; }
+// };
+// #define qDebug dbg
+
 void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
     std::erase_if(ps, [](const Path& path) { return path.size() < 2; });
 
@@ -78,7 +87,7 @@ Pathss& Creator::groupedPaths(Grouping group, Point::Type k, bool fl) {
     using F = void (*)(PolyTree&);
 
     std::function<void(PolyTree&)> grouping = [&grouping, group, this](PolyTree& node) {
-        qDebug() << "node" << node.Level() << "Polygon" << node.Polygon().size();
+        // qDebug() << __FUNCTION__ << "node" << node.Level() << "Polygon" << node.Polygon().size();
         if ((group == Grouping::Cutoff) ^ node.IsHole()) {
             Paths paths;
             paths.reserve(node.Count() + 1);
@@ -182,9 +191,10 @@ void Creator::createGc() {
             }
         }
         if (!isCancel()) {
-            create();
             checkMillingFl = false;
+            msg = tr("createGc");
             Timer t("createGc");
+            create();
         }
         qWarning() << "Creator::createGc() finish";
     } catch (const cancelException& e) {
@@ -199,7 +209,7 @@ void Creator::createGc() {
 GCode::File* Creator::file() const { return file_; }
 
 std::pair<int, int> Creator::getProgress() {
-    return {static_cast<int>(max()), static_cast<int>(current())};
+    return {max(), current()};
 }
 
 void Creator::stacking(Paths& paths) {
@@ -220,7 +230,7 @@ void Creator::stacking(Paths& paths) {
     }
     sortPolyTreeByNesting(polyTree);
     returnPss.clear();
-    /************************************************************************************************/
+    /**************************************************************************************/
 
     auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
         QList<std::iterator_traits<Path::iterator>::difference_type> list;
@@ -291,7 +301,7 @@ void Creator::stacking(Paths& paths) {
         }
         // PROG setProgInc();
     };
-    /************************************************************************************************/
+    /**************************************************************************************/
     // PROG .3setProgMax(polyTree.Total());
     stacker({&polyTree, false});
 
