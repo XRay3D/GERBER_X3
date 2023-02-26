@@ -11,12 +11,150 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_formsutil.h"
-#include "gc_errordialog.h"
 
+#include "app.h"
+#include "gi_error.h"
+#include "graphicsview.h"
 #include "project.h"
 #include "qprogressdialog.h"
+#include <QAbstractTableModel>
+#include <QHeaderView>
+#include <QIcon>
+#include <QPainter>
+#include <QPushButton>
+#include <QTableView>
+#include <QtWidgets/QAbstractButton>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QVBoxLayout>
+#include <condition_variable>
+#include <execution>
+#include <mutex>
+#include <ranges>
+#include <sstream>
 
 const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+
+inline QIcon errorIcon(const QPainterPath& path) {
+
+    const QRectF rect = path.boundingRect();
+
+    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
+
+    double ky = rect.bottom() * scale;
+    double kx = rect.left() * scale;
+    if (rect.width() > rect.height())
+        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
+    else
+        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
+
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(App::settings().theme() > LightRed ? Qt::white : Qt::black);
+    //    painter.translate(tr);
+    painter.translate(-kx, ky);
+    painter.scale(scale, -scale);
+    painter.drawPath(path);
+    return pixmap;
+}
+
+class ErrorModel : public QAbstractTableModel {
+    mvector<GiError*> items;
+
+public:
+    ErrorModel(mvector<GiError*>&& items, QObject* parent = nullptr)
+        : QAbstractTableModel(parent)
+        , items(std::move(items)) {
+    }
+    virtual ~ErrorModel() { qDeleteAll(items); }
+
+    // QAbstractItemModel interface
+public:
+    int rowCount(const QModelIndex&) const override { return static_cast<int>(items.size()); }
+    int columnCount(const QModelIndex&) const override { return 2; }
+    QVariant data(const QModelIndex& index, int role) const override {
+        switch (role) {
+        case Qt::DisplayRole:
+            if (index.column() == 0) {
+                auto pos {items[index.row()]->boundingRect().center()};
+                return QString("X = %1\nY = %2").arg(pos.x()).arg(pos.y());
+            }
+            return items[index.row()]->area();
+        case Qt::UserRole:
+            return QVariant::fromValue(items[index.row()]);
+        case Qt::DecorationRole:
+            if (index.column() == 0)
+                return errorIcon(items[index.row()]->shape());
+            return {};
+        case Qt::TextAlignmentRole:
+            if (index.column() == 0)
+                return Qt::AlignVCenter;
+            return Qt::AlignCenter;
+        default:
+            break;
+        }
+        return {};
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
+        if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+            if (section == 0) {
+                return tr("Position");
+            } else {
+                return tr("Area mm²");
+            }
+        }
+        return QAbstractTableModel::headerData(section, orientation, role);
+    }
+
+    void updateScene() {
+        QRectF rect;
+        for (auto item : items)
+            if (item->isSelected())
+                rect = rect.united(item->boundingRect());
+        App::graphicsView()->fitInView(rect);
+        //        App::graphicsView()->zoomOut();
+    }
+};
+
+class TableView : public QTableView {
+    //    Q_OBJECT
+public:
+    TableView(QWidget* parent)
+        : QTableView(parent) {
+        horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        setSelectionBehavior(QAbstractItemView::SelectRows);
+        setSelectionMode(QAbstractItemView::ExtendedSelection);
+        setIconSize({IconSize, IconSize});
+    }
+    virtual ~TableView() { }
+
+    // QAbstractItemView interface
+protected slots:
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override {
+        QTableView::selectionChanged(selected, deselected);
+        for (auto& var : selected.indexes()) {
+            var.data(Qt::UserRole).value<GiError*>()->setSelected(true);
+        }
+        for (auto& var : deselected.indexes()) {
+            var.data(Qt::UserRole).value<GiError*>()->setSelected(false);
+        }
+        static_cast<ErrorModel*>(model())->updateScene();
+    }
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override {
+        QTableView::showEvent(event);
+        resizeRowsToContents();
+    }
+};
 
 class ProgressDialog : public QDialog {
 public:
@@ -82,46 +220,71 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
     , gcCreator {tpc}
     , progressDialog(new QProgressDialog(this)) {
 
-    content = new QWidget(this);
+    auto vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(ctrWidget = new QWidget(this));
+    vLayout->addWidget(errWidget = new QWidget(this));
+    vLayout->setContentsMargins(0, 0, 0, 0);
 
-    dsbxDepth = new DepthForm(this);
-    dsbxDepth->setObjectName("dsbxDepth");
+    { // Creator
+        content = new QWidget(ctrWidget);
 
-    leName = new QLineEdit(this);
-    leName->setObjectName("leName");
+        dsbxDepth = new DepthForm(ctrWidget);
+        dsbxDepth->setObjectName("dsbxDepth");
 
-    pbClose = new QPushButton(tr("Close"), this);
-    pbClose->setIcon(QIcon::fromTheme("window-close"));
-    pbClose->setObjectName("pbClose");
+        leName = new QLineEdit(ctrWidget);
+        leName->setObjectName("leName");
 
-    pbCreate = new QPushButton(tr("Create"), this);
-    pbCreate->setIcon(QIcon::fromTheme("document-export"));
-    pbCreate->setObjectName("pbCreate");
-    connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::createFile);
+        pbClose = new QPushButton(tr("Close"), ctrWidget);
+        pbClose->setIcon(QIcon::fromTheme("window-close"));
+        pbClose->setObjectName("pbClose");
 
-    auto line = [this] {
-        auto line = new QFrame(this);
-        line->setFrameShadow(QFrame::Plain);
-        line->setFrameShape(QFrame::HLine);
-        return line;
-    };
+        pbCreate = new QPushButton(tr("Create"), ctrWidget);
+        pbCreate->setIcon(QIcon::fromTheme("document-export"));
+        pbCreate->setObjectName("pbCreate");
+        connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::createFile);
 
-    grid = new QGridLayout(this);
-    grid->setContentsMargins(6, 6, 6, 6);
-    grid->setSpacing(6);
+        auto line = [this] {
+            auto line = new QFrame(ctrWidget);
+            line->setFrameShadow(QFrame::Plain);
+            line->setFrameShape(QFrame::HLine);
+            return line;
+        };
 
-    int row {};
-    constexpr int rowSpan {1}, columnSpan {2};
-    grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan);           // row 0
-    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 1
-    grid->addWidget(content, ++row, 0, rowSpan, columnSpan);           // row 2
-    grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 3
-    grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);          // row 4
-    grid->addWidget(leName, row, 1);                                   // row 4
-    grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan);          // row 5
-    grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan);           // row 6
-    grid->addWidget(new QWidget(this), ++row, 0, rowSpan, columnSpan); // row 7
-    grid->setRowStretch(row, 1);
+        grid = new QGridLayout(ctrWidget);
+        grid->setContentsMargins(6, 6, 6, 6);
+        grid->setSpacing(6);
+
+        int row {};
+        constexpr int rowSpan {1}, columnSpan {2};
+        grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan);           // row 0
+        grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 1
+        grid->addWidget(content, ++row, 0, rowSpan, columnSpan);           // row 2
+        grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 3
+        grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);          // row 4
+        grid->addWidget(leName, row, 1);                                   // row 4
+        grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan);          // row 5
+        grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan);           // row 6
+        grid->addWidget(new QWidget(this), ++row, 0, rowSpan, columnSpan); // row 7
+        grid->setRowStretch(row, 1);
+    }
+    { // On Error
+        auto grid = new QVBoxLayout(errWidget);
+        grid->addWidget(errTable = new TableView(errWidget));
+        grid->addWidget(errBtnBox = new QDialogButtonBox(errWidget));
+
+        errBtnBox->setObjectName(QString::fromUtf8("errBtnBox"));
+        errBtnBox->setOrientation(Qt::Horizontal);
+        errBtnBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+        errBtnBox->button(QDialogButtonBox::Ok)->setText(tr("Continue"));
+        errBtnBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
+
+        connect(errBtnBox->button(QDialogButtonBox::Ok),
+            &QAbstractButton::clicked, this, &GcFormBase::errContinue);
+        connect(errBtnBox->button(QDialogButtonBox::Cancel),
+            &QAbstractButton::clicked, this, &GcFormBase::errBreak);
+        errWidget->setVisible({});
+    }
 
     progressDialog->setMinimumDuration(100);
     progressDialog->setModal(true);
@@ -147,6 +310,8 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
 }
 
 GcFormBase::~GcFormBase() {
+    if (errWidget->isVisible())
+        errBreak();
     thread.quit();
     thread.wait();
 }
@@ -190,7 +355,7 @@ void GcFormBase::addUsedGi(GraphicsItem* gi) {
         //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
         // #endif
         //        } else {
-        usedItems_[{file->id(), -1}].push_back(gi->id());
+        //            usedItems_[{file->id(), -1}].push_back(gi->id());
         //        }
     }
 }
@@ -202,13 +367,48 @@ void GcFormBase::cancel() {
 
 void GcFormBase::errorHandler(int) {
     qDebug(__FUNCTION__);
+
+    if (gcCreator->items.empty())
+        return;
+
     gcCreator->checkMillingFl = false;
     stopProgress();
-    if (bool fl = ErrorDialog(std::move(gcCreator->items), this).exec(); fl) {
-        startProgress();
-        gcCreator->continueCalc(fl);
-    } else
-        gcCreator->continueCalc(fl);
+
+    ctrWidget->setVisible(false);
+    errWidget->setVisible(true);
+
+    std::ranges::for_each(gcCreator->items, [](auto i) { App::graphicsView()->scene()->addItem(i); });
+
+    errTable->setModel(new ErrorModel(std::move(gcCreator->items), errTable));
+    errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    App::graphicsView()->startUpdateTimer(32);
+}
+
+void GcFormBase::errContinue() {
+    qDebug(__FUNCTION__);
+    App::graphicsView()->stopUpdateTimer();
+
+    delete errTable->model();
+
+    ctrWidget->setVisible(true);
+    errWidget->setVisible({});
+
+    startProgress();
+    gcCreator->continueCalc(true);
+}
+
+void GcFormBase::errBreak() {
+    qDebug(__FUNCTION__);
+    App::graphicsView()->stopUpdateTimer();
+
+    delete errTable->model();
+
+    ctrWidget->setVisible(true);
+    errWidget->setVisible({});
+
+    gcCreator->continueCalc(false);
 }
 
 void GcFormBase::startProgress() {

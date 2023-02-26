@@ -14,7 +14,21 @@
 
 #include <QObject>
 
-#include <condition_variable>
+// #include "app.h"
+// #include "gi_error.h"
+// #include "graphicsview.h"
+// #include <QAbstractTableModel>
+// #include <QHeaderView>
+// #include <QIcon>
+// #include <QPainter>
+// #include <QPushButton>
+// #include <QTableView>
+// #include <QtWidgets/QAbstractButton>
+// #include <QtWidgets/QApplication>
+// #include <QtWidgets/QDialog>
+// #include <QtWidgets/QDialogButtonBox>
+// #include <QtWidgets/QVBoxLayout>
+// #include <condition_variable>
 #include <mutex>
 #include <sstream>
 
