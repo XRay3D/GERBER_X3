@@ -138,9 +138,9 @@ void HatchingForm::createFile() {
     //        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
-    creator->addRawPaths(wRawPaths);
+    gcCreator->setGcp(gcp_);
+    gcCreator->addPaths(wPaths);
+    gcCreator->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }

@@ -31,8 +31,8 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool cl
 class GiError;
 
 class ProgressCancel {
-    static inline size_t max_;
-    static inline size_t current_;
+    static inline int max_;
+    static inline int current_;
     static inline bool cancel_;
 
 public:
@@ -46,23 +46,23 @@ public:
     /// \brief Progress max
     /// \return
     ///
-    static size_t max() { return max_; }
+    static int max() { return max_; }
     /////////////////
     /// \brief Progress setMax
     /// \param max
     ///
-    static void setMax(size_t max) { max_ = max; }
+    static void setMax(int max) { max_ = max; }
 
     /////////////////
     /// \brief Progress current
     /// \return
     ///
-    static size_t current() { return current_; }
+    static int current() { return current_; }
     /////////////////
     /// \brief Progress setCurrent
     /// \param current
     ///
-    static void setCurrent(size_t current = 0) { current_ = current; }
+    static void setCurrent(int current = 0) { current_ = current; }
     /////////////////
     /// \brief Progress incCurrent
     ///

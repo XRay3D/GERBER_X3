@@ -50,7 +50,7 @@ protected:
     virtual void createFile() = 0;
     virtual void updateName() = 0;
 
-    GCode::Creator* const creator;
+    GCode::Creator* const gcCreator;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
     UsedItems usedItems_;

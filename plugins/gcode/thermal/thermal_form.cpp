@@ -177,9 +177,9 @@ void Form::createFile() {
     gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    creator->setGcp(gpc);
-    creator->addPaths(wPaths);
-    creator->addSupportPaths(wBridgePaths);
+    gcCreator->setGcp(gpc);
+    gcCreator->addPaths(wPaths);
+    gcCreator->addSupportPaths(wBridgePaths);
     fileCount = 1;
     emit createToolpath();
 }
