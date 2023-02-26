@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 #include "gc_types.h"
+#include <condition_variable>
 #include <myclipper.h>
 
 #include <QObject>
