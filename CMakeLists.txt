@@ -13,6 +13,8 @@ cmake_minimum_required(VERSION 3.20)
 set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
+#git submodule update --init --recursive
+
 project(GERBER_X3)
 
 set(CMAKE_AUTOMOC ON)

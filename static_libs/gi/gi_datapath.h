@@ -18,14 +18,6 @@ class File;
 }
 
 class GiDataPath : public GraphicsItem {
-    //    QRectF boundingRect_;
-    int timerId = 0;
-#ifdef __GNUC__
-    static QTimer timer;
-#else
-    static inline QTimer timer;
-#endif
-    static inline int dashOffset;
     mutable QPainterPath selectionShape_;
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;

@@ -36,12 +36,12 @@ private:
 // type
 using Clipper = Clipper2Lib::Clipper64;
 using ClipperOffset = Clipper2Lib::ClipperOffset;
-using Path = Clipper2Lib::PathI;
-using Paths = Clipper2Lib::PathsI;
+using Path = Clipper2Lib::Path64;
+using Paths = Clipper2Lib::Paths64;
 using Pathss = mvector<Paths>;
-using Point = Clipper2Lib::PointI;
-using PolyTree = Clipper2Lib::PolyTreeI;
-using Rect = Clipper2Lib::RectI;
+using Point = Clipper2Lib::Point64;
+using PolyTree = Clipper2Lib::PolyTree64;
+using Rect = Clipper2Lib::Rect64;
 // func
 using Clipper2Lib::Area;
 using Clipper2Lib::Bounds;

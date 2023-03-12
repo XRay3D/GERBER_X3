@@ -90,17 +90,17 @@ template <typename T>
 inline QDataStream& operator>>(QDataStream& s, mvector<T>& c) {
     using Container = mvector<T>;
     c.clear();
-    quint32 n;
+    size_t n;
     s >> n;
     c.reserve(n);
-    for (quint32 i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         typename Container::value_type t;
         s >> t;
         if (s.status() != QDataStream::Ok) {
             c.clear();
             break;
         }
-        c.push_back(t);
+        c.emplace_back(t);
     }
     return s;
 }
