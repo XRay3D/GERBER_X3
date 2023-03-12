@@ -45,6 +45,7 @@
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <gi_datapath.h>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -140,6 +141,8 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
     App::setGraphicsView(this);
+
+    startUpdateTimer(20);
 }
 
 GraphicsView::~GraphicsView() {
@@ -690,6 +693,7 @@ void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
 
 void GraphicsView::timerEvent(QTimerEvent* event) {
     //    if (event->timerId() == timerId)
+    ++App::dashOffset();
     scene()->update();
 }
 

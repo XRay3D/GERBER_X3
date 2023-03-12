@@ -69,6 +69,7 @@ class App {
     QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
+    int dashOffset_ {};
 
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
@@ -87,6 +88,8 @@ public:
             qDebug() << "App" << app_ << sharedMemory.errorString();
         }
     }
+
+    static auto& dashOffset() { return app_->dashOffset_; }
 
     static void setMarkers(int i, GiMarker* marker) { app_->markers[i] = marker; }
     static auto* zero() { return app_->markers[0]; }

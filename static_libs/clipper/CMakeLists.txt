@@ -10,7 +10,6 @@
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-
 project(clipper LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,27 +19,14 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/*.cpp)
+file(GLOB_RECURSE HEADERS *.h) #[[${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/]]
+file(GLOB_RECURSE SOURCES *.cpp) #[[${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/]]
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
 
 add_library(clipper STATIC
-    #    cpline.cpp
-    #    cpline.h
-    #    clipper.cpp
-    #    clipper.hpp
-    #    clipper_base.hpp
-    #    clipper_clipper.hpp
-    #    clipper_offset.hpp
-    #    clipper_base.cpp
-    #    clipper_clipper.cpp
-    #    clipper_offset.cpp
-
     ${HEADERS}
     ${SOURCES}
-    myclipper.cpp
-    myclipper.h
 )
 
 target_link_libraries(clipper PRIVATE

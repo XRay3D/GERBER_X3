@@ -22,10 +22,6 @@
 #include <ranges>
 #include <set>
 
-#ifdef __GNUC__
-QTimer GiDataPath::timer;
-#endif
-
 GiDataPath::GiDataPath(const Path& path, FileInterface* file)
     : GraphicsItem(file) {
     shape_.addPolygon(path);
@@ -51,7 +47,7 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         if (option->state & QStyle::State_Selected) {
             color.setAlpha(255);
             pen.setColor(color);
-            pen.setDashOffset(dashOffset);
+            pen.setDashOffset(App::dashOffset());
         }
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);

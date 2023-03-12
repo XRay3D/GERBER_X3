@@ -107,9 +107,6 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     toolpathActions[GCode::GCodeProperties]->triggered();
 
-    connect(&GiDataPath::timer, &QTimer::timeout, [] { ++GiDataPath::dashOffset; });
-    GiDataPath::timer.start(50);
-
     while (qApp->applicationDirPath().contains("GERBER_X3/bin/")) { // NOTE (need for debug)
         int i = 100;
         int k = 100;
@@ -167,7 +164,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         qApp->setQuitOnLastWindowClosed(false); /////????
         App::fileModel()->closeProject();
         event->accept();
-        exit(-222);
+        exit(-222); // hack for fast exit
     } else {
         event->ignore();
     }
