@@ -2205,7 +2205,6 @@ namespace Clipper2Lib {
     if (wasTrimmed) SetDx(horzEdge); // +/-infinity
   }
 
-
   void ClipperBase::DoHorizontal(Active& horz)
     /*******************************************************************************
         * Notes: Horizontal edges (HEs) at scanline intersections (ie at the top or    *
@@ -2222,6 +2221,7 @@ namespace Clipper2Lib {
         *         /              |        /       |       /                            *
         *******************************************************************************/
   {
+      ifCancelThenThrow();//x-ray
     Point64 pt;
     bool horzIsOpen = IsOpen(horz);
     int_t y = horz.bot.y;
