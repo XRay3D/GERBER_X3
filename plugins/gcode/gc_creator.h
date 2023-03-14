@@ -100,6 +100,8 @@ public:
     static void setCancel(bool cancel) { cancel_ = cancel; }
 };
 
+inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
+
 namespace GCode {
 
 class File;

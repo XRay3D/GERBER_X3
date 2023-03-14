@@ -33,6 +33,7 @@
 // #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+
 template <class T1, class T2>
 inline QDataStream& operator>>(QDataStream& s, std::pair<T1, T2>& p) {
     s >> p.first >> p.second;
@@ -44,140 +45,87 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
     s << p.first << p.second;
     return s;
 }
+
 #endif
-////////////////////////////////////////////////////////////////
-/// std::map<Key, T, std::greater<int>>
-///
-// template <class Key, class T>
-// inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, std::greater<int>>& map)
-//{
-//     //StreamStateSaver stateSaver(&s);
-//     using Container = std::map<Key, T>;
-//     map.clear();
+
+// template <typename T>
+// inline QDataStream& operator>>(QDataStream& stream, mvector<T>& container) {
 //     quint32 n;
-//     s >> n;
-//     for (quint32 i = 0; i < n; ++i) {
-//         typename Container::key_type k;
-//         typename Container::mapped_type t;
-//         s >> k >> t;
-//         if (s.status() != QDataStream::Ok) {
-//             map.clear();
-//             break;
-//         }
-//         map.emplace(k, t);
+//     stream >> n;
+//     container.resize(n);
+//     for (auto&& var : container) {
+//         stream >> var;
+//         if (stream.status() != QDataStream::Ok)
+//             return container.clear(), stream;
 //     }
-//     return s;
+//     return stream;
 // }
 
-// template <class Key, class T>
-// inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, std::greater<int>>& map)
-//{
-//     s << quint32(map.size());
-//     // Deserialization should occur in the reverse order.
-//     // Otherwise, value() will return the least recently inserted
-//     // value instead of the most recently inserted one.
-//     auto it = map.cend();
-//     auto begin = map.cbegin();
-//     while (it != begin) {
-//         --it;
-//         s << it->first << it->second;
-//     }
-//     return s;
+// template <typename T>
+// inline QDataStream& operator<<(QDataStream& stream, const mvector<T>& container) {
+//     using Container = mvector<T>;
+//     stream << quint32(container.size());
+//     for (const auto& var : container)
+//         stream << var;
+//     return stream;
 // }
-// #endif
 
+////////////////////////////////////////////////////////////////
+/// std::vector<T>
+///
 template <typename T>
-inline QDataStream& operator>>(QDataStream& s, mvector<T>& c) {
-    using Container = mvector<T>;
-    c.clear();
-    size_t n;
-    s >> n;
-    c.reserve(n);
-    for (size_t i = 0; i < n; ++i) {
-        typename Container::value_type t;
-        s >> t;
-        if (s.status() != QDataStream::Ok) {
-            c.clear();
-            break;
-        }
-        c.emplace_back(t);
+inline QDataStream& operator>>(QDataStream& stream, std::vector<T>& container) {
+    quint32 n;
+    stream >> n;
+    container.resize(n);
+    for (auto&& var : container) {
+        stream >> var;
+        if (stream.status() != QDataStream::Ok)
+            return container.clear(), stream;
     }
-    return s;
+    return stream;
 }
 
 template <typename T>
-inline QDataStream& operator<<(QDataStream& s, const mvector<T>& c) {
-    using Container = mvector<T>;
-    s << quint32(c.size());
-    for (const typename Container::value_type& t : c)
-        s << t;
-    return s;
+inline QDataStream& operator<<(QDataStream& stream, const std::vector<T>& container) {
+    stream << quint32(container.size());
+    for (const auto& var : container)
+        stream << var;
+    return stream;
 }
 
 ////////////////////////////////////////////////////////////////
 /// std::map<Key, T>
 ///
-template <class Key, class T, class C>
-inline QDataStream& operator>>(QDataStream& s, std::map<Key, T, C>& map) {
+template <class Key, class Val, class Comp>
+inline QDataStream& operator>>(QDataStream& stream, std::map<Key, Val, Comp>& map) {
     // StreamStateSaver stateSaver(&s);
-    using Container = std::map<Key, T>;
     map.clear();
     quint32 n;
-    s >> n;
-    for (quint32 i = 0; i < n; ++i) {
-        typename Container::key_type k;
-        typename Container::mapped_type t;
-        s >> k >> t;
-        if (s.status() != QDataStream::Ok) {
-            map.clear();
-            break;
-        }
-        map.emplace(k, t);
+    stream >> n;
+    while (n--) {
+        Key key;
+        Val val;
+        stream >> key >> val;
+        if (stream.status() != QDataStream::Ok)
+            return map.clear(), stream;
+        map.emplace(key, val);
     }
-    return s;
+    return stream;
 }
 
-template <class Key, class T, class C>
-inline QDataStream& operator<<(QDataStream& s, const std::map<Key, T, C>& map) {
-    s << quint32(map.size());
+template <class Key, class Val, class Comp>
+inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Comp>& map) {
+    stream << quint32(map.size());
     // Deserialization should occur in the reverse order.
     // Otherwise, value() will return the least recently inserted
     // value instead of the most recently inserted one.
+
     auto it = map.cend();
     auto begin = map.cbegin();
     while (it != begin) {
         --it;
-        s << it->first << it->second;
+        stream << it->first << it->second;
     }
-    return s;
-}
-////////////////////////////////////////////////////////////////
-/// std::vector<T>
-///
-template <typename T>
-inline QDataStream& operator>>(QDataStream& s, std::vector<T>& c) {
-    using Container = mvector<T>;
-    c.clear();
-    quint32 n;
-    s >> n;
-    c.reserve(n);
-    for (quint32 i = 0; i < n; ++i) {
-        typename Container::value_type t;
-        s >> t;
-        if (s.status() != QDataStream::Ok) {
-            c.clear();
-            break;
-        }
-        c.push_back(t);
-    }
-    return s;
-}
-
-template <typename T>
-inline QDataStream& operator<<(QDataStream& s, const std::vector<T>& c) {
-    using Container = mvector<T>;
-    s << quint32(c.size());
-    for (const typename Container::value_type& t : c)
-        s << t;
-    return s;
+    return stream;
 }

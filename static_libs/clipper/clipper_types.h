@@ -24,6 +24,7 @@
 
 static constexpr auto uScale {100000};
 static constexpr auto dScale {1. / uScale};
+extern void ifCancelThenThrow();
 
 namespace Clipper2Lib {
 
