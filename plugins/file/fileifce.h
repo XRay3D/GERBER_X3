@@ -185,6 +185,7 @@ public:
     void setId(int id) { id_ = id; }
 
     virtual FileTree::Node* node() = 0;
+    virtual QIcon icon() const { return {}; }
 
     bool userColor() const { return userColor_; }
     void setUserColor(bool userColor) { userColor_ = userColor; }

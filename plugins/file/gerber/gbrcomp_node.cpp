@@ -15,7 +15,7 @@
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "gbr_types.h"
 
 #include <QGraphicsScene>

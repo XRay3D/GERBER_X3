@@ -19,9 +19,6 @@
 #include <QVariant>
 #include <variant>
 
-using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems>;
-
 namespace GCode {
 
 enum GCodeType {
@@ -61,12 +58,16 @@ enum class Grouping {
     Cutoff,
 };
 
+using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
+using V = std::variant<int, double, UsedItems>;
+
 struct Variant : V {
     using V::V;
 
     friend QDataStream& operator>>(QDataStream& stream, V& v) {
         uint8_t index;
         stream >> index;
+
         switch (index) {
         case 0:
             v = int {};
@@ -163,6 +164,7 @@ public:
         IgnoreCopper, // need for Thermal
         HathStep      // need for Hatching
     };
+
     Q_ENUM(Param)
 
     GCodeParams() {

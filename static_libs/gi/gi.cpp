@@ -17,7 +17,7 @@
  ********************************************************************************/
 
 #include "gi.h"
-#include "file.h"
+#include "fileifce.h"
 #include "gi_group.h"
 #include "graphicsview.h"
 #include <QGraphicsScene>

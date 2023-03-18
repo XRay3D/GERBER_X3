@@ -11,7 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi.h"
-#include "gc_file.h"
+#include "file.h"
 #include "jc_voronoi.h"
 
 namespace ClipperLib {
@@ -43,7 +43,7 @@ void VoronoiCreator::create() {
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
         gcp_.gcType = Voronoi;
-        file_ = new File({sortBE(returnPs)}, std::move(gcp_));
+        file_ = new VoronoiFile(std::move(gcp_), {sortBE(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
@@ -76,7 +76,7 @@ void VoronoiCreator::create() {
                 ++begin;
         }
 
-        file_ = new File(returnPss, std::move(gcp_), workingRawPs);
+        file_ = new VoronoiFile(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

@@ -233,67 +233,67 @@ void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void ProfileForm::editFile(GCode::File* file) {
 
-    GCode::GCodeParams gcp_ {file->gcp()};
+    //    GCode::GCodeParams gcp_ {file->gcp()};
 
-    fileId = gcp_.fileId;
-    editMode_ = true;
+    //    fileId = gcp_.fileId;
+    //    editMode_ = true;
 
-    { // GUI
-        side = gcp_.side();
-        direction = static_cast<GCode::Direction>(gcp_.convent());
-        ui->toolHolder->setTool(gcp_.tools.front());
-        dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
+    //    { // GUI
+    //        side = gcp_.side();
+    //        direction = static_cast<GCode::Direction>(gcp_.convent());
+    //        ui->toolHolder->setTool(gcp_.tools.front());
+    //        dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
 
-        switch (side) {
-        case GCode::On:
-            ui->rbOn->setChecked(true);
-            break;
-        case GCode::Outer:
-            ui->rbOutside->setChecked(true);
-            break;
-        case GCode::Inner:
-            ui->rbInside->setChecked(true);
-            break;
-        }
+    //        switch (side) {
+    //        case GCode::On:
+    //            ui->rbOn->setChecked(true);
+    //            break;
+    //        case GCode::Outer:
+    //            ui->rbOutside->setChecked(true);
+    //            break;
+    //        case GCode::Inner:
+    //            ui->rbInside->setChecked(true);
+    //            break;
+    //        }
 
-        switch (direction) {
-        case GCode::Climb:
-            ui->rbClimb->setChecked(true);
-            break;
-        case GCode::Conventional:
-            ui->rbConventional->setChecked(true);
-            break;
-        }
-    }
+    //        switch (direction) {
+    //        case GCode::Climb:
+    //            ui->rbClimb->setChecked(true);
+    //            break;
+    //        case GCode::Conventional:
+    //            ui->rbConventional->setChecked(true);
+    //            break;
+    //        }
+    //    }
 
-    { // GrItems
-        usedItems_.clear();
-        auto items {gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>()};
+    //    { // GrItems
+    //        usedItems_.clear();
+    //        auto items {gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>()};
 
-        auto i = items.cbegin();
-        while (i != items.cend()) {
+    //        auto i = items.cbegin();
+    //        while (i != items.cend()) {
 
-            //            auto [_fileId, _] = i.key();
-            //            Q_UNUSED(_)
-            //            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
-            //            ++i;
-        }
-    }
+    //            //            auto [_fileId, _] = i.key();
+    //            //            Q_UNUSED(_)
+    //            //            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
+    //            //            ++i;
+    //        }
+    //    }
 
-    { // Bridges
-        if (gcp_.params.contains(GCode::GCodeParams::Bridges)) {
-            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
-            //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
-            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
-            //                 App::graphicsView()->scene()->addItem(brItem);
-            //                brItem->setPos(pos);
-            //                brItem->lastPos_ = pos;
-            //            }
-            updateBridge();
-            brItem = new GiBridge(lenght_, size_, side, brItem);
-            //        delete item;
-        }
-    }
+    //    { // Bridges
+    //        if (gcp_.params.contains(GCode::GCodeParams::Bridges)) {
+    //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
+    //            //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
+    //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
+    //            //                 App::graphicsView()->scene()->addItem(brItem);
+    //            //                brItem->setPos(pos);
+    //            //                brItem->lastPos_ = pos;
+    //            //            }
+    //            updateBridge();
+    //            brItem = new GiBridge(lenght_, size_, side, brItem);
+    //            //        delete item;
+    //        }
+    //    }
 }
 
 #include "moc_profile_form.cpp"

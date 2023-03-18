@@ -9,37 +9,24 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "fileifce.h"
 #include "gc_types.h"
-#include <condition_variable>
-#include <myclipper.h>
+#include "myclipper.h"
 
 #include <QObject>
 
-// #include "app.h"
-// #include "gi_error.h"
-// #include "graphicsview.h"
-// #include <QAbstractTableModel>
-// #include <QHeaderView>
-// #include <QIcon>
-// #include <QPainter>
-// #include <QPushButton>
-// #include <QTableView>
-// #include <QtWidgets/QAbstractButton>
-// #include <QtWidgets/QApplication>
-// #include <QtWidgets/QDialog>
-// #include <QtWidgets/QDialogButtonBox>
-// #include <QtWidgets/QVBoxLayout>
-// #include <condition_variable>
+#include <condition_variable>
 #include <mutex>
 #include <sstream>
 
-#if __has_include(<source_location>)
-    #include <source_location>
-using sl = std::source_location;
-#else
-    #include <experimental/source_location>
-using sl = std::experimental::source_location;
-#endif
+// #if __has_include(<source_location>)
+//     #include <source_location>
+// using sl = std::source_location;
+// #else
+//     #include <experimental/source_location>
+// using sl = std::experimental::source_location;
+// #endif
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
 
@@ -83,7 +70,7 @@ public:
     ///
     static void incCurrent() { ++current_; }
     static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(const sl location = sl::current()) {
+    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
         ++current_;
         if (cancel_) [[unlikely]] {
             //            static std::stringstream ss;
@@ -151,7 +138,7 @@ public:
     bool checkMillingFl {};
 
 signals:
-    void fileReady(GCode::File* file);
+    void fileReady(File* file);
     void canceled();
     void errorOccurred(int = 0);
 

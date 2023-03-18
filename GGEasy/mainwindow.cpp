@@ -14,8 +14,8 @@
 #include "mainwindow.h"
 
 #include "aboutform.h"
-#include "file.h"
 #include "file_plugin.h"
+#include "fileifce.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
@@ -112,7 +112,7 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if (0) {
-            QDir dir(R"(E:\YandexDisk\G2G\RefUcamco Gerber\pcb_fabrication_data_in_gerber_example_2)");
+            QDir dir(R"(E:\YandexDisk\G2G\test files\Ucamco\Gerber_File_Format_Examples 20210409)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
@@ -551,7 +551,7 @@ void MainWindow::saveGCodeFile(int id) {
         return;
     auto* file = project_->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCode::GCFile::getLastDir().append(file->shortName()),
+        GCode::File::getLastDir().append(file->shortName()),
         tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
 
     if (name.isEmpty())
@@ -584,7 +584,7 @@ void MainWindow::saveSelectedGCodeFiles() {
     for (const auto& [key, files] : gcFilesMap) {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
-                QString name(GCode::GCFile::getLastDir().append(file->shortName()));
+                QString name(GCode::File::getLastDir().append(file->shortName()));
                 if (!name.endsWith(GCode::Settings::fileExtension()))
                     name += QStringList({"_TS", "_BS"})[file->side()];
 
@@ -599,7 +599,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::GCFile::getLastDir().append(files.first()->getTool().nameEnc()));
+            QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
             if (!name.endsWith(GCode::Settings::fileExtension()))
                 name += QStringList({"_TS", "_BS"})[files.first()->side()];
 
@@ -828,22 +828,23 @@ bool MainWindow::maybeSave() {
 }
 
 void MainWindow::editGcFile(GCode::File* file) {
-    switch (file->gtype()) {
-    case GCode::Null:
-    case GCode::Profile:
-        // FIXME toolpathActions[GCode::Profile]->triggered();
-        // FIXME reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
-        break;
-    case GCode::Pocket:
-    case GCode::Voronoi:
-    case GCode::Thermal:
-    case GCode::Drill:
-    case GCode::GCodeProperties:
-    case GCode::Raster:
-    case GCode::LaserHLDI:
-    default:
-        break;
-    }
+    qWarning(__FUNCTION__);
+    //    switch (file->gtype()) {
+    //    case GCode::Null:
+    //    case GCode::Profile:
+    //        // FIXME toolpathActions[GCode::Profile]->triggered();
+    //        // FIXME reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
+    //        break;
+    //    case GCode::Pocket:
+    //    case GCode::Voronoi:
+    //    case GCode::Thermal:
+    //    case GCode::Drill:
+    //    case GCode::GCodeProperties:
+    //    case GCode::Raster:
+    //    case GCode::LaserHLDI:
+    //    default:
+    //        break;
+    //    }
 }
 
 bool MainWindow::saveFile(const QString& fileName) {

@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "pocketraster.h"
 
-#include "gc_file.h"
+#include "file.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
@@ -232,7 +232,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = Raster;
-        file_ = new File(returnPss, std::move(gcp_), fillPaths);
+        file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -329,7 +329,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = LaserHLDI;
-        file_ = new File(returnPss, std::move(gcp_));
+        file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

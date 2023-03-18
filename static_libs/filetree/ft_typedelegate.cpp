@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "ft_typedelegate.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "project.h"
 
 #include <QComboBox>

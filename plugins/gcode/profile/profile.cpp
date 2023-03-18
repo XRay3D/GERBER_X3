@@ -11,11 +11,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "profile.h"
-#include "gc_file.h"
 #include "gi_bridge.h"
 #include "graphicsview.h"
-#include "mainwindow.h"
-#include "profile_form.h"
+// #include "mainwindow.h"
+// #include "profile_form.h"
 #include <numbers>
 
 namespace GCode {
@@ -77,7 +76,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
             break;
 
         gcp_.gcType = Profile;
-        file_ = new File(returnPss, std::move(gcp_));
+        file_ = new ProfileFile(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
         return;

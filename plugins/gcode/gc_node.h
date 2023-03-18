@@ -12,16 +12,16 @@
 
 #include "ft_node.h"
 
+class FileInterface;
+
 namespace GCode {
 
-class File;
-
 class Node : public FileTree::Node {
-    friend class File;
-    File* const file;
+    friend class ::FileInterface;
+    FileInterface* const file;
 
 public:
-    explicit Node(File* file);
+    explicit Node(FileInterface* file);
     ~Node() override = default;
 
     // FileTree::Node interface

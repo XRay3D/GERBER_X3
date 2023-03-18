@@ -11,8 +11,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_node.h"
-#include "gc_file.h"
+// #include "gc_file.h"
+#include "fileifce.h"
 #include "gc_highlighter.h"
+#include "gc_file.h"
 
 #include <QFileInfo>
 #include <QIcon>
@@ -20,11 +22,9 @@
 
 #include "ft_view.h"
 
-#include "settings.h"
-
 namespace GCode {
 
-Node::Node(File* file)
+Node::Node(FileInterface* file)
     : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
 }

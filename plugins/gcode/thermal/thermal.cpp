@@ -11,7 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal.h"
-#include "gc_file.h"
+#include "file.h"
 #include "project.h"
 
 namespace Thermal {
@@ -99,7 +99,8 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = ::GCode::Thermal;
-        file_ = new GCode::File(sortB(returnPss), std::move(gcp_));
+        sortB(returnPss);
+        file_ = new ::GCode::ThermalFile(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

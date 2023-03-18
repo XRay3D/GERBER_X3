@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "hatching.h"
 
-#include "gc_file.h"
+#include "file.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
@@ -296,7 +296,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         emit fileReady(nullptr);
     } else {
         gcp_.gcType = Hatching;
-        file_ = new File(returnPss, std::move(gcp_));
+        file_ = new CrosshatchFile(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

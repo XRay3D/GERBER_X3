@@ -11,11 +11,12 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
+#include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "drill_model.h"
 #include "ui_drillform.h"
 
-#include "drill_gi_preview.h"
+#include "file.h"
 #include "gi_point.h"
 #include "gi_preview.h"
 #include "graphicsview.h"
@@ -433,7 +434,7 @@ void Form::createFile() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                GCode::File* gcode = new GCode::File({pathsMap[usedToolId].paths}, {App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCode::Profile});
+                GCode::File* gcode = new GCode::ProfileFile({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCode::Profile}, {pathsMap[usedToolId].paths});
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -521,7 +522,7 @@ void Form::createFile() {
                         point1 = val.drillPath[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({{val.drillPath}}, {App::toolHolder().tool(toolId), dsbxDepth->value(), GCode::Drill});
+                GCode::File* gcode = new GCode::DrillFile({App::toolHolder().tool(toolId), dsbxDepth->value(), GCode::Drill}, {{val.drillPath}}, {});
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + type_ + indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);

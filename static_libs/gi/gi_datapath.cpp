@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "gi_datapath.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"

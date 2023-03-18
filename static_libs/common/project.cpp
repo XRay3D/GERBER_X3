@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include <project.h>
 
-#include "file.h"
+#include "fileifce.h"
 #include "ft_model.h"
 #include "graphicsview.h"
 

@@ -18,7 +18,7 @@
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "file_plugin.h"
 #include "qcheckbox.h"
 #include "shapepluginin.h"
@@ -74,7 +74,7 @@ void View::on_doubleClicked(const QModelIndex& index) {
         //            hideOther();
         //            {
         //                const int id = menuIndex_.data(Qt::UserRole).toInt();
-        //                GCode::File* file = static_cast<GCode::File*>(App::project()->file(id));
+        //                FileInterface* file = static_cast<FileInterface*>(App::project()->file(id));
         //                App::project()->showFiles(file->gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
         //                file->gcp_.fileId = file->id();
         //                App::mainWindow()->editGcFile(file);

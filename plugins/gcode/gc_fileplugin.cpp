@@ -12,10 +12,11 @@
  ********************************************************************************/
 
 #include "gc_fileplugin.h"
-#include "file.h"
+#include "gc_types.h"
+#include "fileifce.h"
 #include "ft_view.h"
-#include "gc_file.h"
-// #include "gc_node.h"
+// #include "gc_file.h"
+//  #include "gc_node.h"
 
 #include <QMessageBox>
 #include <QtWidgets>
@@ -38,7 +39,7 @@ int Plugin::type() const { return int(FileType::GCode); }
 
 QString Plugin::folderName() const { return tr("Tool Paths"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+FileInterface* Plugin::createFile() { return nullptr /*new File()*/; }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 

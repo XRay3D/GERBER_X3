@@ -17,11 +17,11 @@
 #include <QThread>
 #include <QtWidgets>
 
-namespace GCode {
-class File;
-class file_;
-
-} // namespace GCode
+class GCode::File;
+//namespace GCode {
+//class File;
+//class file_;
+//} // namespace GCode
 
 class GraphicsItem;
 class QProgressDialog;
@@ -53,7 +53,7 @@ protected:
     GCode::Creator* const gcCreator;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
-    UsedItems usedItems_;
+    GCode::UsedItems usedItems_;
     Side boardSide = Top;
     void addUsedGi(GraphicsItem* gi);
 

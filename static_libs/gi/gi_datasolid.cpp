@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "gi_datasolid.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "graphicsview.h"
 #include <QElapsedTimer>
 #include <QPainter>

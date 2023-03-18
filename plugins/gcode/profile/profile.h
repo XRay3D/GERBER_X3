@@ -11,11 +11,21 @@
 #pragma once
 
 #include "gc_creator.h"
+#include "gc_file.h"
 
 #include <QIcon>
 #include <QPixmap>
 
 namespace GCode {
+
+class ProfileFile final : public File {
+public:
+    explicit ProfileFile();
+    explicit ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss);
+    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    void createGi() override;
+    void genGcodeAndTile() override;
+}; // ProfileFile
 
 class ProfileCreator : public Creator {
 public:

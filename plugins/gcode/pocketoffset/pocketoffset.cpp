@@ -11,7 +11,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketoffset.h"
-#include "gc_file.h"
 
 namespace GCode {
 
@@ -97,7 +96,7 @@ void PocketCreator::createFixedSteps(const Tool& tool, const double depth, const
         offset.AddPaths(fillPaths, JoinType::Round, EndType::Round);
         fillPaths = offset.Execute(dOffset + 10);
     }
-    file_ = new GCode::File(returnPss, std::move(gcp_), fillPaths);
+    file_ = new PocketOffsetFile(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -174,7 +173,7 @@ void PocketCreator::createStdFull(const Tool& tool, const double depth) {
         fillPaths = offset.Execute(dOffset);
         CleanPaths(fillPaths, uScale * 0.001);
     }
-    file_ = new GCode::File(returnPss, std::move(gcp_), fillPaths);
+    file_ = new PocketOffsetFile(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -295,7 +294,7 @@ void PocketCreator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 offset.AddPaths(paths, JoinType::Round, EndType::Round);
             Paths fillToolpath;
             fillToolpath = offset.Execute(dOffset);
-            file_ = new GCode::File(returnPss, GCodeParams {gcp_}, fillToolpath);
+            file_ = new PocketOffsetFile(std::move(gcp_), std::move(returnPss), std::move(fillToolpath));
             file_->setFileName(tool.nameEnc());
             // App::project()->addFile(file_);
             emit fileReady(file_);

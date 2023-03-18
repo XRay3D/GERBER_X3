@@ -13,7 +13,7 @@
 #include "gbr_types.h"
 #include "gbrcomp_onent.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "gi_group.h"
 
 #include <QDebug>

@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "gbrcomp_item.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "graphicsview.h"
 
 #include <QPainter>

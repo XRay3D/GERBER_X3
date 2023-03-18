@@ -13,28 +13,28 @@
 #include "gc_formsutil.h"
 
 #include "app.h"
+#include "fileifce.h"
 #include "gi_error.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "qprogressdialog.h"
+
 #include <QAbstractTableModel>
 #include <QHeaderView>
 #include <QIcon>
 #include <QPainter>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QTableView>
-#include <QtWidgets/QAbstractButton>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets>
+
 #include <condition_variable>
 #include <execution>
 #include <mutex>
 #include <ranges>
 #include <sstream>
 
-const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+static const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+static const int GCodeFileId = qRegisterMetaType<GCode::File*>("GCode::File*");
 
 inline QIcon errorIcon(const QPainterPath& path) {
 
@@ -349,7 +349,7 @@ void GcFormBase::timerEvent(QTimerEvent* event) {
 
 void GcFormBase::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
-        FileInterface const* file = gi->file();
+        //        GCode::File const* file = gi->file();
         //        if (file->type() == FileType::Gerber) {
         // #ifdef GBR_
         //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());

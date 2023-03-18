@@ -11,21 +11,21 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_creator.h"
-#include "gc_file.h"
+// #include "gc_file.h"
 #include "gc_types.h"
 
 #include "app.h"
 #include "gi_error.h"
 #include "gi_point.h"
 #include "myclipper.h"
+#include "project.h"
 #include "utils.h"
 
 #include <execution> //std::execution::parallel_policy
 #include <set>
 #include <stdexcept>
 
-static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
-
+//static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
 // struct dbg {
 //     dbg() { }
 //     template <class T>
@@ -47,10 +47,10 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
     // assert(ps.isEmpty());
     GCode::GCodeParams gcp {tool, 0.0, GCode::Null};
     gcp.color = color;
-    auto file = new GCode::File({ps}, std::move(gcp));
-    file->setFileName(fileName + "_" + tool.name());
-    // file->itemGroup()->setPen({ Qt::green, 0.0 });
-    emit App::project()->addFileDbg(file);
+    //    auto file = new GCode::File({ps}, std::move(gcp));
+    //    file->setFileName(fileName + "_" + tool.name());
+    //    // file->itemGroup()->setPen({ Qt::green, 0.0 });
+    //    emit App::project()->addFileDbg(file);
 };
 
 namespace GCode {
@@ -206,7 +206,7 @@ void Creator::createGc() {
     }
 }
 
-GCode::File* Creator::file() const { return file_; }
+File* Creator::file() const { return file_; }
 
 std::pair<int, int> Creator::getProgress() {
     return {max(), current()};

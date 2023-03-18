@@ -9,9 +9,21 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "gc_creator.h"
+#include "gc_file.h"
 
 namespace GCode {
+
+class PocketOffsetFile final : public File {
+public:
+    explicit PocketOffsetFile();
+    explicit PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
+    void createGi() override;
+    void genGcodeAndTile() override;
+};
+
 class PocketCreator : public Creator {
 public:
     using Creator::Creator;

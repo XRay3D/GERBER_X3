@@ -13,7 +13,7 @@
 #include "dxf_sourcedialog.h"
 
 #include "app.h"
-#include "file.h"
+#include "fileifce.h"
 #include "project.h"
 
 namespace Dxf {

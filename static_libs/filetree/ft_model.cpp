@@ -12,7 +12,7 @@
  ********************************************************************************/
 #include "ft_model.h"
 
-#include "file.h"
+#include "fileifce.h"
 #include "file_plugin.h"
 #include "ft_foldernode.h"
 #include "shapepluginin.h"

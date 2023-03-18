@@ -394,9 +394,9 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             gcp_.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File(Pathss {{dst}}, std::move(gcp_));
-            gcode->setFileName(tr("Pin_") + tool.nameEnc());
-            App::project()->addFile(gcode);
+            0; // FIXME    FileInterface* gcode = new FileInterface(Pathss {{dst}}, std::move(gcp_));
+            0; // FIXME    gcode->setFileName(tr("Pin_") + tool.nameEnc());
+            0; // FIXME     App::project()->addFile(gcode);
         }
     });
     {

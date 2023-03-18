@@ -14,7 +14,7 @@
 #include "dxf_block.h"
 #include "dxf_codedata.h"
 #include "dxf_types.h"
-#include "file.h"
+#include "fileifce.h"
 #include "gi_group.h"
 
 #include <QDebug>

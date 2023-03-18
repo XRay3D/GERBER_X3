@@ -52,6 +52,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 add_library(gc_profile STATIC
     profile.cpp
     profile.h
+    file.cpp
 )
 
 target_link_libraries(gc_profile PRIVATE

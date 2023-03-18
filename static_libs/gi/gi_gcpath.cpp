@@ -21,13 +21,13 @@
 #define QT_DEBUG
 // #undef QT_DEBUG
 
-GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
+GiGcPath::GiGcPath(const Paths& paths, FileInterface* file)
     : gcFile_(file) {
     for (const Path& path : paths)
         shape_.addPolygon(path);
     double k;
     if (gcFile_)
-        k = gcFile_->gcp_.getToolDiameter() * 0.5;
+        k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
@@ -36,12 +36,12 @@ GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
 #endif
 }
 
-GiGcPath::GiGcPath(const Path& path, GCode::File* file)
+GiGcPath::GiGcPath(const Path& path, FileInterface* file)
     : gcFile_(file) {
     shape_.addPolygon(path);
     double k;
     if (gcFile_)
-        k = gcFile_->gcp_.getToolDiameter() * 0.5;
+        k = 0; // FIXME  gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
