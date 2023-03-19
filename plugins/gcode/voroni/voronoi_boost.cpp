@@ -13,22 +13,22 @@
 #include "voronoi_boost.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
-    #include "mvector.h"
+#include "mvector.h"
 
-    #include <cstdio>
-    #include <vector>
+#include <cstdio>
+#include <vector>
 
-    #pragma warning(push)
-    #pragma warning(disable : 5055)
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
-    // Your function
-    #include "voronoi_visual_utils.h"
-    #include <boost/polygon/polygon.hpp>
-    #include <boost/polygon/voronoi.hpp>
+#pragma warning(push)
+#pragma warning(disable : 5055)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+// Your function
+#include "voronoi_visual_utils.h"
+#include <boost/polygon/polygon.hpp>
+#include <boost/polygon/voronoi.hpp>
 
-    #pragma GCC diagnostic pop
-    #pragma warning(pop)
+#pragma GCC diagnostic pop
+#pragma warning(pop)
 
 using boost::polygon::high;
 using boost::polygon::low;

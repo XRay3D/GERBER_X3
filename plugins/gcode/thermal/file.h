@@ -10,7 +10,6 @@
 // ********************************************************************************/
 #pragma once
 
-#include "file.h"
 #include "gc_file.h"
 
 namespace GCode {
@@ -21,6 +20,7 @@ public:
     explicit ThermalFile();
     explicit ThermalFile(GCodeParams&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
+    FileType type() const override { return FileType(Thermal); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

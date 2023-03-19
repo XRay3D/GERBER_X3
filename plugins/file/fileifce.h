@@ -26,6 +26,20 @@
 #include <QFileInfo>
 #include <QModelIndex>
 
+enum class FileType {
+    Gerber,
+    Excellon,
+    Dxf,
+    Hpgl,
+    TopoR,
+
+    GCode = 100,
+    // 101 - ...
+
+    Shapes = 200
+    // 201 - ...
+};
+
 using LayerTypes = std::vector<LayerType>;
 
 class FileInterface {

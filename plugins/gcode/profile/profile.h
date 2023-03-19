@@ -23,14 +23,22 @@ public:
     explicit ProfileFile();
     explicit ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    FileType type() const override { return FileType(Profile); }
     void createGi() override;
     void genGcodeAndTile() override;
 }; // ProfileFile
 
-class ProfileCreator : public Creator {
+class ProfileCtr : public Creator {
+
 public:
-    ProfileCreator();
-    ~ProfileCreator() override = default;
+    ProfileCtr();
+    ~ProfileCtr() override = default;
+
+    enum {
+        BridgeLen = GCodeParams::UserParam,
+        TrimmingCorners,
+        TrimmingOpenPaths,
+    };
 
 private:
     void createProfile(const Tool& tool, const double depth);

@@ -20,6 +20,7 @@
 #include "gi_gcpath.h"
 #include "gi_point.h"
 #include "math.h"
+#include "plugintypes.h"
 #include "project.h"
 
 #include <QFileInfo>
@@ -40,9 +41,7 @@ File::File(GCodeParams&& gcp, Paths&& pocketPaths, Pathss&& toolPathss)
 
 File::File() { }
 
-FileType File::type() const { return FileType::GCode; }
-
-GCodeType File::gtype() const { return gcp_.gcType; }
+// GCodeType File::gtype() const { return gcp_.gcType; }
 
 mvector<QString> File::gCodeText() const { return lines_; }
 
@@ -333,8 +332,6 @@ QString File::format(double val) {
     return str;
 }
 
-Paths File::merge() const { return {}; }
-
 void File::write(QDataStream& stream) const {
     stream << gcp_;
     stream << pocketPaths_;
@@ -344,6 +341,7 @@ void File::write(QDataStream& stream) const {
 void File::read(QDataStream& stream) {
     auto& gcp = *const_cast<GCodeParams*>(&gcp_);
     switch (App::project()->ver()) {
+    case ProVer_7:
     case ProVer_6:
     case ProVer_5:
     case ProVer_4:
@@ -352,14 +350,14 @@ void File::read(QDataStream& stream) {
         stream >> toolPathss_;
         break;
     case ProVer_3: {
-        stream >> pocketPaths_;
-        stream >> gcp.gcType;
-        stream >> toolPathss_;
-        gcp.tools.resize(1);
-        stream >> gcp.tools.front();
-        double depth;
-        stream >> depth;
-        gcp.params[GCodeParams::Depth] = depth;
+        //        stream >> pocketPaths_;
+        //        stream >> gcp.gcType;
+        //        stream >> toolPathss_;
+        //        gcp.tools.resize(1);
+        //        stream >> gcp.tools.front();
+        //        double depth;
+        //        stream >> depth;
+        //        gcp.params[GCodeParams::Depth] = depth;
     }
         [[fallthrough]];
     case ProVer_2:
@@ -369,8 +367,6 @@ void File::read(QDataStream& stream) {
     //    stream >> *static_cast<FileInterface*>(this);
     // _read(stream);
 }
-
-void File::initFrom(FileInterface* file) { }
 
 FileTree::Node* File::node() { return node_ ? node_ : node_ = new Node(this); }
 
@@ -429,10 +425,10 @@ void File::saveMillingPocket(const QPointF& offset) {
 }
 
 void File::saveMillingProfile(const QPointF& offset) {
-    if (gcp_.gcType == Raster) {
-        saveMillingRaster(offset);
-        return;
-    }
+    //    if (gcp_.gcType == Raster) {
+    //        saveMillingRaster(offset);
+    //        return;
+    //    }
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());

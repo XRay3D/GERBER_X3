@@ -45,16 +45,16 @@ void PocketOffsetFile::genGcodeAndTile() {
 }
 
 void PocketOffsetFile::createGi() {
-    switch (gcp_.gcType) {
-    case GCode::Raster:
-        createGiRaster();
-        break;
-    case GCode::Pocket:
-        createGiPocket();
-        break;
-    default:
-        break;
-    }
+    //    switch (gcp_.gcType) {
+    //    case GCode::Raster:
+    //        createGiRaster();
+    //        break;
+    //    case GCode::Pocket:
+    createGiPocket();
+    //        break;
+    //    default:
+    //        break;
+    //    }
 
     itemGroup()->setVisible(true);
 }

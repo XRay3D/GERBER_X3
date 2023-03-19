@@ -12,10 +12,13 @@
  ********************************************************************************/
 #include "gc_creator.h"
 // #include "gc_file.h"
+#include "gc_file.h"
 #include "gc_types.h"
 
 #include "app.h"
+#include "gi_datapath.h"
 #include "gi_error.h"
+#include "gi_gcpath.h"
 #include "gi_point.h"
 #include "myclipper.h"
 #include "project.h"
@@ -25,32 +28,79 @@
 #include <set>
 #include <stdexcept>
 
-//static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
-// struct dbg {
-//     dbg() { }
-//     template <class T>
-//     dbg(const T&) { }
-//     template <class T>
-//     dbg operator<<(const T&) { return *this; }
-// };
-// #define qDebug dbg
+// static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
+//  struct dbg {
+//      dbg() { }
+//      template <class T>
+//      dbg(const T&) { }
+//      template <class T>
+//      dbg operator<<(const T&) { return *this; }
+//  };
+//  #define qDebug dbg
+
+class GCodeGbgFile final : public GCode::File {
+    QColor color;
+
+public:
+    explicit GCodeGbgFile(GCode::GCodeParams&& gcp, Paths&& toolPaths, QColor color)
+        : GCode::File(std::move(gcp), std::move(toolPaths), {})
+        , color {color} {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    FileType type() const override { return FileType(GCode::Profile); }
+    void createGi() override {
+        GraphicsItem* item;
+        //        for (const Path& path : pocketPaths_) {
+        //            item = new GiDataPath(path, this);
+        //            itemGroup()->push_back(item);
+        //        }
+        //        for (const Paths& paths : pocketPaths_) {
+        item = new GiGcPath(pocketPaths_, this);
+        item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColorPtr(&color);
+        itemGroup()->push_back(item);
+        //        }
+
+        for (size_t i {}; const Paths& paths : toolPathss_) {
+            item = new GiGcPath(toolPathss_[i], this);
+            item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+            itemGroup()->push_back(item);
+            for (size_t j = 0; j < paths.size() - 1; ++j)
+                g0path_.push_back({paths[j].back(), paths[j + 1].front()});
+            if (i < toolPathss_.size() - 1) {
+                g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
+            }
+        }
+
+        item = new GiGcPath(g0path_);
+        //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+        itemGroup()->push_back(item);
+
+        itemGroup()->setVisible(true);
+    }
+    void genGcodeAndTile() override { saveLaserProfile({}); }
+};
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
     std::erase_if(ps, [](const Path& path) { return path.size() < 2; });
-
     if (ps.empty())
         return;
-
     if (close)
         std::ranges::for_each(ps, [](Path& p) { p.push_back(p.front()); });
+    GCode::GCodeParams gcp {tool, 0.0};
+    //    gcp.color = color;
+    auto file = new GCodeGbgFile(std::move(gcp), std::move(ps), color);
+    file->setFileName(fileName + "_" + tool.name());
+    //    file->setColor(color);
+    // file->itemGroup()->setPen({ Qt::green, 0.0 });
 
-    // assert(ps.isEmpty());
-    GCode::GCodeParams gcp {tool, 0.0, GCode::Null};
-    gcp.color = color;
-    //    auto file = new GCode::File({ps}, std::move(gcp));
-    //    file->setFileName(fileName + "_" + tool.name());
-    //    // file->itemGroup()->setPen({ Qt::green, 0.0 });
-    //    emit App::project()->addFileDbg(file);
+    emit App::project()->addFileDbg(file);
 };
 
 namespace GCode {
@@ -117,7 +167,7 @@ Pathss& Creator::groupedPaths(Grouping group, Point::Type k, bool fl) {
 }
 
 Path Creator::boundPaths(const Paths& paths, Point::Type k) const {
-    Rect rect(Bounds(workingPs));
+    Rect rect(Bounds(paths));
     rect.bottom += k;
     rect.left -= k;
     rect.right += k;
@@ -180,15 +230,16 @@ void Creator::createGc() {
 
     try {
         if (type() == Profile || type() == Pocket || type() == Raster) {
-            try {
-                checkMillingFl = true;
-                checkMilling(gcp_.side());
-            } catch (const cancelException& e) {
-                ProgressCancel::reset();
-                qWarning() << "checkMilling canceled:" << e.what();
-            } catch (...) {
-                throw;
-            }
+            if (!qApp->applicationDirPath().contains("GERBER_X3/bin/"))
+                try {
+                    checkMillingFl = true;
+                    checkMilling(gcp_.side());
+                } catch (const cancelException& e) {
+                    ProgressCancel::reset();
+                    qWarning() << "checkMilling canceled:" << e.what();
+                } catch (...) {
+                    throw;
+                }
         }
         if (!isCancel()) {
             checkMillingFl = false;
@@ -305,12 +356,20 @@ void Creator::stacking(Paths& paths) {
     // PROG .3setProgMax(polyTree.Total());
     stacker({&polyTree, false});
 
+    //    qDebug() << __FUNCTION__ << returnPss.front().size();
+    //    qDebug() << __FUNCTION__ << returnPss[1].size();
+    if (returnPss.front().size() == 1)
+        returnPss.remove(0); // remove frame (boundPaths + k)
+
     for (Paths& retPaths : returnPss) {
-        std::reverse(retPaths.begin(), retPaths.end());
-        for (size_t i = 0; i < retPaths.size(); ++i) {
+        //        dbgPaths(retPaths, __FUNCTION__, Qt::red);
+
+        for (size_t i = 0; i < retPaths.size(); ++i)
             if (retPaths[i].empty())
                 retPaths.erase(retPaths.begin() + i--);
-        }
+
+        std::ranges::reverse(retPaths);
+
         for (Path& path : retPaths)
             path.push_back(path.front());
     }

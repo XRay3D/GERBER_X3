@@ -73,9 +73,9 @@ namespace GCode {
 
 void VoronoiCgal::cgalVoronoi() {
     Point::Type minX = std::numeric_limits<Point::Type>::max(),
-         minY = std::numeric_limits<Point::Type>::max(),
-         maxX = std::numeric_limits<Point::Type>::min(),
-         maxY = std::numeric_limits<Point::Type>::min();
+                minY = std::numeric_limits<Point::Type>::max(),
+                maxX = std::numeric_limits<Point::Type>::min(),
+                maxY = std::numeric_limits<Point::Type>::min();
     //    progress(4, 0);
     SDG2 sdg;
     int id = 0;

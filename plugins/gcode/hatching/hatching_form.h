@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+#include "file.h"
 #include "gc_formsutil.h"
 
 namespace Ui {
@@ -61,4 +62,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+C"}; }
     QWidget* createForm() override { return new HatchingForm(this); };
     int type() const override { return GCode::Hatching; }
+    FileInterface* createFile() const override { return new GCode::CrosshatchFile; }
 };

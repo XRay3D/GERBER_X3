@@ -19,21 +19,15 @@ class Project;
 
 namespace GCode {
 
-struct GCObj : QObject {
-    //    Q_OBJECT
-    // public:
-    //    GCObj() { }
-    //    virtual ~GCObj() { }
-};
+struct GCObj : QObject { };
 
 class File : public FileInterface {
-    friend class ::Project;
+    //    friend class ::Project;
 
 public:
     File(GCodeParams&& gcp, Paths&& pocketPaths, Pathss&& toolPathss);
     File();
-    FileType type() const override;
-    GCodeType gtype() const;
+    //    GCodeType gtype() const;
 
     mvector<QString> gCodeText() const;
     Tool getTool() const;
@@ -61,10 +55,10 @@ public:
     void endFile();
 
 private:
-    double feedRate_ = 0.0;
-    double plungeRate_ = 0.0;
-    int spindleSpeed_ = 0;
-    int toolType_ = 0;
+    double feedRate_ {};
+    double plungeRate_ {};
+    int spindleSpeed_ {};
+    int toolType_ {};
 
 protected:
     void startPath(const QPointF& point);
@@ -125,47 +119,31 @@ protected:
     QString speed(int val);
     QString format(double val);
 
-    virtual Paths merge() const override;
+    virtual Paths merge() const override { return {}; }
 
     // FileInterface interfaces
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    void initFrom(FileInterface* file) override;
+    void initFrom(FileInterface* file) override { qWarning(__FUNCTION__); }
     FileTree::Node* node() override;
-
-
 
     /////////////////////////////////////////////////////////////
 
     void saveDrill(const QPointF& offset);
-
-    void saveLaserPocket(const QPointF& offset);
-
-    void saveMillingPocket(const QPointF& offset);
-
-    void saveMillingProfile(const QPointF& offset);
-
-    void saveLaserProfile(const QPointF& offset);
-
-    void saveMillingRaster(const QPointF& offset);
-
     void saveLaserHLDI(const QPointF& offset);
-
+    void saveLaserPocket(const QPointF& offset);
+    void saveLaserProfile(const QPointF& offset);
+    void saveMillingPocket(const QPointF& offset);
+    void saveMillingProfile(const QPointF& offset);
+    void saveMillingRaster(const QPointF& offset);
 
     /////////////////////////////////////////////////////////////
 
-
-
     void createGiDrill();
-
-    void createGiPocket();
-
-    void createGiProfile();
-
-    void createGiRaster();
-
     void createGiLaser();
-
+    void createGiPocket();
+    void createGiProfile();
+    void createGiRaster();
 };
 
 } // namespace GCode

@@ -50,6 +50,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
+#include "file.h"
 #include "gc_plugin.h"
 #include <QToolBar>
 
@@ -64,4 +65,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
     QWidget* createForm() override { return new PocketRasterForm(this); };
     int type() const override { return GCode::Raster; }
+    FileInterface* createFile() const override { return new GCode::PocketRasterFile; }
 };

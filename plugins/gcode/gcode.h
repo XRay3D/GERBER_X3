@@ -11,9 +11,9 @@
 #pragma once
 
 #include "gc_creator.h"
-//#include "gc_file.h"
+// #include "gc_file.h"
+#include "gc_file.h"
 #include "gc_highlighter.h"
 #include "gc_node.h"
 #include "gc_plugin.h"
 #include "gc_types.h"
-#include "gc_file.h"

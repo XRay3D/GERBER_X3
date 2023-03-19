@@ -9,7 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "gc_formsutil.h"
+#include "ui_pocketoffsetform.h"
 
 namespace Ui {
 class PocketOffsetForm;
@@ -51,7 +53,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#include "gc_plugin.h"
+#include "pocketoffset.h"
 #include <QToolBar>
 
 class GCPluginImpl final : public GCodePlugin {
@@ -65,4 +67,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
     QWidget* createForm() override { return new PocketOffsetForm(this); };
     int type() const override { return GCode::Pocket; }
+    FileInterface* createFile() const override { return new GCode::PocketOffsetFile; }
 };

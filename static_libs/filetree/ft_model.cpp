@@ -12,8 +12,8 @@
  ********************************************************************************/
 #include "ft_model.h"
 
-#include "fileifce.h"
 #include "file_plugin.h"
+#include "fileifce.h"
 #include "ft_foldernode.h"
 #include "shapepluginin.h"
 #include "shheaders.h"
@@ -40,7 +40,10 @@ void Model::addFile(FileInterface* file) {
     if (!file)
         return;
 
-    const int type = int(file->type());
+    int type = int(file->type());
+
+    if (type > 100) // NOTE  переписать для ГКода отдельно
+        type = 100;
 
     if (mapNode.find(type) == mapNode.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);

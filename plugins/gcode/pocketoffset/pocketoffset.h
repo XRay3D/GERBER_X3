@@ -20,16 +20,21 @@ public:
     explicit PocketOffsetFile();
     explicit PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
+    FileType type() const override { return FileType(Pocket); }
     void createGi() override;
     void genGcodeAndTile() override;
 };
 
-class PocketCreator : public Creator {
+class PocketCtr : public Creator {
 public:
     using Creator::Creator;
 
+    enum {
+        OffsetSteps = GCodeParams::UserParam,
+    };
+
 private:
-    void createFixedSteps(const Tool& tool, const double depth, const int steps);
+    void createFixedSteps(const Tool& tool, const double depth, int steps);
     void createStdFull(const Tool& tool, const double depth);
     void createMultiTool(const mvector<Tool>& tools, double depth);
 

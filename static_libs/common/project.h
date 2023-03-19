@@ -26,6 +26,7 @@ enum FileVersion {
     ProVer_4,
     ProVer_5,
     ProVer_6,
+    ProVer_7,
 };
 
 class FileInterface;

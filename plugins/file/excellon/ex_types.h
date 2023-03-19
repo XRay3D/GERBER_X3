@@ -11,8 +11,8 @@
 #pragma once
 #include "datastream.h"
 #include <QPolygonF>
-#include <type_traits>
 #include <numbers>
+#include <type_traits>
 
 class GiDrill;
 

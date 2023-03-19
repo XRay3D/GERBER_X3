@@ -69,6 +69,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
+#include "profile.h"
 #include <QToolBar>
 
 class GCPluginImpl final : public GCodePlugin {
@@ -82,4 +83,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
     QWidget* createForm() override { return new ProfileForm(this); };
     int type() const override { return GCode::Profile; }
+    FileInterface* createFile() const override { return new GCode::ProfileFile; }
 };

@@ -10,7 +10,6 @@
 // ********************************************************************************/
 #pragma once
 
-#include "file.h"
 #include "gc_file.h"
 
 namespace GCode {
@@ -21,6 +20,7 @@ public:
     explicit PocketRasterFile();
     explicit PocketRasterFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
+    FileType type() const override { return FileType(Raster); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

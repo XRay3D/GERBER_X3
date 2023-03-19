@@ -14,6 +14,7 @@
 
 #include "fileifce.h"
 #include "ft_model.h"
+#include "gc_plugin.h"
 #include "graphicsview.h"
 
 #include "shapepluginin.h"
@@ -35,7 +36,11 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
     int type;
     stream >> type;
     if (App::filePlugins().contains(type)) {
-        file.reset(App::filePlugin(type)->createFile());
+        if (FileType(type) >= FileType::GCode && FileType(type) < FileType::Shapes)
+            file.reset(App::gCodePlugin(type)->createFile());
+        else
+            file.reset(App::filePlugin(type)->createFile());
+
         stream >> *file;
         file->addToScene();
         if (!App::project()->watcher.files().contains(file->name()))
@@ -136,6 +141,7 @@ bool Project::open(const QString& fileName) {
     try {
         in >> ver_;
         switch (ver_) {
+        case ProVer_7:
         case ProVer_6:
             [[fallthrough]];
         case ProVer_5:

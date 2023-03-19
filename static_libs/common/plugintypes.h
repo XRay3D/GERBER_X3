@@ -78,16 +78,6 @@ struct AbstrGraphicObject {
     virtual Paths& rPaths() = 0;
 };
 
-enum class FileType {
-    Gerber,
-    Excellon,
-    GCode,
-    Dxf,
-    Hpgl,
-    TopoR,
-    Shapes = 100
-};
-
 enum Side {
     NullSide = -1,
     Top,

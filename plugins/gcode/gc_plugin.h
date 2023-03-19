@@ -6,6 +6,7 @@ class QAction;
 class QMenu;
 class QToolBar;
 class QWidget;
+class FileInterface;
 
 class GCodePlugin : public QObject, public PluginData {
     Q_OBJECT
@@ -19,6 +20,7 @@ public:
     [[nodiscard]] virtual QWidget* createForm() = 0;
     [[nodiscard]] virtual bool canToShow() const;
     [[nodiscard]] virtual int type() const = 0;
+    [[nodiscard]] virtual FileInterface* createFile() const = 0;
 
     [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);
 

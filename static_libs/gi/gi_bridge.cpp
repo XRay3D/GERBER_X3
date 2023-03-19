@@ -76,7 +76,7 @@ QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) 
 
 void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     lastPos_ = pos();
-  // FIXME    App::graphicsView()->disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
+    // FIXME    App::graphicsView()->disconnect(App::graphicsView(), &GraphicsView::mouseMove, this, &GiBridge::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 

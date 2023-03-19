@@ -78,7 +78,7 @@ void GraphicsItem::setVisible(bool visible) {
     //    if (visible) {
     //        setOpacity(0.0);
     setOpacity(1.0 * visible);
-    QGraphicsItem/*QGraphicsObject*/::setVisible(visible);
+    QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
     //    }
 }
 

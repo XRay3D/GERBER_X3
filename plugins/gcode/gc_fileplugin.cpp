@@ -12,9 +12,9 @@
  ********************************************************************************/
 
 #include "gc_fileplugin.h"
-#include "gc_types.h"
 #include "fileifce.h"
 #include "ft_view.h"
+#include "gc_types.h"
 // #include "gc_file.h"
 //  #include "gc_node.h"
 

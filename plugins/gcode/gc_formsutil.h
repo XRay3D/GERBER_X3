@@ -18,10 +18,10 @@
 #include <QtWidgets>
 
 class GCode::File;
-//namespace GCode {
-//class File;
-//class file_;
-//} // namespace GCode
+// namespace GCode {
+// class File;
+// class file_;
+// } // namespace GCode
 
 class GraphicsItem;
 class QProgressDialog;

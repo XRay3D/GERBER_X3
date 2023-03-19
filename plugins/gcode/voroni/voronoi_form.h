@@ -42,6 +42,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
+#include "file.h"
 #include "gc_plugin.h"
 #include <QToolBar>
 
@@ -56,4 +57,5 @@ public:
     QWidget* createForm() override { return new VoronoiForm(this); };
     QKeySequence keySequence() const override { return {"Ctrl+Shift+V"}; }
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
+    FileInterface* createFile() const override { return new GCode::VoronoiFile; }
 };

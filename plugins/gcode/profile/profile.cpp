@@ -18,16 +18,16 @@
 #include <numbers>
 
 namespace GCode {
-ProfileCreator::ProfileCreator() {
+ProfileCtr::ProfileCtr() {
 }
 
-void ProfileCreator::create() {
+void ProfileCtr::create() {
     createProfile(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
 }
 
-GCodeType ProfileCreator::type() { return Profile; }
+GCodeType ProfileCtr::type() { return Profile; }
 
-void ProfileCreator::createProfile(const Tool& tool, const double depth) {
+void ProfileCtr::createProfile(const Tool& tool, const double depth) {
     do {
 
         toolDiameter = tool.getDiameter(depth);
@@ -35,7 +35,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
         const double dOffset = ((gcp_.side() == Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
 
         if (gcp_.side() == On) {
-            if (gcp_.params[GCodeParams::Trimming].toBool())
+            if (gcp_.params[TrimmingOpenPaths].toBool())
                 trimmingOpenPaths(workingRawPs);
             returnPs = std::move(workingPs);
         } else {
@@ -69,13 +69,12 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
 
         makeBridges();
 
-        if (gcp_.params.contains(GCodeParams::CornerTrimming) && gcp_.params[GCodeParams::CornerTrimming].toInt())
+        if (gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
             cornerTrimming();
 
         if (returnPss.empty())
             break;
 
-        gcp_.gcType = Profile;
         file_ = new ProfileFile(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
@@ -84,7 +83,7 @@ void ProfileCreator::createProfile(const Tool& tool, const double depth) {
     emit fileReady(nullptr);
 }
 
-void ProfileCreator::trimmingOpenPaths(Paths& paths) {
+void ProfileCtr::trimmingOpenPaths(Paths& paths) {
     const double dOffset = toolDiameter * uScale * 0.5;
     for (size_t i = 0; i < paths.size(); ++i) {
         auto& p = paths[i];
@@ -98,7 +97,7 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
             QLineF e(p.back(), p.front());
             b.setLength(b.length() - toolDiameter * 0.5);
             e.setLength(e.length() - toolDiameter * 0.5);
-            p = {(b.p2()), (e.p2())};
+            p = Path{(b.p2()), (e.p2())};
         } else if (double l = Perimeter(p); l <= toolDiameter * uScale) {
             paths.remove(i--);
             continue;
@@ -130,7 +129,7 @@ void ProfileCreator::trimmingOpenPaths(Paths& paths) {
     }
 }
 
-void ProfileCreator::cornerTrimming() {
+void ProfileCtr::cornerTrimming() {
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
@@ -168,7 +167,7 @@ void ProfileCreator::cornerTrimming() {
     }
 }
 
-void ProfileCreator::makeBridges() {
+void ProfileCtr::makeBridges() {
     // find Bridges
     mvector<GiBridge*> bridgeItems;
     for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
@@ -245,7 +244,7 @@ void ProfileCreator::makeBridges() {
     }
 }
 
-void ProfileCreator::reorder() {
+void ProfileCtr::reorder() {
     //    returnPss = {returnPs};
     //    return;
     PolyTree polyTree;
@@ -280,7 +279,7 @@ void ProfileCreator::reorder() {
     }
 }
 
-void ProfileCreator::reduceDistance(Point& from, Path& to) {
+void ProfileCtr::reduceDistance(Point& from, Path& to) {
     double d = std::numeric_limits<double>::max();
     int ctr2 = 0, idx = 0;
     for (auto pt2 : to) {
@@ -294,7 +293,7 @@ void ProfileCreator::reduceDistance(Point& from, Path& to) {
     from = to.back();
 }
 
-void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
+void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     rpaths.clear();
 
     //    auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
@@ -302,14 +301,14 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     //    };
     //    rpaths.reserve(Total(polytree));
 
-    std::function<void(PolyTree&, ProfileCreator::NodeType)> addPolyNodeToPaths;
+    std::function<void(PolyTree&, ProfileCtr::NodeType)> addPolyNodeToPaths;
 
     if (!Settings::profileSort()) { // Grouping by nesting
 
         markPolyTreeDByNesting(polytree);
 
         std::map<int, Paths> pathsMap;
-        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, ProfileCreator::NodeType nodetype) {
+        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
             bool match = true;
             if (nodetype == ntClosed)
                 match = true; //! polynode.IsOpen();// FIXME
@@ -335,8 +334,8 @@ void ProfileCreator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     } else { // Grouping by nesting depth
         sortPolyTreeByNesting(polytree);
         Point from = App::settings().mkrZeroOffset();
-        std::function<void(PolyTree&, ProfileCreator::NodeType)> addPolyNodeToPaths =
-            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCreator::NodeType nodetype) {
+        std::function<void(PolyTree&, ProfileCtr::NodeType)> addPolyNodeToPaths =
+                [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
                 bool match = true;
                 if (nodetype == ntClosed)
                     match = true; //! polynode.IsOpen(); FIXME

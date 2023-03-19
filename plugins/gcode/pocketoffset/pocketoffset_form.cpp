@@ -24,7 +24,7 @@ enum {
 };
 
 PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::PocketCreator, parent)
+    : GcFormBase(plugin, new GCode::PocketCtr, parent)
     , ui(new Ui::PocketOffsetForm)
     , names {tr("Pockert On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
@@ -63,8 +63,8 @@ PocketOffsetForm::PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
     connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &PocketOffsetForm::onSbxStepsValueChanged);
 
     //
-
-    ui->sbxSteps->setSuffix(tr(" - Infinity"));
+    if (ui->sbxSteps->value() == 0)
+        ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
 
 PocketOffsetForm::~PocketOffsetForm() {
@@ -168,7 +168,7 @@ void PocketOffsetForm::createFile() {
     gcp_.setSide(side);
     gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
-        gcp_.params[GCode::GCodeParams::Steps] = ui->sbxSteps->value();
+        gcp_.params[GCode::PocketCtr::OffsetSteps] = ui->sbxSteps->value();
 
     gcCreator->setGcp(gcp_);
     gcCreator->addPaths(wPaths);

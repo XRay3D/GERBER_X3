@@ -15,6 +15,15 @@ struct mvector : std::vector<T> {
     inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
     inline void append(const std::span<T>& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
 
+    inline void append(V&& vec) {
+        if (vec.empty())
+            return;
+        if (V::capacity() - V::size() < vec.size())
+            V::reserve(V::size() + vec.size());
+        for (auto&& var : vec)
+            V::emplace_back(std::move(var));
+    }
+
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
     bool removeOne(const T& t) {

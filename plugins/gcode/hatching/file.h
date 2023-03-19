@@ -10,7 +10,6 @@
 // ********************************************************************************/
 #pragma once
 
-#include "file.h"
 #include "gc_file.h"
 
 namespace GCode {
@@ -20,9 +19,9 @@ public:
     explicit CrosshatchFile();
     explicit CrosshatchFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
+    FileType type() const override { return FileType(Hatching); }
     void createGi() override;
     void genGcodeAndTile() override;
 };
 
 } // namespace GCode
-

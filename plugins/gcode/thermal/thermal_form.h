@@ -77,6 +77,7 @@ public:
     void editFile(GCode::File* file) override;
 };
 
+#include "file.h"
 #include "gc_plugin.h"
 #include <QToolBar>
 
@@ -92,6 +93,7 @@ public:
     QWidget* createForm() override { return new Form(this); };
     bool canToShow() const override { return Form::canToShow(); }
     int type() const override { return GCode::Thermal; }
+    FileInterface* createFile() const override { return new GCode::ThermalFile; }
 };
 
 } // namespace Thermal

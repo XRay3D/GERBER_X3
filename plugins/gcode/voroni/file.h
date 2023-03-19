@@ -10,17 +10,17 @@
  ********************************************************************************/
 #pragma once
 
-#include "file.h"
 #include "gc_file.h"
 
 namespace GCode {
 
-class VoronoiFile : public File {
+class VoronoiFile final : public File {
 
 public:
     explicit VoronoiFile();
     explicit VoronoiFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
+    FileType type() const override { return FileType(Voronoi); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

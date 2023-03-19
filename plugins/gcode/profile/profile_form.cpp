@@ -20,7 +20,7 @@
 #include <QMessageBox>
 
 ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::ProfileCreator, parent)
+    : GcFormBase(plugin, new GCode::ProfileCtr, parent)
     , ui(new Ui::ProfileForm) {
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
@@ -143,7 +143,12 @@ void ProfileForm::createFile() {
     gcp_.setSide(side);
     gcp_.tools.push_back(tool);
     gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    (side == GCode::On) ? gcp_.params[GCode::GCodeParams::Trimming] = ui->cbxTrimming->isChecked() : gcp_.params[GCode::GCodeParams::CornerTrimming] = ui->cbxTrimming->isChecked();
+
+    if (side == GCode::On)
+        gcp_.params[GCode::ProfileCtr::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
+    else
+        gcp_.params[GCode::ProfileCtr::TrimmingCorners] = ui->cbxTrimming->isChecked();
+
     gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
@@ -153,7 +158,7 @@ void ProfileForm::createFile() {
     }
     if (!brv.isEmpty()) {
         // gcp_.params[GCode::GCodeParams::Bridges].fromValue(brv);
-        gcp_.params[GCode::GCodeParams::BridgeLen] = ui->dsbxBridgeLenght->value();
+        gcp_.params[GCode::ProfileCtr::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
     gcCreator->setGcp(gcp_);

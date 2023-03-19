@@ -13,6 +13,7 @@
 #include "fileifce.h"
 #include "gc_types.h"
 #include "myclipper.h"
+#include "utils.h"
 
 #include <QObject>
 

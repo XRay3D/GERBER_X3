@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_point.h"
+#include "drill/file.h"
 #include "project.h"
 
 #include "gcode.h"
@@ -390,13 +391,12 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.setValue("depth", depth);
             settings.endGroup();
 
-            GCode::GCodeParams gcp_(tool, depth, GCode::Drill);
-
+            GCode::GCodeParams gcp_ {tool, depth};
             gcp_.params[GCode::GCodeParams::NotTile];
 
-            0; // FIXME    FileInterface* gcode = new FileInterface(Pathss {{dst}}, std::move(gcp_));
-            0; // FIXME    gcode->setFileName(tr("Pin_") + tool.nameEnc());
-            0; // FIXME     App::project()->addFile(gcode);
+            //  FIXME           FileInterface* gcode = new GCode::DrillFile(std::move(gcp_), Pathss {{dst}});
+            //  FIXME          gcode->setFileName(tr("Pin_") + tool.nameEnc());
+            //  FIXME          App::project()->addFile(gcode);
         }
     });
     {

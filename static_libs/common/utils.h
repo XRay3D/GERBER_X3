@@ -8,20 +8,18 @@
 #include <map>
 #include <string_view>
 
-using ns_ = std::nano;
-using us_ = std::micro;
-using ms_ = std::milli;
-using seconds__ = std::ratio<1>;
-using minutes__ = std::ratio<60>;
-using hours__ = std::ratio<3600>;
-template <class T = seconds__>
-    requires                        //
-    std::is_same_v<T, ns_> ||       //
-    std::is_same_v<T, us_> ||       //
-    std::is_same_v<T, ms_> ||       //
-    std::is_same_v<T, seconds__> || //
-    std::is_same_v<T, minutes__> || //
-    std::is_same_v<T, hours__>      //
+using nS = std::nano;
+using uS = std::micro;
+using mS = std::milli;
+using Sec = std::ratio<1>;
+using Mins = std::ratio<60>;
+using Hours = std::ratio<3600>;
+
+template <typename... Ts>
+constexpr auto isSame = std::is_same_v<Ts...>;
+
+template <class T = Sec>
+    requires isSame<T, nS> || isSame<T, uS> || isSame<T, mS> || isSame<T, Sec> || isSame<T, Mins> || isSame<T, Hours>
 
 struct Timer {
 #if defined(__gnu_linux__) || defined(__GNUC__)
@@ -46,19 +44,22 @@ struct Timer {
         auto& [ctr, avg] = avgMap[stringView];
         avg += timeout.count();
         ++ctr;
+        qDebug(format(), stringView.data(), timeout.count(), avg / ctr);
+    }
 
-        /**/ if constexpr (std::is_same_v<T, ns_>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) nS", stringView.data(), timeout.count(), avg / ctr);
-        else if constexpr (std::is_same_v<T, us_>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) uS", stringView.data(), timeout.count(), avg / ctr);
-        else if constexpr (std::is_same_v<T, ms_>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) mS", stringView.data(), timeout.count(), avg / ctr);
-        else if constexpr (std::is_same_v<T, seconds__>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) S", stringView.data(), timeout.count(), avg / ctr);
-        else if constexpr (std::is_same_v<T, minutes__>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) M", stringView.data(), timeout.count(), avg / ctr);
-        else if constexpr (std::is_same_v<T, hours__>)
-            qDebug("\t%10s -> %1.3f (avg %1.3f) H", stringView.data(), timeout.count(), avg / ctr);
+    constexpr auto format() const noexcept {
+        /**/ if constexpr (std::is_same_v<T, nS>)
+            return "\t%20s -> %1.3f (avg %1.3f) nS";
+        else if constexpr (std::is_same_v<T, uS>)
+            return "\t%20s -> %1.3f (avg %1.3f) uS";
+        else if constexpr (std::is_same_v<T, mS>)
+            return "\t%20s -> %1.3f (avg %1.3f) mS";
+        else if constexpr (std::is_same_v<T, Sec>)
+            return "\t%20s -> %1.3f (avg %1.3f) S";
+        else if constexpr (std::is_same_v<T, Mins>)
+            return "\t%20s -> %1.3f (avg %1.3f) M";
+        else if constexpr (std::is_same_v<T, Hours>)
+            return "\t%20s -> %1.3f (avg %1.3f) H";
     }
 };
 template <class T>

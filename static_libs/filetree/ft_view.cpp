@@ -18,8 +18,8 @@
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
 
-#include "fileifce.h"
 #include "file_plugin.h"
+#include "fileifce.h"
 #include "qcheckbox.h"
 #include "shapepluginin.h"
 

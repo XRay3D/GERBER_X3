@@ -33,6 +33,7 @@ public:
 private:
     std::string m_descr;
 };
+
 // type
 using Clipper = Clipper2Lib::Clipper64;
 using ClipperOffset = Clipper2Lib::ClipperOffset;
@@ -42,10 +43,13 @@ using Pathss = mvector<Paths>;
 using Point = Clipper2Lib::Point64;
 using PolyTree = Clipper2Lib::PolyTree64;
 using Rect = Clipper2Lib::Rect64;
+
 // func
 using Clipper2Lib::Area;
 using Clipper2Lib::Bounds;
+using Clipper2Lib::InflatePaths;
 using Clipper2Lib::PointInPolygon;
+
 // enum
 using Clipper2Lib::ClipType;
 using Clipper2Lib::EndType;
@@ -53,6 +57,15 @@ using Clipper2Lib::FillRule;
 using Clipper2Lib::JoinType;
 using Clipper2Lib::PathType;
 using Clipper2Lib::PointInPolygonResult;
+
+using CT = Clipper2Lib::ClipType;
+using ET = Clipper2Lib::EndType;
+using FR = Clipper2Lib::FillRule;
+using JT = Clipper2Lib::JoinType;
+using PT = Clipper2Lib::PathType;
+using PIPResult = Clipper2Lib::PointInPolygonResult;
+
+namespace C2 = Clipper2Lib;
 
 Q_DECLARE_METATYPE(Point)
 

@@ -13,8 +13,8 @@
 #include "gc_node.h"
 // #include "gc_file.h"
 #include "fileifce.h"
-#include "gc_highlighter.h"
 #include "gc_file.h"
+#include "gc_highlighter.h"
 
 #include <QFileInfo>
 #include <QIcon>

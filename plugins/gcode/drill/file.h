@@ -10,7 +10,6 @@
 // ********************************************************************************/
 #pragma once
 
-#include "file.h"
 #include "gc_file.h"
 
 namespace GCode {
@@ -20,9 +19,9 @@ public:
     explicit DrillFile();
     explicit DrillFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
+    FileType type() const override { return FileType(Drill); }
     void createGi() override;
     void genGcodeAndTile() override;
 };
 
 } // namespace GCode
-

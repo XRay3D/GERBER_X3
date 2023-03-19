@@ -22,6 +22,9 @@
 #include <QPolygonF>
 #include <mvector.h>
 
+#include "app.h"
+#include "settings.h"
+
 static constexpr auto uScale {100000};
 static constexpr auto dScale {1. / uScale};
 extern void ifCancelThenThrow();
@@ -262,6 +265,7 @@ template <typename T>
 struct Path : mvector<Point<T>> {
     using MV = mvector<Point<T>>;
     using MV::MV;
+    using MV::operator=;
 
     Path(const QPolygonF& v) {
         MV::reserve(v.size());
@@ -314,6 +318,7 @@ template <typename T>
 struct Paths : mvector<Path<T>> {
     using MV = mvector<Path<T>>;
     using MV::MV;
+    using MV::operator=;
 
     Paths(const MV& v)
         : MV(v) { }
