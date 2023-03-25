@@ -130,7 +130,6 @@ void PocketCtr::createStdFull(const Tool& tool, const double depth) {
 }
 
 void PocketCtr::createMultiTool(const mvector<Tool>& tools, double depth) {
-    Timer t {__FUNCTION__};
 
     if (gcp_.side() == Outer)
         groupedPaths(Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);
@@ -164,28 +163,35 @@ void PocketCtr::createMultiTool(const mvector<Tool>& tools, double depth) {
             clipFrame = C2::Union(clipFrame, tmp, FR::EvenOdd);
         }
 
-        for (size_t pIdx {}; const Paths& paths : groupedPss) {
-            Paths wp = InflatePaths(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
+        Paths cutAreaPaths;
 
-            if (tIdx) // обрезка текущего пути предыдущим
-                wp = C2::Difference(wp, clipFrame, FR::EvenOdd);
+        {
+            Timer t {"groupedPss"};
+            for (size_t pIdx {}; const Paths& paths : groupedPss) {
+                Paths wp = InflatePaths(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
-            if (tIdx == size - 1)
-                removeSmall(wp, dOffset * 0.5); // последний
-            else if (tIdx /*+ 1 != size*/)
-                removeSmall(wp, dOffset * 2.0); // остальные
+                if (tIdx) // обрезка текущего пути предыдущим
+                    wp = C2::Difference(wp, clipFrame, FR::EvenOdd);
 
-            // dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
+                if (tIdx == size - 1)
+                    removeSmall(wp, dOffset * 0.5); // последний
+                else if (tIdx /*+ 1 != size*/)
+                    removeSmall(wp, dOffset * 2.0); // остальные
 
-            fillPaths[tIdx].append(wp);
+                // dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
 
-            do {
-                returnPs.append(wp);
-                CleanPaths(wp, uScale * 0.0005);
-                wp = InflatePaths(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
-            } while (wp.size());
-            ++pIdx;
-        } // for (const Paths& paths : groupedPss_) {
+                fillPaths[tIdx].append(wp);
+
+                cutAreaPaths.append(wp);
+
+                do {
+                    returnPs.append(wp);
+                    CleanPaths(wp, uScale * 0.0005);
+                    wp = InflatePaths(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
+                } while (wp.size());
+                ++pIdx;
+            } // for (const Paths& paths : groupedPss_) {
+        }
 
         if (returnPs.empty()) {
             emit fileReady(nullptr);
@@ -193,15 +199,16 @@ void PocketCtr::createMultiTool(const mvector<Tool>& tools, double depth) {
         }
 
         // make a fill box for the toolpath and create a file
-        std::ranges::for_each(returnPs, [](auto&& path) { path.emplace_back(path.front()); });
-        Paths fillToolpath = InflatePaths(returnPs, toolDiameter, JT::Round, ET::Round, uScale);
+        Timer t {"cutAreaPaths"};
+        //dbgPaths(cutAreaPaths, "cutAreaPaths", Qt::green);
+        cutAreaPaths = InflatePaths(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
 
         stacking(returnPs);
         assert(returnPss.size());
 
         gcp_.params[GCodeParams::MultiToolIndex] = tIdx;
 
-        file_ = new PocketOffsetFile(GCodeParams {gcp_}, std::move(returnPss), std::move(fillToolpath));
+        file_ = new PocketOffsetFile(GCodeParams {gcp_}, std::move(returnPss), std::move(cutAreaPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
 

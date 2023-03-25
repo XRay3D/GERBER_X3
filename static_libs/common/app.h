@@ -38,9 +38,9 @@ class Form;
 
 using Handlers = mvector<Shapes::Handle*>;
 
-using FileInterfacesMap = std::map<int, FilePlugin*>; /*PIF*/      // > ;
-using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>; /*PIS*/ // > ;
-using GCodeInterfaceMap = std::map<int, GCodePlugin*>; /*PIG*/     // > ;
+using FileInterfacesMap = std::map<int, FilePlugin*>;
+using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>;
+using GCodeInterfaceMap = std::map<int, GCodePlugin*>;
 
 class App {
     inline static App* app_ = nullptr;

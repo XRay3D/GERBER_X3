@@ -1030,7 +1030,7 @@ bool Parser::parseFormat(const QString& gLine) {
     static const QVector<QChar> coordinateValuesNotationList {'A', 'I'};
     static constexpr ctll::fixed_string ptrnFormat(R"(^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$)"); // fixed_string("^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$");
     if (auto [whole, c1, c2, c3, c4, c5, c6] = ctre::match<ptrnFormat>(data); whole) {
-        switch (zeroOmissionModeList.indexOf(CtreCapTo(c1).operator QString()[0])) {
+        switch (zeroOmissionModeList.indexOf(c1.data()[0])) {
         case OmitLeadingZeros:
             file->format().zeroOmisMode = OmitLeadingZeros;
             break;
@@ -1040,7 +1040,7 @@ bool Parser::parseFormat(const QString& gLine) {
             break;
 #endif
         }
-        switch (coordinateValuesNotationList.indexOf(CtreCapTo(c2).operator QString()[0])) {
+        switch (coordinateValuesNotationList.indexOf(c2.data()[0])) {
         case AbsoluteNotation:
             file->format().coordValueNotation = AbsoluteNotation;
             break;

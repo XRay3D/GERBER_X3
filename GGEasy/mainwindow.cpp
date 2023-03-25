@@ -35,6 +35,50 @@
 #include <QtWidgets>
 #include <forward_list>
 
+/*
+
+C:\Users\X-Ray\Documents\QtPro>git apply GGEASY.patch
+GGEASY.patch:6956: trailing whitespace.
+  const int scale_error_i       = 2; // non-fatal
+GGEASY.patch:6957: trailing whitespace.
+  const int non_pair_error_i    = 4; // non-fatal
+GGEASY.patch:7335: trailing whitespace.
+  inline Path<T1> ScalePath(const Path<T2>& path,
+GGEASY.patch:7351: trailing whitespace.
+      [scale_x, scale_y](const auto& pt)
+GGEASY.patch:7355: trailing whitespace.
+      [scale_x, scale_y](const auto& pt)
+error: patch failed: GERBER_X3/CMakeLists.txt:10
+error: GERBER_X3/CMakeLists.txt: patch does not apply
+error: patch failed: GERBER_X3/plugins/file/file_plugins_en.ts:1
+error: GERBER_X3/plugins/file/file_plugins_en.ts: patch does not apply
+error: patch failed: GERBER_X3/plugins/file/file_plugins_ru.ts:19
+error: GERBER_X3/plugins/file/file_plugins_ru.ts: patch does not apply
+error: patch failed: GERBER_X3/plugins/file/gerber/file_gerber_en.ts:1
+error: GERBER_X3/plugins/file/gerber/file_gerber_en.ts: patch does not apply
+error: patch failed: GERBER_X3/plugins/file/gerber/file_gerber_ru.ts:170
+error: GERBER_X3/plugins/file/gerber/file_gerber_ru.ts: patch does not apply
+error: patch failed: GERBER_X3/plugins/gcode/gc_file.cpp:439
+error: GERBER_X3/plugins/gcode/gc_file.cpp: patch does not apply
+error: patch failed: GERBER_X3/plugins/gcode/gcode_en.ts:1
+error: GERBER_X3/plugins/gcode/gcode_en.ts: patch does not apply
+error: patch failed: GERBER_X3/plugins/gcode/gcode_ru.ts:27
+error: GERBER_X3/plugins/gcode/gcode_ru.ts: patch does not apply
+
+error: patch failed: GERBER_X3/plugins/gcode/pocketoffset/pocketoffset_form.cpp:26
+error: GERBER_X3/plugins/gcode/pocketoffset/pocketoffset_form.cpp: patch does not apply
+error: GERBER_X3/plugins/gcode/profile/prof_file.cpp: No such file or directory
+error: patch failed: GERBER_X3/plugins/gcode/thermal/thermal_form.h:77
+error: GERBER_X3/plugins/gcode/thermal/thermal_form.h: patch does not apply
+error: patch failed: GERBER_X3/plugins/gcode/voroni/voronoi_boost.cpp:18
+error: GERBER_X3/plugins/gcode/voroni/voronoi_boost.cpp: patch does not apply
+error: GERBER_X3/plugins/gcode/voroni/voronoi_file.cpp: No such file or directory
+error: patch failed: GERBER_X3/plugins/shape/CMakeLists.txt:56
+error: GERBER_X3/plugins/shape/CMakeLists.txt: patch does not apply
+
+
+*/
+
 static auto PointConverter = QMetaType::registerConverter(&Point::toString);
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
@@ -141,7 +185,8 @@ MainWindow::MainWindow(QWidget* parent)
             i = 1000;
             // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
         if (0)
@@ -158,13 +203,10 @@ MainWindow::~MainWindow() {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
     if (qApp->applicationDirPath().contains("GERBER_X3/bin") || maybeSave()) {
-        writeSettings();
         delete dockWidget_;
-        qApp->closeAllWindows();
-        qApp->setQuitOnLastWindowClosed(false); /////????
+        writeSettings();
         App::fileModel()->closeProject();
         event->accept();
-        exit(-222); // hack for fast exit
     } else {
         event->ignore();
     }

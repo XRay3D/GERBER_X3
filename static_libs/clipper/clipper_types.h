@@ -154,19 +154,11 @@ struct Point {
     //    constexpr Point& operator=(Point&& p) noexcept = default;
     //    constexpr Point& operator=(const Point& p) noexcept = default;
 
-    constexpr Point(QPointF&& p) noexcept
-        : x(p.x() * uScale)
-        , y(p.y() * uScale) {
-    }
     constexpr Point(const QPointF& p) noexcept
         : x(p.x() * uScale)
         , y(p.y() * uScale) {
     }
-    constexpr Point& operator=(QPointF&& p) noexcept {
-        x = p.x() * uScale;
-        y = p.y() * uScale;
-        return *this;
-    }
+
     constexpr Point& operator=(const QPointF& p) noexcept {
         x = p.x() * uScale;
         y = p.y() * uScale;

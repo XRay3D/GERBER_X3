@@ -18,6 +18,7 @@
 #include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
+#include <ranges>
 
 ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     : GcFormBase(plugin, new GCode::ProfileCtr, parent)
@@ -26,6 +27,16 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     setWindowTitle(tr("Profile Toolpath"));
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
+
+    ui->cbxBridgeAlignType->addItems({
+        /*Вручную. По Горизонтали. По Вертикали. По Горизонтали и вертикали. Через расстояние. Равномерно по периметру.*/
+        tr("Manually"),
+        tr("Horizontally"),
+        tr("Vertically"),
+        tr("Horizontally and vertically"),
+        tr("Through the distance"),
+        tr("Evenly around the perimeter"),
+    });
 
     MySettings settings;
     settings.beginGroup("ProfileForm");
@@ -36,6 +47,8 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
     settings.getValue(ui->rbOn);
     settings.getValue(ui->rbOutside);
     settings.getValue(ui->cbxTrimming);
+    settings.getValue(ui->dsbxBridgeValue, 1.0);
+    settings.getValue(ui->cbxBridgeAlignType, 1.0);
     settings.getValue(varName(trimming_), 0);
     settings.endGroup();
 
@@ -75,6 +88,8 @@ ProfileForm::~ProfileForm() {
     settings.setValue(ui->rbOn);
     settings.setValue(ui->rbOutside);
     settings.setValue(ui->cbxTrimming);
+    settings.setValue(ui->cbxBridgeAlignType);
+    settings.setValue(ui->dsbxBridgeValue);
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
@@ -144,6 +159,10 @@ void ProfileForm::createFile() {
     gcp_.tools.push_back(tool);
     gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
 
+    gcp_.params[GCode::ProfileCtr::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
+    gcp_.params[GCode::ProfileCtr::BridgeValue] = ui->dsbxBridgeValue->value();
+    // NOTE reserve   gcp_.params[GCode::ProfileCtr::BridgeValue2] = ui->dsbxBridgeValue->value();
+
     if (side == GCode::On)
         gcp_.params[GCode::ProfileCtr::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
@@ -184,14 +203,88 @@ void ProfileForm::showEvent(QShowEvent* event) {
 }
 
 void ProfileForm::onAddBridgeClicked() {
-    if (brItem) {
-        if (!brItem->ok())
-            delete brItem;
+    static auto solid = [](auto* item) { return item->type() == GiType::DataSolid; };
+
+    const double value = ui->dsbxBridgeValue->value();
+
+    switch (ui->cbxBridgeAlignType->currentIndex()) {
+    case Manually: {
+        if (brItem) {
+            if (!brItem->ok())
+                delete brItem;
+        }
+        brItem = new GiBridge(lenght_, size_, side, brItem);
+        App::graphicsView()->scene()->addItem(brItem);
+        brItem->setVisible(true);
+        brItem->setOpacity(1.0);
+    } break;
+    case Horizontally: {
+        for (auto* item : App::graphicsView()->scene()->selectedItems() /* | std::views::filter(solid)*/) {
+            GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
+
+            if (gi->type() == GiType::DataSolid) {
+
+                auto bounds = Bounds(gi->paths());
+                // dbgPaths(gi->paths(), __FUNCTION__, Qt::magenta);
+
+                int step = bounds.Width() / (value + 1);
+                if (0) {
+                    Clipper clipper;
+                    for (int var : std::views::iota(1, lround(value) + 1)) {
+                        Path p {
+                            {bounds.left + step * var, bounds.bottom + uScale},
+                            {bounds.left + step * var,    bounds.top - uScale}
+                        };
+                        //                    dbgPaths({p}, __FUNCTION__, Qt::red);
+                        clipper.AddOpenSubject({p});
+                    }
+
+                    clipper.AddClip(gi->paths());
+                    Paths result;
+                    Paths _;
+                    clipper.Execute(CT::Intersection, FR::/*NonZero*/ EvenOdd, _, result);
+                }
+
+                for (int var : std::views::iota(1, lround(value) + 1)) {
+                    QLineF testLine {
+                        Point(bounds.left + step * var, bounds.bottom + uScale),
+                        Point(bounds.left + step * var, bounds.top - uScale)};
+
+                    for (auto&& path : gi->paths()) {
+                        for (int i {}; i < path.size(); ++i) {
+                            QLineF srcline {path[i], path[(i + 1) % path.size()]};
+                            QPointF intersects;
+                            if (auto is = testLine.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
+                                qDebug() << "intersects1" << is << intersects;
+                                brItem = new GiBridge(lenght_, size_, side, brItem);
+                                App::graphicsView()->scene()->addItem(brItem);
+                                brItem->setPos(intersects);
+                                // qDebug() << __FUNCTION__ << brItem->calculate(intersects) << intersects;
+                                brItem->setOk(true);
+                                if (!brItem->ok())
+                                    delete brItem;
+                                else {
+                                    brItem->setVisible(true);
+                                    brItem->setOpacity(1.0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } break;
+    case Vertically: {
+    } break;
+    case HorizontallyVertically: {
+    } break;
+    case ThroughTheDistance: {
+    } break;
+    case EvenlyDround: {
+    } break;
+    default:
+        break;
     }
-    brItem = new GiBridge(lenght_, size_, side, brItem);
-    App::graphicsView()->scene()->addItem(brItem);
-    brItem->setVisible(true);
-    brItem->setOpacity(1.0);
 }
 
 void ProfileForm::updateBridge() {

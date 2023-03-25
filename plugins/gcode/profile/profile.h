@@ -38,6 +38,9 @@ public:
         BridgeLen = GCodeParams::UserParam,
         TrimmingCorners,
         TrimmingOpenPaths,
+        BridgeAlignType,
+        BridgeValue,
+        BridgeValue2,
     };
 
 private:

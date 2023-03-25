@@ -97,7 +97,7 @@ void ProfileCtr::trimmingOpenPaths(Paths& paths) {
             QLineF e(p.back(), p.front());
             b.setLength(b.length() - toolDiameter * 0.5);
             e.setLength(e.length() - toolDiameter * 0.5);
-            p = Path{(b.p2()), (e.p2())};
+            p = Path {(b.p2()), (e.p2())};
         } else if (double l = Perimeter(p); l <= toolDiameter * uScale) {
             paths.remove(i--);
             continue;
@@ -178,12 +178,34 @@ void ProfileCtr::makeBridges() {
     if (bridgeItems.size()) {
         for (auto& returnPs_ : returnPss) {
             const Path& path = returnPs_.front();
-            std::vector<std::pair<GiBridge*, Point>> biStack;
+            std::vector<GiBridge*> biStack;
             biStack.reserve(bridgeItems.size());
             Point pt;
+
+            auto test = [](QLineF l, QPointF p) {
+                auto xo = p.x();
+                auto yo = p.y();
+                auto xa = l.p1().x();
+                auto ya = l.p1().y();
+                auto xb = l.p2().x();
+                auto yb = l.p2().y();
+
+                auto t = ((xo - xa) * (xb - xa) + (yo - ya) * (yb - ya))
+                    / (pow(xb - xa, 2) + pow(yb - ya, 2));
+                t = std::clamp(t, 0.0, 1.0);
+                return sqrt(pow(xa - xo + (xb - xa) * t, 2)
+                    + pow(ya - yo + (yb - ya) * t, 2));
+            };
+
             for (GiBridge* bi : bridgeItems) {
-                if (pointOnPolygon(bi->getPath(), path, &pt))
-                    biStack.emplace_back(bi, pt);
+                for (int i {}; i < path.size(); ++i) {
+                    QLineF srcline {path[i], path[(i + 1) % path.size()]};
+
+                    qDebug() << "test" << test(srcline, bi->pos());
+                }
+                //                auto res = C2::PointInPolygon(Point(bi->pos()), path);
+                //                if (res == C2::PointInPolygonResult::IsOn)
+                //                    biStack.emplace_back(bi);
             }
             if (!biStack.empty()) {
                 Paths paths;
@@ -195,9 +217,10 @@ void ProfileCtr::makeBridges() {
 
                     Clipper clipper;
                     clipper.AddSubject(paths);
-                    for (const auto& bip : biStack) {
-                        clipper.AddClip({CirclePath((bip.first->lenght() + toolDiameter) * uScale, bip.second)});
-                    }
+
+                    for (const auto& bip : biStack)
+                        clipper.AddClip(bip->paths(toolDiameter * uScale));
+
                     clipper.Execute(ClipType::Intersection, FillRule::Positive, paths);
                 }
                 // cut toolPath
@@ -335,7 +358,7 @@ void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         sortPolyTreeByNesting(polytree);
         Point from = App::settings().mkrZeroOffset();
         std::function<void(PolyTree&, ProfileCtr::NodeType)> addPolyNodeToPaths =
-                [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
+            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
                 bool match = true;
                 if (nodetype == ntClosed)
                     match = true; //! polynode.IsOpen(); FIXME

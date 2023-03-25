@@ -28,7 +28,7 @@ public:
 
 private slots:
     void onAddBridgeClicked();
-    void onNameTextChanged(const QString& arg1);
+    void onNameTextChanged(const QString &arg1);
 
 private:
     void updateBridge();
@@ -55,6 +55,16 @@ private:
         Line = 1,
         Corner = 2,
     };
+
+    enum BridgeAlign {
+        Manually,
+        Horizontally,
+        Vertically,
+        HorizontallyVertically,
+        ThroughTheDistance,
+        EvenlyDround,
+    };
+
     int trimming_ = 0;
 
 protected:

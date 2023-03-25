@@ -1939,78 +1939,78 @@ Would you like to continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../mainwindow.cpp" line="1319"/>
+        <location filename="../mainwindow.cpp" line="1317"/>
         <source>Files</source>
         <translation>Файлы</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="224"/>
+        <location filename="../mainwindow.cpp" line="221"/>
         <source>Ready</source>
         <translation>Готов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="228"/>
+        <location filename="../mainwindow.cpp" line="225"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="231"/>
-        <location filename="../mainwindow.cpp" line="233"/>
+        <location filename="../mainwindow.cpp" line="228"/>
+        <location filename="../mainwindow.cpp" line="230"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="236"/>
         <location filename="../mainwindow.cpp" line="239"/>
-        <location filename="../mainwindow.cpp" line="242"/>
         <source>&amp;New project</source>
         <translation>&amp;Новый проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="241"/>
+        <location filename="../mainwindow.cpp" line="238"/>
         <source>Create a new file</source>
         <translation>Создать новый файл</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="242"/>
         <location filename="../mainwindow.cpp" line="245"/>
-        <location filename="../mainwindow.cpp" line="248"/>
         <source>&amp;Open...</source>
         <translation>&amp;Открыть...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="247"/>
+        <location filename="../mainwindow.cpp" line="244"/>
         <source>Open an existing file</source>
         <translation>Открыть существующий файл</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="248"/>
         <location filename="../mainwindow.cpp" line="251"/>
-        <location filename="../mainwindow.cpp" line="254"/>
         <source>&amp;Save project</source>
         <translation>&amp;Сохранить проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="253"/>
+        <location filename="../mainwindow.cpp" line="250"/>
         <source>Save the document to disk</source>
         <translation>Сохранить проект на диск</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="254"/>
         <location filename="../mainwindow.cpp" line="257"/>
-        <location filename="../mainwindow.cpp" line="260"/>
         <source>Save project &amp;As...</source>
         <translation>Сохранить проект и &amp;как ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="259"/>
+        <location filename="../mainwindow.cpp" line="256"/>
         <source>Save the document under a new name</source>
         <translation>Сохранить проект под новым именем</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="273"/>
-        <location filename="../mainwindow.cpp" line="275"/>
+        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="272"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation>Сохранить выбранные &amp;УП...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="274"/>
+        <location filename="../mainwindow.cpp" line="271"/>
         <source>Save selected toolpaths</source>
         <translation>Сохранить выбранные УП</translation>
     </message>
@@ -2031,151 +2031,151 @@ Would you like to continue?</source>
         <translation type="vanished">Очистить список</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="263"/>
-        <location filename="../mainwindow.cpp" line="267"/>
-        <location filename="../mainwindow.cpp" line="876"/>
+        <location filename="../mainwindow.cpp" line="260"/>
+        <location filename="../mainwindow.cpp" line="264"/>
+        <location filename="../mainwindow.cpp" line="874"/>
         <source>&amp;Close project &quot;%1&quot;</source>
         <translation>&amp;Закрыть проект &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="265"/>
+        <location filename="../mainwindow.cpp" line="262"/>
         <source>Close project</source>
         <translation>Закрыть проект</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="290"/>
+        <location filename="../mainwindow.cpp" line="287"/>
         <source>P&amp;rint</source>
         <translation>&amp;Печатать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="292"/>
+        <location filename="../mainwindow.cpp" line="289"/>
         <source>Print</source>
         <translation>Печатать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="296"/>
+        <location filename="../mainwindow.cpp" line="293"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="298"/>
+        <location filename="../mainwindow.cpp" line="295"/>
         <source>Exit the application</source>
         <translation>Выйти из приложения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="302"/>
+        <location filename="../mainwindow.cpp" line="299"/>
         <source>&amp;Edit</source>
         <translation>Правка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="326"/>
+        <location filename="../mainwindow.cpp" line="323"/>
         <source>&amp;Service</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="338"/>
+        <location filename="../mainwindow.cpp" line="335"/>
         <source>&amp;Settings</source>
         <translation>&amp;Параметры</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="339"/>
+        <location filename="../mainwindow.cpp" line="336"/>
         <source>Show the application&apos;s settings box</source>
         <translation>Показать окно настроек приложения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="328"/>
-        <location filename="../mainwindow.cpp" line="330"/>
+        <location filename="../mainwindow.cpp" line="325"/>
+        <location filename="../mainwindow.cpp" line="327"/>
         <source>Service</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="370"/>
+        <location filename="../mainwindow.cpp" line="367"/>
         <source>Ruller</source>
         <translation>Линейка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="376"/>
+        <location filename="../mainwindow.cpp" line="373"/>
         <source>Resize</source>
         <translation>Изменить размер</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="383"/>
+        <location filename="../mainwindow.cpp" line="380"/>
         <source>&amp;Help</source>
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="386"/>
+        <location filename="../mainwindow.cpp" line="383"/>
         <source>&amp;About</source>
         <translation>&amp;О G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="387"/>
+        <location filename="../mainwindow.cpp" line="384"/>
         <source>Show the application&apos;s About box</source>
         <translation>Показать окно приложения O G2G</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="389"/>
+        <location filename="../mainwindow.cpp" line="386"/>
         <source>About &amp;Qt</source>
         <translation>О &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="390"/>
+        <location filename="../mainwindow.cpp" line="387"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Показать окно о библиотеки Qt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="394"/>
+        <location filename="../mainwindow.cpp" line="391"/>
         <source>About &amp;Plugins…</source>
         <translation>О &amp;плагинах…</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="395"/>
+        <location filename="../mainwindow.cpp" line="392"/>
         <source>Show loaded plugins…</source>
         <translation>Показать загруженные плагины…</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="399"/>
+        <location filename="../mainwindow.cpp" line="396"/>
         <source>&amp;Viev</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="402"/>
-        <location filename="../mainwindow.cpp" line="404"/>
+        <location filename="../mainwindow.cpp" line="399"/>
+        <location filename="../mainwindow.cpp" line="401"/>
         <source>Zoom ToolBar</source>
         <translation>Панель Увеличение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="411"/>
-        <location filename="../mainwindow.cpp" line="412"/>
+        <location filename="../mainwindow.cpp" line="408"/>
+        <location filename="../mainwindow.cpp" line="409"/>
         <source>Fit best</source>
         <translation>Вписать</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="417"/>
-        <location filename="../mainwindow.cpp" line="418"/>
+        <location filename="../mainwindow.cpp" line="414"/>
+        <location filename="../mainwindow.cpp" line="415"/>
         <source>100%</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="419"/>
+        <location filename="../mainwindow.cpp" line="416"/>
         <source>Ctrl+0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="423"/>
-        <location filename="../mainwindow.cpp" line="424"/>
+        <location filename="../mainwindow.cpp" line="420"/>
+        <location filename="../mainwindow.cpp" line="421"/>
         <source>Zoom in</source>
         <translation>Увеличить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="429"/>
-        <location filename="../mainwindow.cpp" line="430"/>
+        <location filename="../mainwindow.cpp" line="426"/>
+        <location filename="../mainwindow.cpp" line="427"/>
         <source>Zoom out</source>
         <translation>Уменьшить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="439"/>
-        <location filename="../mainwindow.cpp" line="440"/>
+        <location filename="../mainwindow.cpp" line="436"/>
+        <location filename="../mainwindow.cpp" line="437"/>
         <source>Zoom to selected</source>
         <translation>Увеличить выбранное</translation>
     </message>
@@ -2196,18 +2196,18 @@ Would you like to continue?</source>
         <translation type="vanished">Выбор</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="305"/>
+        <location filename="../mainwindow.cpp" line="302"/>
         <source>Select all</source>
         <translation>Выбрать все</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="449"/>
+        <location filename="../mainwindow.cpp" line="446"/>
         <source>&amp;Paths</source>
         <translation>&amp;УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="451"/>
-        <location filename="../mainwindow.cpp" line="453"/>
+        <location filename="../mainwindow.cpp" line="448"/>
+        <location filename="../mainwindow.cpp" line="450"/>
         <source>Toolpath</source>
         <translation>Путь инструмента</translation>
     </message>
@@ -2232,27 +2232,27 @@ Would you like to continue?</source>
         <translation type="vanished">&amp;Сверловка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="344"/>
+        <location filename="../mainwindow.cpp" line="341"/>
         <source>&amp;G-Code Properties</source>
         <translation>П&amp;араметры G-кода</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="285"/>
+        <location filename="../mainwindow.cpp" line="282"/>
         <source>Recent Files...</source>
         <translation>Последние файлы...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="286"/>
+        <location filename="../mainwindow.cpp" line="283"/>
         <source>Recent Projects...</source>
         <translation>Последние проекты...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="351"/>
+        <location filename="../mainwindow.cpp" line="348"/>
         <source>Tool Base</source>
         <translation>База инструментов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="352"/>
         <source>Autoplace All Refpoints</source>
         <translation>Авторазмещение всех опорных точек</translation>
     </message>
@@ -2265,8 +2265,8 @@ Would you like to continue?</source>
         <translation type="vanished">&amp;Штриховка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="470"/>
-        <location filename="../mainwindow.cpp" line="472"/>
+        <location filename="../mainwindow.cpp" line="467"/>
+        <location filename="../mainwindow.cpp" line="469"/>
         <source>Graphics Items</source>
         <translation>Графические элементы</translation>
     </message>
@@ -2283,37 +2283,37 @@ Would you like to continue?</source>
         <translation type="vanished">Линия</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="529"/>
+        <location filename="../mainwindow.cpp" line="526"/>
         <source>Union</source>
         <translation>Объединение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="530"/>
+        <location filename="../mainwindow.cpp" line="527"/>
         <source>Difference</source>
         <translation>Разница</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="531"/>
+        <location filename="../mainwindow.cpp" line="528"/>
         <source>Exclusion</source>
         <translation>Исключение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="532"/>
+        <location filename="../mainwindow.cpp" line="529"/>
         <source>Intersection</source>
         <translation>Пересечение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="314"/>
+        <location filename="../mainwindow.cpp" line="311"/>
         <source>Undo</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="319"/>
+        <location filename="../mainwindow.cpp" line="316"/>
         <source>Redo</source>
         <translation>Повторить</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="366"/>
+        <location filename="../mainwindow.cpp" line="363"/>
         <source>Snap to grid</source>
         <translation>Привязка к сетке</translation>
     </message>
@@ -2342,63 +2342,63 @@ Would you like to continue?</source>
         <translation type="vanished">Включить в расчет</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1198"/>
-        <location filename="../mainwindow.cpp" line="1225"/>
+        <location filename="../mainwindow.cpp" line="1196"/>
+        <location filename="../mainwindow.cpp" line="1223"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1200"/>
+        <location filename="../mainwindow.cpp" line="1198"/>
         <source>Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)</source>
         <translation>Любой (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1225"/>
+        <location filename="../mainwindow.cpp" line="1223"/>
         <source>Project (*.g2g)</source>
         <translation>Проект (*.g2g)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="813"/>
+        <location filename="../mainwindow.cpp" line="810"/>
         <source>Do you want to close this project?</source>
         <translation>Закрыть этот проект?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="556"/>
+        <location filename="../mainwindow.cpp" line="553"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="558"/>
+        <location filename="../mainwindow.cpp" line="555"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="618"/>
+        <location filename="../mainwindow.cpp" line="615"/>
         <source>;	Contains files:</source>
         <translation>;	Содержит файлы:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="779"/>
+        <location filename="../mainwindow.cpp" line="776"/>
         <source>File open errors</source>
         <translation>Ошибки открытия файлов</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="813"/>
-        <location filename="../mainwindow.cpp" line="819"/>
-        <location filename="../mainwindow.cpp" line="860"/>
-        <location filename="../mainwindow.cpp" line="936"/>
+        <location filename="../mainwindow.cpp" line="810"/>
+        <location filename="../mainwindow.cpp" line="816"/>
+        <location filename="../mainwindow.cpp" line="858"/>
+        <location filename="../mainwindow.cpp" line="934"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="819"/>
+        <location filename="../mainwindow.cpp" line="816"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation>Документ был изменен.
 Вы хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="937"/>
+        <location filename="../mainwindow.cpp" line="935"/>
         <source>Do you want to reload file %1?</source>
         <translation>Перезагрузить файл %1?</translation>
     </message>
@@ -2409,12 +2409,12 @@ Do you want to save your changes?</source>
 %2.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="857"/>
+        <location filename="../mainwindow.cpp" line="855"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="861"/>
+        <location filename="../mainwindow.cpp" line="859"/>
         <source>Cannot write file %1:
 %2.</source>
         <translation>Невозможно записать файл%1:
@@ -2425,17 +2425,17 @@ Do you want to save your changes?</source>
         <translation type="vanished">Без названия.g2g</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="900"/>
+        <location filename="../mainwindow.cpp" line="898"/>
         <source>Icon size = 24</source>
         <translation>Размер иконки = 24</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="901"/>
+        <location filename="../mainwindow.cpp" line="899"/>
         <source>Icon size = 48</source>
         <translation>Размер иконки = 48</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="902"/>
+        <location filename="../mainwindow.cpp" line="900"/>
         <source>Icon size = 72</source>
         <translation>Размер иконки = 72</translation>
     </message>
@@ -3263,19 +3263,19 @@ X %2:Y %3</translation>
 </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="595"/>
-        <location filename="../mainwindow.cpp" line="610"/>
+        <location filename="../mainwindow.cpp" line="592"/>
+        <location filename="../mainwindow.cpp" line="607"/>
         <source>Save GCode file</source>
         <translation>Сохранить файл УП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="597"/>
-        <location filename="../mainwindow.cpp" line="612"/>
+        <location filename="../mainwindow.cpp" line="594"/>
+        <location filename="../mainwindow.cpp" line="609"/>
         <source>GCode (*.%1)</source>
         <translation>УП (*.%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="649"/>
+        <location filename="../mainwindow.cpp" line="646"/>
         <source>No selected toolpath files.</source>
         <translation>Нет выбранных файлов УП.</translation>
     </message>

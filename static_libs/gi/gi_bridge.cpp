@@ -175,18 +175,21 @@ void GiBridge::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/) { /* F
 }
 
 void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseReleaseEvent(event);
     if (ok_ && pos() == lastPos_) {
         ptr_ = new GiBridge(lenght_, size_, side_, ptr_);
         scene()->addItem(ptr_);
         ptr_->setPos(pos());
         ptr_->setVisible(true);
     } else if (!ok_) {
-        //   FIXME     deleteLater();
+        scene()->removeItem(this);
+        delete this;
     }
-    QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Paths GiBridge::paths(int) const { return Paths(); }
+Paths GiBridge::paths(int toolDiameter) const {
+    return {CirclePath(lenght() * uScale + toolDiameter, pos())};
+}
 
 int GiBridge::type() const { return GiType::Bridge; }
 
