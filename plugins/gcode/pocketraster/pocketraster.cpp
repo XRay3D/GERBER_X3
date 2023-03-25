@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,10 +25,10 @@ RasterCreator::RasterCreator() {
 }
 
 void RasterCreator::create() {
-    if (gcp_.params[GCodeParams::Fast].toBool())
-        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
-    else
-        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+//    if (gcp_.params[GCodeParams::Fast].toBool())
+//        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+//    else
+//        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
@@ -231,7 +231,7 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = Raster;
+
         file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
@@ -328,7 +328,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = LaserHLDI;
+
         file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);

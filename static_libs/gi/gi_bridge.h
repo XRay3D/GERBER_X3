@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,17 +23,17 @@ class GiBridge final : public GraphicsItem {
     friend class ProfileForm;
 
 public:
-    explicit GiBridge(double& lenght, double& size, GCode::SideOfMilling& side, GiBridge*& ptr);
-    ~GiBridge() override { ptr_ = nullptr; }
+    explicit GiBridge(double& lenght, double& toolDiam, GCode::SideOfMilling& side);
+    ~GiBridge() override { moveBrPtr = nullptr; }
 
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-
+    // QGraphicsItem interface
+    QRectF boundingRect() const override { return pPath.boundingRect(); }
+    QPainterPath shape() const override { return pPath; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    Q_INVOKABLE void setNewPos(const QPointF& pos);
     // GraphicsItem interface
     Paths paths(int alternate = {}) const override;
+    void changeColor() override { }
 
     bool ok() const;
     double lenght() const;
@@ -41,26 +41,31 @@ public:
 
     void update();
 
-    Point getPoint(const int side) const;
-    QLineF getPath() const;
+    //    Point getPoint(const int side) const;
+    //    QLineF getPath() const;
 
-    void setOk(bool ok);
-    void changeColor() override { }
+    //    void setOk(bool ok);
+    static inline GiBridge* moveBrPtr; // FIXME приватизировать в будущем??
+
+    //    Point::Type pathHash {};
+    //    Point::Type pathHash_() const { return pathHash; }
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    GiBridge*& ptr_;
-    GCode::SideOfMilling& side_;
-    QPainterPath path_;
-    QPointF calculate(const QPointF& pos);
-    QPointF lastPos_;
-    bool ok_ = false;
-    double angle_ = 0.0;
+    double angle_ {};
     double& lenght_;
-    double& size_;
+    double& toolDiam_;
+
+    QPainterPath pPath;
+
+    QPointF snapedPos(const QPointF& pos);
+    QPointF lastPos;
+
+    GCode::SideOfMilling& side_;
+
+    bool ok_ = false;
 };

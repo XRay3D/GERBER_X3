@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,9 +18,11 @@
 #include <cstdio>
 #include <vector>
 
+#if defined(__GNUC__) && (__GNUC__ >= 7)
 #pragma warning(push)
 #pragma warning(disable : 5055)
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
 // Your function
 #include "voronoi_visual_utils.h"
@@ -29,6 +31,7 @@
 
 #pragma GCC diagnostic pop
 #pragma warning(pop)
+#endif
 
 using boost::polygon::high;
 using boost::polygon::low;
@@ -102,7 +105,7 @@ void VoronoiBoost::boostVoronoi() {
 
     int id = 0, id2 = 0;
     // add line segments to diagram
-    msg = tr("Calc BOOST Voronoi");
+    msg = QObject::tr("Calc BOOST Voronoi");
 
     size_t max {};
     for (const Paths& paths : groupedPss)

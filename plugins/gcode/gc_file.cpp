@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -155,13 +155,13 @@ void File::endFile() {
 void File::addInfo() {
     const static auto side_ {GCObj::tr("Top|Bottom").split('|')};
     if (Settings::info()) {
-        lines_.emplace_back(GCObj::tr(";\t           Name: %1").arg(shortName()));
-        lines_.emplace_back(GCObj::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
-        lines_.emplace_back(GCObj::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
-        lines_.emplace_back(GCObj::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
-        lines_.emplace_back(GCObj::tr(";\tTool Pass Depth: %1").arg(gcp_.getTool().passDepth()));
-        lines_.emplace_back(GCObj::tr(";\t          Depth: %1").arg(gcp_.getDepth()));
-        lines_.emplace_back(GCObj::tr(";\t           Side: %1").arg(side_[side()]));
+        lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
+        lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
+        lines_.emplace_back(QObject::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
+        lines_.emplace_back(QObject::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
+        lines_.emplace_back(QObject::tr(";\tTool Pass Depth: %1").arg(gcp_.getTool().passDepth()));
+        lines_.emplace_back(QObject::tr(";\t          Depth: %1").arg(gcp_.getDepth()));
+        lines_.emplace_back(QObject::tr(";\t           Side: %1").arg(side_[side()]));
     }
 }
 

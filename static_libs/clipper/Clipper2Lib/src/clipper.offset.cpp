@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Author    :  Angus Johnson                                                   *
- * Date      :  15 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  http://www.angusj.com                                           *
  * Copyright :  Angus Johnson 2010-2022                                         *
  * Purpose   :  Path Offset (Inflate/Shrink)                                    *
@@ -363,7 +363,7 @@ void ClipperOffset::DoGroupOffset(Group& group, double delta) {
     // calculate a sensible number of steps (for 360 deg for the given offset
     if (group.join_type_ == JoinType::Round || group.end_type_ == EndType::Round) {
         steps_per_rad_ = PI / std::acos(1 - arcTol / abs_group_delta_) / (PI * 2);
-        steps_per_rad_ = App::settings().clpCircleSegments(delta*dScale); // X-Ray
+        steps_per_rad_ = App::settings().clpCircleSegments(delta * dScale); // X-Ray
     }
 
     bool is_closed_path = IsClosedPath(group.end_type_);

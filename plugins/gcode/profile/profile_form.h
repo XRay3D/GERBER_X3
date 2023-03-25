@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -28,18 +28,18 @@ public:
 
 private slots:
     void onAddBridgeClicked();
-    void onNameTextChanged(const QString &arg1);
+    void onNameTextChanged(const QString& arg1);
 
 private:
     void updateBridge();
     void updatePixmap();
     void rb_clicked();
 
-    double size_ = 0.0;
+    double toolDiam_ = 0.0;
     double lenght_ = 0.0;
 
     Ui::ProfileForm* ui;
-    GiBridge* brItem = nullptr;
+    //    GiBridge* brItem = nullptr;
 
     const QStringList names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps {
@@ -64,6 +64,8 @@ private:
         ThroughTheDistance,
         EvenlyDround,
     };
+
+    void updateBridgePos(QPointF pos);
 
     int trimming_ = 0;
 

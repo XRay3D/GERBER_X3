@@ -1,20 +1,17 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
+#* Date      :  March 25, 2023                                                  *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
+#* Copyright :  Damir Bakiev 2016-2023                                          *
 #* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
-set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
-
-#git submodule update --recursive --remote --force
-
+#set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+#set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
 project(GERBER_X3)
 

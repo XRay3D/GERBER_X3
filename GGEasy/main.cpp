@@ -4,9 +4,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -26,7 +26,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QTextCodec>
+#include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -182,11 +182,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
         const QString suffix("*.so");
-    #else
+#else
         const QString suffix("*.so");
-    #endif
+#endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else

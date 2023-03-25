@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,9 +13,6 @@
 #include "profile.h"
 #include "gi_bridge.h"
 #include "graphicsview.h"
-// #include "mainwindow.h"
-// #include "profile_form.h"
-#include <numbers>
 
 namespace GCode {
 ProfileCtr::ProfileCtr() {
@@ -169,45 +166,19 @@ void ProfileCtr::cornerTrimming() {
 
 void ProfileCtr::makeBridges() {
     // find Bridges
-    mvector<GiBridge*> bridgeItems;
-    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
-        if (item->type() == GiType::Bridge)
-            bridgeItems.push_back(static_cast<GiBridge*>(item));
-    }
+    auto brItems {App::graphicsView()->items<GiBridge>()};
+
     // create Bridges
-    if (bridgeItems.size()) {
+    if (brItems.size()) {
+
         for (auto& returnPs_ : returnPss) {
+            dbgPaths(returnPs_, __FUNCTION__, Qt::magenta);
+
             const Path& path = returnPs_.front();
-            std::vector<GiBridge*> biStack;
-            biStack.reserve(bridgeItems.size());
-            Point pt;
+            const auto pathHash = path.hash();
 
-            auto test = [](QLineF l, QPointF p) {
-                auto xo = p.x();
-                auto yo = p.y();
-                auto xa = l.p1().x();
-                auto ya = l.p1().y();
-                auto xb = l.p2().x();
-                auto yb = l.p2().y();
-
-                auto t = ((xo - xa) * (xb - xa) + (yo - ya) * (yb - ya))
-                    / (pow(xb - xa, 2) + pow(yb - ya, 2));
-                t = std::clamp(t, 0.0, 1.0);
-                return sqrt(pow(xa - xo + (xb - xa) * t, 2)
-                    + pow(ya - yo + (yb - ya) * t, 2));
-            };
-
-            for (GiBridge* bi : bridgeItems) {
-                for (int i {}; i < path.size(); ++i) {
-                    QLineF srcline {path[i], path[(i + 1) % path.size()]};
-
-                    qDebug() << "test" << test(srcline, bi->pos());
-                }
-                //                auto res = C2::PointInPolygon(Point(bi->pos()), path);
-                //                if (res == C2::PointInPolygonResult::IsOn)
-                //                    biStack.emplace_back(bi);
-            }
-            if (!biStack.empty()) {
+            //            if (ranges::find(brItems, pathHash, &GiBridge::pathHash) != brItems.end())
+            if (0) {
                 Paths paths;
                 // create frame
                 {
@@ -218,8 +189,12 @@ void ProfileCtr::makeBridges() {
                     Clipper clipper;
                     clipper.AddSubject(paths);
 
-                    for (const auto& bip : biStack)
-                        clipper.AddClip(bip->paths(toolDiameter * uScale));
+                    //                    for (const auto& bip : brItems | ranges::views::filter([pathHash](GiBridge* item) {
+                    //                             return item->pathHash == pathHash;
+                    //                         })) {
+                    //                        clipper.AddClip(bip->paths(toolDiameter * uScale));
+                    //                        dbgPaths({bip->paths(toolDiameter * uScale)}, __FUNCTION__, Qt::green);
+                    //                    }
 
                     clipper.Execute(ClipType::Intersection, FillRule::Positive, paths);
                 }
@@ -236,30 +211,29 @@ void ProfileCtr::makeBridges() {
                 mergeSegments(paths);
                 sortBE(paths);
 
-                std::erase_if(paths, [](auto& path) { return path.size() == 0; });
+                std::erase_if(paths, [](auto& path) { return path.empty(); });
 
-                auto check = [&paths, &path] {
-                    for (size_t i = 0, end = path.size() - 1; i < end; ++i) {
-                        auto srcPt(path[i]);
-                        for (const auto& rPath : paths) {
-                            for (size_t j = 0, rEnd = rPath.size() - 1; j < rEnd; ++j) {
-                                if (srcPt == rPath[j]) {
-                                    if (path[i + 1] == rPath[j + 1]) {
-                                        return false;
-                                    } else if (j && path[i + 1] == rPath[j - 1]) {
-                                        return true;
-                                    } else if (j && i && path[i - 1] == rPath[j - 1]) {
-                                        return false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return false; // ???
-                };
-
-                if (check())
-                    ReversePaths(paths);
+                //                auto check = [&paths, &path] {
+                //                    for (size_t i = 0, end = path.size() - 1; i < end; ++i) {
+                //                        auto srcPt(path[i]);
+                //                        for (const auto& rPath : paths) {
+                //                            for (size_t j = 0, rEnd = rPath.size() - 1; j < rEnd; ++j) {
+                //                                if (srcPt == rPath[j]) {
+                //                                    if (path[i + 1] == rPath[j + 1]) {
+                //                                        return false;
+                //                                    } else if (j && path[i + 1] == rPath[j - 1]) {
+                //                                        return true;
+                //                                    } else if (j && i && path[i - 1] == rPath[j - 1]) {
+                //                                        return false;
+                //                                    }
+                //                                }
+                //                            }
+                //                        }
+                //                    }
+                //                    return false; // ???
+                //                };
+                //                if (check())
+                //                    ReversePaths(paths);
 
                 std::swap(returnPs_, paths);
             }

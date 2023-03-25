@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -54,28 +54,26 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
 
     rb_clicked();
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
-    connect(ui->rbOn, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &ProfileForm::rb_clicked);
+    // clang-format off
+    connect(App::graphicsView(),  &GraphicsView::mouseMove,      this, &ProfileForm::updateBridgePos);
+    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &ProfileForm::updateBridge);
+    connect(leName,               &QLineEdit::textChanged,       this, &ProfileForm::onNameTextChanged);
+    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &ProfileForm::updateBridge);
+    connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &ProfileForm::onAddBridgeClicked);
+    connect(ui->rbClimb,          &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
+    connect(ui->rbConventional,   &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
+    connect(ui->rbInside,         &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
+    connect(ui->rbOn,             &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
+    connect(ui->rbOutside,        &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
+    connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
+    // clang-format on
 
-    connect(ui->dsbxBridgeLenght, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ProfileForm::updateBridge);
-    connect(dsbxDepth, &DepthForm::valueChanged, this, &ProfileForm::updateBridge);
-
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
-
-    connect(leName, &QLineEdit::textChanged, this, &ProfileForm::onNameTextChanged);
-
-    //
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
         if (side == GCode::On)
             checked ? trimming_ |= Trimming::Line : trimming_ &= ~Trimming::Line;
         else
             checked ? trimming_ |= Trimming::Corner : trimming_ &= ~Trimming::Corner;
     });
-
-    connect(ui->pbAddBridge, &QPushButton::clicked, this, &ProfileForm::onAddBridgeClicked);
 }
 
 ProfileForm::~ProfileForm() {
@@ -113,7 +111,7 @@ void ProfileForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* sItem : App::graphicsView()->scene()->selectedItems()) {
+    for (auto* sItem : App::graphicsView()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
         switch (sItem->type()) {
         case GiType::DataSolid:
@@ -203,81 +201,63 @@ void ProfileForm::showEvent(QShowEvent* event) {
 }
 
 void ProfileForm::onAddBridgeClicked() {
-    static auto solid = [](auto* item) { return item->type() == GiType::DataSolid; };
-
     const double value = ui->dsbxBridgeValue->value();
 
-    switch (ui->cbxBridgeAlignType->currentIndex()) {
-    case Manually: {
-        if (brItem) {
-            if (!brItem->ok())
-                delete brItem;
-        }
-        brItem = new GiBridge(lenght_, size_, side, brItem);
-        App::graphicsView()->scene()->addItem(brItem);
-        brItem->setVisible(true);
-        brItem->setOpacity(1.0);
-    } break;
-    case Horizontally: {
-        for (auto* item : App::graphicsView()->scene()->selectedItems() /* | std::views::filter(solid)*/) {
-            GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
+    auto addHorizontallyVertically = [this, value](BridgeAlign align) {
+        auto testAndAdd = [this](QLineF testLineV, QLineF srcline) {
+            QPointF intersects;
+            if (auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
+                qDebug() << "intersects1" << is << intersects;
+                auto brItem = App::graphicsView()->addItem(new GiBridge(lenght_, toolDiam_, side));
+                //                brItem->pathHash = pathHash;
+                brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
+                brItem->setPos(brItem->snapedPos(intersects));
+                brItem->setVisible(true);
+                brItem->setOpacity(1.0);
+                if (!brItem->ok())
+                    delete brItem;
+            }
+        };
 
-            if (gi->type() == GiType::DataSolid) {
-
-                auto bounds = Bounds(gi->paths());
-                // dbgPaths(gi->paths(), __FUNCTION__, Qt::magenta);
-
-                int step = bounds.Width() / (value + 1);
-                if (0) {
-                    Clipper clipper;
-                    for (int var : std::views::iota(1, lround(value) + 1)) {
-                        Path p {
-                            {bounds.left + step * var, bounds.bottom + uScale},
-                            {bounds.left + step * var,    bounds.top - uScale}
-                        };
-                        //                    dbgPaths({p}, __FUNCTION__, Qt::red);
-                        clipper.AddOpenSubject({p});
-                    }
-
-                    clipper.AddClip(gi->paths());
-                    Paths result;
-                    Paths _;
-                    clipper.Execute(CT::Intersection, FR::/*NonZero*/ EvenOdd, _, result);
-                }
-
-                for (int var : std::views::iota(1, lround(value) + 1)) {
-                    QLineF testLine {
-                        Point(bounds.left + step * var, bounds.bottom + uScale),
-                        Point(bounds.left + step * var, bounds.top - uScale)};
-
-                    for (auto&& path : gi->paths()) {
-                        for (int i {}; i < path.size(); ++i) {
-                            QLineF srcline {path[i], path[(i + 1) % path.size()]};
-                            QPointF intersects;
-                            if (auto is = testLine.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
-                                qDebug() << "intersects1" << is << intersects;
-                                brItem = new GiBridge(lenght_, size_, side, brItem);
-                                App::graphicsView()->scene()->addItem(brItem);
-                                brItem->setPos(intersects);
-                                // qDebug() << __FUNCTION__ << brItem->calculate(intersects) << intersects;
-                                brItem->setOk(true);
-                                if (!brItem->ok())
-                                    delete brItem;
-                                else {
-                                    brItem->setVisible(true);
-                                    brItem->setOpacity(1.0);
-                                }
-                            }
-                        }
+        for (GraphicsItem* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+            auto bounds = Bounds(gi->paths());
+            int step = bounds.Width() / (value + 1);
+            for (int var : std::views::iota(1, lround(value) + 1)) {
+                QLineF testLineH {
+                    Point(bounds.left + step * var, bounds.bottom + uScale),
+                    Point(bounds.left + step * var, bounds.top - uScale)};
+                QLineF testLineV {
+                    Point(bounds.left - uScale, bounds.top + step * var),
+                    Point(bounds.right + uScale, bounds.top + step * var)};
+                for (auto&& path : gi->paths()) {
+                    auto pathHash = path.hash();
+                    for (int i {}; i < path.size(); ++i) {
+                        QLineF srcline {path[i], path[(i + 1) % path.size()]};
+                        if (align & Horizontally)
+                            testAndAdd(testLineH, srcline);
+                        if (align & Vertically)
+                            testAndAdd(testLineV, srcline);
                     }
                 }
             }
         }
+    };
+
+    auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
+    switch (at) {
+    case Manually: {
+        auto brItem = new GiBridge(lenght_, toolDiam_, side);
+        App::graphicsView()->addItem(brItem);
+        brItem->setVisible(true);
+        brItem->setOpacity(1.0);
+        GiBridge::moveBrPtr = brItem;
     } break;
-    case Vertically: {
-    } break;
-    case HorizontallyVertically: {
-    } break;
+    case Horizontally:
+    case Vertically:
+    case HorizontallyVertically:
+        qDeleteAll(App::graphicsView()->items<GiBridge>());
+        addHorizontallyVertically(at);
+        break;
     case ThroughTheDistance: {
     } break;
     case EvenlyDround: {
@@ -289,11 +269,9 @@ void ProfileForm::onAddBridgeClicked() {
 
 void ProfileForm::updateBridge() {
     lenght_ = ui->dsbxBridgeLenght->value();
-    size_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
-        if (item->type() == GiType::Bridge)
-            static_cast<GiBridge*>(item)->update();
-    }
+    toolDiam_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    for (GiBridge* item : App::graphicsView()->items<GiBridge>())
+        item->update();
 }
 
 void ProfileForm::updatePixmap() {
@@ -325,6 +303,11 @@ void ProfileForm::rb_clicked() {
     updateButtonIconSize();
 
     updatePixmap();
+}
+
+void ProfileForm::updateBridgePos(QPointF pos) {
+    if (GiBridge::moveBrPtr)
+        GiBridge::moveBrPtr->setPos(pos);
 }
 
 void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
@@ -383,7 +366,7 @@ void ProfileForm::editFile(GCode::File* file) {
     //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
     //            //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
     //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
-    //            //                 App::graphicsView()->scene()->addItem(brItem);
+    //            //                 App::graphicsView()->addItem(brItem);
     //            //                brItem->setPos(pos);
     //            //                brItem->lastPos_ = pos;
     //            //            }

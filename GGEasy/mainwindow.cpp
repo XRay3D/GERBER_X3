@@ -6,7 +6,7 @@
  * Version : na *
  * Date : 11 November 2021 *
  * Website : na *
- * Copyright : Damir Bakiev 2016-2022 *
+ * Copyright : Damir Bakiev 2016-2023 *
  * License: *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt *
@@ -187,7 +187,8 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
         }
         if (0)
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
@@ -538,7 +539,7 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        auto selectedItems(App::graphicsView()->scene()->selectedItems());
+        auto selectedItems(App::graphicsView()->selectedItems());
         Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
             if (clipItem->type() >= GiType::ShCircle)
@@ -908,6 +909,8 @@ bool MainWindow::saveFile(const QString& fileName) {
 }
 
 void MainWindow::setCurrentFile(const QString& fileName) {
+    if (fileName.isEmpty())
+        setWindowTitle(tr("Untitled") + ".g2g[*]");
     project_->setName(fileName);
     project_->setModified(false);
     setWindowModified(false);
@@ -1067,7 +1070,8 @@ void MainWindow::updateTheme() {
 
         qApp->setPalette(palette);
     } else {
-
+        qApp->setStyle(QStyleFactory::create("Fusion"));
+        qApp->setPalette(QApplication::style()->standardPalette());
         //        QPalette palette;
 
         //        palette.setCurrentColorGroup(QPalette::Active);

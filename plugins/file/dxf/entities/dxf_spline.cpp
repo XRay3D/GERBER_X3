@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -99,7 +99,8 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     int n, d;
     d = poly.degreeOfTheSplineCurve; // Enter degree of curve:
     n = poly.ControlPoints.size();
-    QVector<double> uVec; //= poly.KnotValues;
+    QVector<double> uVec;
+    //  poly.KnotValues;
     for (int i = 0; i < n + d; i++) {
         uVec.push_back(((double)i) / (n + d - 1));
     }
@@ -259,19 +260,19 @@ void Spline::read(QDataStream& stream) {
 ////////////////////////////////////
 
 #ifndef M_PI_2
-// For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
-// when compiling with -std=c++11
-#define M_PI_2 (1.57079632679489661923)
+    // For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
+    // when compiling with -std=c++11
+    #define M_PI_2 (1.57079632679489661923)
 #endif
 
 #ifndef LOG_MIN
-//! Minimum value for logarithmic scales
-#define LOG_MIN 1.0e-100
+    //! Minimum value for logarithmic scales
+    #define LOG_MIN 1.0e-100
 #endif
 
 #ifndef LOG_MAX
-//! Maximum value for logarithmic scales
-#define LOG_MAX 1.0e100
+    //! Maximum value for logarithmic scales
+    #define LOG_MAX 1.0e100
 #endif
 
 // QWT_EXPORT double qwtGetMin(const double* array, int size);

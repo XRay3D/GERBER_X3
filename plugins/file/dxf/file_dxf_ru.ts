@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ru_RU">
+<TS version="2.1" language="ru_RU" sourcelanguage="en_US">
 <context>
     <name>Dxf::DxfObj</name>
     <message>
         <location filename="dxf_sourcedialog.cpp" line="96"/>
         <source>Next</source>
-        <translation type="unfinished"></translation>
+        <translation>Следующий</translation>
     </message>
     <message>
         <location filename="dxf_sourcedialog.cpp" line="109"/>
         <source>Prev</source>
-        <translation type="unfinished"></translation>
+        <translation>Предыдущий</translation>
     </message>
     <message>
         <location filename="dxf_node.cpp" line="43"/>
-        <location filename="dxf_node.cpp" line="282"/>
+        <location filename="dxf_node.cpp" line="285"/>
         <source>Colorize</source>
-        <translation type="unfinished"></translation>
+        <translation>Раскрасить</translation>
     </message>
     <message>
         <location filename="dxf_node.cpp" line="124"/>
         <source>Section HEADER</source>
-        <translation type="unfinished"></translation>
+        <translation>Раздел HEADER</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="275"/>
+        <location filename="dxf_node.cpp" line="278"/>
         <source>&amp;Hide other</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Скрыть другие</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="276"/>
+        <location filename="dxf_node.cpp" line="279"/>
         <source>&amp;Show source</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Показать источник</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="295"/>
+        <location filename="dxf_node.cpp" line="298"/>
         <source>&amp;Layers</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Слои</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="300"/>
+        <location filename="dxf_node.cpp" line="303"/>
         <source>Header</source>
-        <translation type="unfinished"></translation>
+        <translation>Заголовок</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="306"/>
+        <location filename="dxf_node.cpp" line="309"/>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Закрыть</translation>
     </message>
     <message>
-        <location filename="dxf_node.cpp" line="391"/>
+        <location filename="dxf_node.cpp" line="394"/>
         <source>Change color</source>
-        <translation type="unfinished"></translation>
+        <translation>Сменить цвет</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="40"/>
         <source>Normal</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормальный</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="40"/>
         <source>Displays paths with pen width and fill.</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображает контуры с шириной пера и заливкой.</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="41"/>
         <source>Paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Контуры</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="41"/>
         <source>Displays paths without pen width.</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображает контуры без ширины пера.</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="42"/>
         <source>Both</source>
-        <translation type="unfinished"></translation>
+        <translation>Оба</translation>
     </message>
     <message>
         <location filename="dxf_file.cpp" line="42"/>
         <source>Displays paths without and with pen width.</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображает контуры без пера и с шириной пера.</translation>
     </message>
     <message>
         <location filename="dxf_sourcedialog.h" line="54"/>
         <location filename="dxf_sourcedialog.h" line="78"/>
         <source>Data</source>
-        <translation type="unfinished"></translation>
+        <translation>Данные</translation>
     </message>
     <message>
         <location filename="dxf_sourcedialog.h" line="54"/>
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Код</translation>
     </message>
     <message>
         <location filename="dxf_sourcedialog.h" line="74"/>
         <source>Line</source>
-        <translation type="unfinished"></translation>
+        <translation>Строка в файле</translation>
     </message>
     <message>
         <location filename="dxf_sourcedialog.h" line="76"/>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
 </context>
 <context>
@@ -111,7 +111,7 @@
     <message>
         <location filename="dxf_plugin.cpp" line="216"/>
         <source>Dxf Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлы Dxf</translation>
     </message>
 </context>
 <context>
@@ -120,82 +120,85 @@
         <location filename="tables/dxf_layermodel.cpp" line="68"/>
         <location filename="tables/dxf_layermodel.cpp" line="80"/>
         <source>Empty layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Пустой слой</translation>
     </message>
     <message>
         <location filename="tables/dxf_layermodel.cpp" line="77"/>
         <location filename="tables/dxf_layermodel.cpp" line="167"/>
         <source>Solid</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормальный</translation>
     </message>
     <message>
         <location filename="tables/dxf_layermodel.cpp" line="77"/>
         <location filename="tables/dxf_layermodel.cpp" line="167"/>
         <source>Paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Контуры</translation>
     </message>
     <message>
         <location filename="tables/dxf_layermodel.cpp" line="130"/>
         <source>Visible
 &amp; color</source>
-        <translation type="unfinished"></translation>
+        <translation>Видимость
+и цвет</translation>
     </message>
     <message>
         <location filename="tables/dxf_layermodel.cpp" line="132"/>
         <source>Entity
 count</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во
+сущностей</translation>
     </message>
     <message>
         <location filename="tables/dxf_layermodel.cpp" line="134"/>
         <source>Visible
 type</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображаемый
+тип</translation>
     </message>
     <message>
         <location filename="section/dxf_entities.cpp" line="149"/>
         <source>Unknown Entity: %1, %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Неизвестная сущность: %1, %2</translation>
     </message>
     <message>
         <location filename="section/dxf_entities.cpp" line="151"/>
         <source>Not implemented: %1, %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Не реализовано: %1, %2</translation>
     </message>
     <message>
         <location filename="section/dxf_blocks.cpp" line="33"/>
         <source>blockName ERR!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка в имени блока!</translation>
     </message>
     <message>
         <location filename="entities/dxf_solid.cpp" line="111"/>
         <source>Unsupported type Solid: corners %1!</source>
-        <translation type="unfinished"></translation>
+        <translation>Неподдерживаемый тип Solid: углы %1!</translation>
     </message>
     <message>
         <location filename="entities/dxf_hatch.cpp" line="156"/>
         <source>Unimplemented edge type in HATCH: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Не реализованный тип кромки в штриховке: %1</translation>
     </message>
     <message>
         <location filename="entities/dxf_hatch.cpp" line="158"/>
         <source>Unknown edge type in HATCH: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Неизвестный тип кромки в штриховке: %1</translation>
     </message>
     <message>
         <location filename="entities/dxf_entity.cpp" line="289"/>
         <source>SectionParser is null!</source>
-        <translation type="unfinished"></translation>
+        <translation>SectionParser имеет значение null!</translation>
     </message>
     <message>
         <location filename="entities/dxf_entity.cpp" line="291"/>
         <source>File in SectionParser is null!</source>
-        <translation type="unfinished"></translation>
+        <translation>File в SectionParser имеет значение null!</translation>
     </message>
     <message>
         <location filename="entities/dxf_entity.cpp" line="293"/>
         <source>Layer &apos;%1&apos; not found in file!</source>
-        <translation type="unfinished"></translation>
+        <translation>Слой &quot;%1&quot; не найден в файле!</translation>
     </message>
 </context>
 <context>
@@ -203,27 +206,27 @@ type</source>
     <message>
         <location filename="dxf_settingstab.cpp" line="75"/>
         <source>Font</source>
-        <translation type="unfinished"></translation>
+        <translation>Шрифт</translation>
     </message>
     <message>
         <location filename="dxf_settingstab.cpp" line="77"/>
         <source>Bold:</source>
-        <translation type="unfinished"></translation>
+        <translation>Жирный:</translation>
     </message>
     <message>
         <location filename="dxf_settingstab.cpp" line="78"/>
         <source>Default Font:</source>
-        <translation type="unfinished"></translation>
+        <translation>Шрифт по умолчанию:</translation>
     </message>
     <message>
         <location filename="dxf_settingstab.cpp" line="79"/>
         <source>Italic:</source>
-        <translation type="unfinished"></translation>
+        <translation>Курсив:</translation>
     </message>
     <message>
         <location filename="dxf_settingstab.cpp" line="80"/>
         <source>Override declared fonts in DXF:</source>
-        <translation type="unfinished"></translation>
+        <translation>Переопределить объявленные в DXF шрифты:</translation>
     </message>
 </context>
 </TS>

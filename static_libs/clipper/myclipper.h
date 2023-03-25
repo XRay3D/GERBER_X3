@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -160,3 +160,21 @@ inline void SimplifyPolygons(const Paths& in_polys, Paths& out_polys, Clipper2Li
 inline void SimplifyPolygons(Paths& polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
     SimplifyPolygons(polys, polys, fillType);
 }
+
+struct LineABC {
+    // ax + by + c = 0
+    double a;
+    double b;
+    double c;
+    LineABC(const QLineF& l)
+        : a {l.p1().y() - l.p2().y()}
+        , b {l.p2().x() - l.p1().x()}
+        , c {l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
+    operator bool() const {
+        return !qFuzzyIsNull(a) | !qFuzzyIsNull(b);
+    }
+    double distance(const QPointF& p) const {
+        return abs(a * p.x() + b * p.y() + c) / sqrt(a * a + b * b);
+    }
+    double lenght() const { return sqrt(a * a + b * b); }
+};

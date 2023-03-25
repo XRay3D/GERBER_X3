@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,11 +24,12 @@ Path CirclePath(double diametr, const Point& center) {
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
     Path poligon(intSteps);
-    for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = Point(
-            static_cast<Point::Type>(cos(i * 2 * pi / intSteps) * radius) + center.x,
-            static_cast<Point::Type>(sin(i * 2 * pi / intSteps) * radius) + center.y);
-    }
+    for (int i {}; auto&& pt : poligon) {
+        pt = Point(static_cast<Point::Type>(cos(i * 2 * pi / intSteps) * radius),
+                 static_cast<Point::Type>(sin(i * 2 * pi / intSteps) * radius))
+            + center;
+        ++i;
+    };
     return poligon;
 }
 

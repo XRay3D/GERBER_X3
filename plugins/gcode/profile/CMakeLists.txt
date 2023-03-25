@@ -1,9 +1,9 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
+#* Date      :  March 25, 2023                                                  *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
+#* Copyright :  Damir Bakiev 2016-2023                                          *
 #* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,7 +18,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
@@ -52,7 +52,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 add_library(gc_profile STATIC
     profile.cpp
     profile.h
-    file.cpp
 )
 
 target_link_libraries(gc_profile PRIVATE
@@ -64,3 +63,17 @@ target_link_libraries(gc_profile PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+set(TS_FILES
+    ${PROJECT_NAME}_ru.ts
+)
+
+set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES} OPTIONS -silent OPTIONS -source-language en_US)
+    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES OPTIONS -silent)
+else()
+    qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+    qt5_add_translation(${QM_FILES} ${TS_FILES})
+endif()

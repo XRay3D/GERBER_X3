@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -42,7 +42,7 @@ void VoronoiCreator::create() {
 
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        gcp_.gcType = Voronoi;
+        
         file_ = new VoronoiFile(std::move(gcp_), {sortBE(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
@@ -50,7 +50,7 @@ void VoronoiCreator::create() {
         Paths copy {returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
-        gcp_.gcType = Voronoi;
+        
         { // создание пермычек.
             Clipper clipper;
             clipper.AddClip(workingRawPs);

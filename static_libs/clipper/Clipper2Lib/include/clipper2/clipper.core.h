@@ -38,8 +38,8 @@ enum class FillRule { EvenOdd,
     Positive,
     Negative };
 
-// Point ------------------------------------------------------------------------
 /*
+// Point ------------------------------------------------------------------------
   template <typename T>
   struct Point {
     T x;

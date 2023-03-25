@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,7 +11,12 @@
 #pragma once
 #include <QGraphicsItem>
 #include <QGraphicsView>
+#include <QScreen>
 #include <QSettings>
+
+#include <ranges>
+namespace ranges = std::ranges;
+namespace rviews = std::ranges::views;
 
 class Ruler;
 class QGridLayout;
@@ -60,6 +65,27 @@ public:
             killTimer(timerId);
         timerId = 0;
     }
+    /////////////////////////////////
+    template <typename T>
+    std::vector<T*> items() const {
+        auto items = scene()->items()
+            | rviews::filter([](auto* item) { return bool(dynamic_cast<T*>(item)); })
+            | rviews::transform([](auto* item) { return static_cast<T*>(item); });
+        return {items.begin(), items.end()};
+    }
+
+    auto selectedItems() const { return scene()->selectedItems(); }
+
+    template <typename T>
+    std::vector<T*> selectedItems() const {
+        auto items = scene()->selectedItems()
+            | rviews::filter([](auto* item) { return bool(dynamic_cast<T*>(item)); })
+            | rviews::transform([](auto* item) { return static_cast<T*>(item); });
+        return {items.begin(), items.end()};
+    }
+
+    template <typename T>
+    auto addItem(T* item) const { return scene()->addItem(item), item; }
 
 signals:
     void fileDroped(const QString&);

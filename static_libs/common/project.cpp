@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -60,7 +60,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
     if (App::shapePlugins().contains(type)) {
         shape.reset(App::shapePlugin(type)->createShape());
         stream >> *shape;
-        App::graphicsView()->scene()->addItem(shape.get());
+        App::graphicsView()->addItem(shape.get());
     }
     return stream;
 }
@@ -377,7 +377,7 @@ QString Project::name() { return name_; }
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
     if (isUntitled_)
-        name_ = QObject::tr("Untitled.g2g");
+        name_ = QObject::tr("Untitled") + ".g2g";
     else
         name_ = name;
 }

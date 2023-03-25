@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -32,7 +32,7 @@ Circle::Circle(QPointF center, QPointF pt)
 
     redraw();
 
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
 }
 
 void Circle::redraw() {

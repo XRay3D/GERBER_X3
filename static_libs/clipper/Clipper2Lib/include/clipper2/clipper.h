@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Author    :  Angus Johnson                                                   *
- * Date      :  29 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  http://www.angusj.com                                           *
  * Copyright :  Angus Johnson 2010-2022                                         *
  * Purpose   :  This module provides a simple interface to the Clipper Library  *

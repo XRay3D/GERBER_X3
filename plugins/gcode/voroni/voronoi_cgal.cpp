@@ -3,22 +3,22 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi_cgal.h"
 #if __has_include(<CGAL/Algebraic_structure_traits_.h>)
-#include <CGAL/Algebraic_structure_traits.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Segment_Delaunay_graph_2.h>
-#include <CGAL/Segment_Delaunay_graph_filtered_traits_2.h>
-#include <CGAL/Segment_Delaunay_graph_storage_traits_with_info_2.h>
-#include <CGAL/Segment_Delaunay_graph_traits_2.h>
-#include <ranges>
+    #include <CGAL/Algebraic_structure_traits.h>
+    #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+    #include <CGAL/Segment_Delaunay_graph_2.h>
+    #include <CGAL/Segment_Delaunay_graph_filtered_traits_2.h>
+    #include <CGAL/Segment_Delaunay_graph_storage_traits_with_info_2.h>
+    #include <CGAL/Segment_Delaunay_graph_traits_2.h>
+    #include <ranges>
 
 struct convert_info {
     using Info = int;
@@ -48,8 +48,8 @@ inline auto toPoint(const CGAL::Point_2<K>& point) { return Point {static_cast<P
 
 ///////////////////////////////////
 
-#include "mvector.h"
-#include <cstdio>
+    #include "mvector.h"
+    #include <cstdio>
 
 struct Segment {
     Point p0;
@@ -80,7 +80,7 @@ void VoronoiCgal::cgalVoronoi() {
     SDG2 sdg;
     int id = 0;
     // add line segments to diagram
-    msg = tr("Calc CGAL Voronoi");
+    msg = QObject::tr("Calc CGAL Voronoi");
 
     size_t max {};
     for (const Paths& paths : groupedPss_)

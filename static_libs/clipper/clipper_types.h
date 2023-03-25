@@ -21,11 +21,12 @@
 #include <QDebug>
 #include <QPolygonF>
 #include <mvector.h>
+#include <ranges>
 
 #include "app.h"
 #include "settings.h"
 
-static constexpr auto uScale {100000};
+static constexpr auto uScale {100'000};
 static constexpr auto dScale {1. / uScale};
 extern void ifCancelThenThrow();
 
@@ -303,6 +304,12 @@ struct Path : mvector<Point<T>> {
         for (auto&& point : *this)
             point += pt;
         return *this;
+    }
+
+    T hash() const {
+        return std::accumulate(MV::cbegin(), MV::cend(), T {}, [](T acc, Point<T> p) {
+            return acc ^= p.x, acc ^= p.y;
+        });
     }
 };
 
