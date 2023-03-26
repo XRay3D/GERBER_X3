@@ -42,7 +42,7 @@ void VoronoiJc::jcVoronoi() {
             }
         }
     };
-    // PROG //PROG .3setProgMaxAndVal(7, 1); // progress
+
     for (const Paths& paths : groupedPss) {
         for (const Path& path : paths) {
             Point tmp(path.front());
@@ -55,7 +55,7 @@ void VoronoiJc::jcVoronoi() {
         }
         ++id;
     }
-    // PROG //PROG .3setProgMaxAndVal(7, 2); // progress
+
     for (const Path& path : workingRawPs) {
         Point tmp(path.front());
         for (const Point& point : path) {
@@ -104,7 +104,6 @@ void VoronoiJc::jcVoronoi() {
 
     for (const auto& [key, edge] : edges) {
         returnPs.append(toPath(edge));
-        // PROG //PROG .3setProgMaxAndVal(edges.size(), returnPs_.size()); // progress
     }
     mergePaths(returnPs, 0.005 * uScale);
     returnPs.append(toPath(frame));

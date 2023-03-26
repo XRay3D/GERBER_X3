@@ -42,21 +42,21 @@ void VoronoiCreator::create() {
 
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        
-        file_ = new VoronoiFile(std::move(gcp_), {sortBE(returnPs)}, {});
+
+        file_ = new VoronoiFile(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
         Paths copy {returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
-        
+
         { // создание пермычек.
             Clipper clipper;
             clipper.AddClip(workingRawPs);
             clipper.AddOpenSubject(copy);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
-            sortBE(copy);
+            sortBeginEnd(copy);
             for (auto&& p : copy)
                 returnPss.push_back({p});
         }

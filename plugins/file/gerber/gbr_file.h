@@ -51,9 +51,9 @@ public:
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(FileInterface* file) override;
-    FileTree::Node* node() override;
+    FileTree_::Node* node() override;
 
-    FileType type() const override { return FileType::Gerber; }
+    FileType type() const override { return FileType::Gerber_; }
 
     void setColor(const QColor& color) override;
 
@@ -78,12 +78,12 @@ private:
     std::forward_list<Path> checkList;
     static inline File* crutch;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
 public:
     void createGi() override;
     const QList<Comp::Component>& components() const;

@@ -260,7 +260,7 @@ void File::initFrom(FileInterface* file) {
     setItemType(file->itemsType());
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
 }
 

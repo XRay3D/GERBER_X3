@@ -63,8 +63,6 @@ void PolyLine::parse(CodeData& code) {
         code = sp->nextCode();
         Entity::parse(code);
     } while (code.code() != 0);
-    //    qDebug() << data.size();
-    //    qDebug() << data;
 }
 
 Entity::Type PolyLine::type() const { return Type::POLYLINE; }

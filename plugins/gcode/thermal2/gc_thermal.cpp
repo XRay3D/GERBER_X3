@@ -89,7 +89,7 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         clipper.AddPaths(m_returnPs, ptSubject, false);
         clipper.AddPaths(framePaths, ptClip, true);
         clipper.Execute(ctDifference, m_returnPs, pftPositive);
-        sortBE(m_returnPs);
+        sortBeginEnd(m_returnPs);
     }
 
     if (m_returnPs.size())

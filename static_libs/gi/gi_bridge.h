@@ -23,7 +23,7 @@ class GiBridge final : public GraphicsItem {
     friend class ProfileForm;
 
 public:
-    explicit GiBridge(double& lenght, double& toolDiam, GCode::SideOfMilling& side);
+    explicit GiBridge();
     ~GiBridge() override { moveBrPtr = nullptr; }
 
     // QGraphicsItem interface
@@ -36,14 +36,13 @@ public:
     void changeColor() override { }
 
     bool ok() const;
-    double lenght() const;
-    double angle() const;
-
     void update();
+    bool test(const Path& path);
 
-    QLineF testLine() const;
-
-    static inline GiBridge* moveBrPtr; // FIXME приватизировать в будущем??
+    static inline GiBridge* moveBrPtr;          // NOTE приватизировать в будущем??
+    static inline double lenght {};             //
+    static inline double toolDiam {};           //
+    static inline GCode::SideOfMilling side {}; //
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -51,17 +50,16 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
+    QLineF testLine() const;
+    Point intersectPoint;
+
     double angle_ {};
-    double& lenght_;
-    double& toolDiam_;
 
     QPainterPath pPath;
     QPainterPath cutoff;
 
     QPointF snapedPos(const QPointF& pos);
     QPointF lastPos;
-
-    GCode::SideOfMilling& side_;
 
     bool ok_ = false;
 };

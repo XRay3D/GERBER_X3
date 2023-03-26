@@ -111,9 +111,8 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 }
 
 GraphicObject Text::toGo() const {
-    //    qDebug() << data.size();
+
     //    for (auto& code : data)
-    //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
     double ascent = 0.0;
     double scaleX = 0.0;

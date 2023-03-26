@@ -119,7 +119,7 @@ void File::initFrom(FileInterface* file) {
     static_cast<Node*>(node_)->file = this;
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
 }
 
@@ -132,7 +132,7 @@ Layer* File::layer(const QString& name) {
     return nullptr;
 }
 
-FileType File::type() const { return FileType::Dxf; }
+FileType File::type() const { return FileType::Dxf_; }
 
 void File::createGi() {
     Timer t {__FUNCTION__};

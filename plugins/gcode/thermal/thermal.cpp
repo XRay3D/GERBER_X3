@@ -89,7 +89,7 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
         clipper.AddOpenSubject(returnPs);
         clipper.AddClip(framePaths);
         clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
-        sortBE(returnPs);
+        sortBeginEnd(returnPs);
     }
 
     if (returnPs.size())
@@ -98,7 +98,7 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        
+
         sortB(returnPss);
         file_ = new ::GCode::ThermalFile(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());

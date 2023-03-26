@@ -34,15 +34,17 @@ namespace Gerber {
 QTimer Node::decorationTimer_;
 
 Node::Node(File* file)
-    : FileTree::Node(file->id(), FileTree::File)
+    : FileTree_::Node(FileTree_::File)
     , file(file) {
     if (!file->userColor()) {
         connect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
         decorationTimer_.start(500);
     }
 }
-
-Node::~Node() { decorationTimer_.start(100); }
+Node::~Node() {
+    App::project()->deleteFile(file->id());
+    decorationTimer_.start(100);
+}
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
@@ -50,11 +52,11 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        switch (FileTree::Column(index.column())) {
-        case FileTree::Column::Side:
+        switch (FileTree_::Column(index.column())) {
+        case FileTree_::Column::Side:
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
-        case FileTree::Column::ItemsType:
+        case FileTree_::Column::ItemsType:
             qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
             emit App::fileModel()->dataChanged(this->index(), this->index(), {Qt::DecorationRole});
@@ -63,7 +65,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             break;
         }
         break;
-    case FileTree::Select:
+    case FileTree_::Select:
         for (auto ig : file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
@@ -73,12 +75,12 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         return itemFlag | Qt::ItemIsEditable;
-    case FileTree::Column::ItemsType:
+    case FileTree_::Column::ItemsType:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -86,8 +88,8 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return file->shortName();
@@ -106,24 +108,24 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             default:
                 return decoration(file->color());
             }
-        case FileTree::Id:
-            return id_.get();
+        case FileTree_::Id:
+            return id();
         default:
             return QVariant();
         }
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return sideStrList[file->side()];
         case Qt::EditRole:
             return static_cast<bool>(file->side());
-        case FileTree::Id:
-            return id_.get();
+        case FileTree_::Id:
+            return id();
         default:
             return QVariant();
         }
-    case FileTree::Column::ItemsType:
+    case FileTree_::Column::ItemsType:
         switch (role) {
         case Qt::DisplayRole:
             return file->displayedTypes().at(file->itemsType()).shortActName();
@@ -131,8 +133,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return file->displayedTypes().at(file->itemsType()).actToolTip;
         case Qt::EditRole:
             return file->displayedTypes().at(file->itemsType()).id;
-        case FileTree::Id:
-            return id_.get();
+        case FileTree_::Id:
+            return id();
         default:
             return QVariant();
         }
@@ -141,6 +143,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     }
     return QVariant();
 }
+
+int Node::id() const { return file->id(); }
 
 QTimer* Node::decorationTimer() { return &decorationTimer_; }
 
@@ -153,8 +157,8 @@ void Node::repaint() const {
     emit App::fileModel()->dataChanged(index(0), index(0), {Qt::DecorationRole});
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
-    menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
+void Node::menu(QMenu& menu, FileTree_::View* tv) const {
+    menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree_::View::hideOther);
     menu.setToolTipDuration(0);
     menu.setToolTipsVisible(true);
     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
@@ -182,7 +186,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     if (!file->itemGroup(File::Components)->empty()) {
         menu.addAction(QIcon(), GbrObj::tr("Show &Components"), [this, tv] {
             Comp::Dialog dialog(tv);
-            dialog.setFile(id_);
+            dialog.setFile(id());
             dialog.exec();
         });
     }
@@ -199,7 +203,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         }
     });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("document-close"), GbrObj::tr("&Close"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme("document-close"), GbrObj::tr("&Close"), tv, &FileTree_::View::closeFile);
 }
 
 } // namespace Gerber

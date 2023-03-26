@@ -16,7 +16,7 @@ namespace Shapes {
 
 class Shape;
 
-class Node : public FileTree::Node {
+class Node : public FileTree_::Node {
     friend class Shape;
     Shape* shape;
 
@@ -28,7 +28,8 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) const override;
+    int id() const override;
 };
 
 } // namespace Shapes

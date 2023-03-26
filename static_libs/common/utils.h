@@ -88,7 +88,7 @@ struct CtreCapTo {
     operator int() const { return toInt(); }
     //    template <typename Ty>
     //    operator Ty() const {
-    //        qDebug() << __FUNCSIG__;
+
     //        if constexpr (std::is_enuv_<Ty>)
     //            return static_cast<Ty>(toInt());
     //        if constexpr (std::is_integral_v<Ty>)

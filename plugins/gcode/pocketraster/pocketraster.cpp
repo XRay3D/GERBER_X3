@@ -25,10 +25,10 @@ RasterCreator::RasterCreator() {
 }
 
 void RasterCreator::create() {
-//    if (gcp_.params[GCodeParams::Fast].toBool())
-//        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
-//    else
-//        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //    if (gcp_.params[GCodeParams::Fast].toBool())
+    //        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //    else
+    //        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
@@ -302,8 +302,6 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         }
     }
 
-    // PROG //PROG .3setProgMaxAndVal(0, 0);
-
     { //  calculate
         Clipper c;
         c.AddOpenSubject({zPath});
@@ -408,7 +406,7 @@ void RasterCreator::addAcc(Paths& src, const Point::Type accDistance) {
         Paths paths;
 
         for (size_t i = 0; i < src.size(); ++i) {
-            // PROG //PROG .3setProgMaxAndVal(src.size(), i);
+
             if (yLast != src[i].front().y) {
                 adder(paths);
                 reverse = !reverse;

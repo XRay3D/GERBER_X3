@@ -61,7 +61,7 @@ void sView::setFile(int fileId) {
 }
 
 void sView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-    // qDebug() << selected.value(0) << deselected.value(0);
+
     QTreeView::selectionChanged(selected, deselected);
 }
 

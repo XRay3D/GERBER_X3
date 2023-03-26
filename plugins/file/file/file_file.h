@@ -29,7 +29,7 @@ public:
 public:
     void createGi() override;
     void initFrom(FileInterface* file) override;
-    FileTree::Node* node() override;
+    FileTree_::Node* node() override;
 
 protected:
     void write(QDataStream& stream) const override;

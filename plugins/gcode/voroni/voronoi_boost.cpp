@@ -86,7 +86,6 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
-    //    qDebug() << "discretize" << sampled_edge.size();
     Path path;
     path.reserve(sampled_edge.size());
     for (const auto& p : sampled_edge)

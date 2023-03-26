@@ -101,6 +101,8 @@ void PocketCtr::createStdFull(const Tool& tool, const double depth) {
     else // Inner:
         groupedPaths(Grouping::Copper);
 
+    dbgPaths(groupedPss, "groupedPss", Qt::red);
+
     setCurrent(0);
 
     for (Paths paths : groupedPss) {

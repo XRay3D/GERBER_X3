@@ -211,7 +211,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::Dxf); }
+int Plugin::type() const { return int(FileType::Dxf_); }
 
 QString Plugin::folderName() const { return tr("Dxf Files"); }
 
@@ -240,13 +240,13 @@ void Plugin::updateFileModel(FileInterface* file) {
     }
     Dxf::Layers layers;
     for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
-        //        qDebug() << name << layer;
+
         if (!layer->isEmpty())
             layers[name] = layer;
     }
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
-        //        qDebug() << name << layer;
+
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();

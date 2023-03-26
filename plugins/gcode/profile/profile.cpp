@@ -11,14 +11,18 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "profile.h"
+#include "app.h"
 #include "gi_bridge.h"
 #include "graphicsview.h"
+
+#include <execution>
 
 namespace GCode {
 ProfileCtr::ProfileCtr() {
 }
 
 void ProfileCtr::create() {
+    // WARNING App::fileTreeView()->closeFiles();
     createProfile(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
 }
 
@@ -59,15 +63,15 @@ void ProfileCtr::createProfile(const Tool& tool, const double depth) {
         if (gcp_.side() == On && workingRawPs.size()) {
             returnPss.reserve(returnPss.size() + workingRawPs.size());
             mergePaths(workingRawPs);
-            sortBE(workingRawPs);
+            sortBeginEnd(workingRawPs);
             for (auto&& path : workingRawPs)
                 returnPss.push_back({std::move(path)});
         }
 
-        makeBridges();
-
         if (gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
             cornerTrimming();
+
+        makeBridges();
 
         if (returnPss.empty())
             break;
@@ -104,11 +108,11 @@ void ProfileCtr::trimmingOpenPaths(Paths& paths) {
                 ClipperOffset offset;
                 offset.AddPath(p, JoinType::Miter, EndType::Butt);
                 ps = offset.Execute(dOffset + 100);
-                // dbgPaths(ps, {}, "offset+");
+
                 offset.Clear();
                 offset.AddPath(ps.front(), JoinType::Miter, EndType::Polygon);
                 ps = offset.Execute(-dOffset);
-                // dbgPaths(ps, {}, "offset-");
+
                 if (ps.empty()) {
                     paths.remove(i--);
                     continue;
@@ -119,7 +123,7 @@ void ProfileCtr::trimmingOpenPaths(Paths& paths) {
                 clipper.AddOpenSubject({p});
                 clipper.AddClip(ps);
                 clipper.Execute(ClipType::Intersection, FillRule::Positive, ps); // FIXME open paths ???
-                // dbgPaths(ps, {}, "clip-");
+
                 p = ps.front();
             }
         }
@@ -165,80 +169,49 @@ void ProfileCtr::cornerTrimming() {
 }
 
 void ProfileCtr::makeBridges() {
-    // find Bridges
-    auto brItems {App::graphicsView()->items<GiBridge>()};
+    auto bridgeItems {App::graphicsView()->items<GiBridge>(GiType::Bridge)};
+    if (bridgeItems.empty())
+        return;
 
-    // create Bridges
-    if (brItems.size()) {
+    std::for_each(std::execution::par_unseq, returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
+        // find Bridges
+        auto biStack = bridgeItems | rviews::filter([&rPaths](GiBridge* bi) { return bi->test(rPaths.front()); });
+        if (ranges::empty(biStack))
+            return;
+        auto isPositive1 = C2::IsPositive(rPaths.front());
 
-        for (auto& returnPs_ : returnPss) {
-            dbgPaths(returnPs_, __FUNCTION__, Qt::magenta);
+        // create frame
+        Paths frame = C2::InflatePaths(rPaths, toolDiameter * uScale * 0.1, JT::Miter, ET::Butt, uScale);
+        Paths clip;
+        for (GiBridge* bip : biStack)
+            clip.append(bip->paths());
 
-            const Path& path = returnPs_.front();
-            const auto pathHash = path.hash();
+        frame = C2::Intersect(frame, clip, FR::Positive);
 
-            //            if (ranges::find(brItems, pathHash, &GiBridge::pathHash) != brItems.end())
-            if (0) {
-                Paths paths;
-                // create frame
-                {
-                    ClipperOffset offset;
-                    offset.AddPath(path, JoinType::Miter, EndType::Round);
-                    paths = offset.Execute(+toolDiameter * uScale * 0.1);
+        // cut toolPath
+        Clipper clipper;
+        clipper.AddOpenSubject(rPaths);
+        clipper.AddClip(frame);
+        PolyTree polytree;
+        clipper.Execute(CT::Difference, FR::Positive, frame, rPaths);
 
-                    Clipper clipper;
-                    clipper.AddSubject(paths);
+        if (rPaths.empty())
+            return;
 
-                    //                    for (const auto& bip : brItems | ranges::views::filter([pathHash](GiBridge* item) {
-                    //                             return item->pathHash == pathHash;
-                    //                         })) {
-                    //                        clipper.AddClip(bip->paths(toolDiameter * uScale));
-                    //                        dbgPaths({bip->paths(toolDiameter * uScale)}, __FUNCTION__, Qt::green);
-                    //                    }
+        mergeSegments(rPaths);
+        sortBeginEnd(rPaths);
 
-                    clipper.Execute(ClipType::Intersection, FillRule::Positive, paths);
-                }
-                // cut toolPath
-                {
-                    Clipper clipper;
-                    clipper.AddOpenSubject({path});
-                    clipper.AddClip(paths);
-                    //                    PolyTree polytree;
-                    clipper.Execute(ClipType::Difference, FillRule::Positive, /*polytree*/ paths, paths);
-                    //                    polyTreeToPaths(polytree, paths);
-                }
-                // merge result toolPaths
-                mergeSegments(paths);
-                sortBE(paths);
+        auto IsPositive = [](Paths paths) {
+            for (auto&& path : paths.midRef(1))
+                paths.front().append(path);
+            return C2::IsPositive(paths.front());
+        };
 
-                std::erase_if(paths, [](auto& path) { return path.empty(); });
+        if (isPositive1 ^ IsPositive(rPaths)) // Вернуть исходное направление пути
+            ReversePaths(rPaths), ranges::reverse(rPaths);
+    });
 
-                //                auto check = [&paths, &path] {
-                //                    for (size_t i = 0, end = path.size() - 1; i < end; ++i) {
-                //                        auto srcPt(path[i]);
-                //                        for (const auto& rPath : paths) {
-                //                            for (size_t j = 0, rEnd = rPath.size() - 1; j < rEnd; ++j) {
-                //                                if (srcPt == rPath[j]) {
-                //                                    if (path[i + 1] == rPath[j + 1]) {
-                //                                        return false;
-                //                                    } else if (j && path[i + 1] == rPath[j - 1]) {
-                //                                        return true;
-                //                                    } else if (j && i && path[i - 1] == rPath[j - 1]) {
-                //                                        return false;
-                //                                    }
-                //                                }
-                //                            }
-                //                        }
-                //                    }
-                //                    return false; // ???
-                //                };
-                //                if (check())
-                //                    ReversePaths(paths);
-
-                std::swap(returnPs_, paths);
-            }
-        }
-    }
+    std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
 }
 
 void ProfileCtr::reorder() {

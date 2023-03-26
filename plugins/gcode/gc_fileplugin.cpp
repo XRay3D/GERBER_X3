@@ -35,7 +35,7 @@ Plugin::Plugin(QObject* parent)
 
 bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
 
-int Plugin::type() const { return int(FileType::GCode); }
+int Plugin::type() const { return int(FileType::GCode_); }
 
 QString Plugin::folderName() const { return tr("Tool Paths"); }
 
@@ -43,13 +43,13 @@ FileInterface* Plugin::createFile() { return nullptr /*new File()*/; }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 
-void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
+void Plugin::createMainMenu(QMenu& menu, FileTree_::View* tv) {
     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
         if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
     });
     menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
-        tv, &FileTree::View::saveSelectedGCodeFiles);
+        tv, &FileTree_::View::saveSelectedGCodeFiles);
 }
 
 SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {

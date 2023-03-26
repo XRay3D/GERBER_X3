@@ -73,8 +73,10 @@ struct mvector : std::vector<T> {
         return v;
     }
 
-    std::span<T> midRef(size_t idx) const {
-        return {V::cbegin() + idx, V::cend()};
+    auto midRef(size_t idx) const {
+        if (idx >= V::size())
+            return std::span {V::cend(), V::cend()};
+        return std::span {V::cbegin() + idx, V::cend()};
     }
 
     //    mvector mid(size_t idx, size_t len = 0)

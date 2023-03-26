@@ -56,9 +56,9 @@ ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
 
     // clang-format off
     connect(App::graphicsView(),  &GraphicsView::mouseMove,      this, &ProfileForm::updateBridgePos);
-    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &ProfileForm::updateBridge);
+    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &ProfileForm::updateBridges);
     connect(leName,               &QLineEdit::textChanged,       this, &ProfileForm::onNameTextChanged);
-    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &ProfileForm::updateBridge);
+    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &ProfileForm::updateBridges);
     connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &ProfileForm::onAddBridgeClicked);
     connect(ui->rbClimb,          &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
     connect(ui->rbConventional,   &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
@@ -111,34 +111,41 @@ void ProfileForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* sItem : App::graphicsView()->selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(sItem);
-        switch (sItem->type()) {
+    for (auto* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+        switch (gi->type()) {
         case GiType::DataSolid:
-        case GiType::DataPath:
-            if (!file) {
-                file = gi->file();
-                boardSide = file->side();
-            } else if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
-            if (sItem->type() == GiType::DataSolid)
-                wPaths.append(gi->paths());
-            else
-                wRawPaths.append(gi->paths());
+            wPaths.append(gi->paths());
             break;
+        case GiType::DataPath: {
+            auto paths = gi->paths();
+            if (paths.front() == paths.back())
+                wPaths.append(paths);
+            else
+                wRawPaths.append(paths);
+        } break;
+            //            if (!file) {
+            //                file = gi->file();
+            //                boardSide = file->side();
+            //            } else if (file != gi->file()) {
+            //                if (skip) {
+            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+            //                        return;
+            //                }
+            //            }
+            //            if (gi->type() == GiType::DataSolid)
+            //                wPaths.append(gi->paths());
+            //            else
+            //                wRawPaths.append(gi->paths());
+            //            break;
         case GiType::ShCircle:
         case GiType::ShRectangle:
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
         case GiType::ShText:
-            wRawPaths.append(gi->paths());
-            break;
         case GiType::Drill:
             wPaths.append(gi->paths());
+            break;
+        case GiType::ShPolyLine:
+        case GiType::ShCirArc:
+            wRawPaths.append(gi->paths());
             break;
         default:
             break;
@@ -179,15 +186,15 @@ void ProfileForm::createFile() {
     }
 
     gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(wPaths);
-    gcCreator->addRawPaths(wRawPaths);
+    gcCreator->addPaths(std::move(wPaths));
+    gcCreator->addRawPaths(std::move(wRawPaths));
     fileCount = 1;
     emit createToolpath();
 }
 
 void ProfileForm::updateName() {
     leName->setText(names[side]);
-    updateBridge();
+    updateBridges();
 }
 
 void ProfileForm::resizeEvent(QResizeEvent* event) {
@@ -208,7 +215,7 @@ void ProfileForm::onAddBridgeClicked() {
             QPointF intersects;
             if (auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << "intersects1" << is << intersects;
-                auto brItem = App::graphicsView()->addItem(new GiBridge(lenght_, toolDiam_, side));
+                auto brItem = App::graphicsView()->addItem<GiBridge>();
                 //                brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(intersects));
@@ -246,7 +253,9 @@ void ProfileForm::onAddBridgeClicked() {
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
     switch (at) {
     case Manually: {
-        auto brItem = new GiBridge(lenght_, toolDiam_, side);
+        //        GiBridge::lenght = ui->dsbxBridgeLenght->value();
+        //        GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+        auto brItem = new GiBridge;
         App::graphicsView()->addItem(brItem);
         brItem->setVisible(true);
         brItem->setOpacity(1.0);
@@ -267,9 +276,10 @@ void ProfileForm::onAddBridgeClicked() {
     }
 }
 
-void ProfileForm::updateBridge() {
-    lenght_ = ui->dsbxBridgeLenght->value();
-    toolDiam_ = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+void ProfileForm::updateBridges() {
+    GiBridge::lenght = ui->dsbxBridgeLenght->value();
+    GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    GiBridge::side = side;
     for (GiBridge* item : App::graphicsView()->items<GiBridge>())
         item->update();
 }

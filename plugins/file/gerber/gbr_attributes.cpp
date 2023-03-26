@@ -145,7 +145,6 @@ void File::parse(const QStringList& list) {
         break;
     default:;
         custom[list.first()] = list.mid(1);
-        // qDebug() << "custom" << custom;
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +165,7 @@ Aperture::Function Aperture::toFunction(const QString& key) {
 void Aperture::parse(const QStringList& list) {
     switch (toStdAttr(list.first())) {
     case StdAttr::AperFunction:
-        // qDebug() << list;
+
         if (function_)
             function_.reset();
         switch (const auto function = toFunction(list[1]); function) {

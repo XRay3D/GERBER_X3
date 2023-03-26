@@ -12,11 +12,11 @@
  ********************************************************************************/
 #include <project.h>
 
+#include "file_plugin.h"
 #include "fileifce.h"
 #include "ft_model.h"
 #include "gc_plugin.h"
 #include "graphicsview.h"
-
 #include "shapepluginin.h"
 
 #include <QElapsedTimer>
@@ -35,11 +35,11 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<FileInterface
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file) {
     int type;
     stream >> type;
-    if (App::filePlugins().contains(type)) {
-        if (FileType(type) >= FileType::GCode && FileType(type) < FileType::Shapes)
+    if (App::filePlugins().contains(FileType(type))) {
+        if (FileType(type) >= FileType::GCode_ && FileType(type) < FileType::Shapes_)
             file.reset(App::gCodePlugin(type)->createFile());
         else
-            file.reset(App::filePlugin(type)->createFile());
+            file.reset(App::filePlugin(FileType(type))->createFile());
 
         stream >> *file;
         file->addToScene();
@@ -265,7 +265,7 @@ QString Project::fileNames() {
     QString fileNames;
     for (const auto& [id, sp] : files_) {
         FileInterface* item = sp.get();
-        if (sp && (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon)))
+        if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
             fileNames.append(item->name()).push_back('|');
     }
     return fileNames;
@@ -277,7 +277,7 @@ int Project::contains(const QString& name) {
         return -1;
     for (const auto& [id, sp] : files_) {
         FileInterface* item = sp.get();
-        if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
+        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
@@ -288,14 +288,14 @@ bool Project::reload(int id, FileInterface* file) {
     if (files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
-        App::filePlugin(int(file->type()))->updateFileModel(file);
+        App::filePlugin(file->type())->updateFileModel(file);
         setChanged();
         return true;
     }
     return false;
 }
 
-mvector<FileInterface*> Project::files(FileType type) {
+mvector<FileInterface*> Project::files(int type) {
     QMutexLocker locker(&mutex_);
     mvector<FileInterface*> rfiles;
     rfiles.reserve(files_.size());
@@ -307,7 +307,7 @@ mvector<FileInterface*> Project::files(FileType type) {
     return rfiles;
 }
 
-mvector<FileInterface*> Project::files(const mvector<FileType> types) {
+mvector<FileInterface*> Project::files(const mvector<int> types) {
     QMutexLocker locker(&mutex_);
     mvector<FileInterface*> rfiles;
     rfiles.reserve(files_.size());
@@ -345,7 +345,6 @@ int Project::addFile(FileInterface* file) {
         App::fileModel()->addFile(file);
         setChanged();
         watcher.addPath(file->name());
-        //        qDebug() << "watcher" << watcher.files();
     }
     return file->id();
 }

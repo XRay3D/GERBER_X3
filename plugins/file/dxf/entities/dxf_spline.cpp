@@ -260,19 +260,19 @@ void Spline::read(QDataStream& stream) {
 ////////////////////////////////////
 
 #ifndef M_PI_2
-    // For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
-    // when compiling with -std=c++11
-    #define M_PI_2 (1.57079632679489661923)
+// For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
+// when compiling with -std=c++11
+#define M_PI_2 (1.57079632679489661923)
 #endif
 
 #ifndef LOG_MIN
-    //! Minimum value for logarithmic scales
-    #define LOG_MIN 1.0e-100
+//! Minimum value for logarithmic scales
+#define LOG_MIN 1.0e-100
 #endif
 
 #ifndef LOG_MAX
-    //! Maximum value for logarithmic scales
-    #define LOG_MAX 1.0e100
+//! Maximum value for logarithmic scales
+#define LOG_MAX 1.0e100
 #endif
 
 // QWT_EXPORT double qwtGetMin(const double* array, int size);

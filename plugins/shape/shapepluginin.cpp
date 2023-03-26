@@ -23,7 +23,7 @@ void Plugin::finalizeShape() {
 
 Shapes::Plugin::Plugin() { App app; }
 
-void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
+void Plugin::createMainMenu(QMenu& menu, FileTree_::View* tv) {
     menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete All Shapes"), [tv] {
         if (QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();

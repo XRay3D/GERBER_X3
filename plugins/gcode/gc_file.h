@@ -25,7 +25,7 @@ class File : public FileInterface {
     //    friend class ::Project;
 
 public:
-    File(GCodeParams&& gcp, Paths&& pocketPaths, Pathss&& toolPathss);
+    File(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths = {});
     File();
     //    GCodeType gtype() const;
 
@@ -125,7 +125,7 @@ protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
     void initFrom(FileInterface* file) override { qWarning(__FUNCTION__); }
-    FileTree::Node* node() override;
+    FileTree_::Node* node() override;
 
     /////////////////////////////////////////////////////////////
 

@@ -115,7 +115,7 @@ void Form::updateFiles() {
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber, FileType::Dxf}))
+    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber_, FileType::Dxf_}))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
@@ -128,7 +128,7 @@ bool Form::canToShow() {
         return true;
 
     QComboBox cbx;
-    for (auto type : {FileType::Gerber, FileType::Dxf}) {
+    for (auto type : {FileType::Gerber_, FileType::Dxf_}) {
         for (auto file : App::project()->files(type)) {
             App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
             if (cbx.count())
@@ -179,10 +179,10 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
     if (!file)
         return;
     switch (file->type()) {
-    case FileType::Gerber:
+    case FileType::Gerber_:
         type_ = "_D";
         break;
-    case FileType::Dxf:
+    case FileType::Dxf_:
         type_ = "_DXF";
         break;
     case FileType::Excellon:

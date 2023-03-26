@@ -18,7 +18,7 @@ PocketOffsetFile::PocketOffsetFile()
     : File() { }
 
 PocketOffsetFile::PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
+    : File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
         addInfo();

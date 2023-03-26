@@ -72,8 +72,6 @@ void Line::parse(CodeData& code) {
         }
         code = sp->nextCode();
     } while (code.code() != 0);
-    //    qDebug() << data.size();
-    //    qDebug() << data;
 }
 
 Entity::Type Line::type() const { return Type::LINE; }

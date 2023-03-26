@@ -10,13 +10,14 @@
  ********************************************************************************/
 #pragma once
 
-#include "settings.h"
-#include "tool.h"
-#include "mvector.h"
-
+#include <QCoreApplication>
 #include <QDebug>
 #include <QObject>
 #include <QSharedMemory>
+
+#include "mvector.h"
+#include "settings.h"
+#include "tool.h"
 
 #include <assert.h>
 #include <map>
@@ -29,10 +30,10 @@ class Plugin;
 class Handle;
 } // namespace Shapes
 
-namespace FileTree {
+namespace FileTree_ {
 class View;
 class Model;
-} // namespace FileTree
+} // namespace FileTree_
 
 namespace DrillPlugin {
 class Form;
@@ -40,7 +41,7 @@ class Form;
 
 using Handlers = mvector<Shapes::Handle*>;
 
-using FileInterfacesMap = std::map<int, FilePlugin*>;
+using FileInterfacesMap = std::map<int, FilePlugin*, std::less<>>;
 using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>;
 using GCodeInterfaceMap = std::map<int, GCodePlugin*>;
 
@@ -68,8 +69,8 @@ class App {
     inline static App* app_ = nullptr;
 
     HOLDER(DrillPlugin::Form, DrillForm, drillForm, -10)
-    HOLDER(FileTree::Model, FileModel, fileModel, -11)
-    HOLDER(FileTree::View, FileTreeView, fileTreeView, -12)
+    HOLDER(FileTree_::Model, FileModel, fileModel, -11)
+    HOLDER(FileTree_::View, FileTreeView, fileTreeView, -12)
     HOLDER(GCodePropertiesForm, GCodePropertiesForm, gCodePropertiesForm, -13)
     HOLDER(QUndoStack, UndoStack, undoStack, -17)
     HOLDER2(GraphicsView, graphicsView, -14)

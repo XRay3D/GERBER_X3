@@ -139,8 +139,8 @@ void Shape::changeColor() {
 Node* Shape::node() const { return node_; }
 
 bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         // case Qt::DisplayRole:
         //     return QString("%1 (%2)").arg(name()).arg(giId_);
@@ -149,10 +149,10 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         // case Qt::DecorationRole:
         //     return icon();
-        case FileTree::Id:
+        case FileTree_::Id:
             id_ = value.toInt();
             return true;
-        case FileTree::Select:
+        case FileTree_::Select:
             setSelected(value.toBool());
             return true;
         default:
@@ -164,8 +164,8 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Shape::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return QString("%1 (%2)").arg(name()).arg(id_);
@@ -173,9 +173,9 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
             return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return icon();
-        case FileTree::Id:
+        case FileTree_::Id:
             return id_;
-        case FileTree::Select:
+        case FileTree_::Select:
             return isSelected();
         default:
             return QVariant();
@@ -187,17 +187,17 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
 
 Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         return itemFlag;
     default:
         return itemFlag;
     }
 }
 
-void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
+void Shape::menu(QMenu& menu, FileTree_::View* /*tv*/) const {
     auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         App::fileModel()->removeRow(node_->row(), node_->index().parent());
     });

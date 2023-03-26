@@ -18,7 +18,7 @@
 #include <QThread>
 #include <QUndoStack>
 
-namespace FileTree {
+namespace FileTree_ {
 class View;
 }
 
@@ -28,7 +28,7 @@ class File;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-    //    friend void FileTree::View::on_doubleClicked(const QModelIndex&);
+    //    friend void FileTree_::View::on_doubleClicked(const QModelIndex&);
     friend class Recent;
     friend class Project;
 
@@ -152,7 +152,7 @@ private:
         class QDockWidget* treeDockWidget;
         class QWidget* widget;
         class QVBoxLayout* verticalLayout;
-        FileTree::View* treeView;
+        FileTree_::View* treeView;
         void setupUi(QMainWindow* MainWindow);       // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi
     } ui;

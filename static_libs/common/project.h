@@ -35,7 +35,6 @@ class Shape;
 }
 class QFile;
 class QFileSystemWatcher;
-enum class FileType;
 
 using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
 using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
@@ -82,8 +81,8 @@ public:
 
     int addFile(FileInterface* const file);
     bool contains(FileInterface* file);
-    mvector<FileInterface*> files(FileType type);
-    mvector<FileInterface*> files(const mvector<FileType> types);
+    mvector<FileInterface*> files(int type);
+    mvector<FileInterface*> files(const mvector<int> types);
     void deleteFile(int id);
     QString fileNames();
     int contains(const QString& name);

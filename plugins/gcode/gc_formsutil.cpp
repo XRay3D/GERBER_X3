@@ -266,7 +266,11 @@ void GcFormBase::fileHandler(GCode::File* file) {
         cancel();
 
     if (file == nullptr) {
-        QMessageBox::information(this, tr("Warning"), tr("The tool doesn`t fit in the Working items!"));
+        auto message = tr("The tool doesn`t fit in the Working items!");
+        if (App::isDebug())
+            qDebug() << __FUNCTION__ << message;
+        else
+            QMessageBox::information(this, tr("Warning"), message);
         return;
     }
 
@@ -294,7 +298,7 @@ void GcFormBase::timerEvent(QTimerEvent* event) {
 void GcFormBase::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
         //        GCode::File const* file = gi->file();
-        //        if (file->type() == FileType::Gerber) {
+        //        if (file->type() == FileType::Gerber_) {
         // #ifdef GBR_
         //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
         // #endif

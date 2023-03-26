@@ -25,14 +25,16 @@
 namespace GCode {
 
 Node::Node(FileInterface* file)
-    : FileTree::Node(file->id(), FileTree::File)
+    : FileTree_::Node(FileTree_::File)
     , file(file) {
 }
+
+Node::~Node() { App::project()->deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
     switch (index.column()) {
-    case FileTree::Column::NameColorVisible:
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -42,7 +44,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         default:;
         }
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         switch (role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
@@ -50,7 +52,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         default:;
         }
     default:
-        if (role == FileTree::Select) {
+        if (role == FileTree_::Select) {
             file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
             return true;
         }
@@ -60,7 +62,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 QVariant Node::data(const QModelIndex& index, int role) const {
     switch (index.column()) {
-    case FileTree::Column::NameColorVisible:
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             if (file->shortName().endsWith(Settings::fileExtension()))
@@ -75,12 +77,12 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return file->icon();
-        case FileTree::Id:
-            return id_.get();
+        case FileTree_::Id:
+            return id();
         default:
             return QVariant();
         }
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -98,11 +100,11 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
-    case FileTree::Column::NameColorVisible:
+    case FileTree_::Column::NameColorVisible:
         if (file->shortName().endsWith(Settings::fileExtension()))
             return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
-    case FileTree::Column::Side: {
+    case FileTree_::Column::Side: {
         if (file->shortName().endsWith(Settings::fileExtension()))
             return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
@@ -112,26 +114,28 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     }
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree_::View* tv) const {
     static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
-        emit tv->saveGCodeFile(id_);
+        emit tv->saveGCodeFile(id());
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
-        tv, &FileTree::View::hideOther);
-    if (!dialog[id_])
+        tv, &FileTree_::View::hideOther);
+    if (!dialog[id()])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-            dialog[id_] = new Dialog(file->lines2(), file->name(), tv);
+            dialog[id()] = new Dialog(file->lines2(), file->name(), tv);
             auto destroy = [this] {
-                delete dialog[id_];
-                dialog[id_] = nullptr;
+                delete dialog[id()];
+                dialog[id()] = nullptr;
             };
-            QObject::connect(dialog[id_], &QDialog::finished, destroy);
-            dialog[id_]->show();
+            QObject::connect(dialog[id()], &QDialog::finished, destroy);
+            dialog[id()]->show();
         });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree_::View::closeFile);
 }
+
+int Node::id() const { return file->id(); }
 
 } // namespace GCode

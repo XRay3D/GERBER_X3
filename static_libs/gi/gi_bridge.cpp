@@ -21,11 +21,8 @@
 #include <list>
 #include <vector>
 
-GiBridge::GiBridge(double& lenght, double& toolDiam, GCode::SideOfMilling& side)
-    : side_(side)
-    , lenght_(lenght)
-    , toolDiam_(toolDiam) {
-    pPath.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
+GiBridge::GiBridge() {
+    pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
@@ -34,6 +31,7 @@ void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     painter->setBrush(!ok_ ? Qt::red : Qt::green);
     painter->setPen(Qt::NoPen);
     painter->drawPath(pPath);
+
     if (!ok_)
         return;
 
@@ -59,7 +57,7 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
         return pos;
 
     auto retPos {pos};
-    auto lenght = std::numeric_limits<double>::max();
+    auto minLenght = std::numeric_limits<double>::max();
 
     QLineF line;
     ok_ = false;
@@ -73,25 +71,31 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
     auto transform = [](auto* item) { return static_cast<GraphicsItem*>(item); };
 
     for (GraphicsItem* gi : col | rviews::filter(filter) | rviews::transform(transform)) {
-        for (const Path& path : gi->paths()) {
+        auto paths = gi->paths();
+        if (gi->type() == GiType::DataPath
+            && paths.size() == 1
+            && paths.front().front() == paths.front().back()
+            && IsPositive(paths.front())) // fix direction for drawing
+            ReversePath(paths.front());
+        for (Path& path : paths) {
             for (size_t i {}, s = path.size(); i < s; ++i) {
                 QLineF tmpLine(path[i], path[(i + 1) % s]);
                 double tmp = LineABC(tmpLine).distance(pos);
-                if (lenght > tmp && tmp < lenght_)
-                    lenght = tmp, line = tmpLine;
+                if (minLenght > tmp && tmp < lenght)
+                    minLenght = tmp, line = tmpLine;
             }
         }
     }
 
     if (!line.isNull()) {
-        lenght = line.length() - lenght_ / 2;
+        minLenght = line.length() - lenght / 2;
         angle_ = line.angle();
-        if (QLineF(line.center(), pos).length() < lenght_ / 2 || line.length() < lenght_) {
+        if (QLineF(line.center(), pos).length() < lenght / 2 && line.length() < lenght) {
             // точка центра прямой
             retPos = line.center();
             ok_ = true;
             update(); // Cutoff
-        } else if (QLineF(line.p1(), pos).length() < lenght && QLineF(line.p2(), pos).length() < lenght) {
+        } else if (QLineF(line.p1(), pos).length() < minLenght && QLineF(line.p2(), pos).length() < minLenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
             auto k2 = (line.p2().y() - line.p1().y());
@@ -107,40 +111,42 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
     return retPos;
 }
 
-double GiBridge::angle() const { return angle_; }
-
 void GiBridge::update() {
     pPath = QPainterPath();
-    pPath.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
+    pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
 
     cutoff.clear();
-    QLineF lTool, lCenter = QLineF::fromPolar(toolDiam_ + lenght_, angle_);
+
+    if (!ok_)
+        return;
+
+    QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
     double start, span = 180;
-    switch (side_) {
+    switch (side) {
     case GCode::On:
         lCenter.translate(-lCenter.center());
-        lTool = QLineF::fromPolar(toolDiam_, start = angle_ - 90);
+        lTool = QLineF::fromPolar(toolDiam, start = angle_ - 90);
         break;
     case GCode::Outer:
-        lTool = QLineF::fromPolar(toolDiam_, start = angle_ - 90);
+        lTool = QLineF::fromPolar(toolDiam, start = angle_ - 90);
         lCenter.translate(lTool.center() - lCenter.center());
         break;
     case GCode::Inner:
-        lTool = QLineF::fromPolar(toolDiam_, start = angle_ + 90);
+        lTool = QLineF::fromPolar(toolDiam, start = angle_ + 90);
         lCenter.translate(lTool.center() - lCenter.center());
         span = -180;
         break;
     }
 
-    if (1) { // test
+    if (0) { // test
         QLineF lTool2 = testLine();
         lTool2.translate(pos() - lTool2.center());
         cutoff.moveTo(lTool2.p1());
         cutoff.lineTo(lTool2.p2());
     }
 
-    const QPointF offset {toolDiam_ / 2., toolDiam_ / 2};
-    const QSizeF size {toolDiam_, toolDiam_};
+    const QPointF offset {toolDiam / 2., toolDiam / 2};
+    const QSizeF size {toolDiam, toolDiam};
 
     lTool.translate(lCenter.p1() - lTool.center());
     cutoff.moveTo(lTool.p2());
@@ -154,19 +160,19 @@ void GiBridge::update() {
     QGraphicsItem::update();
 }
 
+bool GiBridge::test(const Path& path) { return pointOnPolygon(testLine(), path, &intersectPoint); }
+
 QLineF GiBridge::testLine() const {
-    QLineF lTool2 = QLineF::fromPolar(toolDiam_ * 1.2, angle_ - 90);
+    QLineF lTool2 = QLineF::fromPolar(toolDiam * 1.2, angle_ - 90);
     return lTool2.translated(pos() - lTool2.center());
 }
-
-double GiBridge::lenght() const { return lenght_; }
 
 bool GiBridge::ok() const { return ok_; }
 
 void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
     if (ok_ && pos() == lastPos) {
-        moveBrPtr = new GiBridge(lenght_, toolDiam_, side_);
+        moveBrPtr = new GiBridge;
         scene()->addItem(moveBrPtr);
         moveBrPtr->setPos(pos());
         moveBrPtr->setVisible(true);
@@ -176,10 +182,8 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     }
 }
 
-Paths GiBridge::paths(int) const {
-    return {CirclePath((lenght_ + toolDiam_) * uScale, pos())};
-}
-
 int GiBridge::type() const { return GiType::Bridge; }
+
+Paths GiBridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
 
 #include "moc_gi_bridge.cpp"

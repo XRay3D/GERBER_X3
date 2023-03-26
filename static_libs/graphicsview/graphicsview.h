@@ -102,6 +102,12 @@ public:
     template <typename T>
     auto addItem(T* item) const { return scene()->addItem(item), item; }
 
+    template <typename T, typename... Args>
+    auto addItem(Args... args) const {
+        auto item = new T {std::forward<Args>(args)...};
+        return addItem(item);
+    }
+
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
@@ -124,7 +130,7 @@ private:
                 auto rview = items | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
                 return {rview.begin(), rview.end()};
             } else if constexpr (!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
-                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
+                auto rview = items | rviews::filter(et) /* WARNING | rviews::filter(FilterDyn {}) */ | rviews::transform(Transform {});
                 return {rview.begin(), rview.end()};
             } else if constexpr (isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
                 auto rview = items | rviews::filter(et);

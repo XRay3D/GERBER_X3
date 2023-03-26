@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
                     if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
                         file->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::filePlugins().emplace(file->type(), file);
+                        App::filePlugins().emplace(std::pair {file->type(), file});
                         continue;
                     }
                     if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {

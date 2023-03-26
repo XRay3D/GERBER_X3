@@ -53,7 +53,7 @@ private:
     // FileInterface interface
 public:
     void initFrom(FileInterface* file) override;
-    FileTree::Node* node() override;
+    FileTree_::Node* node() override;
     FileType type() const override;
     void createGi() override;
     bool isVisible() const override;

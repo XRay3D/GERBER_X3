@@ -24,16 +24,16 @@
 #include "project.h"
 
 #include <QFileInfo>
+#include <QRegularExpression>
 
 namespace GCode {
 
 void calcArcs(Path path);
 
-File::File(GCodeParams&& gcp, Paths&& pocketPaths, Pathss&& toolPathss)
+File::File(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : gcp_(std::move(gcp))
     , pocketPaths_(std::move(pocketPaths))
     , toolPathss_(std::move(toolPathss)) {
-
     for (auto&& paths : toolPathss_)
         for (auto&& path : paths)
             calcArcs(path);
@@ -368,7 +368,7 @@ void File::read(QDataStream& stream) {
     // _read(stream);
 }
 
-FileTree::Node* File::node() { return node_ ? node_ : node_ = new Node(this); }
+FileTree_::Node* File::node() { return node_ ? node_ : node_ = new Node(this); }
 
 /////////////////////////////////////////////////////////////
 void File::saveDrill(const QPointF& offset) {

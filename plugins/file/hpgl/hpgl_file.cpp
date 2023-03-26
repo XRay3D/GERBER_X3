@@ -107,7 +107,7 @@ void File::initFrom(FileInterface* file) {
     //    static_cast<Node*>(m_node)->file = this;
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 

@@ -28,7 +28,7 @@ ProfileFile::ProfileFile()
     : File() { }
 
 ProfileFile::ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss)
-    : File(std::move(gcp), {}, std::move(toolPathss)) {
+    : File(std::move(gcp), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
         addInfo();

@@ -31,12 +31,9 @@ private slots:
     void onNameTextChanged(const QString& arg1);
 
 private:
-    void updateBridge();
+    void updateBridges();
     void updatePixmap();
     void rb_clicked();
-
-    double toolDiam_ = 0.0;
-    double lenght_ = 0.0;
 
     Ui::ProfileForm* ui;
     //    GiBridge* brItem = nullptr;

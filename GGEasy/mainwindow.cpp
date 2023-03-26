@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // connect plugins
     for (auto& [type, ptr] : App::filePlugins()) {
-        if (ptr->type() == int(FileType::GCode))
+        if (ptr->type() == int(FileType::GCode_))
             continue;
         ptr->moveToThread(&parserThread);
         connect(ptr, &FilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
@@ -96,11 +96,11 @@ MainWindow::MainWindow(QWidget* parent)
         ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
-    ui.treeView->setModel(new FileTree::Model(ui.treeView));
+    ui.treeView->setModel(new FileTree_::Model(ui.treeView));
 
-    connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
-    connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
-    connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
+    connect(ui.treeView, &FileTree_::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui.treeView, &FileTree_::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
+    connect(ui.treeView, &FileTree_::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
     App::toolHolder().readTools();
     setCurrentFile(QString());
@@ -140,10 +140,9 @@ MainWindow::MainWindow(QWidget* parent)
 
         if (1) {
             i = 1000;
-            // QTimer::singleShot(i += k, [this] { loadFile(R"(D:\ARM\MagicTable\SchPcb469\en.MB1189_manufacturing\MB1189_B\MB1189_REVB_150522_FAB2_GBR\MB1189_REVB_150522_FAB2-1-6.drl)"); });
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
         }
@@ -1300,7 +1299,7 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     verticalLayout->setSpacing(6);
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     verticalLayout->setContentsMargins(3, 3, 3, 3);
-    treeView = new FileTree::View(widget);
+    treeView = new FileTree_::View(widget);
     treeView->setObjectName(QString::fromUtf8("treeView"));
     treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 

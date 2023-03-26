@@ -178,3 +178,21 @@ struct LineABC {
     }
     double lenght() const { return sqrt(a * a + b * b); }
 };
+
+inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
+    const size_t cnt = path.size();
+    if (cnt < 2)
+        return false;
+    QPointF p;
+    for (size_t i = 0; i < cnt; ++i) {
+        const Point& pt1 = path[(i + 1) % cnt];
+        const Point& pt2 = path[i];
+        QLineF l1(pt1, pt2);
+        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
+            if (ret)
+                *ret = (p);
+            return true;
+        }
+    }
+    return false;
+}

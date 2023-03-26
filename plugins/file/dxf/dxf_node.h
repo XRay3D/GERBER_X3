@@ -17,7 +17,7 @@ namespace Dxf {
 class Layer;
 class File;
 
-class Node : public FileTree::Node {
+class Node : public FileTree_::Node {
     mutable bool header = true;
     mutable bool layer = true;
     friend class File;
@@ -25,16 +25,17 @@ class Node : public FileTree::Node {
 
 public:
     explicit Node(File* file);
-    ~Node() override = default;
+    ~Node() override;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) const override;
+    int id() const override;
 };
 
-class NodeLayer : public FileTree::Node {
+class NodeLayer : public FileTree_::Node {
     friend class Dxf::Node;
     const QString name;
     Layer* const layer;
@@ -43,11 +44,12 @@ public:
     explicit NodeLayer(const QString& name, Layer* layer);
     ~NodeLayer() override = default;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) const override;
+    int id() const override;
 };
 
 } // namespace Dxf

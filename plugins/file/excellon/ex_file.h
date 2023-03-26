@@ -25,7 +25,7 @@ public:
     explicit File();
     ~File() override;
 
-    FileType type() const override { return FileType::Excellon; }
+    FileType type() const override { return FileType::Excellon_; }
 
     double tool(int t) const;
     Tools tools() const;
@@ -34,10 +34,9 @@ public:
     void setFormat(const Format& value);
 
     // FileInterface interface
-public:
     void createGi() override;
     void initFrom(FileInterface* file) override;
-    FileTree::Node* node() override;
+    FileTree_::Node* node() override;
 
 protected:
     void write(QDataStream& stream) const override;

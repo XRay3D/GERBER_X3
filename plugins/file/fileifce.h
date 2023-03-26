@@ -12,11 +12,10 @@
 
 #include "datastream.h"
 
-#include "app.h"
-#include "file_plugin.h"
+// #include "app.h"
 #include "ft_node.h"
 #include "gi_group.h"
-#include "myclipper.h"
+// #include "myclipper.h"
 #include "plugintypes.h"
 #include "project.h"
 #include "splashscreen.h"
@@ -26,19 +25,30 @@
 #include <QFileInfo>
 #include <QModelIndex>
 
-enum class FileType {
-    Gerber,
-    Excellon,
-    Dxf,
+enum FileType {
+    Gerber_,
+    Excellon_,
+    Dxf_,
     Hpgl,
     TopoR,
 
-    GCode = 100,
+    GCode_ = 100,
     // 101 - ...
 
-    Shapes = 200
+    Shapes_ = 200
     // 201 - ...
 };
+
+Q_DECLARE_METATYPE(FileType)
+
+namespace std {
+template <>
+struct hash<FileType> {
+    size_t operator()(const FileType& v) const {
+        return hash<int>()(static_cast<int>(v));
+    }
+};
+} // namespace std
 
 using LayerTypes = std::vector<LayerType>;
 
@@ -198,7 +208,7 @@ public:
     const int& id() const { return id_; }
     void setId(int id) { id_ = id; }
 
-    virtual FileTree::Node* node() = 0;
+    virtual FileTree_::Node* node() = 0;
     virtual QIcon icon() const { return {}; }
 
     bool userColor() const { return userColor_; }
@@ -210,7 +220,7 @@ protected:
     virtual Paths merge() const = 0;
 
     LayerTypes layerTypes_;
-    FileTree::Node* node_ = nullptr;
+    FileTree_::Node* node_ = nullptr;
     Pathss groupedPaths_;
     QColor color_;
     bool userColor_ {};

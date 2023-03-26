@@ -88,7 +88,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::Excellon); }
+int Plugin::type() const { return int(FileType::Excellon_); }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 

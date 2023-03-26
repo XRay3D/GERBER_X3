@@ -106,40 +106,82 @@ void PocketOffsetForm::createFile() {
     FileInterface const* file = nullptr;
     bool skip {true};
 
-    for (auto* item : App::graphicsView()->selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
+    for (auto* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+        switch (gi->type()) {
         case GiType::DataSolid:
-        case GiType::DataPath:
-            if (!file) {
-                file = gi->file();
-                boardSide = file->side();
-            } else if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
-            if (item->type() == GiType::DataSolid)
-                wPaths.append(gi->paths());
-            else
-                wRawPaths.append(gi->paths());
+            wPaths.append(gi->paths());
             break;
+        case GiType::DataPath: {
+            auto paths = gi->paths();
+            if (paths.front() == paths.back())
+                wPaths.append(paths);
+            else
+                wRawPaths.append(paths);
+        } break;
+            //            if (!file) {
+            //                file = gi->file();
+            //                boardSide = file->side();
+            //            } else if (file != gi->file()) {
+            //                if (skip) {
+            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+            //                        return;
+            //                }
+            //            }
+            //            if (gi->type() == GiType::DataSolid)
+            //                wPaths.append(gi->paths());
+            //            else
+            //                wRawPaths.append(gi->paths());
+            //            break;
         case GiType::ShCircle:
         case GiType::ShRectangle:
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
         case GiType::ShText:
-            wRawPaths.append(gi->paths());
-            break;
         case GiType::Drill:
             wPaths.append(gi->paths());
+            break;
+        case GiType::ShPolyLine:
+        case GiType::ShCirArc:
+            wRawPaths.append(gi->paths());
             break;
         default:
             break;
         }
         addUsedGi(gi);
     }
+
+    //    for (auto* item : App::graphicsView()->selectedItems()) {
+    //        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
+    //        switch (item->type()) {
+    //        case GiType::DataSolid:
+    //        case GiType::DataPath:
+    //            if (!file) {
+    //                file = gi->file();
+    //                boardSide = file->side();
+    //            } else if (file != gi->file()) {
+    //                if (skip) {
+    //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+    //                        return;
+    //                }
+    //            }
+    //            if (item->type() == GiType::DataSolid)
+    //                wPaths.append(gi->paths());
+    //            else
+    //                wRawPaths.append(gi->paths());
+    //            break;
+    //        case GiType::ShCircle:
+    //        case GiType::ShRectangle:
+    //        case GiType::ShPolyLine:
+    //        case GiType::ShCirArc:
+    //        case GiType::ShText:
+    //            wRawPaths.append(gi->paths());
+    //            break;
+    //        case GiType::Drill:
+    //            wPaths.append(gi->paths());
+    //            break;
+    //        default:
+    //            break;
+    //        }
+    //        addUsedGi(gi);
+    //    }
 
     if (wRawPaths.empty() && wPaths.empty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
@@ -172,7 +214,7 @@ void PocketOffsetForm::createFile() {
         gcp_.params[GCode::PocketCtr::OffsetSteps] = ui->sbxSteps->value();
 
     gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(wPaths);
+    gcCreator->addPaths(std::move(wPaths));
     gcCreator->addRawPaths(wRawPaths);
     fileCount = static_cast<int>(gcp_.tools.size());
     createToolpath();

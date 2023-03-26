@@ -35,6 +35,14 @@ namespace rviews = std::ranges::views;
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
 
+inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
+    if (pss.empty())
+        return;
+    for (auto&& paths : pss.midRef(1))
+        pss.front().append(std::move(paths));
+    dbgPaths(pss.front(), fileName, color, closed, tool);
+}
+
 class GiError;
 
 class ProgressCancel {
@@ -111,19 +119,20 @@ public:
 
     std::pair<int, int> getProgress();
 
-    void addRawPaths(Paths rawPaths);
+    void addPaths(Paths&& paths);
+    void addRawPaths(Paths paths);
     void addSupportPaths(Pathss supportPaths);
-    void addPaths(const Paths& paths);
 
-    Pathss& groupedPaths(Grouping group, Point::Type k = uScale, bool fl = {});
+    Pathss& groupedPaths(Grouping group, Point::Type offset = uScale, bool skipFrame = {});
+    void grouping(Grouping group, PolyTree& node);
 
-    Path boundPaths(const Paths& paths, Point::Type k) const;
+    Path boundOfPaths(const Paths& paths, Point::Type k) const;
 
     /*static*/ Paths& sortB(Paths& src);
-    /*static*/ Paths& sortBE(Paths& src);
+    /*static*/ Paths& sortBeginEnd(Paths& src);
 
     /*static*/ Pathss& sortB(Pathss& src);
-    /*static*/ Pathss& sortBE(Pathss& src);
+    /*static*/ Pathss& sortBeginEnd(Pathss& src);
 
     void createGc();
 
@@ -150,11 +159,15 @@ signals:
 protected:
     bool checkMilling(SideOfMilling side);
 
-    bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret = nullptr);
     void stacking(Paths& paths);
-    void mergeSegments(Paths& paths, double glue = 0.0);
 
-    void mergePaths(Paths& paths, const double dist = 0.0);
+    /////////////////////////////////////////////////
+    /// \brief склеивает пути при совпадении конечных точек
+    /// \param paths - пути
+    /// \param maxDist - максимальное расстояние между конечными точками
+    void mergeSegments(Paths& paths, double maxDist = 0.0);
+
+    void mergePaths(Paths& paths, const double maxDist = 0.0);
 
     void markPolyTreeDByNesting(PolyTree& polynode);
     void sortPolyTreeByNesting(PolyTree& polynode);

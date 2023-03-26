@@ -41,7 +41,7 @@ public:
     [[nodiscard]] virtual Shape* createShape(const QPointF& point = {}) const = 0;
     virtual int type() const = 0;
 
-    void createMainMenu(QMenu& menu, FileTree::View* tv);
+    void createMainMenu(QMenu& menu, FileTree_::View* tv);
 
     QString folderName() const;
 

@@ -132,7 +132,7 @@ void Form::updateFiles() {
 
     ui->cbxFile->clear();
 
-    for (auto file : App::project()->files(FileType::Gerber))
+    for (auto file : App::project()->files(FileType::Gerber_))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
@@ -142,7 +142,7 @@ void Form::updateFiles() {
 
 bool Form::canToShow() {
     QComboBox cbx;
-    for (auto file : App::project()->files(FileType::Gerber)) {
+    for (auto file : App::project()->files(FileType::Gerber_)) {
         App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
         if (cbx.count())
             return true;

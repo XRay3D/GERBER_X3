@@ -200,7 +200,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::Gerber); }
+int Plugin::type() const { return int(FileType::Gerber_); }
 
 QString Plugin::folderName() const { return tr("Gerber Files"); }
 

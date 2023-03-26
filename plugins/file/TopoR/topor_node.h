@@ -18,7 +18,7 @@ namespace TopoR {
 
 class File;
 
-class Node : public FileTree::Node {
+class Node : public FileTree_::Node {
     friend class File;
     File* file;
 
@@ -26,11 +26,11 @@ public:
     explicit Node(File* file);
     ~Node() override = default;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) const override;
 };
 
 } // namespace TopoR

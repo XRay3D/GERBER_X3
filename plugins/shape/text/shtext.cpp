@@ -151,8 +151,8 @@ void Text::setPt(const QPointF& point) {
 }
 
 bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -162,7 +162,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         break;
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         if (role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -175,10 +175,10 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 Qt::ItemFlags Text::flags(const QModelIndex& index) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         return Shape::flags(index) | Qt::ItemIsEditable;
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         return Shape::flags(index) | Qt::ItemIsEditable;
     default:
         return Shape::flags(index);
@@ -186,8 +186,8 @@ Qt::ItemFlags Text::flags(const QModelIndex& index) const {
 }
 
 QVariant Text::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
@@ -199,7 +199,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         default:
             return Shape::data(index, role);
         }
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -214,7 +214,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
     }
 }
 
-void Text::menu(QMenu& menu, FileTree::View* tv) const {
+void Text::menu(QMenu& menu, FileTree_::View* tv) const {
     Shape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
         ShTextDialog dlg({const_cast<Text*>(this)}, tv);

@@ -88,7 +88,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
                 auto data {toU16StrView(gLine)};
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
                 if (auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole) {    ///*regexp.match(gLine)); match.hasMatch()*/) {
-                    // qDebug() << "dummy" << gLine << id.data() << par.data();
+
                     return true;
                 }
                 return false;
@@ -144,7 +144,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qDebug() << file->shortName() << t.elapsed() << "ms";
 
         //        for (auto [key, val] : rel)
-        //            qDebug() << key << '\t' << val;
 
         if (file->graphicObjects_.empty()) {
             delete file;
@@ -1204,7 +1203,7 @@ bool Parser::parseLoadName(const QString& gLine) {
     auto data {toU16StrView(gLine)};
     static constexpr ctll::fixed_string ptrnLoadName(R"(^%LN(.+)\*%$)"); // fixed_string("^%LN(.+)\*%$");
     if (ctre::match<ptrnLoadName>(data)) {
-        // qDebug() << gLine << match.capturedTexts();
+
         return true;
     }
     return false;

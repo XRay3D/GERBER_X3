@@ -115,7 +115,7 @@ void File::initFrom(FileInterface* file) {
     static_cast<Excellon::Node*>(node_)->file = this;
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return node_ ? node_ : node_ = new Excellon::Node(this);
 }
 

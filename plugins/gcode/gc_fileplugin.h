@@ -30,7 +30,7 @@ public:
     FileInterface* createFile() override;
 
     QIcon icon() const override;
-    void createMainMenu(QMenu& menu, FileTree::View* tv) override;
+    void createMainMenu(QMenu& menu, FileTree_::View* tv) override;
 
 public slots:
     FileInterface* parseFile(const QString& fileName, int type) override;
