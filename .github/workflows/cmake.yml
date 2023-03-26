@@ -33,14 +33,15 @@ jobs:
           
       - name: boost
         run: sudo apt-get update && sudo apt-get install -yq libboost-dev
+        
       - name: Installing system libs
         shell: cmake -P {0}
         run: |
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          execute_process(
-            COMMAND sudo apt install libgl1-mesa-dev
-          )
-        endif()
+          if ("${{ runner.os }}" STREQUAL "Linux")
+            execute_process(
+              COMMAND sudo apt install libgl1-mesa-dev
+            )
+          endif()
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
