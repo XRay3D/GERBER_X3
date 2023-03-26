@@ -388,7 +388,7 @@ void MainWindow::createActionsHelp() {
     // Separator
     helpMenu->addSeparator();
     // About Plugins
-    action = helpMenu->addAction(tr("About &Plugins…"), [this] { DialogAboutPlugins(this).exec(); });
+    action = helpMenu->addAction(tr("About &Plugins…"), this, [this] { DialogAboutPlugins(this).exec(); });
     action->setStatusTip(tr("Show loaded plugins…"));
 }
 
@@ -897,9 +897,9 @@ QMenu* MainWindow::createPopupMenu() {
     menu->removeAction(toolpathToolBar->toggleViewAction());
     menu->removeAction(ui.treeDockWidget->toggleViewAction());
 
-    menu->addAction(tr("Icon size = 24"), [this]() { setIconSize(QSize(24, 24)); });
-    menu->addAction(tr("Icon size = 48"), [this]() { setIconSize(QSize(48, 48)); });
-    menu->addAction(tr("Icon size = 72"), [this]() { setIconSize(QSize(72, 72)); });
+    menu->addAction(tr("Icon size = 24"), this, [this]() { setIconSize(QSize(24, 24)); });
+    menu->addAction(tr("Icon size = 48"), this, [this]() { setIconSize(QSize(48, 48)); });
+    menu->addAction(tr("Icon size = 72"), this, [this]() { setIconSize(QSize(72, 72)); });
 
     qDebug() << menu->parent();
 

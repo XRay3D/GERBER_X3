@@ -34,7 +34,7 @@ void Recent::createMenu(QMenu* fileMenu, const QString& menuName) {
         recentFileActs[i]->setVisible(false);
     }
     recentMenu->addSeparator();
-    recentFileActs[Recent::MaxRecentFiles] = recentMenu->addAction(tr("Clear Recent"), [this] {
+    recentFileActs[Recent::MaxRecentFiles] = recentMenu->addAction(tr("Clear Recent"), this, [this] {
         QSettings settings;
         writeRecentFiles({}, settings);
         updateRecentFileActions();
