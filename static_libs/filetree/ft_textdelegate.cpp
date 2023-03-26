@@ -14,7 +14,7 @@
 
 #include <QLineEdit>
 
-namespace FileTree {
+namespace FileTree_ {
 
 TextDelegate::TextDelegate(QObject* parent)
     : QStyledItemDelegate(parent) {
@@ -42,6 +42,6 @@ void TextDelegate::emitCommitData() {
     emit commitData(qobject_cast<QWidget*>(sender()));
 }
 
-} // namespace FileTree
+} // namespace FileTree_
 
 #include "moc_ft_textdelegate.cpp"

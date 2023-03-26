@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "fileifce.h"
 #include <QAbstractItemModel>
 
 class FileInterface;
@@ -18,20 +19,17 @@ class Shape;
 }
 class Project;
 
-namespace FileTree {
+namespace FileTree_ {
 
 class Node;
 
 class Model : public QAbstractItemModel {
     Q_OBJECT
     Node* rootItem;
-    struct Pair {
-        Node* node;
-        int type;
-    };
-    std::map<int, Pair> mapNode;
+    std::map<int, Node*> fileFolders;
     friend class ::Project;
     friend class Node;
+    friend class View;
 
 signals:
     void updateActions();
@@ -86,5 +84,5 @@ private:
     void addShape(Shapes::Shape* shape);
 };
 
-} // namespace FileTree
+} // namespace FileTree_
 #include "app.h"

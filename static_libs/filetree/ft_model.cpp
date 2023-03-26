@@ -20,7 +20,7 @@
 
 #include <QTimer>
 
-namespace FileTree {
+namespace FileTree_ {
 
 using TreeItem = Node;
 
@@ -40,25 +40,25 @@ void Model::addFile(FileInterface* file) {
     if (!file)
         return;
 
-    int type = int(file->type());
+    FileType type = file->type();
 
-    if (type > 100) // NOTE  переписать для ГКода отдельно
-        type = 100;
+    if (type > FileType(100)) // NOTE  переписать для ГКода отдельно
+        type = FileType(100);
 
-    if (mapNode.find(type) == mapNode.end()) {
+    if (fileFolders.find(type) == fileFolders.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair {nullptr, type});
-        rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), mapNode[type].type));
+        auto it = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
+        rootItem->addChild(it);
         endInsertRows();
     }
 
-    Node* item(mapNode[type].node);
+    Node* item(fileFolders[type]);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    mapNode[type].node->addChild(file->node());
+    fileFolders[type]->addChild(file->node());
     endInsertRows();
 
     App::filePlugin(type)->updateFileModel(file);
@@ -69,19 +69,19 @@ void Model::addShape(Shapes::Shape* shape) {
     if (!shape)
         return;
 
-    const int type = int(FileType::Shapes);
+    FileType type = FileType::Shapes_;
 
-    if (mapNode.find(type) == mapNode.end()) {
+    if (fileFolders.find(type) == fileFolders.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair {nullptr, type});
         auto si = App::shapePlugins().begin()->second;
-        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), mapNode[type].type));
+        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
+        rootItem->addChild(it);
         endInsertRows();
     }
 
-    Node* item(mapNode[type].node);
+    Node* item(fileFolders[type]);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -338,6 +338,6 @@ Node* Model::getItem(const QModelIndex& index) const {
     return rootItem;
 }
 
-} // namespace FileTree
+} // namespace FileTree_
 
 #include "moc_ft_model.cpp"

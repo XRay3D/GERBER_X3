@@ -21,21 +21,19 @@
 #include <QVariant>
 #include <project.h>
 
-namespace FileTree {
+namespace FileTree_ {
 
-Node::Node(std::reference_wrapper<const int> id, Type type)
-    : type(type)
-    , id_(id) {
-}
+Node::Node(Type type)
+    : type(type) { }
 
 Node::~Node() {
-    if (id_ > -1) {
+    if (id__ > -1) {
         switch (type) {
         case File:
-            App::project()->deleteFile(id_);
+            App::project()->deleteFile(id__);
             break;
         case Shape:
-            App::project()->deleteShape(id_);
+            App::project()->deleteShape(id__);
             break;
         default:
             break;
@@ -85,4 +83,4 @@ QModelIndex Node::index(int column) const {
     return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this));
 }
 
-} // namespace FileTree
+} // namespace FileTree_

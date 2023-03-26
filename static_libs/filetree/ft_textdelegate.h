@@ -12,7 +12,7 @@
 
 #include <QStyledItemDelegate>
 
-namespace FileTree {
+namespace FileTree_ {
 
 class TextDelegate : public QStyledItemDelegate {
     Q_OBJECT
@@ -31,4 +31,4 @@ public:
     void emitCommitData();
 };
 
-} // namespace FileTree
+} // namespace FileTree_

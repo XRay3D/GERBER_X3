@@ -14,7 +14,7 @@
 
 #include <QComboBox>
 
-namespace FileTree {
+namespace FileTree_ {
 
 SideDelegate::SideDelegate(QObject* parent)
     : QStyledItemDelegate(parent) {
@@ -48,6 +48,6 @@ void SideDelegate::emitCommitData() {
     emit commitData(qobject_cast<QWidget*>(sender()));
 }
 
-} // namespace FileTree
+} // namespace FileTree_
 
 #include "moc_ft_sidedelegate.cpp"

@@ -12,22 +12,23 @@
 
 #include "ft_node.h"
 
-namespace FileTree {
+namespace FileTree_ {
 
-class FolderNode : public FileTree::Node {
+class FolderNode : public FileTree_::Node {
     QString name;
     Qt::CheckState checkState_ = Qt::Checked;
 
 public:
     explicit FolderNode(const QString& name);
-    explicit FolderNode(const QString& name, int& id);
+    explicit FolderNode(const QString& name, int id);
     ~FolderNode() override;
 
-    // FileTree::Node interface
+    // FileTree_::Node interface
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     void menu(QMenu& menu, View* tv) const override;
+    int id() const override { return id__; }
 };
 
-} // namespace FileTree
+} // namespace FileTree_

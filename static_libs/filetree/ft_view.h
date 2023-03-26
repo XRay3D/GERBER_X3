@@ -14,7 +14,7 @@
 
 #include <QTreeView>
 
-namespace FileTree {
+namespace FileTree_ {
 
 class View : public QTreeView {
     Q_OBJECT
@@ -26,6 +26,9 @@ public:
     void hideOther();
     void closeFile();
     void closeFiles();
+
+    void closeAllFiles(FileType type);
+
     void setModel(QAbstractItemModel* model) override;
 
 signals:
@@ -50,4 +53,4 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
 };
 
-} // namespace FileTree
+} // namespace FileTree_

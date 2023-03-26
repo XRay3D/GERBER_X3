@@ -35,7 +35,7 @@
 #include <QTimer>
 #include <doublespinbox.h>
 
-namespace FileTree {
+namespace FileTree_ {
 
 View::View(QWidget* parent)
     : QTreeView(parent) {
@@ -121,6 +121,11 @@ void View::closeFiles() {
     model_->removeRows(0, childCount_, menuIndex_);
 }
 
+void View::closeAllFiles(FileType type) {
+    // WARNING   model_->createIndex(0, 0, &model_->fileFolders[type]);
+    model_->removeRows(0, childCount_, menuIndex_);
+}
+
 void View::setModel(QAbstractItemModel* model) {
     QTreeView::setModel(model_ = static_cast<Model*>(model));
 
@@ -183,7 +188,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if (menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
-        const int type = menuIndex_.data(Role::Id).toInt();
+        const FileType type = menuIndex_.data(Role::Id).value<FileType>();
         const int cType = menuIndex_.data(Role::ContentType).toInt();
         if (cType == Type::File) {
             App::filePlugin(type)->createMainMenu(menu, this);
@@ -205,7 +210,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
-            auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+            auto file = App::project()->file(selectedRows.front().data(FileTree_::Id).toInt());
             if (file) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
@@ -242,7 +247,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                     // layout.addRow(new QWidget(&d), &button);
                     dialog.resize({0, 0});
 
-                    auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+                    auto file = App::project()->file(selectedRows.front().data(FileTree_::Id).toInt());
 
                     auto transform = file->transform();
 
@@ -260,7 +265,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                         };
 
                         for (auto&& index : selectedRows) {
-                            auto file = App::project()->file(index.data(FileTree::Id).toInt());
+                            auto file = App::project()->file(index.data(FileTree_::Id).toInt());
                             if (file)
                                 file->setTransform(transform);
                         }
@@ -307,6 +312,6 @@ void View::mouseDoubleClickEvent(QMouseEvent* event) {
         QTreeView::mouseDoubleClickEvent(event);
 }
 
-} // namespace FileTree
+} // namespace FileTree_
 
 #include "moc_ft_view.cpp"

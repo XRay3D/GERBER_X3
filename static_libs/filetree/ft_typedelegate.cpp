@@ -17,7 +17,7 @@
 
 #include <QComboBox>
 
-namespace FileTree {
+namespace FileTree_ {
 
 TypeDelegate::TypeDelegate(QObject* parent)
     : QStyledItemDelegate(parent) {
@@ -52,6 +52,6 @@ void TypeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, cons
 
 void TypeDelegate::emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-} // namespace FileTree
+} // namespace FileTree_
 
 #include "moc_ft_typedelegate.cpp"

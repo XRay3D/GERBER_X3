@@ -22,7 +22,7 @@
 class QMenu;
 
 inline QPixmap decoration(QColor color, QChar chr = {}) {
-    //    qDebug() << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+
     QPixmap pixmap(22, 22);
     pixmap.fill(Qt::transparent);
     QPainter p(&pixmap);
@@ -40,7 +40,7 @@ inline QPixmap decoration(QColor color, QChar chr = {}) {
     return pixmap;
 }
 
-namespace FileTree {
+namespace FileTree_ {
 
 class View;
 
@@ -73,7 +73,7 @@ class Node {
     Node(const Node&) = delete;
 
 public:
-    explicit Node(std::reference_wrapper<const int> id, Type type);
+    explicit Node(Type type);
     virtual ~Node();
 
     Node* child(int row) const;
@@ -92,17 +92,18 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu& menu, View* tv) const = 0;
 
+    virtual int id() const = 0; //{ return id_; }
+    virtual void setId(int id) { id__ = id; }
+
     QModelIndex index(int column = 0) const;
 
     const QStringList sideStrList {QObject::tr("Top|Bottom").split('|')};
     const Type type;
 
-    void setId(const int& id) { id_ = id; }
-
 protected:
-    std::reference_wrapper<const int> id_;
+    int id__ {-1};
     Node* parent_ = nullptr;
     mvector<std::unique_ptr<Node>> childs;
 };
 
-} // namespace FileTree
+} // namespace FileTree_

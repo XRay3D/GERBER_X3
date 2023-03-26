@@ -14,18 +14,20 @@
 
 #include <QIcon>
 
-namespace FileTree {
+namespace FileTree_ {
 
 constexpr int FolderNodeId {-1};
 
 FolderNode::FolderNode(const QString& name)
-    : FileTree::Node(FolderNodeId, Folder)
+    : FileTree_::Node(Folder)
     , name(name) {
+    setId(FolderNodeId);
 }
 
-FolderNode::FolderNode(const QString& name, int& id)
-    : FileTree::Node(id, Folder)
+FolderNode::FolderNode(const QString& name, int id)
+    : FileTree_::Node(Folder)
     , name(name) {
+    setId(id);
 }
 
 FolderNode::~FolderNode() { }
@@ -43,7 +45,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
     }
     switch (role) {
     case Role::Id:
-        return id_.get();
+        return id();
     case Role::NodeType:
         return Folder;
     case Role::ContentType:
@@ -73,4 +75,4 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
 void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) const {
 }
 
-} // namespace FileTree
+} // namespace FileTree_
