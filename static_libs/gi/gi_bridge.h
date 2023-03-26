@@ -41,14 +41,9 @@ public:
 
     void update();
 
-    //    Point getPoint(const int side) const;
-    //    QLineF getPath() const;
+    QLineF testLine() const;
 
-    //    void setOk(bool ok);
     static inline GiBridge* moveBrPtr; // FIXME приватизировать в будущем??
-
-    //    Point::Type pathHash {};
-    //    Point::Type pathHash_() const { return pathHash; }
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -61,6 +56,7 @@ private:
     double& toolDiam_;
 
     QPainterPath pPath;
+    QPainterPath cutoff;
 
     QPointF snapedPos(const QPointF& pos);
     QPointF lastPos;

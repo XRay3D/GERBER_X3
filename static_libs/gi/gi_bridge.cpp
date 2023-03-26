@@ -31,49 +31,15 @@ GiBridge::GiBridge(double& lenght, double& toolDiam, GCode::SideOfMilling& side)
 }
 
 void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-
-    painter->setPen({ok_ ? Qt::green : Qt::red, toolDiam_, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin});
-    painter->drawPoint(0, 0);
-
-    painter->setPen({Qt::magenta, 0.0});
-
+    painter->setBrush(!ok_ ? Qt::red : Qt::green);
+    painter->setPen(Qt::NoPen);
     painter->drawPath(pPath);
+    if (!ok_)
+        return;
 
-    //    painter->setBrush(!ok_ ? Qt::red : Qt::green);
-    //    painter->setPen(Qt::NoPen);
-    //    painter->setTransform(QTransform {}.rotate(-(angle_ - 360)), true);
-    //    painter->drawPath(path_);
-
-    //    painter->setBrush(Qt::NoBrush);
-    //    painter->setPen(QPen(Qt::white, 2 * App::graphicsView()->scaleFactor()));
-
-    //    const double toolRadius = toolDiam_ / 2;
-
-    //    QLineF line({}, {lenght_ / 2 + toolRadius, 0});
-    //    switch (side_) {
-    //    case GCode::On:
-    //        break;
-    //    case GCode::Outer:
-    //        line.translate(-toolRadius, 0);
-    //        break;
-    //    case GCode::Inner:
-    //        line.translate(+toolRadius, 0);
-    //        break;
-    //    }
-
-    //    painter->drawLine(line);
-
-    //    auto drawEllipse = [painter, toolRadius](const QPointF& pt, bool fl) {
-    //        const QRectF rectangle(pt + QPointF {toolRadius, toolRadius}, pt - QPointF {toolRadius, toolRadius});
-    //        const int startAngle = (fl ? 0 : 180) * 16;
-    //        const int spanAngle = 180 * 16;
-    //        painter->drawArc(rectangle, startAngle, spanAngle);
-    //    };
-
-    //    line.setAngle(+90);
-    //    drawEllipse(line.p2(), false);
-    //    line.setAngle(-90);
-    //    drawEllipse(line.p2(), true);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(QPen(Qt::gray, 2 * App::graphicsView()->scaleFactor()));
+    painter->drawPath(cutoff);
 }
 
 QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) {
@@ -119,9 +85,12 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
 
     if (!line.isNull()) {
         lenght = line.length() - lenght_ / 2;
-        if (QLineF(line.center(), pos).length() < lenght_) {
+        angle_ = line.angle();
+        if (QLineF(line.center(), pos).length() < lenght_ / 2 || line.length() < lenght_) {
+            // точка центра прямой
             retPos = line.center();
             ok_ = true;
+            update(); // Cutoff
         } else if (QLineF(line.p1(), pos).length() < lenght && QLineF(line.p2(), pos).length() < lenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
@@ -131,6 +100,7 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
             auto y = line.p1().y() + k * k2;
             retPos = {x, y};
             ok_ = true;
+            update(); // Cutoff
         }
     }
 
@@ -142,30 +112,52 @@ double GiBridge::angle() const { return angle_; }
 void GiBridge::update() {
     pPath = QPainterPath();
     pPath.addEllipse(QPointF(), lenght_ / 2, lenght_ / 2);
+
+    cutoff.clear();
+    QLineF lTool, lCenter = QLineF::fromPolar(toolDiam_ + lenght_, angle_);
+    double start, span = 180;
+    switch (side_) {
+    case GCode::On:
+        lCenter.translate(-lCenter.center());
+        lTool = QLineF::fromPolar(toolDiam_, start = angle_ - 90);
+        break;
+    case GCode::Outer:
+        lTool = QLineF::fromPolar(toolDiam_, start = angle_ - 90);
+        lCenter.translate(lTool.center() - lCenter.center());
+        break;
+    case GCode::Inner:
+        lTool = QLineF::fromPolar(toolDiam_, start = angle_ + 90);
+        lCenter.translate(lTool.center() - lCenter.center());
+        span = -180;
+        break;
+    }
+
+    if (1) { // test
+        QLineF lTool2 = testLine();
+        lTool2.translate(pos() - lTool2.center());
+        cutoff.moveTo(lTool2.p1());
+        cutoff.lineTo(lTool2.p2());
+    }
+
+    const QPointF offset {toolDiam_ / 2., toolDiam_ / 2};
+    const QSizeF size {toolDiam_, toolDiam_};
+
+    lTool.translate(lCenter.p1() - lTool.center());
+    cutoff.moveTo(lTool.p2());
+    cutoff.arcTo(QRectF {lCenter.p1() - offset, size}, start + 000, span);
+    lTool.translate(lCenter.p2() - lTool.center());
+    cutoff.lineTo(lTool.p1());
+    cutoff.arcTo(QRectF {lCenter.p2() - offset, size}, start + 180, span);
+    lTool.translate(lCenter.p1() - lTool.center());
+    cutoff.lineTo(lTool.p2());
+
     QGraphicsItem::update();
 }
 
-// Point GiBridge::getPoint(const int side) const {
-//     QLineF l2(0, 0, toolDiam_ / 2, 0);
-//     l2.translate(pos());
-//     switch (side) {
-//     case GCode::On:
-//         return (pos());
-//     case GCode::Outer:
-//         l2.setAngle(angle_ + 180);
-//         return (l2.p2());
-//     case GCode::Inner:
-//         l2.setAngle(angle_);
-//         return (l2.p2());
-//     }
-//     return Point();
-// }
-
-// QLineF GiBridge::getPath() const {
-//     QLineF retLine(QLineF::fromPolar(toolDiam_ * 0.51, angle_).p2(), QLineF::fromPolar(toolDiam_ * 0.51, angle_ + 180).p2());
-//     retLine.translate(pos());
-//     return retLine;
-// }
+QLineF GiBridge::testLine() const {
+    QLineF lTool2 = QLineF::fromPolar(toolDiam_ * 1.2, angle_ - 90);
+    return lTool2.translated(pos() - lTool2.center());
+}
 
 double GiBridge::lenght() const { return lenght_; }
 
