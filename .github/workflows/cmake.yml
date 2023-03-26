@@ -43,17 +43,6 @@ jobs:
             )
           endif()
 
-#       - name: Install Qt
-#         uses: jurplel/install-qt-action@v2
-#         with:
-#           version:      ${{ env.QT_VERSION }}
-#           host:         linux
-#           target:       desktop
-#           arch:         gcc_64
-#           dir:          ${{ runner.temp }}
-#           modules:      qtcharts qt3d
-#           setup-python: false
-
       - name: Download Qt
         id: qt
         shell: cmake -P {0}
