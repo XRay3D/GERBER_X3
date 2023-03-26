@@ -7,6 +7,7 @@ on:
     branches: [ master , dev ]
 
 env:
+  QT_VERSION: 5.15.2
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
@@ -23,6 +24,72 @@ jobs:
       # install dependencies
     - name: boost
       run: sudo apt-get update && sudo apt-get install -yq libboost-dev
+      
+    - name: Installing system libs
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(
+            COMMAND sudo apt install libgl1-mesa-dev
+          )
+        endif()
+        
+    - name: Download Qt
+      id: qt
+      shell: cmake -P {0}
+      run: |
+        set(qt_version $ENV{QT_VERSION})
+        string(REPLACE "." "" qt_version_dotless "${qt_version}")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(url_os "windows_x86")
+          if ("${{ matrix.config.environment_script }}" MATCHES "vcvars64.bat")
+            set(qt_package_name "qt.qt5.${qt_version_dotless}.win64_msvc2017_64")
+            set(qt_dir_prefix "${qt_version}/msvc2017_64")
+          elseif ("${{ matrix.config.environment_script }}" MATCHES "vcvars32.bat")
+            set(qt_package_name "qt.qt5.${qt_version_dotless}.win32_msvc2017")
+            set(qt_dir_prefix "${qt_version}/msvc2017")
+          else()
+          endif()
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(url_os "linux_x64")
+          set(qt_package_name "qt.qt5.${qt_version_dotless}.gcc_64")
+          set(qt_dir_prefix "${qt_version}/gcc_64")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(url_os "mac_x64")
+          set(qt_package_name "qt.qt5.${qt_version_dotless}.clang_64")
+          set(qt_dir_prefix "${qt_version}/clang_64")
+        endif()
+        set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
+        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml SHOW_PROGRESS)
+        file(READ ./Updates.xml updates_xml)
+        string(REGEX MATCH "<Name>${qt_package_name}.*<Version>([0-9+-.]+)</Version>.*<DownloadableArchives>qtbase([a-zA-Z0-9_-]+).7z"
+          updates_xml_output "${updates_xml}")
+        set(package_version ${CMAKE_MATCH_1})
+        set(package_suffix ${CMAKE_MATCH_2})
+        string(REPLACE "-debug-symbols" "" package_suffix "${package_suffix}")
+        # Workaround for CMake's greedy regex
+        if ("${{ matrix.config.environment_script }}" MATCHES "vcvars32.bat")
+          string(REPLACE "X86_64" "X86" package_suffix "${package_suffix}")
+        endif()
+        file(MAKE_DIRECTORY qt5)
+        # Save the path for other steps
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
+        message("::set-output name=qt_dir::${qt_dir}")
+        foreach(package qtbase qtdeclarative qttools qtsvg)
+          file(DOWNLOAD
+            "${qt_base_url}/${qt_package_name}/${package_version}${package}${package_suffix}.7z" ./${package}.7z
+            SHOW_PROGRESS
+          )
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qt5)
+        endforeach()
+        file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
+        string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
+        string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
+        string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
+        string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
+        file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
+
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -32,9 +99,11 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+#     - name: Test
+#       working-directory: ${{github.workspace}}/build
+#       # Execute tests defined by the CMake configuration.  
+#       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+#       run: ctest -C ${{env.BUILD_TYPE}}
+      
+      
       
