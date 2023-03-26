@@ -33,51 +33,8 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
-#include <forward_list>
 
-/*
-
-C:\Users\X-Ray\Documents\QtPro>git apply GGEASY.patch
-GGEASY.patch:6956: trailing whitespace.
-  const int scale_error_i       = 2; // non-fatal
-GGEASY.patch:6957: trailing whitespace.
-  const int non_pair_error_i    = 4; // non-fatal
-GGEASY.patch:7335: trailing whitespace.
-  inline Path<T1> ScalePath(const Path<T2>& path,
-GGEASY.patch:7351: trailing whitespace.
-      [scale_x, scale_y](const auto& pt)
-GGEASY.patch:7355: trailing whitespace.
-      [scale_x, scale_y](const auto& pt)
-error: patch failed: GERBER_X3/CMakeLists.txt:10
-error: GERBER_X3/CMakeLists.txt: patch does not apply
-error: patch failed: GERBER_X3/plugins/file/file_plugins_en.ts:1
-error: GERBER_X3/plugins/file/file_plugins_en.ts: patch does not apply
-error: patch failed: GERBER_X3/plugins/file/file_plugins_ru.ts:19
-error: GERBER_X3/plugins/file/file_plugins_ru.ts: patch does not apply
-error: patch failed: GERBER_X3/plugins/file/gerber/file_gerber_en.ts:1
-error: GERBER_X3/plugins/file/gerber/file_gerber_en.ts: patch does not apply
-error: patch failed: GERBER_X3/plugins/file/gerber/file_gerber_ru.ts:170
-error: GERBER_X3/plugins/file/gerber/file_gerber_ru.ts: patch does not apply
-error: patch failed: GERBER_X3/plugins/gcode/gc_file.cpp:439
-error: GERBER_X3/plugins/gcode/gc_file.cpp: patch does not apply
-error: patch failed: GERBER_X3/plugins/gcode/gcode_en.ts:1
-error: GERBER_X3/plugins/gcode/gcode_en.ts: patch does not apply
-error: patch failed: GERBER_X3/plugins/gcode/gcode_ru.ts:27
-error: GERBER_X3/plugins/gcode/gcode_ru.ts: patch does not apply
-
-error: patch failed: GERBER_X3/plugins/gcode/pocketoffset/pocketoffset_form.cpp:26
-error: GERBER_X3/plugins/gcode/pocketoffset/pocketoffset_form.cpp: patch does not apply
-error: GERBER_X3/plugins/gcode/profile/prof_file.cpp: No such file or directory
-error: patch failed: GERBER_X3/plugins/gcode/thermal/thermal_form.h:77
-error: GERBER_X3/plugins/gcode/thermal/thermal_form.h: patch does not apply
-error: patch failed: GERBER_X3/plugins/gcode/voroni/voronoi_boost.cpp:18
-error: GERBER_X3/plugins/gcode/voroni/voronoi_boost.cpp: patch does not apply
-error: GERBER_X3/plugins/gcode/voroni/voronoi_file.cpp: No such file or directory
-error: patch failed: GERBER_X3/plugins/shape/CMakeLists.txt:56
-error: GERBER_X3/plugins/shape/CMakeLists.txt: patch does not apply
-
-
-*/
+// #include <forward_list>
 
 static auto PointConverter = QMetaType::registerConverter(&Point::toString);
 
