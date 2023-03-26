@@ -697,22 +697,20 @@ void MainWindow::writeSettings() {
 
 void MainWindow::selectAll() {
     if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
-            if (item->type() == GiType::Preview)
-                item->setSelected(true);
+        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+            item->setSelected(true);
     } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
-        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
-            if (item->type() == GiType::Preview)
-                item->setSelected(true);
+        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+            item->setSelected(true);
     } else {
-        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->items())
             if (item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
 }
 
 void MainWindow::deSelectAll() {
-    for (QGraphicsItem* item : App::graphicsView()->scene()->items())
+    for (QGraphicsItem* item : App::graphicsView()->items())
         if (item->isVisible())
             item->setSelected(false);
 }
@@ -723,7 +721,7 @@ void MainWindow::printDialog() {
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
         // FIXME       ScopedTrue sTrue(App::graphicsView()->scene()->drawPdf_);
         QRectF rect;
-        for (QGraphicsItem* item : App::graphicsView()->scene()->items())
+        for (QGraphicsItem* item : App::graphicsView()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());

@@ -91,7 +91,7 @@ ProfileForm::~ProfileForm() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for (QGraphicsItem* giItem : App::graphicsView()->scene()->items()) {
+    for (QGraphicsItem* giItem : App::graphicsView()->items()) {
         if (giItem->type() == GiType::Bridge)
             delete giItem;
     }
@@ -169,7 +169,7 @@ void ProfileForm::createFile() {
     gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
-    for (QGraphicsItem* item : App::graphicsView()->scene()->items()) {
+    for (QGraphicsItem* item : App::graphicsView()->items()) {
         if (item->type() == GiType::Bridge)
             brv.push_back(item->pos());
     }

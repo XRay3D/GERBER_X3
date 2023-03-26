@@ -28,6 +28,25 @@ class GraphicsView : public QGraphicsView {
     Q_PROPERTY(double scale READ getScale WRITE setScale)
     Q_PROPERTY(QRectF viewRect READ getViewRect WRITE setViewRect)
 
+    template <size_t N>
+    struct EnumHelper : std::integral_constant<bool, N != 0> {
+        template <typename... Es>
+            requires(std::is_enum_v<Es> && ...) || (sizeof...(Es) == 0)
+        constexpr EnumHelper(Es... es)
+            : array {es...} { }
+        int array[N];
+        template <size_t... Is>
+        constexpr bool impl(auto* item, std::index_sequence<Is...>) const {
+            return ((item->type() == array[Is]) || ...);
+        }
+        constexpr bool operator()(auto* item) const {
+            return impl(item, std::make_index_sequence<N> {});
+        }
+    };
+
+    template <typename... Es>
+    EnumHelper(Es...) -> EnumHelper<sizeof...(Es)>;
+
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
     ~GraphicsView() override;
@@ -65,23 +84,19 @@ public:
             killTimer(timerId);
         timerId = 0;
     }
+
     /////////////////////////////////
-    template <typename T>
-    std::vector<T*> items() const {
-        auto items = scene()->items()
-            | rviews::filter([](auto* item) { return bool(dynamic_cast<T*>(item)); })
-            | rviews::transform([](auto* item) { return static_cast<T*>(item); });
-        return {items.begin(), items.end()};
+    template <typename T = QGraphicsItem, typename... Ts>
+    auto items(Ts... ts) const {
+        return getItemImpl<
+            qOverload<Qt::SortOrder>(&QGraphicsScene::items),
+            T>(EnumHelper {ts...}, Qt::DescendingOrder);
     }
 
-    auto selectedItems() const { return scene()->selectedItems(); }
-
-    template <typename T>
-    std::vector<T*> selectedItems() const {
-        auto items = scene()->selectedItems()
-            | rviews::filter([](auto* item) { return bool(dynamic_cast<T*>(item)); })
-            | rviews::transform([](auto* item) { return static_cast<T*>(item); });
-        return {items.begin(), items.end()};
+    template <typename T = QGraphicsItem, typename... Ts>
+    auto selectedItems(Ts... ts) const {
+        return getItemImpl<&QGraphicsScene::selectedItems,
+            T>(EnumHelper {ts...});
     }
 
     template <typename T>
@@ -94,6 +109,30 @@ signals:
     void mouseClickL(const QPointF&);
 
 private:
+    template <auto Ptr, typename T, typename FilterInt, typename... Args>
+    std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
+        const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
+        constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
+        if constexpr (isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
+            return {items.begin(), items.end()};
+        } else {
+            // WARNING FilterInt faster than dynamic_cast
+            // to improve speed dont use FilterDyn
+            using FilterDyn = decltype([](auto* item) { return bool(dynamic_cast<T*>(item)); });
+            using Transform = decltype([](auto* item) { return static_cast<T*>(item); });
+            if constexpr (!isQGraphicsItem && !FilterInt::value) { // вернуть все T*
+                auto rview = items | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
+                return {rview.begin(), rview.end()};
+            } else if constexpr (!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
+                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
+                return {rview.begin(), rview.end()};
+            } else if constexpr (isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
+                auto rview = items | rviews::filter(et);
+                return {rview.begin(), rview.end()};
+            }
+        }
+    }
+
     Ruler* const hRuler;
     Ruler* const vRuler;
     QGridLayout* const gridLayout;
