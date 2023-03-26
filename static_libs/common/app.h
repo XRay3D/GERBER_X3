@@ -99,6 +99,8 @@ class App {
 
     QSharedMemory sharedMemory {"AppSettings"};
 
+    const bool isDebug_ {QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
+
 public:
     explicit App() {
         if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
@@ -109,8 +111,9 @@ public:
             qDebug() << "App" << app_ << sharedMemory.errorString();
         }
     }
-
     static auto& dashOffset() { return app_->dashOffset_; }
+
+    static bool isDebug() { return app_->isDebug_; }
 
     static void setMarkers(int i, GiMarker* marker) { app_->markers[i] = marker; }
     static auto* zero() { return app_->markers[0]; }

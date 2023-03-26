@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget* parent)
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Profile]->toggle(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
         }
         if (0)
@@ -160,7 +160,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin") || maybeSave()) {
+    if (App::isDebug() || maybeSave()) {
         delete dockWidget_;
         writeSettings();
         App::fileModel()->closeProject();
@@ -367,7 +367,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin")) { // (need for debug)
+    if (App::isDebug()) { // (need for debug)
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
@@ -669,7 +669,7 @@ void MainWindow::readSettings() {
         settings.endArray();
     }
 
-    if (qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    if (App::isDebug())
         loadFile(settings.value("project").toString());
 
     settings.endGroup();

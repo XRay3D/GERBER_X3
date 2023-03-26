@@ -248,7 +248,7 @@ void Form::createTPI(FileInterface* file) {
 
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Form::onSelectionChanged);
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    if (0 && App::isDebug())
         ui->treeView->expandAll();
 }
 

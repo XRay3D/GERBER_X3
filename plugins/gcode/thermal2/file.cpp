@@ -30,7 +30,7 @@
 
 void calcArcs(Path path) {
     return;
-    //    if (!qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    //    if (!App::isDebug())
     //        return;
     //    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
     //        QGraphicsLineItem* item;
